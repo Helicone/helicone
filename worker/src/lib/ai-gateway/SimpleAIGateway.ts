@@ -22,7 +22,10 @@ import {
   RequestParams,
   BodyMappingType,
 } from "@helicone-package/cost/models/types";
-import { SecureCacheProvider } from "../util/cache/secureCache";
+import {
+  SecureCacheProvider,
+  getAndStoreInCache,
+} from "../util/cache/secureCache";
 import { GatewayMetrics } from "./GatewayMetrics";
 import {
   toOpenAIResponse,
@@ -184,15 +187,16 @@ export class SimpleAIGateway {
 
     // Step 4: Get disallow list (only if there are PTB attempts)
     const hasPtbAttempts = attempts.some((a) => a.authType === "ptb");
-    const disallowSpan = this.traceContext?.sampled && hasPtbAttempts
-      ? this.tracer.startSpan(
-          "ai_gateway.gateway.get_disallow_list",
-          "getDisallowList",
-          "ai-gateway",
-          {},
-          this.traceContext
-        )
-      : null;
+    const disallowSpan =
+      this.traceContext?.sampled && hasPtbAttempts
+        ? this.tracer.startSpan(
+            "ai_gateway.gateway.get_disallow_list",
+            "getDisallowList",
+            "ai-gateway",
+            {},
+            this.traceContext
+          )
+        : null;
     const disallowList = hasPtbAttempts
       ? await this.getDisallowList(this.orgId)
       : [];
@@ -253,7 +257,10 @@ export class SimpleAIGateway {
       }
 
       // Check disallow list (only for PTB attempts)
-      if (attempt.authType === "ptb" && this.isDisallowed(attempt, disallowList)) {
+      if (
+        attempt.authType === "ptb" &&
+        this.isDisallowed(attempt, disallowList)
+      ) {
         errors.push({
           source: attempt.source,
           message:
@@ -344,9 +351,10 @@ export class SimpleAIGateway {
     // Forces usage data for streaming requests
     if (
       parsedBody.stream === true &&
-      (this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping === "OPENAI"
-        || this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping === "RESPONSES"
-      )
+      (this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping ===
+        "OPENAI" ||
+        this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping ===
+          "RESPONSES")
     ) {
       parsedBody.stream_options = {
         ...(parsedBody.stream_options || {}),
@@ -407,7 +415,10 @@ export class SimpleAIGateway {
       modelStrings,
       body: parsedBody,
       plugins,
-      globalIgnoreProviders: globalIgnoreProvidersSet.size > 0 ? globalIgnoreProvidersSet : undefined,
+      globalIgnoreProviders:
+        globalIgnoreProvidersSet.size > 0
+          ? globalIgnoreProvidersSet
+          : undefined,
     });
   }
 
@@ -474,14 +485,29 @@ export class SimpleAIGateway {
   }
 
   private async getDisallowList(orgId: string): Promise<DisallowListEntry[]> {
-    try {
-      const walletId = this.env.WALLET.idFromName(orgId);
-      const walletStub = this.env.WALLET.get(walletId);
-      return await walletStub.getDisallowList();
-    } catch (error) {
-      console.error("Failed to get disallow list:", error);
-      return [];
-    }
+    const cacheKey = `disallow_list:${orgId}`;
+    const result = await getAndStoreInCache(
+      cacheKey,
+      {
+        SECURE_CACHE: this.env.SECURE_CACHE,
+        REQUEST_CACHE_KEY: this.env.REQUEST_CACHE_KEY,
+        REQUEST_CACHE_KEY_2: this.env.REQUEST_CACHE_KEY_2,
+      },
+      async () => {
+        try {
+          const walletId = this.env.WALLET.idFromName(orgId);
+          const walletStub = this.env.WALLET.get(walletId);
+          const list = await walletStub.getDisallowList();
+          return ok(list);
+        } catch (error) {
+          console.error("Failed to get disallow list:", error);
+          return ok([] as DisallowListEntry[]);
+        }
+      },
+      60 // 60 second TTL
+    );
+
+    return result.data ?? [];
   }
 
   private isDisallowed(
