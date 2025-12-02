@@ -46,27 +46,26 @@ export class HeliconeProvider extends BaseProvider {
   }
 
   buildRequestBody(endpoint: Endpoint, context: RequestBodyContext): string {
-    // Check if this is an Anthropic model
+    let updatedBody = context.parsedBody;
+    console.log("updatedBody", JSON.stringify(updatedBody, null, 2));
     const isAnthropicModel = endpoint.author === "anthropic";
-
-    if (isAnthropicModel) {
-      // Use Anthropic message format (converted from OpenAI format if needed)
-      if (context.bodyMapping === "NO_MAPPING") {
-        const body = { ...context.parsedBody };
-
+    if (context.bodyMapping === "NO_MAPPING") {
+      if (isAnthropicModel) {
         // Ensure system message is in object format if it's a string
-        if (typeof body.system === "string") {
-          body.system = [{ type: "text", text: body.system }];
+        if (typeof updatedBody.system === "string") {
+          updatedBody.system = [{ type: "text", text: updatedBody.system }];
         }
-
-        return JSON.stringify({
-          ...body,
-          model: endpoint.providerModelId,
-        });
       }
 
+      return JSON.stringify({
+        ...updatedBody,
+        model: endpoint.providerModelId,
+      });
+    }
+
+    if (isAnthropicModel) {
       const anthropicBody = context.toAnthropic(
-        context.parsedBody,
+        updatedBody,
         endpoint.providerModelId
       );
 
@@ -77,9 +76,15 @@ export class HeliconeProvider extends BaseProvider {
       return JSON.stringify(anthropicBody);
     }
 
+    // TODO: when anthropic models are supported with Responses API
+    // move this converstion BEFORE toAnthropic
+    if (context.bodyMapping === "RESPONSES") {
+      updatedBody = context.toChatCompletions(updatedBody);
+    }
+
     // Standard format - just pass through with correct model
     return JSON.stringify({
-      ...context.parsedBody,
+      ...updatedBody,
       model: endpoint.providerModelId,
     });
   }
