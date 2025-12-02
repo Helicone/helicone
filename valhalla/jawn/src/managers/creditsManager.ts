@@ -1,6 +1,6 @@
 import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 import { registry } from "@helicone-package/cost/models/registry";
-import { ModelProviderName } from "@helicone-package/cost/models/providers";
+import { MODEL_NAME_MAPPINGS } from "@helicone-package/cost/models/provider-helpers";
 import { err, ok, Result } from "../../../../packages/common/result";
 import {
   CreditBalanceResponse,
@@ -10,19 +10,27 @@ import { AuthParams } from "../packages/common/auth/types";
 import { isError, resultMap } from "../packages/common/result";
 import { BaseManager } from "./BaseManager";
 import { WalletManager } from "./wallet/WalletManager";
-import { dbQueryClickhouse } from "../lib/shared/db/dbExecute";
+import { dbQueryClickhouse, dbExecute } from "../lib/shared/db/dbExecute";
+
+// Discount rule stored in organization.discounts JSONB
+interface OrgDiscount {
+  provider: string | null; // null = all providers
+  model: string | null; // null = all models, supports wildcards like "gpt-%"
+  percent: number; // e.g., 10 = 10% off
+}
 
 export interface ModelSpend {
   model: string;
   provider: string;
-  cost: number; // USD
-  requestCount: number;
   promptTokens: number;
   completionTokens: number;
   pricing: {
     inputPer1M: number;
     outputPer1M: number;
   } | null;
+  subtotal: number; // Cost before discount (USD)
+  discountPercent: number; // 0-100
+  total: number; // Cost after discount (USD)
 }
 
 export interface SpendBreakdownResponse {
@@ -116,6 +124,33 @@ export class CreditsManager extends BaseManager {
     });
   }
 
+  // Check if a model matches a pattern (supports SQL LIKE-style % wildcards)
+  private matchesPattern(value: string, pattern: string | null): boolean {
+    if (pattern === null) return true; // null matches everything
+    // Convert SQL LIKE pattern to regex
+    const regexPattern = pattern
+      .replace(/[.+?^${}()|[\]\\]/g, "\\$&") // Escape regex special chars except %
+      .replace(/%/g, ".*"); // Convert % to .*
+    return new RegExp(`^${regexPattern}$`, "i").test(value);
+  }
+
+  // Find the first matching discount rule for a model/provider
+  private findDiscount(
+    discounts: OrgDiscount[],
+    model: string,
+    provider: string
+  ): number {
+    for (const rule of discounts) {
+      const providerMatch =
+        rule.provider === null || rule.provider === provider;
+      const modelMatch = this.matchesPattern(model, rule.model);
+      if (providerMatch && modelMatch) {
+        return rule.percent;
+      }
+    }
+    return 0;
+  }
+
   public async getSpendBreakdown(
     timeRange: TimeRange
   ): Promise<Result<SpendBreakdownResponse, string>> {
@@ -141,6 +176,19 @@ export class CreditsManager extends BaseManager {
           startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
       }
 
+      // Fetch org's discount rules
+      const discountsResult = await dbExecute<{ discounts: OrgDiscount[] }>(
+        `SELECT discounts FROM organization WHERE id = $1`,
+        [this.authParams.organizationId]
+      );
+      // TODO: Remove this fake data once migration is applied
+      const discounts: OrgDiscount[] =
+        discountsResult.data?.[0]?.discounts ?? [
+          { provider: "helicone", model: "gpt%", percent: 10 },
+          { provider: "helicone", model: "claude-%", percent: 15 },
+          { provider: "helicone", model: "grok-%", percent: 5 },
+        ];
+
       const query = `
         SELECT
           model,
@@ -155,6 +203,7 @@ export class CreditsManager extends BaseManager {
           AND request_created_at >= {val_1 : DateTime64(3)}
           AND request_created_at < {val_2 : DateTime64(3)}
         GROUP BY model, provider
+        HAVING cost > 0
         ORDER BY cost DESC
         LIMIT 50
       `;
@@ -173,11 +222,13 @@ export class CreditsManager extends BaseManager {
       }
 
       const models: ModelSpend[] = res.data.map((row) => {
-        // Look up pricing from registry
+        // Look up pricing from registry using model:provider key
+        // Apply model name mapping for backward compatibility (e.g., kimi-k2-instruct -> kimi-k2-0905)
+        const normalizedModel = MODEL_NAME_MAPPINGS[row.model] || row.model;
         let pricing: { inputPer1M: number; outputPer1M: number } | null = null;
-        const configResult = registry.getModelProviderConfigByProviderModelId(
-          row.model,
-          row.provider as ModelProviderName
+        const configResult = registry.getModelProviderConfig(
+          normalizedModel,
+          row.provider
         );
         if (!configResult.error && configResult.data?.pricing?.[0]) {
           const p = configResult.data.pricing[0];
@@ -187,18 +238,27 @@ export class CreditsManager extends BaseManager {
           };
         }
 
+        const subtotal = parseFloat(row.cost);
+        const discountPercent = this.findDiscount(
+          discounts,
+          row.model,
+          row.provider
+        );
+        const total = subtotal * (1 - discountPercent / 100);
+
         return {
           model: row.model,
           provider: row.provider,
-          cost: parseFloat(row.cost),
-          requestCount: parseInt(row.request_count, 10),
           promptTokens: parseInt(row.prompt_tokens, 10) || 0,
           completionTokens: parseInt(row.completion_tokens, 10) || 0,
           pricing,
+          subtotal,
+          discountPercent,
+          total,
         };
       });
 
-      const totalCost = models.reduce((sum, m) => sum + m.cost, 0);
+      const totalCost = models.reduce((sum, m) => sum + m.total, 0);
 
       return ok({
         models,

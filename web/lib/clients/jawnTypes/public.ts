@@ -4088,10 +4088,6 @@ Json: JsonObject;
       model: string;
       provider: string;
       /** Format: double */
-      cost: number;
-      /** Format: double */
-      requestCount: number;
-      /** Format: double */
       promptTokens: number;
       /** Format: double */
       completionTokens: number;
@@ -4101,6 +4097,12 @@ Json: JsonObject;
         /** Format: double */
         inputPer1M: number;
       } | null;
+      /** Format: double */
+      subtotal: number;
+      /** Format: double */
+      discountPercent: number;
+      /** Format: double */
+      total: number;
     };
     SpendBreakdownResponse: {
       models: components["schemas"]["ModelSpend"][];

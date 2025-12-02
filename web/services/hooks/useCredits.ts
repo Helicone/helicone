@@ -1,6 +1,5 @@
 import { useOrg } from "../../components/layout/org/organizationContext";
 import { $JAWN_API } from "../../lib/clients/jawn";
-import { useQuery } from "@tanstack/react-query";
 
 // Types matching the backend
 export interface PurchasedCredits {
@@ -141,14 +140,15 @@ export const useCreateCheckoutSession = () => {
 export interface ModelSpend {
   model: string;
   provider: string;
-  cost: number;
-  requestCount: number;
   promptTokens: number;
   completionTokens: number;
   pricing: {
     inputPer1M: number;
     outputPer1M: number;
   } | null;
+  subtotal: number; // Cost before discount
+  discountPercent: number; // 0-100
+  total: number; // Cost after discount
 }
 
 export interface SpendBreakdownResponse {

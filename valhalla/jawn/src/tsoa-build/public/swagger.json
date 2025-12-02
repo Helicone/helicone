@@ -12364,14 +12364,6 @@
 					"provider": {
 						"type": "string"
 					},
-					"cost": {
-						"type": "number",
-						"format": "double"
-					},
-					"requestCount": {
-						"type": "number",
-						"format": "double"
-					},
 					"promptTokens": {
 						"type": "number",
 						"format": "double"
@@ -12397,16 +12389,29 @@
 						],
 						"type": "object",
 						"nullable": true
+					},
+					"subtotal": {
+						"type": "number",
+						"format": "double"
+					},
+					"discountPercent": {
+						"type": "number",
+						"format": "double"
+					},
+					"total": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"required": [
 					"model",
 					"provider",
-					"cost",
-					"requestCount",
 					"promptTokens",
 					"completionTokens",
-					"pricing"
+					"pricing",
+					"subtotal",
+					"discountPercent",
+					"total"
 				],
 				"type": "object",
 				"additionalProperties": false

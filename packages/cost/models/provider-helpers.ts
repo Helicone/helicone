@@ -336,7 +336,7 @@ export function validateProvider(
  * Model name mapping for backward compatibility
  * Maps deprecated/incorrect model names to their correct counterparts
  */
-const MODEL_NAME_MAPPINGS: Record<string, string> = {
+export const MODEL_NAME_MAPPINGS: Record<string, string> = {
   "gemini-1.5-flash": "gemini-2.5-flash-lite",
   "claude-3.5-sonnet": "claude-3.5-sonnet-v2",
   "claude-3.5-sonnet-20240620": "claude-3.5-sonnet-v2",
