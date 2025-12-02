@@ -149,7 +149,16 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
       tracer.finishTrace();
       ctx.waitUntil(tracer.sendTrace());
 
-      return response;
+      // Add request ID to response headers for client visibility
+      const requestId = requestWrapper.heliconeHeaders.requestId;
+      const responseWithRequestId = new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers: new Headers(response.headers),
+      });
+      responseWithRequestId.headers.set("Helicone-Request-Id", requestId);
+
+      return responseWithRequestId;
     }
   );
 
