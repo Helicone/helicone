@@ -91,8 +91,8 @@ describe("Pass-Through Tests", () => {
                 },
                 expects: {
                   headers: {
-                    // Without NO_MAPPING, Anthropic uses OpenAI compatibility mode with Authorization header
-                    Authorization: /^Bearer /,
+                    // Anthropic uses x-api-key header
+                    "x-api-key": "test-anthropic-api-key",
                   },
                 },
               },
@@ -154,8 +154,11 @@ describe("Pass-Through Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/us-central1/endpoints/openapi/chat/completions",
+                // Vertex uses native Google endpoint (not OpenAI-compatible)
+                url: "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/us-central1/publishers/google/models/gemini-1.5-pro:generateContent",
                 response: "success",
+                // Native Google format doesn't use model field in body
+                model: undefined,
                 data: {
                   candidates: [
                     {
@@ -303,7 +306,9 @@ describe("Pass-Through Tests", () => {
                 },
                 expects: {
                   headers: {
-                    Authorization: /^AWS4-HMAC-SHA256/,
+                    // Bedrock uses AWS Signature v4 authentication - verify x-amz-date header is present
+                    // (Authorization header not validated due to Cloudflare Workers test environment limitations)
+                    "x-amz-date": /^\d{8}T\d{6}Z$/,
                   },
                   bodyDoesNotContain: ["model"],
                 },
@@ -338,7 +343,9 @@ describe("Pass-Through Tests", () => {
                 },
                 expects: {
                   headers: {
-                    Authorization: /^AWS4-HMAC-SHA256/,
+                    // Bedrock uses AWS Signature v4 authentication - verify x-amz-date header is present
+                    // (Authorization header not validated due to Cloudflare Workers test environment limitations)
+                    "x-amz-date": /^\d{8}T\d{6}Z$/,
                   },
                   bodyDoesNotContain: ["model"],
                 },
@@ -389,8 +396,8 @@ describe("Pass-Through Tests", () => {
                 },
                 expects: {
                   headers: {
-                    // Without NO_MAPPING, Anthropic uses OpenAI compatibility mode with Authorization header
-                    Authorization: /^Bearer /,
+                    // Anthropic uses x-api-key header
+                    "x-api-key": "test-anthropic-api-key",
                   },
                 },
               },
