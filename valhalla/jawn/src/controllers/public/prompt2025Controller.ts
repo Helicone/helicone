@@ -242,7 +242,7 @@ export class Prompt2025Controller extends Controller {
     }
     return result;
   }
-  
+
   @Get("count")
   public async getPrompt2025Count(
     @Request() request: JawnAuthenticatedRequest
