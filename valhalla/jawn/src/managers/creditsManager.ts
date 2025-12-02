@@ -1,4 +1,6 @@
 import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
+import { registry } from "@helicone-package/cost/models/registry";
+import { ModelProviderName } from "@helicone-package/cost/models/providers";
 import { err, ok, Result } from "../../../../packages/common/result";
 import {
   CreditBalanceResponse,
@@ -9,6 +11,27 @@ import { isError, resultMap } from "../packages/common/result";
 import { BaseManager } from "./BaseManager";
 import { WalletManager } from "./wallet/WalletManager";
 import { dbQueryClickhouse } from "../lib/shared/db/dbExecute";
+
+export interface ModelSpend {
+  model: string;
+  provider: string;
+  cost: number; // USD
+  requestCount: number;
+  promptTokens: number;
+  completionTokens: number;
+  pricing: {
+    inputPer1M: number;
+    outputPer1M: number;
+  } | null;
+}
+
+export interface SpendBreakdownResponse {
+  models: ModelSpend[];
+  totalCost: number;
+  timeRange: { start: string; end: string };
+}
+
+type TimeRange = "7d" | "30d" | "90d" | "all";
 
 export class CreditsManager extends BaseManager {
   constructor(authParams: AuthParams) {
@@ -91,5 +114,102 @@ export class CreditsManager extends BaseManager {
         resolve(err(`Error retrieving total spend: ${error.message}`));
       }
     });
+  }
+
+  public async getSpendBreakdown(
+    timeRange: TimeRange
+  ): Promise<Result<SpendBreakdownResponse, string>> {
+    try {
+      const now = new Date();
+      let startDate: Date;
+
+      switch (timeRange) {
+        case "7d":
+          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          break;
+        case "30d":
+          startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          break;
+        case "90d":
+          startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+          break;
+        case "all":
+          // Use a very old date to get all data
+          startDate = new Date("2020-01-01");
+          break;
+        default:
+          startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      }
+
+      const query = `
+        SELECT
+          model,
+          provider,
+          count(*) as request_count,
+          sum(prompt_tokens) as prompt_tokens,
+          sum(completion_tokens) as completion_tokens,
+          sum(cost) / ${COST_PRECISION_MULTIPLIER} as cost
+        FROM request_response_rmt
+        WHERE organization_id = {val_0 : String}
+          AND is_passthrough_billing = true
+          AND request_created_at >= {val_1 : DateTime64(3)}
+          AND request_created_at < {val_2 : DateTime64(3)}
+        GROUP BY model, provider
+        ORDER BY cost DESC
+        LIMIT 50
+      `;
+
+      const res = await dbQueryClickhouse<{
+        model: string;
+        provider: string;
+        request_count: string;
+        prompt_tokens: string;
+        completion_tokens: string;
+        cost: string;
+      }>(query, [this.authParams.organizationId, startDate, now]);
+
+      if (isError(res)) {
+        return err(res.error);
+      }
+
+      const models: ModelSpend[] = res.data.map((row) => {
+        // Look up pricing from registry
+        let pricing: { inputPer1M: number; outputPer1M: number } | null = null;
+        const configResult = registry.getModelProviderConfigByProviderModelId(
+          row.model,
+          row.provider as ModelProviderName
+        );
+        if (!configResult.error && configResult.data?.pricing?.[0]) {
+          const p = configResult.data.pricing[0];
+          pricing = {
+            inputPer1M: p.input * 1_000_000,
+            outputPer1M: p.output * 1_000_000,
+          };
+        }
+
+        return {
+          model: row.model,
+          provider: row.provider,
+          cost: parseFloat(row.cost),
+          requestCount: parseInt(row.request_count, 10),
+          promptTokens: parseInt(row.prompt_tokens, 10) || 0,
+          completionTokens: parseInt(row.completion_tokens, 10) || 0,
+          pricing,
+        };
+      });
+
+      const totalCost = models.reduce((sum, m) => sum + m.cost, 0);
+
+      return ok({
+        models,
+        totalCost,
+        timeRange: {
+          start: startDate.toISOString(),
+          end: now.toISOString(),
+        },
+      });
+    } catch (error: any) {
+      return err(`Error retrieving spend breakdown: ${error.message}`);
+    }
   }
 }

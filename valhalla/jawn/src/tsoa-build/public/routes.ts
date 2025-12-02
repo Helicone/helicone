@@ -4010,6 +4010,44 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__totalSpend-number__"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ModelSpend": {
+        "dataType": "refObject",
+        "properties": {
+            "model": {"dataType":"string","required":true},
+            "provider": {"dataType":"string","required":true},
+            "cost": {"dataType":"double","required":true},
+            "requestCount": {"dataType":"double","required":true},
+            "promptTokens": {"dataType":"double","required":true},
+            "completionTokens": {"dataType":"double","required":true},
+            "pricing": {"dataType":"union","subSchemas":[{"dataType":"nestedObjectLiteral","nestedProperties":{"outputPer1M":{"dataType":"double","required":true},"inputPer1M":{"dataType":"double","required":true}}},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "SpendBreakdownResponse": {
+        "dataType": "refObject",
+        "properties": {
+            "models": {"dataType":"array","array":{"dataType":"refObject","ref":"ModelSpend"},"required":true},
+            "totalCost": {"dataType":"double","required":true},
+            "timeRange": {"dataType":"nestedObjectLiteral","nestedProperties":{"end":{"dataType":"string","required":true},"start":{"dataType":"string","required":true}},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_SpendBreakdownResponse_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"ref":"SpendBreakdownResponse","required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_SpendBreakdownResponse.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_SpendBreakdownResponse_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ResultSuccess__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array_": {
         "dataType": "refObject",
         "properties": {
@@ -11477,6 +11515,38 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getTotalSpend',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsCreditsController_getSpendBreakdown: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                timeRange: {"in":"query","name":"timeRange","dataType":"union","subSchemas":[{"dataType":"enum","enums":["7d"]},{"dataType":"enum","enums":["30d"]},{"dataType":"enum","enums":["90d"]},{"dataType":"enum","enums":["all"]}]},
+        };
+        app.get('/v1/credits/spend/breakdown',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(CreditsController)),
+            ...(fetchMiddlewares<RequestHandler>(CreditsController.prototype.getSpendBreakdown)),
+
+            async function CreditsController_getSpendBreakdown(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsCreditsController_getSpendBreakdown, request, response });
+
+                const controller = new CreditsController();
+
+              await templateService.apiHandler({
+                methodName: 'getSpendBreakdown',
                 controller,
                 response,
                 next,

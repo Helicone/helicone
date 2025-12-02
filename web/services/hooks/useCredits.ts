@@ -136,3 +136,51 @@ export const useCreateCheckoutSession = () => {
     },
   });
 };
+
+// Types for spend breakdown
+export interface ModelSpend {
+  model: string;
+  provider: string;
+  cost: number;
+  requestCount: number;
+  promptTokens: number;
+  completionTokens: number;
+  pricing: {
+    inputPer1M: number;
+    outputPer1M: number;
+  } | null;
+}
+
+export interface SpendBreakdownResponse {
+  models: ModelSpend[];
+  totalCost: number;
+  timeRange: { start: string; end: string };
+}
+
+export type SpendTimeRange = "7d" | "30d" | "90d" | "all";
+
+// A hook for fetching spend breakdown by model
+export const useSpendBreakdown = (timeRange: SpendTimeRange = "30d") => {
+  const org = useOrg();
+
+  const result = $JAWN_API.useQuery(
+    "get",
+    "/v1/credits/spend/breakdown",
+    {
+      params: {
+        query: {
+          timeRange,
+        },
+      },
+    },
+    {
+      enabled: !!org?.currentOrg?.id,
+      staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    },
+  );
+
+  return {
+    ...result,
+    data: result.data?.data as SpendBreakdownResponse | undefined,
+  };
+};

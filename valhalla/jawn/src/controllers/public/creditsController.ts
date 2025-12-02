@@ -1,6 +1,10 @@
 import { Controller, Get, Query, Request, Route, Security, Tags } from "tsoa";
 import type { JawnAuthenticatedRequest } from "../../types/request";
-import { CreditsManager } from "../../managers/creditsManager";
+import {
+  CreditsManager,
+  ModelSpend,
+  SpendBreakdownResponse,
+} from "../../managers/creditsManager";
 import { err, isError, ok, Result } from "../../packages/common/result";
 
 export interface PurchasedCredits {
@@ -83,5 +87,22 @@ export class CreditsController extends Controller {
     }
 
     return ok({ totalSpend: result.data });
+  }
+
+  @Get("/spend/breakdown")
+  public async getSpendBreakdown(
+    @Request() request: JawnAuthenticatedRequest,
+    @Query() timeRange?: "7d" | "30d" | "90d" | "all"
+  ): Promise<Result<SpendBreakdownResponse, string>> {
+    const creditsManager = new CreditsManager(request.authParams);
+
+    const result = await creditsManager.getSpendBreakdown(timeRange ?? "30d");
+
+    if (isError(result)) {
+      this.setStatus(400);
+      return err(result.error);
+    }
+
+    return ok(result.data);
   }
 }

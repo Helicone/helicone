@@ -161,9 +161,9 @@ const Credits: NextPageWithLayout<void> = () => {
                     >
                       Add Credits
                     </Button>
-                    <Link href="/requests" className="w-full">
+                    <Link href="/credits/breakdown" className="w-full">
                       <Button variant="outline" size="sm" className="w-full">
-                        View Usage
+                        View Spend Breakdown
                       </Button>
                     </Link>
                   </CardContent>
