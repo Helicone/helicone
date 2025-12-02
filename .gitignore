@@ -65,4 +65,3 @@ supabase/seed.private.sql
 
 
 ignored/
-yarn.lock
