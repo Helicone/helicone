@@ -293,10 +293,10 @@ const convertRequestInputToMessages = (
   }
 
   const messages: Message[] = [];
-  let lastAssistantMessage: Message | null = null;
 
   input.forEach((msg: any, msgIdx) => {
-    // Handle function calls - group them into tool_calls array
+    // Handle function calls - each function_call becomes its own assistant message
+    // to preserve chronological order in conversation history
     if (msg.type === "function_call") {
       const toolCall = {
         id: msg.id || msg.call_id || `req-tool-${msgIdx}`,
@@ -305,19 +305,14 @@ const convertRequestInputToMessages = (
         type: "function",
       };
 
-      // Find or create an assistant message to attach tool calls to
-      if (!lastAssistantMessage || lastAssistantMessage.role !== "assistant") {
-        lastAssistantMessage = {
-          _type: "message",
-          role: "assistant",
-          content: "", // Assistant messages with tool calls can have empty content
-          id: `req-msg-assistant-${msgIdx}`,
-          tool_calls: [],
-        };
-        messages.push(lastAssistantMessage);
-      }
-
-      lastAssistantMessage.tool_calls?.push(toolCall);
+      // Create a new assistant message for each function call
+      messages.push({
+        _type: "message",
+        role: "assistant",
+        content: "",
+        id: `req-msg-assistant-${msgIdx}`,
+        tool_calls: [toolCall],
+      });
       return;
     }
 
@@ -389,19 +384,13 @@ const convertRequestInputToMessages = (
           }
         }
 
-        const message = {
+        messages.push({
           _type: "message",
           role: msg.role,
           type: "input_text",
           content: content,
           id: `req-msg-${msgIdx}`,
-        } as Message;
-        messages.push(message);
-
-        // Update lastAssistantMessage if this is an assistant message
-        if (msg.role === "assistant") {
-          lastAssistantMessage = message;
-        }
+        } as Message);
 
         return;
       } else if (Array.isArray(msg.content)) {
