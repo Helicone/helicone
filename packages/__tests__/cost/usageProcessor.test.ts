@@ -75,6 +75,8 @@ describe("OpenAIUsageProcessor", () => {
       output: 10,
       cacheDetails: {
         cachedInput: 1152,
+        write5m: 0,
+        write1h: 0,
       },
     });
   });

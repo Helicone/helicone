@@ -52,6 +52,8 @@ exports[`OpenAIUsageProcessor usage processing snapshot 1`] = `
     "data": {
       "cacheDetails": {
         "cachedInput": 1152,
+        "write1h": 0,
+        "write5m": 0,
       },
       "input": 96,
       "output": 10,
