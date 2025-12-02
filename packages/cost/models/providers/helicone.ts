@@ -47,7 +47,6 @@ export class HeliconeProvider extends BaseProvider {
 
   buildRequestBody(endpoint: Endpoint, context: RequestBodyContext): string {
     let updatedBody = context.parsedBody;
-    console.log("updatedBody", JSON.stringify(updatedBody, null, 2));
     const isAnthropicModel = endpoint.author === "anthropic";
     if (context.bodyMapping === "NO_MAPPING") {
       if (isAnthropicModel) {
