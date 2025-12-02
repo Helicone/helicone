@@ -43,8 +43,6 @@ export function heliconeProviderToModelProviderName(
       return "perplexity";
     case "DEEPSEEK":
       return "deepseek";
-    case "COHERE":
-      return "cohere";
     case "OPENROUTER":
       return "openrouter";
     case "DEEPINFRA":
@@ -63,6 +61,8 @@ export function heliconeProviderToModelProviderName(
       return "baseten";
     case "FIREWORKS":
       return "fireworks";
+    case "CANOPYWAVE":
+      return "canopywave";
     // new registry does not have
     case "LOCAL":
     case "HELICONE":
@@ -135,6 +135,9 @@ export const dbProviderToProvider = (
   }
   if (provider === "openrouter" || provider === "OpenRouter") {
     return "openrouter";
+  }
+  if (provider === "canopywave" || provider === "Canopy Wave") {
+    return "canopywave";
   }
   if (provider === "novita" || provider === "Novita") {
     return "novita";
@@ -314,7 +317,7 @@ export async function buildRequestBody(
 export async function buildErrorMessage(
   endpoint: Endpoint,
   response: Response
-): Promise<Result<string>> {
+): Promise<Result<{ message: string; details?: any }>> {
   const providerResult = getProvider(endpoint.provider);
   if (providerResult.error) {
     return err(providerResult.error);
