@@ -4,11 +4,9 @@ import { runGatewayTest } from "./test-framework";
 import { createOpenAIMockResponse } from "../test-utils";
 
 // Define auth expectations for Google AI Studio
+// Note: Google AI Studio uses API key in URL query parameter, not headers
 const googleAuthExpectations = {
-  headers: {
-    // Google AI Studio uses OpenAI compatibility mode with Authorization header
-    Authorization: /^Bearer /,
-  },
+  // No header expectations - auth is in URL query param
 };
 
 // Define auth expectations for Vertex
@@ -51,9 +49,11 @@ describe("Google Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+                // Native Google endpoint with API key in URL query param
+                url: /^https:\/\/generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-2\.5-flash:generateContent\?key=/,
                 response: "success",
-                model: "gemini-2.5-flash",
+                // Native Google format doesn't use model field in body
+                model: undefined,
                 data: createOpenAIMockResponse("gemini-2.5-flash"),
                 expects: googleAuthExpectations,
               },
@@ -68,9 +68,11 @@ describe("Google Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/us-central1/endpoints/openapi/chat/completions",
+                // Vertex uses native Google endpoint (not OpenAI-compatible)
+                url: "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/us-central1/publishers/google/models/gemini-2.5-flash:generateContent",
                 response: "success",
-                model: "google/gemini-2.5-flash",
+                // Native Google format doesn't use model field in body
+                model: undefined,
                 data: createOpenAIMockResponse("gemini-2.5-flash"),
                 expects: vertexAuthExpectations,
               },
@@ -88,9 +90,11 @@ describe("Google Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+                // Native Google endpoint with API key in URL query param
+                url: /^https:\/\/generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-2\.5-flash-lite:generateContent\?key=/,
                 response: "success",
-                model: "gemini-2.5-flash-lite",
+                // Native Google format doesn't use model field in body
+                model: undefined,
                 data: createOpenAIMockResponse("gemini-2.5-flash-lite"),
                 expects: googleAuthExpectations,
               },
@@ -105,9 +109,11 @@ describe("Google Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/us-central1/endpoints/openapi/chat/completions",
+                // Vertex uses native Google endpoint (not OpenAI-compatible)
+                url: "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/us-central1/publishers/google/models/gemini-2.5-flash-lite:generateContent",
                 response: "success",
-                model: "google/gemini-2.5-flash-lite",
+                // Native Google format doesn't use model field in body
+                model: undefined,
                 data: createOpenAIMockResponse("gemini-2.5-flash-lite"),
                 expects: vertexAuthExpectations,
               },
@@ -125,9 +131,11 @@ describe("Google Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+                // Native Google endpoint with API key in URL query param
+                url: /^https:\/\/generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-2\.5-pro:generateContent\?key=/,
                 response: "success",
-                model: "gemini-2.5-pro",
+                // Native Google format doesn't use model field in body
+                model: undefined,
                 data: createOpenAIMockResponse("gemini-2.5-pro"),
                 expects: googleAuthExpectations,
               },
@@ -142,9 +150,11 @@ describe("Google Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/us-central1/endpoints/openapi/chat/completions",
+                // Vertex uses native Google endpoint (not OpenAI-compatible)
+                url: "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/test-project/locations/us-central1/publishers/google/models/gemini-2.5-pro:generateContent",
                 response: "success",
-                model: "google/gemini-2.5-pro",
+                // Native Google format doesn't use model field in body
+                model: undefined,
                 data: createOpenAIMockResponse("gemini-2.5-pro"),
                 expects: vertexAuthExpectations,
               },
@@ -412,7 +422,8 @@ describe("Google Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+                // Native Google endpoint with API key in URL query param
+                url: /^https:\/\/generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-2\.5-flash:generateContent\?key=/,
                 response: "failure",
                 statusCode: 500,
                 errorMessage: "Google AI Studio service unavailable",
@@ -428,7 +439,8 @@ describe("Google Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+                // Native Google endpoint with API key in URL query param
+                url: /^https:\/\/generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-2\.5-pro:generateContent\?key=/,
                 response: "failure",
                 statusCode: 429,
                 errorMessage: "Rate limit exceeded",
@@ -444,7 +456,8 @@ describe("Google Registry Tests", () => {
           expected: {
             providers: [
               {
-                url: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+                // Native Google endpoint with API key in URL query param
+                url: /^https:\/\/generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-2\.5-flash:generateContent\?key=/,
                 response: "failure",
                 statusCode: 401,
                 errorMessage: "Invalid API key",
