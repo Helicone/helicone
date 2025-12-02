@@ -12,6 +12,7 @@ export class AnthropicToOpenAIStreamConverter {
   private created: number = 0;
   private finalUsage: ChatCompletionChunk["usage"] | null = null;
   private inputTokens: number = 0; // Some providers (e.g. Anthropic) don't include input_tokens in the message_delta event
+  private cacheCreationDetails: { ephemeral_5m_input_tokens: number; ephemeral_1h_input_tokens: number } | null = null; // Cache creation details from message_start
   private toolCallState: Map<
     number,
     {
@@ -69,6 +70,12 @@ export class AnthropicToOpenAIStreamConverter {
         this.messageId = event.message.id;
         this.model = event.message.model;
         this.inputTokens = event.message.usage.input_tokens ?? 0;
+        this.cacheCreationDetails = event.message.usage.cache_creation
+          ? {
+              ephemeral_5m_input_tokens: event.message.usage.cache_creation.ephemeral_5m_input_tokens ?? 0,
+              ephemeral_1h_input_tokens: event.message.usage.cache_creation.ephemeral_1h_input_tokens ?? 0,
+            }
+          : null;
         this.toolCallState.clear();
         this.nextToolCallIndex = 0;
         this.annotations = [];
@@ -293,10 +300,8 @@ export class AnthropicToOpenAIStreamConverter {
               ...(cacheWriteTokens > 0 && {
                 cache_write_tokens: cacheWriteTokens,
                 cache_write_details: {
-                  write_5m_tokens:
-                    event.usage.cache_creation?.ephemeral_5m_input_tokens ?? 0,
-                  write_1h_tokens:
-                    event.usage.cache_creation?.ephemeral_1h_input_tokens ?? 0,
+                  write_5m_tokens: this.cacheCreationDetails?.ephemeral_5m_input_tokens ?? 0,
+                  write_1h_tokens: this.cacheCreationDetails?.ephemeral_1h_input_tokens ?? 0,
                 },
               }),
             },
