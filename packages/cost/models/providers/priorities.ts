@@ -24,6 +24,7 @@ export const PROVIDER_PRIORITIES: Record<ModelProviderName, number> = {
   azure: 4,
   baseten: 4,
   bedrock: 4,
+  canopywave: 4,
   cerebras: 4,
   chutes: 4,
   deepinfra: 4,
