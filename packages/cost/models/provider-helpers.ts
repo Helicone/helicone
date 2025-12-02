@@ -348,6 +348,9 @@ const MODEL_NAME_MAPPINGS: Record<string, string> = {
   "deepseek-r1": "deepseek-reasoner",
   "kimi-k2": "kimi-k2-0905",
   "kimi-k2-instruct": "kimi-k2-0905",
+  // Grok 4.1 backwards compatibility (period to dash)
+  "grok-4.1-fast-non-reasoning": "grok-4-1-fast-non-reasoning",
+  "grok-4.1-fast-reasoning": "grok-4-1-fast-reasoning",
 };
 
 export function parseModelString(
