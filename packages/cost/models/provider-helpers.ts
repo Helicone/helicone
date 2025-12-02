@@ -43,6 +43,8 @@ export function heliconeProviderToModelProviderName(
       return "perplexity";
     case "DEEPSEEK":
       return "deepseek";
+    case "COHERE":
+      return "cohere";
     case "OPENROUTER":
       return "openrouter";
     case "DEEPINFRA":
