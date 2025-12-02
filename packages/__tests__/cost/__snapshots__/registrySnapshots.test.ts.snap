@@ -5100,6 +5100,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "grok-4.1-fast-non-reasoning:helicone": {
+      "context": 2000000,
+      "crossRegion": false,
+      "maxTokens": 2000000,
+      "modelId": "pa/grok-4-1-fast-non-reasoning",
+      "parameters": [
+        "logprobs",
+        "max_tokens",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "grok-4.1-fast-non-reasoning:xai": {
       "context": 2000000,
       "crossRegion": false,
@@ -5108,6 +5131,54 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "parameters": [
         "logprobs",
         "max_tokens",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "xai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "grok-4.1-fast-reasoning:helicone": {
+      "context": 2000000,
+      "crossRegion": false,
+      "maxTokens": 2000000,
+      "modelId": "pa/grok-4-1-fast-reasoning",
+      "parameters": [
+        "logprobs",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "grok-4.1-fast-reasoning:xai": {
+      "context": 2000000,
+      "crossRegion": false,
+      "maxTokens": 2000000,
+      "modelId": "grok-4-1-fast-reasoning",
+      "parameters": [
+        "logprobs",
+        "max_tokens",
+        "reasoning",
         "response_format",
         "seed",
         "structured_outputs",
@@ -5281,6 +5352,36 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "zai/glm-4": {
+    "glm-4.6:canopywave": {
+      "context": 204800,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "zai/glm-4.6",
+      "parameters": [
+        "frequency_penalty",
+        "functions",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "reasoning",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "canopywave",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "glm-4.6:novita": {
       "context": 204800,
       "crossRegion": false,
@@ -5623,10 +5724,13 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "helicone",
     "helicone",
     "helicone",
+    "helicone",
+    "helicone",
     "openrouter",
     "openrouter",
     "openrouter",
     "openrouter",
+    "xai",
     "xai",
     "xai",
     "xai",
@@ -5636,6 +5740,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "xai",
   ],
   "zai/glm-4": [
+    "canopywave",
     "novita",
   ],
 }
@@ -7255,6 +7360,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "zai/glm-4": {
+    "canopywave": [
+      {
+        "input": 4.5e-7,
+        "output": 0.0000015,
+        "threshold": 0,
+      },
+    ],
     "novita": [
       {
         "input": 6e-7,
@@ -7508,6 +7620,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "glm-4.6",
       "providers": [
+        "canopywave",
         "novita",
       ],
     },
@@ -7698,6 +7811,14 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "grok-4.1-fast-non-reasoning",
       "providers": [
+        "helicone",
+        "xai",
+      ],
+    },
+    {
+      "model": "grok-4.1-fast-reasoning",
+      "providers": [
+        "helicone",
         "xai",
       ],
     },
@@ -7976,6 +8097,10 @@ exports[`Registry Snapshots verify registry state 1`] = `
     },
     {
       "modelCount": 1,
+      "provider": "canopywave",
+    },
+    {
+      "modelCount": 1,
       "provider": "cerebras",
     },
     {
@@ -8003,7 +8128,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "groq",
     },
     {
-      "modelCount": 35,
+      "modelCount": 37,
       "provider": "helicone",
     },
     {
@@ -8035,7 +8160,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "vertex",
     },
     {
-      "modelCount": 7,
+      "modelCount": 8,
       "provider": "xai",
     },
   ],
@@ -8093,6 +8218,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "grok-4-fast-non-reasoning",
     "grok-4-fast-reasoning",
     "grok-4.1-fast-non-reasoning",
+    "grok-4.1-fast-reasoning",
     "grok-code-fast-1",
     "hermes-2-pro-llama-3-8b",
     "kimi-k2-0711",
@@ -8140,9 +8266,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 237,
-  "totalModelProviderConfigs": 237,
-  "totalModelsWithPtb": 90,
-  "totalProviders": 20,
+  "totalEndpoints": 241,
+  "totalModelProviderConfigs": 241,
+  "totalModelsWithPtb": 91,
+  "totalProviders": 21,
 }
 `;
