@@ -567,6 +567,15 @@ export class Wallet extends DurableObject<Env> {
         )
         .one();
 
+      // Probabilistic cleanup: 1% chance to clean stale escrows
+      if (Math.random() < 0.01) {
+        const oneHourAgo = Date.now() - 60 * 60 * 1000;
+        this.ctx.storage.sql.exec(
+          "DELETE FROM escrows WHERE created_at < ?",
+          oneHourAgo
+        );
+      }
+
       return { clickhouseLastCheckedAt: result.checked_at };
     });
   }
