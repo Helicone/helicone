@@ -59,6 +59,7 @@ export abstract class BaseProvider {
     if (context.bodyMapping === "RESPONSES") {
       updatedBody = context.toChatCompletions(updatedBody);
     }
+
     return JSON.stringify({
       ...updatedBody,
       model: endpoint.providerModelId,

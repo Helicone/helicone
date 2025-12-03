@@ -83,6 +83,37 @@ export type ResponsesToolChoice =
   | "required"
   | { type: "function"; function: { name: string } };
 
+/**
+ * Context editing configuration for managing conversation context.
+ * Only supported for Anthropic models - will be stripped for other providers.
+ *
+ * @see https://docs.anthropic.com/en/docs/build-with-claude/context-editing
+ */
+export interface ResponsesContextEditingConfig {
+  /**
+   * Whether context editing is enabled.
+   */
+  enabled: boolean;
+
+  /**
+   * Optional strategy for clearing old tool uses when context exceeds thresholds.
+   */
+  clear_tool_uses?: {
+    trigger?: number;
+    keep?: number;
+    clear_at_least?: number;
+    exclude_tools?: string[];
+    clear_tool_inputs?: boolean;
+  };
+
+  /**
+   * Optional strategy for clearing thinking blocks when extended thinking is enabled.
+   */
+  clear_thinking?: {
+    keep?: number | "all";
+  };
+}
+
 export interface ResponsesRequestBody {
   model: string;
   input: string | ResponsesInputItem[];
@@ -120,6 +151,11 @@ export interface ResponsesRequestBody {
   seed?: number;
   service_tier?: string;
   stream_options?: any;
+  /**
+   * Context editing configuration for managing conversation context.
+   * Only supported for Anthropic models - will be stripped for other providers.
+   */
+  context_editing?: ResponsesContextEditingConfig;
   // Deprecated parameters (pass-through if present)
   function_call?: string | { name: string };
   functions?: Array<any>;
