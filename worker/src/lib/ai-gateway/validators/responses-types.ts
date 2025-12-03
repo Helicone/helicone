@@ -696,6 +696,32 @@ const ResponseStreamOptions = z.union([
   z.object({ include_obfuscation: z.boolean() }).partial().passthrough(),
   z.null(),
 ]);
+
+// Context editing configuration for managing conversation context
+// Only supported for Anthropic models - will be stripped for other providers
+const ClearToolUsesConfig = z
+  .object({
+    trigger: z.number().int().optional(),
+    keep: z.number().int().optional(),
+    clear_at_least: z.number().int().optional(),
+    exclude_tools: z.array(z.string()).optional(),
+    clear_tool_inputs: z.boolean().optional(),
+  })
+  .passthrough();
+
+const ClearThinkingConfig = z
+  .object({
+    keep: z.union([z.number().int(), z.literal("all")]).optional(),
+  })
+  .passthrough();
+
+const ContextEditingConfig = z
+  .object({
+    enabled: z.boolean(),
+    clear_tool_uses: ClearToolUsesConfig.optional(),
+    clear_thinking: ClearThinkingConfig.optional(),
+  })
+  .passthrough();
 // ConversationParam_2 was removed
 // ConversationParam was removed
 const CreateResponse = CreateModelResponseProperties.and(
@@ -710,6 +736,9 @@ const CreateResponse = CreateModelResponseProperties.and(
       instructions: z.union([z.string(), z.null()]),
       stream: z.union([z.boolean(), z.null()]),
       stream_options: ResponseStreamOptions,
+      // Context editing configuration for managing conversation context
+      // Only supported for Anthropic models - will be stripped for other providers
+      context_editing: ContextEditingConfig.optional(),
       // conversation was removed
     })
     .partial()

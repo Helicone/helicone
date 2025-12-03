@@ -54,6 +54,10 @@ export class HeliconeProvider extends BaseProvider {
         if (typeof updatedBody.system === "string") {
           updatedBody.system = [{ type: "text", text: updatedBody.system }];
         }
+        return JSON.stringify({
+          ...updatedBody,
+          model: endpoint.providerModelId,
+        });
       }
 
       return JSON.stringify({
