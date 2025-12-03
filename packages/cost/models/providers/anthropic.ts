@@ -46,7 +46,7 @@ export class AnthropicProvider extends BaseProvider {
     let updatedBody = context.parsedBody;
 
     if (context.bodyMapping === "RESPONSES") {
-      updatedBody = context.toChatCompletions(context.parsedBody);
+      updatedBody = context.toChatCompletions(updatedBody);
     }
     const anthropicBody = context.toAnthropic(updatedBody, endpoint.providerModelId);
     return JSON.stringify(anthropicBody);
