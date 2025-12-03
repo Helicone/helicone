@@ -10,13 +10,18 @@ import { AuthParams } from "../packages/common/auth/types";
 import { isError, resultMap } from "../packages/common/result";
 import { BaseManager } from "./BaseManager";
 import { WalletManager } from "./wallet/WalletManager";
-import { dbQueryClickhouse, dbExecute } from "../lib/shared/db/dbExecute";
+import { dbExecute, dbQueryClickhouse } from "../lib/shared/db/dbExecute";
+import { DiscountCalculator } from "../utils/discountCalculator";
 
-// Discount rule stored in organization.discounts JSONB
-interface OrgDiscount {
-  provider: string | null; // null = all providers
-  model: string | null; // null = all models, supports wildcards like "gpt-%"
-  percent: number; // e.g., 10 = 10% off
+export interface PTBInvoice {
+  id: string;
+  organizationId: string;
+  stripeInvoiceId: string | null;
+  startDate: string;
+  endDate: string;
+  amountCents: number;
+  notes: string | null;
+  createdAt: string;
 }
 
 export interface ModelSpend {
@@ -124,70 +129,45 @@ export class CreditsManager extends BaseManager {
     });
   }
 
-  // Check if a model matches a pattern (supports SQL LIKE-style % wildcards)
-  private matchesPattern(value: string, pattern: string | null): boolean {
-    if (pattern === null) return true; // null matches everything
-    // Convert SQL LIKE pattern to regex
-    const regexPattern = pattern
-      .replace(/[.+?^${}()|[\]\\]/g, "\\$&") // Escape regex special chars except %
-      .replace(/%/g, ".*"); // Convert % to .*
-    return new RegExp(`^${regexPattern}$`, "i").test(value);
-  }
-
-  // Find the first matching discount rule for a model/provider
-  private findDiscount(
-    discounts: OrgDiscount[],
-    model: string,
-    provider: string
-  ): number {
-    for (const rule of discounts) {
-      const providerMatch =
-        rule.provider === null || rule.provider === provider;
-      const modelMatch = this.matchesPattern(model, rule.model);
-      if (providerMatch && modelMatch) {
-        return rule.percent;
-      }
-    }
-    return 0;
-  }
-
   public async getSpendBreakdown(
     timeRange: TimeRange
   ): Promise<Result<SpendBreakdownResponse, string>> {
+    const now = new Date();
+    let startDate: Date;
+
+    switch (timeRange) {
+      case "7d":
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case "30d":
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      case "90d":
+        startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+        break;
+      case "all":
+        startDate = new Date("2020-01-01");
+        break;
+      default:
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    }
+
+    return this.getSpendBreakdownByDateRange(startDate, now);
+  }
+
+  /**
+   * Get spend breakdown for a custom date range.
+   * Used by admin invoicing to get spend for specific billing periods.
+   */
+  public async getSpendBreakdownByDateRange(
+    startDate: Date,
+    endDate: Date
+  ): Promise<Result<SpendBreakdownResponse, string>> {
     try {
-      const now = new Date();
-      let startDate: Date;
-
-      switch (timeRange) {
-        case "7d":
-          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-          break;
-        case "30d":
-          startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-          break;
-        case "90d":
-          startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
-          break;
-        case "all":
-          // Use a very old date to get all data
-          startDate = new Date("2020-01-01");
-          break;
-        default:
-          startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-      }
-
-      // Fetch org's discount rules
-      const discountsResult = await dbExecute<{ discounts: OrgDiscount[] }>(
-        `SELECT discounts FROM organization WHERE id = $1`,
-        [this.authParams.organizationId]
+      // Get discount calculator for this org
+      const discountCalculator = await DiscountCalculator.forOrg(
+        this.authParams.organizationId
       );
-      // TODO: Remove this fake data once migration is applied
-      const discounts: OrgDiscount[] =
-        discountsResult.data?.[0]?.discounts ?? [
-          { provider: "helicone", model: "gpt%", percent: 10 },
-          { provider: "helicone", model: "claude-%", percent: 15 },
-          { provider: "helicone", model: "grok-%", percent: 5 },
-        ];
 
       const query = `
         SELECT
@@ -205,7 +185,6 @@ export class CreditsManager extends BaseManager {
         GROUP BY model, provider
         HAVING cost > 0
         ORDER BY cost DESC
-        LIMIT 50
       `;
 
       const res = await dbQueryClickhouse<{
@@ -215,7 +194,7 @@ export class CreditsManager extends BaseManager {
         prompt_tokens: string;
         completion_tokens: string;
         cost: string;
-      }>(query, [this.authParams.organizationId, startDate, now]);
+      }>(query, [this.authParams.organizationId, startDate, endDate]);
 
       if (isError(res)) {
         return err(res.error);
@@ -239,8 +218,7 @@ export class CreditsManager extends BaseManager {
         }
 
         const subtotal = parseFloat(row.cost);
-        const discountPercent = this.findDiscount(
-          discounts,
+        const discountPercent = discountCalculator.findDiscount(
           row.model,
           row.provider
         );
@@ -265,11 +243,55 @@ export class CreditsManager extends BaseManager {
         totalCost,
         timeRange: {
           start: startDate.toISOString(),
-          end: now.toISOString(),
+          end: endDate.toISOString(),
         },
       });
     } catch (error: any) {
       return err(`Error retrieving spend breakdown: ${error.message}`);
+    }
+  }
+
+  /**
+   * List all invoices for the current org (read-only for customers).
+   */
+  public async listInvoices(): Promise<Result<PTBInvoice[], string>> {
+    try {
+      const result = await dbExecute<{
+        id: string;
+        organization_id: string;
+        stripe_invoice_id: string | null;
+        start_date: string;
+        end_date: string;
+        amount_cents: string;
+        notes: string | null;
+        created_at: string;
+      }>(
+        `SELECT id, organization_id, stripe_invoice_id, start_date, end_date,
+                amount_cents, notes, created_at
+         FROM ptb_invoices
+         WHERE organization_id = $1
+         ORDER BY created_at DESC`,
+        [this.authParams.organizationId]
+      );
+
+      if (result.error) {
+        return err(`Error listing invoices: ${result.error}`);
+      }
+
+      const invoices: PTBInvoice[] = (result.data || []).map((row) => ({
+        id: row.id,
+        organizationId: row.organization_id,
+        stripeInvoiceId: row.stripe_invoice_id,
+        startDate: row.start_date,
+        endDate: row.end_date,
+        amountCents: parseInt(row.amount_cents, 10),
+        notes: row.notes,
+        createdAt: row.created_at,
+      }));
+
+      return ok(invoices);
+    } catch (error: any) {
+      return err(`Error listing invoices: ${error.message}`);
     }
   }
 }

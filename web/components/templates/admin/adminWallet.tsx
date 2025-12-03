@@ -89,6 +89,15 @@ export default function AdminWallet() {
     model: string;
   } | null>(null);
 
+  // Delete invoice state
+  const [deleteInvoiceDialogOpen, setDeleteInvoiceDialogOpen] = useState(false);
+  const [invoiceToDelete, setInvoiceToDelete] = useState<{
+    id: string;
+    startDate: string;
+    endDate: string;
+    amountCents: number;
+  } | null>(null);
+
   // Wallet modification form state
   const [modifyAmount, setModifyAmount] = useState<string>("");
   const [modifyType, setModifyType] = useState<"credit" | "debit">("credit");
@@ -110,6 +119,17 @@ export default function AdminWallet() {
     from: addDays(new Date(), -30),
     to: new Date(),
   });
+
+  // Organization detail tab state (for expanded row)
+  const [orgDetailTab, setOrgDetailTab] = useState<string>("wallet");
+
+  // Invoice form state
+  const [invoiceStartDate, setInvoiceStartDate] = useState<string>("");
+  const [invoiceEndDate, setInvoiceEndDate] = useState<string>("");
+  const [isCreatingInvoice, setIsCreatingInvoice] = useState(false);
+  const [invoiceError, setInvoiceError] = useState<string | null>(null);
+  const [invoiceSuccess, setInvoiceSuccess] = useState<string | null>(null);
+  const [createInvoiceDialogOpen, setCreateInvoiceDialogOpen] = useState(false);
 
   // Time-series granularity state (default: day)
   const [groupBy, setGroupBy] = useState<
@@ -212,6 +232,68 @@ export default function AdminWallet() {
   const deleteDisallowMutation = $JAWN_API.useMutation(
     "delete",
     "/v1/admin/wallet/{orgId}/disallow-list",
+  );
+
+  // Invoice queries and mutations
+  const {
+    data: invoiceSummaryResponse,
+    refetch: refetchInvoiceSummary,
+    isLoading: invoiceSummaryLoading,
+    error: invoiceSummaryError,
+  } = $JAWN_API.useQuery(
+    "post",
+    "/v1/admin/wallet/{orgId}/invoice-summary",
+    {
+      params: {
+        path: { orgId: selectedOrg || "" },
+      },
+    },
+    { enabled: !!selectedOrg, retry: false },
+  );
+
+  const {
+    data: invoicesListResponse,
+    refetch: refetchInvoicesList,
+    isLoading: invoicesListLoading,
+    error: invoicesListError,
+  } = $JAWN_API.useQuery(
+    "post",
+    "/v1/admin/wallet/{orgId}/invoices/list",
+    {
+      params: {
+        path: { orgId: selectedOrg || "" },
+      },
+    },
+    { enabled: !!selectedOrg, retry: false },
+  );
+
+  const {
+    data: spendBreakdownResponse,
+    refetch: refetchSpendBreakdown,
+    isLoading: spendBreakdownLoading,
+  } = $JAWN_API.useQuery(
+    "post",
+    "/v1/admin/wallet/{orgId}/spend-breakdown",
+    {
+      params: {
+        path: { orgId: selectedOrg || "" },
+        query: {
+          startDate: invoiceStartDate,
+          endDate: invoiceEndDate,
+        },
+      },
+    },
+    { enabled: !!selectedOrg && !!invoiceStartDate && !!invoiceEndDate },
+  );
+
+  const createInvoiceMutation = $JAWN_API.useMutation(
+    "post",
+    "/v1/admin/wallet/{orgId}/create-invoice",
+  );
+
+  const deleteInvoiceMutation = $JAWN_API.useMutation(
+    "delete",
+    "/v1/admin/wallet/{orgId}/invoices/{invoiceId}",
   );
 
   // Fetch table data (lazy loaded when table is selected)
@@ -490,6 +572,80 @@ export default function AdminWallet() {
       setIsUpdatingSettings(false);
     }
   };
+
+  const handleCreateInvoice = async () => {
+    if (!selectedOrg || !invoiceStartDate || !invoiceEndDate) return;
+
+    setCreateInvoiceDialogOpen(false);
+    setInvoiceError(null);
+    setInvoiceSuccess(null);
+    setIsCreatingInvoice(true);
+
+    try {
+      const result = await createInvoiceMutation.mutateAsync({
+        params: {
+          path: { orgId: selectedOrg },
+        },
+        body: {
+          startDate: invoiceStartDate,
+          endDate: invoiceEndDate,
+          daysUntilDue: 30,
+        },
+      });
+
+      if (result.error) {
+        setInvoiceError(result.error);
+      } else if (result.data) {
+        setInvoiceSuccess(
+          `Draft created: ${formatCurrency(result.data.amountCents / 100)} - ${result.data.invoiceId}`,
+        );
+        // Refetch data
+        refetchInvoiceSummary();
+        refetchInvoicesList();
+
+        // Open the invoice in Stripe dashboard in a new tab
+        if (result.data.dashboardUrl) {
+          window.open(result.data.dashboardUrl, "_blank");
+        }
+      }
+    } catch (error) {
+      setInvoiceError(
+        error instanceof Error ? error.message : "Failed to create invoice",
+      );
+    } finally {
+      setIsCreatingInvoice(false);
+    }
+  };
+
+  const handleDeleteInvoice = async () => {
+    if (!selectedOrg || !invoiceToDelete) return;
+
+    try {
+      const result = await deleteInvoiceMutation.mutateAsync({
+        params: {
+          path: {
+            orgId: selectedOrg,
+            invoiceId: invoiceToDelete.id,
+          },
+        },
+      });
+
+      if (result.data) {
+        // Refetch data
+        await refetchInvoiceSummary();
+        await refetchInvoicesList();
+      }
+    } catch (error) {
+      console.error("Error deleting invoice:", error);
+    } finally {
+      setDeleteInvoiceDialogOpen(false);
+      setInvoiceToDelete(null);
+    }
+  };
+
+  const invoiceSummary = (invoiceSummaryResponse as any)?.data;
+  const invoicesList = (invoicesListResponse as any)?.data || [];
+  const spendBreakdown = (spendBreakdownResponse as any)?.data || [];
 
   return (
     <div className="flex h-screen flex-col overflow-hidden p-6">
@@ -860,7 +1016,14 @@ export default function AdminWallet() {
                               <Loader2 size={20} className="animate-spin" />
                             </div>
                           ) : walletDetails ? (
-                            <div className="flex flex-col gap-6">
+                            <Tabs value={orgDetailTab} onValueChange={setOrgDetailTab} className="w-full">
+                              <TabsList className="mb-4">
+                                <TabsTrigger value="wallet">Wallet</TabsTrigger>
+                                <TabsTrigger value="invoicing">Invoicing</TabsTrigger>
+                                <TabsTrigger value="disallow">Disallow List</TabsTrigger>
+                              </TabsList>
+
+                              <TabsContent value="wallet" className="flex flex-col gap-6 mt-0">
                               {/* Overview */}
                               <div className="flex flex-col gap-3">
                                 <H4>Overview</H4>
@@ -1061,7 +1224,204 @@ export default function AdminWallet() {
                                   </Small>
                                 )}
                               </div>
+                              </TabsContent>
 
+                              <TabsContent value="invoicing" className="flex flex-col gap-4 mt-0">
+                              {/* Invoicing */}
+                              <div className="flex flex-col gap-3">
+                                <H4>PTB Invoicing</H4>
+
+                                {/* Show message if invoicing not available (migration not applied) */}
+                                {invoiceSummaryError || invoicesListError ? (
+                                  <div className="rounded-md border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-950">
+                                    <Small className="text-amber-700 dark:text-amber-300">
+                                      Invoicing not available. Migration may not be applied yet.
+                                    </Small>
+                                  </div>
+                                ) : (
+                                  <>
+                                {/* Invoice Summary */}
+                                {invoiceSummaryLoading ? (
+                                  <div className="flex items-center gap-2">
+                                    <Loader2 size={14} className="animate-spin" />
+                                    <Small>Loading summary...</Small>
+                                  </div>
+                                ) : invoiceSummary ? (
+                                  <div className="flex items-center gap-6 rounded-md border bg-muted/30 p-3">
+                                    <div className="flex flex-col gap-0.5">
+                                      <Small className="text-muted-foreground">Total Spend</Small>
+                                      <span className="font-medium">{formatCurrency(invoiceSummary.totalSpendCents / 100)}</span>
+                                    </div>
+                                    <div className="flex flex-col gap-0.5">
+                                      <Small className="text-muted-foreground">Total Invoiced</Small>
+                                      <span className="font-medium">{formatCurrency(invoiceSummary.totalInvoicedCents / 100)}</span>
+                                    </div>
+                                    <div className="flex flex-col gap-0.5">
+                                      <Small className="text-muted-foreground">Uninvoiced Balance</Small>
+                                      <span className={`font-semibold ${invoiceSummary.uninvoicedBalanceCents > 0 ? "text-amber-600" : ""}`}>
+                                        {formatCurrency(invoiceSummary.uninvoicedBalanceCents / 100)}
+                                      </span>
+                                    </div>
+                                    {invoiceSummary.lastInvoiceEndDate && (
+                                      <div className="flex flex-col gap-0.5">
+                                        <Small className="text-muted-foreground">Last Invoice Through</Small>
+                                        <span className="font-medium">{new Date(invoiceSummary.lastInvoiceEndDate).toLocaleDateString()}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : null}
+
+                                {/* Get Spend Breakdown */}
+                                <div className="flex flex-col gap-2 rounded-md border p-3">
+                                  <Small className="font-semibold">Create New Invoice</Small>
+                                  <div className="flex items-center gap-2">
+                                    <Input
+                                      type="date"
+                                      value={invoiceStartDate}
+                                      onChange={(e) => setInvoiceStartDate(e.target.value)}
+                                      className="h-8 w-40"
+                                    />
+                                    <span className="text-muted-foreground">to</span>
+                                    <Input
+                                      type="date"
+                                      value={invoiceEndDate}
+                                      onChange={(e) => setInvoiceEndDate(e.target.value)}
+                                      className="h-8 w-40"
+                                    />
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => refetchSpendBreakdown()}
+                                      disabled={!invoiceStartDate || !invoiceEndDate || spendBreakdownLoading}
+                                    >
+                                      {spendBreakdownLoading ? <Loader2 size={14} className="animate-spin" /> : "Load"}
+                                    </Button>
+                                  </div>
+                                  {spendBreakdown.length > 0 && (
+                                    <div className="max-h-48 overflow-auto rounded border">
+                                      <table className="w-full text-sm">
+                                        <thead className="sticky top-0 bg-muted">
+                                          <tr>
+                                            <th className="p-2 text-left">Model</th>
+                                            <th className="p-2 text-left">Provider</th>
+                                            <th className="p-2 text-right">Input Tokens</th>
+                                            <th className="p-2 text-right">Output Tokens</th>
+                                            <th className="p-2 text-right">Subtotal</th>
+                                            <th className="p-2 text-right">Discount</th>
+                                            <th className="p-2 text-right">Total</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          {spendBreakdown.map((item: any, idx: number) => (
+                                            <tr key={idx} className="border-t">
+                                              <td className="p-2">{item.model || "(unknown)"}</td>
+                                              <td className="p-2">{item.provider || "(unknown)"}</td>
+                                              <td className="p-2 text-right font-mono text-xs">{item.promptTokens.toLocaleString()}</td>
+                                              <td className="p-2 text-right font-mono text-xs">{item.completionTokens.toLocaleString()}</td>
+                                              <td className="p-2 text-right font-mono text-muted-foreground">{formatCurrency(item.subtotal)}</td>
+                                              <td className="p-2 text-right font-mono">
+                                                {item.discountPercent > 0 ? (
+                                                  <span className="text-green-600">-{item.discountPercent}%</span>
+                                                ) : (
+                                                  <span className="text-muted-foreground">-</span>
+                                                )}
+                                              </td>
+                                              <td className="p-2 text-right font-mono font-medium">{formatCurrency(item.total)}</td>
+                                            </tr>
+                                          ))}
+                                          <tr className="border-t bg-muted/50 font-medium">
+                                            <td colSpan={6} className="p-2 text-right">Total:</td>
+                                            <td className="p-2 text-right font-mono">
+                                              {formatCurrency(spendBreakdown.reduce((sum: number, item: any) => sum + item.total, 0))}
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  )}
+                                  {spendBreakdown.length > 0 && (
+                                    <Button
+                                      size="sm"
+                                      className="w-fit"
+                                      onClick={() => setCreateInvoiceDialogOpen(true)}
+                                      disabled={isCreatingInvoice}
+                                    >
+                                      {isCreatingInvoice ? (
+                                        <Loader2 size={14} className="animate-spin" />
+                                      ) : (
+                                        "Create Draft"
+                                      )}
+                                    </Button>
+                                  )}
+                                  {invoiceError && <Small className="text-red-600">{invoiceError}</Small>}
+                                  {invoiceSuccess && <Small className="text-green-600">{invoiceSuccess}</Small>}
+                                </div>
+
+                                {/* Past Invoices */}
+                                <div className="flex flex-col gap-2 rounded-md border p-3">
+                                  <Small className="font-semibold">Past Invoices</Small>
+                                {invoicesListLoading ? (
+                                  <div className="flex items-center gap-2">
+                                    <Loader2 size={14} className="animate-spin" />
+                                    <Small>Loading...</Small>
+                                  </div>
+                                ) : invoicesList.length > 0 ? (
+                                    <div className="max-h-32 overflow-auto rounded border">
+                                      <table className="w-full text-sm">
+                                        <thead className="sticky top-0 bg-muted">
+                                          <tr>
+                                            <th className="p-2 text-left">Period</th>
+                                            <th className="p-2 text-right">Amount</th>
+                                            <th className="p-2 text-left">Stripe ID</th>
+                                            <th className="p-2 text-left">Created</th>
+                                            <th className="w-12 p-2"></th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          {invoicesList.map((inv: any) => (
+                                            <tr key={inv.id} className="border-t">
+                                              <td className="p-2">
+                                                {new Date(inv.startDate).toLocaleDateString()} - {new Date(inv.endDate).toLocaleDateString()}
+                                              </td>
+                                              <td className="p-2 text-right font-mono">{formatCurrency(inv.amountCents / 100)}</td>
+                                              <td className="p-2 font-mono text-xs">{inv.stripeInvoiceId || "-"}</td>
+                                              <td className="p-2 text-muted-foreground">{new Date(inv.createdAt).toLocaleDateString()}</td>
+                                              <td className="p-2">
+                                                <Button
+                                                  variant="ghost"
+                                                  size="sm"
+                                                  className="h-6 w-6 p-0"
+                                                  onClick={() => {
+                                                    setInvoiceToDelete({
+                                                      id: inv.id,
+                                                      startDate: inv.startDate,
+                                                      endDate: inv.endDate,
+                                                      amountCents: inv.amountCents,
+                                                    });
+                                                    setDeleteInvoiceDialogOpen(true);
+                                                  }}
+                                                >
+                                                  <Trash2
+                                                    size={14}
+                                                    className="text-destructive"
+                                                  />
+                                                </Button>
+                                              </td>
+                                            </tr>
+                                          ))}
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                ) : (
+                                  <Small className="text-muted-foreground">No invoices recorded yet.</Small>
+                                )}
+                                </div>
+                                  </>
+                                )}
+                              </div>
+                              </TabsContent>
+
+                              <TabsContent value="disallow" className="flex flex-col gap-4 mt-0">
                               {/* Disallow List */}
                               <div className="flex flex-col gap-2">
                                 <H4>
@@ -1191,7 +1551,8 @@ export default function AdminWallet() {
                                   </div>
                                 )}
                               </div>
-                            </div>
+                              </TabsContent>
+                            </Tabs>
                           ) : (
                             <p className="text-sm text-muted-foreground">
                               Failed to load wallet details
@@ -1298,6 +1659,67 @@ export default function AdminWallet() {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Invoice Confirmation Dialog */}
+      <AlertDialog open={deleteInvoiceDialogOpen} onOpenChange={setDeleteInvoiceDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Invoice?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this invoice record?
+              <br />
+              <br />
+              <strong>Period:</strong>{" "}
+              {invoiceToDelete && new Date(invoiceToDelete.startDate).toLocaleDateString()} -{" "}
+              {invoiceToDelete && new Date(invoiceToDelete.endDate).toLocaleDateString()}
+              <br />
+              <strong>Amount:</strong>{" "}
+              {invoiceToDelete && formatCurrency(invoiceToDelete.amountCents / 100)}
+              <br />
+              <br />
+              This will only remove the record from Helicone. If an invoice was created in Stripe, it will not be affected.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteInvoice}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Create Invoice Confirmation Dialog */}
+      <AlertDialog open={createInvoiceDialogOpen} onOpenChange={setCreateInvoiceDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Create Draft Invoice?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will create a draft invoice in Stripe for:
+              <br />
+              <br />
+              <strong>Period:</strong>{" "}
+              {invoiceStartDate && new Date(invoiceStartDate).toLocaleDateString()} -{" "}
+              {invoiceEndDate && new Date(invoiceEndDate).toLocaleDateString()}
+              <br />
+              <strong>Amount:</strong>{" "}
+              {formatCurrency(spendBreakdown.reduce((sum: number, item: any) => sum + item.total, 0))}
+              <br />
+              <br />
+              The draft will open in Stripe where you can review and send it.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleCreateInvoice}>
+              Create Draft
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

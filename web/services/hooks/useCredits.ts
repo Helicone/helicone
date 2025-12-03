@@ -160,27 +160,73 @@ export interface SpendBreakdownResponse {
 export type SpendTimeRange = "7d" | "30d" | "90d" | "all";
 
 // A hook for fetching spend breakdown by model
-export const useSpendBreakdown = (timeRange: SpendTimeRange = "30d") => {
+// Can use either preset timeRange or custom startDate/endDate
+export const useSpendBreakdown = (
+  options:
+    | { timeRange: SpendTimeRange }
+    | { startDate: Date; endDate: Date }
+) => {
   const org = useOrg();
+
+  const isCustomRange = "startDate" in options;
+
+  // Build query params
+  const queryParams = isCustomRange
+    ? {
+        startDate: options.startDate.toISOString(),
+        endDate: options.endDate.toISOString(),
+      }
+    : {
+        timeRange: options.timeRange,
+      };
 
   const result = $JAWN_API.useQuery(
     "get",
     "/v1/credits/spend/breakdown",
     {
       params: {
-        query: {
-          timeRange,
-        },
+        query: queryParams,
       },
     },
     {
       enabled: !!org?.currentOrg?.id,
-      staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
-    },
+      staleTime: 0, // Don't cache - always refetch
+    }
   );
 
   return {
     ...result,
     data: result.data?.data as SpendBreakdownResponse | undefined,
+  };
+};
+
+// Types for PTB invoices
+export interface PTBInvoice {
+  id: string;
+  organizationId: string;
+  stripeInvoiceId: string | null;
+  startDate: string;
+  endDate: string;
+  amountCents: number;
+  notes: string | null;
+  createdAt: string;
+}
+
+// A hook for fetching invoices for the current org
+export const useInvoices = () => {
+  const org = useOrg();
+
+  const result = $JAWN_API.useQuery(
+    "get",
+    "/v1/credits/invoices",
+    {},
+    {
+      enabled: !!org?.currentOrg?.id,
+    }
+  );
+
+  return {
+    ...result,
+    data: (result.data?.data as PTBInvoice[] | undefined) ?? [],
   };
 };

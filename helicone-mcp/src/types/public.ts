@@ -698,6 +698,9 @@ export interface paths {
   "/v1/credits/spend/breakdown": {
     get: operations["GetSpendBreakdown"];
   };
+  "/v1/credits/invoices": {
+    get: operations["ListInvoices"];
+  };
   "/v1/public/alert-banner": {
     get: operations["GetAlertBanners"];
     patch: operations["UpdateAlertBannerActive"];
@@ -4119,6 +4122,23 @@ Json: JsonObject;
       error: null;
     };
     "Result_SpendBreakdownResponse.string_": components["schemas"]["ResultSuccess_SpendBreakdownResponse_"] | components["schemas"]["ResultError_string_"];
+    PTBInvoice: {
+      id: string;
+      organizationId: string;
+      stripeInvoiceId: string | null;
+      startDate: string;
+      endDate: string;
+      /** Format: double */
+      amountCents: number;
+      notes: string | null;
+      createdAt: string;
+    };
+    "ResultSuccess_PTBInvoice-Array_": {
+      data: components["schemas"]["PTBInvoice"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PTBInvoice-Array.string_": components["schemas"]["ResultSuccess_PTBInvoice-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array_": {
       data: {
           updated_at: string;
@@ -8049,6 +8069,8 @@ export interface operations {
     parameters: {
       query?: {
         timeRange?: "7d" | "30d" | "90d" | "all";
+        startDate?: string;
+        endDate?: string;
       };
     };
     responses: {
@@ -8056,6 +8078,16 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_SpendBreakdownResponse.string_"];
+        };
+      };
+    };
+  };
+  ListInvoices: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PTBInvoice-Array.string_"];
         };
       };
     };
