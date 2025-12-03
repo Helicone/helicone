@@ -53,6 +53,7 @@ export default function Chat({
           : [...requestMessages, ...responseMessages];
 
     // For contentArray messages, flatten. In playground, we treat as one message dynamically.
+    // Also handle reasoning messages by splitting them into separate reasoning + content messages
     return mode === "PLAYGROUND_INPUT"
       ? allMessages
       : allMessages.reduce<Message[]>((acc, message) => {
@@ -70,6 +71,38 @@ export default function Chat({
             );
             return [...acc, ...flattenedParts];
           }
+
+          // Handle messages with reasoning content - split into reasoning + content messages
+          if (message.reasoning && message.content) {
+            const reasoningMessage: Message = {
+              ...message,
+              role: "reasoning",
+              content: message.reasoning,
+              reasoning: undefined,
+              id: `${message.id || "msg"}-reasoning`,
+              _type: "message",
+            };
+            const contentMessage: Message = {
+              ...message,
+              reasoning: undefined,
+              id: message.id || `msg-content`,
+            };
+            return [...acc, reasoningMessage, contentMessage];
+          }
+
+          // Handle messages with only reasoning (no content)
+          if (message.reasoning && !message.content) {
+            const reasoningMessage: Message = {
+              ...message,
+              role: "reasoning",
+              content: message.reasoning,
+              reasoning: undefined,
+              id: message.id || `msg-reasoning`,
+              _type: "message",
+            };
+            return [...acc, reasoningMessage];
+          }
+
           // If not a contentArray or it's empty, just add the message itself
           return [...acc, message];
         }, []);

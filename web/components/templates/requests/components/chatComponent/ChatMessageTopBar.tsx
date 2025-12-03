@@ -19,6 +19,8 @@ import { Trash2Icon, ClipboardIcon, ClipboardCheckIcon } from "lucide-react";
 import { ReactNode, useState } from "react";
 import { LuPlus } from "react-icons/lu";
 import { ChatMode } from "../Chat";
+import { RoleBadge, getHeaderTint } from "./RoleBadge";
+import { cn } from "@/lib/utils";
 
 interface ChatMessageTopBarProps {
   dragHandle?: ReactNode;
@@ -110,8 +112,15 @@ export default function ChatMessageTopBar({
     onAddImage,
   });
 
+  const headerTint = getHeaderTint(message.role);
+
   return (
-    <header className="group sticky top-0 z-10 flex h-12 w-full flex-row items-center justify-between bg-sidebar-background px-4 dark:bg-black">
+    <header
+      className={cn(
+        "group sticky top-0 z-10 flex h-12 w-full flex-row items-center justify-between px-4",
+        headerTint
+      )}
+    >
       <div className="flex items-center gap-2">
         {dragHandle && (
           <div {...attributes} {...listeners}>
@@ -136,9 +145,7 @@ export default function ChatMessageTopBar({
           </Select>
         ) : (
           <div className="flex items-center gap-2">
-            <h2 className="text-sm font-medium capitalize text-secondary">
-              {message.role}
-            </h2>
+            <RoleBadge role={message.role} />
             {onCopyContent && (
               <Button
                 variant="ghost"
