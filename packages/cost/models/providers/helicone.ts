@@ -54,17 +54,14 @@ export class HeliconeProvider extends BaseProvider {
         if (typeof updatedBody.system === "string") {
           updatedBody.system = [{ type: "text", text: updatedBody.system }];
         }
-        // Anthropic models via Helicone support context_editing - keep it in the body
         return JSON.stringify({
           ...updatedBody,
           model: endpoint.providerModelId,
         });
       }
 
-      // Strip context_editing for non-Anthropic models
-      const { context_editing, ...bodyWithoutContextEditing } = updatedBody;
       return JSON.stringify({
-        ...bodyWithoutContextEditing,
+        ...updatedBody,
         model: endpoint.providerModelId,
       });
     }
@@ -88,12 +85,9 @@ export class HeliconeProvider extends BaseProvider {
       updatedBody = context.toChatCompletions(updatedBody);
     }
 
-    // Strip context_editing for non-Anthropic models
-    const { context_editing, ...bodyWithoutContextEditing } = updatedBody;
-
     // Standard format - just pass through with correct model
     return JSON.stringify({
-      ...bodyWithoutContextEditing,
+      ...updatedBody,
       model: endpoint.providerModelId,
     });
   }

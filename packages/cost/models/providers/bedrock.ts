@@ -115,20 +115,16 @@ export class BedrockProvider extends BaseProvider {
   buildRequestBody(endpoint: Endpoint, context: RequestBodyContext): string {
     if (context.bodyMapping === "NO_MAPPING") {
       // For Claude models, add anthropic_version and remove model/stream
-      // Note: Bedrock doesn't support context_editing yet - strip it
       if (endpoint.providerModelId.includes("claude-")) {
-        const { context_editing, ...bodyWithoutContextEditing } = context.parsedBody;
         return JSON.stringify({
-          ...bodyWithoutContextEditing,
+          ...context.parsedBody,
           anthropic_version: "bedrock-2023-05-31",
           model: undefined,
           stream: undefined,
         });
       }
-      // Strip context_editing - only supported by direct Anthropic API
-      const { context_editing, ...bodyWithoutContextEditing } = context.parsedBody;
       return JSON.stringify({
-        ...bodyWithoutContextEditing,
+        ...context.parsedBody,
         model: endpoint.providerModelId,
       });
     }
@@ -139,19 +135,14 @@ export class BedrockProvider extends BaseProvider {
     }
 
     if (endpoint.providerModelId.includes("claude-")) {
-      // Note: Bedrock doesn't support context_editing yet
-      // The toAnthropic mapper will handle it but we strip it from the final body
       const anthropicBody = context.toAnthropic(
         updatedBody,
         endpoint.providerModelId,
         { includeCacheBreakpoints: false }
       );
 
-      // Bedrock doesn't support context_editing - remove it
-      const { context_editing, ...anthropicBodyWithoutContextEditing } = anthropicBody as any;
-
       updatedBody = {
-        ...anthropicBodyWithoutContextEditing,
+        ...anthropicBody,
         anthropic_version: "bedrock-2023-05-31",
         model: undefined, // model is not needed in Bedrock inputs (as its defined via URL)
         stream: undefined,
@@ -159,12 +150,9 @@ export class BedrockProvider extends BaseProvider {
       return JSON.stringify(updatedBody);
     }
 
-    // Strip context_editing for non-Claude models
-    const { context_editing, ...bodyWithoutContextEditing } = context.parsedBody;
-
     // Pass through
     return JSON.stringify({
-      ...bodyWithoutContextEditing,
+      ...context.parsedBody,
       model: endpoint.providerModelId,
     });
   }

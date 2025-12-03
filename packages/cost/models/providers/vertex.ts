@@ -94,19 +94,15 @@ export class VertexProvider extends BaseProvider {
     if (context.bodyMapping === "NO_MAPPING") {
       // For Claude models on Vertex, still need to add anthropic_version
       // even when the body is already in Anthropic format (NO_MAPPING)
-      // Note: Vertex doesn't support context_editing yet - strip it
       if (modelId.includes("claude-")) {
-        const { context_editing, ...bodyWithoutContextEditing } = context.parsedBody;
         return JSON.stringify({
-          ...bodyWithoutContextEditing,
+          ...context.parsedBody,
           anthropic_version: "vertex-2023-10-16",
           model: undefined,
         });
       }
-      // Strip context_editing - only supported by direct Anthropic API
-      const { context_editing, ...bodyWithoutContextEditing } = context.parsedBody;
       return JSON.stringify({
-        ...bodyWithoutContextEditing,
+        ...context.parsedBody,
         model: modelId,
       });
     }
@@ -119,37 +115,28 @@ export class VertexProvider extends BaseProvider {
     }
 
     if (modelId.toLowerCase().includes("gemini")) {
-      // Strip context_editing for Gemini models
-      const { context_editing, ...bodyWithoutContextEditing } = updatedBody;
-      const geminiBody = toGoogle(bodyWithoutContextEditing);
+      const geminiBody = toGoogle(updatedBody);
       return JSON.stringify(geminiBody);
     }
 
     if (endpoint.providerModelId.includes("claude-")) {
-      // Note: Vertex doesn't support context_editing yet
       const anthropicBody = context.toAnthropic(
         updatedBody,
         endpoint.providerModelId,
         { includeCacheBreakpoints: false }
       );
 
-      // Vertex doesn't support context_editing - remove it
-      const { context_editing, ...anthropicBodyWithoutContextEditing } = anthropicBody as any;
-
       updatedBody = {
-        ...anthropicBodyWithoutContextEditing,
+        ...anthropicBody,
         anthropic_version: "vertex-2023-10-16",
         model: undefined, // model is not needed in Vertex inputs (as its defined via URL)
       };
       return JSON.stringify(updatedBody);
     }
 
-    // Strip context_editing for other models
-    const { context_editing, ...bodyWithoutContextEditing } = context.parsedBody;
-
     // Pass through
     return JSON.stringify({
-      ...bodyWithoutContextEditing,
+      ...context.parsedBody,
       model: endpoint.providerModelId,
     });
   }

@@ -42,10 +42,8 @@ export class GoogleProvider extends BaseProvider {
   ): string {
     const modelId = endpoint.providerModelId || "";
     if (context.bodyMapping === "NO_MAPPING") {
-      // Strip context_editing - only supported by Anthropic
-      const { context_editing, ...bodyWithoutContextEditing } = context.parsedBody;
       return JSON.stringify({
-        ...bodyWithoutContextEditing,
+        ...context.parsedBody,
         model: modelId,
       });
     }
@@ -57,10 +55,7 @@ export class GoogleProvider extends BaseProvider {
       updatedBody = context.toChatCompletions(context.parsedBody);
     }
 
-    // Strip context_editing - only supported by Anthropic
-    const { context_editing, ...bodyWithoutContextEditing } = updatedBody;
-
-    const googleBody = toGoogle(bodyWithoutContextEditing);
+    const googleBody = toGoogle(updatedBody);
     return JSON.stringify(googleBody);
   }
 }
