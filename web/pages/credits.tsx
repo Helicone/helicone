@@ -594,60 +594,64 @@ const Credits: NextPageWithLayout<void> = () => {
 
             {/* Invoices Tab */}
             <TabsContent value="invoices" className="overflow-auto p-6 mt-0 data-[state=inactive]:hidden">
-              {invoicesLoading ? (
-                <div className="flex h-full items-center justify-center">
-                  <span className="text-muted-foreground">Loading invoices...</span>
-                </div>
-              ) : invoicesError ? (
-                <div className="flex h-full items-center justify-center">
-                  <span className="text-destructive">Error loading invoices</span>
-                </div>
-              ) : invoices.length === 0 ? (
-                <div className="flex h-full flex-col items-center justify-center gap-2">
-                  <FileText size={48} className="text-muted-foreground" />
-                  <span className="text-muted-foreground">No invoices yet</span>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Period</TableHead>
-                      <TableHead className="text-right">Amount</TableHead>
-                      <TableHead>Stripe Invoice</TableHead>
-                      <TableHead>Created</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {invoices.map((invoice) => (
-                      <TableRow key={invoice.id}>
-                        <TableCell>
-                          {new Date(invoice.startDate).toLocaleDateString()} - {new Date(invoice.endDate).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell className="text-right font-mono font-medium">
-                          {(invoice.amountCents / 100).toLocaleString("en-US", { style: "currency", currency: "usd" })}
-                        </TableCell>
-                        <TableCell>
-                          {invoice.stripeInvoiceId ? (
-                            <a
-                              href={`https://dashboard.stripe.com/invoices/${invoice.stripeInvoiceId}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-1 text-primary hover:underline"
-                            >
-                              View <ExternalLink size={12} />
-                            </a>
-                          ) : (
-                            <span className="text-muted-foreground">-</span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {new Date(invoice.createdAt).toLocaleDateString()}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <FileText size={20} className="text-muted-foreground" />
+                    <CardTitle className="text-base">Billing History</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {invoicesLoading ? (
+                    <div className="py-8 text-center">
+                      <Muted>Loading invoices...</Muted>
+                    </div>
+                  ) : invoicesError ? (
+                    <div className="py-8 text-center">
+                      <span className="text-destructive">Error loading invoices</span>
+                    </div>
+                  ) : invoices.length === 0 ? (
+                    <div className="py-8 text-center">
+                      <Muted>No invoices yet</Muted>
+                    </div>
+                  ) : (
+                    <div className="space-y-0">
+                      {invoices.map((invoice) => (
+                        <div
+                          key={invoice.id}
+                          className="flex items-center justify-between border-b border-border py-4 last:border-b-0"
+                        >
+                          <div className="flex flex-col gap-1">
+                            <div className="text-sm font-medium">
+                              {new Date(invoice.startDate).toLocaleDateString()} - {new Date(invoice.endDate).toLocaleDateString()}
+                            </div>
+                            <XSmall className="text-muted-foreground">
+                              Created {new Date(invoice.createdAt).toLocaleDateString()}
+                            </XSmall>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <span className="font-mono font-medium">
+                              {(invoice.amountCents / 100).toLocaleString("en-US", { style: "currency", currency: "usd" })}
+                            </span>
+                            {invoice.stripeInvoiceId ? (
+                              <a
+                                href={`https://dashboard.stripe.com/invoices/${invoice.stripeInvoiceId}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1 text-sm text-primary hover:underline"
+                              >
+                                View <ExternalLink size={12} />
+                              </a>
+                            ) : (
+                              <span className="text-sm text-muted-foreground">Pending</span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
         </div>
