@@ -27,7 +27,7 @@ import { Search } from "lucide-react";
 import type { PromptWithVersions } from "@/services/hooks/prompts";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import TableFooter from "../requests/tableFooter";
-import router from "next/router";
+import { useRouter } from "next/router";
 import useNotification from "@/components/shared/notification/useNotification";
 import { SimpleTable } from "@/components/shared/table/simpleTable";
 import { useLocalStorage } from "@/services/hooks/localStorage";
@@ -40,6 +40,7 @@ interface PromptsPageProps {
 }
 
 const PromptsPage = (props: PromptsPageProps) => {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [selectedPrompt, setSelectedPrompt] =
     useState<PromptWithVersions | null>(null);
@@ -56,6 +57,9 @@ const PromptsPage = (props: PromptsPageProps) => {
   const drawerRef = useRef<any>(null);
   const [drawerSize, setDrawerSize] = useLocalStorage("prompt-drawer-size", 40);
   const { setToolHandler } = useHeliconeAgent();
+
+  // Get promptId from URL query params for deep linking from requests page
+  const urlPromptId = router.query.promptId as string | undefined;
 
   const { data: tags = [], isLoading: isLoadingTags } = useGetPromptTags();
   const { data, isLoading } = useGetPromptsWithVersions(
@@ -77,6 +81,18 @@ const PromptsPage = (props: PromptsPageProps) => {
       }
     }
   }, [prompts, selectedPrompt?.prompt.id]);
+
+  // Handle deep linking from requests page via promptId query param
+  useEffect(() => {
+    if (urlPromptId && prompts.length > 0 && !selectedPrompt) {
+      const promptToSelect = prompts.find((p) => p.prompt.id === urlPromptId);
+      if (promptToSelect) {
+        setSelectedPrompt(promptToSelect);
+        setFilteredMajorVersion(null);
+        drawerRef.current?.expand();
+      }
+    }
+  }, [urlPromptId, prompts, selectedPrompt]);
 
   const { data: filteredVersions, isLoading: isLoadingFilteredVersions } =
     useGetPromptVersions(
