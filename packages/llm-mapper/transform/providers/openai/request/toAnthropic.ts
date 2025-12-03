@@ -5,6 +5,9 @@ import {
   AnthropicWebSearchTool,
   AnthropicToolChoice,
   AnthropicContextManagement,
+  AnthropicContextEdit,
+  AnthropicClearToolUsesEdit,
+  AnthropicClearThinkingEdit,
 } from "../../../types/anthropic";
 import {
   HeliconeChatCompletionContentPart,
@@ -569,58 +572,67 @@ function mapWebSearch(
  * Maps the Helicone context_editing configuration to Anthropic's context_management format.
  *
  * Helicone uses a unified `context_editing` object with `enabled` flag and optional strategies,
- * while Anthropic uses `context_management` with versioned strategy names.
+ * while Anthropic uses `context_management` with an `edits` array containing versioned strategy objects.
  *
  * @see https://docs.anthropic.com/en/docs/build-with-claude/context-editing
  */
 function mapContextEditing(
   contextEditing: NonNullable<HeliconeChatCreateParams["context_editing"]>
 ): AnthropicContextManagement {
-  const contextManagement: AnthropicContextManagement = {};
+  const edits: AnthropicContextEdit[] = [];
+
+  // clear_thinking must come first in the array per Anthropic docs
+  if (contextEditing.clear_thinking) {
+    const thinkingConfig = contextEditing.clear_thinking;
+    const thinkingEdit: AnthropicClearThinkingEdit = {
+      type: "clear_thinking_20251015",
+    };
+    if (thinkingConfig.keep !== undefined) {
+      thinkingEdit.keep =
+        thinkingConfig.keep === "all"
+          ? "all"
+          : { type: "thinking_turns", value: thinkingConfig.keep };
+    }
+    edits.push(thinkingEdit);
+  }
 
   // Map clear_tool_uses to Anthropic's clear_tool_uses_20250919 strategy
   if (contextEditing.clear_tool_uses) {
     const toolUsesConfig = contextEditing.clear_tool_uses;
-    contextManagement.clear_tool_uses_20250919 = {};
+    const toolUsesEdit: AnthropicClearToolUsesEdit = {
+      type: "clear_tool_uses_20250919",
+    };
 
     if (toolUsesConfig.trigger !== undefined) {
-      contextManagement.clear_tool_uses_20250919.trigger = toolUsesConfig.trigger;
+      toolUsesEdit.trigger = {
+        type: "input_tokens",
+        value: toolUsesConfig.trigger,
+      };
     }
     if (toolUsesConfig.keep !== undefined) {
-      contextManagement.clear_tool_uses_20250919.keep = toolUsesConfig.keep;
+      toolUsesEdit.keep = { type: "tool_uses", value: toolUsesConfig.keep };
     }
     if (toolUsesConfig.clear_at_least !== undefined) {
-      contextManagement.clear_tool_uses_20250919.clear_at_least = toolUsesConfig.clear_at_least;
+      toolUsesEdit.clear_at_least = {
+        type: "input_tokens",
+        value: toolUsesConfig.clear_at_least,
+      };
     }
     if (toolUsesConfig.exclude_tools !== undefined) {
-      contextManagement.clear_tool_uses_20250919.exclude_tools = toolUsesConfig.exclude_tools;
+      toolUsesEdit.exclude_tools = toolUsesConfig.exclude_tools;
     }
     if (toolUsesConfig.clear_tool_inputs !== undefined) {
-      contextManagement.clear_tool_uses_20250919.clear_tool_inputs = toolUsesConfig.clear_tool_inputs;
+      toolUsesEdit.clear_tool_inputs = toolUsesConfig.clear_tool_inputs;
     }
-  }
-
-  // Map clear_thinking to Anthropic's clear_thinking_20251015 strategy
-  if (contextEditing.clear_thinking) {
-    const thinkingConfig = contextEditing.clear_thinking;
-    contextManagement.clear_thinking_20251015 = {};
-
-    if (thinkingConfig.keep !== undefined) {
-      contextManagement.clear_thinking_20251015.keep = thinkingConfig.keep;
-    }
+    edits.push(toolUsesEdit);
   }
 
   // If enabled but no specific strategies provided, use defaults
-  // Anthropic will use sensible defaults when an empty object is provided
-  // However, we need at least one strategy to be meaningful
-  if (
-    !contextEditing.clear_tool_uses &&
-    !contextEditing.clear_thinking
-  ) {
-    // Enable clear_tool_uses with defaults when context_editing is enabled
-    // but no specific strategies are provided
-    contextManagement.clear_tool_uses_20250919 = {};
+  // Add clear_tool_uses with defaults when context_editing is enabled
+  // but no specific strategies are provided
+  if (edits.length === 0) {
+    edits.push({ type: "clear_tool_uses_20250919" });
   }
 
-  return contextManagement;
+  return { edits };
 }

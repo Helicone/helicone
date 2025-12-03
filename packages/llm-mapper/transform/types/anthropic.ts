@@ -43,47 +43,30 @@ export type AnthropicThinkingConfig = {
 
 /**
  * Context management configuration for Anthropic's context editing feature.
- * Allows automatic management of conversation context as it grows.
+ * Uses an edits array with versioned strategy types.
  *
  * @see https://docs.anthropic.com/en/docs/build-with-claude/context-editing
  */
 export interface AnthropicContextManagement {
-  /**
-   * Strategy for clearing old tool uses when context exceeds thresholds.
-   */
-  clear_tool_uses_20250919?: {
-    /**
-     * Token threshold at which to trigger clearing (default: 100000)
-     */
-    trigger?: number;
-    /**
-     * Number of recent tool uses to preserve (default: 3)
-     */
-    keep?: number;
-    /**
-     * Minimum tokens to clear per activation
-     */
-    clear_at_least?: number;
-    /**
-     * Tool names to exclude from clearing
-     */
-    exclude_tools?: string[];
-    /**
-     * Whether to also clear tool call inputs (default: false)
-     */
-    clear_tool_inputs?: boolean;
-  };
+  edits: AnthropicContextEdit[];
+}
 
-  /**
-   * Strategy for clearing thinking blocks when extended thinking is enabled.
-   */
-  clear_thinking_20251015?: {
-    /**
-     * Number of assistant turns with thinking to preserve, or "all" for maximum cache hits.
-     * Default: 1
-     */
-    keep?: number | "all";
-  };
+export type AnthropicContextEdit =
+  | AnthropicClearToolUsesEdit
+  | AnthropicClearThinkingEdit;
+
+export interface AnthropicClearToolUsesEdit {
+  type: "clear_tool_uses_20250919";
+  trigger?: { type: "input_tokens" | "tool_uses"; value: number };
+  keep?: { type: "tool_uses"; value: number };
+  clear_at_least?: { type: "input_tokens"; value: number };
+  exclude_tools?: string[];
+  clear_tool_inputs?: boolean;
+}
+
+export interface AnthropicClearThinkingEdit {
+  type: "clear_thinking_20251015";
+  keep?: { type: "thinking_turns"; value: number } | "all";
 }
 
 export interface AnthropicMessage {
