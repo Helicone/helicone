@@ -2,6 +2,7 @@ import { clsx } from "@/components/shared/clsx";
 import LoadingAnimation from "@/components/shared/loadingAnimation";
 import DraggableColumnHeader from "@/components/shared/themed/table/columns/draggableColumnHeader";
 import { DragColumnItem } from "@/components/shared/themed/table/columns/DragList";
+import { useColumnResize } from "@/hooks/useColumnResize";
 import { TableTreeNode } from "@/components/templates/sessions/sessionId/Tree/TreeView";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -32,6 +33,9 @@ import { Result } from "@/packages/common/result";
 import { SingleFilterDef } from "@helicone-package/filters/frontendFilterDefs";
 import { OrganizationFilter } from "../../../../../services/lib/organization_layout/organization_layout";
 import { SortDirection } from "../../../../../services/lib/sorts/requests/sorts";
+
+// Constants for table sizing
+const HEADER_HEIGHT = "44px";
 
 type CheckboxMode = "always_visible" | "on_hover" | "never";
 
@@ -116,6 +120,7 @@ export default function SessionTimelineTable(
   props: ThemedTableProps<TableTreeNode>,
 ) {
   const {
+    id,
     defaultData,
     defaultColumns,
     skeletonLoading,
@@ -142,6 +147,12 @@ export default function SessionTimelineTable(
       return mapAccumulator;
     }, new Map<string, boolean>());
   }, [defaultData]);
+
+  // Use the column resize hook
+  const { columnSizes, resizingColumn, handleResizeStart } = useColumnResize({
+    columns: defaultColumns,
+    tableId: id,
+  });
 
   const table = useReactTable({
     data: defaultData,
@@ -256,40 +267,53 @@ export default function SessionTimelineTable(
                       </div>
                     </th>
                   )}
-                  {headerGroup.headers.map((header, index) => (
-                    <th
-                      key={`header-${index}`}
-                      className={clsx(
-                        "relative",
-                        index === headerGroup.headers.length - 1 &&
-                          "border-r border-slate-300 dark:border-slate-700",
-                      )}
-                    >
-                      {index === 0 && onToggleAllRows !== undefined && (
-                        <div className="absolute left-1 top-1/2 z-10 -translate-y-1/2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => onToggleAllRows(table)}
-                            className="h-6 w-6"
-                            aria-label={"Toggle expand all rows"}
-                          >
-                            <ChevronsUpDown className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      )}
-                      <DraggableColumnHeader
-                        header={header}
-                        sortable={sortable}
-                        index={index}
-                        totalColumns={headerGroup.headers.length}
-                      />
-                      {index < headerGroup.headers.length - 1 && (
-                        <div className="absolute right-0 top-0 h-full w-px bg-slate-300 dark:bg-slate-700" />
-                      )}
-                      <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
-                    </th>
-                  ))}
+                  {headerGroup.headers.map((header, index) => {
+                    const columnDef = defaultColumns[index] as any;
+                    const columnWidth = columnSizes[index] ?? columnDef?.minSize ?? columnDef?.size ?? 120;
+
+                    return (
+                      <th
+                        key={`header-${index}`}
+                        className={clsx(
+                          "relative",
+                          index === headerGroup.headers.length - 1 &&
+                            "border-r border-slate-300 dark:border-slate-700",
+                        )}
+                        style={{
+                          width: `${columnWidth}px`,
+                          minWidth: `${columnWidth}px`,
+                          maxWidth: `${columnWidth}px`,
+                          height: HEADER_HEIGHT,
+                        }}
+                      >
+                        {index === 0 && onToggleAllRows !== undefined && (
+                          <div className="absolute left-1 top-1/2 z-10 -translate-y-1/2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => onToggleAllRows(table)}
+                              className="h-6 w-6"
+                              aria-label={"Toggle expand all rows"}
+                            >
+                              <ChevronsUpDown className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
+                        <DraggableColumnHeader
+                          header={header}
+                          sortable={sortable}
+                          index={index}
+                          totalColumns={headerGroup.headers.length}
+                          onResizeStart={handleResizeStart}
+                          isResizing={resizingColumn === index}
+                        />
+                        {index < headerGroup.headers.length - 1 && (
+                          <div className="absolute right-0 top-0 h-full w-px bg-slate-300 dark:bg-slate-700" />
+                        )}
+                        <div className="absolute bottom-0 left-0 right-0 h-[0.5px] bg-slate-300 dark:bg-slate-700" />
+                      </th>
+                    );
+                  })}
                 </tr>
               ))}
             </thead>
@@ -361,7 +385,11 @@ export default function SessionTimelineTable(
                       />
                     </div>
                   </td>
-                  {row.getVisibleCells().map((cell, i) => (
+                  {row.getVisibleCells().map((cell, i) => {
+                    const columnDef = defaultColumns[i] as any;
+                    const columnWidth = columnSizes[i] ?? columnDef?.minSize ?? columnDef?.size ?? 120;
+
+                    return (
                     <td
                       key={cell.id}
                       className={clsx(
@@ -384,7 +412,9 @@ export default function SessionTimelineTable(
                           "border-r border-border",
                       )}
                       style={{
-                        maxWidth: cell.column.getSize(),
+                        width: `${columnWidth}px`,
+                        minWidth: `${columnWidth}px`,
+                        maxWidth: `${columnWidth}px`,
                       }}
                     >
                       <div
@@ -483,7 +513,8 @@ export default function SessionTimelineTable(
                           )}
                       </div>
                     </td>
-                  ))}
+                    );
+                  })}
                   {rowLink && (
                     <td
                       className="m-0 border-0 p-0"
