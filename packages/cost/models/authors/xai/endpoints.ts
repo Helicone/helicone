@@ -174,8 +174,9 @@ export const endpoints = {
       "*": {},
     },
   },
-  "grok-4-1-fast-non-reasoning:xai": {
+  "grok-4.1-fast-non-reasoning:xai": {
     providerModelId: "grok-4-1-fast-non-reasoning",
+    providerModelIdAliases: ["grok-4.1-fast-non-reasoning"],
     provider: "xai",
     author: "xai",
     pricing: [
@@ -208,8 +209,9 @@ export const endpoints = {
       "*": {},
     },
   },
-  "grok-4-1-fast-reasoning:xai": {
+  "grok-4.1-fast-reasoning:xai": {
     providerModelId: "grok-4-1-fast-reasoning",
+    providerModelIdAliases: ["grok-4.1-fast-reasoning"],
     provider: "xai",
     author: "xai",
     pricing: [
@@ -495,8 +497,9 @@ export const endpoints = {
       "*": {},
     },
   },
-  "grok-4-1-fast-non-reasoning:helicone": {
-    providerModelId: "pa/grok-4-1-fast-non-reasoning",
+  "grok-4.1-fast-non-reasoning:helicone": {
+    providerModelId: "pa/grok-4.1-fast-non-reasoning",
+    providerModelIdAliases: ["pa/grok-4-1-fast-non-reasoning"],
     provider: "helicone",
     author: "xai",
     pricing: [
@@ -529,8 +532,9 @@ export const endpoints = {
       "*": {},
     },
   },
-  "grok-4-1-fast-reasoning:helicone": {
-    providerModelId: "pa/grok-4-1-fast-reasoning",
+  "grok-4.1-fast-reasoning:helicone": {
+    providerModelId: "pa/grok-4.1-fast-reasoning",
+    providerModelIdAliases: ["pa/grok-4-1-fast-reasoning"],
     provider: "helicone",
     author: "xai",
     pricing: [
