@@ -205,6 +205,7 @@ export interface PTBInvoice {
   id: string;
   organizationId: string;
   stripeInvoiceId: string | null;
+  hostedInvoiceUrl: string | null;
   startDate: string;
   endDate: string;
   amountCents: number;

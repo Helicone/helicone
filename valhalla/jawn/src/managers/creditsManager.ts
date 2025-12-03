@@ -17,6 +17,7 @@ export interface PTBInvoice {
   id: string;
   organizationId: string;
   stripeInvoiceId: string | null;
+  hostedInvoiceUrl: string | null;
   startDate: string;
   endDate: string;
   amountCents: number;
@@ -260,14 +261,15 @@ export class CreditsManager extends BaseManager {
         id: string;
         organization_id: string;
         stripe_invoice_id: string | null;
+        hosted_invoice_url: string | null;
         start_date: string;
         end_date: string;
         amount_cents: string;
         notes: string | null;
         created_at: string;
       }>(
-        `SELECT id, organization_id, stripe_invoice_id, start_date, end_date,
-                amount_cents, notes, created_at
+        `SELECT id, organization_id, stripe_invoice_id, hosted_invoice_url,
+                start_date, end_date, amount_cents, notes, created_at
          FROM ptb_invoices
          WHERE organization_id = $1
          ORDER BY created_at DESC`,
@@ -282,6 +284,7 @@ export class CreditsManager extends BaseManager {
         id: row.id,
         organizationId: row.organization_id,
         stripeInvoiceId: row.stripe_invoice_id,
+        hostedInvoiceUrl: row.hosted_invoice_url,
         startDate: row.start_date,
         endDate: row.end_date,
         amountCents: parseInt(row.amount_cents, 10),

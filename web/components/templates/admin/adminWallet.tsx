@@ -53,9 +53,11 @@ import {
   DollarSign,
   ExternalLink,
   Loader2,
+  Pencil,
   Search,
   Trash2,
   TrendingUp,
+  X,
 } from "lucide-react";
 import { useEffect, useRef } from "react";
 
@@ -130,6 +132,9 @@ export default function AdminWallet() {
   const [invoiceError, setInvoiceError] = useState<string | null>(null);
   const [invoiceSuccess, setInvoiceSuccess] = useState<string | null>(null);
   const [createInvoiceDialogOpen, setCreateInvoiceDialogOpen] = useState(false);
+
+  // Hosted URL editing state - tracks pending edits before save
+  const [editingHostedUrl, setEditingHostedUrl] = useState<{ invoiceId: string; url: string } | null>(null);
 
   // Time-series granularity state (default: day)
   const [groupBy, setGroupBy] = useState<
@@ -294,6 +299,11 @@ export default function AdminWallet() {
   const deleteInvoiceMutation = $JAWN_API.useMutation(
     "delete",
     "/v1/admin/wallet/{orgId}/invoices/{invoiceId}",
+  );
+
+  const updateInvoiceMutation = $JAWN_API.useMutation(
+    "post",
+    "/v1/admin/wallet/{orgId}/invoices/{invoiceId}/update",
   );
 
   // Fetch table data (lazy loaded when table is selected)
@@ -640,6 +650,28 @@ export default function AdminWallet() {
     } finally {
       setDeleteInvoiceDialogOpen(false);
       setInvoiceToDelete(null);
+    }
+  };
+
+  const handleSaveHostedUrl = async (invoiceId: string, url: string) => {
+    if (!selectedOrg) return;
+
+    try {
+      await updateInvoiceMutation.mutateAsync({
+        params: {
+          path: {
+            orgId: selectedOrg,
+            invoiceId,
+          },
+        },
+        body: {
+          hostedInvoiceUrl: url || null,
+        },
+      });
+      setEditingHostedUrl(null);
+      await refetchInvoicesList();
+    } catch (error) {
+      console.error("Error updating hosted URL:", error);
     }
   };
 
@@ -1366,13 +1398,13 @@ export default function AdminWallet() {
                                     <Small>Loading...</Small>
                                   </div>
                                 ) : invoicesList.length > 0 ? (
-                                    <div className="max-h-32 overflow-auto rounded border">
+                                    <div className="max-h-48 overflow-auto rounded border">
                                       <table className="w-full text-sm">
                                         <thead className="sticky top-0 bg-muted">
                                           <tr>
                                             <th className="p-2 text-left">Period</th>
                                             <th className="p-2 text-right">Amount</th>
-                                            <th className="p-2 text-left">Stripe ID</th>
+                                            <th className="p-2 text-left">Hosted URL</th>
                                             <th className="p-2 text-left">Created</th>
                                             <th className="w-12 p-2"></th>
                                           </tr>
@@ -1384,7 +1416,62 @@ export default function AdminWallet() {
                                                 {new Date(inv.startDate).toLocaleDateString()} - {new Date(inv.endDate).toLocaleDateString()}
                                               </td>
                                               <td className="p-2 text-right font-mono">{formatCurrency(inv.amountCents / 100)}</td>
-                                              <td className="p-2 font-mono text-xs">{inv.stripeInvoiceId || "-"}</td>
+                                              <td className="p-2">
+                                                {editingHostedUrl?.invoiceId === inv.id ? (
+                                                  <div className="flex items-center gap-1">
+                                                    <Input
+                                                      value={editingHostedUrl.url}
+                                                      onChange={(e) => setEditingHostedUrl({ invoiceId: inv.id, url: e.target.value })}
+                                                      placeholder="https://invoice.stripe.com/..."
+                                                      className="h-6 w-48 text-xs"
+                                                    />
+                                                    <Button
+                                                      variant="ghost"
+                                                      size="sm"
+                                                      className="h-6 w-6 p-0"
+                                                      onClick={() => handleSaveHostedUrl(inv.id, editingHostedUrl.url)}
+                                                    >
+                                                      <Check size={12} className="text-green-600" />
+                                                    </Button>
+                                                    <Button
+                                                      variant="ghost"
+                                                      size="sm"
+                                                      className="h-6 w-6 p-0"
+                                                      onClick={() => setEditingHostedUrl(null)}
+                                                    >
+                                                      <X size={12} className="text-muted-foreground" />
+                                                    </Button>
+                                                  </div>
+                                                ) : inv.hostedInvoiceUrl ? (
+                                                  <div className="flex items-center gap-1">
+                                                    <a
+                                                      href={inv.hostedInvoiceUrl}
+                                                      target="_blank"
+                                                      rel="noopener noreferrer"
+                                                      className="text-xs text-blue-600 hover:underline truncate max-w-[120px]"
+                                                    >
+                                                      View Invoice
+                                                    </a>
+                                                    <Button
+                                                      variant="ghost"
+                                                      size="sm"
+                                                      className="h-5 w-5 p-0"
+                                                      onClick={() => setEditingHostedUrl({ invoiceId: inv.id, url: inv.hostedInvoiceUrl || "" })}
+                                                    >
+                                                      <Pencil size={10} className="text-muted-foreground" />
+                                                    </Button>
+                                                  </div>
+                                                ) : (
+                                                  <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-6 px-2 text-xs text-muted-foreground"
+                                                    onClick={() => setEditingHostedUrl({ invoiceId: inv.id, url: "" })}
+                                                  >
+                                                    + Add URL
+                                                  </Button>
+                                                )}
+                                              </td>
                                               <td className="p-2 text-muted-foreground">{new Date(inv.createdAt).toLocaleDateString()}</td>
                                               <td className="p-2">
                                                 <Button

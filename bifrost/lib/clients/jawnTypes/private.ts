@@ -690,6 +690,10 @@ export interface paths {
     /** @description Delete a recorded invoice. */
     delete: operations["DeleteInvoice"];
   };
+  "/v1/admin/wallet/{orgId}/invoices/{invoiceId}/update": {
+    /** @description Update an invoice's hosted URL (for after sending from Stripe). */
+    post: operations["UpdateInvoice"];
+  };
   "/v1/admin/wallet/{orgId}/invoices/list": {
     /** @description List all recorded invoices for an org. */
     post: operations["ListInvoices"];
@@ -16390,6 +16394,7 @@ Json: JsonObject;
       id: string;
       organizationId: string;
       stripeInvoiceId: string | null;
+      hostedInvoiceUrl: string | null;
       startDate: string;
       endDate: string;
       /** Format: double */
@@ -16530,6 +16535,14 @@ Json: JsonObject;
       error: null;
     };
     "Result__deleted-boolean_.string_": components["schemas"]["ResultSuccess__deleted-boolean__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__updated-boolean__": {
+      data: {
+        updated: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__updated-boolean_.string_": components["schemas"]["ResultSuccess__updated-boolean__"] | components["schemas"]["ResultError_string_"];
     InvoiceSummary: {
       /** Format: double */
       totalSpendCents: number;
@@ -20680,6 +20693,30 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__deleted-boolean_.string_"];
+        };
+      };
+    };
+  };
+  /** @description Update an invoice's hosted URL (for after sending from Stripe). */
+  UpdateInvoice: {
+    parameters: {
+      path: {
+        orgId: string;
+        invoiceId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          hostedInvoiceUrl: string | null;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__updated-boolean_.string_"];
         };
       };
     };

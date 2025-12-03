@@ -630,6 +630,34 @@ export class AdminWalletController extends Controller {
   }
 
   /**
+   * Update an invoice's hosted URL (for after sending from Stripe).
+   */
+  @Post("/{orgId}/invoices/{invoiceId}/update")
+  public async updateInvoice(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string,
+    @Path() invoiceId: string,
+    @Body() body: { hostedInvoiceUrl: string | null }
+  ): Promise<Result<{ updated: boolean }, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    try {
+      const result = await dbExecute(
+        `UPDATE ptb_invoices SET hosted_invoice_url = $1 WHERE id = $2 AND organization_id = $3`,
+        [body.hostedInvoiceUrl, invoiceId, orgId]
+      );
+
+      if (result.error) {
+        return err(`Error updating invoice: ${result.error}`);
+      }
+
+      return ok({ updated: true });
+    } catch (error: any) {
+      return err(`Error updating invoice: ${error.message}`);
+    }
+  }
+
+  /**
    * List all recorded invoices for an org.
    */
   @Post("/{orgId}/invoices/list")
@@ -644,13 +672,16 @@ export class AdminWalletController extends Controller {
         id: string;
         organization_id: string;
         stripe_invoice_id: string | null;
+        hosted_invoice_url: string | null;
         start_date: string;
         end_date: string;
         amount_cents: string;
         notes: string | null;
         created_at: string;
       }>(
-        `SELECT * FROM ptb_invoices WHERE organization_id = $1 ORDER BY created_at DESC`,
+        `SELECT id, organization_id, stripe_invoice_id, hosted_invoice_url,
+                start_date, end_date, amount_cents, notes, created_at
+         FROM ptb_invoices WHERE organization_id = $1 ORDER BY created_at DESC`,
         [orgId]
       );
 
@@ -662,6 +693,7 @@ export class AdminWalletController extends Controller {
         id: row.id,
         organizationId: row.organization_id,
         stripeInvoiceId: row.stripe_invoice_id,
+        hostedInvoiceUrl: row.hosted_invoice_url,
         startDate: row.start_date,
         endDate: row.end_date,
         amountCents: parseInt(row.amount_cents, 10),

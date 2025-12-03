@@ -4055,6 +4055,7 @@ const models: TsoaRoute.Models = {
             "id": {"dataType":"string","required":true},
             "organizationId": {"dataType":"string","required":true},
             "stripeInvoiceId": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+            "hostedInvoiceUrl": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
             "startDate": {"dataType":"string","required":true},
             "endDate": {"dataType":"string","required":true},
             "amountCents": {"dataType":"double","required":true},

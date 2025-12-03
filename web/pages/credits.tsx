@@ -88,6 +88,12 @@ const Credits: NextPageWithLayout<void> = () => {
 
   const router = useRouter();
 
+  // Tab state synced with URL
+  const currentTab = (router.query.tab as string) || "overview";
+  const setCurrentTab = (tab: string) => {
+    router.replace({ query: { ...router.query, tab } }, undefined, { shallow: true });
+  };
+
   // Data hooks
   const {
     data: creditData,
@@ -244,7 +250,7 @@ const Credits: NextPageWithLayout<void> = () => {
 
       <div className="flex min-h-0 flex-1 justify-center">
         <div className="flex w-full max-w-7xl flex-col">
-          <Tabs defaultValue="overview" className="flex min-h-0 flex-1 flex-col">
+          <Tabs value={currentTab} onValueChange={setCurrentTab} className="flex min-h-0 flex-1 flex-col">
             <div className="px-6 pt-4">
               <TabsList>
                 <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -593,65 +599,62 @@ const Credits: NextPageWithLayout<void> = () => {
             </TabsContent>
 
             {/* Invoices Tab */}
-            <TabsContent value="invoices" className="overflow-auto p-6 mt-0 data-[state=inactive]:hidden">
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <FileText size={20} className="text-muted-foreground" />
-                    <CardTitle className="text-base">Billing History</CardTitle>
+            <TabsContent value="invoices" className="flex min-h-0 flex-col mt-0 data-[state=inactive]:hidden">
+              <div className="flex-1 overflow-auto">
+                {invoicesLoading ? (
+                  <div className="flex h-full items-center justify-center">
+                    <span className="text-muted-foreground">Loading invoices...</span>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  {invoicesLoading ? (
-                    <div className="py-8 text-center">
-                      <Muted>Loading invoices...</Muted>
-                    </div>
-                  ) : invoicesError ? (
-                    <div className="py-8 text-center">
-                      <span className="text-destructive">Error loading invoices</span>
-                    </div>
-                  ) : invoices.length === 0 ? (
-                    <div className="py-8 text-center">
-                      <Muted>No invoices yet</Muted>
-                    </div>
-                  ) : (
-                    <div className="space-y-0">
+                ) : invoicesError ? (
+                  <div className="flex h-full items-center justify-center">
+                    <span className="text-destructive">Error loading invoices</span>
+                  </div>
+                ) : invoices.length === 0 ? (
+                  <div className="flex h-full items-center justify-center">
+                    <span className="text-muted-foreground">No invoices yet</span>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader className="sticky top-0 bg-background">
+                      <TableRow className="border-b">
+                        <TableHead>Period</TableHead>
+                        <TableHead>Created</TableHead>
+                        <TableHead className="text-right">Amount</TableHead>
+                        <TableHead className="text-right">Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
                       {invoices.map((invoice) => (
-                        <div
-                          key={invoice.id}
-                          className="flex items-center justify-between border-b border-border py-4 last:border-b-0"
-                        >
-                          <div className="flex flex-col gap-1">
-                            <div className="text-sm font-medium">
-                              {new Date(invoice.startDate).toLocaleDateString()} - {new Date(invoice.endDate).toLocaleDateString()}
-                            </div>
-                            <XSmall className="text-muted-foreground">
-                              Created {new Date(invoice.createdAt).toLocaleDateString()}
-                            </XSmall>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <span className="font-mono font-medium">
-                              {(invoice.amountCents / 100).toLocaleString("en-US", { style: "currency", currency: "usd" })}
-                            </span>
-                            {invoice.stripeInvoiceId ? (
+                        <TableRow key={invoice.id}>
+                          <TableCell className="font-medium">
+                            {new Date(invoice.startDate).toLocaleDateString()} - {new Date(invoice.endDate).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {new Date(invoice.createdAt).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell className="text-right font-mono font-semibold">
+                            {(invoice.amountCents / 100).toLocaleString("en-US", { style: "currency", currency: "usd" })}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {invoice.hostedInvoiceUrl ? (
                               <a
-                                href={`https://dashboard.stripe.com/invoices/${invoice.stripeInvoiceId}`}
+                                href={invoice.hostedInvoiceUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center gap-1 text-sm text-primary hover:underline"
+                                className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
                               >
                                 View <ExternalLink size={12} />
                               </a>
                             ) : (
                               <span className="text-sm text-muted-foreground">Pending</span>
                             )}
-                          </div>
-                        </div>
+                          </TableCell>
+                        </TableRow>
                       ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                    </TableBody>
+                  </Table>
+                )}
+              </div>
             </TabsContent>
           </Tabs>
         </div>

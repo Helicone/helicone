@@ -12494,6 +12494,10 @@
 						"type": "string",
 						"nullable": true
 					},
+					"hostedInvoiceUrl": {
+						"type": "string",
+						"nullable": true
+					},
 					"startDate": {
 						"type": "string"
 					},
@@ -12516,6 +12520,7 @@
 					"id",
 					"organizationId",
 					"stripeInvoiceId",
+					"hostedInvoiceUrl",
 					"startDate",
 					"endDate",
 					"amountCents",

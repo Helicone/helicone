@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS "public"."ptb_invoices" (
   "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "organization_id" UUID NOT NULL REFERENCES "public"."organization"("id") ON DELETE CASCADE,
   "stripe_invoice_id" TEXT,
+  "hosted_invoice_url" TEXT,
   "start_date" TIMESTAMPTZ NOT NULL,
   "end_date" TIMESTAMPTZ NOT NULL,
   "amount_cents" BIGINT NOT NULL,
