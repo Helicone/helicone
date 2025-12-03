@@ -65,3 +65,5 @@ supabase/seed.private.sql
 
 
 ignored/
+
+packages/__tests__/cost/__snapshots__/registrySnapshots.test.ts.snap
