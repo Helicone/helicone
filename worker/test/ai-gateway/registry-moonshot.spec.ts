@@ -38,6 +38,13 @@ const openrouterAuthExpectations = {
   },
 };
 
+// Define auth expectations for Canopy Wave provider
+const canopywaveAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
 describe("Moonshot AI Registry Tests", () => {
   beforeEach(() => {
     // Clear all mocks between tests
@@ -2578,6 +2585,363 @@ describe("Moonshot AI Registry Tests", () => {
               ),
               expects: {
                 ...fireworksAuthExpectations,
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+  });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  describe("BYOK Tests - kimi-k2-thinking with Canopy Wave", () => {
+    describe("kimi-k2-thinking", () => {
+      it("should handle canopy wave provider", () =>
+        runGatewayTest({
+          model: "kimi-k2-thinking/canopywave",
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "success",
+                model: "moonshotai/kimi-k2-thinking",
+                data: createOpenAIMockResponse(
+                  "moonshotai/kimi-k2-thinking"
+                ),
+                expects: canopywaveAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle tool calls with canopy wave provider", () =>
+        runGatewayTest({
+          model: "kimi-k2-thinking/canopywave",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "What's the weather?" }],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "get_weather",
+                    description: "Get current weather",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        location: { type: "string" },
+                      },
+                      required: ["location"],
+                    },
+                  },
+                },
+              ],
+              tool_choice: "auto",
+              temperature: 0.7,
+              max_tokens: 1000,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "success",
+                model: "moonshotai/kimi-k2-thinking",
+                data: createOpenAIMockResponse(
+                  "moonshotai/kimi-k2-thinking"
+                ),
+                expects: {
+                  ...canopywaveAuthExpectations,
+                  bodyContains: [
+                    "tools",
+                    "tool_choice",
+                    "get_weather",
+                    "temperature",
+                    "max_tokens",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle response format with canopy wave provider", () =>
+        runGatewayTest({
+          model: "kimi-k2-thinking/canopywave",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "Generate JSON data" }],
+              response_format: { type: "json_object" },
+              temperature: 0.1,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "success",
+                model: "moonshotai/kimi-k2-thinking",
+                data: createOpenAIMockResponse(
+                  "moonshotai/kimi-k2-thinking"
+                ),
+                expects: {
+                  ...canopywaveAuthExpectations,
+                  bodyContains: [
+                    "response_format",
+                    "json_object",
+                    "temperature",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle structured outputs with fireworks provider", () =>
+        runGatewayTest({
+          model: "kimi-k2-thinking/canopywave",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "Extract data" }],
+              response_format: {
+                type: "json_schema",
+                json_schema: {
+                  name: "data_extraction",
+                  schema: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string" },
+                      age: { type: "number" },
+                    },
+                    required: ["name", "age"],
+                  },
+                },
+              },
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "success",
+                model: "moonshotai/kimi-k2-thinking",
+                data: createOpenAIMockResponse(
+                  "moonshotai/kimi-k2-thinking"
+                ),
+                expects: {
+                  ...canopywaveAuthExpectations,
+                  bodyContains: [
+                    "response_format",
+                    "json_schema",
+                    "data_extraction",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle all supported parameters with fireworks provider", () =>
+        runGatewayTest({
+          model: "kimi-k2-thinking/canopywave",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test comprehensive parameters" },
+              ],
+              max_tokens: 1000,
+              temperature: 0.8,
+              stop: ["STOP"],
+              response_format: { type: "text" },
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "success",
+                model: "moonshotai/kimi-k2-thinking",
+                data: createOpenAIMockResponse(
+                  "moonshotai/kimi-k2-thinking"
+                ),
+                expects: {
+                  ...canopywaveAuthExpectations,
+                  bodyContains: [
+                    "max_tokens",
+                    "temperature",
+                    "stop",
+                    "response_format",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+  });
+
+  describe("Error scenarios - kimi-k2-thinking with Canopy Wave Provider", () => {
+    it("should handle Canopy Wave provider failure", () =>
+      runGatewayTest({
+        model: "kimi-k2-0905/canopywave",
+        expected: {
+          providers: [
+            {
+              url: "https://inference.canopywave.io/v1/chat/completions",
+              response: "failure",
+              statusCode: 500,
+              errorMessage: "Canopy Wave service unavailable",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+
+    it("should handle rate limiting from Canopy Wave", () =>
+      runGatewayTest({
+        model: "kimi-k2-0905/canopywave",
+        expected: {
+          providers: [
+            {
+              url: "https://inference.canopywave.io/v1/chat/completions",
+              response: "failure",
+              statusCode: 429,
+              errorMessage: "Rate limit exceeded",
+            },
+          ],
+          finalStatus: 429,
+        },
+      }));
+
+    it("should handle authentication failure from Fireworks", () =>
+      runGatewayTest({
+        model: "kimi-k2-0905/canopywave",
+        expected: {
+          providers: [
+            {
+              url: "https://inference.canopywave.io/v1/chat/completions",
+              response: "failure",
+              statusCode: 401,
+              errorMessage: "Invalid API key",
+            },
+          ],
+          finalStatus: 401,
+        },
+      }));
+
+    it("should handle model not found error from Canopy Wave", () =>
+      runGatewayTest({
+        model: "kimi-k2-0905/canopywave",
+        expected: {
+          providers: [
+            {
+              url: "https://inference.canopywave.io/v1/chat/completions",
+              response: "failure",
+              statusCode: 404,
+              errorMessage: "Model not found",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+
+    it("should handle timeout from Canopy Wave", () =>
+      runGatewayTest({
+        model: "kimi-k2-0905/canopywave",
+        expected: {
+          providers: [
+            {
+              url: "https://inference.canopywave.io/v1/chat/completions",
+              response: "failure",
+              statusCode: 408,
+              errorMessage: "Request timeout",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+  });
+
+  describe("Provider validation - kimi-k2-thinking with Canopy Wave", () => {
+    it("should construct correct Canopy Wave URL for kimi-k2-thinking", () =>
+      runGatewayTest({
+        model: "kimi-k2-thinking/canopywave",
+        expected: {
+          providers: [
+            {
+              url: "https://inference.canopywave.io/v1/chat/completions",
+              response: "success",
+              model: "moonshotai/kimi-k2-thinking",
+              data: createOpenAIMockResponse(
+                "moonshotai/kimi-k2-thinking"
+              ),
+              expects: canopywaveAuthExpectations,
+              customVerify: (call) => {
+                // Verify that the URL is correctly constructed
+                // Base URL: https://inference.canopywave.io/v1
+                // Built URL: https://inference.canopywave.io/v1/chat/completions
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle provider model ID mapping correctly for Canopy Wave", () =>
+      runGatewayTest({
+        model: "kimi-k2-thinking/canopywave",
+        expected: {
+          providers: [
+            {
+              url: "https://inference.canopywave.io/v1/chat/completions",
+              response: "success",
+              model: "moonshotai/kimi-k2-thinking", // Should map to the correct provider model ID
+              data: createOpenAIMockResponse(
+                "moonshotai/kimi-k2-thinking"
+              ),
+              expects: canopywaveAuthExpectations,
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle request body mapping for Canopy Wave", () =>
+      runGatewayTest({
+        model: "kimi-k2-thinking/canopywave",
+        request: {
+          bodyMapping: "NO_MAPPING",
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://inference.canopywave.io/v1/chat/completions",
+              response: "success",
+              model: "moonshotai/kimi-k2-thinking",
+              data: createOpenAIMockResponse(
+                "moonshotai/kimi-k2-thinking"
+              ),
+              expects: {
+                ...canopywaveAuthExpectations,
               },
             },
           ],

@@ -3134,6 +3134,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "kimi-k2-thinking:canopywave": {
+      "context": 262144,
+      "crossRegion": false,
+      "maxTokens": 262144,
+      "modelId": "moonshotai/kimi-k2-thinking",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "canopywave",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "kimi-k2-thinking:deepinfra": {
       "context": 256000,
       "crossRegion": false,
@@ -5607,6 +5630,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   ],
   "moonshotai/kimi-k2": [
     "baseten",
+    "canopywave",
     "deepinfra",
     "deepinfra",
     "fireworks",
@@ -6973,6 +6997,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 0,
       },
     ],
+    "canopywave": [
+      {
+        "input": 4.8e-7,
+        "output": 0.000002,
+        "threshold": 0,
+      },
+    ],
     "deepinfra": [
       {
         "input": 5.5e-7,
@@ -7857,6 +7888,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "kimi-k2-thinking",
       "providers": [
+        "canopywave",
         "deepinfra",
         "fireworks",
         "novita",
@@ -8096,7 +8128,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "bedrock",
     },
     {
-      "modelCount": 1,
+      "modelCount": 2,
       "provider": "canopywave",
     },
     {
@@ -8266,8 +8298,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 241,
-  "totalModelProviderConfigs": 241,
+  "totalEndpoints": 242,
+  "totalModelProviderConfigs": 242,
   "totalModelsWithPtb": 91,
   "totalProviders": 21,
 }
