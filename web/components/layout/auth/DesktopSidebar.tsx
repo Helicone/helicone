@@ -9,8 +9,18 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
-import { MessageCircle, Rocket, Settings, Coins, Zap, FileText, LayoutGrid, ArrowUpRight } from "lucide-react";
+import {
+  MessageCircle,
+  Rocket,
+  Settings,
+  Coins,
+  Zap,
+  FileText,
+  LayoutGrid,
+  ArrowUpRight,
+} from "lucide-react";
 import { useTheme } from "next-themes";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import ChangelogModal from "../ChangelogModal";
@@ -268,7 +278,7 @@ const DesktopSidebar = ({
           {/* Main content area */}
           <div className="flex min-h-0 flex-1 flex-col">
             <ScrollArea
-              className="flex h-full flex-1 flex-col justify-between"
+              className="flex h-full flex-1 flex-col"
               width="thin"
               type="scroll"
             >
@@ -331,43 +341,43 @@ const DesktopSidebar = ({
                     )}
                   </nav>
                 </div>
-              </div>
 
-              {/* InfoBox */}
-              {canShowInfoBox &&
-                orgContext?.currentOrg?.tier === "free" &&
-                (isCollapsed ? (
-                  <div className="px-2 py-2">
-                    <ProFeatureWrapper featureName="pro" enabled={false}>
-                      <Button
-                        variant="action"
-                        size="icon"
-                        className="h-8 w-full bg-sky-500 text-white hover:bg-sky-600"
-                      >
-                        <Rocket className="h-4 w-4" />
-                      </Button>
-                    </ProFeatureWrapper>
-                  </div>
-                ) : (
-                  <div className="mx-2 mb-4 mt-2 flex flex-col items-start justify-between gap-4 rounded border border-slate-200 bg-slate-50 px-3 py-2 font-medium text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 md:flex-row md:items-center md:justify-center md:gap-2">
-                    <div className="flex flex-col gap-2">
-                      <h1 className="text-start text-xs leading-[1.35rem] tracking-tight">
-                        Unlock more features with{" "}
-                        <span className="font-bold text-sky-500">Pro</span>. No
-                        usage limits, sessions, user analytics, custom
-                        properties and much more.
-                      </h1>
+                {/* InfoBox */}
+                {canShowInfoBox &&
+                  orgContext?.currentOrg?.tier === "free" &&
+                  (isCollapsed ? (
+                    <div className="px-2 py-2">
                       <ProFeatureWrapper featureName="pro" enabled={false}>
                         <Button
                           variant="action"
-                          className="h-8 w-full bg-sky-500 text-xs text-white hover:bg-sky-600"
+                          size="icon"
+                          className="h-8 w-full bg-sky-500 text-white hover:bg-sky-600"
                         >
-                          Start Pro Free Trial
+                          <Rocket className="h-4 w-4" />
                         </Button>
                       </ProFeatureWrapper>
                     </div>
-                  </div>
-                ))}
+                  ) : (
+                    <div className="mx-2 mb-4 mt-2 flex flex-col items-start justify-between gap-4 rounded border border-slate-200 bg-slate-50 px-3 py-2 font-medium text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 md:flex-row md:items-center md:justify-center md:gap-2">
+                      <div className="flex flex-col gap-2">
+                        <h1 className="text-start text-xs leading-[1.35rem] tracking-tight">
+                          Unlock more features with{" "}
+                          <span className="font-bold text-sky-500">Pro</span>.
+                          No usage limits, sessions, user analytics, custom
+                          properties and much more.
+                        </h1>
+                        <ProFeatureWrapper featureName="pro" enabled={false}>
+                          <Button
+                            variant="action"
+                            className="h-8 w-full bg-sky-500 text-xs text-white hover:bg-sky-600"
+                          >
+                            Start Pro Free Trial
+                          </Button>
+                        </ProFeatureWrapper>
+                      </div>
+                    </div>
+                  ))}
+              </div>
             </ScrollArea>
 
             <div
@@ -376,6 +386,84 @@ const DesktopSidebar = ({
                 isCollapsed && "items-center",
               )}
             >
+              {/* Resources Section */}
+              <Link
+                href="/quickstart"
+                className={cn(
+                  "flex items-center text-xs hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
+                  isCollapsed
+                    ? "h-8 w-8 justify-center rounded-md"
+                    : "h-8 w-full justify-start gap-2 rounded-md px-3",
+                  router.pathname === "/quickstart"
+                    ? "bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900/50"
+                    : "text-muted-foreground",
+                )}
+              >
+                <Zap
+                  size={16}
+                  className={cn(
+                    router.pathname === "/quickstart"
+                      ? "text-blue-700 dark:text-blue-300"
+                      : "text-muted-foreground",
+                  )}
+                />
+                {!isCollapsed && <span>Quickstart</span>}
+              </Link>
+
+              <a
+                href="https://docs.helicone.ai"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cn(
+                  "flex items-center text-xs text-muted-foreground hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
+                  isCollapsed
+                    ? "h-8 w-8 justify-center rounded-md"
+                    : "h-8 w-full justify-start gap-2 rounded-md px-3",
+                )}
+              >
+                <FileText size={16} className="text-muted-foreground" />
+                {!isCollapsed && (
+                  <>
+                    <span>Docs</span>
+                    <ArrowUpRight
+                      size={12}
+                      className="ml-auto text-muted-foreground"
+                    />
+                  </>
+                )}
+              </a>
+
+              <a
+                href="https://helicone.ai/models"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cn(
+                  "flex items-center text-xs text-muted-foreground hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
+                  isCollapsed
+                    ? "h-8 w-8 justify-center rounded-md"
+                    : "h-8 w-full justify-start gap-2 rounded-md px-3",
+                )}
+              >
+                <LayoutGrid size={16} className="text-muted-foreground" />
+                {!isCollapsed && (
+                  <>
+                    <span>Models</span>
+                    <ArrowUpRight
+                      size={12}
+                      className="ml-auto text-muted-foreground"
+                    />
+                  </>
+                )}
+              </a>
+
+              {/* Partial-width divider */}
+              <div
+                className={cn(
+                  "my-2 h-px bg-slate-200 dark:bg-slate-700",
+                  isCollapsed ? "w-6" : "mx-3",
+                )}
+              />
+
               <Button
                 variant="ghost"
                 size="none"
@@ -467,100 +555,6 @@ const DesktopSidebar = ({
                     handleChangelogClick={handleChangelogClick}
                     isCollapsed={isCollapsed}
                   />
-
-                  {/* Resources Section */}
-                  <div
-                    className={cn(
-                      "mt-2 border-t border-slate-200 pt-2 dark:border-slate-800",
-                      isCollapsed && "flex flex-col items-center",
-                    )}
-                  >
-                    <Button
-                      variant="ghost"
-                      size="none"
-                      onClick={() => router.push("/quickstart")}
-                      className={cn(
-                        "flex items-center text-xs hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
-                        isCollapsed
-                          ? "h-8 w-8 justify-center"
-                          : "h-8 w-full justify-start gap-2 px-3",
-                        router.pathname === "/quickstart"
-                          ? "bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900/50"
-                          : "text-muted-foreground",
-                      )}
-                    >
-                      <Zap
-                        size={16}
-                        className={cn(
-                          router.pathname === "/quickstart"
-                            ? "text-blue-700 dark:text-blue-300"
-                            : "text-muted-foreground",
-                        )}
-                      />
-                      {!isCollapsed && <span>Quickstart</span>}
-                    </Button>
-
-                    <Button
-                      variant="ghost"
-                      size="none"
-                      asChild
-                      className={cn(
-                        "flex items-center text-xs text-muted-foreground hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
-                        isCollapsed
-                          ? "h-8 w-8 justify-center"
-                          : "h-8 w-full justify-start gap-2 px-3",
-                      )}
-                    >
-                      <a
-                        href="https://docs.helicone.ai"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <FileText size={16} className="text-muted-foreground" />
-                        {!isCollapsed && (
-                          <>
-                            <span>Docs</span>
-                            <ArrowUpRight
-                              size={12}
-                              className="ml-auto text-muted-foreground"
-                            />
-                          </>
-                        )}
-                      </a>
-                    </Button>
-
-                    <Button
-                      variant="ghost"
-                      size="none"
-                      asChild
-                      className={cn(
-                        "flex items-center text-xs text-muted-foreground hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
-                        isCollapsed
-                          ? "h-8 w-8 justify-center"
-                          : "h-8 w-full justify-start gap-2 px-3",
-                      )}
-                    >
-                      <a
-                        href="https://helicone.ai/models"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <LayoutGrid
-                          size={16}
-                          className="text-muted-foreground"
-                        />
-                        {!isCollapsed && (
-                          <>
-                            <span>Models</span>
-                            <ArrowUpRight
-                              size={12}
-                              className="ml-auto text-muted-foreground"
-                            />
-                          </>
-                        )}
-                      </a>
-                    </Button>
-                  </div>
                 </>
               )}
             </div>
