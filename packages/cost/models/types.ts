@@ -39,7 +39,7 @@ export interface Modality {
   outputs: OutputModality[];
 }
 
-export type ResponseFormat = "ANTHROPIC" | "OPENAI";
+export type ResponseFormat = "ANTHROPIC" | "OPENAI" | "GOOGLE";
 
 export type Tokenizer =
   | "Claude"
@@ -218,6 +218,7 @@ export interface EndpointConfig extends UserEndpointConfig {
 export interface RequestParams {
   isStreaming?: boolean;
   bodyMapping?: BodyMappingType;
+  apiKey?: string;
 }
 
 export interface Endpoint extends BaseConfig {

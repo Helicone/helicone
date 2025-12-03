@@ -51,6 +51,9 @@ export type ModelProviderName = keyof typeof providers;
 export const ResponsesAPIEnabledProviders: ModelProviderName[] = [
   "openai",
   "helicone",
+  "anthropic",
+  "bedrock",
+  "google-ai-studio",
 
   // chat completions only
   "azure",

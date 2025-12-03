@@ -3248,7 +3248,8 @@
 					"NVIDIA",
 					"VERCEL",
 					"CEREBRAS",
-					"BASETEN"
+					"BASETEN",
+					"CANOPYWAVE"
 				]
 			},
 			"ModelProviderName": {
@@ -3258,6 +3259,7 @@
 					"anthropic",
 					"azure",
 					"bedrock",
+					"canopywave",
 					"cerebras",
 					"chutes",
 					"deepinfra",
@@ -9264,7 +9266,8 @@
 				"type": "string",
 				"enum": [
 					"ANTHROPIC",
-					"OPENAI"
+					"OPENAI",
+					"GOOGLE"
 				]
 			},
 			"ModelProviderConfig": {
@@ -13219,6 +13222,7 @@
 														"anthropic",
 														"azure",
 														"bedrock",
+														"canopywave",
 														"cerebras",
 														"chutes",
 														"deepinfra",

@@ -7,7 +7,6 @@ import type {
   AuthResult,
   RequestBodyContext,
   RequestParams,
-  ResponseFormat,
   ModelSpec,
 } from "./types";
 import { providers, ModelProviderName } from "./providers";
@@ -165,7 +164,7 @@ export const dbProviderToProvider = (
 
 export function buildEndpointUrl(
   endpoint: Endpoint,
-  requestParams: RequestParams
+  requestParams: RequestParams,
 ): Result<string> {
   const providerResult = getProvider(endpoint.provider);
   if (providerResult.error) {
@@ -348,6 +347,9 @@ const MODEL_NAME_MAPPINGS: Record<string, string> = {
   "deepseek-r1": "deepseek-reasoner",
   "kimi-k2": "kimi-k2-0905",
   "kimi-k2-instruct": "kimi-k2-0905",
+  // Grok 4.1 backwards compatibility (period to dash)
+  "grok-4.1-fast-non-reasoning": "grok-4-1-fast-non-reasoning",
+  "grok-4.1-fast-reasoning": "grok-4-1-fast-reasoning",
 };
 
 export function parseModelString(

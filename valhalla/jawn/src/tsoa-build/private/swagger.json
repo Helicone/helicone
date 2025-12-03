@@ -4150,7 +4150,8 @@
 					"NVIDIA",
 					"VERCEL",
 					"CEREBRAS",
-					"BASETEN"
+					"BASETEN",
+					"CANOPYWAVE"
 				]
 			},
 			"ModelProviderName": {
@@ -4160,6 +4161,7 @@
 					"anthropic",
 					"azure",
 					"bedrock",
+					"canopywave",
 					"cerebras",
 					"chutes",
 					"deepinfra",
@@ -49285,6 +49287,7 @@
 														"anthropic",
 														"azure",
 														"bedrock",
+														"canopywave",
 														"cerebras",
 														"chutes",
 														"deepinfra",

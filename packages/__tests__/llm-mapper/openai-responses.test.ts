@@ -324,7 +324,7 @@ describe("OpenAI Responses API Mapper", () => {
       });
     });
 
-    it("should handle multiple function calls in sequence", () => {
+    it("should handle multiple function calls in sequence - each as separate message", () => {
       const request = {
         model: "gpt-4",
         input: [
@@ -349,7 +349,8 @@ describe("OpenAI Responses API Mapper", () => {
         model: "gpt-4",
       });
 
-      expect(result.schema.request?.messages).toHaveLength(1);
+      // Each function_call should be a separate assistant message to preserve chronological order
+      expect(result.schema.request?.messages).toHaveLength(2);
       expect(result.schema.request?.messages?.[0]).toMatchObject({
         _type: "message",
         role: "assistant" as const,
@@ -361,6 +362,13 @@ describe("OpenAI Responses API Mapper", () => {
             arguments: { param1: "[REDACTED_VALUE_1]" },
             type: "function",
           },
+        ],
+      });
+      expect(result.schema.request?.messages?.[1]).toMatchObject({
+        _type: "message",
+        role: "assistant" as const,
+        content: "",
+        tool_calls: [
           {
             id: "call_[REDACTED_2]",
             name: "[REDACTED_FUNCTION_2]",

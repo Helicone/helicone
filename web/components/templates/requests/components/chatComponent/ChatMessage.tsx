@@ -811,7 +811,7 @@ export default function ChatMessage({
       <div
         className={cn(
           "relative flex w-full flex-col",
-          chatMode !== "PLAYGROUND_INPUT" && "px-4 pb-4 pt-0",
+          chatMode !== "PLAYGROUND_INPUT" && "px-4 pb-4 pt-2",
           chatMode === "PLAYGROUND_OUTPUT" && "pt-4",
         )}
         onMouseEnter={() => setIsHovering(true)}

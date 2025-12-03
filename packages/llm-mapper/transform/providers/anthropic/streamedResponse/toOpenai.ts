@@ -12,6 +12,7 @@ export class AnthropicToOpenAIStreamConverter {
   private created: number = 0;
   private finalUsage: ChatCompletionChunk["usage"] | null = null;
   private inputTokens: number = 0; // Some providers (e.g. Anthropic) don't include input_tokens in the message_delta event
+  private cacheCreationDetails: { ephemeral_5m_input_tokens: number; ephemeral_1h_input_tokens: number } | null = null; // Cache creation details from message_start
   private toolCallState: Map<
     number,
     {
@@ -25,6 +26,7 @@ export class AnthropicToOpenAIStreamConverter {
   private nextToolCallIndex: number = 0;
   private annotations: OpenAIAnnotation[] = [];
   private currentContentLength: number = 0;
+  private thinkingBlockState: Map<number, { thinking: string; signature: string }> = new Map(); // Track thinking blocks with their signatures
 
   constructor() {
     this.created = Math.floor(Date.now() / 1000);
@@ -68,10 +70,17 @@ export class AnthropicToOpenAIStreamConverter {
         this.messageId = event.message.id;
         this.model = event.message.model;
         this.inputTokens = event.message.usage.input_tokens ?? 0;
+        this.cacheCreationDetails = event.message.usage.cache_creation
+          ? {
+              ephemeral_5m_input_tokens: event.message.usage.cache_creation.ephemeral_5m_input_tokens ?? 0,
+              ephemeral_1h_input_tokens: event.message.usage.cache_creation.ephemeral_1h_input_tokens ?? 0,
+            }
+          : null;
         this.toolCallState.clear();
         this.nextToolCallIndex = 0;
         this.annotations = [];
         this.currentContentLength = 0;
+        this.thinkingBlockState.clear();
 
         chunks.push(
           this.createChunk({
@@ -153,6 +162,9 @@ export class AnthropicToOpenAIStreamConverter {
               ],
             })
           );
+        } else if (event.content_block.type === "thinking") {
+          // Initialize thinking block state for this index
+          this.thinkingBlockState.set(event.index, { thinking: "", signature: "" });
         } else if (
           event.content_block.type === "web_search_tool_result" ||
           event.content_block.type === "server_tool_use"
@@ -218,6 +230,31 @@ export class AnthropicToOpenAIStreamConverter {
               );
             }
           }
+        } else if (event.delta.type === "thinking_delta") {
+          // Accumulate thinking content for this block
+          const thinkingState = this.thinkingBlockState.get(event.index);
+          if (thinkingState) {
+            thinkingState.thinking += event.delta.thinking;
+          }
+
+          chunks.push(
+            this.createChunk({
+              choices: [
+                {
+                  index: 0,
+                  delta: { reasoning: event.delta.thinking },
+                  logprobs: null,
+                  finish_reason: null,
+                },
+              ],
+            })
+          );
+        } else if (event.delta.type === "signature_delta") {
+          // Accumulate signature for this thinking block
+          const thinkingState = this.thinkingBlockState.get(event.index);
+          if (thinkingState) {
+            thinkingState.signature += event.delta.signature;
+          }
         } else if (event.delta.type === "citations_delta") {
           // Collect citations - will be sent at the end in message_delta
           const citation = event.delta.citation;
@@ -263,10 +300,8 @@ export class AnthropicToOpenAIStreamConverter {
               ...(cacheWriteTokens > 0 && {
                 cache_write_tokens: cacheWriteTokens,
                 cache_write_details: {
-                  write_5m_tokens:
-                    event.usage.cache_creation?.ephemeral_5m_input_tokens ?? 0,
-                  write_1h_tokens:
-                    event.usage.cache_creation?.ephemeral_1h_input_tokens ?? 0,
+                  write_5m_tokens: this.cacheCreationDetails?.ephemeral_5m_input_tokens ?? 0,
+                  write_1h_tokens: this.cacheCreationDetails?.ephemeral_1h_input_tokens ?? 0,
                 },
               }),
             },
@@ -287,6 +322,10 @@ export class AnthropicToOpenAIStreamConverter {
 
         const finishReason = this.mapStopReason(event.delta.stop_reason);
 
+        // Collect reasoning_details from accumulated thinking blocks
+        const reasoning_details = Array.from(this.thinkingBlockState.values())
+          .filter(state => state.thinking || state.signature);
+
         chunks.push(
           this.createChunk({
             choices: [
@@ -295,6 +334,9 @@ export class AnthropicToOpenAIStreamConverter {
                 delta: {
                   ...(this.annotations.length > 0 && {
                     annotations: this.annotations,
+                  }),
+                  ...(reasoning_details.length > 0 && {
+                    reasoning_details,
                   }),
                 },
                 logprobs: null,
