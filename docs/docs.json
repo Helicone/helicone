@@ -42,6 +42,7 @@
               {
                 "group": "Integrations",
                 "pages": [
+                  "gateway/integrations/overview",
                   "gateway/integrations/codex",
                   "gateway/integrations/langchain",
                   "gateway/integrations/langgraph",
