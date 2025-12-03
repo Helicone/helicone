@@ -4,6 +4,7 @@ import {
   AnthropicTool,
   AnthropicWebSearchTool,
   AnthropicToolChoice,
+  AnthropicContextManagement,
 } from "../../../types/anthropic";
 import {
   HeliconeChatCompletionContentPart,
@@ -116,6 +117,11 @@ export function toAnthropic(
 
   if (openAIBody.logit_bias) {
     throw new Error("Logit bias is not supported");
+  }
+
+  // Map context_editing to Anthropic's context_management
+  if (openAIBody.context_editing?.enabled) {
+    antBody.context_management = mapContextEditing(openAIBody.context_editing);
   }
 
   // if and only if the user did not provide any cache control breakpoints,
@@ -557,4 +563,64 @@ function mapWebSearch(
   }
 
   return webSearchTool;
+}
+
+/**
+ * Maps the Helicone context_editing configuration to Anthropic's context_management format.
+ *
+ * Helicone uses a unified `context_editing` object with `enabled` flag and optional strategies,
+ * while Anthropic uses `context_management` with versioned strategy names.
+ *
+ * @see https://docs.anthropic.com/en/docs/build-with-claude/context-editing
+ */
+function mapContextEditing(
+  contextEditing: NonNullable<HeliconeChatCreateParams["context_editing"]>
+): AnthropicContextManagement {
+  const contextManagement: AnthropicContextManagement = {};
+
+  // Map clear_tool_uses to Anthropic's clear_tool_uses_20250919 strategy
+  if (contextEditing.clear_tool_uses) {
+    const toolUsesConfig = contextEditing.clear_tool_uses;
+    contextManagement.clear_tool_uses_20250919 = {};
+
+    if (toolUsesConfig.trigger !== undefined) {
+      contextManagement.clear_tool_uses_20250919.trigger = toolUsesConfig.trigger;
+    }
+    if (toolUsesConfig.keep !== undefined) {
+      contextManagement.clear_tool_uses_20250919.keep = toolUsesConfig.keep;
+    }
+    if (toolUsesConfig.clear_at_least !== undefined) {
+      contextManagement.clear_tool_uses_20250919.clear_at_least = toolUsesConfig.clear_at_least;
+    }
+    if (toolUsesConfig.exclude_tools !== undefined) {
+      contextManagement.clear_tool_uses_20250919.exclude_tools = toolUsesConfig.exclude_tools;
+    }
+    if (toolUsesConfig.clear_tool_inputs !== undefined) {
+      contextManagement.clear_tool_uses_20250919.clear_tool_inputs = toolUsesConfig.clear_tool_inputs;
+    }
+  }
+
+  // Map clear_thinking to Anthropic's clear_thinking_20251015 strategy
+  if (contextEditing.clear_thinking) {
+    const thinkingConfig = contextEditing.clear_thinking;
+    contextManagement.clear_thinking_20251015 = {};
+
+    if (thinkingConfig.keep !== undefined) {
+      contextManagement.clear_thinking_20251015.keep = thinkingConfig.keep;
+    }
+  }
+
+  // If enabled but no specific strategies provided, use defaults
+  // Anthropic will use sensible defaults when an empty object is provided
+  // However, we need at least one strategy to be meaningful
+  if (
+    !contextEditing.clear_tool_uses &&
+    !contextEditing.clear_thinking
+  ) {
+    // Enable clear_tool_uses with defaults when context_editing is enabled
+    // but no specific strategies are provided
+    contextManagement.clear_tool_uses_20250919 = {};
+  }
+
+  return contextManagement;
 }

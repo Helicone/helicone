@@ -27,6 +27,11 @@ export interface AnthropicRequestBody {
   tools?: (AnthropicTool | AnthropicWebSearchTool)[];
   tool_choice?: AnthropicToolChoice;
   thinking?: AnthropicThinkingConfig;
+  /**
+   * Context management configuration for automatic context editing.
+   * @see https://docs.anthropic.com/en/docs/build-with-claude/context-editing
+   */
+  context_management?: AnthropicContextManagement;
 }
 
 export type AnthropicThinkingConfig = {
@@ -35,6 +40,51 @@ export type AnthropicThinkingConfig = {
 } | {
   type: "disabled";
 };
+
+/**
+ * Context management configuration for Anthropic's context editing feature.
+ * Allows automatic management of conversation context as it grows.
+ *
+ * @see https://docs.anthropic.com/en/docs/build-with-claude/context-editing
+ */
+export interface AnthropicContextManagement {
+  /**
+   * Strategy for clearing old tool uses when context exceeds thresholds.
+   */
+  clear_tool_uses_20250919?: {
+    /**
+     * Token threshold at which to trigger clearing (default: 100000)
+     */
+    trigger?: number;
+    /**
+     * Number of recent tool uses to preserve (default: 3)
+     */
+    keep?: number;
+    /**
+     * Minimum tokens to clear per activation
+     */
+    clear_at_least?: number;
+    /**
+     * Tool names to exclude from clearing
+     */
+    exclude_tools?: string[];
+    /**
+     * Whether to also clear tool call inputs (default: false)
+     */
+    clear_tool_inputs?: boolean;
+  };
+
+  /**
+   * Strategy for clearing thinking blocks when extended thinking is enabled.
+   */
+  clear_thinking_20251015?: {
+    /**
+     * Number of assistant turns with thinking to preserve, or "all" for maximum cache hits.
+     * Default: 1
+     */
+    keep?: number | "all";
+  };
+}
 
 export interface AnthropicMessage {
   role: "user" | "assistant";

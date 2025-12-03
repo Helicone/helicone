@@ -17,8 +17,12 @@ export class OpenRouterProvider extends BaseProvider {
     if (context.bodyMapping === "RESPONSES") {
       updatedBody = context.toChatCompletions(updatedBody);
     }
+
+    // Strip context_editing - only supported by direct Anthropic API
+    const { context_editing, ...bodyWithoutContextEditing } = updatedBody;
+
     return JSON.stringify({
-      ...updatedBody,
+      ...bodyWithoutContextEditing,
       model: endpoint.providerModelId,
       usage: { include: true }
     });

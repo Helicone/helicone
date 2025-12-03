@@ -59,8 +59,13 @@ export abstract class BaseProvider {
     if (context.bodyMapping === "RESPONSES") {
       updatedBody = context.toChatCompletions(updatedBody);
     }
+
+    // Strip context_editing - only supported by specific providers (Anthropic)
+    // Providers that support it should handle it in their own buildRequestBody
+    const { context_editing, ...bodyWithoutContextEditing } = updatedBody;
+
     return JSON.stringify({
-      ...updatedBody,
+      ...bodyWithoutContextEditing,
       model: endpoint.providerModelId,
     });
   }

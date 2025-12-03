@@ -165,6 +165,8 @@ export function toChatCompletions(
     service_tier: (body as any).service_tier,
     parallel_tool_calls: (body as any).parallel_tool_calls,
     stream_options: (body as any).stream_options,
+    // Context editing passthrough (only supported by Anthropic - will be stripped for other providers)
+    context_editing: body.context_editing,
     // Deprecated passthroughs (supported by Chat Completions clients)
     function_call: (body as any).function_call,
     functions: (body as any).functions,

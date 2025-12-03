@@ -17,8 +17,12 @@ export class MistralProvider extends BaseProvider {
     if (context.bodyMapping === "RESPONSES") {
       updatedBody = context.toChatCompletions(updatedBody);
     }
+
+    // Strip context_editing - only supported by Anthropic
+    const { context_editing, ...bodyWithoutContextEditing } = updatedBody;
+
     return JSON.stringify({
-      ...updatedBody,
+      ...bodyWithoutContextEditing,
       model: endpoint.providerModelId,
       user: undefined
     });

@@ -22,8 +22,10 @@ export class OpenAIProvider extends BaseProvider {
     context: RequestBodyContext
   ): string | Promise<string> {
     if (context.bodyMapping === "RESPONSES") {
+      // Strip context_editing - only supported by Anthropic
+      const { context_editing, ...bodyWithoutContextEditing } = context.parsedBody;
       return JSON.stringify({
-        ...context.parsedBody,
+        ...bodyWithoutContextEditing,
         model: endpoint.providerModelId,
       });
     }
