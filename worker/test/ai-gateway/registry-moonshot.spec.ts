@@ -2593,21 +2593,6 @@ describe("Moonshot AI Registry Tests", () => {
       }));
   });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   describe("BYOK Tests - kimi-k2-thinking with Canopy Wave", () => {
     describe("kimi-k2-thinking", () => {
       it("should handle canopy wave provider", () =>
