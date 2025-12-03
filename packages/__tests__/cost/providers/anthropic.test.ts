@@ -50,7 +50,7 @@ describe("AnthropicProvider", () => {
       );
 
       expect(result.headers["x-api-key"]).toBe("test-api-key");
-      expect(result.headers["anthropic-beta"]).toBeUndefined();
+      expect(result.headers["anthropic-beta"]).toBe("context-management-2025-06-27");
     });
   });
 
