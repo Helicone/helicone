@@ -113,7 +113,7 @@ export function toChatCompletions(
   messages.push(...inputMessages);
 
   // tools: Responses (flattened) -> Chat Completions (nested func)
-  const tools = Array.isArray((body as any).tools)
+  const tools = Array.isArray(body.tools)
     ? ((body.tools as ResponsesToolDefinition[]).map((t) => {
         if (t.type !== "function") return t as any;
         return {
@@ -162,12 +162,14 @@ export function toChatCompletions(
     response_format: body.response_format as any,
     seed: body.seed,
     user: body.user,
-    service_tier: (body as any).service_tier,
-    parallel_tool_calls: (body as any).parallel_tool_calls,
-    stream_options: (body as any).stream_options,
+    service_tier: body.service_tier,
+    parallel_tool_calls: body.parallel_tool_calls,
+    stream_options: body.stream_options,
+    // Context editing passthrough (only supported by Anthropic - will be stripped for other providers)
+    context_editing: body.context_editing,
     // Deprecated passthroughs (supported by Chat Completions clients)
-    function_call: (body as any).function_call,
-    functions: (body as any).functions,
+    function_call: body.function_call,
+    functions: body.functions,
     ...(body.stream ? { stream_options: { include_usage: true } } : {}),
   } as HeliconeChatCreateParams;
 

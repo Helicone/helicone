@@ -125,6 +125,7 @@ export class VertexProvider extends BaseProvider {
         endpoint.providerModelId,
         { includeCacheBreakpoints: false }
       );
+
       updatedBody = {
         ...anthropicBody,
         anthropic_version: "vertex-2023-10-16",
