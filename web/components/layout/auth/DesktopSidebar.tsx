@@ -9,7 +9,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
-import { MessageCircle, Rocket, Settings, Coins } from "lucide-react";
+import { MessageCircle, Rocket, Settings, Coins, Zap, FileText, LayoutGrid, ArrowUpRight } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -467,6 +467,100 @@ const DesktopSidebar = ({
                     handleChangelogClick={handleChangelogClick}
                     isCollapsed={isCollapsed}
                   />
+
+                  {/* Resources Section */}
+                  <div
+                    className={cn(
+                      "mt-2 border-t border-slate-200 pt-2 dark:border-slate-800",
+                      isCollapsed && "flex flex-col items-center",
+                    )}
+                  >
+                    <Button
+                      variant="ghost"
+                      size="none"
+                      onClick={() => router.push("/quickstart")}
+                      className={cn(
+                        "flex items-center text-xs hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
+                        isCollapsed
+                          ? "h-8 w-8 justify-center"
+                          : "h-8 w-full justify-start gap-2 px-3",
+                        router.pathname === "/quickstart"
+                          ? "bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900/50"
+                          : "text-muted-foreground",
+                      )}
+                    >
+                      <Zap
+                        size={16}
+                        className={cn(
+                          router.pathname === "/quickstart"
+                            ? "text-blue-700 dark:text-blue-300"
+                            : "text-muted-foreground",
+                        )}
+                      />
+                      {!isCollapsed && <span>Quickstart</span>}
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      size="none"
+                      asChild
+                      className={cn(
+                        "flex items-center text-xs text-muted-foreground hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
+                        isCollapsed
+                          ? "h-8 w-8 justify-center"
+                          : "h-8 w-full justify-start gap-2 px-3",
+                      )}
+                    >
+                      <a
+                        href="https://docs.helicone.ai"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <FileText size={16} className="text-muted-foreground" />
+                        {!isCollapsed && (
+                          <>
+                            <span>Docs</span>
+                            <ArrowUpRight
+                              size={12}
+                              className="ml-auto text-muted-foreground"
+                            />
+                          </>
+                        )}
+                      </a>
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      size="none"
+                      asChild
+                      className={cn(
+                        "flex items-center text-xs text-muted-foreground hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
+                        isCollapsed
+                          ? "h-8 w-8 justify-center"
+                          : "h-8 w-full justify-start gap-2 px-3",
+                      )}
+                    >
+                      <a
+                        href="https://helicone.ai/models"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <LayoutGrid
+                          size={16}
+                          className="text-muted-foreground"
+                        />
+                        {!isCollapsed && (
+                          <>
+                            <span>Models</span>
+                            <ArrowUpRight
+                              size={12}
+                              className="ml-auto text-muted-foreground"
+                            />
+                          </>
+                        )}
+                      </a>
+                    </Button>
+                  </div>
                 </>
               )}
             </div>
