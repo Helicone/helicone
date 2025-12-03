@@ -11,15 +11,22 @@ export function toResponses(body: OpenAIResponseBody): ResponsesResponseBody {
   const message = first?.message;
   const output: any[] = [];
 
-  // Add reasoning item FIRST if present (before message)
-  if (message?.reasoning || (message?.reasoning_details && message.reasoning_details.length > 0)) {
-    const reasoningText = message.reasoning ||
-      message.reasoning_details?.map(r => r.thinking).join("\n\n") || "";
-
+  if (message?.reasoning_details && message.reasoning_details.length > 0) {
+    for (const detail of message.reasoning_details) {
+      const reasoningItem: ResponsesReasoningOutputItem = {
+        id: `rs_${Math.random().toString(36).slice(2, 10)}`,
+        type: "reasoning",
+        summary: [{ type: "summary_text", text: detail.thinking }],
+        encrypted_content: detail.signature || null,
+      };
+      output.push(reasoningItem);
+    }
+  } else if (message?.reasoning) {
     const reasoningItem: ResponsesReasoningOutputItem = {
       id: `rs_${Math.random().toString(36).slice(2, 10)}`,
       type: "reasoning",
-      summary: [{ type: "summary_text", text: reasoningText }],
+      summary: [{ type: "summary_text", text: message.reasoning }],
+      encrypted_content: null,
     };
     output.push(reasoningItem);
   }

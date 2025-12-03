@@ -83,6 +83,71 @@ function convertInputToMessages(input: ResponsesRequestBody["input"]) {
       continue;
     }
 
+    // Handle reasoning: collect consecutive reasoning items into a single assistant message
+    // with multiple reasoning_details. Anthropic requires all thinking blocks in one message.
+    if ((item as any).type === "reasoning") {
+      const reasoningDetails: Array<{ thinking: string; signature: string }> = [];
+      let hasAllSignatures = true;
+
+      let j = i;
+      while (j < input.length && (input[j] as any).type === "reasoning") {
+        const reasoningItem = input[j] as any;
+        // get reasoning text from summary
+        let reasoningContent = "";
+        if (Array.isArray(reasoningItem.summary)) {
+          reasoningContent = reasoningItem.summary
+            .map((s: any) => {
+              if (s.type === "summary_text" && s.text) {
+                return s.text;
+              }
+              return typeof s === "string" ? s : JSON.stringify(s);
+            })
+            .join("\n\n");
+        } else if (typeof reasoningItem.summary === "string") {
+          reasoningContent = reasoningItem.summary;
+        }
+
+        // signatures required for providers like anthropic
+        if (reasoningItem.encrypted_content) {
+          reasoningDetails.push({
+            thinking: reasoningContent,
+            signature: reasoningItem.encrypted_content,
+          });
+        } else {
+          hasAllSignatures = false;
+          reasoningDetails.push({
+            thinking: reasoningContent,
+            signature: "",
+          });
+        }
+        j++;
+      }
+
+      // Skip ahead to after the last reasoning item (loop will increment i)
+      i = j - 1;
+
+      if (hasAllSignatures && reasoningDetails.length > 0) {
+        messages.push({
+          role: "assistant",
+          content: "",
+          reasoning_details: reasoningDetails,
+        } as any);
+      } else if (reasoningDetails.length === 1) {
+        messages.push({
+          role: "assistant",
+          content: "",
+          reasoning: reasoningDetails[0].thinking,
+        } as any);
+      } else {
+        messages.push({
+          role: "assistant",
+          content: "",
+          reasoning_details: reasoningDetails.filter(d => d.signature),
+        } as any);
+      }
+      continue;
+    }
+
     const msg = item as ResponsesMessageInputItem;
     const role = mapRole(msg.role);
 

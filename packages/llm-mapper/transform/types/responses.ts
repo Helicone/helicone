@@ -160,6 +160,7 @@ export interface ResponsesReasoningOutputItem {
   id: string;
   type: "reasoning";
   summary: any[];
+  encrypted_content?: string | null;  // Signature for multi-turn thinking
 }
 
 export interface ResponsesUsage {
