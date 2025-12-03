@@ -5,6 +5,11 @@ import { BaseStreamEvent } from "./common";
 
 export type ResponsesRole = "user" | "assistant" | "system" | "developer";
 
+export interface ResponsesSummaryTextPart {
+  type: "summary_text";
+  text: string;
+}
+
 export interface ResponsesInputTextPart {
   type: "input_text";
   text: string;
@@ -56,7 +61,8 @@ export interface ResponsesFunctionCallOutputInputItem {
 export type ResponsesInputItem =
   | ResponsesMessageInputItem
   | ResponsesFunctionCallInputItem
-  | ResponsesFunctionCallOutputInputItem;
+  | ResponsesFunctionCallOutputInputItem
+  | ResponsesReasoningItem;
 
 export interface ResponsesToolFunction {
   name: string;
@@ -66,7 +72,9 @@ export interface ResponsesToolFunction {
 
 export interface ResponsesToolDefinition {
   type: "function";
-  function: ResponsesToolFunction;
+  name: string;
+  description?: string;
+  parameters?: Record<string, any> // JSON Object
 }
 
 export type ResponsesToolChoice =
@@ -146,6 +154,13 @@ export interface ResponsesMessageOutputItem {
   content: ResponsesOutputContentPart[];
 }
 
+export interface ResponsesReasoningOutputItem {
+  id: string;
+  type: "reasoning";
+  summary: ResponsesSummaryTextPart[];
+  encrypted_content?: string | null;  // Signature for multi-turn thinking
+}
+
 export interface ResponsesFunctionCallOutputItem {
   id: string;
   type: "function_call";
@@ -156,7 +171,7 @@ export interface ResponsesFunctionCallOutputItem {
   parsed_arguments?: any | null;
 }
 
-export interface ResponsesReasoningOutputItem {
+export interface ResponsesReasoningItem {
   id: string;
   type: "reasoning";
   summary: any[];
@@ -195,7 +210,7 @@ export interface ResponsesResponseBody {
   output: (
     | ResponsesMessageOutputItem
     | ResponsesFunctionCallOutputItem
-    | ResponsesReasoningOutputItem
+    | ResponsesReasoningItem
   )[];
   parallel_tool_calls?: boolean;
   previous_response_id?: string | null;
@@ -207,7 +222,7 @@ export interface ResponsesResponseBody {
   temperature?: number;
   text?: { format?: { type: string }; verbosity?: "low" | "medium" | "high" };
   tool_choice?: "auto" | "none" | { type: "function"; function: { name: string } };
-  tools?: (ResponsesToolDefinition & Record<string, any>)[];
+  tools?: ResponsesToolDefinition[];
   top_logprobs?: number;
   top_p?: number;
   truncation?: string;
@@ -238,7 +253,7 @@ export interface ResponseOutputItemAddedEvent extends BaseStreamEvent {
   item:
     | (ResponsesMessageOutputItem & { status: "in_progress" | "completed" })
     | ResponsesFunctionCallOutputItem
-    | ResponsesReasoningOutputItem;
+    | ResponsesReasoningItem;
 }
 
 export interface ResponseContentPartAddedEvent extends BaseStreamEvent {
@@ -248,6 +263,14 @@ export interface ResponseContentPartAddedEvent extends BaseStreamEvent {
   output_index: number;
   content_index: number;
   part: { type: "output_text"; text: string; annotations?: any[]; logprobs?: any[] } | any;
+}
+
+export interface ResponseContentPartDoneEvent extends BaseStreamEvent {
+  type: "response.content_part.done";
+  item_id: string;
+  output_index: number;
+  content_index: number;
+  part: ResponsesOutputTextPart;
 }
 
 export interface ResponseOutputTextDeltaEvent extends BaseStreamEvent {
@@ -277,7 +300,8 @@ export interface ResponseOutputItemDoneEvent extends BaseStreamEvent {
   output_index: number;
   item:
     | (ResponsesMessageOutputItem & { status: "completed" | "in_progress" })
-    | ResponsesFunctionCallOutputItem;
+    | ResponsesFunctionCallOutputItem
+    | ResponsesReasoningOutputItem;
 }
 
 export interface ResponseFunctionCallArgumentsDeltaEvent extends BaseStreamEvent {
@@ -319,7 +343,7 @@ export interface ResponseReasoningSummaryPartAddedEvent extends BaseStreamEvent 
   item_id: string;
   output_index: number;
   summary_index: number;
-  part: { type: "summary_text"; text: string };
+  part: ResponsesSummaryTextPart;
 }
 
 export interface ResponseReasoningSummaryTextDeltaEvent extends BaseStreamEvent {
@@ -347,7 +371,7 @@ export interface ResponseReasoningSummaryPartDoneEvent extends BaseStreamEvent {
   item_id: string;
   output_index: number;
   summary_index: number;
-  part: { type: "summary_text"; text: string };
+  part: ResponsesSummaryTextPart;
 }
 
 export type ResponsesStreamEvent =
@@ -355,6 +379,7 @@ export type ResponsesStreamEvent =
   | ResponseInProgressEvent
   | ResponseOutputItemAddedEvent
   | ResponseContentPartAddedEvent
+  | ResponseContentPartDoneEvent
   | ResponseOutputTextDeltaEvent
   | ResponseOutputTextDoneEvent
   | ResponseOutputItemDoneEvent

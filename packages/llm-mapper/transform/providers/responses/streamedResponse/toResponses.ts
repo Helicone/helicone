@@ -10,6 +10,7 @@ import {
   ResponseReasoningSummaryTextDeltaEvent,
   ResponseReasoningSummaryTextDoneEvent,
   ResponseReasoningSummaryPartDoneEvent,
+  ResponsesResponseBody,
 } from "../../../types/responses";
 
 interface ReasoningState {
@@ -87,7 +88,7 @@ export class ChatToResponsesStreamConverter {
           summary: [{ type: "summary_text", text: state.buffer }],
           encrypted_content: state.signature,
         },
-      } as any);
+      });
 
       state.done = true;
     }
@@ -115,15 +116,15 @@ export class ChatToResponsesStreamConverter {
         response: {
           id: this.responseId,
           object: "response",
-          created_at: this.created as any,
-          status: "in_progress" as any,
+          created_at: this.created,
+          status: "in_progress",
           output: [],
           model: this.model,
         },
       };
       events.push(createdEvt);
 
-      events.push({ type: "response.in_progress", response: { id: this.responseId } } as any);
+      events.push({ type: "response.in_progress", response: { id: this.responseId, object: "response", model: this.model, output: [] } });
     }
 
     for (const choice of c.choices ?? []) {
@@ -165,7 +166,7 @@ export class ChatToResponsesStreamConverter {
                 type: "reasoning",
                 summary: [],
               },
-            } as any);
+            });
             state.itemAdded = true;
           }
 
@@ -211,7 +212,7 @@ export class ChatToResponsesStreamConverter {
                 role: "assistant",
                 content: [],
               },
-            } as any);
+            });
             this.itemAdded = true;
           }
           if (!this.partAdded) {
@@ -221,7 +222,7 @@ export class ChatToResponsesStreamConverter {
               output_index: msgOutputIndex,
               content_index: 0,
               part: { type: "output_text", text: "", annotations: [] },
-            } as any);
+            });
             this.partAdded = true;
           }
           const deltaEvt: ResponseOutputTextDeltaEvent = {
@@ -266,7 +267,7 @@ export class ChatToResponsesStreamConverter {
                 arguments: "",
                 parsed_arguments: null,
               },
-            } as any);
+            });
             this.emittedFunctionItems.add(existing.item_id);
           }
 
@@ -276,7 +277,7 @@ export class ChatToResponsesStreamConverter {
               item_id: existing.item_id,
               output_index: msgOutputIndex,
               delta: tc.function.arguments,
-            } as any);
+            });
           }
         }
       }
@@ -303,7 +304,7 @@ export class ChatToResponsesStreamConverter {
               output_index: msgOutputIndex,
               content_index: 0,
               part: { type: "output_text", text: this.textBuffer, annotations: [] },
-            } as any);
+            });
           }
           events.push({
             type: "response.output_item.done",
@@ -317,7 +318,7 @@ export class ChatToResponsesStreamConverter {
                 { type: "output_text", text: this.textBuffer, annotations: [] },
               ],
             },
-          } as any);
+          });
         }
 
         this.toolCalls.forEach((tc) => {
@@ -326,7 +327,7 @@ export class ChatToResponsesStreamConverter {
             item_id: tc.item_id,
             output_index: msgOutputIndex,
             arguments: tc.arguments || "{}",
-          } as any);
+          });
           events.push({
             type: "response.output_item.done",
             output_index: msgOutputIndex,
@@ -339,7 +340,7 @@ export class ChatToResponsesStreamConverter {
               arguments: tc.arguments || "{}",
               parsed_arguments: null,
             },
-          } as any);
+          });
         });
       }
     }
@@ -359,7 +360,7 @@ export class ChatToResponsesStreamConverter {
           : undefined,
       };
 
-      const output: any[] = [];
+      const output: ResponsesResponseBody["output"] = [];
 
       for (const state of this.reasoningStates) {
         if (state.itemAdded) {
@@ -400,8 +401,8 @@ export class ChatToResponsesStreamConverter {
           id: this.responseId,
           object: "response",
           created: this.created,
-          created_at: this.created as any,
-          status: "completed" as any,
+          created_at: this.created,
+          status: "completed",
           model: this.model,
           output,
           usage,
