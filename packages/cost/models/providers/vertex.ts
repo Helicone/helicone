@@ -130,7 +130,6 @@ export class VertexProvider extends BaseProvider {
         anthropic_version: "vertex-2023-10-16",
         model: undefined, // model is not needed in Vertex inputs (as its defined via URL)
       };
-      console.log("Anthropic Body for Vertex:", JSON.stringify(updatedBody, null, 2));
       return JSON.stringify(updatedBody);
     }
 
