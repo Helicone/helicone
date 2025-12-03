@@ -1,7 +1,7 @@
 import type { ModelConfig } from "../../../types";
 
 export const models = {
-  "claude-opus-4-1": {
+  "claude-opus-4.1": {
     name: "Anthropic: Claude Opus 4.1",
     author: "anthropic",
     description:

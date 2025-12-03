@@ -339,6 +339,9 @@ export function validateProvider(
 /**
  * Model name mapping for backward compatibility
  * Maps deprecated/incorrect model names to their correct counterparts
+ *
+ * Note: Model versions should use periods (e.g., claude-opus-4.1, grok-4.1)
+ * Mappings below support customers who used the old dash-based version format
  */
 const MODEL_NAME_MAPPINGS: Record<string, string> = {
   "gemini-1.5-flash": "gemini-2.5-flash-lite",
@@ -347,9 +350,16 @@ const MODEL_NAME_MAPPINGS: Record<string, string> = {
   "deepseek-r1": "deepseek-reasoner",
   "kimi-k2": "kimi-k2-0905",
   "kimi-k2-instruct": "kimi-k2-0905",
-  // Grok 4.1 backwards compatibility (dash to period)
+
+  // xAI Grok backward compatibility (dash to period)
   "grok-4-1-fast-non-reasoning": "grok-4.1-fast-non-reasoning",
   "grok-4-1-fast-reasoning": "grok-4.1-fast-reasoning",
+
+  // Anthropic Claude backward compatibility (dash to period)
+  "claude-opus-4-1": "claude-opus-4.1",
+  "claude-opus-4-1-20250805": "claude-opus-4.1-20250805",
+  "claude-sonnet-4-5-20250929": "claude-sonnet-4.5-20250929",
+  "claude-haiku-4-5-20251001": "claude-haiku-4.5-20251001",
 };
 
 export function parseModelString(

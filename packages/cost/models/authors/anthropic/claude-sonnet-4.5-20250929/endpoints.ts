@@ -3,7 +3,7 @@ import type { ModelProviderConfig } from "../../../types";
 import { ClaudeSonnet4520250929ModelName } from "./model";
 
 export const endpoints = {
-  "claude-sonnet-4-5-20250929:anthropic": {
+  "claude-sonnet-4.5-20250929:anthropic": {
     providerModelId: "claude-sonnet-4-5-20250929",
     provider: "anthropic",
     author: "anthropic",
@@ -43,7 +43,7 @@ export const endpoints = {
       "*": {},
     },
   },
-  "claude-sonnet-4-5-20250929:vertex": {
+  "claude-sonnet-4.5-20250929:vertex": {
     provider: "vertex",
     author: "anthropic",
     providerModelId: "claude-sonnet-4-5@20250929",
@@ -84,7 +84,7 @@ export const endpoints = {
       },
     },
   },
-  "claude-sonnet-4-5-20250929:bedrock": {
+  "claude-sonnet-4.5-20250929:bedrock": {
     provider: "bedrock",
     author: "anthropic",
     providerModelId: "anthropic.claude-sonnet-4-5-20250929-v1:0",
@@ -125,7 +125,7 @@ export const endpoints = {
       "us-east-1": {},
     },
   },
-  "claude-sonnet-4-5-20250929:openrouter": {
+  "claude-sonnet-4.5-20250929:openrouter": {
     provider: "openrouter",
     author: "anthropic",
     providerModelId: "anthropic/claude-sonnet-4.5",
@@ -157,10 +157,10 @@ export const endpoints = {
       "*": {},
     },
   },
-  "claude-sonnet-4-5-20250929:helicone": {
+  "claude-sonnet-4.5-20250929:helicone": {
     provider: "helicone",
     author: "anthropic",
-    providerModelId: "pa/claude-sonnet-4-5-20250929",
+    providerModelId: "pa/claude-sonnet-4.5-20250929",
     version: "20250929",
     pricing: [
       {

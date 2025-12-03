@@ -3,7 +3,7 @@ import type { ModelProviderConfig } from "../../../types";
 import { ClaudeOpus4120250805ModelName } from "./model";
 
 export const endpoints = {
-  "claude-opus-4-1-20250805:anthropic": {
+  "claude-opus-4.1-20250805:anthropic": {
     providerModelId: "claude-opus-4-1-20250805",
     provider: "anthropic",
     author: "anthropic",
@@ -40,7 +40,7 @@ export const endpoints = {
     },
   },
 
-  "claude-opus-4-1-20250805:vertex": {
+  "claude-opus-4.1-20250805:vertex": {
     providerModelId: "claude-opus-4-1@20250805",
     provider: "vertex",
     author: "anthropic",
@@ -77,7 +77,7 @@ export const endpoints = {
       },
     },
   },
-  "claude-opus-4-1-20250805:bedrock": {
+  "claude-opus-4.1-20250805:bedrock": {
     provider: "bedrock",
     author: "anthropic",
     providerModelId: "anthropic.claude-opus-4-1-20250805-v1:0",
@@ -114,7 +114,7 @@ export const endpoints = {
       "us-east-1": {},
     },
   },
-  "claude-opus-4-1-20250805:openrouter": {
+  "claude-opus-4.1-20250805:openrouter": {
     provider: "openrouter",
     author: "anthropic",
     providerModelId: "anthropic/claude-opus-4.1",
@@ -142,10 +142,10 @@ export const endpoints = {
       "*": {},
     },
   },
-  "claude-opus-4-1-20250805:helicone": {
+  "claude-opus-4.1-20250805:helicone": {
     provider: "helicone",
     author: "anthropic",
-    providerModelId: "pa/claude-opus-4-1-20250805",
+    providerModelId: "pa/claude-opus-4.1-20250805",
     version: "20250805",
     pricing: [
       {
