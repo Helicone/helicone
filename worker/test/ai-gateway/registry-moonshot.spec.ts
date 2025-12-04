@@ -2817,7 +2817,7 @@ describe("Moonshot AI Registry Tests", () => {
         },
       }));
 
-    it("should handle authentication failure from Fireworks", () =>
+    it("should handle authentication failure from Canopy Wave", () =>
       runGatewayTest({
         model: "kimi-k2-0905/canopywave",
         expected: {
