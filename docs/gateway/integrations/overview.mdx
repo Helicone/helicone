@@ -4,64 +4,54 @@ sidebarTitle: "Overview"
 description: "Integrate Helicone AI Gateway with popular frameworks and tools to access 100+ LLM providers with top tier observability"
 "twitter:title": "Helicone AI Gateway Integrations - Helicone OSS LLM Observability"
 ---
+import RequestIntegration from "/snippets/request-integration.mdx";
 
 Helicone AI Gateway integrates with most AI frameworks and development tools to give you access to 100+ LLM providers and top tier observability.
 
 ## Why Use Helicone Integrations?
 
 <CardGroup cols={2}>
-<Card title="Minimal Code Changes" icon="code">
-  Most integrations require only updating your base URL and API key - your existing code stays the same
-</Card>
-<Card title="100+ Models Available" icon="database">
-  Access GPT, Claude, Gemini, and many more models through a single endpoint
-</Card>
-<Card title="Full Observability" icon="chart-line">
-  Track all requests, costs, latency, and errors in one unified dashboard
-</Card>
-<Card title="Automatic Failover" icon="shield-check">
-  Built-in routing and fallback logic keeps your applications running
-</Card>
+  <Card title="Minimal Code Changes" icon="code">
+    Most integrations require only updating your base URL and API key - your existing code stays the same
+  </Card>
+  <Card title="100+ Models Available" icon="database">
+    Access GPT, Claude, Gemini, and many more models through a single endpoint
+  </Card>
+  <Card title="Full Observability" icon="chart-line">
+    Track all requests, costs, latency, and errors in one unified dashboard
+  </Card>
+  <Card title="Automatic Failover" icon="shield-check">
+    Built-in routing and fallback logic keeps your applications running
+  </Card>
 </CardGroup>
 
 ## Popular Integrations
 
+Most often, integrating to Helicone is as simple as updating your `baseURL` to `
+"https://ai-gateway.helicone.ai/v1"` and adding your Helicone API key as a header.
+
+<RequestIntegration />
+
 <CardGroup cols={2}>
-<Card title="LangChain" icon="link" href="/gateway/integrations/langchain">
-  Integrate with LangChain to access 100+ LLM providers with unified observability. Works with both Python and TypeScript.
-</Card>
-<Card title="LangGraph" icon="route" href="/gateway/integrations/langgraph">
-  Use Helicone AI Gateway with LangGraph for building stateful, multi-actor applications with LLMs.
-</Card>
-<Card title="LlamaIndex" icon="tree-pine" href="/gateway/integrations/llamaindex">
-  Connect LlamaIndex to Helicone AI Gateway using the dedicated llama-index-llms-helicone package.
-</Card>
-<Card title="Vercel AI SDK" icon="sparkles" href="/getting-started/integration-method/vercelai">
-  Integrate Vercel AI SDK with Helicone to monitor, debug, and improve your AI applications with full observability.
-</Card>
-<Card title="Zapier" icon="zap" href="/gateway/integrations/zapier">
-  Use the Helicone Zapier app to run Chat Completions via the AI Gateway in your automation workflows.
-</Card>
-<Card title="Codex" icon="terminal" href="/gateway/integrations/codex">
-  Integrate Helicone AI Gateway with Codex for enhanced code generation capabilities.
-</Card>
+  <Card title="LangChain" icon="link" href="/gateway/integrations/langchain" horizontal>
+    Works with both Python and TypeScript.
+  </Card>
+  <Card title="LangGraph" icon="route" href="/gateway/integrations/langgraph" horizontal>
+    Building stateful, multi-actor applications with LLMs.
+  </Card>
+  <Card title="LlamaIndex" icon="indent" href="/gateway/integrations/llamaindex" horizontal>
+    Get full observability for your LlamaIndex searches.
+  </Card>
+  <Card title="Vercel AI SDK" icon="sparkles" href="/getting-started/integration-method/vercelai" horizontal>
+    Route, monitor, debug, and improve your AI applications.
+  </Card>
+  <Card title="Zapier" icon="plug" href="/gateway/integrations/zapier" horizontal>
+    Use LLMs in your automation workflows with full observability.
+  </Card>
+  <Card title="Codex" icon="terminal" href="/gateway/integrations/codex" horizontal>
+    Enhance your code generation capabilities.
+  </Card>
 </CardGroup>
-
-## Quick Start
-
-Most integrations follow a similar pattern:
-
-1. **Get your Helicone API key** - Sign up at [helicone.ai](https://www.helicone.ai) and generate an [API key](https://us.helicone.ai/settings/api-keys)
-2. **Update your configuration** - Change your base URL to `https://ai-gateway.helicone.ai/v1` and use your Helicone API key
-3. **Start making requests** - Your existing code continues to work, now with full observability
-
-## Need a Different Integration?
-
-Don't see the framework or tool you're using? We'd love to help you integrate Helicone AI Gateway with your stack.
-
-<Callout title="Request a Helicone Integration" type="info">
-  Need help integrating with a framework or tool not listed here? <a href="https://helicone.ai/contact" target="_blank">Contact us</a> and we'll help you get set up.
-</Callout>
 
 ## Related Documentation
 
