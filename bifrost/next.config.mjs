@@ -58,11 +58,6 @@ const nextConfig = {
         permanent: true,
       },
       {
-        source: "/roadmap",
-        destination: "https://us.helicone.ai/roadmap",
-        permanent: true,
-      },
-      {
         source: "/community",
         destination: "/customers",
         permanent: true,
