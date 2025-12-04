@@ -500,6 +500,10 @@
   "navbar": {
     "links": [
       {
+        "label": "Models",
+        "href": "https://helicone.ai/models"
+      },
+      {
         "label": "Discord",
         "href": "https://discord.com/invite/zsSTcH2qhG"
       },

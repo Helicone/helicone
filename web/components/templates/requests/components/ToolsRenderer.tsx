@@ -4,6 +4,8 @@ import { JsonRenderer } from "./chatComponent/single/JsonRenderer";
 import { Button } from "@/components/ui/button";
 import { ClipboardIcon, ClipboardCheckIcon } from "lucide-react";
 import { useState } from "react";
+import { RoleBadge, getHeaderTint } from "./chatComponent/RoleBadge";
+import { cn } from "@/lib/utils";
 
 interface ToolsRendererProps {
   tools: any[] | undefined;
@@ -28,10 +30,17 @@ export default function ToolsRenderer({ tools, chatMode }: ToolsRendererProps) {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const headerTint = getHeaderTint("tools");
+
   const ToolsHeader = () => (
-    <header className="sticky top-0 z-10 flex h-12 w-full flex-row items-center justify-between bg-sidebar-background px-4 dark:bg-black">
+    <header
+      className={cn(
+        "sticky top-0 z-10 flex h-12 w-full flex-row items-center justify-between px-4",
+        headerTint
+      )}
+    >
       <div className="flex items-center gap-2">
-        <h2 className="text-sm font-medium capitalize text-secondary">Tools</h2>
+        <RoleBadge role="tools" />
         <Button
           variant="ghost"
           size="icon"
@@ -52,7 +61,7 @@ export default function ToolsRenderer({ tools, chatMode }: ToolsRendererProps) {
     return (
       <div className="border-t border-border">
         <ToolsHeader />
-        <div className="px-4 pb-4 pt-0">
+        <div className="px-4 pb-4 pt-2">
           <MarkdownEditor
             language="json"
             setText={() => {}}
@@ -67,7 +76,7 @@ export default function ToolsRenderer({ tools, chatMode }: ToolsRendererProps) {
   return (
     <div className="border-t border-border">
       <ToolsHeader />
-      <div className="px-3 pb-3 pt-0">
+      <div className="px-4 pb-4 pt-2">
         <div className="rounded-md border border-border bg-muted p-3">
           <div className="divide-y divide-border">
             {tools.map((tool: any, index: number) => (
