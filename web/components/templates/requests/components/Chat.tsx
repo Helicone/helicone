@@ -173,8 +173,6 @@ export default function Chat({
     });
   };
 
-  console.log("messages", JSON.stringify(messages, null, 2));
-
   const renderMessages = () => {
     if (mode === "PLAYGROUND_INPUT") {
       return (
