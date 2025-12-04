@@ -4577,6 +4577,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "openai/oss": {
+    "gpt-oss-120b:baseten": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "openai/gpt-oss-120b",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "baseten",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-oss-120b:cerebras": {
       "context": 131072,
       "crossRegion": false,
@@ -5726,6 +5749,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
   ],
   "openai/oss": [
+    "baseten",
     "cerebras",
     "deepinfra",
     "groq",
@@ -7288,6 +7312,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "openai/oss": {
+    "baseten": [
+      {
+        "input": 1e-7,
+        "output": 5e-7,
+        "threshold": 0,
+      },
+    ],
     "cerebras": [
       {
         "input": 3.5e-7,
@@ -7776,6 +7807,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "gpt-oss-120b",
       "providers": [
+        "baseten",
         "cerebras",
         "deepinfra",
         "groq",
@@ -8109,7 +8141,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "azure",
     },
     {
-      "modelCount": 1,
+      "modelCount": 2,
       "provider": "baseten",
     },
     {
@@ -8287,8 +8319,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 242,
-  "totalModelProviderConfigs": 242,
+  "totalEndpoints": 243,
+  "totalModelProviderConfigs": 243,
   "totalModelsWithPtb": 91,
   "totalProviders": 21,
 }

@@ -259,6 +259,36 @@ export const endpoints = {
       "*": {},
     },
   },
+  "gpt-oss-120b:baseten": {
+    providerModelId: "openai/gpt-oss-120b",
+    provider: "baseten",
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000001, // $0.10/1M tokens
+        output: 0.0000005, // $0.50/1M tokens
+      },
+    ],
+    contextLength: 131_072,
+    maxCompletionTokens: 131_072,
+    supportedParameters: [
+      "structured_outputs",
+      "response_format",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "tools",
+      "tool_choice",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${GPTOSSModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;
