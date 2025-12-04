@@ -6,16 +6,10 @@
 
 </div>
 
-<p align="center">
-  <a href="https://docs.helicone.ai/">Docs</a> • <a href="https://www.helicone.ai/changelog">Changelog</a> • <a href="https://github.com/helicone/helicone/issues">Bug reports</a>
-</p>
-<p align="center">
-  <em><a href="https://helicone.ai/demo">See Helicone in Action! (Free)</a></em>
-</p>
 <p align="center" style="margin: 0; padding: 0;">
   <img alt="helicone logo" src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/Twitter_Cover_A1.png" style="display: block; margin: 0; padding: 0;">
 </p>
-</br >
+</br>
 
 <p align="center">
   <a href='https://github.com/helicone/helicone/graphs/contributors'><img src='https://img.shields.io/github/contributors/helicone/helicone?style=flat-square' alt='Contributors' /></a>
@@ -23,6 +17,9 @@
   <a href='https://github.com/helicone/helicone/pulse'><img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/m/helicone/helicone?style=flat-square"/></a>
   <a href='https://github.com/helicone/helicone/issues?q=is%3Aissue+is%3Aclosed'><img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/helicone/helicone?style=flat-square"/></a>
   <a href='https://www.ycombinator.com/companies/helicone'><img alt="Y Combinator" src="https://img.shields.io/badge/Y%20Combinator-Helicone-orange?style=flat-square"/></a>
+</p>
+<p align="center">
+  <a href="https://docs.helicone.ai/">Docs</a> • <a href="https://www.helicone.ai/changelog">Changelog</a> • <a href="https://github.com/helicone/helicone/issues">Bug reports</a> • <a href="https://helicone.ai/demo">See Helicone in Action! (Free)</a>
 </p>
 
 ## Helicone is an AI Gateway & LLM Observability Platform for AI Engineers
