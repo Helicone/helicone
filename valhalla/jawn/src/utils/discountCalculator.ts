@@ -1,121 +1,39 @@
 import { dbExecute } from "../lib/shared/db/dbExecute";
 
-// Discount rule stored in organization.discounts JSONB
 export interface OrgDiscount {
   provider: string | null; // null = all providers
-  model: string | null; // null = all models, supports regex like "gpt.*"
-  percent: number; // e.g., 10 = 10% off
+  model: string | null; // null = all models, supports regex
+  percent: number; // 0-100
 }
 
-
-export interface SpendItem {
-  model: string;
-  provider: string;
-  costUsd: number;
-  promptTokens?: number;
-  completionTokens?: number;
+export async function getOrgDiscounts(orgId: string): Promise<OrgDiscount[]> {
+  const result = await dbExecute<{ discounts: OrgDiscount[] | null }>(
+    `SELECT discounts FROM organization WHERE id = $1`,
+    [orgId]
+  );
+  return result.data?.[0]?.discounts || [];
 }
 
-export interface DiscountedSpendItem extends SpendItem {
-  subtotal: number; // Cost before discount (USD)
-  discountPercent: number; // 0-100
-  total: number; // Cost after discount (USD)
-}
-
-/**
- * Handles organization discount calculations.
- * Used by both credits breakdown (public) and admin invoicing flows.
- */
-export class DiscountCalculator {
-  constructor(private discounts: OrgDiscount[]) {}
-
-  /**
-   * Create a DiscountCalculator for a specific organization.
-   * Fetches discount rules from the organization's discounts JSONB column.
-   * If org has no discounts configured, returns an empty discount list (no discounts applied).
-   */
-  static async forOrg(orgId: string): Promise<DiscountCalculator> {
-    const result = await dbExecute<{ discounts: OrgDiscount[] | null }>(
-      `SELECT discounts FROM organization WHERE id = $1`,
-      [orgId]
-    );
-
-    const discounts = result.data?.[0]?.discounts || [];
-
-    return new DiscountCalculator(discounts);
-  }
-
-  /**
-   * Check if a model matches a regex pattern.
-   * Examples:
-   *   - "gpt.*" matches "gpt-4", "gpt-4o", "gpt-3.5-turbo"
-   *   - "claude-3.*" matches "claude-3.5-sonnet", "claude-3-opus"
-   *   - null matches everything
-   */
-  matchesPattern(value: string, pattern: string | null): boolean {
-    if (pattern === null) return true; // null matches everything
-    try {
-      return new RegExp(pattern, "i").test(value);
-    } catch {
-      // Invalid regex, fall back to exact match
-      return value.toLowerCase() === pattern.toLowerCase();
+export function findDiscount(
+  discounts: OrgDiscount[],
+  model: string,
+  provider: string
+): number {
+  for (const rule of discounts) {
+    const providerMatch = rule.provider === null || rule.provider === provider;
+    const modelMatch = matchesPattern(model, rule.model);
+    if (providerMatch && modelMatch) {
+      return rule.percent;
     }
   }
+  return 0;
+}
 
-  /**
-   * Find the first matching discount rule for a model/provider combination.
-   * Rules are evaluated in order; first match wins.
-   * @returns The discount percentage (0-100), or 0 if no match
-   */
-  findDiscount(model: string, provider: string): number {
-    for (const rule of this.discounts) {
-      const providerMatch =
-        rule.provider === null || rule.provider === provider;
-      const modelMatch = this.matchesPattern(model, rule.model);
-      if (providerMatch && modelMatch) {
-        return rule.percent;
-      }
-    }
-    return 0;
-  }
-
-  /**
-   * Apply discounts to a list of spend items.
-   * Returns items with subtotal (pre-discount), discountPercent, and total (post-discount).
-   */
-  applyDiscounts(items: SpendItem[]): DiscountedSpendItem[] {
-    return items.map((item) => {
-      const subtotal = item.costUsd;
-      const discountPercent = this.findDiscount(item.model, item.provider);
-      const total = subtotal * (1 - discountPercent / 100);
-
-      return {
-        ...item,
-        subtotal,
-        discountPercent,
-        total,
-      };
-    });
-  }
-
-  /**
-   * Calculate the total cost after applying discounts.
-   */
-  calculateTotal(items: SpendItem[]): number {
-    return this.applyDiscounts(items).reduce((sum, item) => sum + item.total, 0);
-  }
-
-  /**
-   * Get the discount rules for debugging/display.
-   */
-  getDiscounts(): OrgDiscount[] {
-    return this.discounts;
-  }
-
-  /**
-   * Check if any discounts are configured.
-   */
-  hasDiscounts(): boolean {
-    return this.discounts.length > 0;
+function matchesPattern(value: string, pattern: string | null): boolean {
+  if (pattern === null) return true;
+  try {
+    return new RegExp(pattern, "i").test(value);
+  } catch {
+    return value.toLowerCase() === pattern.toLowerCase();
   }
 }

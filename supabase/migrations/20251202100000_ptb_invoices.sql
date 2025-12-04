@@ -13,9 +13,9 @@ CREATE TABLE IF NOT EXISTS "public"."ptb_invoices" (
   "created_at" TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Indexes
-CREATE INDEX IF NOT EXISTS idx_ptb_invoices_org ON "public"."ptb_invoices"(organization_id);
-CREATE INDEX IF NOT EXISTS idx_ptb_invoices_created_at ON "public"."ptb_invoices"(created_at DESC);
+-- Composite index for org lookups + ordering by created_at
+CREATE INDEX IF NOT EXISTS idx_ptb_invoices_org_created
+  ON "public"."ptb_invoices"(organization_id, created_at DESC);
 
 -- Enable Row Level Security
 ALTER TABLE "public"."ptb_invoices" ENABLE ROW LEVEL SECURITY;

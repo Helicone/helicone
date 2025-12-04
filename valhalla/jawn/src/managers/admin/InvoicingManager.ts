@@ -1,7 +1,11 @@
 import { err, ok, Result } from "../../packages/common/result";
 import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 import { dbExecute, dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
-import { DiscountCalculator, OrgDiscount } from "../../utils/discountCalculator";
+import {
+  OrgDiscount,
+  getOrgDiscounts,
+  findDiscount,
+} from "../../utils/discountCalculator";
 import Stripe from "stripe";
 import { SecretManager } from "@helicone-package/secrets/SecretManager";
 
@@ -151,8 +155,8 @@ export class InvoicingManager {
         return err(`No spend data found for ${startDate.toISOString()} to ${endDate.toISOString()}`);
       }
 
-      // 3. Get discount calculator for this org
-      const discountCalculator = await DiscountCalculator.forOrg(this.orgId);
+      // 3. Get discounts for this org
+      const discounts = await getOrgDiscounts(this.orgId);
 
       // 4. Initialize Stripe
       const stripe = new Stripe(SecretManager.getSecret("STRIPE_SECRET_KEY")!, {
@@ -190,10 +194,7 @@ export class InvoicingManager {
 
       for (const item of spendResult.data) {
         const subtotalUsd = parseFloat(item.cost);
-        const discountPercent = discountCalculator.findDiscount(
-          item.model,
-          item.provider
-        );
+        const discountPercent = findDiscount(discounts, item.model, item.provider);
         const totalUsd = subtotalUsd * (1 - discountPercent / 100);
         const amountCents = Math.round(totalUsd * 100);
 
