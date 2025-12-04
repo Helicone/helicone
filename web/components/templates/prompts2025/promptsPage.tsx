@@ -59,7 +59,7 @@ const PromptsPage = (props: PromptsPageProps) => {
   const { setToolHandler } = useHeliconeAgent();
 
   // Get promptId from URL query params for deep linking from requests page
-  const urlPromptId = router.query.promptId as string | undefined;
+  const urlPromptId = Array.isArray(router.query.promptId) ? router.query.promptId[0] : router.query.promptId;
 
   const { data: tags = [], isLoading: isLoadingTags } = useGetPromptTags();
   const { data, isLoading } = useGetPromptsWithVersions(
