@@ -2,6 +2,45 @@ import { NextRequest, NextResponse } from "next/server";
 
 const SLACK_CHANNEL_ID = "C0A1JK43BFE";
 
+// Simple in-memory rate limiting
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const MAX_REQUESTS_PER_WINDOW = 3;
+
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+
+function getRateLimitKey(request: NextRequest): string {
+  // Try to get real IP from various headers (Vercel, Cloudflare, etc.)
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  const realIp = request.headers.get("x-real-ip");
+  const cfConnectingIp = request.headers.get("cf-connecting-ip");
+
+  return cfConnectingIp || realIp || forwardedFor?.split(",")[0]?.trim() || "unknown";
+}
+
+function checkRateLimit(key: string): { allowed: boolean; remaining: number; resetIn: number } {
+  const now = Date.now();
+  const record = rateLimitMap.get(key);
+
+  // Clean up expired entries periodically
+  if (rateLimitMap.size > 10000) {
+    for (const [k, v] of rateLimitMap) {
+      if (now > v.resetTime) rateLimitMap.delete(k);
+    }
+  }
+
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(key, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+    return { allowed: true, remaining: MAX_REQUESTS_PER_WINDOW - 1, resetIn: RATE_LIMIT_WINDOW_MS };
+  }
+
+  if (record.count >= MAX_REQUESTS_PER_WINDOW) {
+    return { allowed: false, remaining: 0, resetIn: record.resetTime - now };
+  }
+
+  record.count++;
+  return { allowed: true, remaining: MAX_REQUESTS_PER_WINDOW - record.count, resetIn: record.resetTime - now };
+}
+
 // Sanitize text: remove special characters except hyphens and dots
 function sanitizeText(text: string): string {
   // Remove special characters except hyphens, dots, spaces, and alphanumeric
@@ -15,8 +54,31 @@ function hasContent(text: string): boolean {
 
 export async function POST(request: NextRequest) {
   try {
+    // Check rate limit
+    const rateLimitKey = getRateLimitKey(request);
+    const rateLimit = checkRateLimit(rateLimitKey);
+
+    if (!rateLimit.allowed) {
+      const resetMinutes = Math.ceil(rateLimit.resetIn / 60000);
+      return NextResponse.json(
+        { error: `Too many requests. Please try again in ${resetMinutes} minute${resetMinutes === 1 ? "" : "s"}.` },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(Math.ceil(rateLimit.resetIn / 1000)),
+          }
+        }
+      );
+    }
+
     const body = await request.json();
-    const { modelName, providerName } = body;
+    const { modelName, providerName, website } = body;
+
+    // Honeypot check - if the hidden "website" field is filled, it's a bot
+    if (website) {
+      // Silently accept but don't process - bots think they succeeded
+      return NextResponse.json({ success: true });
+    }
 
     // Validate that at least one field has content after trimming whitespace
     const modelHasContent = modelName && hasContent(modelName);

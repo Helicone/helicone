@@ -28,6 +28,7 @@ export function RequestModelModal({
   const [providerName, setProviderName] = useState("");
   const [status, setStatus] = useState<SubmitStatus>("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [honeypot, setHoneypot] = useState(""); // Hidden field to catch bots
 
   // Check if the form has valid content (at least one field with non-whitespace content)
   const hasValidContent =
@@ -48,6 +49,7 @@ export function RequestModelModal({
         body: JSON.stringify({
           modelName,
           providerName,
+          website: honeypot, // Honeypot field - bots will fill this
         }),
       });
 
@@ -79,6 +81,7 @@ export function RequestModelModal({
       setProviderName("");
       setStatus("idle");
       setErrorMessage("");
+      setHoneypot("");
       onOpenChange(false);
     }
   };
@@ -135,6 +138,29 @@ export function RequestModelModal({
                   value={providerName}
                   onChange={(e) => setProviderName(e.target.value)}
                   disabled={status === "loading"}
+                />
+              </div>
+
+              {/* Honeypot field - hidden from real users, bots will fill it */}
+              <div
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  left: "-9999px",
+                  opacity: 0,
+                  height: 0,
+                  overflow: "hidden",
+                }}
+              >
+                <label htmlFor="website">Website</label>
+                <input
+                  type="text"
+                  id="website"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={honeypot}
+                  onChange={(e) => setHoneypot(e.target.value)}
                 />
               </div>
 
