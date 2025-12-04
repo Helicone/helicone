@@ -40,7 +40,7 @@ describe("AnthropicProvider", () => {
       );
 
       expect(result.headers["x-api-key"]).toBe("test-api-key");
-      expect(result.headers["anthropic-beta"]).toBe("context-1m-2025-08-07");
+      expect(result.headers["anthropic-beta"]).toBe("context-management-2025-06-27,context-1m-2025-08-07");
     });
 
     it("should not include anthropic-beta header for non-sonnet-4 models", () => {
@@ -50,7 +50,7 @@ describe("AnthropicProvider", () => {
       );
 
       expect(result.headers["x-api-key"]).toBe("test-api-key");
-      expect(result.headers["anthropic-beta"]).toBeUndefined();
+      expect(result.headers["anthropic-beta"]).toBe("context-management-2025-06-27");
     });
   });
 
