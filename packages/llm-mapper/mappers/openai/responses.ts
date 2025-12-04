@@ -6,6 +6,7 @@ const typeMap: Record<string, Message["_type"]> = {
   input_text: "message",
   input_image: "image",
   input_file: "file",
+  output_text: "message", // Assistant messages that come back as input have output_text type
 };
 
 interface OpenAIResponseRequest {
@@ -404,6 +405,9 @@ const convertRequestInputToMessages = (
             };
 
             if (content.type === "input_text" && content.text) {
+              baseResponse.content = content.text;
+            } else if (content.type === "output_text" && content.text) {
+              // Handle output_text from assistant messages that are sent back as input
               baseResponse.content = content.text;
             } else if (content.type === "input_image") {
               baseResponse.detail = content.detail;

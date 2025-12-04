@@ -489,6 +489,69 @@ describe("OpenAI Responses API Mapper", () => {
         ],
       });
     });
+
+    it("should handle output_text content from assistant messages in input (ENG-3689)", () => {
+      // This test verifies that assistant messages with output_text content
+      // (which occur when previous responses are sent back as input) are properly extracted
+      const request = {
+        model: "gpt-5-mini",
+        input: [
+          {
+            role: "user" as const,
+            content: [
+              {
+                type: "input_text" as const,
+                text: "What is the weather in San Francisco?",
+              },
+            ],
+          },
+          {
+            id: "msg_123",
+            type: "message",
+            status: "completed",
+            content: [
+              {
+                type: "output_text" as const,
+                annotations: [],
+                logprobs: [],
+                text: "Plan: 1) Call the weather tool to fetch current weather.",
+              },
+            ],
+            role: "assistant" as const,
+          },
+        ],
+      };
+
+      const result = mapOpenAIResponse({
+        request: request as any,
+        response: {},
+        model: "gpt-5-mini",
+      });
+
+      expect(result.schema.request?.messages).toHaveLength(2);
+
+      // Check user message
+      expect(result.schema.request?.messages?.[0]).toMatchObject({
+        _type: "contentArray",
+        role: "user" as const,
+      });
+
+      // Check assistant message with output_text content is properly extracted
+      const assistantMessage = result.schema.request?.messages?.[1];
+      expect(assistantMessage).toMatchObject({
+        _type: "contentArray",
+        role: "assistant" as const,
+      });
+
+      // Verify the contentArray contains the output_text content properly mapped
+      expect(assistantMessage?.contentArray).toHaveLength(1);
+      expect(assistantMessage?.contentArray?.[0]).toMatchObject({
+        _type: "message",
+        role: "assistant" as const,
+        type: "output_text",
+        content: "Plan: 1) Call the weather tool to fetch current weather.",
+      });
+    });
   });
 
   describe("Response Conversion", () => {
