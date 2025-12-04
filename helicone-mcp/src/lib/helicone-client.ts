@@ -233,7 +233,9 @@ export async function useAiGateway(
       headers["Helicone-User-Id"] = options.userId;
     }
     if (options?.customProperties) {
-      headers["Helicone-Property"] = JSON.stringify(options.customProperties);
+      Object.entries(options.customProperties).forEach(([key, value]) => {
+        headers[`Helicone-Property-${key}`] = String(value);
+      });
     }
 
     const response = await fetch(`${HELICONE_AI_GATEWAY_BASE}/v1/chat/completions`, {
