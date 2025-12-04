@@ -1,5 +1,5 @@
 <p align="center" style="margin: 0; padding: 0;">
-  <img alt="helicone logo" src="https://github.com/user-attachments/assets/71c5896d-85e1-44fd-a966-0ac27170e343" width="400" style="display: block; margin: 0; padding: 0;">
+  <img alt="helicone logo" src="https://marketing-assets-helicone.s3.us-west-2.amazonaws.com/Twitter_Cover_A1.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIA4LT7EZHCCPRSC5C4%2F20251204%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20251204T174046Z&X-Amz-Expires=300&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEIL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIGzojakHehpVNRlJ3LhyqsAg6plFjiU4a6vgIrtuRXofAiBBBN5xVCay7v9zhZ2OZwrgdQtLuxbxyi8Dghb1QRMpEirxAghLEAAaDDg0OTU5NjQzNDg4NCIM8GkuShbT%2FOO45%2Bm5Ks4Cd8tD4tY59NOP2Oylw9Nesu0qUFZBGCC0jYIBhgyHLyL9IKiHg3GytXQ7ijOXOQplxgyhq7J5fd9dOwZIAiivpQDEAZjX8xCfeXndnX2TZtPDuY%2BZvqOJrlvhzYFXDxay0DffSNi9%2Bf8sQxLodu2ca8t45pq3TP6OY4%2F9V4jR0jiZnVHGf7ZmscQXVfYy40cOK0x4H%2F7ZiUfjdIgcblBJtuCJyHwr7zfi37sxr6sRBPsCZ8SZl4lfvUfCq4%2BA%2BvP8pJ6twsqczkrfd7YXCWJ4zWY6jHxktC%2Fodadm%2B8%2FHo85gr%2BR9ydu4CO6qZ4Ii5qDIrjHl0xaI1Y7P1kOSHOWs1je9n1yZOEjiyCLMZeb%2FnwakZQ4OFtcyRvs21TxWrZ0Vhej4umQMYwt8BvnNypCCBlhrx5DiOR6cuu8YD%2Fin3HAoLR21cpAxmR6Q9Pe6KDCUjsfJBjquAgmyMUsW70Aieqy6Tlu%2BQ%2BXDM%2BMIV8M7k8ecLDuR9OL1dRH70pgua6NxBiepwJ03K67xirHSjE55Z72PLcAyGZ6Z5DwP8jWYD99jvGELJbfb6bVlfJyCQwnziBAXKSkIsOs4jmqfr9LtD7xwQEIiEvpz%2BEyFSHTDV427MU0rygLEYiSOtlKUZIONawij%2BFP7VebdTXA%2FqlUE%2FmY%2FYSnD2cJ7nKpsk01QCIWXjKSbXD%2FyDp4C95GQjDbwTyBEBd48MTnqE2Io2zN6lf2cZE2Qmgm9F1r8Ny3ewYPRUEfA2AXQhfhhi2rgnyjozRrKPOGhZd25xfRU0lkSyGJ3XNPYz9nAvgd22mmQRlfQkbajy5Z%2B8d03ZW3fhr4MswnLFgcTlyStuzeBjMrDP7IYDja1&X-Amz-Signature=238f1d6791b02dbde132e3566778e946c232072ba1241c4192982aa4e8a36834&X-Amz-SignedHeaders=host&response-content-disposition=inline" style="display: block; margin: 0; padding: 0;">
 </p>
 
 <div align="center">
@@ -98,7 +98,7 @@ Helicone is comprised of five services:
 - **ClickHouse**: Analytics Database
 - **Minio**: Object Storage for logs.
 
-### LLM Observability Integrations
+### Integrations
 
 ### Inference Providers
 
@@ -121,7 +121,7 @@ Helicone is comprised of five services:
 | DeepInfra     | [JS/TS, Python](https://www.helicone.ai/models?providers=deepinfra)                                                                                                                                | Serverless AI inference for various models            |       |
 | Fireworks AI  | [JS/TS, Python](https://www.helicone.ai/models?providers=fireworks)                                                                                                                                | Fast inference API for open-source LLMs               |
 
-### Framework integrations
+### Frameworks
 
 | Framework                                                             | Supports                                                            | Description                                                                             |
 | --------------------------------------------------------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
