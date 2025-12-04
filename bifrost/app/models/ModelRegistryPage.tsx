@@ -20,7 +20,9 @@ import {
   X,
   Filter,
   Info,
+  Plus,
 } from "lucide-react";
+import { RequestModelModal } from "./RequestModelModal";
 import { useModelFiltering } from "@/hooks/useModelFiltering";
 import { Model, SortOption } from "@/lib/filters/modelFilters";
 import { components } from "@/lib/clients/jawnTypes/public";
@@ -119,6 +121,7 @@ export function ModelRegistryPage() {
     ])
   );
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [requestModalOpen, setRequestModalOpen] = useState(false);
 
   const toggleSection = (section: string) => {
     const newSet = new Set(expandedSections);
@@ -510,6 +513,15 @@ export function ModelRegistryPage() {
                     <SelectItem value="newest">Newest First</SelectItem>
                   </SelectContent>
                 </Select>
+
+                {/* Request Model Button */}
+                <button
+                  onClick={() => setRequestModalOpen(true)}
+                  className="flex items-center justify-center gap-2 px-4 h-10 border border-gray-200 dark:border-gray-700 rounded-md text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-200 transition-colors whitespace-nowrap"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span className="hidden sm:inline">Request Model</span>
+                </button>
               </div>
               <div className="flex items-center">
                 <span className="text-sm text-gray-500 dark:text-gray-400">
@@ -676,6 +688,12 @@ export function ModelRegistryPage() {
           </div>
         )}
       </div>
+
+      {/* Request Model Modal */}
+      <RequestModelModal
+        open={requestModalOpen}
+        onOpenChange={setRequestModalOpen}
+      />
     </div>
   );
 }
