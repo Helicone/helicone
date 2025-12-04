@@ -12,13 +12,18 @@ import clsx from "clsx";
 import {
   ArrowUpRightIcon,
   CalendarIcon,
+  HelpCircle,
+  MessageCircle,
   MessageCircleMore,
+  Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FaDiscord } from "react-icons/fa6";
 import { ChangelogItem } from "./auth/types";
 import { useOrg } from "./org/organizationContext";
+import { useHeliconeAgent } from "@/components/templates/agent/HeliconeAgentContext";
+import { useRouter } from "next/router";
 import Intercom from "@intercom/messenger-js-sdk";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import { usePathname } from "next/navigation";
@@ -42,6 +47,8 @@ const SidebarHelpDropdown = ({
 
   const [chatOpen, setChatOpen] = useState(false);
   const orgContext = useOrg();
+  const { agentChatOpen, setAgentChatOpen } = useHeliconeAgent();
+  const router = useRouter();
   const heliconeAuthClient = useHeliconeAuthClient();
   Intercom({
     app_id: INTERCOM_APP_ID,
@@ -75,23 +82,36 @@ const SidebarHelpDropdown = ({
             size="none"
             className={clsx(
               "flex h-8 items-center text-xs text-muted-foreground hover:text-foreground",
-              isCollapsed ? "w-8" : "w-full gap-1",
+              isCollapsed ? "w-8" : "w-full gap-2 px-3",
+              hasNewChangelog && "text-primary",
             )}
           >
             <div className="relative flex items-center">
-              <span
-                className={clsx(
-                  "text-xs font-medium",
-                  hasNewChangelog && "text-primary",
-                )}
-              >
-                ?
-              </span>
+              <HelpCircle size={16} />
             </div>
             {!isCollapsed && <span>Help</span>}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="ml-4 w-64 text-slate-700 dark:text-slate-200">
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onSelect={() => router.push("/quickstart")}
+          >
+            <Zap className="mr-2 h-4 w-4 text-slate-500" />
+            Quickstart
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onSelect={() => setAgentChatOpen(!agentChatOpen)}
+          >
+            <div className="relative mr-2">
+              <MessageCircle className="h-4 w-4 text-slate-500" />
+              {agentChatOpen && (
+                <span className="absolute -right-1 -top-1 h-1.5 w-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
+              )}
+            </div>
+            AI Support
+          </DropdownMenuItem>
           <DropdownMenuItem
             className="cursor-pointer"
             onSelect={() => {

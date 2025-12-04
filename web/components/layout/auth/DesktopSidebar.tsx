@@ -10,17 +10,14 @@ import {
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
 import {
-  MessageCircle,
   Rocket,
   Settings,
   Coins,
-  Zap,
   FileText,
   LayoutGrid,
   ArrowUpRight,
 } from "lucide-react";
 import { useTheme } from "next-themes";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import ChangelogModal from "../ChangelogModal";
@@ -30,7 +27,6 @@ import SidebarHelpDropdown from "../SidebarHelpDropdown";
 import NavItem from "./NavItem";
 import { ChangelogItem } from "./types";
 import SidebarQuickstepCard from "../SidebarQuickstartCard";
-import { useHeliconeAgent } from "@/components/templates/agent/HeliconeAgentContext";
 import { useCredits } from "@/services/hooks/useCredits";
 
 // Sidebar width constants
@@ -58,7 +54,6 @@ const DesktopSidebar = ({
   NAVIGATION,
   sidebarRef,
 }: SidebarProps) => {
-  const { agentChatOpen, setAgentChatOpen } = useHeliconeAgent();
   const orgContext = useOrg();
   const router = useRouter();
   const onboardingStatus = orgContext?.currentOrg
@@ -387,29 +382,6 @@ const DesktopSidebar = ({
               )}
             >
               {/* Resources Section */}
-              <Link
-                href="/quickstart"
-                className={cn(
-                  "flex items-center text-xs hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
-                  isCollapsed
-                    ? "h-8 w-8 justify-center rounded-md"
-                    : "h-8 w-full justify-start gap-2 rounded-md px-3",
-                  router.pathname === "/quickstart"
-                    ? "bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900/50"
-                    : "text-muted-foreground",
-                )}
-              >
-                <Zap
-                  size={16}
-                  className={cn(
-                    router.pathname === "/quickstart"
-                      ? "text-blue-700 dark:text-blue-300"
-                      : "text-muted-foreground",
-                  )}
-                />
-                {!isCollapsed && <span>Quickstart</span>}
-              </Link>
-
               <a
                 href="https://docs.helicone.ai"
                 target="_blank"
@@ -463,26 +435,6 @@ const DesktopSidebar = ({
                   isCollapsed ? "w-6" : "mx-3",
                 )}
               />
-
-              <Button
-                variant="ghost"
-                size="none"
-                onClick={() => setAgentChatOpen(!agentChatOpen)}
-                className={cn(
-                  "flex items-center text-xs text-muted-foreground hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
-                  isCollapsed
-                    ? "h-8 w-8 justify-center"
-                    : "h-8 w-full justify-start gap-2 px-3",
-                )}
-              >
-                <div className="relative">
-                  <MessageCircle size={16} className="text-muted-foreground" />
-                  {agentChatOpen && (
-                    <span className="absolute -right-1 -top-1 h-1.5 w-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
-                  )}
-                </div>
-                {!isCollapsed && <span>Support</span>}
-              </Button>
 
               {orgContext?.currentOrg?.tier !== "demo" && (
                 <>
