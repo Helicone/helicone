@@ -94,7 +94,7 @@ Helicone is comprised of five services:
 - **ClickHouse**: Analytics Database
 - **Minio**: Object Storage for logs.
 
-### Integrations
+## Integrations
 
 ### Inference Providers
 
@@ -138,7 +138,7 @@ Helicone is comprised of five services:
 
 > This list may be out of date. Don't see your provider or framework? Check out the latest integrations in our [docs](https://docs.helicone.ai/gateway/integrations/overview). If not found there, request a new integration by contacting help@helicone.ai.
 
-### Contributing
+## Contributing
 
 We ❤️ our contributors! We warmly welcome contributions for documentation, integrations, costs, and feature requests.
 
