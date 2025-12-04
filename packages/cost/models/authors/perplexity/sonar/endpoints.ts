@@ -13,7 +13,6 @@ export const endpoints = {
         input: 0.000001, // $1.00 per 1M tokens
         output: 0.000001, // $1.00 per 1M tokens
         request: 0.005, // $5.00 per 1K requests (Low search mode)
-        image: 0.0,
         audio: 0.0,
         web_search: 0.005, // Base request fee
       },
@@ -43,7 +42,6 @@ export const endpoints = {
         input: 0.000003, // $3.00 per 1M tokens
         output: 0.000015, // $15.00 per 1M tokens
         request: 0.006, // $6.00 per 1K requests (Low search mode)
-        image: 0.0,
         audio: 0.0,
         web_search: 0.006, // Base request fee
       },
@@ -73,7 +71,6 @@ export const endpoints = {
         input: 0.000001, // $1.00 per 1M tokens
         output: 0.000005, // $5.00 per 1M tokens
         request: 0.005, // $5.00 per 1K requests (Low search mode)
-        image: 0.0,
         audio: 0.0,
         web_search: 0.005, // Base request fee
       },
@@ -104,7 +101,6 @@ export const endpoints = {
         input: 0.000002, // $2.00 per 1M tokens
         output: 0.000008, // $8.00 per 1M tokens
         request: 0.006, // $6.00 per 1K requests (Low search mode)
-        image: 0.0,
         audio: 0.0,
         web_search: 0.006, // Base request fee
       },
@@ -135,7 +131,6 @@ export const endpoints = {
         input: 0.000002, // $2.00 per 1M tokens (base input)
         output: 0.000008, // $8.00 per 1M tokens (base output)
         request: 0.0,
-        image: 0.0,
         audio: 0.0,
         web_search: 0.005, // $5.00 per 1K searches
         // Note: Additional pricing for citation tokens ($2/1M) and reasoning tokens ($3/1M)

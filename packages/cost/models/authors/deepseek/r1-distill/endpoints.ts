@@ -13,7 +13,6 @@ export const endpoints = {
         input: 0.00000075,
         output: 0.00000099,
         request: 0.0,
-        image: 0.0,
         audio: 0.0,
         web_search: 0.0,
       },
