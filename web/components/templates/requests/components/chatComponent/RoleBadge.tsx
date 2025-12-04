@@ -8,6 +8,7 @@ import {
   Brain,
   Terminal,
   HelpCircle,
+  Boxes,
   type LucideIcon,
 } from "lucide-react";
 
@@ -16,6 +17,7 @@ export type RoleType =
   | "assistant"
   | "system"
   | "tool"
+  | "tools"
   | "function"
   | "reasoning"
   | "developer";
@@ -53,11 +55,18 @@ const ROLE_STYLES: Record<
     icon: Settings,
   },
   tool: {
-    bg: "bg-orange-100 dark:bg-orange-900/40",
-    text: "text-orange-700 dark:text-orange-300",
-    border: "border-orange-300 dark:border-orange-700",
+    bg: "bg-slate-200 dark:bg-slate-700/50",
+    text: "text-slate-700 dark:text-slate-200",
+    border: "border-slate-400 dark:border-slate-500",
     label: "Tool",
     icon: Wrench,
+  },
+  tools: {
+    bg: "bg-slate-200 dark:bg-slate-700/50",
+    text: "text-slate-700 dark:text-slate-200",
+    border: "border-slate-400 dark:border-slate-500",
+    label: "Tools",
+    icon: Boxes,
   },
   function: {
     bg: "bg-yellow-100 dark:bg-yellow-900/40",
@@ -136,7 +145,8 @@ const HEADER_TINTS: Record<RoleType, string> = {
   user: "bg-blue-100 dark:bg-[#0a0a1a]",
   assistant: "bg-purple-100 dark:bg-[#0f0a1a]",
   system: "bg-green-100 dark:bg-[#0a1a0f]",
-  tool: "bg-orange-100 dark:bg-[#1a0f0a]",
+  tool: "bg-slate-200 dark:bg-[#12141a]",
+  tools: "bg-slate-200 dark:bg-[#12141a]",
   function: "bg-yellow-100 dark:bg-[#1a1a0a]",
   reasoning: "bg-amber-100 dark:bg-[#1a140a]",
   developer: "bg-slate-100 dark:bg-[#0a0a0f]",

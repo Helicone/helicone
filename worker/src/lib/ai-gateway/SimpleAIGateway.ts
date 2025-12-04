@@ -31,7 +31,10 @@ import {
   toOpenAIStreamResponse,
 } from "@helicone-package/llm-mapper/transform/providers/normalizeResponse";
 import { DataDogTracer, TraceContext } from "../monitoring/DataDogTracer";
-import { ResponsesAPIEnabledProviders } from "@helicone-package/cost/models/providers";
+import {
+  ResponsesAPIEnabledProviders,
+  ContextEditingEnabledProviders,
+} from "@helicone-package/cost/models/providers";
 import { oaiChat2responsesResponse } from "../clients/llmmapper/router/oaiChat2responses/nonStream";
 import { oaiChat2responsesStreamResponse } from "../clients/llmmapper/router/oaiChat2responses/stream";
 import { validateProvider } from "@helicone-package/cost/models/provider-helpers";
@@ -273,6 +276,15 @@ export class SimpleAIGateway {
       }
       // Set gateway attempt to request wrapper
       this.requestWrapper.setGatewayAttempt(attempt);
+
+      // Strip context_editing for providers that don't support it
+      if (
+        finalBody.context_editing &&
+        !ContextEditingEnabledProviders.includes(attempt.endpoint.provider)
+      ) {
+        const { context_editing, ...bodyWithoutContextEditing } = finalBody;
+        finalBody = bodyWithoutContextEditing;
+      }
 
       const result = await this.attemptExecutor.execute({
         attempt,

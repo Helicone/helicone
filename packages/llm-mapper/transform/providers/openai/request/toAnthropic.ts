@@ -4,6 +4,10 @@ import {
   AnthropicTool,
   AnthropicWebSearchTool,
   AnthropicToolChoice,
+  AnthropicContextManagement,
+  AnthropicContextEdit,
+  AnthropicClearToolUsesEdit,
+  AnthropicClearThinkingEdit,
 } from "../../../types/anthropic";
 import {
   HeliconeChatCompletionContentPart,
@@ -20,11 +24,14 @@ export function toAnthropic(
   }
 ): AnthropicRequestBody {
   const includeCache = options?.includeCacheBreakpoints !== false;
+  
+  // Determine max_tokens with default fallback
+  const maxTokens = openAIBody.max_completion_tokens ?? openAIBody.max_tokens ?? 4096;
+  
   const antBody: AnthropicRequestBody = {
     model: providerModelId || openAIBody.model,
     messages: [],
-    max_tokens:
-      openAIBody.max_completion_tokens ?? openAIBody.max_tokens ?? 1024,
+    max_tokens: maxTokens,
     temperature: openAIBody.temperature ?? undefined,
     top_p: openAIBody.top_p ?? undefined,
 
@@ -32,17 +39,17 @@ export function toAnthropic(
   };
 
   if (openAIBody.reasoning_effort) {
-    if (!openAIBody.reasoning_options) {
-      throw new Error("reasoning_options are required for Anthropic models");
-    }
+    let budgetTokens: number;
     
-    if (!openAIBody.reasoning_options.budget_tokens) {
-      throw new Error("reasoning_options.budget_tokens are required for Anthropic models");
+    if (openAIBody.reasoning_options?.budget_tokens) {
+      budgetTokens = openAIBody.reasoning_options.budget_tokens;
+    } else {
+      budgetTokens = Math.floor(maxTokens / 2);
     }
 
     antBody.thinking = {
       type: "enabled",
-      budget_tokens: openAIBody.reasoning_options.budget_tokens,
+      budget_tokens: budgetTokens,
     };
 
     // temperature 1 is required for Anthropic models to enable reasoning
@@ -116,6 +123,11 @@ export function toAnthropic(
 
   if (openAIBody.logit_bias) {
     throw new Error("Logit bias is not supported");
+  }
+
+  // Map context_editing to Anthropic's context_management
+  if (openAIBody.context_editing?.enabled) {
+    antBody.context_management = mapContextEditing(openAIBody.context_editing);
   }
 
   // if and only if the user did not provide any cache control breakpoints,
@@ -557,4 +569,73 @@ function mapWebSearch(
   }
 
   return webSearchTool;
+}
+
+/**
+ * Maps the Helicone context_editing configuration to Anthropic's context_management format.
+ *
+ * Helicone uses a unified `context_editing` object with `enabled` flag and optional strategies,
+ * while Anthropic uses `context_management` with an `edits` array containing versioned strategy objects.
+ *
+ * @see https://docs.anthropic.com/en/docs/build-with-claude/context-editing
+ */
+function mapContextEditing(
+  contextEditing: NonNullable<HeliconeChatCreateParams["context_editing"]>
+): AnthropicContextManagement {
+  const edits: AnthropicContextEdit[] = [];
+
+  // clear_thinking must come first in the array per Anthropic docs
+  if (contextEditing.clear_thinking) {
+    const thinkingConfig = contextEditing.clear_thinking;
+    const thinkingEdit: AnthropicClearThinkingEdit = {
+      type: "clear_thinking_20251015",
+    };
+    if (thinkingConfig.keep !== undefined) {
+      thinkingEdit.keep =
+        thinkingConfig.keep === "all"
+          ? "all"
+          : { type: "thinking_turns", value: thinkingConfig.keep };
+    }
+    edits.push(thinkingEdit);
+  }
+
+  // Map clear_tool_uses to Anthropic's clear_tool_uses_20250919 strategy
+  if (contextEditing.clear_tool_uses) {
+    const toolUsesConfig = contextEditing.clear_tool_uses;
+    const toolUsesEdit: AnthropicClearToolUsesEdit = {
+      type: "clear_tool_uses_20250919",
+    };
+
+    if (toolUsesConfig.trigger !== undefined) {
+      toolUsesEdit.trigger = {
+        type: "input_tokens",
+        value: toolUsesConfig.trigger,
+      };
+    }
+    if (toolUsesConfig.keep !== undefined) {
+      toolUsesEdit.keep = { type: "tool_uses", value: toolUsesConfig.keep };
+    }
+    if (toolUsesConfig.clear_at_least !== undefined) {
+      toolUsesEdit.clear_at_least = {
+        type: "input_tokens",
+        value: toolUsesConfig.clear_at_least,
+      };
+    }
+    if (toolUsesConfig.exclude_tools !== undefined) {
+      toolUsesEdit.exclude_tools = toolUsesConfig.exclude_tools;
+    }
+    if (toolUsesConfig.clear_tool_inputs !== undefined) {
+      toolUsesEdit.clear_tool_inputs = toolUsesConfig.clear_tool_inputs;
+    }
+    edits.push(toolUsesEdit);
+  }
+
+  // If enabled but no specific strategies provided, use defaults
+  // Add clear_tool_uses with defaults when context_editing is enabled
+  // but no specific strategies are provided
+  if (edits.length === 0) {
+    edits.push({ type: "clear_tool_uses_20250919" });
+  }
+
+  return { edits };
 }

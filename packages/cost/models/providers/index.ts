@@ -47,6 +47,19 @@ export const providers = {
 
 export type ModelProviderName = keyof typeof providers;
 
+/**
+ * Providers that support the context editing feature.
+ * Context editing allows automatic management of conversation context,
+ * clearing old tool uses and thinking blocks to optimize costs and stay
+ * within context window limits.
+ *
+ * Currently only Anthropic models support this feature.
+ * @see https://docs.anthropic.com/en/docs/build-with-claude/context-editing
+ */
+export const ContextEditingEnabledProviders: ModelProviderName[] = [
+  "anthropic",
+];
+
 // TODO: temporarily whitelist responses API providers until all mappings are done
 export const ResponsesAPIEnabledProviders: ModelProviderName[] = [
   "openai",
