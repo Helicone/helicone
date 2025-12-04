@@ -184,7 +184,7 @@ export const endpoints = {
       "response_format",
     ],
     ptbEnabled: true,
-    quantization: "fp4",
+    quantization: "fp8",
     endpointConfigs: {
       "*": {},
     },
