@@ -2699,7 +2699,7 @@ describe("Moonshot AI Registry Tests", () => {
           },
         }));
 
-      it("should handle structured outputs with fireworks provider", () =>
+      it("should handle structured outputs with canopy wave provider", () =>
         runGatewayTest({
           model: "kimi-k2-thinking/canopywave",
           request: {
