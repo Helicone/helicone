@@ -37,6 +37,21 @@ export const models = {
     },
     tokenizer: "Qwen",
   },
+  "qwen3-coder-480b-a35b-instruct-fp8": {
+    name: "Qwen3 Coder 480B A35B Instruct FP8",
+    author: "alibaba",
+    description:
+      "Qwen3-Coder-480B-A35B-Instruct-FP8 is the Qwen3's most agentic code model, featuring significant performance on agentic coding, agentic browser-use and other foundational coding tasks, achieving results comparable to Claude Sonnet. This is is a large language model for coding with 480 billion total parameters and 35 billion activated per inference, using FP8 precision for efficiency",
+    contextLength: 262_144,
+    maxOutputTokens: 16_384,
+    created: "2025-07-23T00:00:00.000Z",
+    modality: {
+      inputs: ["text", "image", "audio", "video"],
+      outputs: ["text"],
+    },
+    tokenizer: "Qwen",
+  },
+
   "qwen3-next-80b-a3b-instruct": {
     name: "Qwen3 Next 80B A3B Instruct",
     author: "qwen",
