@@ -7,15 +7,6 @@ export interface OrgDiscount {
   percent: number; // e.g., 10 = 10% off
 }
 
-/**
- * Default discounts applied when org has none configured.
- * TODO: Remove once all orgs have discounts configured in DB.
- */
-const DEFAULT_DISCOUNTS: OrgDiscount[] = [
-  { provider: "helicone", model: "gpt.*", percent: 10 },
-  { provider: "helicone", model: "claude-.*", percent: 15 },
-  { provider: "helicone", model: "grok-.*", percent: 5 },
-];
 
 export interface SpendItem {
   model: string;
@@ -41,7 +32,7 @@ export class DiscountCalculator {
   /**
    * Create a DiscountCalculator for a specific organization.
    * Fetches discount rules from the organization's discounts JSONB column.
-   * Falls back to DEFAULT_DISCOUNTS if org has none configured.
+   * If org has no discounts configured, returns an empty discount list (no discounts applied).
    */
   static async forOrg(orgId: string): Promise<DiscountCalculator> {
     const result = await dbExecute<{ discounts: OrgDiscount[] | null }>(
@@ -49,12 +40,7 @@ export class DiscountCalculator {
       [orgId]
     );
 
-    const orgDiscounts = result.data?.[0]?.discounts;
-    // Use org's discounts if configured, otherwise fall back to defaults
-    const discounts: OrgDiscount[] =
-      orgDiscounts && orgDiscounts.length > 0
-        ? orgDiscounts
-        : DEFAULT_DISCOUNTS;
+    const discounts = result.data?.[0]?.discounts || [];
 
     return new DiscountCalculator(discounts);
   }

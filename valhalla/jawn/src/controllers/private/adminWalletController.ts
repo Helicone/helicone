@@ -17,16 +17,18 @@ import { err, ok, Result } from "../../packages/common/result";
 import { authCheckThrow } from "./adminController";
 import { ENVIRONMENT } from "../../lib/clients/constant";
 import { SettingsManager } from "../../utils/settings";
-import { dbExecute, dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { AdminWalletManager } from "../../managers/admin/AdminWalletManager";
 import { AdminWalletAnalyticsManager } from "../../managers/admin/AdminWalletAnalyticsManager";
 import { WalletState } from "../../types/wallet";
 import { WalletManager } from "../../managers/wallet/WalletManager";
-import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
-import Stripe from "stripe";
-import { SecretManager } from "@helicone-package/secrets/SecretManager";
-import { DiscountCalculator, OrgDiscount } from "../../utils/discountCalculator";
+import { OrgDiscount } from "../../utils/discountCalculator";
 import { CreditsManager, ModelSpend, PTBInvoice } from "../../managers/creditsManager";
+import {
+  InvoicingManager,
+  InvoiceSummary,
+  CreateInvoiceResponse,
+} from "../../managers/admin/InvoicingManager";
 
 interface DashboardData {
   organizations: Array<{
@@ -74,22 +76,6 @@ interface TimeSeriesDataPoint {
 interface TimeSeriesResponse {
   deposits: TimeSeriesDataPoint[];
   spend: TimeSeriesDataPoint[];
-}
-
-
-interface InvoiceSummary {
-  totalSpendCents: number;
-  totalInvoicedCents: number;
-  uninvoicedBalanceCents: number;
-  lastInvoiceEndDate: string | null;
-}
-
-interface CreateInvoiceResponse {
-  invoiceId: string;
-  hostedInvoiceUrl: string | null;
-  dashboardUrl: string; // Stripe dashboard URL for editing draft invoices
-  amountCents: number;
-  ptbInvoiceId: string;
 }
 
 @Route("v1/admin/wallet")
@@ -613,20 +599,8 @@ export class AdminWalletController extends Controller {
   ): Promise<Result<{ deleted: boolean }, string>> {
     await authCheckThrow(request.authParams.userId);
 
-    try {
-      const result = await dbExecute(
-        `DELETE FROM ptb_invoices WHERE id = $1 AND organization_id = $2`,
-        [invoiceId, orgId]
-      );
-
-      if (result.error) {
-        return err(`Error deleting invoice: ${result.error}`);
-      }
-
-      return ok({ deleted: true });
-    } catch (error: any) {
-      return err(`Error deleting invoice: ${error.message}`);
-    }
+    const manager = new InvoicingManager(orgId);
+    return manager.deleteInvoice(invoiceId);
   }
 
   /**
@@ -641,20 +615,8 @@ export class AdminWalletController extends Controller {
   ): Promise<Result<{ updated: boolean }, string>> {
     await authCheckThrow(request.authParams.userId);
 
-    try {
-      const result = await dbExecute(
-        `UPDATE ptb_invoices SET hosted_invoice_url = $1 WHERE id = $2 AND organization_id = $3`,
-        [body.hostedInvoiceUrl, invoiceId, orgId]
-      );
-
-      if (result.error) {
-        return err(`Error updating invoice: ${result.error}`);
-      }
-
-      return ok({ updated: true });
-    } catch (error: any) {
-      return err(`Error updating invoice: ${error.message}`);
-    }
+    const manager = new InvoicingManager(orgId);
+    return manager.updateInvoice(invoiceId, body.hostedInvoiceUrl);
   }
 
   /**
@@ -667,44 +629,12 @@ export class AdminWalletController extends Controller {
   ): Promise<Result<PTBInvoice[], string>> {
     await authCheckThrow(request.authParams.userId);
 
-    try {
-      const result = await dbExecute<{
-        id: string;
-        organization_id: string;
-        stripe_invoice_id: string | null;
-        hosted_invoice_url: string | null;
-        start_date: string;
-        end_date: string;
-        amount_cents: string;
-        notes: string | null;
-        created_at: string;
-      }>(
-        `SELECT id, organization_id, stripe_invoice_id, hosted_invoice_url,
-                start_date, end_date, amount_cents, notes, created_at
-         FROM ptb_invoices WHERE organization_id = $1 ORDER BY created_at DESC`,
-        [orgId]
-      );
+    const creditsManager = new CreditsManager({
+      organizationId: orgId,
+      userId: request.authParams.userId,
+    });
 
-      if (result.error) {
-        return err(`Error listing invoices: ${result.error}`);
-      }
-
-      const invoices: PTBInvoice[] = (result.data || []).map((row) => ({
-        id: row.id,
-        organizationId: row.organization_id,
-        stripeInvoiceId: row.stripe_invoice_id,
-        hostedInvoiceUrl: row.hosted_invoice_url,
-        startDate: row.start_date,
-        endDate: row.end_date,
-        amountCents: parseInt(row.amount_cents, 10),
-        notes: row.notes,
-        createdAt: row.created_at,
-      }));
-
-      return ok(invoices);
-    } catch (error: any) {
-      return err(`Error listing invoices: ${error.message}`);
-    }
+    return creditsManager.listInvoices();
   }
 
   /**
@@ -717,60 +647,8 @@ export class AdminWalletController extends Controller {
   ): Promise<Result<InvoiceSummary, string>> {
     await authCheckThrow(request.authParams.userId);
 
-    try {
-      // Get total PTB spend from ClickHouse (all time)
-      const spendQuery = `
-        SELECT sum(cost) / ${COST_PRECISION_MULTIPLIER} as total_cost
-        FROM request_response_rmt
-        WHERE organization_id = {val_0 : String}
-          AND is_passthrough_billing = true
-      `;
-
-      const spendResult = await dbQueryClickhouse<{ total_cost: string }>(
-        spendQuery,
-        [orgId]
-      );
-
-      if (spendResult.error) {
-        return err(`Error fetching spend: ${spendResult.error}`);
-      }
-
-      const totalSpendUsd = parseFloat(spendResult.data?.[0]?.total_cost || "0");
-      const totalSpendCents = Math.round(totalSpendUsd * 100);
-
-      // Get total invoiced from Postgres
-      const invoicedResult = await dbExecute<{
-        total_invoiced: string;
-        last_end_date: string | null;
-      }>(
-        `SELECT
-           COALESCE(SUM(amount_cents), 0) as total_invoiced,
-           MAX(end_date) as last_end_date
-         FROM ptb_invoices
-         WHERE organization_id = $1`,
-        [orgId]
-      );
-
-      if (invoicedResult.error) {
-        return err(`Error fetching invoiced amount: ${invoicedResult.error}`);
-      }
-
-      const totalInvoicedCents = parseInt(
-        invoicedResult.data?.[0]?.total_invoiced || "0",
-        10
-      );
-      const lastInvoiceEndDate =
-        invoicedResult.data?.[0]?.last_end_date || null;
-
-      return ok({
-        totalSpendCents,
-        totalInvoicedCents,
-        uninvoicedBalanceCents: totalSpendCents - totalInvoicedCents,
-        lastInvoiceEndDate,
-      });
-    } catch (error: any) {
-      return err(`Error fetching invoice summary: ${error.message}`);
-    }
+    const manager = new InvoicingManager(orgId);
+    return manager.getInvoiceSummary();
   }
 
   /**
@@ -797,178 +675,8 @@ export class AdminWalletController extends Controller {
       return err("Invalid date format");
     }
 
-    try {
-      // 1. Get org's Stripe customer ID
-      const orgResult = await dbExecute<{
-        stripe_customer_id: string | null;
-        name: string;
-      }>(
-        `SELECT stripe_customer_id, name FROM organization WHERE id = $1`,
-        [orgId]
-      );
-
-      if (orgResult.error || !orgResult.data?.[0]) {
-        return err("Organization not found");
-      }
-
-      const stripeCustomerId = orgResult.data[0].stripe_customer_id;
-      const orgName = orgResult.data[0].name;
-
-      if (!stripeCustomerId) {
-        return err("Organization does not have a Stripe customer ID");
-      }
-
-      // 2. Get spend breakdown for date range
-      const spendQuery = `
-        SELECT
-          model,
-          provider,
-          sum(prompt_tokens) as prompt_tokens,
-          sum(completion_tokens) as completion_tokens,
-          sum(cost) / ${COST_PRECISION_MULTIPLIER} as cost
-        FROM request_response_rmt
-        WHERE organization_id = {val_0 : String}
-          AND is_passthrough_billing = true
-          AND request_created_at >= {val_1 : DateTime64(3)}
-          AND request_created_at < {val_2 : DateTime64(3)}
-        GROUP BY model, provider
-        HAVING cost > 0
-        ORDER BY cost DESC
-      `;
-
-      const spendResult = await dbQueryClickhouse<{
-        model: string;
-        provider: string;
-        prompt_tokens: string;
-        completion_tokens: string;
-        cost: string;
-      }>(spendQuery, [orgId, start, end]);
-
-      if (spendResult.error) {
-        return err(`Error fetching spend data: ${spendResult.error}`);
-      }
-
-      if (!spendResult.data || spendResult.data.length === 0) {
-        return err(`No spend data found for ${start.toISOString()} to ${end.toISOString()}`);
-      }
-
-      // 3. Get discount calculator for this org
-      const discountCalculator = await DiscountCalculator.forOrg(orgId);
-
-      console.log(`Creating invoice for ${orgId}: ${spendResult.data.length} line items found`);
-
-      // 4. Initialize Stripe
-      const stripe = new Stripe(SecretManager.getSecret("STRIPE_SECRET_KEY")!, {
-        apiVersion: "2025-02-24.acacia",
-      });
-
-      // 5. Create the invoice FIRST (in draft mode) so we can attach items to it
-      const periodStart = start.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
-      const periodEnd = end.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
-
-      const invoice = await stripe.invoices.create({
-        customer: stripeCustomerId,
-        collection_method: "send_invoice",
-        days_until_due: body.daysUntilDue || 30,
-        description: `API Usage: ${periodStart} - ${periodEnd}`,
-        metadata: {
-          orgId,
-          startDate: start.toISOString(),
-          endDate: end.toISOString(),
-          type: "ptb_usage",
-        },
-        pending_invoice_items_behavior: "exclude", // Don't auto-include pending items
-      });
-
-      console.log(`Created draft invoice: ${invoice.id}`);
-
-      // 6. Create invoice items with discounts applied
-      const formatTokens = (tokens: number): string => {
-        if (tokens >= 1_000_000) return `${(tokens / 1_000_000).toFixed(2)}M`;
-        if (tokens >= 1_000) return `${(tokens / 1_000).toFixed(1)}K`;
-        return tokens.toLocaleString();
-      };
-
-      let totalAmountCents = 0;
-
-      for (const item of spendResult.data) {
-        const subtotalUsd = parseFloat(item.cost);
-        const discountPercent = discountCalculator.findDiscount(
-          item.model,
-          item.provider
-        );
-        const totalUsd = subtotalUsd * (1 - discountPercent / 100);
-        const amountCents = Math.round(totalUsd * 100);
-
-        console.log(`  Item: ${item.model} - subtotal: ${subtotalUsd}, discount: ${discountPercent}%, total: ${totalUsd}, amountCents: ${amountCents}`);
-
-        if (amountCents <= 0) continue;
-
-        totalAmountCents += amountCents;
-
-        const promptTokens = parseInt(item.prompt_tokens, 10) || 0;
-        const completionTokens = parseInt(item.completion_tokens, 10) || 0;
-
-        // Build description with discount info if applicable
-        const modelInfo = `${item.model || "unknown"} (${item.provider || "unknown"})`;
-        const discountInfo = discountPercent > 0 ? ` [${discountPercent}% discount]` : "";
-        const tokenInfo = `${formatTokens(promptTokens)} input, ${formatTokens(completionTokens)} output`;
-        const description = `${modelInfo}${discountInfo} - ${tokenInfo}`;
-
-        const invoiceItem = await stripe.invoiceItems.create({
-          customer: stripeCustomerId,
-          invoice: invoice.id, // Explicitly attach to this invoice
-          amount: amountCents,
-          currency: "usd",
-          description,
-        });
-
-        console.log(`  Created invoice item: ${invoiceItem.id} attached to ${invoice.id}`);
-      }
-
-      console.log(`Total amount: ${totalAmountCents} cents`);
-
-      // 6. Record in ptb_invoices
-      const ptbResult = await dbExecute<{ id: string }>(
-        `INSERT INTO ptb_invoices (organization_id, stripe_invoice_id, start_date, end_date, amount_cents, notes)
-         VALUES ($1, $2, $3, $4, $5, $6)
-         RETURNING id`,
-        [
-          orgId,
-          invoice.id,
-          start,
-          end,
-          totalAmountCents,
-          `Auto-created invoice for ${orgName}`,
-        ]
-      );
-
-      if (ptbResult.error) {
-        // Invoice was created but recording failed - log but don't fail
-        console.error("Failed to record invoice in ptb_invoices:", ptbResult.error);
-      }
-
-      // Build the Stripe dashboard URL for this invoice
-      const dashboardUrl = `https://dashboard.stripe.com/invoices/${invoice.id}`;
-
-      return ok({
-        invoiceId: invoice.id,
-        hostedInvoiceUrl: null, // Draft invoices don't have a hosted URL yet
-        dashboardUrl,
-        amountCents: totalAmountCents,
-        ptbInvoiceId: ptbResult.data?.[0]?.id || "",
-      });
-    } catch (error: any) {
-      return err(`Error creating invoice: ${error.message}`);
-    }
+    const manager = new InvoicingManager(orgId);
+    return manager.createInvoice(start, end, body.daysUntilDue);
   }
 
   /**
@@ -981,24 +689,12 @@ export class AdminWalletController extends Controller {
   ): Promise<Result<OrgDiscount[], string>> {
     await authCheckThrow(request.authParams.userId);
 
-    try {
-      const result = await dbExecute<{ discounts: OrgDiscount[] | null }>(
-        `SELECT discounts FROM organization WHERE id = $1`,
-        [orgId]
-      );
+    const creditsManager = new CreditsManager({
+      organizationId: orgId,
+      userId: request.authParams.userId,
+    });
 
-      if (result.error) {
-        return err(`Error fetching discounts: ${result.error}`);
-      }
-
-      if (!result.data || result.data.length === 0) {
-        return err("Organization not found");
-      }
-
-      return ok(result.data[0].discounts || []);
-    } catch (error: any) {
-      return err(`Error fetching discounts: ${error.message}`);
-    }
+    return creditsManager.getDiscounts();
   }
 
   /**
@@ -1012,30 +708,7 @@ export class AdminWalletController extends Controller {
   ): Promise<Result<OrgDiscount[], string>> {
     await authCheckThrow(request.authParams.userId);
 
-    try {
-      // Validate discounts
-      for (const discount of body.discounts) {
-        if (discount.percent < 0 || discount.percent > 100) {
-          return err("Discount percent must be between 0 and 100");
-        }
-      }
-
-      const result = await dbExecute<{ discounts: OrgDiscount[] }>(
-        `UPDATE organization SET discounts = $1 WHERE id = $2 RETURNING discounts`,
-        [JSON.stringify(body.discounts), orgId]
-      );
-
-      if (result.error) {
-        return err(`Error updating discounts: ${result.error}`);
-      }
-
-      if (!result.data || result.data.length === 0) {
-        return err("Organization not found");
-      }
-
-      return ok(result.data[0].discounts || []);
-    } catch (error: any) {
-      return err(`Error updating discounts: ${error.message}`);
-    }
+    const manager = new InvoicingManager(orgId);
+    return manager.updateDiscounts(body.discounts);
   }
 }
