@@ -291,7 +291,9 @@ export class AttemptExecutor {
 
       // If provider doesn't return Authorization header, remove the original one
       // This handles providers that use URL-based auth (like Google's native API)
-      if (!('Authorization' in authHeaders)) {
+      // Check both cases since headers can be lowercase or capitalized
+      const hasAuthHeader = 'Authorization' in authHeaders || 'authorization' in authHeaders;
+      if (!hasAuthHeader && endpoint.provider === "google-ai-studio") {
         requestWrapper.getHeaders().delete('Authorization');
       }
 
