@@ -83,8 +83,8 @@ export class VertexProvider extends BaseProvider {
     // Gemini models use Google's predict format; all others use rawPredict for native format
     const isStreaming = requestParams.isStreaming === true;
     const endpointMethod = isStreaming
-        ? "streamRawPredict"
-        : "rawPredict";
+      ? "streamRawPredict"
+      : "rawPredict";
 
     return `${baseEndpointUrl}:${endpointMethod}`;
   }
@@ -123,7 +123,7 @@ export class VertexProvider extends BaseProvider {
       const anthropicBody = context.toAnthropic(
         updatedBody,
         endpoint.providerModelId,
-        { includeCacheBreakpoints: false }
+        { includeCacheBreakpoints: true }
       );
 
       updatedBody = {
