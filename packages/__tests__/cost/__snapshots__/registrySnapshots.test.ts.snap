@@ -5768,7 +5768,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "groq": [
       {
         "audio": 0,
-        "image": 0,
         "input": 2.9e-7,
         "output": 5.9e-7,
         "request": 0,
@@ -6686,7 +6685,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "groq": [
       {
         "audio": 0,
-        "image": 0,
         "input": 7.5e-7,
         "output": 9.9e-7,
         "request": 0,
@@ -6711,7 +6709,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
           "write5m": 1,
         },
         "cacheStoragePerHour": 0.000001,
-        "image": 0.001238,
         "input": 3e-7,
         "output": 0.0000025,
         "threshold": 0,
@@ -6732,7 +6729,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
           "write5m": 1,
         },
         "cacheStoragePerHour": 0.000001,
-        "image": 0.001238,
         "input": 3e-7,
         "output": 0.0000025,
         "threshold": 0,
@@ -6908,7 +6904,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "groq": [
       {
         "audio": 0,
-        "image": 0,
         "input": 1e-8,
         "output": 1e-8,
         "request": 0,
@@ -6993,7 +6988,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "cacheMultipliers": {
           "cachedInput": 0.5,
         },
-        "image": 0,
         "input": 0.000001,
         "output": 0.000003,
         "request": 0,
@@ -7273,7 +7267,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "deepinfra": [
       {
         "audio": 0,
-        "image": 0,
         "input": 4e-8,
         "output": 1.6e-7,
         "request": 0,
@@ -7284,7 +7277,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "groq": [
       {
         "audio": 0,
-        "image": 0,
         "input": 1e-7,
         "output": 5e-7,
         "request": 0,
@@ -7313,7 +7305,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "perplexity": [
       {
         "audio": 0,
-        "image": 0,
         "input": 0.000002,
         "output": 0.000008,
         "request": 0,
@@ -7329,7 +7320,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "cacheMultipliers": {
           "cachedInput": 0.25,
         },
-        "image": 0,
         "input": 3e-7,
         "output": 5e-7,
         "request": 0,
@@ -7350,7 +7340,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "cacheMultipliers": {
           "cachedInput": 0.25,
         },
-        "image": 0,
         "input": 3e-7,
         "output": 5e-7,
         "request": 0,
