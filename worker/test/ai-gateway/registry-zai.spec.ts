@@ -10,6 +10,7 @@ const novitaAuthExpectations = {
   }
 };
 
+// Define auth expectations for Canopy Wave provider
 const canopywaveAuthExpectations = {
   headers: {
     Authorization: /^Bearer /,
