@@ -5254,7 +5254,7 @@ describe("Alibaba Registry Tests", () => {
     describe("qwen3-coder-480b-a35b-instruct-fp8 Advanced scenarios", () => {
       it("should handle custom headers and body mapping", () =>
         runGatewayTest({
-          model: "qwen-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
           request: {
             messages: [{ role: "user", content: "Test with custom mapping" }],
             headers: {
