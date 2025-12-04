@@ -54,6 +54,7 @@ import {
   ExternalLink,
   Loader2,
   Pencil,
+  Plus,
   Search,
   Trash2,
   TrendingUp,
@@ -135,6 +136,13 @@ export default function AdminWallet() {
 
   // Hosted URL editing state - tracks pending edits before save
   const [editingHostedUrl, setEditingHostedUrl] = useState<{ invoiceId: string; url: string } | null>(null);
+
+  // Discount editing state
+  const [newDiscountProvider, setNewDiscountProvider] = useState("");
+  const [newDiscountModel, setNewDiscountModel] = useState("");
+  const [newDiscountPercent, setNewDiscountPercent] = useState("");
+  const [discountError, setDiscountError] = useState<string | null>(null);
+  const [discountSuccess, setDiscountSuccess] = useState<string | null>(null);
 
   // Time-series granularity state (default: day)
   const [groupBy, setGroupBy] = useState<
@@ -304,6 +312,27 @@ export default function AdminWallet() {
   const updateInvoiceMutation = $JAWN_API.useMutation(
     "post",
     "/v1/admin/wallet/{orgId}/invoices/{invoiceId}/update",
+  );
+
+  // Discount queries and mutations
+  const {
+    data: discountsListResponse,
+    refetch: refetchDiscountsList,
+    isLoading: discountsListLoading,
+  } = $JAWN_API.useQuery(
+    "post",
+    "/v1/admin/wallet/{orgId}/discounts/list",
+    {
+      params: {
+        path: { orgId: selectedOrg || "" },
+      },
+    },
+    { enabled: !!selectedOrg, retry: false },
+  );
+
+  const updateDiscountsMutation = $JAWN_API.useMutation(
+    "post",
+    "/v1/admin/wallet/{orgId}/discounts/update",
   );
 
   // Fetch table data (lazy loaded when table is selected)
@@ -678,6 +707,81 @@ export default function AdminWallet() {
   const invoiceSummary = (invoiceSummaryResponse as any)?.data;
   const invoicesList = (invoicesListResponse as any)?.data || [];
   const spendBreakdown = (spendBreakdownResponse as any)?.data || [];
+  const discountsList: Array<{ provider: string | null; model: string | null; percent: number }> = (discountsListResponse as any)?.data || [];
+
+  const handleAddDiscount = async () => {
+    if (!selectedOrg) return;
+
+    setDiscountError(null);
+    setDiscountSuccess(null);
+
+    const percent = parseInt(newDiscountPercent);
+    if (isNaN(percent) || percent <= 0 || percent > 100) {
+      setDiscountError("Discount percent must be between 1 and 100");
+      return;
+    }
+
+    const newDiscount = {
+      provider: newDiscountProvider.trim() || null,
+      model: newDiscountModel.trim() || null,
+      percent,
+    };
+
+    try {
+      const updatedDiscounts = [...discountsList, newDiscount];
+      const result = await updateDiscountsMutation.mutateAsync({
+        params: {
+          path: { orgId: selectedOrg },
+        },
+        body: {
+          discounts: updatedDiscounts,
+        },
+      });
+
+      if (result.error) {
+        setDiscountError(result.error);
+      } else {
+        setDiscountSuccess("Discount added");
+        setNewDiscountProvider("");
+        setNewDiscountModel("");
+        setNewDiscountPercent("");
+        await refetchDiscountsList();
+        // Clear success after 2 seconds
+        setTimeout(() => setDiscountSuccess(null), 2000);
+      }
+    } catch (error) {
+      setDiscountError(error instanceof Error ? error.message : "Failed to add discount");
+    }
+  };
+
+  const handleDeleteDiscount = async (index: number) => {
+    if (!selectedOrg) return;
+
+    setDiscountError(null);
+    setDiscountSuccess(null);
+
+    try {
+      const updatedDiscounts = discountsList.filter((_, i) => i !== index);
+      const result = await updateDiscountsMutation.mutateAsync({
+        params: {
+          path: { orgId: selectedOrg },
+        },
+        body: {
+          discounts: updatedDiscounts,
+        },
+      });
+
+      if (result.error) {
+        setDiscountError(result.error);
+      } else {
+        setDiscountSuccess("Discount removed");
+        await refetchDiscountsList();
+        setTimeout(() => setDiscountSuccess(null), 2000);
+      }
+    } catch (error) {
+      setDiscountError(error instanceof Error ? error.message : "Failed to remove discount");
+    }
+  };
 
   return (
     <div className="flex h-screen flex-col overflow-hidden p-6">
@@ -1052,6 +1156,7 @@ export default function AdminWallet() {
                               <TabsList className="mb-4">
                                 <TabsTrigger value="wallet">Wallet</TabsTrigger>
                                 <TabsTrigger value="invoicing">Invoicing</TabsTrigger>
+                                <TabsTrigger value="discounts">Discounts</TabsTrigger>
                                 <TabsTrigger value="disallow">Disallow List</TabsTrigger>
                               </TabsList>
 
@@ -1505,6 +1610,115 @@ export default function AdminWallet() {
                                 </div>
                                   </>
                                 )}
+                              </div>
+                              </TabsContent>
+
+                              <TabsContent value="discounts" className="flex flex-col gap-4 mt-0">
+                              {/* Discounts */}
+                              <div className="flex flex-col gap-3">
+                                <H4>Discount Rules</H4>
+                                <Small className="text-muted-foreground">
+                                  Configure per-model discount percentages. Rules are evaluated in order; first match wins. Use regex patterns: gpt.* (starts with gpt), .*turbo.* (contains turbo).
+                                </Small>
+
+                                {/* Current Discounts */}
+                                {discountsListLoading ? (
+                                  <div className="flex items-center gap-2">
+                                    <Loader2 size={14} className="animate-spin" />
+                                    <Small>Loading discounts...</Small>
+                                  </div>
+                                ) : discountsList.length > 0 ? (
+                                  <div className="max-h-48 overflow-auto rounded border">
+                                    <table className="w-full text-sm">
+                                      <thead className="sticky top-0 bg-muted">
+                                        <tr>
+                                          <th className="p-2 text-left">Provider</th>
+                                          <th className="p-2 text-left">Model Pattern</th>
+                                          <th className="p-2 text-right">Discount %</th>
+                                          <th className="w-12 p-2"></th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {discountsList.map((discount, idx) => (
+                                          <tr key={idx} className="border-t">
+                                            <td className="p-2">{discount.provider || "(any)"}</td>
+                                            <td className="p-2 font-mono text-xs">{discount.model || "(any)"}</td>
+                                            <td className="p-2 text-right font-mono text-green-600">{discount.percent}%</td>
+                                            <td className="p-2">
+                                              <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-6 w-6 p-0"
+                                                onClick={() => handleDeleteDiscount(idx)}
+                                                disabled={updateDiscountsMutation.isPending}
+                                              >
+                                                <Trash2 size={14} className="text-destructive" />
+                                              </Button>
+                                            </td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                ) : (
+                                  <div className="border border-dashed p-4 text-center text-sm text-muted-foreground">
+                                    No discount rules configured. Default discounts will apply.
+                                  </div>
+                                )}
+
+                                {/* Add Discount Form */}
+                                <div className="flex flex-col gap-2 rounded-md border p-3">
+                                  <Small className="font-semibold">Add Discount Rule</Small>
+                                  <div className="flex items-end gap-2">
+                                    <div className="flex flex-col gap-1">
+                                      <Small className="text-muted-foreground">Provider</Small>
+                                      <Input
+                                        placeholder="helicone"
+                                        value={newDiscountProvider}
+                                        onChange={(e) => setNewDiscountProvider(e.target.value)}
+                                        className="h-8 w-32"
+                                      />
+                                    </div>
+                                    <div className="flex flex-1 flex-col gap-1">
+                                      <Small className="text-muted-foreground">Model Regex</Small>
+                                      <Input
+                                        placeholder="gpt.*"
+                                        value={newDiscountModel}
+                                        onChange={(e) => setNewDiscountModel(e.target.value)}
+                                        className="h-8"
+                                      />
+                                    </div>
+                                    <div className="flex flex-col gap-1">
+                                      <Small className="text-muted-foreground">Discount</Small>
+                                      <div className="flex items-center gap-1">
+                                        <Input
+                                          type="number"
+                                          min="1"
+                                          max="100"
+                                          placeholder="10"
+                                          value={newDiscountPercent}
+                                          onChange={(e) => setNewDiscountPercent(e.target.value)}
+                                          className="h-8 w-16"
+                                        />
+                                        <span className="text-muted-foreground">%</span>
+                                      </div>
+                                    </div>
+                                    <Button
+                                      size="sm"
+                                      onClick={handleAddDiscount}
+                                      disabled={updateDiscountsMutation.isPending || !newDiscountPercent}
+                                      className="h-8"
+                                    >
+                                      {updateDiscountsMutation.isPending ? (
+                                        <Loader2 size={14} className="animate-spin" />
+                                      ) : (
+                                        "Add"
+                                      )}
+                                    </Button>
+                                  </div>
+                                  {discountError && <Small className="text-red-600">{discountError}</Small>}
+                                  {discountSuccess && <Small className="text-green-600">{discountSuccess}</Small>}
+                                </div>
                               </div>
                               </TabsContent>
 

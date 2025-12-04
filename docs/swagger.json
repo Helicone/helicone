@@ -12563,6 +12563,62 @@
 					}
 				]
 			},
+			"OrgDiscount": {
+				"properties": {
+					"provider": {
+						"type": "string",
+						"nullable": true
+					},
+					"model": {
+						"type": "string",
+						"nullable": true
+					},
+					"percent": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"provider",
+					"model",
+					"percent"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_OrgDiscount-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/OrgDiscount"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_OrgDiscount-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_OrgDiscount-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"ResultSuccess__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array_": {
 				"properties": {
 					"data": {
@@ -22808,6 +22864,32 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/Result_PTBInvoice-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Credits"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/credits/discounts": {
+			"get": {
+				"operationId": "GetDiscounts",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_OrgDiscount-Array.string_"
 								}
 							}
 						}

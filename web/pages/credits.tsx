@@ -32,9 +32,11 @@ import { useAutoTopoffSettings } from "@/services/hooks/useAutoTopoff";
 import {
   useCredits,
   useCreditTransactions,
+  useDiscounts,
   useInvoices,
   useSpendBreakdown,
   type ModelSpend,
+  type OrgDiscount,
   type PurchasedCredits,
 } from "@/services/hooks/useCredits";
 import { formatDate } from "@/utils/date";
@@ -126,6 +128,9 @@ const Credits: NextPageWithLayout<void> = () => {
     refetch: refetchInvoices,
   } = useInvoices();
 
+  // Fetch discount rules
+  const { data: discounts, isLoading: discountsLoading } = useDiscounts();
+
   // Auto-open auto top-up modal when returning from Stripe setup
   useEffect(() => {
     if (router.query.setup === "success") {
@@ -193,11 +198,6 @@ const Credits: NextPageWithLayout<void> = () => {
     });
   };
 
-  const formatDiscount = (percent: number) => {
-    if (percent === 0) return "-";
-    return `-${percent}%`;
-  };
-
   const SortableHeader = ({
     field,
     children,
@@ -255,7 +255,12 @@ const Credits: NextPageWithLayout<void> = () => {
               <TabsList>
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="usage">Usage</TabsTrigger>
-                <TabsTrigger value="invoices">Invoices</TabsTrigger>
+                {invoices.length > 0 && (
+                  <TabsTrigger value="invoices">Invoices</TabsTrigger>
+                )}
+                {discounts.length > 0 && (
+                  <TabsTrigger value="discounts">Discounts</TabsTrigger>
+                )}
               </TabsList>
             </div>
 
@@ -526,6 +531,7 @@ const Credits: NextPageWithLayout<void> = () => {
                     )}
                   </CardContent>
                 </Card>
+
               </div>
             </TabsContent>
 
@@ -573,9 +579,7 @@ const Credits: NextPageWithLayout<void> = () => {
                         <SortableHeader field="outputTokens" align="right">Output Tokens</SortableHeader>
                         <TableHead className="text-right">Input $/1M</TableHead>
                         <TableHead className="text-right">Output $/1M</TableHead>
-                        <TableHead className="text-right">Subtotal</TableHead>
-                        <TableHead className="text-right">Discount</TableHead>
-                        <SortableHeader field="total" align="right">Total</SortableHeader>
+                        <SortableHeader field="total" align="right">Cost</SortableHeader>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -587,8 +591,6 @@ const Credits: NextPageWithLayout<void> = () => {
                           <TableCell className="text-right font-mono">{formatTokens(item.completionTokens)}</TableCell>
                           <TableCell className="text-right font-mono text-muted-foreground">{formatPrice(item.pricing?.inputPer1M)}</TableCell>
                           <TableCell className="text-right font-mono text-muted-foreground">{formatPrice(item.pricing?.outputPer1M)}</TableCell>
-                          <TableCell className="text-right font-mono text-muted-foreground">{formatCost(item.subtotal)}</TableCell>
-                          <TableCell className="text-right font-mono text-green-600">{formatDiscount(item.discountPercent)}</TableCell>
                           <TableCell className="text-right font-mono font-semibold">{formatCost(item.total)}</TableCell>
                         </TableRow>
                       ))}
@@ -598,22 +600,10 @@ const Credits: NextPageWithLayout<void> = () => {
               </div>
             </TabsContent>
 
-            {/* Invoices Tab */}
-            <TabsContent value="invoices" className="flex min-h-0 flex-col mt-0 data-[state=inactive]:hidden">
-              <div className="flex-1 overflow-auto">
-                {invoicesLoading ? (
-                  <div className="flex h-full items-center justify-center">
-                    <span className="text-muted-foreground">Loading invoices...</span>
-                  </div>
-                ) : invoicesError ? (
-                  <div className="flex h-full items-center justify-center">
-                    <span className="text-destructive">Error loading invoices</span>
-                  </div>
-                ) : invoices.length === 0 ? (
-                  <div className="flex h-full items-center justify-center">
-                    <span className="text-muted-foreground">No invoices yet</span>
-                  </div>
-                ) : (
+            {/* Invoices Tab (only shown when invoices exist) */}
+            {invoices.length > 0 && (
+              <TabsContent value="invoices" className="flex min-h-0 flex-col mt-0 data-[state=inactive]:hidden">
+                <div className="flex-1 overflow-auto">
                   <Table>
                     <TableHeader className="sticky top-0 bg-background">
                       <TableRow className="border-b">
@@ -653,9 +643,42 @@ const Credits: NextPageWithLayout<void> = () => {
                       ))}
                     </TableBody>
                   </Table>
-                )}
-              </div>
-            </TabsContent>
+                </div>
+              </TabsContent>
+            )}
+
+            {/* Discounts Tab (only shown when discounts exist) */}
+            {discounts.length > 0 && (
+              <TabsContent value="discounts" className="flex min-h-0 flex-col mt-0 data-[state=inactive]:hidden">
+                <div className="border-b px-6 py-3">
+                  <Muted>These discounts will be applied to your future invoices.</Muted>
+                </div>
+                <div className="flex-1 overflow-auto">
+                  <Table>
+                    <TableHeader className="sticky top-0 bg-background">
+                      <TableRow className="border-b">
+                        <TableHead>Provider</TableHead>
+                        <TableHead>Model Pattern</TableHead>
+                        <TableHead className="text-right">Discount</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {discounts.map((discount, idx) => (
+                        <TableRow key={idx}>
+                          <TableCell className="font-medium">{discount.provider || "(any)"}</TableCell>
+                          <TableCell className="font-mono text-sm text-muted-foreground">
+                            {discount.model || "(any)"}
+                          </TableCell>
+                          <TableCell className="text-right font-mono font-semibold text-green-600">
+                            {discount.percent}% off
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </TabsContent>
+            )}
           </Tabs>
         </div>
       </div>

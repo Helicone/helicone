@@ -11,7 +11,7 @@ import { isError, resultMap } from "../packages/common/result";
 import { BaseManager } from "./BaseManager";
 import { WalletManager } from "./wallet/WalletManager";
 import { dbExecute, dbQueryClickhouse } from "../lib/shared/db/dbExecute";
-import { DiscountCalculator } from "../utils/discountCalculator";
+import { OrgDiscount } from "../utils/discountCalculator";
 
 export interface PTBInvoice {
   id: string;
@@ -158,18 +158,13 @@ export class CreditsManager extends BaseManager {
 
   /**
    * Get spend breakdown for a custom date range.
-   * Used by admin invoicing to get spend for specific billing periods.
+   * Shows raw costs without discounts - discounts are only applied during invoice creation.
    */
   public async getSpendBreakdownByDateRange(
     startDate: Date,
     endDate: Date
   ): Promise<Result<SpendBreakdownResponse, string>> {
     try {
-      // Get discount calculator for this org
-      const discountCalculator = await DiscountCalculator.forOrg(
-        this.authParams.organizationId
-      );
-
       const query = `
         SELECT
           model,
@@ -219,11 +214,9 @@ export class CreditsManager extends BaseManager {
         }
 
         const subtotal = parseFloat(row.cost);
-        const discountPercent = discountCalculator.findDiscount(
-          row.model,
-          row.provider
-        );
-        const total = subtotal * (1 - discountPercent / 100);
+        // No discounts for customer-facing view - discounts only applied during invoice creation
+        const discountPercent = 0;
+        const total = subtotal;
 
         return {
           model: row.model,
@@ -295,6 +288,30 @@ export class CreditsManager extends BaseManager {
       return ok(invoices);
     } catch (error: any) {
       return err(`Error listing invoices: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get discount rules configured for this organization.
+   */
+  public async getDiscounts(): Promise<Result<OrgDiscount[], string>> {
+    try {
+      const result = await dbExecute<{ discounts: OrgDiscount[] | null }>(
+        `SELECT discounts FROM organization WHERE id = $1`,
+        [this.authParams.organizationId]
+      );
+
+      if (result.error) {
+        return err(`Error fetching discounts: ${result.error}`);
+      }
+
+      if (!result.data || result.data.length === 0) {
+        return ok([]);
+      }
+
+      return ok(result.data[0].discounts || []);
+    } catch (error: any) {
+      return err(`Error fetching discounts: ${error.message}`);
     }
   }
 }

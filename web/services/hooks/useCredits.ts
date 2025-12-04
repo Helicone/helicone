@@ -231,3 +231,29 @@ export const useInvoices = () => {
     data: (result.data?.data as PTBInvoice[] | undefined) ?? [],
   };
 };
+
+// Types for discounts
+export interface OrgDiscount {
+  provider: string | null;
+  model: string | null;
+  percent: number;
+}
+
+// A hook for fetching discount rules for the current org
+export const useDiscounts = () => {
+  const org = useOrg();
+
+  const result = $JAWN_API.useQuery(
+    "get",
+    "/v1/credits/discounts",
+    {},
+    {
+      enabled: !!org?.currentOrg?.id,
+    }
+  );
+
+  return {
+    ...result,
+    data: (result.data?.data as OrgDiscount[] | undefined) ?? [],
+  };
+};

@@ -3,7 +3,7 @@ import { dbExecute } from "../lib/shared/db/dbExecute";
 // Discount rule stored in organization.discounts JSONB
 export interface OrgDiscount {
   provider: string | null; // null = all providers
-  model: string | null; // null = all models, supports wildcards like "gpt-%"
+  model: string | null; // null = all models, supports regex like "gpt.*"
   percent: number; // e.g., 10 = 10% off
 }
 
@@ -12,9 +12,9 @@ export interface OrgDiscount {
  * TODO: Remove once all orgs have discounts configured in DB.
  */
 const DEFAULT_DISCOUNTS: OrgDiscount[] = [
-  { provider: "helicone", model: "gpt%", percent: 10 },
-  { provider: "helicone", model: "claude-%", percent: 15 },
-  { provider: "helicone", model: "grok-%", percent: 5 },
+  { provider: "helicone", model: "gpt.*", percent: 10 },
+  { provider: "helicone", model: "claude-.*", percent: 15 },
+  { provider: "helicone", model: "grok-.*", percent: 5 },
 ];
 
 export interface SpendItem {
@@ -60,19 +60,20 @@ export class DiscountCalculator {
   }
 
   /**
-   * Check if a model matches a pattern (supports SQL LIKE-style % wildcards)
+   * Check if a model matches a regex pattern.
    * Examples:
-   *   - "gpt%" matches "gpt-4", "gpt-4o", "gpt-3.5-turbo"
-   *   - "claude-%" matches "claude-3.5-sonnet", "claude-3-opus"
+   *   - "gpt.*" matches "gpt-4", "gpt-4o", "gpt-3.5-turbo"
+   *   - "claude-3.*" matches "claude-3.5-sonnet", "claude-3-opus"
    *   - null matches everything
    */
   matchesPattern(value: string, pattern: string | null): boolean {
     if (pattern === null) return true; // null matches everything
-    // Convert SQL LIKE pattern to regex
-    const regexPattern = pattern
-      .replace(/[.+?^${}()|[\]\\]/g, "\\$&") // Escape regex special chars except %
-      .replace(/%/g, ".*"); // Convert % to .*
-    return new RegExp(`^${regexPattern}$`, "i").test(value);
+    try {
+      return new RegExp(pattern, "i").test(value);
+    } catch {
+      // Invalid regex, fall back to exact match
+      return value.toLowerCase() === pattern.toLowerCase();
+    }
   }
 
   /**

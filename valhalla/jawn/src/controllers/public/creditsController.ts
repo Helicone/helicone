@@ -7,6 +7,7 @@ import {
   SpendBreakdownResponse,
 } from "../../managers/creditsManager";
 import { err, isError, ok, Result } from "../../packages/common/result";
+import { OrgDiscount } from "../../utils/discountCalculator";
 
 export interface PurchasedCredits {
   id: string;
@@ -135,6 +136,21 @@ export class CreditsController extends Controller {
   ): Promise<Result<PTBInvoice[], string>> {
     const creditsManager = new CreditsManager(request.authParams);
     const result = await creditsManager.listInvoices();
+
+    if (isError(result)) {
+      this.setStatus(400);
+      return err(result.error);
+    }
+
+    return ok(result.data);
+  }
+
+  @Get("/discounts")
+  public async getDiscounts(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<OrgDiscount[], string>> {
+    const creditsManager = new CreditsManager(request.authParams);
+    const result = await creditsManager.getDiscounts();
 
     if (isError(result)) {
       this.setStatus(400);

@@ -25,7 +25,7 @@ import { WalletManager } from "../../managers/wallet/WalletManager";
 import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 import Stripe from "stripe";
 import { SecretManager } from "@helicone-package/secrets/SecretManager";
-import { DiscountCalculator } from "../../utils/discountCalculator";
+import { DiscountCalculator, OrgDiscount } from "../../utils/discountCalculator";
 import { CreditsManager, ModelSpend, PTBInvoice } from "../../managers/creditsManager";
 
 interface DashboardData {
@@ -968,6 +968,74 @@ export class AdminWalletController extends Controller {
       });
     } catch (error: any) {
       return err(`Error creating invoice: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get discount rules for an organization.
+   */
+  @Post("/{orgId}/discounts/list")
+  public async listDiscounts(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string
+  ): Promise<Result<OrgDiscount[], string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    try {
+      const result = await dbExecute<{ discounts: OrgDiscount[] | null }>(
+        `SELECT discounts FROM organization WHERE id = $1`,
+        [orgId]
+      );
+
+      if (result.error) {
+        return err(`Error fetching discounts: ${result.error}`);
+      }
+
+      if (!result.data || result.data.length === 0) {
+        return err("Organization not found");
+      }
+
+      return ok(result.data[0].discounts || []);
+    } catch (error: any) {
+      return err(`Error fetching discounts: ${error.message}`);
+    }
+  }
+
+  /**
+   * Update discount rules for an organization.
+   */
+  @Post("/{orgId}/discounts/update")
+  public async updateDiscounts(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string,
+    @Body() body: { discounts: OrgDiscount[] }
+  ): Promise<Result<OrgDiscount[], string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    try {
+      // Validate discounts
+      for (const discount of body.discounts) {
+        if (discount.percent < 0 || discount.percent > 100) {
+          return err("Discount percent must be between 0 and 100");
+        }
+      }
+
+      const result = await dbExecute<{ discounts: OrgDiscount[] }>(
+        `UPDATE organization SET discounts = $1 WHERE id = $2 RETURNING discounts`,
+        [JSON.stringify(body.discounts), orgId]
+      );
+
+      if (result.error) {
+        return err(`Error updating discounts: ${result.error}`);
+      }
+
+      if (!result.data || result.data.length === 0) {
+        return err("Organization not found");
+      }
+
+      return ok(result.data[0].discounts || []);
+    } catch (error: any) {
+      return err(`Error updating discounts: ${error.message}`);
     }
   }
 }

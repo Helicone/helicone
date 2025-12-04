@@ -701,6 +701,9 @@ export interface paths {
   "/v1/credits/invoices": {
     get: operations["ListInvoices"];
   };
+  "/v1/credits/discounts": {
+    get: operations["GetDiscounts"];
+  };
   "/v1/public/alert-banner": {
     get: operations["GetAlertBanners"];
     patch: operations["UpdateAlertBannerActive"];
@@ -4140,6 +4143,18 @@ Json: JsonObject;
       error: null;
     };
     "Result_PTBInvoice-Array.string_": components["schemas"]["ResultSuccess_PTBInvoice-Array_"] | components["schemas"]["ResultError_string_"];
+    OrgDiscount: {
+      provider: string | null;
+      model: string | null;
+      /** Format: double */
+      percent: number;
+    };
+    "ResultSuccess_OrgDiscount-Array_": {
+      data: components["schemas"]["OrgDiscount"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_OrgDiscount-Array.string_": components["schemas"]["ResultSuccess_OrgDiscount-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array_": {
       data: {
           updated_at: string;
@@ -8089,6 +8104,16 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_PTBInvoice-Array.string_"];
+        };
+      };
+    };
+  };
+  GetDiscounts: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_OrgDiscount-Array.string_"];
         };
       };
     };

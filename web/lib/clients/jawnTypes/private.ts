@@ -658,6 +658,9 @@ export interface paths {
   "/v1/credits/invoices": {
     get: operations["ListInvoices"];
   };
+  "/v1/credits/discounts": {
+    get: operations["GetDiscounts"];
+  };
   "/v1/admin/wallet/gateway/dashboard_data": {
     post: operations["GetGatewayDashboardData"];
   };
@@ -708,6 +711,14 @@ export interface paths {
      * This creates line items in Stripe for each model/provider combo.
      */
     post: operations["CreateInvoice"];
+  };
+  "/v1/admin/wallet/{orgId}/discounts/list": {
+    /** @description Get discount rules for an organization. */
+    post: operations["ListDiscounts"];
+  };
+  "/v1/admin/wallet/{orgId}/discounts/update": {
+    /** @description Update discount rules for an organization. */
+    post: operations["UpdateDiscounts"];
   };
   "/v1/audio/convert-to-wav": {
     post: operations["ConvertToWav"];
@@ -16408,6 +16419,18 @@ Json: JsonObject;
       error: null;
     };
     "Result_PTBInvoice-Array.string_": components["schemas"]["ResultSuccess_PTBInvoice-Array_"] | components["schemas"]["ResultError_string_"];
+    OrgDiscount: {
+      provider: string | null;
+      model: string | null;
+      /** Format: double */
+      percent: number;
+    };
+    "ResultSuccess_OrgDiscount-Array_": {
+      data: components["schemas"]["OrgDiscount"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_OrgDiscount-Array.string_": components["schemas"]["ResultSuccess_OrgDiscount-Array_"] | components["schemas"]["ResultError_string_"];
     DashboardData: {
       organizations: ({
           /** Format: double */
@@ -20528,6 +20551,16 @@ export interface operations {
       };
     };
   };
+  GetDiscounts: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_OrgDiscount-Array.string_"];
+        };
+      };
+    };
+  };
   GetGatewayDashboardData: {
     parameters: {
       query?: {
@@ -20762,6 +20795,45 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_CreateInvoiceResponse.string_"];
+        };
+      };
+    };
+  };
+  /** @description Get discount rules for an organization. */
+  ListDiscounts: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_OrgDiscount-Array.string_"];
+        };
+      };
+    };
+  };
+  /** @description Update discount rules for an organization. */
+  UpdateDiscounts: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          discounts: components["schemas"]["OrgDiscount"][];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_OrgDiscount-Array.string_"];
         };
       };
     };
