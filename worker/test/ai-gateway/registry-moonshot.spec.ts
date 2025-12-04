@@ -2744,7 +2744,7 @@ describe("Moonshot AI Registry Tests", () => {
           },
         }));
 
-      it("should handle all supported parameters with fireworks provider", () =>
+      it("should handle all supported parameters with canopy wave provider", () =>
         runGatewayTest({
           model: "kimi-k2-thinking/canopywave",
           request: {
