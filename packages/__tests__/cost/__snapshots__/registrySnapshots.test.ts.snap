@@ -4578,21 +4578,18 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
   },
   "openai/oss": {
     "gpt-oss-120b:baseten": {
-      "context": 131072,
+      "context": 128072,
       "crossRegion": false,
-      "maxTokens": 131072,
+      "maxTokens": 128072,
       "modelId": "openai/gpt-oss-120b",
       "parameters": [
-        "frequency_penalty",
         "max_tokens",
-        "presence_penalty",
         "response_format",
         "stop",
         "structured_outputs",
         "temperature",
         "tool_choice",
         "tools",
-        "top_p",
       ],
       "provider": "baseten",
       "ptbEnabled": true,
