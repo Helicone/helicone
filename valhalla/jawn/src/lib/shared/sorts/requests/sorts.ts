@@ -121,43 +121,54 @@ export function buildRequestSortClickhouse(sort: SortLeafRequest): string {
   }
   if (sort.latency) {
     assertValidSortDirection(sort.latency);
-    return `toInt32(request_response_rmt.latency) ${sort.latency}`;
+    // Use NULLS LAST to ensure NULL latencies are sorted to the end regardless of direction
+    // Add secondary sort by request_created_at for stable ordering when latencies are equal
+    return `request_response_rmt.latency ${sort.latency} NULLS LAST, request_response_rmt.request_created_at DESC`;
   }
   if (sort.total_tokens) {
     assertValidSortDirection(sort.total_tokens);
-    return `(request_response_rmt.prompt_tokens + request_response_rmt.completion_tokens) ${sort.total_tokens}`;
+    // Add secondary sort for stable ordering
+    return `(request_response_rmt.prompt_tokens + request_response_rmt.completion_tokens) ${sort.total_tokens}, request_response_rmt.request_created_at DESC`;
   }
   if (sort.completion_tokens) {
     assertValidSortDirection(sort.completion_tokens);
-    return `request_response_rmt.completion_tokens ${sort.completion_tokens}`;
+    // Add secondary sort for stable ordering
+    return `request_response_rmt.completion_tokens ${sort.completion_tokens} NULLS LAST, request_response_rmt.request_created_at DESC`;
   }
   if (sort.prompt_tokens) {
     assertValidSortDirection(sort.prompt_tokens);
-    return `request_response_rmt.prompt_tokens ${sort.prompt_tokens}`;
+    // Add secondary sort for stable ordering
+    return `request_response_rmt.prompt_tokens ${sort.prompt_tokens} NULLS LAST, request_response_rmt.request_created_at DESC`;
   }
   if (sort.user_id) {
     assertValidSortDirection(sort.user_id);
-    return `request_response_rmt.user_id ${sort.user_id}`;
+    // Add secondary sort for stable ordering
+    return `request_response_rmt.user_id ${sort.user_id}, request_response_rmt.request_created_at DESC`;
   }
   if (sort.body_model) {
     assertValidSortDirection(sort.body_model);
-    return `request_response_rmt.model ${sort.body_model}`;
+    // Add secondary sort for stable ordering
+    return `request_response_rmt.model ${sort.body_model}, request_response_rmt.request_created_at DESC`;
   }
   if (sort.is_cached) {
     assertValidSortDirection(sort.is_cached);
-    return `request_response_rmt.is_cached ${sort.is_cached}`;
+    // Add secondary sort for stable ordering
+    return `request_response_rmt.is_cached ${sort.is_cached}, request_response_rmt.request_created_at DESC`;
   }
   if (sort.request_prompt) {
     assertValidSortDirection(sort.request_prompt);
-    return `JSONExtractString(request_response_rmt.request_body, 'prompt') ${sort.request_prompt}`;
+    // Add secondary sort for stable ordering
+    return `JSONExtractString(request_response_rmt.request_body, 'prompt') ${sort.request_prompt}, request_response_rmt.request_created_at DESC`;
   }
   if (sort.response_text) {
     assertValidSortDirection(sort.response_text);
-    return `JSONExtractString(request_response_rmt.response_body, 'choices', 0, 'text') ${sort.response_text}`;
+    // Add secondary sort for stable ordering
+    return `JSONExtractString(request_response_rmt.response_body, 'choices', 0, 'text') ${sort.response_text}, request_response_rmt.request_created_at DESC`;
   }
   if (sort.cost) {
     assertValidSortDirection(sort.cost);
-    return `cost ${sort.cost}`;
+    // Add secondary sort for stable ordering
+    return `cost ${sort.cost} NULLS LAST, request_response_rmt.request_created_at DESC`;
   }
   if (sort.properties) {
     for (const key in sort.properties) {
@@ -165,7 +176,8 @@ export function buildRequestSortClickhouse(sort: SortLeafRequest): string {
       if (!key.match(/^[a-zA-Z0-9_]+$/)) {
         throw new Error(`Invalid property key: ${key}`);
       }
-      return `request_response_rmt.properties['${key}'] ${sort.properties[key]}`;
+      // Add secondary sort for stable ordering
+      return `request_response_rmt.properties['${key}'] ${sort.properties[key]}, request_response_rmt.request_created_at DESC`;
     }
   }
 
