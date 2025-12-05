@@ -7,6 +7,7 @@ iconType: "solid"
 ---
 
 import Star from "/snippets/star.mdx";
+import RequestIntegration from "/snippets/request-integration.mdx";
 
 ## Introduction
 
@@ -184,122 +185,124 @@ That's it! Just one additional parameter and you're routing through Helicone's A
 Here's a full example that tests multiple models:
 
 <CodeGroup>
-```csharp .NET
-using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.ChatCompletion;
-using DotNetEnv;
+  ```csharp .NET
+  using Microsoft.SemanticKernel;
+  using Microsoft.SemanticKernel.ChatCompletion;
+  using DotNetEnv;
 
-// Load environment
-Env.Load();
-var apiKey = Environment.GetEnvironmentVariable("HELICONE_API_KEY");
+  // Load environment
+  Env.Load();
+  var apiKey = Environment.GetEnvironmentVariable("HELICONE_API_KEY");
 
-if (string.IsNullOrEmpty(apiKey))
-{
-    Console.WriteLine("❌ HELICONE_API_KEY not found in environment");
-    return;
-}
+  if (string.IsNullOrEmpty(apiKey))
+  {
+      Console.WriteLine("❌ HELICONE_API_KEY not found in environment");
+      return;
+  }
 
-Console.WriteLine("🚀 Testing multiple models through Helicone AI Gateway\n");
+  Console.WriteLine("🚀 Testing multiple models through Helicone AI Gateway\n");
 
-// Test different models
-await TestModel("gpt-4.1-mini", "OpenAI GPT-4.1 Mini");
-await TestModel("claude-opus-4-1", "Anthropic Claude Opus 4.1");
-await TestModel("gemini-2.5-flash-lite", "Google Gemini 2.5 Flash Lite");
+  // Test different models
+  await TestModel("gpt-4.1-mini", "OpenAI GPT-4.1 Mini");
+  await TestModel("claude-opus-4-1", "Anthropic Claude Opus 4.1");
+  await TestModel("gemini-2.5-flash-lite", "Google Gemini 2.5 Flash Lite");
 
-Console.WriteLine("\n✅ All models tested!");
-Console.WriteLine("🔍 Check your dashboard: https://us.helicone.ai/dashboard");
+  Console.WriteLine("\n✅ All models tested!");
+  Console.WriteLine("🔍 Check your dashboard: https://us.helicone.ai/dashboard");
 
-async Task TestModel(string modelId, string modelName)
-{
-    try
-    {
-        var builder = Kernel.CreateBuilder();
+  async Task TestModel(string modelId, string modelName)
+  {
+      try
+      {
+          var builder = Kernel.CreateBuilder();
 
-        // Configure with Helicone AI Gateway
-        builder.AddOpenAIChatCompletion(
-            modelId: modelId,
-            apiKey: apiKey,
-            endpoint: new Uri("https://ai-gateway.helicone.ai/v1")
-        );
+          // Configure with Helicone AI Gateway
+          builder.AddOpenAIChatCompletion(
+              modelId: modelId,
+              apiKey: apiKey,
+              endpoint: new Uri("https://ai-gateway.helicone.ai/v1")
+          );
 
-        var kernel = builder.Build();
-        var chatService = kernel.GetRequiredService<IChatCompletionService>();
+          var kernel = builder.Build();
+          var chatService = kernel.GetRequiredService<IChatCompletionService>();
 
-        var chatHistory = new ChatHistory();
-        chatHistory.AddUserMessage("Say hello in one sentence.");
+          var chatHistory = new ChatHistory();
+          chatHistory.AddUserMessage("Say hello in one sentence.");
 
-        Console.Write($"🤖 Testing {modelName}... ");
-        var response = await chatService.GetChatMessageContentAsync(chatHistory);
-        Console.WriteLine("✅");
-        Console.WriteLine($"   Response: {response.Content}\n");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine("❌");
-        Console.WriteLine($"   Error: {ex.Message}\n");
-    }
-}
-```
+          Console.Write($"🤖 Testing {modelName}... ");
+          var response = await chatService.GetChatMessageContentAsync(chatHistory);
+          Console.WriteLine("✅");
+          Console.WriteLine($"   Response: {response.Content}\n");
+      }
+      catch (Exception ex)
+      {
+          Console.WriteLine("❌");
+          Console.WriteLine($"   Error: {ex.Message}\n");
+      }
+  }
+  ```
 
-```python Python
-import semantic_kernel as sk
-from semantic_kernel.connectors.ai.open_ai import OpenAIChatCompletion
-from semantic_kernel.contents import ChatHistory
-import os
-import asyncio
+  ```python Python
+  import semantic_kernel as sk
+  from semantic_kernel.connectors.ai.open_ai import OpenAIChatCompletion
+  from semantic_kernel.contents import ChatHistory
+  import os
+  import asyncio
 
-# Load environment
-helicone_api_key = os.getenv("HELICONE_API_KEY")
+  # Load environment
+  helicone_api_key = os.getenv("HELICONE_API_KEY")
 
-if not helicone_api_key:
-    print("❌ HELICONE_API_KEY not found in environment")
-    exit(1)
+  if not helicone_api_key:
+      print("❌ HELICONE_API_KEY not found in environment")
+      exit(1)
 
-print("🚀 Testing multiple models through Helicone AI Gateway\n")
+  print("🚀 Testing multiple models through Helicone AI Gateway\n")
 
-async def test_model(model_id: str, model_name: str):
-    try:
-        # Create kernel
-        kernel = sk.Kernel()
+  async def test_model(model_id: str, model_name: str):
+      try:
+          # Create kernel
+          kernel = sk.Kernel()
 
-        # Configure with Helicone AI Gateway
-        kernel.add_service(
-            OpenAIChatCompletion(
-                service_id="helicone-gateway",
-                ai_model_id=model_id,
-                api_key=helicone_api_key,
-                endpoint="https://ai-gateway.helicone.ai/v1"
-            )
-        )
+          # Configure with Helicone AI Gateway
+          kernel.add_service(
+              OpenAIChatCompletion(
+                  service_id="helicone-gateway",
+                  ai_model_id=model_id,
+                  api_key=helicone_api_key,
+                  endpoint="https://ai-gateway.helicone.ai/v1"
+              )
+          )
 
-        chat_service = kernel.get_service("helicone-gateway")
+          chat_service = kernel.get_service("helicone-gateway")
 
-        chat_history = ChatHistory()
-        chat_history.add_user_message("Say hello in one sentence.")
+          chat_history = ChatHistory()
+          chat_history.add_user_message("Say hello in one sentence.")
 
-        print(f"🤖 Testing {model_name}... ", end="")
-        response = await chat_service.get_chat_message_content(
-            chat_history=chat_history
-        )
-        print("✅")
-        print(f"   Response: {response.content}\n")
-    except Exception as ex:
-        print("❌")
-        print(f"   Error: {str(ex)}\n")
+          print(f"🤖 Testing {model_name}... ", end="")
+          response = await chat_service.get_chat_message_content(
+              chat_history=chat_history
+          )
+          print("✅")
+          print(f"   Response: {response.content}\n")
+      except Exception as ex:
+          print("❌")
+          print(f"   Error: {str(ex)}\n")
 
-async def main():
-    # Test different models
-    await test_model("gpt-4.1-mini", "OpenAI GPT-4.1 Mini")
-    await test_model("claude-opus-4-1", "Anthropic Claude Opus 4.1")
-    await test_model("gemini-2.5-flash-lite", "Google Gemini 2.5 Flash Lite")
+  async def main():
+      # Test different models
+      await test_model("gpt-4.1-mini", "OpenAI GPT-4.1 Mini")
+      await test_model("claude-opus-4-1", "Anthropic Claude Opus 4.1")
+      await test_model("gemini-2.5-flash-lite", "Google Gemini 2.5 Flash Lite")
 
-    print("\n✅ All models tested!")
-    print("🔍 Check your dashboard: https://us.helicone.ai/dashboard")
+      print("\n✅ All models tested!")
+      print("🔍 Check your dashboard: https://us.helicone.ai/dashboard")
 
-if __name__ == "__main__":
-    asyncio.run(main())
-```
+  if __name__ == "__main__":
+      asyncio.run(main())
+  ```
 </CodeGroup>
+
+<RequestIntegration />
 
 ## Related Documentation
 

@@ -42,7 +42,9 @@
               {
                 "group": "Integrations",
                 "pages": [
+                  "gateway/integrations/overview",
                   "gateway/integrations/codex",
+                  "gateway/integrations/llamaindex",
                   "gateway/integrations/langchain",
                   "gateway/integrations/langgraph",
                   "gateway/integrations/n8n",
