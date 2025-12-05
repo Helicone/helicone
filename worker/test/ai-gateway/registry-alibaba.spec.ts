@@ -4836,24 +4836,7 @@ describe("Alibaba Registry Tests", () => {
     describe("qwen3-coder-480b-a35b-instruct-fp8 with Canopy Wave Provider", () => {
       it("should handle canopy wave provider", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
-          expected: {
-            providers: [
-              {
-                url: "https://inference.canopywave.io/v1/chat/completions",
-                response: "success",
-                model: "qwen/qwen3-coder",
-                data: createOpenAIMockResponse("qwen/qwen3-coder"),
-                expects: canopywaveAuthExpectations,
-              },
-            ],
-            finalStatus: 200,
-          },
-        }));
-
-      it("should auto-select canopy wave provider when none specified", () =>
-        runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           expected: {
             providers: [
               {
@@ -4870,7 +4853,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle successful request with custom parameters", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           request: {
             messages: [
               { role: "user", content: "Describe this image in detail" },
@@ -4896,7 +4879,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle multimodal input (text and image)", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           request: {
             messages: [
               {
@@ -4921,7 +4904,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle video understanding tasks", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           request: {
             messages: [
               {
@@ -4946,7 +4929,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle streaming requests", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           request: {
             messages: [{ role: "user", content: "Stream this response" }],
             stream: true,
@@ -4970,7 +4953,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle tools parameter support", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           request: {
             messages: [{ role: "user", content: "What's the weather like?" }],
             body: {
@@ -5010,7 +4993,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle structured outputs", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           request: {
             messages: [
               {
@@ -5041,7 +5024,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle document parsing and OCR tasks", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           request: {
             messages: [
               {
@@ -5066,7 +5049,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle chart and diagram analysis", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           request: {
             messages: [
               {
@@ -5091,7 +5074,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should verify context length limits are respected (131k tokens)", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           request: {
             messages: [
               {
@@ -5119,7 +5102,7 @@ describe("Alibaba Registry Tests", () => {
     describe("qwen3-coder-480b-a35b-instruct-fp8 Error scenarios", () => {
       it("should handle Canopy Wave provider failure", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           expected: {
             providers: [
               {
@@ -5135,7 +5118,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle rate limiting from Canopy Wave", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           expected: {
             providers: [
               {
@@ -5151,7 +5134,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle authentication failure", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           expected: {
             providers: [
               {
@@ -5167,7 +5150,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle model not found", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           expected: {
             providers: [
               {
@@ -5183,7 +5166,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle quota exceeded", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           expected: {
             providers: [
               {
@@ -5199,7 +5182,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle bad request with invalid parameters", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           expected: {
             providers: [
               {
@@ -5215,7 +5198,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle timeout scenarios", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           expected: {
             providers: [
               {
@@ -5231,7 +5214,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle content filtering violations", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           request: {
             messages: [
               { role: "user", content: "Content that might be filtered" },
@@ -5254,7 +5237,7 @@ describe("Alibaba Registry Tests", () => {
     describe("qwen3-coder-480b-a35b-instruct-fp8 Advanced scenarios", () => {
       it("should handle custom headers and body mapping", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           request: {
             messages: [{ role: "user", content: "Test with custom mapping" }],
             headers: {
@@ -5284,7 +5267,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle supported parameters correctly", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           request: {
             messages: [
               { role: "user", content: "Test with various parameters" },
@@ -5311,7 +5294,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle multilingual OCR tasks", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           request: {
             messages: [
               {
@@ -5336,7 +5319,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle visual question answering", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           request: {
             messages: [
               {
@@ -5361,7 +5344,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle GUI automation tasks", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           request: {
             messages: [
               {
@@ -5386,7 +5369,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle long-form video comprehension", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           request: {
             messages: [
               {
@@ -5411,7 +5394,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle spatial reasoning tasks", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           request: {
             messages: [
               {
@@ -5436,7 +5419,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle rate limit recovery scenario", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           expected: {
             providers: [
               {
@@ -5454,7 +5437,7 @@ describe("Alibaba Registry Tests", () => {
     describe("qwen3-coder-480b-a35b-instruct-fp8 Edge cases and robustness", () => {
       it("should handle empty messages array", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           request: {
             messages: [],
           },
@@ -5473,7 +5456,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle very long input within context limits", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           request: {
             messages: [
               {
@@ -5498,7 +5481,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle unicode and special characters", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           request: {
             messages: [
               {
@@ -5523,7 +5506,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle malformed JSON gracefully", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           expected: {
             providers: [
               {
@@ -5539,7 +5522,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle network connectivity issues", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           expected: {
             providers: [
               {
@@ -5557,7 +5540,7 @@ describe("Alibaba Registry Tests", () => {
     describe("qwen3-coder-480b-a35b-instruct-fp8 Passthrough billing tests", () => {
       it("should handle passthrough billing with canopy wave provider", () =>
         runGatewayTest({
-          model: "qwen3-coder-480b-a35b-instruct-fp8/canopywave",
+          model: "qwen3-coder/canopywave",
           request: {
             body: {
               messages: [

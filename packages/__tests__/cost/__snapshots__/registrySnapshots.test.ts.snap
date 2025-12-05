@@ -192,7 +192,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
-    "qwen3-coder-480b-a35b-instruct-fp8:canopywave": {
+    "qwen3-coder:canopywave": {
       "context": 262144,
       "crossRegion": false,
       "maxTokens": 65536,
@@ -8081,6 +8081,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "qwen3-coder",
       "providers": [
+        "canopywave",
         "deepinfra",
       ],
     },
@@ -8088,12 +8089,6 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "qwen3-coder-30b-a3b-instruct",
       "providers": [
         "nebius",
-      ],
-    },
-    {
-      "model": "qwen3-coder-480b-a35b-instruct-fp8",
-      "providers": [
-        "canopywave",
       ],
     },
     {
@@ -8310,7 +8305,6 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "qwen3-32b",
     "qwen3-coder",
     "qwen3-coder-30b-a3b-instruct",
-    "qwen3-coder-480b-a35b-instruct-fp8",
     "qwen3-next-80b-a3b-instruct",
     "qwen3-vl-235b-a22b-instruct",
     "sonar",
@@ -8330,7 +8324,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
   "totalArchivedConfigs": 0,
   "totalEndpoints": 243,
   "totalModelProviderConfigs": 243,
-  "totalModelsWithPtb": 92,
+  "totalModelsWithPtb": 91,
   "totalProviders": 21,
 }
 `;
