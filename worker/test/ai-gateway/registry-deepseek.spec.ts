@@ -129,6 +129,22 @@ describe("DeepSeek Registry Tests", () => {
             finalStatus: 200,
           },
         }));
+      
+        it("should handle canopywave provider", () =>
+          runGatewayTest({
+            model: "deepseek-v3/canopywave",
+            expected: {
+              providers: [
+                {
+                  url: "https://inference.canopywave.io/v1/chat/completions",
+                  response: "success",
+                  model: "deepseek/deepseek-chat-v3.1",
+                  expects: canopywaveAuthExpectations,
+                },
+              ],
+              finalStatus: 200,
+            },
+          }));
 
       it("should auto-select deepseek provider when none specified", () =>
         runGatewayTest({
@@ -378,6 +394,56 @@ describe("DeepSeek Registry Tests", () => {
           providers: [
             {
               url: "https://api.deepseek.com/chat/completions",
+              response: "failure",
+              statusCode: 401,
+              errorMessage: "Invalid API key",
+            },
+          ],
+          finalStatus: 401,
+        },
+      }));
+  });
+
+  describe("Error scenarios - Canopy Wave Provider with DeepSeek V3.1", () => {
+    it("should handle canopywave provider failure for DeepSeek V3.1", () =>
+      runGatewayTest({
+        model: "deepseek-v3/canopywave",
+        expected: {
+          providers: [
+            {
+              url: "https://inference.canopywave.io/v1/chat/completions",
+              response: "failure",
+              statusCode: 500,
+              errorMessage: "Canopy Wave service unavailable",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+
+    it("should handle rate limiting from Canopy Wave for DeepSeek V3.1", () =>
+      runGatewayTest({
+        model: "deepseek-v3/canopywave",
+        expected: {
+          providers: [
+            {
+              url: "https://inference.canopywave.io/v1/chat/completions",
+              response: "failure",
+              statusCode: 429,
+              errorMessage: "Rate limit exceeded",
+            },
+          ],
+          finalStatus: 429,
+        },
+      }));
+
+    it("should handle authentication failure from Canopy Wave for DeepSeek V3.1", () =>
+      runGatewayTest({
+        model: "deepseek-v3/canopywave",
+        expected: {
+          providers: [
+            {
+              url: "https://inference.canopywave.io/v1/chat/completions",
               response: "failure",
               statusCode: 401,
               errorMessage: "Invalid API key",
@@ -1841,91 +1907,5 @@ describe("DeepSeek Registry Tests", () => {
           },
         }));
     });
-  });
-
-  describe("BYOK Tests - DeepSeek V3.1 on Canopy Wave", () => {
-    describe("deepseek-v3.1", () => {
-      it("should handle canopywave provider", () =>
-        runGatewayTest({
-          model: "deepseek-v3/canopywave",
-          expected: {
-            providers: [
-              {
-                url: "https://inference.canopywave.io/v1/chat/completions",
-                response: "success",
-                model: "deepseek/deepseek-chat-v3.1",
-                expects: canopywaveAuthExpectations,
-              },
-            ],
-            finalStatus: 200,
-          },
-        }));
-
-      it("should auto-select canopywave provider when none specified", () =>
-        runGatewayTest({
-          model: "deepseek-v3",
-          expected: {
-            providers: [
-              {
-                url: "https://inference.canopywave.io/v1/chat/completions",
-                response: "success",
-                model: "deepseek/deepseek-chat-v3.1",
-                expects: canopywaveAuthExpectations,
-              },
-            ],
-            finalStatus: 200,
-          },
-        }));
-    });
-  });
-
-  describe("Error scenarios - Canopy Wave Provider with DeepSeek V3.1", () => {
-    it("should handle canopywave provider failure for DeepSeek V3.1", () =>
-      runGatewayTest({
-        model: "deepseek-v3/canopywave",
-        expected: {
-          providers: [
-            {
-              url: "https://inference.canopywave.io/v1/chat/completions",
-              response: "failure",
-              statusCode: 500,
-              errorMessage: "Canopy Wave service unavailable",
-            },
-          ],
-          finalStatus: 500,
-        },
-      }));
-
-    it("should handle rate limiting from Canopy Wave for DeepSeek V3.1", () =>
-      runGatewayTest({
-        model: "deepseek-v3/canopywave",
-        expected: {
-          providers: [
-            {
-              url: "https://inference.canopywave.io/v1/chat/completions",
-              response: "failure",
-              statusCode: 429,
-              errorMessage: "Rate limit exceeded",
-            },
-          ],
-          finalStatus: 429,
-        },
-      }));
-
-    it("should handle authentication failure from Canopy Wave for DeepSeek V3.1", () =>
-      runGatewayTest({
-        model: "deepseek-v3/canopywave",
-        expected: {
-          providers: [
-            {
-              url: "https://inference.canopywave.io/v1/chat/completions",
-              response: "failure",
-              statusCode: 401,
-              errorMessage: "Invalid API key",
-            },
-          ],
-          finalStatus: 401,
-        },
-      }));
   });
 });
