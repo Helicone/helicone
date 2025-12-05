@@ -155,7 +155,7 @@ export const endpoints = {
       "*": {},
     },
   },
-  "qwen3-coder-480b-a35b-instruct-fp8:canopywave": {
+  "qwen3-coder:canopywave": {
     providerModelId: "qwen/qwen3-coder",
     provider: "canopywave",
     author: "alibaba",
