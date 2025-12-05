@@ -107,7 +107,11 @@ function buildContentAndAnnotations(textBlocks: AnthropicContentBlock[]): {
 
     // Convert Anthropic citations to OpenAI annotations
     // Only process if citations is an array (web search results), not a config object (document)
-    if (block.citations && Array.isArray(block.citations) && block.citations.length > 0) {
+    if (
+      block.citations &&
+      Array.isArray(block.citations) &&
+      block.citations.length > 0
+    ) {
       // For each citation, find where the cited text appears in this block
       for (const citation of block.citations) {
         // The cited_text is what was quoted from the source
