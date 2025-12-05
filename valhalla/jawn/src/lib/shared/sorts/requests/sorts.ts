@@ -25,6 +25,7 @@ export interface SortLeafRequest {
     [key: string]: SortDirection;
   };
   cost?: SortDirection;
+  time_to_first_token?: SortDirection;
 }
 
 function assertValidSortDirection(direction: SortDirection) {
@@ -48,6 +49,10 @@ export function buildRequestSort(sort: SortLeafRequest) {
   if (sort.latency) {
     assertValidSortDirection(sort.latency);
     return `response.delay_ms ${sort.latency}`;
+  }
+  if (sort.time_to_first_token) {
+    assertValidSortDirection(sort.time_to_first_token);
+    return `response.time_to_first_token ${sort.time_to_first_token}`;
   }
   if (sort.total_tokens) {
     assertValidSortDirection(sort.total_tokens);
@@ -124,6 +129,11 @@ export function buildRequestSortClickhouse(sort: SortLeafRequest): string {
     // Use NULLS LAST to ensure NULL latencies are sorted to the end regardless of direction
     // Add secondary sort by request_created_at for stable ordering when latencies are equal
     return `request_response_rmt.latency ${sort.latency} NULLS LAST, request_response_rmt.request_created_at DESC`;
+  }
+  if (sort.time_to_first_token) {
+    assertValidSortDirection(sort.time_to_first_token);
+    // Add secondary sort for stable ordering
+    return `request_response_rmt.time_to_first_token ${sort.time_to_first_token} NULLS LAST, request_response_rmt.request_created_at DESC`;
   }
   if (sort.total_tokens) {
     assertValidSortDirection(sort.total_tokens);
