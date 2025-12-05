@@ -1,0 +1,283 @@
+---
+title: "Reasoning"
+description: "Enable reasoning through a unified API on Helicone's AI Gateway"
+---
+
+Helicone's AI Gateway provides a unified interface for reasoning across providers. Use the same parameters regardless of provider—the Gateway handles the translation automatically.
+
+<Info>
+Gemini model support for reasoning is coming soon.
+</Info>
+
+---
+
+## Quick Start
+
+<Tabs>
+  <Tab title="Chat Completions">
+    ```typescript
+    import OpenAI from "openai";
+
+    const client = new OpenAI({
+      apiKey: process.env.HELICONE_API_KEY,
+      baseURL: "https://ai-gateway.helicone.ai/v1",
+    });
+
+    const response = await client.chat.completions.create({
+      model: "claude-sonnet-4-20250514",
+      messages: [
+        { role: "user", content: "What is the sum of the first 100 prime numbers?" }
+      ],
+      reasoning_effort: "medium",
+      max_completion_tokens: 16000
+    });
+    ```
+  </Tab>
+  <Tab title="Responses API">
+    ```typescript
+    import OpenAI from "openai";
+
+    const client = new OpenAI({
+      apiKey: process.env.HELICONE_API_KEY,
+      baseURL: "https://ai-gateway.helicone.ai/v1",
+    });
+
+    const response = await client.responses.create({
+      model: "claude-sonnet-4-20250514",
+      input: "What is the sum of the first 100 prime numbers?",
+      reasoning: {
+        effort: "medium"
+      }
+    });
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## Configuration
+
+<Tabs>
+  <Tab title="Chat Completions">
+    ```typescript
+    {
+      reasoning_effort: "low" | "medium" | "high",
+      reasoning_options: {
+        budget_tokens: 8000  // Optional, for Anthropic
+      }
+    }
+    ```
+  </Tab>
+  <Tab title="Responses API">
+    ```typescript
+    {
+      reasoning: {
+        effort: "low" | "medium" | "high"
+      },
+      reasoning_options: {
+        budget_tokens: 8000  // Optional, for Anthropic
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+### reasoning_effort
+
+| Level | Description |
+|-------|-------------|
+| `low` | Light reasoning for simple tasks |
+| `medium` | Balanced reasoning |
+| `high` | Deep reasoning for complex problems |
+
+<Note>
+For Anthropic models, the default is 4096 max completion tokens with 2048 budget reasoning tokens.
+</Note>
+
+---
+
+## Handling Responses
+
+### Chat Completions
+
+<Tabs>
+  <Tab title="Streaming">
+    When streaming, reasoning content arrives in chunks via the `reasoning` delta field, followed by content, and finally `reasoning_details` with the finish reason:
+
+    ```json
+    // Reasoning chunks arrive first
+    {
+      "choices": [{
+        "delta": { "reasoning": "Let me think about this..." }
+      }]
+    }
+
+    // Then content chunks
+    {
+      "choices": [{
+        "delta": { "content": "The answer is 42." }
+      }]
+    }
+
+    // Final chunk includes reasoning_details with signature
+    {
+      "choices": [{
+        "delta": {
+          "reasoning_details": [{
+            "thinking": "The user is asking for...",
+            "signature": "EpICCkYIChgCKkCfWt1pnGxEcz48yQJvie3ppkXZ8ryd..."
+          }]
+        },
+        "finish_reason": "stop"
+      }]
+    }
+    ```
+  </Tab>
+  <Tab title="Non-Streaming">
+    Non-streaming responses include the full reasoning in the message:
+
+    ```json
+    {
+      "id": "msg_01S1QpjYur8kLeEVKVoKxdTP",
+      "object": "chat.completion",
+      "model": "claude-haiku-4-5-20251001",
+      "choices": [{
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "Why don't scientists trust atoms?\n\nBecause they make up everything!",
+          "reasoning": "The user is asking for a very short joke. I should provide something quick, light, and funny...",
+          "reasoning_details": [{
+            "thinking": "The user is asking for a very short joke...",
+            "signature": "Ev8DCkYIChgCKkBeHyembBdwl8C/a/8luinDP0w5/oQP..."
+          }]
+        },
+        "finish_reason": "stop"
+      }],
+      "usage": {
+        "prompt_tokens": 58,
+        "completion_tokens": 108,
+        "total_tokens": 166
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+### Responses API
+
+<Tabs>
+  <Tab title="Streaming">
+    Streaming events follow the Responses API format:
+
+    ```json
+    // Reasoning summary text delta
+    {
+      "type": "response.reasoning_summary_text.delta",
+      "item_id": "rs_0ab50bce3156357b...",
+      "output_index": 0,
+      "summary_index": 0,
+      "delta": "Let me think about this..."
+    }
+
+    // Reasoning item complete
+    {
+      "type": "response.output_item.done",
+      "output_index": 0,
+      "item": {
+        "id": "rs_0ab50bce3156357b...",
+        "type": "reasoning",
+        "summary": [{
+          "type": "summary_text",
+          "text": "**Crafting the response**\n\nThe user wants..."
+        }]
+      }
+    }
+    ```
+  </Tab>
+  <Tab title="Non-Streaming (OpenAI)">
+    ```json
+    {
+      "id": "resp_038bfaf6e50f1c45...",
+      "object": "response",
+      "status": "completed",
+      "model": "gpt-5-mini-2025-08-07",
+      "output": [
+        {
+          "id": "rs_038bfaf6e50f1c45...",
+          "type": "reasoning",
+          "summary": [{
+            "type": "summary_text",
+            "text": "**Generating programming jokes**\n\nThe user wants a short joke..."
+          }]
+        },
+        {
+          "id": "msg_038bfaf6e50f1c45...",
+          "type": "message",
+          "status": "completed",
+          "role": "assistant",
+          "content": [{
+            "type": "output_text",
+            "text": "To understand recursion, you must first understand recursion."
+          }]
+        }
+      ],
+      "usage": {
+        "input_tokens": 17,
+        "output_tokens": 336,
+        "output_tokens_details": {
+          "reasoning_tokens": 320
+        }
+      }
+    }
+    ```
+  </Tab>
+  <Tab title="Non-Streaming (Anthropic)">
+    Anthropic responses include `encrypted_content` for reasoning validation:
+
+    ```json
+    {
+      "id": "msg_017G4K2w5s6zEn3KZ6jp455j",
+      "object": "response",
+      "status": "completed",
+      "model": "claude-haiku-4-5-20251001",
+      "output": [
+        {
+          "id": "rs_msg_017G4K2w5s6zEn3KZ6jp455j_0",
+          "type": "reasoning",
+          "summary": [{
+            "type": "summary_text",
+            "text": "The user wants me to tell a short joke about programming..."
+          }],
+          "encrypted_content": "EuYGCkYIChgCKkBxEozbYO/Z5AL2tlDHwBHcBEOG..."
+        },
+        {
+          "id": "msg_msg_017G4K2w5s6zEn3KZ6jp455j",
+          "type": "message",
+          "status": "completed",
+          "role": "assistant",
+          "content": [{
+            "type": "output_text",
+            "text": "Why do programmers prefer dark mode?\n\nBecause light attracts bugs!"
+          }]
+        }
+      ],
+      "usage": {
+        "input_tokens": 47,
+        "output_tokens": 294
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+<Note>
+Anthropic models always return `encrypted_content` (signatures) in reasoning items. These signatures validate the reasoning chain and are required for multi-turn conversations. Other providers like OpenAI can optionally return signatures when configured.
+</Note>
+
+---
+
+## Related
+
+- [Responses API](/gateway/concepts/responses-api) - Alternative API format with reasoning support
+- [Context Editing](/gateway/concepts/context-editing) - Manage context in long reasoning sessions

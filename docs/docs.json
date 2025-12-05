@@ -34,6 +34,8 @@
                 "group": "Provider Concepts",
                 "pages": [
                   "gateway/concepts/prompt-caching",
+                  "gateway/concepts/reasoning",
+                  "gateway/concepts/context-editing",
                   "gateway/web-search",
                   "gateway/concepts/error-handling",
                   "gateway/concepts/responses-api"
