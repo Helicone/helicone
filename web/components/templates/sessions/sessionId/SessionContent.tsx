@@ -26,6 +26,7 @@ import { useGetRequests } from "../../../../services/hooks/requests";
 import { useSessions } from "../../../../services/hooks/sessions";
 import { Col } from "../../../layout/common/col";
 import ExportButton from "../../../shared/themed/table/exportButton";
+import LoadingAnimation from "../../../shared/loadingAnimation";
 import TreeView from "./Tree/TreeView";
 import TableFooter from "../../requests/tableFooter";
 
@@ -270,12 +271,18 @@ export const SessionContent: React.FC<SessionContentProps> = ({
       />
 
       <div className="flex-1 overflow-auto">
-        <TreeView
-          selectedRequestId={selectedRequestId}
-          setSelectedRequestId={handleRequestIdChange}
-          session={session}
-          isOriginalRealtime={containsRealtime}
-        />
+        {requests.requests.isLoading ? (
+          <div className="flex h-full items-center justify-center">
+            <LoadingAnimation title="Loading session details..." />
+          </div>
+        ) : (
+          <TreeView
+            selectedRequestId={selectedRequestId}
+            setSelectedRequestId={handleRequestIdChange}
+            session={session}
+            isOriginalRealtime={containsRealtime}
+          />
+        )}
       </div>
 
       <TableFooter
