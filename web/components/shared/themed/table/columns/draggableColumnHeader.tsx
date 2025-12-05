@@ -20,7 +20,15 @@ export default function DraggableColumnHeader<T>(props: {
   onResizeStart?: (columnIndex: number, event: React.MouseEvent) => void;
   isResizing?: boolean;
 }) {
-  const { header, sortable, index, totalColumns, className, onResizeStart, isResizing } = props;
+  const {
+    header,
+    sortable,
+    index,
+    totalColumns,
+    className,
+    onResizeStart,
+    isResizing,
+  } = props;
   const router = useRouter();
 
   const meta = header.column.columnDef?.meta as any;
@@ -151,9 +159,7 @@ export default function DraggableColumnHeader<T>(props: {
         <div
           className={clsx(
             "h-full w-1",
-            isResizing
-              ? "bg-blue-700 dark:bg-blue-300"
-              : "bg-transparent",
+            isResizing ? "bg-blue-700 dark:bg-blue-300" : "bg-transparent",
           )}
         />
       </div>

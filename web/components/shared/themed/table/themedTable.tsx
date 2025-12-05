@@ -277,7 +277,15 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                   className="sticky top-0 z-[2] h-11 bg-slate-50 dark:bg-slate-950"
                 >
                   {checkboxMode !== "never" && (
-                    <th className="relative" style={{ height: HEADER_HEIGHT, width: CHECKBOX_COLUMN_WIDTH, minWidth: CHECKBOX_COLUMN_WIDTH, maxWidth: CHECKBOX_COLUMN_WIDTH }}>
+                    <th
+                      className="relative"
+                      style={{
+                        height: HEADER_HEIGHT,
+                        width: CHECKBOX_COLUMN_WIDTH,
+                        minWidth: CHECKBOX_COLUMN_WIDTH,
+                        maxWidth: CHECKBOX_COLUMN_WIDTH,
+                      }}
+                    >
                       <div className="flex h-full items-center justify-center px-2">
                         <Checkbox
                           variant="helicone"
@@ -301,7 +309,11 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                   )}
                   {headerGroup.headers.map((header, index) => {
                     const columnDef = defaultColumns[index] as any;
-                    const columnWidth = columnSizes[index] ?? columnDef.minSize ?? columnDef.size ?? 120;
+                    const columnWidth =
+                      columnSizes[index] ??
+                      columnDef.minSize ??
+                      columnDef.size ??
+                      120;
 
                     return (
                       <th
@@ -394,7 +406,12 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                         : "",
                       checkboxMode === "never" && "hidden",
                     )}
-                    style={{ verticalAlign: "middle", width: CHECKBOX_COLUMN_WIDTH, minWidth: CHECKBOX_COLUMN_WIDTH, maxWidth: CHECKBOX_COLUMN_WIDTH }}
+                    style={{
+                      verticalAlign: "middle",
+                      width: CHECKBOX_COLUMN_WIDTH,
+                      minWidth: CHECKBOX_COLUMN_WIDTH,
+                      maxWidth: CHECKBOX_COLUMN_WIDTH,
+                    }}
                   >
                     <div
                       className={clsx(
@@ -417,7 +434,11 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                   </td>
                   {row.getVisibleCells().map((cell, i) => {
                     const columnDef = defaultColumns[i] as any;
-                    const columnWidth = columnSizes[i] ?? columnDef.minSize ?? columnDef.size ?? 120;
+                    const columnWidth =
+                      columnSizes[i] ??
+                      columnDef.minSize ??
+                      columnDef.size ??
+                      120;
 
                     return (
                       <td
@@ -449,112 +470,113 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
                           maxWidth: `${columnWidth}px`,
                         }}
                       >
-                      <ConditionalLink
-                        href={rowLink?.(row.original)}
-                        className={clsx(
-                          "block h-full w-full",
-                          "py-3",
-                          i === 0 && "pr-2",
-                          i > 0 && "px-2",
-                        )}
-                      >
-                        <div
-                          className={clsx("flex items-center gap-1")}
-                          style={
-                            i === 0
-                              ? {
-                                  paddingLeft: `${
-                                    row.depth * 24 +
-                                    (onToggleAllRows !== undefined ? 24 : 0) +
-                                    (row.getCanExpand() ? 0 : 8)
-                                  }px`,
-                                }
-                              : {}
-                          }
+                        <ConditionalLink
+                          href={rowLink?.(row.original)}
+                          className={clsx(
+                            "block h-full w-full",
+                            "py-3",
+                            i === 0 && "pr-2",
+                            i > 0 && "px-2",
+                          )}
                         >
-                          {i === 0 &&
-                            (() => {
-                              const getAncestorPath = (
-                                currentRow: Row<T>,
-                              ): string | undefined => {
-                                if (currentRow.depth === 0) {
-                                  return (currentRow.original as any)
-                                    ?.path as string;
+                          <div
+                            className={clsx("flex items-center gap-1")}
+                            style={
+                              i === 0
+                                ? {
+                                    paddingLeft: `${
+                                      row.depth * 24 +
+                                      (onToggleAllRows !== undefined ? 24 : 0) +
+                                      (row.getCanExpand() ? 0 : 8)
+                                    }px`,
+                                  }
+                                : {}
+                            }
+                          >
+                            {i === 0 &&
+                              (() => {
+                                const getAncestorPath = (
+                                  currentRow: Row<T>,
+                                ): string | undefined => {
+                                  if (currentRow.depth === 0) {
+                                    return (currentRow.original as any)
+                                      ?.path as string;
+                                  }
+                                  let currentParent = currentRow.getParentRow();
+                                  while (
+                                    currentParent &&
+                                    currentParent.depth > 0
+                                  ) {
+                                    currentParent =
+                                      currentParent.getParentRow();
+                                  }
+                                  return currentParent
+                                    ? ((currentParent.original as any)
+                                        ?.path as string)
+                                    : undefined;
+                                };
+
+                                const ancestorPath = getAncestorPath(row);
+                                const groupColorClass =
+                                  (ancestorPath &&
+                                    topLevelPathColorMap[ancestorPath]) ||
+                                  "bg-transparent";
+
+                                if (groupColorClass !== "bg-transparent") {
+                                  return (
+                                    <div
+                                      className={clsx(
+                                        "absolute bottom-0 left-0 top-0 z-30 w-1",
+                                        groupColorClass,
+                                      )}
+                                    />
+                                  );
                                 }
-                                let currentParent = currentRow.getParentRow();
-                                while (
-                                  currentParent &&
-                                  currentParent.depth > 0
-                                ) {
-                                  currentParent = currentParent.getParentRow();
-                                }
-                                return currentParent
-                                  ? ((currentParent.original as any)
-                                      ?.path as string)
-                                  : undefined;
-                              };
+                                return null;
+                              })()}
 
-                              const ancestorPath = getAncestorPath(row);
-                              const groupColorClass =
-                                (ancestorPath &&
-                                  topLevelPathColorMap[ancestorPath]) ||
-                                "bg-transparent";
-
-                              if (groupColorClass !== "bg-transparent") {
-                                return (
-                                  <div
-                                    className={clsx(
-                                      "absolute bottom-0 left-0 top-0 z-30 w-1",
-                                      groupColorClass,
-                                    )}
-                                  />
-                                );
-                              }
-                              return null;
-                            })()}
-
-                          {i === 0 && row.getCanExpand() && (
-                            <button
-                              {...{
-                                onClick: row.getToggleExpandedHandler(),
-                                style: { cursor: "pointer" },
-                                "data-expander": true,
-                              }}
-                              className="p-0.5"
-                            >
-                              {row.getIsExpanded() ? (
-                                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                              ) : (
-                                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                              )}
-                            </button>
-                          )}
-                          {dataLoading &&
-                          (cell.column.id == "requestText" ||
-                            cell.column.id == "responseText") ? (
-                            <span
-                              className={clsx(
-                                "flex w-full flex-grow",
-                                (cell.column.id == "requestText" ||
-                                  cell.column.id == "responseText") &&
-                                  dataLoading
-                                  ? "animate-pulse rounded-md bg-slate-200"
-                                  : "hidden",
-                              )}
-                            >
-                              &nbsp;
-                            </span>
-                          ) : (
-                            <div className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
-                              {flexRender(
-                                cell.column.columnDef.cell,
-                                cell.getContext(),
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </ConditionalLink>
-                    </td>
+                            {i === 0 && row.getCanExpand() && (
+                              <button
+                                {...{
+                                  onClick: row.getToggleExpandedHandler(),
+                                  style: { cursor: "pointer" },
+                                  "data-expander": true,
+                                }}
+                                className="p-0.5"
+                              >
+                                {row.getIsExpanded() ? (
+                                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                ) : (
+                                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                )}
+                              </button>
+                            )}
+                            {dataLoading &&
+                            (cell.column.id == "requestText" ||
+                              cell.column.id == "responseText") ? (
+                              <span
+                                className={clsx(
+                                  "flex w-full flex-grow",
+                                  (cell.column.id == "requestText" ||
+                                    cell.column.id == "responseText") &&
+                                    dataLoading
+                                    ? "animate-pulse rounded-md bg-slate-200"
+                                    : "hidden",
+                                )}
+                              >
+                                &nbsp;
+                              </span>
+                            ) : (
+                              <div className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
+                                {flexRender(
+                                  cell.column.columnDef.cell,
+                                  cell.getContext(),
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </ConditionalLink>
+                      </td>
                     );
                   })}
                 </tr>

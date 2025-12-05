@@ -21,12 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Muted, Small, XSmall } from "@/components/ui/typography";
 import { useAutoTopoffSettings } from "@/services/hooks/useAutoTopoff";
 import {
@@ -36,7 +31,6 @@ import {
   useInvoices,
   useSpendBreakdown,
   type ModelSpend,
-  type OrgDiscount,
   type PurchasedCredits,
 } from "@/services/hooks/useCredits";
 import { formatDate } from "@/utils/date";
@@ -49,7 +43,6 @@ import {
   Clock,
   CreditCard,
   ExternalLink,
-  FileText,
   RefreshCcw,
   Settings,
   Wallet,
@@ -93,7 +86,9 @@ const Credits: NextPageWithLayout<void> = () => {
   // Tab state synced with URL
   const currentTab = (router.query.tab as string) || "overview";
   const setCurrentTab = (tab: string) => {
-    router.replace({ query: { ...router.query, tab } }, undefined, { shallow: true });
+    router.replace({ query: { ...router.query, tab } }, undefined, {
+      shallow: true,
+    });
   };
 
   // Data hooks
@@ -250,7 +245,11 @@ const Credits: NextPageWithLayout<void> = () => {
 
       <div className="flex min-h-0 flex-1 justify-center">
         <div className="flex w-full max-w-7xl flex-col">
-          <Tabs value={currentTab} onValueChange={setCurrentTab} className="flex min-h-0 flex-1 flex-col">
+          <Tabs
+            value={currentTab}
+            onValueChange={setCurrentTab}
+            className="flex min-h-0 flex-1 flex-col"
+          >
             <div className="px-6 pt-4">
               <TabsList>
                 <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -265,7 +264,10 @@ const Credits: NextPageWithLayout<void> = () => {
             </div>
 
             {/* Overview Tab */}
-            <TabsContent value="overview" className="overflow-auto p-6 mt-0 data-[state=inactive]:hidden">
+            <TabsContent
+              value="overview"
+              className="mt-0 overflow-auto p-6 data-[state=inactive]:hidden"
+            >
               <div className="flex flex-col gap-6">
                 {/* Current Balance Card */}
                 <Card>
@@ -280,7 +282,9 @@ const Credits: NextPageWithLayout<void> = () => {
                   <CardContent>
                     <div className="font-mono text-3xl font-bold">
                       {isLoading ? (
-                        <span className="text-muted-foreground">Loading...</span>
+                        <span className="text-muted-foreground">
+                          Loading...
+                        </span>
                       ) : creditError ? (
                         <span className="text-destructive">
                           Error loading balance
@@ -303,7 +307,10 @@ const Credits: NextPageWithLayout<void> = () => {
                   <Card>
                     <CardHeader>
                       <div className="flex items-center gap-2">
-                        <CreditCard size={20} className="text-muted-foreground" />
+                        <CreditCard
+                          size={20}
+                          className="text-muted-foreground"
+                        />
                         <CardTitle className="text-base">Buy Credits</CardTitle>
                       </div>
                     </CardHeader>
@@ -323,11 +330,17 @@ const Credits: NextPageWithLayout<void> = () => {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Zap size={20} className="text-muted-foreground" />
-                          <CardTitle className="text-base">Auto Top-Up</CardTitle>
+                          <CardTitle className="text-base">
+                            Auto Top-Up
+                          </CardTitle>
                         </div>
                         {autoTopoffSettings && (
                           <Badge
-                            variant={autoTopoffSettings.enabled ? "default" : "secondary"}
+                            variant={
+                              autoTopoffSettings.enabled
+                                ? "default"
+                                : "secondary"
+                            }
                           >
                             {autoTopoffSettings.enabled ? "Active" : "Inactive"}
                           </Badge>
@@ -342,10 +355,19 @@ const Credits: NextPageWithLayout<void> = () => {
                       {autoTopoffSettings?.enabled && (
                         <div className="flex flex-col gap-2">
                           <div className="flex items-center gap-2 text-sm text-foreground">
-                            <Wallet size={14} className="text-muted-foreground" />
+                            <Wallet
+                              size={14}
+                              className="text-muted-foreground"
+                            />
                             <span>
-                              Triggers at ${(autoTopoffSettings.thresholdCents / 100).toFixed(0)}{" "}
-                              • Tops up ${(autoTopoffSettings.topoffAmountCents / 100).toFixed(0)}
+                              Triggers at $
+                              {(
+                                autoTopoffSettings.thresholdCents / 100
+                              ).toFixed(0)}{" "}
+                              • Tops up $
+                              {(
+                                autoTopoffSettings.topoffAmountCents / 100
+                              ).toFixed(0)}
                             </span>
                           </div>
                           {autoTopoffSettings.lastTopoffAt && (
@@ -381,9 +403,13 @@ const Credits: NextPageWithLayout<void> = () => {
                 <Card>
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-base">Recent Transactions</CardTitle>
+                      <CardTitle className="text-base">
+                        Recent Transactions
+                      </CardTitle>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">Page size</span>
+                        <span className="text-sm text-muted-foreground">
+                          Page size
+                        </span>
                         <Select
                           value={pageSize.toString()}
                           onValueChange={(value) => {
@@ -417,78 +443,175 @@ const Credits: NextPageWithLayout<void> = () => {
                     ) : transactions.length > 0 ? (
                       <>
                         <div className="space-y-0">
-                          {transactions.map((transaction: PurchasedCredits, index: number) => {
-                            const amount = transaction.credits || 0;
-                            const created = new Date(transaction.createdAt);
-                            const createdStr = created.toISOString();
-                            const status = transaction.status;
+                          {transactions.map(
+                            (transaction: PurchasedCredits, index: number) => {
+                              const amount = transaction.credits || 0;
+                              const created = new Date(transaction.createdAt);
+                              const createdStr = created.toISOString();
+                              const status = transaction.status;
 
-                            const getStatusDisplay = () => {
-                              if (status === "refunded") {
-                                return { label: "Refunded", icon: AlertCircle, className: "text-amber-600 dark:text-amber-500", showAmount: true, showNetAmount: false };
-                              }
-                              if (transaction.isRefunded && transaction.refundedAmount && transaction.refundedAmount > 0) {
-                                return { label: "Partially refunded", icon: AlertCircle, className: "text-amber-600 dark:text-amber-500", showAmount: true, showNetAmount: true };
-                              }
-                              switch (status) {
-                                case "succeeded":
-                                  return { label: "Completed", icon: CheckCircle, className: "text-green-600 dark:text-green-500", showAmount: true, showNetAmount: false };
-                                case "processing":
-                                  return { label: "Processing", icon: Clock, className: "text-blue-600 dark:text-blue-500", showAmount: true, showNetAmount: false };
-                                case "canceled":
-                                  return { label: "Canceled", icon: XCircle, className: "text-muted-foreground", showAmount: false, showNetAmount: false };
-                                case "requires_action":
-                                case "requires_capture":
-                                case "requires_confirmation":
-                                case "requires_payment_method":
-                                  return { label: "Action Required", icon: AlertCircle, className: "text-amber-600 dark:text-amber-500", showAmount: true, showNetAmount: false };
-                                default:
-                                  return { label: "Credit purchase", icon: CheckCircle, className: "text-green-600 dark:text-green-500", showAmount: true, showNetAmount: false };
-                              }
-                            };
+                              const getStatusDisplay = () => {
+                                if (status === "refunded") {
+                                  return {
+                                    label: "Refunded",
+                                    icon: AlertCircle,
+                                    className:
+                                      "text-amber-600 dark:text-amber-500",
+                                    showAmount: true,
+                                    showNetAmount: false,
+                                  };
+                                }
+                                if (
+                                  transaction.isRefunded &&
+                                  transaction.refundedAmount &&
+                                  transaction.refundedAmount > 0
+                                ) {
+                                  return {
+                                    label: "Partially refunded",
+                                    icon: AlertCircle,
+                                    className:
+                                      "text-amber-600 dark:text-amber-500",
+                                    showAmount: true,
+                                    showNetAmount: true,
+                                  };
+                                }
+                                switch (status) {
+                                  case "succeeded":
+                                    return {
+                                      label: "Completed",
+                                      icon: CheckCircle,
+                                      className:
+                                        "text-green-600 dark:text-green-500",
+                                      showAmount: true,
+                                      showNetAmount: false,
+                                    };
+                                  case "processing":
+                                    return {
+                                      label: "Processing",
+                                      icon: Clock,
+                                      className:
+                                        "text-blue-600 dark:text-blue-500",
+                                      showAmount: true,
+                                      showNetAmount: false,
+                                    };
+                                  case "canceled":
+                                    return {
+                                      label: "Canceled",
+                                      icon: XCircle,
+                                      className: "text-muted-foreground",
+                                      showAmount: false,
+                                      showNetAmount: false,
+                                    };
+                                  case "requires_action":
+                                  case "requires_capture":
+                                  case "requires_confirmation":
+                                  case "requires_payment_method":
+                                    return {
+                                      label: "Action Required",
+                                      icon: AlertCircle,
+                                      className:
+                                        "text-amber-600 dark:text-amber-500",
+                                      showAmount: true,
+                                      showNetAmount: false,
+                                    };
+                                  default:
+                                    return {
+                                      label: "Credit purchase",
+                                      icon: CheckCircle,
+                                      className:
+                                        "text-green-600 dark:text-green-500",
+                                      showAmount: true,
+                                      showNetAmount: false,
+                                    };
+                                }
+                              };
 
-                            const statusDisplay = getStatusDisplay();
-                            const StatusIcon = statusDisplay.icon;
-                            const refundedAmountCents = transaction.refundedAmount ?? 0;
-                            const netCents = amount - refundedAmountCents;
+                              const statusDisplay = getStatusDisplay();
+                              const StatusIcon = statusDisplay.icon;
+                              const refundedAmountCents =
+                                transaction.refundedAmount ?? 0;
+                              const netCents = amount - refundedAmountCents;
 
-                            return (
-                              <div
-                                key={transaction.id || index}
-                                className="flex items-center justify-between border-b border-border py-4 last:border-b-0"
-                              >
-                                <div className="flex items-start gap-3">
-                                  <StatusIcon size={16} className={`mt-0.5 ${statusDisplay.className}`} />
-                                  <div className="flex flex-col gap-1">
-                                    <div className="text-sm" title={created.toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}>
-                                      {formatDate(createdStr)}
+                              return (
+                                <div
+                                  key={transaction.id || index}
+                                  className="flex items-center justify-between border-b border-border py-4 last:border-b-0"
+                                >
+                                  <div className="flex items-start gap-3">
+                                    <StatusIcon
+                                      size={16}
+                                      className={`mt-0.5 ${statusDisplay.className}`}
+                                    />
+                                    <div className="flex flex-col gap-1">
+                                      <div
+                                        className="text-sm"
+                                        title={created.toLocaleString("en-US", {
+                                          month: "short",
+                                          day: "numeric",
+                                          year: "numeric",
+                                          hour: "2-digit",
+                                          minute: "2-digit",
+                                        })}
+                                      >
+                                        {formatDate(createdStr)}
+                                      </div>
+                                      <XSmall className="text-muted-foreground">
+                                        {statusDisplay.label}
+                                      </XSmall>
                                     </div>
-                                    <XSmall className="text-muted-foreground">{statusDisplay.label}</XSmall>
                                   </div>
+                                  {statusDisplay.showAmount && (
+                                    <div className="flex flex-col items-end gap-0.5">
+                                      <div
+                                        className={`text-sm font-medium ${status === "refunded" ? "text-muted-foreground line-through" : transaction.isRefunded ? "text-green-600 dark:text-green-500" : statusDisplay.className}`}
+                                      >
+                                        {status !== "refunded" &&
+                                        (status === "succeeded" ||
+                                          status === "processing")
+                                          ? "+"
+                                          : ""}
+                                        {(amount / 100).toLocaleString(
+                                          "en-US",
+                                          {
+                                            style: "currency",
+                                            currency: "usd",
+                                          },
+                                        )}
+                                      </div>
+                                      {transaction.refundedAmount &&
+                                        transaction.refundedAmount > 0 && (
+                                          <div className="text-sm font-medium text-red-600 dark:text-red-500">
+                                            -
+                                            {(
+                                              transaction.refundedAmount / 100
+                                            ).toLocaleString("en-US", {
+                                              style: "currency",
+                                              currency: "usd",
+                                            })}
+                                          </div>
+                                        )}
+                                      {statusDisplay.showNetAmount &&
+                                        refundedAmountCents > 0 &&
+                                        netCents > 0 && (
+                                          <div className="mt-0.5 border-t border-border pt-0.5">
+                                            <XSmall className="font-medium text-foreground">
+                                              Net: +
+                                              {(netCents / 100).toLocaleString(
+                                                "en-US",
+                                                {
+                                                  style: "currency",
+                                                  currency: "usd",
+                                                },
+                                              )}
+                                            </XSmall>
+                                          </div>
+                                        )}
+                                    </div>
+                                  )}
                                 </div>
-                                {statusDisplay.showAmount && (
-                                  <div className="flex flex-col items-end gap-0.5">
-                                    <div className={`text-sm font-medium ${status === "refunded" ? "text-muted-foreground line-through" : transaction.isRefunded ? "text-green-600 dark:text-green-500" : statusDisplay.className}`}>
-                                      {status !== "refunded" && (status === "succeeded" || status === "processing") ? "+" : ""}
-                                      {(amount / 100).toLocaleString("en-US", { style: "currency", currency: "usd" })}
-                                    </div>
-                                    {transaction.refundedAmount && transaction.refundedAmount > 0 && (
-                                      <div className="text-sm font-medium text-red-600 dark:text-red-500">
-                                        -{(transaction.refundedAmount / 100).toLocaleString("en-US", { style: "currency", currency: "usd" })}
-                                      </div>
-                                    )}
-                                    {statusDisplay.showNetAmount && refundedAmountCents > 0 && netCents > 0 && (
-                                      <div className="mt-0.5 border-t border-border pt-0.5">
-                                        <XSmall className="font-medium text-foreground">
-                                          Net: +{(netCents / 100).toLocaleString("en-US", { style: "currency", currency: "usd" })}
-                                        </XSmall>
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })}
+                              );
+                            },
+                          )}
                         </div>
                         {/* Pagination */}
                         <div className="mt-6 flex items-center justify-center gap-2 border-t border-border pt-4">
@@ -499,7 +622,10 @@ const Credits: NextPageWithLayout<void> = () => {
                               if (hasPrevious) {
                                 const newHistory = [...pageTokenHistory];
                                 newHistory.pop();
-                                const previousToken = newHistory.length > 0 ? newHistory[newHistory.length - 1] : null;
+                                const previousToken =
+                                  newHistory.length > 0
+                                    ? newHistory[newHistory.length - 1]
+                                    : null;
                                 setPageTokenHistory(newHistory);
                                 setCurrentPageToken(previousToken);
                               }
@@ -508,13 +634,18 @@ const Credits: NextPageWithLayout<void> = () => {
                           >
                             <ChevronLeft className="h-3 w-3" />
                           </Button>
-                          <Badge variant="secondary" className="text-xs">Page {currentPageNumber}</Badge>
+                          <Badge variant="secondary" className="text-xs">
+                            Page {currentPageNumber}
+                          </Badge>
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => {
                               if (hasMore && transactionsData?.nextPage) {
-                                setPageTokenHistory([...pageTokenHistory, currentPageToken || ""]);
+                                setPageTokenHistory([
+                                  ...pageTokenHistory,
+                                  currentPageToken || "",
+                                ]);
                                 setCurrentPageToken(transactionsData.nextPage);
                               }
                             }}
@@ -531,27 +662,39 @@ const Credits: NextPageWithLayout<void> = () => {
                     )}
                   </CardContent>
                 </Card>
-
               </div>
             </TabsContent>
 
             {/* Usage Tab */}
-            <TabsContent value="usage" className="flex min-h-0 flex-col mt-0 data-[state=inactive]:hidden">
+            <TabsContent
+              value="usage"
+              className="mt-0 flex min-h-0 flex-col data-[state=inactive]:hidden"
+            >
               <div className="flex items-center justify-between border-b px-6 py-3">
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
                     <Small className="text-muted-foreground">From:</Small>
-                    <DatePicker date={startDate} onDateChange={(d) => d && setStartDate(d)} />
+                    <DatePicker
+                      date={startDate}
+                      onDateChange={(d) => d && setStartDate(d)}
+                    />
                   </div>
                   <div className="flex items-center gap-2">
                     <Small className="text-muted-foreground">To:</Small>
-                    <DatePicker date={endDate} onDateChange={(d) => d && setEndDate(d)} />
+                    <DatePicker
+                      date={endDate}
+                      onDateChange={(d) => d && setEndDate(d)}
+                    />
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground">Total:</span>
                   <span className="font-mono text-lg font-semibold">
-                    {breakdownLoading ? "..." : breakdownError ? "-" : formatCost(breakdownData?.totalCost ?? 0)}
+                    {breakdownLoading
+                      ? "..."
+                      : breakdownError
+                        ? "-"
+                        : formatCost(breakdownData?.totalCost ?? 0)}
                   </span>
                 </div>
               </div>
@@ -567,31 +710,59 @@ const Credits: NextPageWithLayout<void> = () => {
                   </div>
                 ) : sortedModels.length === 0 ? (
                   <div className="flex h-full items-center justify-center">
-                    <span className="text-muted-foreground">No spend data for this time range</span>
+                    <span className="text-muted-foreground">
+                      No spend data for this time range
+                    </span>
                   </div>
                 ) : (
                   <Table>
                     <TableHeader className="sticky top-0 bg-background">
                       <TableRow className="border-b">
                         <SortableHeader field="model">Model</SortableHeader>
-                        <SortableHeader field="provider">Provider</SortableHeader>
-                        <SortableHeader field="inputTokens" align="right">Input Tokens</SortableHeader>
-                        <SortableHeader field="outputTokens" align="right">Output Tokens</SortableHeader>
+                        <SortableHeader field="provider">
+                          Provider
+                        </SortableHeader>
+                        <SortableHeader field="inputTokens" align="right">
+                          Input Tokens
+                        </SortableHeader>
+                        <SortableHeader field="outputTokens" align="right">
+                          Output Tokens
+                        </SortableHeader>
                         <TableHead className="text-right">Input $/1M</TableHead>
-                        <TableHead className="text-right">Output $/1M</TableHead>
-                        <SortableHeader field="total" align="right">Cost</SortableHeader>
+                        <TableHead className="text-right">
+                          Output $/1M
+                        </TableHead>
+                        <SortableHeader field="total" align="right">
+                          Cost
+                        </SortableHeader>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {sortedModels.map((item: ModelSpend, index: number) => (
-                        <TableRow key={`${item.model}-${item.provider}-${index}`}>
-                          <TableCell className="font-medium">{item.model || "(unknown)"}</TableCell>
-                          <TableCell className="text-muted-foreground">{item.provider || "(unknown)"}</TableCell>
-                          <TableCell className="text-right font-mono">{formatTokens(item.promptTokens)}</TableCell>
-                          <TableCell className="text-right font-mono">{formatTokens(item.completionTokens)}</TableCell>
-                          <TableCell className="text-right font-mono text-muted-foreground">{formatPrice(item.pricing?.inputPer1M)}</TableCell>
-                          <TableCell className="text-right font-mono text-muted-foreground">{formatPrice(item.pricing?.outputPer1M)}</TableCell>
-                          <TableCell className="text-right font-mono font-semibold">{formatCost(item.total)}</TableCell>
+                        <TableRow
+                          key={`${item.model}-${item.provider}-${index}`}
+                        >
+                          <TableCell className="font-medium">
+                            {item.model || "(unknown)"}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {item.provider || "(unknown)"}
+                          </TableCell>
+                          <TableCell className="font-mono text-right">
+                            {formatTokens(item.promptTokens)}
+                          </TableCell>
+                          <TableCell className="font-mono text-right">
+                            {formatTokens(item.completionTokens)}
+                          </TableCell>
+                          <TableCell className="font-mono text-right text-muted-foreground">
+                            {formatPrice(item.pricing?.inputPer1M)}
+                          </TableCell>
+                          <TableCell className="font-mono text-right text-muted-foreground">
+                            {formatPrice(item.pricing?.outputPer1M)}
+                          </TableCell>
+                          <TableCell className="font-mono text-right font-semibold">
+                            {formatCost(item.total)}
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -602,7 +773,10 @@ const Credits: NextPageWithLayout<void> = () => {
 
             {/* Invoices Tab (only shown when invoices exist) */}
             {invoices.length > 0 && (
-              <TabsContent value="invoices" className="flex min-h-0 flex-col mt-0 data-[state=inactive]:hidden">
+              <TabsContent
+                value="invoices"
+                className="mt-0 flex min-h-0 flex-col data-[state=inactive]:hidden"
+              >
                 <div className="flex-1 overflow-auto">
                   <Table>
                     <TableHeader className="sticky top-0 bg-background">
@@ -617,13 +791,17 @@ const Credits: NextPageWithLayout<void> = () => {
                       {invoices.map((invoice) => (
                         <TableRow key={invoice.id}>
                           <TableCell className="font-medium">
-                            {new Date(invoice.startDate).toLocaleDateString()} - {new Date(invoice.endDate).toLocaleDateString()}
+                            {new Date(invoice.startDate).toLocaleDateString()} -{" "}
+                            {new Date(invoice.endDate).toLocaleDateString()}
                           </TableCell>
                           <TableCell className="text-muted-foreground">
                             {new Date(invoice.createdAt).toLocaleDateString()}
                           </TableCell>
-                          <TableCell className="text-right font-mono font-semibold">
-                            {(invoice.amountCents / 100).toLocaleString("en-US", { style: "currency", currency: "usd" })}
+                          <TableCell className="font-mono text-right font-semibold">
+                            {(invoice.amountCents / 100).toLocaleString(
+                              "en-US",
+                              { style: "currency", currency: "usd" },
+                            )}
                           </TableCell>
                           <TableCell className="text-right">
                             {invoice.hostedInvoiceUrl ? (
@@ -636,7 +814,9 @@ const Credits: NextPageWithLayout<void> = () => {
                                 View <ExternalLink size={12} />
                               </a>
                             ) : (
-                              <span className="text-sm text-muted-foreground">Pending</span>
+                              <span className="text-sm text-muted-foreground">
+                                Pending
+                              </span>
                             )}
                           </TableCell>
                         </TableRow>
@@ -649,9 +829,14 @@ const Credits: NextPageWithLayout<void> = () => {
 
             {/* Discounts Tab (only shown when discounts exist) */}
             {discounts.length > 0 && (
-              <TabsContent value="discounts" className="flex min-h-0 flex-col mt-0 data-[state=inactive]:hidden">
+              <TabsContent
+                value="discounts"
+                className="mt-0 flex min-h-0 flex-col data-[state=inactive]:hidden"
+              >
                 <div className="border-b px-6 py-3">
-                  <Muted>These discounts will be applied to your future invoices.</Muted>
+                  <Muted>
+                    These discounts will be applied to your future invoices.
+                  </Muted>
                 </div>
                 <div className="flex-1 overflow-auto">
                   <Table>
@@ -665,11 +850,13 @@ const Credits: NextPageWithLayout<void> = () => {
                     <TableBody>
                       {discounts.map((discount, idx) => (
                         <TableRow key={idx}>
-                          <TableCell className="font-medium">{discount.provider || "(any)"}</TableCell>
+                          <TableCell className="font-medium">
+                            {discount.provider || "(any)"}
+                          </TableCell>
                           <TableCell className="font-mono text-sm text-muted-foreground">
                             {discount.model || "(any)"}
                           </TableCell>
-                          <TableCell className="text-right font-mono font-semibold text-green-600">
+                          <TableCell className="font-mono text-right font-semibold text-green-600">
                             {discount.percent}% off
                           </TableCell>
                         </TableRow>
