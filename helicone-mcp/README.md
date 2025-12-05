@@ -1,6 +1,6 @@
 # Helicone MCP Server
 
-A Model Context Protocol (MCP) server for querying Helicone observability platform data.
+A Model Context Protocol (MCP) server for querying Helicone observability platform data and making LLM requests through the Helicone AI Gateway.
 
 ## Installation
 
@@ -20,6 +20,23 @@ A Model Context Protocol (MCP) server for querying Helicone observability platfo
 ```
 
 ## Tools
+
+### `use_ai_gateway`
+
+Make LLM requests through Helicone AI Gateway with automatic observability. Supports 100+ models from OpenAI, Anthropic, Google, and more using OpenAI SDK format.
+
+**Parameters:**
+- `model` (required): Model name (e.g., 'gpt-4o', 'claude-sonnet-4', 'gemini-2.0-flash')
+- `messages` (required): Array of messages with `role` ("system", "user", "assistant") and `content`
+- `max_tokens` (optional): Maximum tokens to generate
+- `temperature` (optional): Response randomness (0-2, default 1)
+- `stream` (optional): Enable streaming response (default false)
+- `sessionId` (optional): Session ID for tracking related requests
+- `sessionName` (optional): Human-readable session name
+- `userId` (optional): User ID for tracking requests by user
+- `customProperties` (optional): Custom properties for request metadata
+
+**Use cases:** Making LLM requests with automatic observability, accessing multiple model providers through one interface, tracking conversations and users.
 
 ### `query_requests`
 
