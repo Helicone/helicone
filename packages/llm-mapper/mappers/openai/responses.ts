@@ -846,6 +846,26 @@ export const mapOpenAIResponse = ({
     model: model || request.model,
   });
 
+  // Convert instructions field to a system message at the beginning of messages array
+  if (request.instructions && mappedRequest.messages) {
+    const systemMessage: Message = {
+      _type: "message",
+      role: "system",
+      content: request.instructions,
+      id: "instructions-system-msg",
+    };
+    mappedRequest.messages = [systemMessage, ...mappedRequest.messages];
+  } else if (request.instructions && !mappedRequest.messages) {
+    // If there are no messages but there are instructions, create messages array with just the system message
+    const systemMessage: Message = {
+      _type: "message",
+      role: "system",
+      content: request.instructions,
+      id: "instructions-system-msg",
+    };
+    mappedRequest.messages = [systemMessage];
+  }
+
   // Create the LlmSchema structure
   const schema: LlmSchema = {
     request: mappedRequest,

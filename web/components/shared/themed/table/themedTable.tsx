@@ -128,6 +128,10 @@ interface ThemedTableProps<T extends { id?: string; subRows?: T[] }> {
    */
   onToggleAllRows?: (table: ReactTable<T>) => void;
   currentRow?: T;
+  /**
+   * Custom loading text to display during skeleton loading state
+   */
+  loadingText?: string;
 }
 
 export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
@@ -154,6 +158,7 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
     tableRef,
     onToggleAllRows,
     currentRow,
+    loadingText = "Loading Data...",
   } = props;
 
   const [expanded, setExpanded] = useState<ExpandedState>({});
@@ -238,7 +243,7 @@ export default function ThemedTable<T extends { id?: string; subRows?: T[] }>(
       {children && <div className="flex-shrink-0">{children}</div>}
       <div className="h-full bg-slate-50 dark:bg-slate-950">
         {skeletonLoading ? (
-          <LoadingAnimation title="Loading Data..." />
+          <LoadingAnimation title={loadingText} />
         ) : rows.length === 0 ? (
           <div className="flex h-48 w-full flex-col items-center justify-center space-y-3 border-border bg-white px-4 py-2 dark:bg-black">
             <TableCellsIcon className="h-12 w-12 text-slate-900 dark:text-slate-100" />
