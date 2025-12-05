@@ -762,8 +762,8 @@ export default function RequestDrawer(props: RequestDivProps) {
                   icon={<ScrollTextIcon className="h-4 w-4" />}
                   copyText={specialProperties.promptId}
                   href={
-                    newPromptId
-                      ? `/prompts`
+                    newPromptVersionId
+                      ? `/prompts?promptId=${newPromptId}`
                       : `/prompts/${promptDataQuery.data?.id}`
                   }
                   truncateLength={dynamicTruncateLength}
