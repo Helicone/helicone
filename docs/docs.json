@@ -44,6 +44,7 @@
                 "pages": [
                   "gateway/integrations/codex",
                   "gateway/integrations/langchain",
+                  "gateway/integrations/langfuse",
                   "gateway/integrations/langgraph",
                   "gateway/integrations/n8n",
                   "gateway/integrations/semantic-kernel",
