@@ -4072,6 +4072,9 @@
 					},
 					"cost": {
 						"$ref": "#/components/schemas/SortDirection"
+					},
+					"time_to_first_token": {
+						"$ref": "#/components/schemas/SortDirection"
 					}
 				},
 				"type": "object",

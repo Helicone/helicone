@@ -1002,6 +1002,7 @@ const models: TsoaRoute.Models = {
             "properties": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"ref":"SortDirection"}},
             "values": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"ref":"SortDirection"}},
             "cost": {"ref":"SortDirection"},
+            "time_to_first_token": {"ref":"SortDirection"},
         },
         "additionalProperties": false,
     },

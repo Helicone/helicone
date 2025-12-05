@@ -1741,6 +1741,7 @@ Json: JsonObject;
         [key: string]: components["schemas"]["SortDirection"];
       };
       cost?: components["schemas"]["SortDirection"];
+      time_to_first_token?: components["schemas"]["SortDirection"];
     };
     RequestQueryParams: {
       filter: components["schemas"]["RequestFilterNode"];

@@ -563,11 +563,15 @@ export class RequestManager extends BaseManager {
 
       let deduped = Array.from(seen.values());
 
-      deduped.sort((a, b) => {
-        const aTime = new Date(a.request_created_at).getTime();
-        const bTime = new Date(b.request_created_at).getTime();
-        return sort.created_at === "asc" ? aTime - bTime : bTime - aTime;
-      });
+      // Only re-sort by created_at if that was the requested sort
+      // Otherwise, preserve the order returned from the database (e.g., latency sort)
+      if (sort.created_at) {
+        deduped.sort((a, b) => {
+          const aTime = new Date(a.request_created_at).getTime();
+          const bTime = new Date(b.request_created_at).getTime();
+          return sort.created_at === "asc" ? aTime - bTime : bTime - aTime;
+        });
+      }
 
       return deduped;
     });
