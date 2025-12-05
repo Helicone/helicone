@@ -1863,47 +1863,13 @@ describe("DeepSeek Registry Tests", () => {
 
       it("should auto-select canopywave provider when none specified", () =>
         runGatewayTest({
-          model: "deepseek-v3/canopywave",
+          model: "deepseek-v3",
           expected: {
             providers: [
               {
                 url: "https://inference.canopywave.io/v1/chat/completions",
                 response: "success",
                 model: "deepseek/deepseek-chat-v3.1",
-                expects: canopywaveAuthExpectations,
-              },
-            ],
-            finalStatus: 200,
-          },
-        }));
-
-      it("should handle canopywave provider", () =>
-        runGatewayTest({
-          model: "deepseek-v3/canopywave",
-          expected: {
-            providers: [
-              {
-                url: "https://inference.canopywave.io/v1/chat/completions",
-                response: "success",
-                model: "deepseek/deepseek-chat-v3.1",
-                data: createOpenAIMockResponse("deepseek/deepseek-chat-v3.1"),
-                expects: canopywaveAuthExpectations,
-              },
-            ],
-            finalStatus: 200,
-          },
-        }));
-
-      it("should handle canopywave provider", () =>
-        runGatewayTest({
-          model: "deepseek-v3/canopywave",
-          expected: {
-            providers: [
-              {
-                url: "https://inference.canopywave.io/v1/chat/completions",
-                response: "success",
-                model: "deepseek/deepseek-chat-v3.1",
-                data: createOpenAIMockResponse("deepseek/deepseek-chat-v3.1"),
                 expects: canopywaveAuthExpectations,
               },
             ],
