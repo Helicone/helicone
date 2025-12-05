@@ -1431,6 +1431,31 @@ describe("DeepSeek Registry Tests", () => {
         }));
     });
 
+    describe("deepseek-v3.1 with Canopy Wave", () => {
+      it("should handle passthrough billing with canopywave provider", () =>
+        runGatewayTest({
+          model: "deepseek-v3/canopywave",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "Test passthrough billing" }],
+              passthroughBilling: true,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "success",
+                model: "deepseek/deepseek-chat-v3.1",
+                data: createOpenAIMockResponse("deepseek/deepseek-chat-v3.1"),
+                expects: canopywaveAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
     describe("deepseek-tng-r1t2-chimera with Chutes", () => {
       it("should handle passthrough billing with chutes provider", () =>
         runGatewayTest({
