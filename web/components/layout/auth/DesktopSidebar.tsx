@@ -10,11 +10,11 @@ import {
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
 import {
+  MessageCircle,
   Rocket,
   Settings,
   Coins,
   FileText,
-  LayoutGrid,
   ArrowUpRight,
 } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -27,6 +27,7 @@ import SidebarHelpDropdown from "../SidebarHelpDropdown";
 import NavItem from "./NavItem";
 import { ChangelogItem } from "./types";
 import SidebarQuickstepCard from "../SidebarQuickstartCard";
+import { useHeliconeAgent } from "@/components/templates/agent/HeliconeAgentContext";
 import { useCredits } from "@/services/hooks/useCredits";
 
 // Sidebar width constants
@@ -54,6 +55,7 @@ const DesktopSidebar = ({
   NAVIGATION,
   sidebarRef,
 }: SidebarProps) => {
+  const { agentChatOpen, setAgentChatOpen } = useHeliconeAgent();
   const orgContext = useOrg();
   const router = useRouter();
   const onboardingStatus = orgContext?.currentOrg
@@ -405,29 +407,6 @@ const DesktopSidebar = ({
                 )}
               </a>
 
-              <a
-                href="https://helicone.ai/models"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={cn(
-                  "flex items-center text-xs text-muted-foreground hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
-                  isCollapsed
-                    ? "h-8 w-8 justify-center rounded-md"
-                    : "h-8 w-full justify-start gap-2 rounded-md px-3",
-                )}
-              >
-                <LayoutGrid size={16} className="text-muted-foreground" />
-                {!isCollapsed && (
-                  <>
-                    <span>Models</span>
-                    <ArrowUpRight
-                      size={12}
-                      className="ml-auto text-muted-foreground"
-                    />
-                  </>
-                )}
-              </a>
-
               {/* Partial-width divider */}
               <div
                 className={cn(
@@ -438,6 +417,26 @@ const DesktopSidebar = ({
 
               {orgContext?.currentOrg?.tier !== "demo" && (
                 <>
+                  <Button
+                    variant="ghost"
+                    size="none"
+                    onClick={() => setAgentChatOpen(!agentChatOpen)}
+                    className={cn(
+                      "flex items-center text-xs text-muted-foreground hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
+                      isCollapsed
+                        ? "h-8 w-8 justify-center"
+                        : "h-8 w-full justify-start gap-2 px-3",
+                    )}
+                  >
+                    <div className="relative">
+                      <MessageCircle size={16} className="text-muted-foreground" />
+                      {agentChatOpen && (
+                        <span className="absolute -right-1 -top-1 h-1.5 w-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
+                      )}
+                    </div>
+                    {!isCollapsed && <span>Support</span>}
+                  </Button>
+
                   <Button
                     variant="ghost"
                     size="none"

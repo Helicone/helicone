@@ -13,7 +13,6 @@ import {
   ArrowUpRightIcon,
   CalendarIcon,
   HelpCircle,
-  MessageCircle,
   MessageCircleMore,
   Zap,
 } from "lucide-react";
@@ -22,7 +21,6 @@ import { useEffect, useState } from "react";
 import { FaDiscord } from "react-icons/fa6";
 import { ChangelogItem } from "./auth/types";
 import { useOrg } from "./org/organizationContext";
-import { useHeliconeAgent } from "@/components/templates/agent/HeliconeAgentContext";
 import { useRouter } from "next/router";
 import Intercom from "@intercom/messenger-js-sdk";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
@@ -47,7 +45,6 @@ const SidebarHelpDropdown = ({
 
   const [chatOpen, setChatOpen] = useState(false);
   const orgContext = useOrg();
-  const { agentChatOpen, setAgentChatOpen } = useHeliconeAgent();
   const router = useRouter();
   const heliconeAuthClient = useHeliconeAuthClient();
   Intercom({
@@ -67,7 +64,7 @@ const SidebarHelpDropdown = ({
     }
   }, [pathname]);
   return (
-    <div className="flex w-full flex-col items-center">
+    <div className="mt-1.5 flex w-full flex-col items-center">
       <DropdownMenu
         modal={false}
         onOpenChange={
@@ -99,18 +96,6 @@ const SidebarHelpDropdown = ({
           >
             <Zap className="mr-2 h-4 w-4 text-slate-500" />
             Quickstart
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="cursor-pointer"
-            onSelect={() => setAgentChatOpen(!agentChatOpen)}
-          >
-            <div className="relative mr-2">
-              <MessageCircle className="h-4 w-4 text-slate-500" />
-              {agentChatOpen && (
-                <span className="absolute -right-1 -top-1 h-1.5 w-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
-              )}
-            </div>
-            AI Support
           </DropdownMenuItem>
           <DropdownMenuItem
             className="cursor-pointer"
