@@ -33,7 +33,7 @@
 - 🎛️ **Fine-tune**: Fine-tune with one of our fine-tuning partners: [OpenPipe](https://openpipe.ai/) or [Autonomi](https://www.autonomi.ai/) (more coming soon)
 - 🛡️ **Enterprise Ready**: SOC 2 and GDPR compliant
 
-> 🎁 Generous monthly [free tier](https://www.helicone.ai/pricing) (10k requests/month) - No credit card required!
+> 🎁 Generous monthly [free tier](https://www.helicone.ai/pricing) (10k requests/month) - No credit card required! Get started in minutes.
 >
 <img src="https://github.com/user-attachments/assets/e16332e9-d642-427e-b3ce-1a74a17f7b2c" alt="Open Sourced LLM Observability & AI Gateway Platform" width="600">
 
