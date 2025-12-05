@@ -32,6 +32,7 @@
 - 🧠 **Prompt Management**: [Version prompts](https://docs.helicone.ai/features/prompts) using production data. Deploy prompts through the AI Gateway without code changes. Your prompts remain under your control, always accessible.
 - 🎛️ **Fine-tune**: Fine-tune with one of our fine-tuning partners: [OpenPipe](https://openpipe.ai/) or [Autonomi](https://www.autonomi.ai/) (more coming soon)
 - 🛡️ **Enterprise Ready**: SOC 2 and GDPR compliant
+- 🔧 **Open Source**: Self-host and contribute to Helicone
 
 > 🎁 Generous monthly [free tier](https://www.helicone.ai/pricing) (10k requests/month) - No credit card required!
 >
