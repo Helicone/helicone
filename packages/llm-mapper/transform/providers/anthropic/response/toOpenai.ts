@@ -58,7 +58,7 @@ export function toOpenAI(response: AnthropicResponseBody): OpenAIResponseBody {
     usage: {
       prompt_tokens: anthropicUsage.input_tokens,
       completion_tokens: anthropicUsage.output_tokens,
-      total_tokens: anthropicUsage.input_tokens + anthropicUsage.output_tokens,
+      total_tokens: anthropicUsage.input_tokens + anthropicUsage.output_tokens + cachedTokens + cacheWriteTokens,
       ...((cachedTokens > 0 || cacheWriteTokens > 0) && {
         prompt_tokens_details: {
           cached_tokens: cachedTokens,

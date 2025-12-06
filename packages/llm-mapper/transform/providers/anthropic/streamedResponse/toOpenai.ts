@@ -316,7 +316,9 @@ export class AnthropicToOpenAIStreamConverter {
           completion_tokens: event.usage.output_tokens,
           total_tokens:
             (event.usage.input_tokens ?? this.inputTokens) +
-            event.usage.output_tokens,
+            event.usage.output_tokens +
+            (cachedTokens ?? 0) +
+            (cacheWriteTokens ?? 0),
           ...((cachedTokens > 0 || cacheWriteTokens > 0) && {
             prompt_tokens_details: {
               cached_tokens: cachedTokens,

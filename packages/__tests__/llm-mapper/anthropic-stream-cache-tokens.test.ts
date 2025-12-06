@@ -35,9 +35,9 @@ data: {"type":"message_stop"}`;
     const usageChunk = chunks.find((c) => c.usage);
     expect(usageChunk).toBeDefined();
 
-    // The bug: prompt_tokens was only 4 (input_tokens), ignoring cache_creation_input_tokens (51713)
-    // Expected: prompt_tokens should be 4 + 51713 = 51717
-    expect(usageChunk.usage.prompt_tokens).toBe(4 + 51713);
+    expect(usageChunk.usage.prompt_tokens).toBe(4);
+    expect(usageChunk.usage.prompt_tokens_details.cache_write_tokens).toBe(51713);
+    expect(usageChunk.usage.prompt_tokens_details.cache_write_details.write_5m_tokens).toBe(51713);
     expect(usageChunk.usage.total_tokens).toBe(4 + 51713 + 813);
 
     // Cache details should still be preserved
@@ -76,9 +76,7 @@ data: {"type":"message_stop"}`;
     const usageChunk = chunks.find((c) => c.usage);
     expect(usageChunk).toBeDefined();
 
-    // prompt_tokens should include cache_read_input_tokens
-    // Total input = 4 (new) + 51713 (cached) = 51717
-    expect(usageChunk.usage.prompt_tokens).toBe(4 + 51713);
+    expect(usageChunk.usage.prompt_tokens).toBe(4);
     expect(usageChunk.usage.total_tokens).toBe(4 + 51713 + 100);
     expect(usageChunk.usage.prompt_tokens_details?.cached_tokens).toBe(51713);
   });
@@ -138,8 +136,7 @@ describe("toOpenAI (non-streaming) - Cache Token Handling", () => {
 
     const result = toOpenAI(anthropicResponse);
 
-    // prompt_tokens should be input_tokens + cache_creation_input_tokens
-    expect(result.usage.prompt_tokens).toBe(4 + 51713);
+    expect(result.usage.prompt_tokens).toBe(4);
     expect(result.usage.total_tokens).toBe(4 + 51713 + 100);
     expect(result.usage.prompt_tokens_details?.cache_write_tokens).toBe(51713);
   });
@@ -164,7 +161,7 @@ describe("toOpenAI (non-streaming) - Cache Token Handling", () => {
     const result = toOpenAI(anthropicResponse);
 
     // prompt_tokens should be input_tokens + cache_read_input_tokens
-    expect(result.usage.prompt_tokens).toBe(4 + 51713);
+    expect(result.usage.prompt_tokens).toBe(4);
     expect(result.usage.total_tokens).toBe(4 + 51713 + 100);
     expect(result.usage.prompt_tokens_details?.cached_tokens).toBe(51713);
   });
