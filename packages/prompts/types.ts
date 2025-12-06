@@ -190,28 +190,24 @@ export type HeliconePromptParams = {
 
 /**
  * Reasoning options for controlling thinking/reasoning behavior.
- *
- * These options extend the standard OpenAI reasoning_effort parameter
- * with provider-specific controls for enhanced thinking capabilities.
  */
 export interface HeliconeReasoningOptions {
   reasoning_options?: {
     /**
-     * Token budget for thinking (works with both Anthropic and Google models)
-     * - For Anthropic: Maps to thinking.budget_tokens
-     * - For Google: Maps to thinkingConfig.thinkingBudget
+     * Token budget for thinking.
+     * - For Google Gemini 2.5: Maps to thinkingConfig.thinkingBudget
+     * - Use -1 for dynamic thinking
      */
     budget_tokens?: number;
 
     /**
      * Thinking level for Google Gemini 3+ models.
-     * This is a Google-specific option.
      * - "low" for faster, less detailed reasoning
      * - "high" for more detailed reasoning
      */
     thinking_level?: "low" | "high";
-  }
-};
+  };
+}
 
 /**
  * Configuration for context editing strategies.

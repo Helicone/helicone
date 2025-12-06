@@ -79,48 +79,12 @@ type ExtendedHeliconeChatCreateParams = HeliconeChatCreateParams & {
 
 /**
  * Extended reasoning options for Google-specific thinking configuration.
- * These extend the standard OpenAI reasoning_options.
  */
 interface GoogleReasoningOptions {
-  /** Token budget for thinking (overrides effort-based calculation) */
+  /** Token budget for thinking (Gemini 2.5 models) */
   budget_tokens?: number;
-  /** Thinking level for Gemini 3+ models */
+  /** Thinking level (Gemini 3+ models) */
   thinking_level?: "low" | "high";
-}
-
-/**
- * Maps OpenAI reasoning_effort levels to Google thinking levels.
- * OpenAI uses: "low" | "medium" | "high"
- * Google uses: "low" | "high" for thinkingLevel
- */
-function mapReasoningEffortToThinkingLevel(
-  effort: "low" | "medium" | "high"
-): "low" | "high" {
-  // Map medium to low, as Google only supports low/high
-  return effort === "high" ? "high" : "low";
-}
-
-/**
- * Maps OpenAI reasoning_effort levels to a token budget for Gemini 2.5 models.
- * These are approximate mappings based on typical reasoning needs.
- */
-function mapReasoningEffortToThinkingBudget(
-  effort: "low" | "medium" | "high",
-  maxOutputTokens?: number
-): number {
-  // Use maxOutputTokens as a reference point, or default values
-  const baseTokens = maxOutputTokens ?? 4096;
-
-  switch (effort) {
-    case "low":
-      return Math.min(1024, Math.floor(baseTokens / 4));
-    case "medium":
-      return Math.min(4096, Math.floor(baseTokens / 2));
-    case "high":
-      return -1; // -1 means dynamic thinking in Google's API
-    default:
-      return Math.floor(baseTokens / 2);
-  }
 }
 
 export function toGoogle(
@@ -199,6 +163,10 @@ export function toGoogle(
     }
   }
 
+  // Debug: Log outbound Google request
+  console.log("[toGoogle] OpenAI input:", JSON.stringify(openAIBody, null, 2));
+  console.log("[toGoogle] Google output:", JSON.stringify(geminiBody, null, 2));
+
   return geminiBody;
 }
 
@@ -268,49 +236,61 @@ function buildGenerationConfig(
 }
 
 /**
+ * Maps OpenAI reasoning_effort to Google thinkingLevel.
+ */
+function mapReasoningEffortToThinkingLevel(
+  effort: "low" | "medium" | "high"
+): "low" | "high" {
+  // Google only supports "low" and "high", so map "medium" to "low"
+  return effort === "high" ? "high" : "low";
+}
+
+/**
  * Builds the Google thinking configuration from OpenAI reasoning parameters.
  *
- * Maps OpenAI's reasoning_effort and reasoning_options to Google's thinkingConfig:
- * - reasoning_effort: "low" | "medium" | "high" -> thinkingLevel or thinkingBudget
- * - reasoning_options.budget_tokens: specific token budget
- * - reasoning_options.thinking_level: direct thinking level override
+ * Supports both:
+ * - reasoning_effort: "low" | "medium" | "high" -> thinkingLevel
+ * - reasoning_options.budget_tokens -> thinkingBudget
+ * - reasoning_options.thinking_level -> thinkingLevel (overrides reasoning_effort)
+ *
+ * If no reasoning parameters are provided, explicitly disables thinking
+ * by setting thinkingBudget to 0.
  */
 function buildThinkingConfig(
   body: HeliconeChatCreateParams,
-  maxOutputTokens?: number
-): GeminiThinkingConfig | undefined {
-  // Check if reasoning is requested
+  _maxOutputTokens?: number
+): GeminiThinkingConfig {
   const reasoningEffort = body.reasoning_effort;
   const reasoningOptions = body.reasoning_options as GoogleReasoningOptions | undefined;
 
-  // If no reasoning configuration, return undefined
+  // If no reasoning configuration, disable thinking by setting budget to 0
   if (!reasoningEffort && !reasoningOptions) {
-    return undefined;
+    return {
+      thinkingBudget: 0,
+    };
   }
 
   const thinkingConfig: GeminiThinkingConfig = {
-    includeThoughts: true, // Always include thoughts when reasoning is enabled
+    includeThoughts: true,
   };
 
-  // Handle explicit thinking_level from reasoning_options (Google-specific)
-  if (reasoningOptions?.thinking_level) {
-    thinkingConfig.thinkingLevel = reasoningOptions.thinking_level;
-  } else if (reasoningEffort) {
-    // Map OpenAI reasoning_effort to Google thinking level
+  // Handle reasoning_effort -> thinkingLevel
+  if (reasoningEffort) {
     thinkingConfig.thinkingLevel = mapReasoningEffortToThinkingLevel(
       reasoningEffort as "low" | "medium" | "high"
     );
   }
 
-  // Handle explicit budget_tokens from reasoning_options
-  if (reasoningOptions?.budget_tokens !== undefined) {
-    thinkingConfig.thinkingBudget = reasoningOptions.budget_tokens;
-  } else if (reasoningEffort) {
-    // Map OpenAI reasoning_effort to a token budget for Gemini 2.5 models
-    thinkingConfig.thinkingBudget = mapReasoningEffortToThinkingBudget(
-      reasoningEffort as "low" | "medium" | "high",
-      maxOutputTokens
-    );
+  // reasoning_options can override or add to the config
+  if (reasoningOptions) {
+    if (reasoningOptions.budget_tokens !== undefined) {
+      thinkingConfig.thinkingBudget = reasoningOptions.budget_tokens;
+    }
+
+    // thinking_level in reasoning_options overrides reasoning_effort
+    if (reasoningOptions.thinking_level !== undefined) {
+      thinkingConfig.thinkingLevel = reasoningOptions.thinking_level;
+    }
   }
 
   return thinkingConfig;

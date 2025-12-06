@@ -6,51 +6,90 @@ import { HeliconeChatCreateParams } from "../../prompts/types";
 
 describe("Google Reasoning/Thinking Support", () => {
   describe("Request Mapper (toGoogle)", () => {
-    it("should add thinkingConfig when reasoning_effort is provided", () => {
+    it("should map reasoning_effort 'high' to thinkingLevel 'high'", () => {
       const openAIRequest: HeliconeChatCreateParams = {
-        model: "gemini-2.5-flash",
+        model: "gemini-3-pro",
         messages: [{ role: "user", content: "What is 2+2?" }],
         reasoning_effort: "high",
       };
 
       const googleRequest = toGoogle(openAIRequest);
 
-      expect(googleRequest.generationConfig).toBeDefined();
-      expect(googleRequest.generationConfig?.thinkingConfig).toBeDefined();
-      expect(googleRequest.generationConfig?.thinkingConfig?.includeThoughts).toBe(true);
-      expect(googleRequest.generationConfig?.thinkingConfig?.thinkingLevel).toBe("high");
-      expect(googleRequest.generationConfig?.thinkingConfig?.thinkingBudget).toBe(-1); // Dynamic thinking
+      expect(googleRequest.generationConfig?.thinkingConfig).toEqual({
+        includeThoughts: true,
+        thinkingLevel: "high",
+      });
     });
 
-    it("should map low reasoning_effort to low thinking level", () => {
+    it("should map reasoning_effort 'low' to thinkingLevel 'low'", () => {
       const openAIRequest: HeliconeChatCreateParams = {
         model: "gemini-3-pro",
-        messages: [{ role: "user", content: "Simple question" }],
+        messages: [{ role: "user", content: "Test" }],
         reasoning_effort: "low",
       };
 
       const googleRequest = toGoogle(openAIRequest);
 
-      expect(googleRequest.generationConfig?.thinkingConfig?.thinkingLevel).toBe("low");
+      expect(googleRequest.generationConfig?.thinkingConfig).toEqual({
+        includeThoughts: true,
+        thinkingLevel: "low",
+      });
     });
 
-    it("should map medium reasoning_effort to low thinking level", () => {
+    it("should map reasoning_effort 'medium' to thinkingLevel 'low'", () => {
       const openAIRequest: HeliconeChatCreateParams = {
         model: "gemini-3-pro",
-        messages: [{ role: "user", content: "Medium complexity question" }],
+        messages: [{ role: "user", content: "Test" }],
         reasoning_effort: "medium",
       };
 
       const googleRequest = toGoogle(openAIRequest);
 
-      // Medium maps to low since Google only supports low/high
-      expect(googleRequest.generationConfig?.thinkingConfig?.thinkingLevel).toBe("low");
+      // Google only supports low/high, so medium maps to low
+      expect(googleRequest.generationConfig?.thinkingConfig).toEqual({
+        includeThoughts: true,
+        thinkingLevel: "low",
+      });
     });
 
-    it("should use explicit budget_tokens from reasoning_options", () => {
+    it("should pass through budget_tokens as thinkingBudget", () => {
       const openAIRequest: HeliconeChatCreateParams = {
         model: "gemini-2.5-flash",
-        messages: [{ role: "user", content: "Complex math problem" }],
+        messages: [{ role: "user", content: "What is 2+2?" }],
+        reasoning_options: {
+          budget_tokens: 100,
+        },
+      };
+
+      const googleRequest = toGoogle(openAIRequest);
+
+      expect(googleRequest.generationConfig?.thinkingConfig).toEqual({
+        includeThoughts: true,
+        thinkingBudget: 100,
+      });
+    });
+
+    it("should pass through thinking_level as thinkingLevel", () => {
+      const openAIRequest: HeliconeChatCreateParams = {
+        model: "gemini-3-pro",
+        messages: [{ role: "user", content: "What is 2+2?" }],
+        reasoning_options: {
+          thinking_level: "high",
+        },
+      };
+
+      const googleRequest = toGoogle(openAIRequest);
+
+      expect(googleRequest.generationConfig?.thinkingConfig).toEqual({
+        includeThoughts: true,
+        thinkingLevel: "high",
+      });
+    });
+
+    it("should combine reasoning_effort with reasoning_options.budget_tokens", () => {
+      const openAIRequest: HeliconeChatCreateParams = {
+        model: "gemini-2.5-flash",
+        messages: [{ role: "user", content: "Test" }],
         reasoning_effort: "high",
         reasoning_options: {
           budget_tokens: 2048,
@@ -59,25 +98,50 @@ describe("Google Reasoning/Thinking Support", () => {
 
       const googleRequest = toGoogle(openAIRequest);
 
-      expect(googleRequest.generationConfig?.thinkingConfig?.thinkingBudget).toBe(2048);
+      expect(googleRequest.generationConfig?.thinkingConfig).toEqual({
+        includeThoughts: true,
+        thinkingLevel: "high",
+        thinkingBudget: 2048,
+      });
     });
 
-    it("should use explicit thinking_level from reasoning_options", () => {
+    it("should let reasoning_options.thinking_level override reasoning_effort", () => {
       const openAIRequest: HeliconeChatCreateParams = {
         model: "gemini-3-pro",
-        messages: [{ role: "user", content: "Question" }],
-        reasoning_effort: "low", // This would normally map to low
+        messages: [{ role: "user", content: "Test" }],
+        reasoning_effort: "high",
         reasoning_options: {
-          thinking_level: "high", // But explicit override to high
+          thinking_level: "low",
         },
       };
 
       const googleRequest = toGoogle(openAIRequest);
 
-      expect(googleRequest.generationConfig?.thinkingConfig?.thinkingLevel).toBe("high");
+      // thinking_level in reasoning_options should override reasoning_effort
+      expect(googleRequest.generationConfig?.thinkingConfig).toEqual({
+        includeThoughts: true,
+        thinkingLevel: "low",
+      });
     });
 
-    it("should not add thinkingConfig when no reasoning parameters are provided", () => {
+    it("should handle budget_tokens=-1 for dynamic thinking", () => {
+      const openAIRequest: HeliconeChatCreateParams = {
+        model: "gemini-2.5-flash",
+        messages: [{ role: "user", content: "Test" }],
+        reasoning_options: {
+          budget_tokens: -1,
+        },
+      };
+
+      const googleRequest = toGoogle(openAIRequest);
+
+      expect(googleRequest.generationConfig?.thinkingConfig).toEqual({
+        includeThoughts: true,
+        thinkingBudget: -1,
+      });
+    });
+
+    it("should disable thinking when no reasoning parameters provided", () => {
       const openAIRequest: HeliconeChatCreateParams = {
         model: "gemini-1.5-pro",
         messages: [{ role: "user", content: "Hello" }],
@@ -85,24 +149,10 @@ describe("Google Reasoning/Thinking Support", () => {
 
       const googleRequest = toGoogle(openAIRequest);
 
-      // Should not have thinkingConfig when no reasoning is requested
-      expect(googleRequest.generationConfig?.thinkingConfig).toBeUndefined();
-    });
-
-    it("should enable thinking when only reasoning_options is provided without effort", () => {
-      const openAIRequest: HeliconeChatCreateParams = {
-        model: "gemini-2.5-flash",
-        messages: [{ role: "user", content: "Complex question" }],
-        reasoning_options: {
-          budget_tokens: 4096,
-        },
-      };
-
-      const googleRequest = toGoogle(openAIRequest);
-
-      expect(googleRequest.generationConfig?.thinkingConfig).toBeDefined();
-      expect(googleRequest.generationConfig?.thinkingConfig?.includeThoughts).toBe(true);
-      expect(googleRequest.generationConfig?.thinkingConfig?.thinkingBudget).toBe(4096);
+      // Explicitly disable thinking by setting thinkingBudget to 0
+      expect(googleRequest.generationConfig?.thinkingConfig).toEqual({
+        thinkingBudget: 0,
+      });
     });
   });
 
@@ -135,12 +185,16 @@ describe("Google Reasoning/Thinking Support", () => {
       const openAIResponse = toOpenAI(googleResponse);
 
       expect(openAIResponse.choices[0].message.content).toBe("The answer is 4.");
-      expect(openAIResponse.choices[0].message.reasoning).toBe("Let me think step by step...");
-      expect(openAIResponse.choices[0].message.reasoning_details).toHaveLength(1);
-      expect(openAIResponse.choices[0].message.reasoning_details?.[0].thinking).toBe(
+      expect(openAIResponse.choices[0].message.reasoning).toBe(
         "Let me think step by step..."
       );
-      expect(openAIResponse.usage.completion_tokens_details?.reasoning_tokens).toBe(10);
+      expect(openAIResponse.choices[0].message.reasoning_details).toHaveLength(1);
+      expect(
+        openAIResponse.choices[0].message.reasoning_details?.[0].thinking
+      ).toBe("Let me think step by step...");
+      expect(openAIResponse.usage.completion_tokens_details?.reasoning_tokens).toBe(
+        10
+      );
     });
 
     it("should handle multiple thinking parts", () => {
@@ -172,7 +226,9 @@ describe("Google Reasoning/Thinking Support", () => {
       const openAIResponse = toOpenAI(googleResponse);
 
       expect(openAIResponse.choices[0].message.content).toBe("Final answer.");
-      expect(openAIResponse.choices[0].message.reasoning).toBe("First thought...Second thought...");
+      expect(openAIResponse.choices[0].message.reasoning).toBe(
+        "First thought...Second thought..."
+      );
       expect(openAIResponse.choices[0].message.reasoning_details).toHaveLength(2);
     });
 
@@ -199,7 +255,9 @@ describe("Google Reasoning/Thinking Support", () => {
 
       const openAIResponse = toOpenAI(googleResponse);
 
-      expect(openAIResponse.choices[0].message.content).toBe("Simple response without thinking.");
+      expect(openAIResponse.choices[0].message.content).toBe(
+        "Simple response without thinking."
+      );
       expect(openAIResponse.choices[0].message.reasoning).toBeUndefined();
       expect(openAIResponse.choices[0].message.reasoning_details).toBeUndefined();
     });
@@ -208,7 +266,6 @@ describe("Google Reasoning/Thinking Support", () => {
   describe("Streaming Converter", () => {
     it("should emit reasoning delta for thought parts", () => {
       const converter = new GoogleToOpenAIStreamConverter();
-      const chunks: any[] = [];
 
       const event = {
         candidates: [
@@ -223,15 +280,15 @@ describe("Google Reasoning/Thinking Support", () => {
 
       const result = converter.convert(event as any);
 
-      // Should have initial role chunk and reasoning chunk
       expect(result.length).toBeGreaterThan(0);
 
-      // Find the reasoning chunk
       const reasoningChunk = result.find(
         (chunk) => chunk.choices[0]?.delta?.reasoning !== undefined
       );
       expect(reasoningChunk).toBeDefined();
-      expect(reasoningChunk?.choices[0].delta.reasoning).toBe("Thinking about this...");
+      expect(reasoningChunk?.choices[0].delta.reasoning).toBe(
+        "Thinking about this..."
+      );
     });
 
     it("should emit content delta for non-thought parts", () => {
@@ -281,7 +338,6 @@ describe("Google Reasoning/Thinking Support", () => {
 
       const result = converter.convert(event as any);
 
-      // Should have: initial role, reasoning delta, content delta
       const reasoningChunk = result.find(
         (chunk) => chunk.choices[0]?.delta?.reasoning !== undefined
       );
