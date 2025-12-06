@@ -5,7 +5,7 @@ import { getJawnClient } from "../../../lib/clients/jawn";
 const useAlertsPage = (
   orgId: string,
   historyPage: number = 0,
-  historyPageSize: number = 25
+  historyPageSize: number = 25,
 ) => {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["alerts", { historyPage, historyPageSize }],

@@ -13,12 +13,7 @@ import {
   SelectValue,
   SelectTrigger,
 } from "@/components/ui/select";
-import {
-  InformationCircleIcon,
-  BookOpenIcon,
-  BellIcon,
-} from "@heroicons/react/24/outline";
-import { TooltipLegacy as Tooltip } from "@/components/ui/tooltipLegacy";
+import { BookOpenIcon, BellIcon } from "@heroicons/react/24/outline";
 import { clsx } from "../../shared/clsx";
 import { alertTimeWindows } from "./constant";
 import { Database } from "../../../db/database.types";
@@ -347,7 +342,9 @@ const AlertFormContent = (props: AlertFormProps) => {
           {/* Alert Condition */}
           <div className="flex flex-col gap-3 rounded-md border border-border bg-muted/20 p-4">
             <div className="flex flex-wrap items-center gap-x-2 gap-y-2">
-              <span className="text-muted-foreground whitespace-nowrap">When</span>
+              <span className="whitespace-nowrap text-muted-foreground">
+                When
+              </span>
               <Select
                 value={selectedMetric}
                 defaultValue="response.status"
@@ -355,7 +352,7 @@ const AlertFormContent = (props: AlertFormProps) => {
                   setSelectedMetric(values as AlertMetric);
                 }}
               >
-                <SelectTrigger className="h-9 w-[160px] border-0 border-b border-border rounded-none bg-transparent px-2 focus:ring-0 focus:border-foreground shadow-none text-foreground">
+                <SelectTrigger className="h-9 w-[160px] rounded-none border-0 border-b border-border bg-transparent px-2 text-foreground shadow-none focus:border-foreground focus:ring-0">
                   <SelectValue placeholder="Select metric" />
                 </SelectTrigger>
                 <SelectContent>
@@ -380,11 +377,13 @@ const AlertFormContent = (props: AlertFormProps) => {
                   })}
                 </SelectContent>
               </Select>
-              <span className="text-muted-foreground whitespace-nowrap">is above</span>
+              <span className="whitespace-nowrap text-muted-foreground">
+                is above
+              </span>
               <div className="relative">
                 {selectedMetric === "cost" && (
                   <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                    <span className="text-gray-500 text-sm">$</span>
+                    <span className="text-sm text-gray-500">$</span>
                   </div>
                 )}
                 <Input
@@ -392,7 +391,7 @@ const AlertFormContent = (props: AlertFormProps) => {
                   name="alert-threshold"
                   id="alert-threshold"
                   className={clsx(
-                    "h-9 w-20 border-0 border-b border-border rounded-none bg-transparent px-2 focus-visible:ring-0 focus-visible:border-foreground text-center",
+                    "h-9 w-20 rounded-none border-0 border-b border-border bg-transparent px-2 text-center focus-visible:border-foreground focus-visible:ring-0",
                     selectedMetric === "response.status" && "pr-8",
                     selectedMetric === "cost" && "pl-7",
                     selectedMetric === "latency" && "pr-10",
@@ -404,23 +403,25 @@ const AlertFormContent = (props: AlertFormProps) => {
                 />
                 {selectedMetric === "response.status" && (
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                    <span className="text-gray-500 text-sm">%</span>
+                    <span className="text-sm text-gray-500">%</span>
                   </div>
                 )}
                 {selectedMetric === "latency" && (
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                    <span className="text-gray-500 text-sm">ms</span>
+                    <span className="text-sm text-gray-500">ms</span>
                   </div>
                 )}
               </div>
-              <span className="text-muted-foreground whitespace-nowrap">for</span>
+              <span className="whitespace-nowrap text-muted-foreground">
+                for
+              </span>
               <Select
                 value={selectedTimeWindow}
                 onValueChange={(values: string) => {
                   setSelectedTimeWindow(values);
                 }}
               >
-                <SelectTrigger className="h-9 w-[120px] border-0 border-b border-border rounded-none bg-transparent px-2 focus:ring-0 focus:border-foreground shadow-none text-foreground">
+                <SelectTrigger className="h-9 w-[120px] rounded-none border-0 border-b border-border bg-transparent px-2 text-foreground shadow-none focus:border-foreground focus:ring-0">
                   <SelectValue placeholder="Time" />
                 </SelectTrigger>
                 <SelectContent>
@@ -438,14 +439,16 @@ const AlertFormContent = (props: AlertFormProps) => {
             {selectedMetric !== "response.status" &&
               selectedMetric !== "count" && (
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-2">
-                  <span className="text-muted-foreground whitespace-nowrap">using</span>
+                  <span className="whitespace-nowrap text-muted-foreground">
+                    using
+                  </span>
                   <Select
                     value={selectedAggregation}
                     onValueChange={(value) =>
                       setSelectedAggregation(value as AlertAggregation)
                     }
                   >
-                    <SelectTrigger className="h-9 w-[120px] border-0 border-b border-border rounded-none bg-transparent px-2 focus:ring-0 focus:border-foreground shadow-none text-foreground">
+                    <SelectTrigger className="h-9 w-[120px] rounded-none border-0 border-b border-border bg-transparent px-2 text-foreground shadow-none focus:border-foreground focus:ring-0">
                       <SelectValue placeholder="Aggregation" />
                     </SelectTrigger>
                     <SelectContent>
@@ -456,15 +459,19 @@ const AlertFormContent = (props: AlertFormProps) => {
                       ))}
                     </SelectContent>
                   </Select>
-                  <span className="text-muted-foreground whitespace-nowrap">aggregation</span>
+                  <span className="whitespace-nowrap text-muted-foreground">
+                    aggregation
+                  </span>
                   {selectedAggregation === "percentile" && (
                     <>
-                      <span className="text-muted-foreground whitespace-nowrap">at</span>
+                      <span className="whitespace-nowrap text-muted-foreground">
+                        at
+                      </span>
                       <Select
                         value={selectedPercentile}
                         onValueChange={setSelectedPercentile}
                       >
-                        <SelectTrigger className="h-9 w-[80px] border-0 border-b border-border rounded-none bg-transparent px-2 focus:ring-0 focus:border-foreground shadow-none text-foreground">
+                        <SelectTrigger className="h-9 w-[80px] rounded-none border-0 border-b border-border bg-transparent px-2 text-foreground shadow-none focus:border-foreground focus:ring-0">
                           <SelectValue placeholder="95th" />
                         </SelectTrigger>
                         <SelectContent>
@@ -482,21 +489,25 @@ const AlertFormContent = (props: AlertFormProps) => {
                         id="alert-percentile"
                         value={selectedPercentile}
                       />
-                      <span className="text-muted-foreground whitespace-nowrap">percentile</span>
+                      <span className="whitespace-nowrap text-muted-foreground">
+                        percentile
+                      </span>
                     </>
                   )}
                 </div>
               )}
 
             <div className="flex flex-wrap items-center gap-x-2 gap-y-2">
-              <span className="text-muted-foreground whitespace-nowrap">grouped by</span>
+              <span className="whitespace-nowrap text-muted-foreground">
+                grouped by
+              </span>
               <Popover open={groupingOpen} onOpenChange={setGroupingOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     role="combobox"
                     aria-expanded={groupingOpen}
-                    className="h-9 w-[160px] justify-between font-normal border-0 border-b border-border rounded-none bg-transparent px-2 hover:bg-transparent hover:border-foreground focus:ring-0 focus:border-foreground shadow-none text-foreground"
+                    className="h-9 w-[160px] justify-between rounded-none border-0 border-b border-border bg-transparent px-2 font-normal text-foreground shadow-none hover:border-foreground hover:bg-transparent focus:border-foreground focus:ring-0"
                   >
                     {selectedGrouping
                       ? groupingOptions.base.find(
@@ -591,19 +602,23 @@ const AlertFormContent = (props: AlertFormProps) => {
             </div>
 
             <div className="flex flex-wrap items-center gap-x-2 gap-y-2">
-              <span className="text-muted-foreground whitespace-nowrap">with at least</span>
+              <span className="whitespace-nowrap text-muted-foreground">
+                with at least
+              </span>
               <Input
                 type="number"
                 name="min-requests"
                 id="min-requests"
-                className="h-9 w-20 border-0 border-b border-border rounded-none bg-transparent px-2 focus-visible:ring-0 focus-visible:border-foreground text-center"
+                className="h-9 w-20 rounded-none border-0 border-b border-border bg-transparent px-2 text-center focus-visible:border-foreground focus-visible:ring-0"
                 defaultValue={
                   initialValues?.minimum_request_count?.toString() || "0"
                 }
                 min={0}
                 step={1}
               />
-              <span className="text-muted-foreground whitespace-nowrap">requests</span>
+              <span className="whitespace-nowrap text-muted-foreground">
+                requests
+              </span>
             </div>
           </div>
 

@@ -1,6 +1,5 @@
 import { useOrg } from "../../components/layout/org/organizationContext";
 import { $JAWN_API } from "../../lib/clients/jawn";
-import { useQuery } from "@tanstack/react-query";
 
 // Types matching the backend
 export interface PurchasedCredits {
@@ -135,4 +134,130 @@ export const useCreateCheckoutSession = () => {
       console.error("Failed to create checkout session:", error);
     },
   });
+};
+
+// Types for spend breakdown
+export interface ModelSpend {
+  model: string;
+  provider: string;
+  promptTokens: number;
+  completionTokens: number;
+  cacheReadTokens: number;
+  cacheWriteTokens: number;
+  pricing: {
+    inputPer1M: number;
+    outputPer1M: number;
+    cacheReadPer1M?: number;
+    cacheWritePer1M?: number;
+  } | null;
+  subtotal: number; // Cost before discount
+  discountPercent: number; // 0-100
+  total: number; // Cost after discount
+}
+
+export interface SpendBreakdownResponse {
+  models: ModelSpend[];
+  totalCost: number;
+  timeRange: { start: string; end: string };
+}
+
+export type SpendTimeRange = "7d" | "30d" | "90d" | "all";
+
+// A hook for fetching spend breakdown by model
+// Can use either preset timeRange or custom startDate/endDate
+export const useSpendBreakdown = (
+  options:
+    | { timeRange: SpendTimeRange }
+    | { startDate: Date; endDate: Date }
+) => {
+  const org = useOrg();
+
+  const isCustomRange = "startDate" in options;
+
+  // Build query params
+  const queryParams = isCustomRange
+    ? {
+        startDate: options.startDate.toISOString(),
+        endDate: options.endDate.toISOString(),
+      }
+    : {
+        timeRange: options.timeRange,
+      };
+
+  const result = $JAWN_API.useQuery(
+    "get",
+    "/v1/credits/spend/breakdown",
+    {
+      params: {
+        query: queryParams,
+      },
+    },
+    {
+      enabled: !!org?.currentOrg?.id,
+      staleTime: 0, // Don't cache - always refetch
+    }
+  );
+
+  return {
+    ...result,
+    data: result.data?.data as SpendBreakdownResponse | undefined,
+  };
+};
+
+// Types for PTB invoices
+export interface PTBInvoice {
+  id: string;
+  organizationId: string;
+  stripeInvoiceId: string | null;
+  hostedInvoiceUrl: string | null;
+  startDate: string;
+  endDate: string;
+  amountCents: number;
+  notes: string | null;
+  createdAt: string;
+}
+
+// A hook for fetching invoices for the current org
+export const useInvoices = () => {
+  const org = useOrg();
+
+  const result = $JAWN_API.useQuery(
+    "get",
+    "/v1/credits/invoices",
+    {},
+    {
+      enabled: !!org?.currentOrg?.id,
+    }
+  );
+
+  return {
+    ...result,
+    data: (result.data?.data as PTBInvoice[] | undefined) ?? [],
+  };
+};
+
+// Types for discounts
+export interface OrgDiscount {
+  provider: string | null;
+  model: string | null;
+  percent: number;
+}
+
+// A hook for fetching discount rules for the current org
+export const useDiscounts = () => {
+  const org = useOrg();
+
+  const result = $JAWN_API.useQuery(
+    "get",
+    "/v1/credits/discounts",
+    {},
+    {
+      enabled: !!org?.currentOrg?.id,
+    }
+  );
+
+  return {
+    ...result,
+    data: (result.data?.data as OrgDiscount[] | undefined) ?? [],
+  };
 };
