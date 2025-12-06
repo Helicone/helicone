@@ -34,31 +34,12 @@ function getCacheWritePricePerToken(model: string, provider: string): number {
   const p = configResult.data.pricing[0];
   const cacheMultipliers = p.cacheMultipliers;
   // Use the 5m or 1h write multiplier if available, otherwise fall back to 1.25×
-  const writeMultiplier = cacheMultipliers?.write5m ?? cacheMultipliers?.write1h ?? 1.25;
+  const writeMultiplier =
+    cacheMultipliers?.write5m ?? cacheMultipliers?.write1h ?? 1.25;
   return p.input * writeMultiplier;
 }
 
 export const CACHE_TOKEN_ADJUSTMENTS: CacheTokenAdjustment[] = [
-  // TEST: Local dev org for testing adjustments
-  // Remove before deploying to production!
-  {
-    orgId: "83635a30-5ba6-41a8-8cc6-fb7df941b24a",
-    model: "gpt-4o",
-    provider: "OPENAI",
-    beforeDate: new Date("2099-12-31T00:00:00Z"), // Far future for testing
-    totalMissingTokens: 100 * 5000, // Test adjustment
-  },
-  {
-    orgId: "83635a30-5ba6-41a8-8cc6-fb7df941b24a",
-    model: "gpt-4o-mini",
-    provider: "OPENAI",
-    beforeDate: new Date("2099-12-31T00:00:00Z"),
-    totalMissingTokens: 100 * 5000, // Test adjustment
-  },
-
-  // Org: 63452b7b-54e6-470c-a9e7-a69b2e17a4cf
-  // Data from 30-day sample ending 2025-12-05
-  // Methodology: Sampled 5,250 requests from S3, calculated median cache_creation_input_tokens per model
   {
     orgId: "63452b7b-54e6-470c-a9e7-a69b2e17a4cf",
     model: "claude-sonnet-4",
@@ -114,16 +95,16 @@ export function getCacheTokenAdjustment(
   endDate: Date
 ): number {
   const adjustment = CACHE_TOKEN_ADJUSTMENTS.find(
-    (a) =>
-      a.orgId === orgId &&
-      a.model === model &&
-      startDate < a.beforeDate // Only apply if invoice period starts before fix date
+    (a) => a.orgId === orgId && a.model === model && startDate < a.beforeDate // Only apply if invoice period starts before fix date
   );
 
   if (!adjustment) return 0;
 
   // Get price from registry
-  const pricePerToken = getCacheWritePricePerToken(adjustment.model, adjustment.provider);
+  const pricePerToken = getCacheWritePricePerToken(
+    adjustment.model,
+    adjustment.provider
+  );
   return adjustment.totalMissingTokens * pricePerToken;
 }
 
@@ -150,13 +131,19 @@ export function getCacheTokenAdjustmentsByModel(
   startDate: Date,
   endDate: Date
 ): Map<string, { amountUsd: number; missingTokens: number }> {
-  const adjustments = new Map<string, { amountUsd: number; missingTokens: number }>();
+  const adjustments = new Map<
+    string,
+    { amountUsd: number; missingTokens: number }
+  >();
 
   for (const a of CACHE_TOKEN_ADJUSTMENTS) {
     if (a.orgId === orgId && startDate < a.beforeDate) {
       const pricePerToken = getCacheWritePricePerToken(a.model, a.provider);
       const amount = a.totalMissingTokens * pricePerToken;
-      const existing = adjustments.get(a.model) || { amountUsd: 0, missingTokens: 0 };
+      const existing = adjustments.get(a.model) || {
+        amountUsd: 0,
+        missingTokens: 0,
+      };
       adjustments.set(a.model, {
         amountUsd: existing.amountUsd + amount,
         missingTokens: existing.missingTokens + a.totalMissingTokens,
