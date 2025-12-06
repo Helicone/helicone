@@ -699,7 +699,7 @@ export interface paths {
   };
   "/v1/admin/wallet/{orgId}/invoices/list": {
     /** @description List all recorded invoices for an org. */
-    post: operations["ListInvoices"];
+    post: operations["AdminListInvoices"];
   };
   "/v1/admin/wallet/{orgId}/invoice-summary": {
     /** @description Get invoice summary: total spend, total invoiced, uninvoiced balance. */
@@ -16373,6 +16373,10 @@ Json: JsonObject;
       promptTokens: number;
       /** Format: double */
       completionTokens: number;
+      /** Format: double */
+      cacheReadTokens: number;
+      /** Format: double */
+      cacheWriteTokens: number;
       pricing: {
         /** Format: double */
         outputPer1M: number;
@@ -16385,6 +16389,8 @@ Json: JsonObject;
       discountPercent: number;
       /** Format: double */
       total: number;
+      /** Format: double */
+      cacheAdjustment?: number;
     };
     SpendBreakdownResponse: {
       models: components["schemas"]["ModelSpend"][];
@@ -20535,13 +20541,7 @@ export interface operations {
       };
     };
   };
-  /** @description List all recorded invoices for an org. */
   ListInvoices: {
-    parameters: {
-      path: {
-        orgId: string;
-      };
-    };
     responses: {
       /** @description Ok */
       200: {
@@ -20750,6 +20750,22 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__updated-boolean_.string_"];
+        };
+      };
+    };
+  };
+  /** @description List all recorded invoices for an org. */
+  AdminListInvoices: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PTBInvoice-Array.string_"];
         };
       };
     };

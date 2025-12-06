@@ -14816,10 +14816,13 @@ const models: TsoaRoute.Models = {
             "provider": {"dataType":"string","required":true},
             "promptTokens": {"dataType":"double","required":true},
             "completionTokens": {"dataType":"double","required":true},
+            "cacheReadTokens": {"dataType":"double","required":true},
+            "cacheWriteTokens": {"dataType":"double","required":true},
             "pricing": {"dataType":"union","subSchemas":[{"dataType":"nestedObjectLiteral","nestedProperties":{"outputPer1M":{"dataType":"double","required":true},"inputPer1M":{"dataType":"double","required":true}}},{"dataType":"enum","enums":[null]}],"required":true},
             "subtotal": {"dataType":"double","required":true},
             "discountPercent": {"dataType":"double","required":true},
             "total": {"dataType":"double","required":true},
+            "cacheAdjustment": {"dataType":"double"},
         },
         "additionalProperties": false,
     },
@@ -22596,27 +22599,27 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsAdminWalletController_listInvoices: Record<string, TsoaRoute.ParameterSchema> = {
+        const argsAdminWalletController_adminListInvoices: Record<string, TsoaRoute.ParameterSchema> = {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
                 orgId: {"in":"path","name":"orgId","required":true,"dataType":"string"},
         };
         app.post('/v1/admin/wallet/:orgId/invoices/list',
             authenticateMiddleware([{"api_key":[]}]),
             ...(fetchMiddlewares<RequestHandler>(AdminWalletController)),
-            ...(fetchMiddlewares<RequestHandler>(AdminWalletController.prototype.listInvoices)),
+            ...(fetchMiddlewares<RequestHandler>(AdminWalletController.prototype.adminListInvoices)),
 
-            async function AdminWalletController_listInvoices(request: ExRequest, response: ExResponse, next: any) {
+            async function AdminWalletController_adminListInvoices(request: ExRequest, response: ExResponse, next: any) {
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
             let validatedArgs: any[] = [];
             try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsAdminWalletController_listInvoices, request, response });
+                validatedArgs = templateService.getValidatedArgs({ args: argsAdminWalletController_adminListInvoices, request, response });
 
                 const controller = new AdminWalletController();
 
               await templateService.apiHandler({
-                methodName: 'listInvoices',
+                methodName: 'adminListInvoices',
                 controller,
                 response,
                 next,

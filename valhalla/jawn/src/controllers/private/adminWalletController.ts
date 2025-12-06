@@ -622,7 +622,7 @@ export class AdminWalletController extends Controller {
    * List all recorded invoices for an org.
    */
   @Post("/{orgId}/invoices/list")
-  public async listInvoices(
+  public async adminListInvoices(
     @Request() request: JawnAuthenticatedRequest,
     @Path() orgId: string
   ): Promise<Result<PTBInvoice[], string>> {

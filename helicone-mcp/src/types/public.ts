@@ -4097,6 +4097,10 @@ Json: JsonObject;
       promptTokens: number;
       /** Format: double */
       completionTokens: number;
+      /** Format: double */
+      cacheReadTokens: number;
+      /** Format: double */
+      cacheWriteTokens: number;
       pricing: {
         /** Format: double */
         outputPer1M: number;
@@ -4109,6 +4113,8 @@ Json: JsonObject;
       discountPercent: number;
       /** Format: double */
       total: number;
+      /** Format: double */
+      cacheAdjustment?: number;
     };
     SpendBreakdownResponse: {
       models: components["schemas"]["ModelSpend"][];

@@ -48569,6 +48569,14 @@
 						"type": "number",
 						"format": "double"
 					},
+					"cacheReadTokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"cacheWriteTokens": {
+						"type": "number",
+						"format": "double"
+					},
 					"pricing": {
 						"properties": {
 							"outputPer1M": {
@@ -48598,6 +48606,10 @@
 					"total": {
 						"type": "number",
 						"format": "double"
+					},
+					"cacheAdjustment": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"required": [
@@ -48605,6 +48617,8 @@
 					"provider",
 					"promptTokens",
 					"completionTokens",
+					"cacheReadTokens",
+					"cacheWriteTokens",
 					"pricing",
 					"subtotal",
 					"discountPercent",
@@ -60545,7 +60559,7 @@
 		},
 		"/v1/admin/wallet/{orgId}/invoices/list": {
 			"post": {
-				"operationId": "ListInvoices",
+				"operationId": "AdminListInvoices",
 				"responses": {
 					"200": {
 						"description": "Ok",

@@ -6,6 +6,10 @@ import {
   getOrgDiscounts,
   findDiscount,
 } from "../../utils/discountCalculator";
+import {
+  getCacheTokenAdjustment,
+  getTotalCacheTokenAdjustment,
+} from "../../utils/cacheTokenAdjustments";
 import Stripe from "stripe";
 import { SecretManager } from "@helicone-package/secrets/SecretManager";
 
@@ -53,7 +57,11 @@ export class InvoicingManager {
         return err(`Error fetching spend: ${spendResult.error}`);
       }
 
-      const totalSpendUsd = parseFloat(spendResult.data?.[0]?.total_cost || "0");
+      const baseSpendUsd = parseFloat(spendResult.data?.[0]?.total_cost || "0");
+
+      // Add cache token adjustments for orgs with missing data
+      const cacheAdjustmentUsd = getTotalCacheTokenAdjustment(this.orgId);
+      const totalSpendUsd = baseSpendUsd + cacheAdjustmentUsd;
       const totalSpendCents = Math.round(totalSpendUsd * 100);
 
       // Get total invoiced from Postgres
@@ -193,7 +201,17 @@ export class InvoicingManager {
       let totalAmountCents = 0;
 
       for (const item of spendResult.data) {
-        const subtotalUsd = parseFloat(item.cost);
+        const baseSubtotalUsd = parseFloat(item.cost);
+
+        // Add cache token adjustment if applicable
+        const cacheAdjustmentUsd = getCacheTokenAdjustment(
+          this.orgId,
+          item.model,
+          startDate,
+          endDate
+        );
+        const subtotalUsd = baseSubtotalUsd + cacheAdjustmentUsd;
+
         const discountPercent = findDiscount(discounts, item.model, item.provider);
         const totalUsd = subtotalUsd * (1 - discountPercent / 100);
         const amountCents = Math.round(totalUsd * 100);
@@ -207,6 +225,7 @@ export class InvoicingManager {
 
         const modelInfo = `${item.model || "unknown"} (${item.provider || "unknown"})`;
         const discountInfo = discountPercent > 0 ? ` [${discountPercent}% discount]` : "";
+        // Note: cacheAdjustmentUsd is added to subtotal but not shown in description (per user request)
         const tokenInfo = `${this.formatTokens(promptTokens)} input, ${this.formatTokens(completionTokens)} output`;
         const description = `${modelInfo}${discountInfo} - ${tokenInfo}`;
 

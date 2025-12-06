@@ -1552,13 +1552,22 @@ export default function AdminWallet() {
                                                       Provider
                                                     </th>
                                                     <th className="p-2 text-right">
-                                                      Input Tokens
+                                                      Input
                                                     </th>
                                                     <th className="p-2 text-right">
-                                                      Output Tokens
+                                                      Output
+                                                    </th>
+                                                    <th className="p-2 text-right">
+                                                      Cache Read
+                                                    </th>
+                                                    <th className="p-2 text-right">
+                                                      Cache Write
                                                     </th>
                                                     <th className="p-2 text-right">
                                                       Subtotal
+                                                    </th>
+                                                    <th className="p-2 text-right">
+                                                      Adjustment
                                                     </th>
                                                     <th className="p-2 text-right">
                                                       Discount
@@ -1592,9 +1601,26 @@ export default function AdminWallet() {
                                                         <td className="font-mono p-2 text-right text-xs">
                                                           {item.completionTokens.toLocaleString()}
                                                         </td>
+                                                        <td className="font-mono p-2 text-right text-xs">
+                                                          {(item.cacheReadTokens || 0).toLocaleString()}
+                                                        </td>
+                                                        <td className="font-mono p-2 text-right text-xs">
+                                                          {(item.cacheWriteTokens || 0).toLocaleString()}
+                                                        </td>
                                                         <td className="font-mono p-2 text-right text-muted-foreground">
                                                           {formatCurrency(
-                                                            item.subtotal,
+                                                            item.subtotal - (item.cacheAdjustment || 0),
+                                                          )}
+                                                        </td>
+                                                        <td className="font-mono p-2 text-right">
+                                                          {item.cacheAdjustment > 0 ? (
+                                                            <span className="text-amber-600">
+                                                              +{formatCurrency(item.cacheAdjustment)}
+                                                            </span>
+                                                          ) : (
+                                                            <span className="text-muted-foreground">
+                                                              -
+                                                            </span>
                                                           )}
                                                         </td>
                                                         <td className="font-mono p-2 text-right">
@@ -1623,7 +1649,7 @@ export default function AdminWallet() {
                                                   )}
                                                   <tr className="border-t bg-muted/50 font-medium">
                                                     <td
-                                                      colSpan={6}
+                                                      colSpan={9}
                                                       className="p-2 text-right"
                                                     >
                                                       Total:

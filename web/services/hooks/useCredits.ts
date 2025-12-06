@@ -142,6 +142,8 @@ export interface ModelSpend {
   provider: string;
   promptTokens: number;
   completionTokens: number;
+  cacheReadTokens: number;
+  cacheWriteTokens: number;
   pricing: {
     inputPer1M: number;
     outputPer1M: number;

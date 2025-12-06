@@ -59,7 +59,9 @@ type SortField =
   | "model"
   | "provider"
   | "inputTokens"
-  | "outputTokens";
+  | "outputTokens"
+  | "cacheReadTokens"
+  | "cacheWriteTokens";
 type SortDirection = "asc" | "desc";
 
 const Credits: NextPageWithLayout<void> = () => {
@@ -154,6 +156,10 @@ const Credits: NextPageWithLayout<void> = () => {
           return (a.promptTokens - b.promptTokens) * multiplier;
         case "outputTokens":
           return (a.completionTokens - b.completionTokens) * multiplier;
+        case "cacheReadTokens":
+          return (a.cacheReadTokens - b.cacheReadTokens) * multiplier;
+        case "cacheWriteTokens":
+          return (a.cacheWriteTokens - b.cacheWriteTokens) * multiplier;
         default:
           return 0;
       }
@@ -723,10 +729,16 @@ const Credits: NextPageWithLayout<void> = () => {
                           Provider
                         </SortableHeader>
                         <SortableHeader field="inputTokens" align="right">
-                          Input Tokens
+                          Input
                         </SortableHeader>
                         <SortableHeader field="outputTokens" align="right">
-                          Output Tokens
+                          Output
+                        </SortableHeader>
+                        <SortableHeader field="cacheReadTokens" align="right">
+                          Cache Read
+                        </SortableHeader>
+                        <SortableHeader field="cacheWriteTokens" align="right">
+                          Cache Write
                         </SortableHeader>
                         <TableHead className="text-right">Input $/1M</TableHead>
                         <TableHead className="text-right">
@@ -753,6 +765,12 @@ const Credits: NextPageWithLayout<void> = () => {
                           </TableCell>
                           <TableCell className="font-mono text-right">
                             {formatTokens(item.completionTokens)}
+                          </TableCell>
+                          <TableCell className="font-mono text-right">
+                            {formatTokens(item.cacheReadTokens)}
+                          </TableCell>
+                          <TableCell className="font-mono text-right">
+                            {formatTokens(item.cacheWriteTokens)}
                           </TableCell>
                           <TableCell className="font-mono text-right text-muted-foreground">
                             {formatPrice(item.pricing?.inputPer1M)}

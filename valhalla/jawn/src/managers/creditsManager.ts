@@ -12,6 +12,7 @@ import { BaseManager } from "./BaseManager";
 import { WalletManager } from "./wallet/WalletManager";
 import { dbExecute, dbQueryClickhouse } from "../lib/shared/db/dbExecute";
 import { OrgDiscount } from "../utils/discountCalculator";
+import { getCacheTokenAdjustmentsByModel } from "../utils/cacheTokenAdjustments";
 
 export interface PTBInvoice {
   id: string;
@@ -30,13 +31,16 @@ export interface ModelSpend {
   provider: string;
   promptTokens: number;
   completionTokens: number;
+  cacheReadTokens: number;
+  cacheWriteTokens: number;
   pricing: {
     inputPer1M: number;
     outputPer1M: number;
   } | null;
-  subtotal: number; // Cost before discount (USD)
+  subtotal: number; // Cost before discount (USD), includes cache adjustment
   discountPercent: number; // 0-100
   total: number; // Cost after discount (USD)
+  cacheAdjustment?: number; // Admin-only: cache write adjustment amount (USD)
 }
 
 export interface SpendBreakdownResponse {
@@ -172,6 +176,8 @@ export class CreditsManager extends BaseManager {
           count(*) as request_count,
           sum(prompt_tokens) as prompt_tokens,
           sum(completion_tokens) as completion_tokens,
+          sum(prompt_cache_read_tokens) as cache_read_tokens,
+          sum(prompt_cache_write_tokens) as cache_write_tokens,
           sum(cost) / ${COST_PRECISION_MULTIPLIER} as cost
         FROM request_response_rmt
         WHERE organization_id = {val_0 : String}
@@ -189,12 +195,21 @@ export class CreditsManager extends BaseManager {
         request_count: string;
         prompt_tokens: string;
         completion_tokens: string;
+        cache_read_tokens: string;
+        cache_write_tokens: string;
         cost: string;
       }>(query, [this.authParams.organizationId, startDate, endDate]);
 
       if (isError(res)) {
         return err(res.error);
       }
+
+      // Get cache token adjustments for this org
+      const cacheAdjustments = getCacheTokenAdjustmentsByModel(
+        this.authParams.organizationId,
+        startDate,
+        endDate
+      );
 
       const models: ModelSpend[] = res.data.map((row) => {
         // Look up pricing from registry using model:provider key
@@ -213,7 +228,11 @@ export class CreditsManager extends BaseManager {
           };
         }
 
-        const subtotal = parseFloat(row.cost);
+        const baseCost = parseFloat(row.cost);
+        const adjustment = cacheAdjustments.get(row.model);
+        const cacheAdjustmentUsd = adjustment?.amountUsd || 0;
+        const missingCacheWriteTokens = adjustment?.missingTokens || 0;
+        const subtotal = baseCost + cacheAdjustmentUsd;
         // No discounts for customer-facing view - discounts only applied during invoice creation
         const discountPercent = 0;
         const total = subtotal;
@@ -223,10 +242,18 @@ export class CreditsManager extends BaseManager {
           provider: row.provider,
           promptTokens: parseInt(row.prompt_tokens, 10) || 0,
           completionTokens: parseInt(row.completion_tokens, 10) || 0,
+          cacheReadTokens: parseInt(row.cache_read_tokens, 10) || 0,
+          cacheWriteTokens:
+            (parseInt(row.cache_write_tokens, 10) || 0) +
+            missingCacheWriteTokens,
           pricing,
           subtotal,
           discountPercent,
           total,
+          // Include adjustment for admin visibility (optional field)
+          ...(cacheAdjustmentUsd > 0 && {
+            cacheAdjustment: cacheAdjustmentUsd,
+          }),
         };
       });
 
