@@ -188,11 +188,26 @@ export type HeliconePromptParams = {
   inputs?: Record<string, any>;
 };
 
+/**
+ * Reasoning options for controlling thinking/reasoning behavior.
+ */
 export interface HeliconeReasoningOptions {
   reasoning_options?: {
-    budget_tokens: number;
-  }
-};
+    /**
+     * Token budget for thinking.
+     * - For Google Gemini 2.5: Maps to thinkingConfig.thinkingBudget
+     * - Use -1 for dynamic thinking
+     */
+    budget_tokens?: number;
+
+    /**
+     * Thinking level for Google Gemini 3+ models.
+     * - "low" for faster, less detailed reasoning
+     * - "high" for more detailed reasoning
+     */
+    thinking_level?: "low" | "high";
+  };
+}
 
 /**
  * Configuration for context editing strategies.

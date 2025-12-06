@@ -5,10 +5,12 @@ import {
   OpenAIResponseMessage,
   OpenAIToolCall,
   OpenAIUsage,
+  OpenAIReasoningDetail,
 } from "../../../types/openai";
 import {
   GoogleCandidate,
   GoogleContent,
+  GoogleContentPart,
   GoogleFunctionCall,
   GoogleResponseBody,
   GoogleTokenDetail,
@@ -52,16 +54,24 @@ function mapCandidates(candidates: GoogleCandidate[]): OpenAIChoice[] {
   return candidates.map((candidate, index) => {
     let content: string[] = [];
     let tool_calls: OpenAIToolCall[] = [];
+    let reasoning: string | undefined;
+    let reasoning_details: OpenAIReasoningDetail[] | undefined;
+
     if (candidate.content) {
-      const { content: extracted_content, tool_calls: extracted_tool_calls } = extractContent(candidate.content);
-      content = extracted_content;
-      tool_calls = extracted_tool_calls;
+      const extracted = extractContent(candidate.content);
+      content = extracted.content;
+      tool_calls = extracted.tool_calls;
+      reasoning = extracted.reasoning;
+      reasoning_details = extracted.reasoning_details;
     }
+
     return {
       index: candidate.index ?? index,
       message: {
         role: "assistant",
         content: content.length > 0 ? content.join("") : null,
+        ...(reasoning && { reasoning }),
+        ...(reasoning_details && reasoning_details.length > 0 && { reasoning_details }),
         ...(tool_calls.length > 0 && { tool_calls }),
       } as OpenAIResponseMessage,
       finish_reason: mapGoogleFinishReason(candidate.finishReason),
@@ -70,11 +80,29 @@ function mapCandidates(candidates: GoogleCandidate[]): OpenAIChoice[] {
   });
 }
 
+/**
+ * Represents extracted content from Google's response.
+ */
+interface ExtractedContent {
+  content: string[];
+  tool_calls: OpenAIToolCall[];
+  reasoning?: string;
+  reasoning_details?: OpenAIReasoningDetail[];
+}
+
+/**
+ * Extracts content, tool calls, and thinking/reasoning from Google's response parts.
+ *
+ * Google's thinking model responses contain parts with a `thought` boolean flag:
+ * - Parts with `thought: true` contain thinking/reasoning summaries
+ * - Parts with `thought: false` or no `thought` field contain the final answer
+ */
 function extractContent(
   content: GoogleContent | GoogleContent[]
-): { content: string[]; tool_calls: OpenAIToolCall[] } {
+): ExtractedContent {
   const contents = Array.isArray(content) ? content : [content];
   const textParts: string[] = [];
+  const thinkingParts: string[] = [];
   const toolCalls: OpenAIToolCall[] = [];
 
   for (const block of contents) {
@@ -89,15 +117,35 @@ function extractContent(
         continue;
       }
 
-      if (part.text) {
-        textParts.push(part.text);
-      } else if (part.functionCall) {
+      if (part.functionCall) {
         toolCalls.push(mapToolCall(part.functionCall, toolCalls.length));
+      } else if (part.text) {
+        // Check if this is a thinking part (Google uses thought: true)
+        if (part.thought === true) {
+          thinkingParts.push(part.text);
+        } else {
+          textParts.push(part.text);
+        }
       }
     }
   }
 
-  return { content: textParts, tool_calls: toolCalls };
+  const result: ExtractedContent = {
+    content: textParts,
+    tool_calls: toolCalls,
+  };
+
+  // Add reasoning if thinking parts were found
+  if (thinkingParts.length > 0) {
+    result.reasoning = thinkingParts.join("");
+    // Google doesn't provide signatures like Anthropic, so we create details without signatures
+    result.reasoning_details = thinkingParts.map((thinking) => ({
+      thinking,
+      signature: "", // Google doesn't provide signatures
+    }));
+  }
+
+  return result;
 }
 
 function mapToolCall(

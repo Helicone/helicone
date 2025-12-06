@@ -36,6 +36,12 @@ type GeminiTool = {
   }>;
 };
 
+type GeminiThinkingConfig = {
+  includeThoughts?: boolean;
+  thinkingLevel?: "low" | "high";
+  thinkingBudget?: number;
+};
+
 type GeminiGenerationConfig = {
   temperature?: number;
   topP?: number;
@@ -45,6 +51,7 @@ type GeminiGenerationConfig = {
   candidateCount?: number;
   presencePenalty?: number;
   frequencyPenalty?: number;
+  thinkingConfig?: GeminiThinkingConfig;
 };
 
 type GeminiToolConfig = {
@@ -69,6 +76,16 @@ type ExtendedHeliconeChatCreateParams = HeliconeChatCreateParams & {
   max_output_tokens?: number | null;
   top_k?: number | null;
 };
+
+/**
+ * Extended reasoning options for Google-specific thinking configuration.
+ */
+interface GoogleReasoningOptions {
+  /** Token budget for thinking (Gemini 2.5 models) */
+  budget_tokens?: number;
+  /** Thinking level (Gemini 3+ models) */
+  thinking_level?: "low" | "high";
+}
 
 export function toGoogle(
   openAIBody: HeliconeChatCreateParams
@@ -146,6 +163,10 @@ export function toGoogle(
     }
   }
 
+  // Debug: Log outbound Google request
+  console.log("[toGoogle] OpenAI input:", JSON.stringify(openAIBody, null, 2));
+  console.log("[toGoogle] Google output:", JSON.stringify(geminiBody, null, 2));
+
   return geminiBody;
 }
 
@@ -205,7 +226,74 @@ function buildGenerationConfig(
     config.frequencyPenalty = frequencyPenalty;
   }
 
+  // Handle reasoning/thinking configuration
+  const thinkingConfig = buildThinkingConfig(body, maxOutputTokens);
+  if (thinkingConfig) {
+    config.thinkingConfig = thinkingConfig;
+  }
+
   return Object.keys(config).length > 0 ? config : undefined;
+}
+
+/**
+ * Maps OpenAI reasoning_effort to Google thinkingLevel.
+ */
+function mapReasoningEffortToThinkingLevel(
+  effort: "low" | "medium" | "high"
+): "low" | "high" {
+  // Google only supports "low" and "high", so map "medium" to "low"
+  return effort === "high" ? "high" : "low";
+}
+
+/**
+ * Builds the Google thinking configuration from OpenAI reasoning parameters.
+ *
+ * Supports both:
+ * - reasoning_effort: "low" | "medium" | "high" -> thinkingLevel
+ * - reasoning_options.budget_tokens -> thinkingBudget
+ * - reasoning_options.thinking_level -> thinkingLevel (overrides reasoning_effort)
+ *
+ * If no reasoning parameters are provided, explicitly disables thinking
+ * by setting thinkingBudget to 0.
+ */
+function buildThinkingConfig(
+  body: HeliconeChatCreateParams,
+  _maxOutputTokens?: number
+): GeminiThinkingConfig {
+  const reasoningEffort = body.reasoning_effort;
+  const reasoningOptions = body.reasoning_options as GoogleReasoningOptions | undefined;
+
+  // If no reasoning configuration, disable thinking by setting budget to 0
+  if (!reasoningEffort && !reasoningOptions) {
+    return {
+      thinkingBudget: 0,
+    };
+  }
+
+  const thinkingConfig: GeminiThinkingConfig = {
+    includeThoughts: true,
+  };
+
+  // Handle reasoning_effort -> thinkingLevel
+  if (reasoningEffort) {
+    thinkingConfig.thinkingLevel = mapReasoningEffortToThinkingLevel(
+      reasoningEffort as "low" | "medium" | "high"
+    );
+  }
+
+  // reasoning_options can override or add to the config
+  if (reasoningOptions) {
+    if (reasoningOptions.budget_tokens !== undefined) {
+      thinkingConfig.thinkingBudget = reasoningOptions.budget_tokens;
+    }
+
+    // thinking_level in reasoning_options overrides reasoning_effort
+    if (reasoningOptions.thinking_level !== undefined) {
+      thinkingConfig.thinkingLevel = reasoningOptions.thinking_level;
+    }
+  }
+
+  return thinkingConfig;
 }
 
 function buildTools(body: HeliconeChatCreateParams): GeminiTool[] | undefined {

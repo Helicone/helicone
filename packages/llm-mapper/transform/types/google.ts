@@ -5,6 +5,7 @@ export interface GoogleFunctionCall {
 
 export interface GoogleContentPart {
   text?: string;
+  thought?: boolean;
   functionCall?: GoogleFunctionCall;
 }
 
@@ -48,3 +49,25 @@ export interface GoogleResponseBody {
 }
 
 export type GoogleStreamEvent = GoogleResponseBody;
+
+/**
+ * Google Gemini Thinking configuration for reasoning/thinking models.
+ * @see https://ai.google.dev/gemini-api/docs/thinking
+ */
+export interface GoogleThinkingConfig {
+  /** Whether to include thinking/reasoning summaries in the response */
+  includeThoughts?: boolean;
+  /**
+   * Thinking level for Gemini 3+ models
+   * - "low" for faster, less detailed reasoning
+   * - "high" for more detailed reasoning
+   */
+  thinkingLevel?: "low" | "high";
+  /**
+   * Token budget for thinking (for Gemini 2.5 models)
+   * - Specific token values (e.g., 1024)
+   * - -1 for dynamic thinking
+   * - 0 to disable thinking
+   */
+  thinkingBudget?: number;
+}

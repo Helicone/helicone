@@ -91,20 +91,8 @@ export class GoogleToOpenAIStreamConverter {
           continue;
         }
 
-        if (part.text) {
-          chunks.push(
-            this.createChunk({
-              choices: [
-                {
-                  index: candidate.index ?? 0,
-                  delta: { content: part.text },
-                  logprobs: null,
-                  finish_reason: null,
-                },
-              ],
-            })
-          );
-        } else if (part.functionCall) {
+        if (part.functionCall) {
+          // Handle function calls (checked first since they may also have text)
           chunks.push(
             this.createChunk({
               choices: [
@@ -131,6 +119,37 @@ export class GoogleToOpenAIStreamConverter {
           );
 
           this.toolCallIndex += 1;
+        } else if (part.text) {
+          // Check if this is a thinking part (Google uses thought: true)
+          if (part.thought === true) {
+            // Emit thinking content as reasoning in the delta
+            chunks.push(
+              this.createChunk({
+                choices: [
+                  {
+                    index: candidate.index ?? 0,
+                    delta: { reasoning: part.text },
+                    logprobs: null,
+                    finish_reason: null,
+                  },
+                ],
+              })
+            );
+          } else {
+            // Regular content
+            chunks.push(
+              this.createChunk({
+                choices: [
+                  {
+                    index: candidate.index ?? 0,
+                    delta: { content: part.text },
+                    logprobs: null,
+                    finish_reason: null,
+                  },
+                ],
+              })
+            );
+          }
         }
       }
     }

@@ -505,12 +505,18 @@ export async function normalizeAIGatewayResponse(params: {
           normalizedOpenAIText = serializeOpenAIChunks(openAIChunks);
         }
       } else if (responseFormat === "GOOGLE") {
+        // Debug: Log incoming Google streaming response
+        console.log("[normalizeAIGatewayResponse] Google stream input:", responseText);
+
         const converter = new GoogleToOpenAIStreamConverter();
         const openAIChunks: ChatCompletionChunk[] = [];
         converter.processLines(responseText, (chunk) => {
           openAIChunks.push(chunk);
         });
         normalizedOpenAIText = serializeOpenAIChunks(openAIChunks);
+
+        // Debug: Log transformed OpenAI streaming response
+        console.log("[normalizeAIGatewayResponse] OpenAI stream output:", normalizedOpenAIText);
       } else if (responseFormat === "OPENAI") {
         // Already in OpenAI format, just normalize usage
         normalizedOpenAIText = await normalizeOpenAIStreamText(
@@ -531,12 +537,19 @@ export async function normalizeAIGatewayResponse(params: {
       // Non-streaming responses
       const providerBody = JSON.parse(responseText);
 
+      // Debug: Log incoming provider response
+      if (responseFormat === "GOOGLE") {
+        console.log("[normalizeAIGatewayResponse] Google response input:", JSON.stringify(providerBody, null, 2));
+      }
+
       let openAIBody = providerBody;
       if (responseFormat === "ANTHROPIC") {
         // Convert Anthropic to OpenAI format
         openAIBody = anthropicToOpenAI(providerBody);
       } else if (responseFormat === "GOOGLE") {
         openAIBody = googleToOpenAI(providerBody);
+        // Debug: Log transformed OpenAI response
+        console.log("[normalizeAIGatewayResponse] OpenAI response output:", JSON.stringify(openAIBody, null, 2));
       }
 
       // Normalize usage for all providers
