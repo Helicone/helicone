@@ -11,7 +11,11 @@ import { isError, resultMap } from "../packages/common/result";
 import { BaseManager } from "./BaseManager";
 import { WalletManager } from "./wallet/WalletManager";
 import { dbExecute, dbQueryClickhouse } from "../lib/shared/db/dbExecute";
-import { OrgDiscount } from "../utils/discountCalculator";
+import {
+  OrgDiscount,
+  getOrgDiscounts,
+  findDiscount,
+} from "../utils/discountCalculator";
 import { getCacheTokenAdjustmentsByModel } from "../utils/cacheTokenAdjustments";
 
 export interface PTBInvoice {
@@ -211,6 +215,9 @@ export class CreditsManager extends BaseManager {
         endDate
       );
 
+      // Get discounts for this org
+      const discounts = await getOrgDiscounts(this.authParams.organizationId);
+
       const models: ModelSpend[] = res.data.map((row) => {
         // Look up pricing from registry using model:provider key
         // Apply model name mapping for backward compatibility (e.g., kimi-k2-instruct -> kimi-k2-0905)
@@ -233,9 +240,9 @@ export class CreditsManager extends BaseManager {
         const cacheAdjustmentUsd = adjustment?.amountUsd || 0;
         const missingCacheWriteTokens = adjustment?.missingTokens || 0;
         const subtotal = baseCost + cacheAdjustmentUsd;
-        // No discounts for customer-facing view - discounts only applied during invoice creation
-        const discountPercent = 0;
-        const total = subtotal;
+        // Apply discounts from org config
+        const discountPercent = findDiscount(discounts, row.model, row.provider);
+        const total = subtotal * (1 - discountPercent / 100);
 
         return {
           model: row.model,
