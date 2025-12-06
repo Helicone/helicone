@@ -4103,6 +4103,10 @@ Json: JsonObject;
       cacheWriteTokens: number;
       pricing: {
         /** Format: double */
+        cacheWritePer1M?: number;
+        /** Format: double */
+        cacheReadPer1M?: number;
+        /** Format: double */
         outputPer1M: number;
         /** Format: double */
         inputPer1M: number;

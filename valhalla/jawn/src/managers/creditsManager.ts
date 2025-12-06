@@ -40,6 +40,8 @@ export interface ModelSpend {
   pricing: {
     inputPer1M: number;
     outputPer1M: number;
+    cacheReadPer1M?: number;
+    cacheWritePer1M?: number;
   } | null;
   subtotal: number; // Cost before discount (USD), includes cache adjustment
   discountPercent: number; // 0-100
@@ -222,16 +224,35 @@ export class CreditsManager extends BaseManager {
         // Look up pricing from registry using model:provider key
         // Apply model name mapping for backward compatibility (e.g., kimi-k2-instruct -> kimi-k2-0905)
         const normalizedModel = MODEL_NAME_MAPPINGS[row.model] || row.model;
-        let pricing: { inputPer1M: number; outputPer1M: number } | null = null;
+        let pricing: {
+          inputPer1M: number;
+          outputPer1M: number;
+          cacheReadPer1M?: number;
+          cacheWritePer1M?: number;
+        } | null = null;
         const configResult = registry.getModelProviderConfig(
           normalizedModel,
           row.provider
         );
         if (!configResult.error && configResult.data?.pricing?.[0]) {
           const p = configResult.data.pricing[0];
+          // Cache multipliers vary by provider:
+          // - Anthropic: cachedInput = 0.1 (10% of input), write = 1.25× input
+          // - OpenAI: cachedInput = 0.5 (50% of input), no write cost
+          const cacheMultipliers = p.cacheMultipliers;
           pricing = {
             inputPer1M: p.input * 1_000_000,
             outputPer1M: p.output * 1_000_000,
+            // Cache read price from multiplier, or undefined if not available
+            cacheReadPer1M: cacheMultipliers?.cachedInput
+              ? p.input * cacheMultipliers.cachedInput * 1_000_000
+              : undefined,
+            // Cache write price: Anthropic charges 1.25× input, OpenAI has no write cost
+            // Only set if there's a 5m or 1h write multiplier (Anthropic)
+            cacheWritePer1M:
+              cacheMultipliers?.write5m || cacheMultipliers?.write1h
+                ? p.input * (cacheMultipliers.write5m ?? cacheMultipliers.write1h ?? 1.25) * 1_000_000
+                : undefined,
           };
         }
 

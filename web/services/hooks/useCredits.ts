@@ -147,6 +147,8 @@ export interface ModelSpend {
   pricing: {
     inputPer1M: number;
     outputPer1M: number;
+    cacheReadPer1M?: number;
+    cacheWritePer1M?: number;
   } | null;
   subtotal: number; // Cost before discount
   discountPercent: number; // 0-100

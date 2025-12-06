@@ -14818,7 +14818,7 @@ const models: TsoaRoute.Models = {
             "completionTokens": {"dataType":"double","required":true},
             "cacheReadTokens": {"dataType":"double","required":true},
             "cacheWriteTokens": {"dataType":"double","required":true},
-            "pricing": {"dataType":"union","subSchemas":[{"dataType":"nestedObjectLiteral","nestedProperties":{"outputPer1M":{"dataType":"double","required":true},"inputPer1M":{"dataType":"double","required":true}}},{"dataType":"enum","enums":[null]}],"required":true},
+            "pricing": {"dataType":"union","subSchemas":[{"dataType":"nestedObjectLiteral","nestedProperties":{"cacheWritePer1M":{"dataType":"double"},"cacheReadPer1M":{"dataType":"double"},"outputPer1M":{"dataType":"double","required":true},"inputPer1M":{"dataType":"double","required":true}}},{"dataType":"enum","enums":[null]}],"required":true},
             "subtotal": {"dataType":"double","required":true},
             "discountPercent": {"dataType":"double","required":true},
             "total": {"dataType":"double","required":true},

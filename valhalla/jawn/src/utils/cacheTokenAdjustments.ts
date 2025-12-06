@@ -9,15 +9,33 @@
  * See: /valhalla/jawn/src/managers/admin/CACHE_TOKEN_ADJUSTMENT_README.md
  */
 
+import { registry } from "@helicone-package/cost/models/registry";
+
 export interface CacheTokenAdjustment {
   orgId: string;
   model: string;
+  provider: string;
   /** Only apply adjustment for requests before this date (when fix was deployed) */
   beforeDate: Date;
   /** Total missing cache write tokens (count × median tokens per request) */
   totalMissingTokens: number;
-  /** Cache write price per token */
-  pricePerToken: number;
+}
+
+/**
+ * Get cache write price per token from the cost registry.
+ * Uses the write5m or write1h multiplier from cacheMultipliers, or falls back to 1.25× input.
+ */
+function getCacheWritePricePerToken(model: string, provider: string): number {
+  const configResult = registry.getModelProviderConfig(model, provider);
+  if (configResult.error || !configResult.data?.pricing?.[0]) {
+    console.warn(`No pricing found for ${model}:${provider}, using 0`);
+    return 0;
+  }
+  const p = configResult.data.pricing[0];
+  const cacheMultipliers = p.cacheMultipliers;
+  // Use the 5m or 1h write multiplier if available, otherwise fall back to 1.25×
+  const writeMultiplier = cacheMultipliers?.write5m ?? cacheMultipliers?.write1h ?? 1.25;
+  return p.input * writeMultiplier;
 }
 
 export const CACHE_TOKEN_ADJUSTMENTS: CacheTokenAdjustment[] = [
@@ -26,16 +44,16 @@ export const CACHE_TOKEN_ADJUSTMENTS: CacheTokenAdjustment[] = [
   {
     orgId: "83635a30-5ba6-41a8-8cc6-fb7df941b24a",
     model: "gpt-4o",
+    provider: "OPENAI",
     beforeDate: new Date("2099-12-31T00:00:00Z"), // Far future for testing
-    totalMissingTokens: 100 * 5000, // Test: adds ~$1.25 adjustment
-    pricePerToken: 0.0000025, // $2.50/MTok
+    totalMissingTokens: 100 * 5000, // Test adjustment
   },
   {
     orgId: "83635a30-5ba6-41a8-8cc6-fb7df941b24a",
     model: "gpt-4o-mini",
+    provider: "OPENAI",
     beforeDate: new Date("2099-12-31T00:00:00Z"),
-    totalMissingTokens: 100 * 5000, // Test: adds ~$0.075 adjustment
-    pricePerToken: 0.00000015, // $0.15/MTok
+    totalMissingTokens: 100 * 5000, // Test adjustment
   },
 
   // Org: 63452b7b-54e6-470c-a9e7-a69b2e17a4cf
@@ -44,44 +62,44 @@ export const CACHE_TOKEN_ADJUSTMENTS: CacheTokenAdjustment[] = [
   {
     orgId: "63452b7b-54e6-470c-a9e7-a69b2e17a4cf",
     model: "claude-sonnet-4",
+    provider: "ANTHROPIC",
     beforeDate: new Date("2025-12-06T00:00:00Z"),
     totalMissingTokens: 21436 * 16492, // 21,436 requests × 16,492 median tokens
-    pricePerToken: 0.00000375, // $3.75/MTok (sonnet cache write = input × 1.25)
   },
   {
     orgId: "63452b7b-54e6-470c-a9e7-a69b2e17a4cf",
     model: "claude-4.5-sonnet",
+    provider: "ANTHROPIC",
     beforeDate: new Date("2025-12-06T00:00:00Z"),
     totalMissingTokens: 18982 * 40496, // 18,982 requests × 40,496 median tokens
-    pricePerToken: 0.00000375,
   },
   {
     orgId: "63452b7b-54e6-470c-a9e7-a69b2e17a4cf",
     model: "claude-opus-4",
+    provider: "ANTHROPIC",
     beforeDate: new Date("2025-12-06T00:00:00Z"),
     totalMissingTokens: 3689 * 32235, // 3,689 requests × 32,235 median tokens
-    pricePerToken: 0.00001875, // $18.75/MTok (opus cache write = input × 1.25)
   },
   {
     orgId: "63452b7b-54e6-470c-a9e7-a69b2e17a4cf",
     model: "claude-3.5-haiku",
+    provider: "ANTHROPIC",
     beforeDate: new Date("2025-12-06T00:00:00Z"),
     totalMissingTokens: 3100 * 44201, // 3,100 requests × 44,201 median tokens
-    pricePerToken: 0.000001, // $1/MTok (haiku cache write = input × 1.25)
   },
   {
     orgId: "63452b7b-54e6-470c-a9e7-a69b2e17a4cf",
     model: "claude-3.7-sonnet",
+    provider: "ANTHROPIC",
     beforeDate: new Date("2025-12-06T00:00:00Z"),
     totalMissingTokens: 1519 * 18270, // 1,519 requests × 18,270 median tokens
-    pricePerToken: 0.00000375,
   },
   {
     orgId: "63452b7b-54e6-470c-a9e7-a69b2e17a4cf",
     model: "claude-4.5-haiku",
+    provider: "ANTHROPIC",
     beforeDate: new Date("2025-12-06T00:00:00Z"),
     totalMissingTokens: 1492 * 14875, // 1,492 requests × 14,875 median tokens
-    pricePerToken: 0.000001,
   },
 ];
 
@@ -104,8 +122,9 @@ export function getCacheTokenAdjustment(
 
   if (!adjustment) return 0;
 
-  // Calculate the USD adjustment
-  return adjustment.totalMissingTokens * adjustment.pricePerToken;
+  // Get price from registry
+  const pricePerToken = getCacheWritePricePerToken(adjustment.model, adjustment.provider);
+  return adjustment.totalMissingTokens * pricePerToken;
 }
 
 /**
@@ -113,7 +132,10 @@ export function getCacheTokenAdjustment(
  */
 export function getTotalCacheTokenAdjustment(orgId: string): number {
   return CACHE_TOKEN_ADJUSTMENTS.filter((a) => a.orgId === orgId).reduce(
-    (sum, a) => sum + a.totalMissingTokens * a.pricePerToken,
+    (sum, a) => {
+      const pricePerToken = getCacheWritePricePerToken(a.model, a.provider);
+      return sum + a.totalMissingTokens * pricePerToken;
+    },
     0
   );
 }
@@ -132,7 +154,8 @@ export function getCacheTokenAdjustmentsByModel(
 
   for (const a of CACHE_TOKEN_ADJUSTMENTS) {
     if (a.orgId === orgId && startDate < a.beforeDate) {
-      const amount = a.totalMissingTokens * a.pricePerToken;
+      const pricePerToken = getCacheWritePricePerToken(a.model, a.provider);
+      const amount = a.totalMissingTokens * pricePerToken;
       const existing = adjustments.get(a.model) || { amountUsd: 0, missingTokens: 0 };
       adjustments.set(a.model, {
         amountUsd: existing.amountUsd + amount,

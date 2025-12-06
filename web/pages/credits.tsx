@@ -741,9 +741,9 @@ const Credits: NextPageWithLayout<void> = () => {
                           Cache Write
                         </SortableHeader>
                         <TableHead className="text-right">Input $/1M</TableHead>
-                        <TableHead className="text-right">
-                          Output $/1M
-                        </TableHead>
+                        <TableHead className="text-right">Output $/1M</TableHead>
+                        <TableHead className="text-right">Cache Rd $/1M</TableHead>
+                        <TableHead className="text-right">Cache Wr $/1M</TableHead>
                         <SortableHeader field="total" align="right">
                           Cost
                         </SortableHeader>
@@ -777,6 +777,12 @@ const Credits: NextPageWithLayout<void> = () => {
                           </TableCell>
                           <TableCell className="font-mono text-right text-muted-foreground">
                             {formatPrice(item.pricing?.outputPer1M)}
+                          </TableCell>
+                          <TableCell className="font-mono text-right text-muted-foreground">
+                            {formatPrice(item.pricing?.cacheReadPer1M)}
+                          </TableCell>
+                          <TableCell className="font-mono text-right text-muted-foreground">
+                            {formatPrice(item.pricing?.cacheWritePer1M)}
                           </TableCell>
                           <TableCell className="font-mono text-right font-semibold">
                             {formatCost(item.total)}

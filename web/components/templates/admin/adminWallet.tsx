@@ -1564,6 +1564,12 @@ export default function AdminWallet() {
                                                       Cache Write
                                                     </th>
                                                     <th className="p-2 text-right">
+                                                      Cache Rd $/1M
+                                                    </th>
+                                                    <th className="p-2 text-right">
+                                                      Cache Wr $/1M
+                                                    </th>
+                                                    <th className="p-2 text-right">
                                                       Subtotal
                                                     </th>
                                                     <th className="p-2 text-right">
@@ -1607,6 +1613,16 @@ export default function AdminWallet() {
                                                         <td className="font-mono p-2 text-right text-xs">
                                                           {(item.cacheWriteTokens || 0).toLocaleString()}
                                                         </td>
+                                                        <td className="font-mono p-2 text-right text-xs text-muted-foreground">
+                                                          {item.pricing?.cacheReadPer1M
+                                                            ? formatCurrency(item.pricing.cacheReadPer1M)
+                                                            : "-"}
+                                                        </td>
+                                                        <td className="font-mono p-2 text-right text-xs text-muted-foreground">
+                                                          {item.pricing?.cacheWritePer1M
+                                                            ? formatCurrency(item.pricing.cacheWritePer1M)
+                                                            : "-"}
+                                                        </td>
                                                         <td className="font-mono p-2 text-right text-muted-foreground">
                                                           {formatCurrency(
                                                             item.subtotal - (item.cacheAdjustment || 0),
@@ -1649,7 +1665,7 @@ export default function AdminWallet() {
                                                   )}
                                                   <tr className="border-t bg-muted/50 font-medium">
                                                     <td
-                                                      colSpan={9}
+                                                      colSpan={11}
                                                       className="p-2 text-right"
                                                     >
                                                       Total:

@@ -12382,6 +12382,14 @@
 					},
 					"pricing": {
 						"properties": {
+							"cacheWritePer1M": {
+								"type": "number",
+								"format": "double"
+							},
+							"cacheReadPer1M": {
+								"type": "number",
+								"format": "double"
+							},
 							"outputPer1M": {
 								"type": "number",
 								"format": "double"
