@@ -53,6 +53,7 @@ export class GenericBodyProcessor implements IBodyProcessor {
         prompt_tokens_details?: {
           cached_tokens?: number;
           audio_tokens?: number;
+          cache_write_tokens?: number;
         };
         completion_tokens_details?: {
           reasoning_tokens?: number;
@@ -88,6 +89,7 @@ export class GenericBodyProcessor implements IBodyProcessor {
     return {
       promptTokens: effectivePromptTokens,
       promptCacheReadTokens: usage?.prompt_tokens_details?.cached_tokens ?? usage?.input_tokens_details?.cached_tokens ?? 0,
+      promptCacheWriteTokens: usage?.prompt_tokens_details?.cache_write_tokens ?? 0,
       completionTokens: effectiveCompletionTokens,
       totalTokens: usage?.total_tokens,
       heliconeCalculated: false,

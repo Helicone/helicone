@@ -12,7 +12,12 @@ export class AnthropicToOpenAIStreamConverter {
   private created: number = 0;
   private finalUsage: ChatCompletionChunk["usage"] | null = null;
   private inputTokens: number = 0; // Some providers (e.g. Anthropic) don't include input_tokens in the message_delta event
-  private cacheCreationDetails: { ephemeral_5m_input_tokens: number; ephemeral_1h_input_tokens: number } | null = null; // Cache creation details from message_start
+  private cacheReadInputTokens: number = 0; // Cache tokens from message_start
+  private cacheCreationInputTokens: number = 0; // Cache creation tokens from message_start
+  private cacheCreationDetails: {
+    ephemeral_5m_input_tokens: number;
+    ephemeral_1h_input_tokens: number;
+  } | null = null; // Cache creation details from message_start
   private toolCallState: Map<
     number,
     {
@@ -26,7 +31,10 @@ export class AnthropicToOpenAIStreamConverter {
   private nextToolCallIndex: number = 0;
   private annotations: OpenAIAnnotation[] = [];
   private currentContentLength: number = 0;
-  private thinkingBlockState: Map<number, { thinking: string; signature: string }> = new Map(); // Track thinking blocks with their signatures
+  private thinkingBlockState: Map<
+    number,
+    { thinking: string; signature: string }
+  > = new Map(); // Track thinking blocks with their signatures
 
   constructor() {
     this.created = Math.floor(Date.now() / 1000);
@@ -70,10 +78,18 @@ export class AnthropicToOpenAIStreamConverter {
         this.messageId = event.message.id;
         this.model = event.message.model;
         this.inputTokens = event.message.usage.input_tokens ?? 0;
+        this.cacheReadInputTokens =
+          event.message.usage.cache_read_input_tokens ?? 0;
+        this.cacheCreationInputTokens =
+          event.message.usage.cache_creation_input_tokens ?? 0;
         this.cacheCreationDetails = event.message.usage.cache_creation
           ? {
-              ephemeral_5m_input_tokens: event.message.usage.cache_creation.ephemeral_5m_input_tokens ?? 0,
-              ephemeral_1h_input_tokens: event.message.usage.cache_creation.ephemeral_1h_input_tokens ?? 0,
+              ephemeral_5m_input_tokens:
+                event.message.usage.cache_creation.ephemeral_5m_input_tokens ??
+                0,
+              ephemeral_1h_input_tokens:
+                event.message.usage.cache_creation.ephemeral_1h_input_tokens ??
+                0,
             }
           : null;
         this.toolCallState.clear();
@@ -164,7 +180,10 @@ export class AnthropicToOpenAIStreamConverter {
           );
         } else if (event.content_block.type === "thinking") {
           // Initialize thinking block state for this index
-          this.thinkingBlockState.set(event.index, { thinking: "", signature: "" });
+          this.thinkingBlockState.set(event.index, {
+            thinking: "",
+            signature: "",
+          });
         } else if (
           event.content_block.type === "web_search_tool_result" ||
           event.content_block.type === "server_tool_use"
@@ -283,15 +302,23 @@ export class AnthropicToOpenAIStreamConverter {
         // if we have any tool calls with empty arguments, emit them with the {} pattern
         this.finalizePendingToolCalls(chunks);
 
-        const cachedTokens = event.usage.cache_read_input_tokens ?? 0;
-        const cacheWriteTokens = event.usage.cache_creation_input_tokens ?? 0;
+        // Cache tokens may come from message_start (stored in instance vars) or message_delta
+        const cachedTokens =
+          event.usage.cache_read_input_tokens ?? this.cacheReadInputTokens;
+        const cacheWriteTokens =
+          event.usage.cache_creation_input_tokens ??
+          this.cacheCreationInputTokens;
         const webSearchRequests =
           event.usage.server_tool_use?.web_search_requests ?? 0;
 
         this.finalUsage = {
           prompt_tokens: event.usage.input_tokens ?? this.inputTokens,
           completion_tokens: event.usage.output_tokens,
-          total_tokens: (event.usage.input_tokens ?? this.inputTokens) + event.usage.output_tokens,
+          total_tokens:
+            (event.usage.input_tokens ?? this.inputTokens) +
+            event.usage.output_tokens +
+            (cachedTokens ?? 0) +
+            (cacheWriteTokens ?? 0),
           ...((cachedTokens > 0 || cacheWriteTokens > 0) && {
             prompt_tokens_details: {
               cached_tokens: cachedTokens,
@@ -300,8 +327,12 @@ export class AnthropicToOpenAIStreamConverter {
               ...(cacheWriteTokens > 0 && {
                 cache_write_tokens: cacheWriteTokens,
                 cache_write_details: {
-                  write_5m_tokens: this.cacheCreationDetails?.ephemeral_5m_input_tokens ?? 0,
-                  write_1h_tokens: this.cacheCreationDetails?.ephemeral_1h_input_tokens ?? 0,
+                  write_5m_tokens:
+                    this.cacheCreationDetails?.ephemeral_5m_input_tokens ??
+                    cacheWriteTokens ??
+                    0,
+                  write_1h_tokens:
+                    this.cacheCreationDetails?.ephemeral_1h_input_tokens ?? 0,
                 },
               }),
             },
@@ -323,8 +354,9 @@ export class AnthropicToOpenAIStreamConverter {
         const finishReason = this.mapStopReason(event.delta.stop_reason);
 
         // Collect reasoning_details from accumulated thinking blocks
-        const reasoning_details = Array.from(this.thinkingBlockState.values())
-          .filter(state => state.thinking || state.signature);
+        const reasoning_details = Array.from(
+          this.thinkingBlockState.values()
+        ).filter((state) => state.thinking || state.signature);
 
         chunks.push(
           this.createChunk({

@@ -19,6 +19,7 @@ export function mapModelUsageToOpenAI(modelUsage: ModelUsage): OpenAIUsage {
   // Map cache details if present
   if (modelUsage.cacheDetails) {
     const { cachedInput, write5m, write1h } = modelUsage.cacheDetails;
+    usage.total_tokens += cachedInput;
 
     usage.prompt_tokens_details = {
       cached_tokens: cachedInput ?? 0,
@@ -33,6 +34,8 @@ export function mapModelUsageToOpenAI(modelUsage: ModelUsage): OpenAIUsage {
         write_5m_tokens: write5m ?? 0,
         write_1h_tokens: write1h ?? 0,
       };
+
+      usage.total_tokens += (write5m ?? 0) + (write1h ?? 0);
     }
   } else if (modelUsage.audio) {
     // Modality tokens without cache details
@@ -60,6 +63,9 @@ export function mapModelUsageToOpenAI(modelUsage: ModelUsage): OpenAIUsage {
       web_search_requests: modelUsage.web_search,
     };
   }
+
+  // TODO: currently modelUsage.audio and modelUsage.thinking aren't really accounted for anywhere in the gateway
+  // but we would add it to total_tokens if we did
 
   // Add cost if present
   if (modelUsage.cost) {
