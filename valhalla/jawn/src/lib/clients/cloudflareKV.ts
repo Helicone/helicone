@@ -1,5 +1,6 @@
 import { Cloudflare } from "cloudflare";
 import { SecretManager } from "@helicone-package/secrets/SecretManager";
+import { type ProviderKey } from "../refetchKeys";
 
 const cloudflare = new Cloudflare({
   apiToken: SecretManager.getSecret("CLOUDFLARE_API_TOKEN"),
@@ -179,5 +180,86 @@ export async function storeInCache(
     });
   } catch (e) {
     console.error("Error storing in cache", e);
+  }
+}
+
+export async function updateProviderKeysInDO(
+  orgId: string,
+  providerKeys: ProviderKey[]
+): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  try {
+    const adminAccessKey = SecretManager.getSecret("HELICONE_MANUAL_ACCESS_KEY");
+    if (!adminAccessKey) {
+      throw new Error("HELICONE_MANUAL_ACCESS_KEY not configured");
+    }
+
+    const response = await fetch(
+      `${process.env.HELICONE_WORKER_API}/do/provider-keys-cache/${orgId}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${adminAccessKey}`,
+        },
+        body: JSON.stringify({
+          providerKeys: providerKeys.map((key) => ({
+            provider: key.provider,
+            org_id: key.orgId,
+            decrypted_provider_key: key.decrypted_provider_key,
+            decrypted_provider_secret_key: key.decrypted_provider_secret_key,
+            auth_type: key.auth_type,
+            byok_enabled: key.byok_enabled ?? null,
+            config: key.config,
+            cuid: key.cuid ?? null,
+          })),
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to update DO: ${response.status} ${response.statusText}`);
+    }
+
+    return { success: true };
+  } catch (e) {
+    console.error("Error updating provider keys in DO", e);
+    return { success: false, error: JSON.stringify(e) };
+  }
+}
+
+export async function invalidateProviderKeyInDO(
+  orgId: string,
+  keyCuid: string
+): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  try {
+    const adminAccessKey = SecretManager.getSecret("HELICONE_MANUAL_ACCESS_KEY");
+    if (!adminAccessKey) {
+      throw new Error("HELICONE_MANUAL_ACCESS_KEY not configured");
+    }
+
+    const response = await fetch(
+      `${process.env.HELICONE_WORKER_API}/do/provider-keys-cache/${orgId}/${keyCuid}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${adminAccessKey}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to invalidate key in DO: ${response.status} ${response.statusText}`);
+    }
+
+    return { success: true };
+  } catch (e) {
+    console.error("Error invalidating provider key in DO", e);
+    return { success: false, error: JSON.stringify(e) };
   }
 }

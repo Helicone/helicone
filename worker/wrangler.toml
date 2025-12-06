@@ -10,6 +10,7 @@ durable_objects.bindings = [
 	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
 	{ name = "WALLET", class_name = "Wallet" },
 	{ name = "REQUEST_BODY_BUFFER", class_name = "RequestBodyBufferContainer" },
+	{ name = "PROVIDER_KEY_CACHE", class_name = "ProviderKeyCache" },
 ]
 
 
@@ -181,6 +182,7 @@ durable_objects.bindings = [
 	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
 	{ name = "WALLET", class_name = "Wallet" },
 	{ name = "REQUEST_BODY_BUFFER", class_name = "RequestBodyBufferContainer" },
+	{ name = "PROVIDER_KEY_CACHE", class_name = "ProviderKeyCache" },
 ]
 
 kv_namespaces = [
@@ -265,6 +267,7 @@ durable_objects.bindings = [
 	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
 	{ name = "WALLET", class_name = "Wallet" },
 	{ name = "REQUEST_BODY_BUFFER", class_name = "RequestBodyBufferContainer" },
+	{ name = "PROVIDER_KEY_CACHE", class_name = "ProviderKeyCache" },
 ]
 
 queues.producers = [
@@ -325,3 +328,7 @@ new_sqlite_classes = ["Wallet"]
 [[migrations]]
 tag = "v9"
 new_sqlite_classes = ["RequestBodyBufferContainer"]
+
+[[migrations]]
+tag = "v10"
+new_sqlite_classes = ["ProviderKeyCache"]
