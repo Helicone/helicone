@@ -12,6 +12,8 @@ yarn install
 
 cd /home/ubuntu/workspaces/helicone
 
+sudo apt update -y
+sudo apt install python3.12-venv -y
 python3 -m venv venv
 source venv/bin/activate
 python3 -m pip install tabulate yarl
