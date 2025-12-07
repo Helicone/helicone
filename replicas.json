@@ -1,0 +1,7 @@
+{
+  "systemPrompt": "Then in different terminals run each of these: 1. **Workers** - Run in background: `cd /home/ubuntu/workspaces/helicone/worker && ./run_ptb_workers.sh` 2. **Jawn (Backend API)** - Run in background: `cd /home/ubuntu/workspaces/helicone/valhalla/jawn && yarn dev` 3. **Web (Frontend)** - Run in background: `cd /home/ubuntu/workspaces/helicone/web && yarn dev:local -p 3000` Then use the Playwright MCP to open chrome in headless mode to log in to helicone and take a screenshot of you logged in as test@helicone.ai/password And then make a PR with a small change to the README and attach a screenshot of you logged in to helicone.",
+  "startHook": {
+    "timeout": 300000,
+    "commands": ["bash ./replicas/start.sh"]
+  }
+}
