@@ -187,6 +187,8 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
             usageData?.prompt_tokens_details?.cached_tokens ??
             usageData?.input_tokens_details?.cached_tokens ??
             0,
+          promptCacheWriteTokens:
+            usageData?.prompt_tokens_details?.cache_write_tokens ?? 0,
           heliconeCalculated: usageData?.helicone_calculated ?? false,
 
           // OpenRouter may contain these fields based on wallet/BYOK setup
