@@ -4072,6 +4072,9 @@
 					},
 					"cost": {
 						"$ref": "#/components/schemas/SortDirection"
+					},
+					"time_to_first_token": {
+						"$ref": "#/components/schemas/SortDirection"
 					}
 				},
 				"type": "object",
@@ -4150,7 +4153,8 @@
 					"NVIDIA",
 					"VERCEL",
 					"CEREBRAS",
-					"BASETEN"
+					"BASETEN",
+					"CANOPYWAVE"
 				]
 			},
 			"ModelProviderName": {
@@ -4160,6 +4164,7 @@
 					"anthropic",
 					"azure",
 					"bedrock",
+					"canopywave",
 					"cerebras",
 					"chutes",
 					"deepinfra",
@@ -49970,6 +49975,7 @@
 														"anthropic",
 														"azure",
 														"bedrock",
+														"canopywave",
 														"cerebras",
 														"chutes",
 														"deepinfra",

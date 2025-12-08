@@ -177,7 +177,8 @@ describe("Perplexity Model Registry", () => {
         const ep = endpoint as ModelProviderConfig;
         const pricing = ep.pricing[0];
         expect(pricing.audio).toBe(0);
-        expect(pricing.image).toBe(0);
+        // Since we don't explicitly support image output right now
+        expect(pricing.image).toBe(undefined);
       });
     });
   });

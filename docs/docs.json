@@ -34,6 +34,8 @@
                 "group": "Provider Concepts",
                 "pages": [
                   "gateway/concepts/prompt-caching",
+                  "gateway/concepts/reasoning",
+                  "gateway/concepts/context-editing",
                   "gateway/web-search",
                   "gateway/concepts/error-handling",
                   "gateway/concepts/responses-api"
@@ -42,8 +44,10 @@
               {
                 "group": "Integrations",
                 "pages": [
+                  "gateway/integrations/claude-agent-sdk",
                   "gateway/integrations/codex",
                   "gateway/integrations/langchain",
+                  "gateway/integrations/langfuse",
                   "gateway/integrations/langgraph",
                   "gateway/integrations/n8n",
                   "gateway/integrations/semantic-kernel",
@@ -499,6 +503,10 @@
   },
   "navbar": {
     "links": [
+      {
+        "label": "Models",
+        "href": "https://helicone.ai/models"
+      },
       {
         "label": "Discord",
         "href": "https://discord.com/invite/zsSTcH2qhG"

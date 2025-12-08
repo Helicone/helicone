@@ -3170,6 +3170,9 @@
 					},
 					"cost": {
 						"$ref": "#/components/schemas/SortDirection"
+					},
+					"time_to_first_token": {
+						"$ref": "#/components/schemas/SortDirection"
 					}
 				},
 				"type": "object",
@@ -3248,7 +3251,8 @@
 					"NVIDIA",
 					"VERCEL",
 					"CEREBRAS",
-					"BASETEN"
+					"BASETEN",
+					"CANOPYWAVE"
 				]
 			},
 			"ModelProviderName": {
@@ -3258,6 +3262,7 @@
 					"anthropic",
 					"azure",
 					"bedrock",
+					"canopywave",
 					"cerebras",
 					"chutes",
 					"deepinfra",
@@ -9264,7 +9269,8 @@
 				"type": "string",
 				"enum": [
 					"ANTHROPIC",
-					"OPENAI"
+					"OPENAI",
+					"GOOGLE"
 				]
 			},
 			"ModelProviderConfig": {
@@ -13504,6 +13510,7 @@
 														"anthropic",
 														"azure",
 														"bedrock",
+														"canopywave",
 														"cerebras",
 														"chutes",
 														"deepinfra",

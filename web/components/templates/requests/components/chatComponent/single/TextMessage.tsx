@@ -6,7 +6,6 @@ import MarkdownEditor from "@/components/shared/markdownEditor";
 import { Mode } from "@/store/requestRenderModeStore";
 import dynamic from "next/dynamic";
 import { markdownComponents } from "@/components/shared/prompts/ResponsePanel";
-import { BrainIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import CitationAnnotations from "./CitationAnnotations";
 
@@ -124,20 +123,6 @@ export default function TextMessage({
     />
   ) : (
     <>
-      {displayReasoning && !displayContent && (
-        <div className="border-l-4 border-muted-foreground/30 bg-muted py-2 pl-2 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <BrainIcon className="h-4 w-4" />
-            <span className="font-medium">Reasoning</span>
-          </div>
-          <ReactMarkdown
-            components={markdownComponents}
-            className="w-full whitespace-pre-wrap break-words text-sm"
-          >
-            {displayReasoning}
-          </ReactMarkdown>
-        </div>
-      )}
       {displayContent ? (
         <>
           <ReactMarkdown
@@ -153,14 +138,12 @@ export default function TextMessage({
             />
           )}
         </>
-      ) : !displayReasoning ? (
+      ) : (
         <div className="flex flex-col gap-2">
           <Skeleton className="h-4 w-full animate-pulse" />
           <Skeleton className="h-4 w-full animate-pulse" />
           <Skeleton className="h-4 w-2/3 animate-pulse" />
         </div>
-      ) : (
-        <></>
       )}
     </>
   );

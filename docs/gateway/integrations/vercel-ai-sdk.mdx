@@ -123,6 +123,41 @@ for await (const chunk of result.textStream) {
 console.log('\n\nStream completed!');
 ```
 
+### UI Message Stream Response
+
+Convert streaming results to a UI-compatible response format:
+
+```typescript
+import { createHelicone } from '@helicone/ai-sdk-provider';
+import { streamText } from 'ai';
+
+const helicone = createHelicone({
+  apiKey: process.env.HELICONE_API_KEY
+});
+
+const result = streamText({
+  model: helicone("gpt-4o-mini", {
+    extraBody: {
+      helicone: {
+        tags: ["simple-stream-test"],
+        properties: {
+          test: "toUIMessageStreamResponse",
+        },
+      },
+    },
+  }),
+  prompt: 'Say "Hello streaming world!"',
+});
+
+const response = result.toUIMessageStreamResponse();
+
+console.log(
+  "Response headers:",
+  Object.fromEntries(response.headers.entries())
+);
+// Just checks that we can create it - actual consumption needs to be in a server
+```
+
 ### Provider Selection
 
 By default, Helicone's AI gateway automatically routes to the cheapest provider. You can also manually select a specific provider:
@@ -212,6 +247,135 @@ const result = await generateText({
 console.log(result.text);
 ```
 
+### Agents
+
+Use Vercel AI SDK's Agent API with Helicone to build multi-step reasoning agents:
+
+```typescript
+import { createHelicone } from "@helicone/ai-sdk-provider";
+import { Experimental_Agent as Agent, tool, jsonSchema, stepCountIs } from "ai";
+
+const helicone = createHelicone({
+  apiKey: process.env.HELICONE_API_KEY!
+});
+
+const weatherAgent = new Agent({
+  model: helicone("claude-4.5-haiku"),
+  stopWhen: stepCountIs(5),
+  tools: {
+    getWeather: tool({
+      description: "Get the current weather for a location",
+      inputSchema: jsonSchema({
+        type: "object",
+        properties: {
+          location: {
+            type: "string",
+            description: "The city and state, e.g. San Francisco, CA",
+          },
+          unit: {
+            type: "string",
+            enum: ["celsius", "fahrenheit"],
+            default: "fahrenheit",
+            description: "Temperature unit",
+          },
+        },
+        required: ["location"],
+      }),
+      execute: async ({ location, unit }) => {
+        // Simulate weather API call
+        const temp =
+          unit === "celsius"
+            ? Math.floor(Math.random() * 30 + 5)
+            : Math.floor(Math.random() * 86 + 32);
+        const conditions = ["sunny", "cloudy", "rainy", "partly cloudy"][
+          Math.floor(Math.random() * 4)
+        ];
+        const result = {
+          location,
+          temperature: temp,
+          unit: unit || "fahrenheit",
+          conditions,
+          description: `It's ${conditions} in ${location} with a temperature of ${temp}°${unit?.charAt(0).toUpperCase() || "F"}.`,
+        };
+        console.log(`Result: ${JSON.stringify(result)}`);
+        return result;
+      },
+    }),
+    calculateWindChill: tool({
+      description: "Calculate wind chill temperature",
+      inputSchema: jsonSchema({
+        type: "object",
+        properties: {
+          temperature: {
+            type: "number",
+            description: "Temperature in Fahrenheit",
+          },
+          windSpeed: {
+            type: "number",
+            description: "Wind speed in mph",
+          },
+        },
+        required: ["temperature", "windSpeed"],
+      }),
+      execute: async ({ temperature, windSpeed }) => {
+        const windChill =
+          35.74 +
+          0.6215 * temperature -
+          35.75 * Math.pow(windSpeed, 0.16) +
+          0.4275 * temperature * Math.pow(windSpeed, 0.16);
+        const result = {
+          temperature,
+          windSpeed,
+          windChill: Math.round(windChill),
+          description: `With a temperature of ${temperature}°F and wind speed of ${windSpeed} mph, the wind chill feels like ${Math.round(windChill)}°F.`,
+        };
+        console.log(`Result: ${JSON.stringify(result)}`);
+        return result;
+      },
+    }),
+  },
+});
+
+try {
+  console.log("🌤️  Asking about weather in multiple cities...\n");
+
+  const result = await weatherAgent.generate({
+    prompt:
+      "You are a helpful weather assistant. When asked about weather, use the getWeather tool to provide accurate information.\n\nWhat is the weather like in San Francisco, CA and New York, NY? Also, if the wind speed in San Francisco is 15 mph, what would the wind chill feel like?"
+  });
+
+  console.log("=== Agent Response ===");
+  console.log(result.text);
+
+  console.log("\n=== Usage Statistics ===");
+  console.log(`Total tokens: ${result.usage?.totalTokens || "N/A"}`);
+  console.log(`Finish reason: ${result.finishReason}`);
+  console.log(`Steps taken: ${result.steps?.length || 0}`);
+
+  if (result.steps && result.steps.length > 0) {
+    console.log("\n=== Steps Breakdown ===");
+    result.steps.forEach((step, index) => {
+      console.log(`Step ${index + 1}: ${step.finishReason}`);
+      if (step.toolCalls && step.toolCalls.length > 0) {
+        console.log(
+          `  Tool calls: ${step.toolCalls.map((tc) => tc.toolName).join(", ")}`
+        );
+        step.toolCalls.forEach((tc, i) => {
+          console.log(
+            `    Tool ${i + 1}: ${tc.toolName}(${JSON.stringify(tc.input)})`
+          );
+        });
+      }
+    });
+  }
+} catch (error) {
+  console.error("❌ Error running agent:", error);
+  if (error instanceof Error) {
+    console.error("Error details:", error.message);
+  }
+}
+```
+
 ### Helicone Prompts Integration
 
 Use prompts created in your Helicone dashboard instead of hardcoding messages in your application:
@@ -263,6 +427,12 @@ const result = await generateText({
 
 For more comprehensive examples, check out the [GitHub repository](https://github.com/Helicone/ai-sdk-provider/tree/main/examples):
 
+
+## Additional Resources
+
+- [Vercel AI SDK Documentation](https://ai-sdk.dev/providers/community-providers/helicone)
+- [Helicone AI SDK Provider Github](https://github.com/Helicone/ai-sdk-provider)
+
 ## Related Documentation
 
 <CardGroup cols={2}>
@@ -292,9 +462,4 @@ For more comprehensive examples, check out the [GitHub repository](https://githu
   </Card>
 </CardGroup>
 
-## Additional Resources
-
-- [Vercel AI SDK Documentation](https://sdk.vercel.ai)
-- [Helicone AI SDK Provider GitHub](https://github.com/Helicone/ai-sdk-provider)
-- [Helicone AI SDK Provider on Vercel](https://ai-sdk.dev/providers/community-providers/helicone)
 

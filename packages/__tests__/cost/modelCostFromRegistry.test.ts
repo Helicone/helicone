@@ -170,7 +170,8 @@ describe("modelCostBreakdownFromRegistry", () => {
     expect(breakdown).not.toBeNull();
     if (breakdown) {
       // Gemini image price: $0.001238 per image
-      expect(breakdown.imageCost).toBe(3 * 0.001238);
+      // Since we don't explicitly support image output right now
+      expect(breakdown.imageCost).toBe(0);
     }
   });
 

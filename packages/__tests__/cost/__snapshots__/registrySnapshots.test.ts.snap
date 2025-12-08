@@ -706,7 +706,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "context": 200000,
       "crossRegion": false,
       "maxTokens": 8192,
-      "modelId": "anthropic/claude-4.5-haiku",
+      "modelId": "anthropic/claude-haiku-4.5",
       "parameters": [
         "max_tokens",
         "stop",
@@ -3134,6 +3134,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "kimi-k2-thinking:canopywave": {
+      "context": 262144,
+      "crossRegion": false,
+      "maxTokens": 262144,
+      "modelId": "moonshotai/kimi-k2-thinking",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "canopywave",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "kimi-k2-thinking:deepinfra": {
       "context": 256000,
       "crossRegion": false,
@@ -4554,6 +4577,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "openai/oss": {
+    "gpt-oss-120b:baseten": {
+      "context": 128072,
+      "crossRegion": false,
+      "maxTokens": 128072,
+      "modelId": "openai/gpt-oss-120b",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "baseten",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-oss-120b:cerebras": {
       "context": 131072,
       "crossRegion": false,
@@ -5006,6 +5049,100 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "grok-4-1-fast-non-reasoning:helicone": {
+      "context": 2000000,
+      "crossRegion": false,
+      "maxTokens": 2000000,
+      "modelId": "pa/grok-4-1-fast-non-reasoning",
+      "parameters": [
+        "logprobs",
+        "max_tokens",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "grok-4-1-fast-non-reasoning:xai": {
+      "context": 2000000,
+      "crossRegion": false,
+      "maxTokens": 2000000,
+      "modelId": "grok-4-1-fast-non-reasoning",
+      "parameters": [
+        "logprobs",
+        "max_tokens",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "xai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "grok-4-1-fast-reasoning:helicone": {
+      "context": 2000000,
+      "crossRegion": false,
+      "maxTokens": 2000000,
+      "modelId": "pa/grok-4-1-fast-reasoning",
+      "parameters": [
+        "logprobs",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "grok-4-1-fast-reasoning:xai": {
+      "context": 2000000,
+      "crossRegion": false,
+      "maxTokens": 2000000,
+      "modelId": "grok-4-1-fast-reasoning",
+      "parameters": [
+        "logprobs",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "xai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "grok-4-fast-non-reasoning:helicone": {
       "context": 2000000,
       "crossRegion": false,
@@ -5085,29 +5222,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "logprobs",
         "max_tokens",
         "reasoning",
-        "response_format",
-        "seed",
-        "structured_outputs",
-        "temperature",
-        "tool_choice",
-        "tools",
-        "top_logprobs",
-        "top_p",
-      ],
-      "provider": "xai",
-      "ptbEnabled": true,
-      "regions": [
-        "*",
-      ],
-    },
-    "grok-4.1-fast-non-reasoning:xai": {
-      "context": 2000000,
-      "crossRegion": false,
-      "maxTokens": 2000000,
-      "modelId": "grok-4-1-fast-non-reasoning",
-      "parameters": [
-        "logprobs",
-        "max_tokens",
         "response_format",
         "seed",
         "structured_outputs",
@@ -5281,6 +5395,36 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "zai/glm-4": {
+    "glm-4.6:canopywave": {
+      "context": 204800,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "zai/glm-4.6",
+      "parameters": [
+        "frequency_penalty",
+        "functions",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "reasoning",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "canopywave",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "glm-4.6:novita": {
       "context": 204800,
       "crossRegion": false,
@@ -5506,6 +5650,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   ],
   "moonshotai/kimi-k2": [
     "baseten",
+    "canopywave",
     "deepinfra",
     "deepinfra",
     "fireworks",
@@ -5601,6 +5746,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
   ],
   "openai/oss": [
+    "baseten",
     "cerebras",
     "deepinfra",
     "groq",
@@ -5623,10 +5769,13 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "helicone",
     "helicone",
     "helicone",
+    "helicone",
+    "helicone",
     "openrouter",
     "openrouter",
     "openrouter",
     "openrouter",
+    "xai",
     "xai",
     "xai",
     "xai",
@@ -5636,6 +5785,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "xai",
   ],
   "zai/glm-4": [
+    "canopywave",
     "novita",
   ],
 }
@@ -5663,7 +5813,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "groq": [
       {
         "audio": 0,
-        "image": 0,
         "input": 2.9e-7,
         "output": 5.9e-7,
         "request": 0,
@@ -6581,7 +6730,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "groq": [
       {
         "audio": 0,
-        "image": 0,
         "input": 7.5e-7,
         "output": 9.9e-7,
         "request": 0,
@@ -6606,7 +6754,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
           "write5m": 1,
         },
         "cacheStoragePerHour": 0.000001,
-        "image": 0.001238,
         "input": 3e-7,
         "output": 0.0000025,
         "threshold": 0,
@@ -6627,7 +6774,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
           "write5m": 1,
         },
         "cacheStoragePerHour": 0.000001,
-        "image": 0.001238,
         "input": 3e-7,
         "output": 0.0000025,
         "threshold": 0,
@@ -6803,7 +6949,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "groq": [
       {
         "audio": 0,
-        "image": 0,
         "input": 1e-8,
         "output": 1e-8,
         "request": 0,
@@ -6868,6 +7013,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 0,
       },
     ],
+    "canopywave": [
+      {
+        "input": 4.8e-7,
+        "output": 0.000002,
+        "threshold": 0,
+      },
+    ],
     "deepinfra": [
       {
         "input": 5.5e-7,
@@ -6888,7 +7040,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "cacheMultipliers": {
           "cachedInput": 0.5,
         },
-        "image": 0,
         "input": 0.000001,
         "output": 0.000003,
         "request": 0,
@@ -7158,6 +7309,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "openai/oss": {
+    "baseten": [
+      {
+        "input": 1e-7,
+        "output": 5e-7,
+        "threshold": 0,
+      },
+    ],
     "cerebras": [
       {
         "input": 3.5e-7,
@@ -7168,7 +7326,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "deepinfra": [
       {
         "audio": 0,
-        "image": 0,
         "input": 4e-8,
         "output": 1.6e-7,
         "request": 0,
@@ -7179,7 +7336,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "groq": [
       {
         "audio": 0,
-        "image": 0,
         "input": 1e-7,
         "output": 5e-7,
         "request": 0,
@@ -7208,7 +7364,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "perplexity": [
       {
         "audio": 0,
-        "image": 0,
         "input": 0.000002,
         "output": 0.000008,
         "request": 0,
@@ -7224,7 +7379,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "cacheMultipliers": {
           "cachedInput": 0.25,
         },
-        "image": 0,
         "input": 3e-7,
         "output": 5e-7,
         "request": 0,
@@ -7245,7 +7399,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "cacheMultipliers": {
           "cachedInput": 0.25,
         },
-        "image": 0,
         "input": 3e-7,
         "output": 5e-7,
         "request": 0,
@@ -7255,6 +7408,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "zai/glm-4": {
+    "canopywave": [
+      {
+        "input": 4.5e-7,
+        "output": 0.0000015,
+        "threshold": 0,
+      },
+    ],
     "novita": [
       {
         "input": 6e-7,
@@ -7508,6 +7668,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "glm-4.6",
       "providers": [
+        "canopywave",
         "novita",
       ],
     },
@@ -7643,6 +7804,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "gpt-oss-120b",
       "providers": [
+        "baseten",
         "cerebras",
         "deepinfra",
         "groq",
@@ -7682,6 +7844,20 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "grok-4-1-fast-non-reasoning",
+      "providers": [
+        "helicone",
+        "xai",
+      ],
+    },
+    {
+      "model": "grok-4-1-fast-reasoning",
+      "providers": [
+        "helicone",
+        "xai",
+      ],
+    },
+    {
       "model": "grok-4-fast-non-reasoning",
       "providers": [
         "helicone",
@@ -7692,12 +7868,6 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "grok-4-fast-reasoning",
       "providers": [
         "helicone",
-        "xai",
-      ],
-    },
-    {
-      "model": "grok-4.1-fast-non-reasoning",
-      "providers": [
         "xai",
       ],
     },
@@ -7736,6 +7906,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "kimi-k2-thinking",
       "providers": [
+        "canopywave",
         "deepinfra",
         "fireworks",
         "novita",
@@ -7967,12 +8138,16 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "azure",
     },
     {
-      "modelCount": 1,
+      "modelCount": 2,
       "provider": "baseten",
     },
     {
       "modelCount": 12,
       "provider": "bedrock",
+    },
+    {
+      "modelCount": 2,
+      "provider": "canopywave",
     },
     {
       "modelCount": 1,
@@ -8003,7 +8178,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "groq",
     },
     {
-      "modelCount": 35,
+      "modelCount": 37,
       "provider": "helicone",
     },
     {
@@ -8035,7 +8210,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "vertex",
     },
     {
-      "modelCount": 7,
+      "modelCount": 8,
       "provider": "xai",
     },
   ],
@@ -8090,9 +8265,10 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "grok-3",
     "grok-3-mini",
     "grok-4",
+    "grok-4-1-fast-non-reasoning",
+    "grok-4-1-fast-reasoning",
     "grok-4-fast-non-reasoning",
     "grok-4-fast-reasoning",
-    "grok-4.1-fast-non-reasoning",
     "grok-code-fast-1",
     "hermes-2-pro-llama-3-8b",
     "kimi-k2-0711",
@@ -8140,9 +8316,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 237,
-  "totalModelProviderConfigs": 237,
-  "totalModelsWithPtb": 90,
-  "totalProviders": 20,
+  "totalEndpoints": 243,
+  "totalModelProviderConfigs": 243,
+  "totalModelsWithPtb": 91,
+  "totalProviders": 21,
 }
 `;

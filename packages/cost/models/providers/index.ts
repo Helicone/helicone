@@ -2,6 +2,7 @@ import { AnthropicProvider } from "./anthropic";
 import { AzureOpenAIProvider } from "./azure";
 import { BasetenProvider } from "./baseten";
 import { BedrockProvider } from "./bedrock";
+import { CanopyWaveProvider } from "./canopywave";
 import { CerebrasProvider } from "./cerebras";
 import { ChutesProvider } from "./chutes";
 import { DeepInfraProvider } from "./deepinfra";
@@ -25,6 +26,7 @@ export const providers = {
   anthropic: new AnthropicProvider(),
   azure: new AzureOpenAIProvider(),
   bedrock: new BedrockProvider(),
+  canopywave: new CanopyWaveProvider(),
   cerebras: new CerebrasProvider(),
   chutes: new ChutesProvider(),
   deepinfra: new DeepInfraProvider(),
@@ -45,10 +47,26 @@ export const providers = {
 
 export type ModelProviderName = keyof typeof providers;
 
+/**
+ * Providers that support the context editing feature.
+ * Context editing allows automatic management of conversation context,
+ * clearing old tool uses and thinking blocks to optimize costs and stay
+ * within context window limits.
+ *
+ * Currently only Anthropic models support this feature.
+ * @see https://docs.anthropic.com/en/docs/build-with-claude/context-editing
+ */
+export const ContextEditingEnabledProviders: ModelProviderName[] = [
+  "anthropic",
+];
+
 // TODO: temporarily whitelist responses API providers until all mappings are done
 export const ResponsesAPIEnabledProviders: ModelProviderName[] = [
   "openai",
   "helicone",
+  "anthropic",
+  "bedrock",
+  "google-ai-studio",
 
   // chat completions only
   "azure",

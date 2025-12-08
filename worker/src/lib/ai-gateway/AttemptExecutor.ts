@@ -48,7 +48,7 @@ export class AttemptExecutor {
     private readonly ctx: ExecutionContext,
     private readonly cacheProvider: CacheProvider,
     private readonly tracer: DataDogTracer
-  ) {}
+  ) { }
 
   async PTBPreCheck(props: {
     attempt: Attempt;
@@ -67,14 +67,14 @@ export class AttemptExecutor {
     // Start wallet operation span
     const walletSpanId = props.traceContext?.sampled
       ? this.tracer.startSpan(
-          "ai_gateway.ptb.credit_validation.reserve_escrow",
-          "reserveEscrow",
-          "helicone-wallet",
-          {
-            operation: "reserve_escrow",
-          },
-          props.traceContext
-        )
+        "ai_gateway.ptb.credit_validation.reserve_escrow",
+        "reserveEscrow",
+        "helicone-wallet",
+        {
+          operation: "reserve_escrow",
+        },
+        props.traceContext
+      )
       : null;
 
     const escrowResult = await this.reserveEscrow(
@@ -119,16 +119,16 @@ export class AttemptExecutor {
     if (props.attempt.authType === "ptb" && endpoint.ptbEnabled) {
       ptbSpanId = props.traceContext?.sampled
         ? this.tracer.startSpan(
-            "ai_gateway.ptb",
-            `${props.requestWrapper.getMethod()} ${props.requestWrapper.getUrl()}`,
-            "ai-gateway-ptb",
-            {
-              provider: endpoint.provider,
-              model: endpoint.providerModelId,
-              http_method: props.requestWrapper.getMethod(),
-            },
-            props.traceContext
-          )
+          "ai_gateway.ptb",
+          `${props.requestWrapper.getMethod()} ${props.requestWrapper.getUrl()}`,
+          "ai-gateway-ptb",
+          {
+            provider: endpoint.provider,
+            model: endpoint.providerModelId,
+            http_method: props.requestWrapper.getMethod(),
+          },
+          props.traceContext
+        )
         : null;
     }
 
@@ -230,6 +230,7 @@ export class AttemptExecutor {
         });
       }
 
+      requestParams.apiKey = providerKey.decrypted_provider_key;
       const urlResult = buildEndpointUrl(endpoint, requestParams);
 
       if (isErr(urlResult)) {
@@ -282,10 +283,18 @@ export class AttemptExecutor {
 
       await requestWrapper.setBody(bodyResult.data);
 
-      for (const [key, value] of Object.entries(
-        authResult.data?.headers || {}
-      )) {
+      // Apply auth headers from provider
+      const authHeaders = authResult.data?.headers || {};
+      for (const [key, value] of Object.entries(authHeaders)) {
         requestWrapper.setHeader(key, value);
+      }
+
+      // If provider doesn't return Authorization header, remove the original one
+      // This handles providers that use URL-based auth (like Google's native API)
+      // Check both cases since headers can be lowercase or capitalized
+      const hasAuthHeader = 'Authorization' in authHeaders || 'authorization' in authHeaders;
+      if (!hasAuthHeader && endpoint.provider === "google-ai-studio") {
+        requestWrapper.getHeaders().delete('Authorization');
       }
 
       metrics.markPreRequestEnd();
@@ -294,17 +303,16 @@ export class AttemptExecutor {
       // Start provider request span
       const providerSpanId = traceContext?.sampled
         ? this.tracer.startSpan(
-            `ai_gateway.${
-              endpoint.ptbEnabled ? "ptb" : "byok"
-            }.provider.llm_request`,
-            `${endpoint.provider} ${endpoint.providerModelId}`,
-            "llm-provider",
-            {
-              provider: endpoint.provider,
-              model: endpoint.providerModelId,
-            },
-            traceContext
-          )
+          `ai_gateway.${endpoint.ptbEnabled ? "ptb" : "byok"
+          }.provider.llm_request`,
+          `${endpoint.provider} ${endpoint.providerModelId}`,
+          "llm-provider",
+          {
+            provider: endpoint.provider,
+            model: endpoint.providerModelId,
+          },
+          traceContext
+        )
         : null;
 
       const providerStartTime = Date.now();

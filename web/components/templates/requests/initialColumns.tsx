@@ -209,7 +209,7 @@ export const getInitialColumns = (): ColumnDef<MappedLLMRequest>[] => [
       );
     },
     meta: {
-      sortKey: "tfft",
+      sortKey: "time_to_first_token",
     },
   },
   {

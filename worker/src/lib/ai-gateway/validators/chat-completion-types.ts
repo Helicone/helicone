@@ -170,6 +170,9 @@ const ReasoningEffort = z.union([
   z.enum(["minimal", "low", "medium", "high"]),
   z.null(),
 ]);
+const ReasoningOptions = z.object({
+  budget_tokens: z.number().int(),
+});
 const WebSearchLocation = z
   .object({
     country: z.string(),
@@ -213,6 +216,7 @@ const PredictionContent = z.object({
     z.string(),
     z.array(ChatCompletionRequestMessageContentPartText),
   ]),
+  reasoning: z.string().optional(),
 });
 const ChatCompletionStreamOptions = z.union([
   z
@@ -285,6 +289,32 @@ const HeliceoneCacheControl = z
     ttl: z.string(),
   })
   .partial();
+
+// Context editing configuration for managing conversation context
+// Only supported for Anthropic models - will be stripped for other providers
+const ClearToolUsesConfig = z
+  .object({
+    trigger: z.number().int().optional(),
+    keep: z.number().int().optional(),
+    clear_at_least: z.number().int().optional(),
+    exclude_tools: z.array(z.string()).optional(),
+    clear_tool_inputs: z.boolean().optional(),
+  })
+  .strict();
+
+const ClearThinkingConfig = z
+  .object({
+    keep: z.union([z.number().int(), z.literal("all")]).optional(),
+  })
+  .strict();
+
+const ContextEditingConfig = z
+  .object({
+    enabled: z.boolean(),
+    clear_tool_uses: ClearToolUsesConfig.optional(),
+    clear_thinking: ClearThinkingConfig.optional(),
+  })
+  .strict();
 // Create a strict version by defining all fields in one object schema
 const CreateChatCompletionRequest = z
   .object({
@@ -305,6 +335,7 @@ const CreateChatCompletionRequest = z
     modalities: ResponseModalities.optional(),
     verbosity: Verbosity.optional(),
     reasoning_effort: ReasoningEffort.optional(),
+    reasoning_options: ReasoningOptions.optional(),
     max_completion_tokens: z.number().int().nullish(),
     frequency_penalty: z.number().gte(-2).lte(2).nullish().default(0),
     presence_penalty: z.number().gte(-2).lte(2).nullish().default(0),
@@ -364,6 +395,10 @@ const CreateChatCompletionRequest = z
       .union([z.enum(["none", "auto"]), ChatCompletionFunctionCallOption])
       .optional(),
     functions: z.array(ChatCompletionFunctions).min(1).max(128).optional(),
+
+    // Context editing configuration for managing conversation context
+    // Only supported for Anthropic models - will be stripped for other providers
+    context_editing: ContextEditingConfig.optional(),
   })
   .strict();
 

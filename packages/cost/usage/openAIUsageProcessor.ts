@@ -135,6 +135,11 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
 
     const usage = parsedResponse.usage || {};
 
+    // This usage processor is applied to all AI Gateway requests when logging tokens from Jawn
+    // this means the processor must properly handle additional AI Gateway only info
+    // OpenAIUsage from "@helicone-package/llm-mapper/transform/types/common";
+    // ResponsesUsage from "@helicone-package/llm-mapper/transform/types/responses";
+
     const promptTokens = usage.prompt_tokens ?? usage.input_tokens ?? 0;
     const completionTokens =
       usage.completion_tokens ?? usage.output_tokens ?? 0;
@@ -148,6 +153,15 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     const promptAudioTokens = promptDetails.audio_tokens ?? 0;
     const completionAudioTokens = completionDetails.audio_tokens ?? 0;
     const reasoningTokens = completionDetails.reasoning_tokens ?? 0;
+
+    // AI Gateway fields - cache write tokens
+    // First try to get the detailed breakdown (5m vs 1h), then fall back to total cache_write_tokens
+    const cacheWriteDetails = promptDetails.cache_write_details;
+    const cacheWriteTokensTotal = promptDetails.cache_write_tokens ?? 0;
+
+    // If we have detailed breakdown, use it; otherwise treat all cache writes as 5m (the common case)
+    const cacheWrite5mTokens = cacheWriteDetails?.write_5m_tokens ?? cacheWriteTokensTotal;
+    const cacheWrite1hTokens = cacheWriteDetails?.write_1h_tokens ?? 0;
 
     const effectivePromptTokens = Math.max(
       0,
@@ -163,9 +177,11 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
       output: effectiveCompletionTokens,
     };
 
-    if (cachedTokens > 0) {
+    if (cachedTokens > 0 || cacheWrite5mTokens > 0 || cacheWrite1hTokens > 0) {
       modelUsage.cacheDetails = {
         cachedInput: cachedTokens,
+        write5m: cacheWrite5mTokens ?? 0,
+        write1h: cacheWrite1hTokens ?? 0,
       };
     }
 
