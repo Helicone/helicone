@@ -1,0 +1,291 @@
+---
+title: "LiteLLM Integration"
+sidebarTitle: "LiteLLM"
+description: "Use Helicone AI Gateway with LiteLLM to get top tier observability for your LLM requests."
+"twitter:title": "LiteLLM Integration - Helicone OSS LLM Observability"
+iconType: "solid"
+---
+
+import { strings } from "/snippets/strings.mdx";
+import Star from "/snippets/star.mdx";
+
+## Introduction
+
+[LiteLLM](https://www.litellm.ai/) is an self-hosted interface for calling LLM APIs.
+
+## Integration Steps
+
+<Steps>
+  <Step title={strings.generateKey}>
+    <div dangerouslySetInnerHTML={{ __html: strings.generateKeyInstructions }} />
+  </Step>
+
+  <Step title={strings.setApiKey}>
+    <div dangerouslySetInnerHTML={{ __html: strings.setApiKeyInstructions }} />
+  </Step>
+
+  <Step title="Install LiteLLM">
+    ```bash
+    pip install litellm python-dotenv
+    ```
+  </Step>
+
+  <Step title="Use LiteLLM with Helicone">
+    Add the `helicone/` prefix to any model name to route through Helicone AI Gateway:
+
+    ```python
+    import os
+    from litellm import completion
+    from dotenv import load_dotenv
+
+    load_dotenv()
+
+    # Route through Helicone by adding "helicone/" prefix
+    response = completion(
+        model="helicone/gpt-4o",
+        messages=[{"role": "user", "content": "What is the capital of France?"}],
+        api_key=os.getenv("HELICONE_API_KEY")
+    )
+
+    print(response.choices[0].message.content)
+    ```
+
+    <div dangerouslySetInnerHTML={{ __html: strings.modelRegistryDescription }} />
+  </Step>
+
+  <Step title={strings.viewRequestsInDashboard}>
+    <div dangerouslySetInnerHTML={{ __html: strings.viewRequestsInDashboardDescription("LiteLLM") }} />
+
+    - Request/response bodies
+    - Latency metrics
+    - Token usage and costs
+    - Model performance analytics
+    - Error tracking
+    - Session tracking
+
+    <Star />
+  </Step>
+</Steps>
+
+## Complete Working Examples
+
+### Basic Completion
+
+```python
+import os
+from litellm import completion
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Simple completion
+response = completion(
+    model="helicone/gpt-4o-mini",
+    messages=[{"role": "user", "content": "Tell me a fun fact about space"}],
+    api_key=os.getenv("HELICONE_API_KEY")
+)
+
+print(response.choices[0].message.content)
+```
+
+### Streaming Responses
+
+```python
+import os
+from litellm import completion
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Streaming example
+response = completion(
+    model="helicone/claude-4.5-sonnet",
+    messages=[{"role": "user", "content": "Write a short story about a robot learning to paint"}],
+    stream=True,
+    api_key=os.getenv("HELICONE_API_KEY")
+)
+
+print("🤖 Assistant (streaming):")
+for chunk in response:
+    if hasattr(chunk.choices[0].delta, 'content') and chunk.choices[0].delta.content:
+        print(chunk.choices[0].delta.content, end="", flush=True)
+print("\n")
+```
+
+### Custom Properties and Session Tracking
+
+Add metadata to track and filter your requests:
+
+```python
+import os
+from litellm import completion
+from dotenv import load_dotenv
+
+load_dotenv()
+
+response = completion(
+    model="helicone/gpt-4o-mini",
+    messages=[{"role": "user", "content": "What's the weather like?"}],
+    api_key=os.getenv("HELICONE_API_KEY"),
+    metadata={
+        "Helicone-Session-Id": "session-abc-123",
+        "Helicone-Session-Name": "Weather Assistant",
+        "Helicone-User-Id": "user-789",
+        "Helicone-Property-Environment": "production",
+        "Helicone-Property-App-Version": "2.1.0",
+        "Helicone-Property-Feature": "weather-query"
+    }
+)
+
+print(response.choices[0].message.content)
+```
+
+## Provider Selection and Fallback
+
+Helicone's AI Gateway supports automatic failover between providers:
+
+```python
+import os
+from litellm import completion
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Automatic routing (cheapest provider)
+response = completion(
+    model="helicone/gpt-4o",
+    messages=[{"role": "user", "content": "Hello!"}],
+    api_key=os.getenv("HELICONE_API_KEY")
+)
+
+# Manual provider selection
+response = completion(
+    model="helicone/claude-4.5-sonnet/anthropic",
+    messages=[{"role": "user", "content": "Hello!"}],
+    api_key=os.getenv("HELICONE_API_KEY")
+)
+
+# Multiple provider fallback chain
+# Try OpenAI first, then Anthropic if it fails
+response = completion(
+    model="helicone/gpt-4o/openai,claude-4.5-sonnet/anthropic",
+    messages=[{"role": "user", "content": "Hello!"}],
+    api_key=os.getenv("HELICONE_API_KEY")
+)
+```
+
+## Advanced Features
+
+### Caching
+
+Enable caching to reduce costs and latency for repeated requests:
+
+```python
+import os
+from litellm import completion
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Enable caching for this request
+response = completion(
+    model="helicone/gpt-4o",
+    messages=[{"role": "user", "content": "What is 2+2?"}],
+    api_key=os.getenv("HELICONE_API_KEY"),
+    metadata={
+        "Helicone-Cache-Enabled": "true"
+    }
+)
+
+print(response.choices[0].message.content)
+
+# Subsequent identical requests will be served from cache
+response2 = completion(
+    model="helicone/gpt-4o",
+    messages=[{"role": "user", "content": "What is 2+2?"}],
+    api_key=os.getenv("HELICONE_API_KEY"),
+    metadata={
+        "Helicone-Cache-Enabled": "true"
+    }
+)
+
+print(response2.choices[0].message.content)
+```
+
+### Retry and Fallback
+
+Configure automatic retries with exponential backoff:
+
+```python
+import os
+from litellm import completion
+from dotenv import load_dotenv
+
+load_dotenv()
+
+response = completion(
+    model="helicone/gpt-4o-mini/openai,claude-4.5-sonnet/anthropic",
+    messages=[{"role": "user", "content": "Hello"}],
+    api_key=os.getenv("HELICONE_API_KEY"),
+    metadata={
+        "Helicone-Retry-Enabled": "true",
+        "Helicone-Retry-Num": "3",
+        "Helicone-Retry-Factor": "2"
+    }
+)
+
+print(response.choices[0].message.content)
+```
+
+### Rate Limiting
+
+Apply rate limiting policies to control request rates:
+
+```python
+import os
+from litellm import completion
+from dotenv import load_dotenv
+
+load_dotenv()
+
+response = completion(
+    model="helicone/gpt-4o",
+    messages=[{"role": "user", "content": "Hello"}],
+    api_key=os.getenv("HELICONE_API_KEY"),
+    metadata={
+        "Helicone-Rate-Limit-Policy": "basic-100"
+    }
+)
+
+print(response.choices[0].message.content)
+```
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="AI Gateway Overview" icon="arrow-progress" href="/gateway/overview">
+    Learn about Helicone's AI Gateway features and capabilities
+  </Card>
+  <Card title="Provider Routing" icon="route" href="/gateway/provider-routing">
+    Configure intelligent routing and automatic failover
+  </Card>
+  <Card title="Model Registry" icon="database" href="https://helicone.ai/models">
+    Browse all available models and providers
+  </Card>
+  <Card title="Custom Properties" icon="tags" href="/features/advanced-usage/custom-properties">
+    Add metadata to track and filter your requests
+  </Card>
+  <Card title="Sessions" icon="link" href="/features/sessions">
+    Track multi-turn conversations and user sessions
+  </Card>
+  <Card title="Rate Limiting" icon="gauge" href="/features/advanced-usage/custom-rate-limits">
+    Configure rate limits for your applications
+  </Card>
+  <Card title="Caching" icon="bolt" href="/features/advanced-usage/caching">
+    Reduce costs and latency with intelligent caching
+  </Card>
+  <Card title="LiteLLM Documentation" icon="book" href="https://docs.litellm.ai">
+    Official LiteLLM documentation
+  </Card>
+</CardGroup>
+

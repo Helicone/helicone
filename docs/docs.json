@@ -49,6 +49,8 @@
                   "gateway/integrations/langchain",
                   "gateway/integrations/langfuse",
                   "gateway/integrations/langgraph",
+                  "gateway/integrations/litellm",
+                  "gateway/integrations/llamaindex",
                   "gateway/integrations/n8n",
                   "gateway/integrations/semantic-kernel",
                   "gateway/integrations/vercel-ai-sdk",
