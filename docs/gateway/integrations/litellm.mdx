@@ -22,16 +22,22 @@ import Star from "/snippets/star.mdx";
 
   <Step title={strings.setApiKey}>
     <div dangerouslySetInnerHTML={{ __html: strings.setApiKeyInstructions }} />
+
+    ```env
+    HELICONE_API_KEY=sk-helicone-...
+    ```
   </Step>
 
-  <Step title="Install LiteLLM">
+  <Step title={installSDK("LiteLLM")}>
+    <p>{strings.installRequiredDependencies}</p>
+
     ```bash
     pip install litellm python-dotenv
     ```
   </Step>
 
   <Step title="Use LiteLLM with Helicone">
-    Add the `helicone/` prefix to any model name to route through Helicone AI Gateway:
+    Add the `helicone/` prefix to any model name to logg requests for Helicone:
 
     ```python
     import os
@@ -56,12 +62,7 @@ import Star from "/snippets/star.mdx";
   <Step title={strings.viewRequestsInDashboard}>
     <div dangerouslySetInnerHTML={{ __html: strings.viewRequestsInDashboardDescription("LiteLLM") }} />
 
-    - Request/response bodies
-    - Latency metrics
-    - Token usage and costs
-    - Model performance analytics
-    - Error tracking
-    - Session tracking
+    <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("any LiteLLM request") }} />
 
     <Star />
   </Step>
@@ -210,31 +211,6 @@ response2 = completion(
 )
 
 print(response2.choices[0].message.content)
-```
-
-### Retry and Fallback
-
-Configure automatic retries with exponential backoff:
-
-```python
-import os
-from litellm import completion
-from dotenv import load_dotenv
-
-load_dotenv()
-
-response = completion(
-    model="helicone/gpt-4o-mini/openai,claude-4.5-sonnet/anthropic",
-    messages=[{"role": "user", "content": "Hello"}],
-    api_key=os.getenv("HELICONE_API_KEY"),
-    metadata={
-        "Helicone-Retry-Enabled": "true",
-        "Helicone-Retry-Num": "3",
-        "Helicone-Retry-Factor": "2"
-    }
-)
-
-print(response.choices[0].message.content)
 ```
 
 ### Rate Limiting
