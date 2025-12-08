@@ -94,22 +94,28 @@ export const CACHE_TOKEN_ADJUSTMENTS: CacheTokenAdjustment[] = [
 ];
 
 /**
- * Get cache token adjustment for a specific org/model/date range.
- * Returns the additional USD to add to the invoice line item.
+ * Find a matching adjustment for the given criteria.
+ * Central matching logic used by all public functions.
  */
-export function getCacheTokenAdjustment(
+function findAdjustment(
   orgId: string,
   model: string,
-  startDate: Date,
-  endDate: Date
-): number {
-  const adjustment = CACHE_TOKEN_ADJUSTMENTS.find(
-    (a) => a.orgId === orgId && a.model === model && startDate < a.beforeDate // Only apply if invoice period starts before fix date
+  clickhouseProvider: string,
+  startDate: Date
+): CacheTokenAdjustment | undefined {
+  return CACHE_TOKEN_ADJUSTMENTS.find(
+    (a) =>
+      a.orgId === orgId &&
+      a.model === model &&
+      a.clickhouseProvider === clickhouseProvider &&
+      startDate < a.beforeDate
   );
+}
 
-  if (!adjustment) return 0;
-
-  // Get price from registry
+/**
+ * Calculate USD amount for an adjustment.
+ */
+function calculateAdjustmentUsd(adjustment: CacheTokenAdjustment): number {
   const pricePerToken = getCacheWritePricePerToken(
     adjustment.model,
     adjustment.provider
@@ -118,14 +124,28 @@ export function getCacheTokenAdjustment(
 }
 
 /**
+ * Get cache token adjustment for a specific org/model/provider/date range.
+ * Returns the additional USD to add to the invoice line item.
+ * @param clickhouseProvider - The provider as stored in ClickHouse (e.g., "helicone")
+ */
+export function getCacheTokenAdjustment(
+  orgId: string,
+  model: string,
+  clickhouseProvider: string,
+  startDate: Date,
+  endDate: Date
+): number {
+  const adjustment = findAdjustment(orgId, model, clickhouseProvider, startDate);
+  if (!adjustment) return 0;
+  return calculateAdjustmentUsd(adjustment);
+}
+
+/**
  * Get total cache token adjustment for an org (for summary).
  */
 export function getTotalCacheTokenAdjustment(orgId: string): number {
   return CACHE_TOKEN_ADJUSTMENTS.filter((a) => a.orgId === orgId).reduce(
-    (sum, a) => {
-      const pricePerToken = getCacheWritePricePerToken(a.model, a.provider);
-      return sum + a.totalMissingTokens * pricePerToken;
-    },
+    (sum, a) => sum + calculateAdjustmentUsd(a),
     0
   );
 }
@@ -147,9 +167,9 @@ export function getCacheTokenAdjustmentsByModel(
   >();
 
   for (const a of CACHE_TOKEN_ADJUSTMENTS) {
-    if (a.orgId === orgId && startDate < a.beforeDate) {
-      const pricePerToken = getCacheWritePricePerToken(a.model, a.provider);
-      const amount = a.totalMissingTokens * pricePerToken;
+    if (findAdjustment(a.orgId, a.model, a.clickhouseProvider, startDate)) {
+      if (a.orgId !== orgId) continue; // Only include this org's adjustments
+      const amount = calculateAdjustmentUsd(a);
       const key = `${a.model}:${a.clickhouseProvider}`;
       const existing = adjustments.get(key) || {
         amountUsd: 0,

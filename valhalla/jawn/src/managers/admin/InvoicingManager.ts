@@ -203,10 +203,11 @@ export class InvoicingManager {
       for (const item of spendResult.data) {
         const baseSubtotalUsd = parseFloat(item.cost);
 
-        // Add cache token adjustment if applicable
+        // Add cache token adjustment if applicable (only for matching clickhouseProvider)
         const cacheAdjustmentUsd = getCacheTokenAdjustment(
           this.orgId,
           item.model,
+          item.provider,
           startDate,
           endDate
         );
