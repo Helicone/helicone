@@ -46,6 +46,7 @@
                 "pages": [
                   "gateway/integrations/claude-agent-sdk",
                   "gateway/integrations/codex",
+                  "gateway/integrations/dpsy",
                   "gateway/integrations/langchain",
                   "gateway/integrations/langfuse",
                   "gateway/integrations/langgraph",
