@@ -1,5 +1,5 @@
 ---
-title: "DSPy Integration"
+title: "DSPy"
 sidebarTitle: "DSPy"
 description: "Integrate Helicone AI Gateway with DSPy to access 100+ LLM providers with unified observability and optimization."
 "twitter:title": "DSPy Integration - Helicone OSS LLM Observability"
@@ -11,7 +11,7 @@ import Star from "/snippets/star.mdx";
 
 ## Introduction
 
-[DSPy](https://dspy.ai) is a framework for algorithmically optimizing LM prompts and weights, especially for building complex systems with language models.
+[DSPy](https://dspy.ai) is a declarative framework for building modular AI software with structured code instead of brittle prompts, offering algorithms that compile AI programs into effective prompts and weights for language models across classifiers, RAG pipelines, and agent loops.
 
 ## Integration Steps
 
@@ -21,16 +21,24 @@ import Star from "/snippets/star.mdx";
   </Step>
 
   <Step title={strings.setApiKey}>
-    <div dangerouslySetInnerHTML={{ __html: strings.setApiKeyInstructions }} />
+    Create a `.env` file in your project.
+
+    ```env
+    HELICONE_API_KEY=sk-helicone-...
+    ```
   </Step>
 
-  <Step title="Install DSPy">
+  <Step title={strings.installSDK("DSPy")}>
+    <p>{strings.installRequiredDependencies}</p>
+
     ```bash Python
     pip install dspy
     ```
   </Step>
 
-  <Step title={strings.configureWithGateway}>
+  <Step title={strings.startUsing("DSPy")}>
+    <p>{strings.viewRequestsInDashboard}</p>
+
     ```python Python
     import dspy
     import os
@@ -40,39 +48,21 @@ import Star from "/snippets/star.mdx";
 
     # Configure DSPy to use Helicone AI Gateway
     lm = dspy.LM(
-        'gpt-4o-mini',  # 100+ models supported
-        api_key=os.getenv('HELICONE_API_KEY'),
-        api_base='https://ai-gateway.helicone.ai/'
+      'gpt-4o-mini',  # or any other model from the Helicone model registry
+      api_key=os.getenv('HELICONE_API_KEY'),
+      api_base='https://ai-gateway.helicone.ai/'
     )
 
     dspy.configure(lm=lm)
+
+    print(lm("Hello, world!"))
     ```
 
     <div dangerouslySetInnerHTML={{ __html: strings.modelRegistryDescription }} />
   </Step>
 
-  <Step title="Use DSPy normally">
-    Your existing DSPy code continues to work without any changes:
-
-    ```python Python
-    # Define a simple module
-    qa = dspy.ChainOfThought('question -> answer')
-
-    # Run inference
-    response = qa(question="What is the capital of France?")
-    print(response.answer)
-    ```
-  </Step>
-
-  <Step title={strings.viewRequestsInDashboard}>
-    <div dangerouslySetInnerHTML={{ __html: strings.viewRequestsInDashboardDescription("DSPy") }} />
-
-    - Request/response bodies
-    - Chain-of-thought reasoning traces
-    - Latency metrics
-    - Token usage and costs
-    - Optimization iterations
-    - Error tracking
+  <Step title={strings.verifyInHelicone}>
+    <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("DSPy") }} />
 
     <Star />
   </Step>
@@ -105,40 +95,6 @@ response = qa(question="How many floors are in the castle David Gregory inherite
 
 print('Answer:', response.answer)
 print('Reasoning:', response.reasoning)
-```
-
-### Using Multiple Models
-
-DSPy makes it easy to switch between different models or use multiple models in the same application:
-
-```python Python
-import dspy
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
-# Configure default model
-default_lm = dspy.LM(
-    'gpt-4o-mini',
-    api_key=os.getenv('HELICONE_API_KEY'),
-    api_base='https://ai-gateway.helicone.ai/v1'
-)
-dspy.configure(lm=default_lm)
-
-# Use default model
-qa = dspy.ChainOfThought('question -> answer')
-response = qa(question="What is Python?")
-print('GPT-4o-mini:', response.answer)
-
-# Switch to a different model for specific tasks
-with dspy.context(lm=dspy.LM(
-    'anthropic/claude-4.5-haiku',
-    api_key=os.getenv('HELICONE_API_KEY'),
-    api_base='https://ai-gateway.helicone.ai/v1'
-)):
-    response = qa(question="What is Python?")
-    print('Claude Haiku:', response.answer)
 ```
 
 ### Custom Generation Configuration
@@ -204,100 +160,6 @@ dspy.configure(lm=lm)
 qa = dspy.ChainOfThought('question -> answer')
 response = qa(question="What is DSPy?")
 print(response.answer)
-```
-
-### Multi-Hop Question Answering
-
-Track complex multi-step reasoning with full observability:
-
-```python Python
-import dspy
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
-# Configure Helicone
-lm = dspy.LM(
-    'gpt-4o-mini',
-    api_key=os.getenv('HELICONE_API_KEY'),
-    api_base='https://ai-gateway.helicone.ai/v1',
-    extra_headers={
-        'Helicone-Session-Id': 'multi-hop-example',
-        'Helicone-Property-Task': 'multi-hop-qa'
-    }
-)
-dspy.configure(lm=lm)
-
-# Define a multi-hop reasoning module
-class MultiHopQA(dspy.Module):
-    def __init__(self):
-        super().__init__()
-        self.generate_query = dspy.ChainOfThought('question -> search_query')
-        self.answer = dspy.ChainOfThought('context, question -> answer')
-
-    def forward(self, question):
-        # First hop: generate search query
-        search = self.generate_query(question=question)
-
-        # Simulate retrieval (in practice, you'd use a retriever)
-        context = "Paris is the capital of France. It has a population of over 2 million."
-
-        # Second hop: answer with context
-        result = self.answer(context=context, question=question)
-        return result
-
-# Use the module
-multi_hop = MultiHopQA()
-response = multi_hop(question="What is the population of France's capital?")
-print('Answer:', response.answer)
-```
-
-### Optimization with BootstrapFewShot
-
-Track optimization iterations in your Helicone dashboard:
-
-```python Python
-import dspy
-import os
-from dotenv import load_dotenv
-from dspy.datasets import HotPotQA
-
-load_dotenv()
-
-# Configure Helicone
-lm = dspy.LM(
-    'gpt-4o-mini',
-    api_key=os.getenv('HELICONE_API_KEY'),
-    api_base='https://ai-gateway.helicone.ai/v1',
-    extra_headers={
-        'Helicone-Session-Id': 'optimization-run',
-        'Helicone-Property-Task': 'bootstrap-optimization'
-    }
-)
-dspy.configure(lm=lm)
-
-# Load dataset
-dataset = HotPotQA(train_seed=1, train_size=20, eval_seed=2023, dev_size=50, test_size=0)
-
-# Define a simple QA module
-qa = dspy.ChainOfThought('question -> answer')
-
-# Define a metric
-def validate_answer(example, pred, trace=None):
-    return example.answer.lower() in pred.answer.lower()
-
-# Optimize with BootstrapFewShot
-from dspy.teleprompt import BootstrapFewShot
-
-optimizer = BootstrapFewShot(metric=validate_answer, max_bootstrapped_demos=4)
-optimized_qa = optimizer.compile(qa, trainset=dataset.train)
-
-# Test the optimized module
-response = optimized_qa(question="What is the capital of France?")
-print('Optimized Answer:', response.answer)
-
-# All optimization iterations are tracked in Helicone!
 ```
 
 ## Helicone Prompts Integration
