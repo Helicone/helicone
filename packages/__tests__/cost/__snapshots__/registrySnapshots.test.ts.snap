@@ -1788,6 +1788,34 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "deepseek-v3:canopywave": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "deepseek/deepseek-chat-v3.1",
+      "parameters": [
+        "frequency_penalty",
+        "function_call",
+        "functions",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "stream",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "canopywave",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "deepseek-v3:deepinfra": {
       "context": 128000,
       "crossRegion": false,
@@ -5600,6 +5628,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
   ],
   "deepseek/deepseek-v3": [
+    "canopywave",
     "deepinfra",
     "deepinfra",
     "deepseek",
@@ -6711,6 +6740,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "deepseek/deepseek-v3": {
+    "canopywave": [
+      {
+        "input": 2.7e-7,
+        "output": 0.000001,
+        "threshold": 0,
+      },
+    ],
     "deepinfra": [
       {
         "cacheMultipliers": {
@@ -7630,6 +7666,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "deepseek-v3",
       "providers": [
+        "canopywave",
         "deepinfra",
         "deepseek",
         "openrouter",

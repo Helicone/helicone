@@ -113,6 +113,41 @@ export const endpoints = {
       "*": {},
     },
   },
+  "deepseek-v3:canopywave": {
+    provider: "canopywave",
+    author: "deepseek",
+    providerModelId: "deepseek/deepseek-chat-v3.1",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000027, // $0.27 per 1M tokens
+        output: 0.000001, // $1.00 per 1M tokens
+      },
+    ],
+    contextLength: 131_072,
+    maxCompletionTokens: 65_536,
+    supportedParameters: [
+      "frequency_penalty",
+      "function_call",
+      "functions",
+      "logprobs",
+      "max_tokens",
+      "presence_penalty",
+      "response_format",
+      "seed",
+      "stop",
+      "stream",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_logprobs",
+      "top_p",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
   "deepseek-v3.1-terminus:deepinfra": {
     provider: "deepinfra",
     author: "deepseek",
