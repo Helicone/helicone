@@ -257,7 +257,10 @@ export class CreditsManager extends BaseManager {
         }
 
         const baseCost = parseFloat(row.cost);
-        const adjustment = cacheAdjustments.get(row.model);
+        // Cache adjustments are keyed by "model:clickhouseProvider"
+        const adjustment = cacheAdjustments.get(
+          `${row.model}:${row.provider}`
+        );
         const cacheAdjustmentUsd = adjustment?.amountUsd || 0;
         const missingCacheWriteTokens = adjustment?.missingTokens || 0;
         const subtotal = baseCost + cacheAdjustmentUsd;

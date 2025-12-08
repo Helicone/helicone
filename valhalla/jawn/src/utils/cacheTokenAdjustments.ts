@@ -14,7 +14,10 @@ import { registry } from "@helicone-package/cost/models/registry";
 export interface CacheTokenAdjustment {
   orgId: string;
   model: string;
+  /** Provider for pricing lookup (e.g., "anthropic") */
   provider: string;
+  /** Provider in ClickHouse to match against (e.g., "helicone" for AI Gateway requests) */
+  clickhouseProvider: string;
   /** Only apply adjustment for requests before this date (when fix was deployed) */
   beforeDate: Date;
   /** Total missing cache write tokens (count × median tokens per request) */
@@ -44,6 +47,7 @@ export const CACHE_TOKEN_ADJUSTMENTS: CacheTokenAdjustment[] = [
     orgId: "63452b7b-54e6-470c-a9e7-a69b2e17a4cf",
     model: "claude-sonnet-4",
     provider: "anthropic",
+    clickhouseProvider: "helicone",
     beforeDate: new Date("2025-12-06T00:00:00Z"),
     totalMissingTokens: 21436 * 16492, // 21,436 requests × 16,492 median tokens
   },
@@ -51,6 +55,7 @@ export const CACHE_TOKEN_ADJUSTMENTS: CacheTokenAdjustment[] = [
     orgId: "63452b7b-54e6-470c-a9e7-a69b2e17a4cf",
     model: "claude-4.5-sonnet",
     provider: "anthropic",
+    clickhouseProvider: "helicone",
     beforeDate: new Date("2025-12-06T00:00:00Z"),
     totalMissingTokens: 18982 * 40496, // 18,982 requests × 40,496 median tokens
   },
@@ -58,6 +63,7 @@ export const CACHE_TOKEN_ADJUSTMENTS: CacheTokenAdjustment[] = [
     orgId: "63452b7b-54e6-470c-a9e7-a69b2e17a4cf",
     model: "claude-opus-4",
     provider: "anthropic",
+    clickhouseProvider: "helicone",
     beforeDate: new Date("2025-12-06T00:00:00Z"),
     totalMissingTokens: 3689 * 32235, // 3,689 requests × 32,235 median tokens
   },
@@ -65,6 +71,7 @@ export const CACHE_TOKEN_ADJUSTMENTS: CacheTokenAdjustment[] = [
     orgId: "63452b7b-54e6-470c-a9e7-a69b2e17a4cf",
     model: "claude-3.5-haiku",
     provider: "anthropic",
+    clickhouseProvider: "helicone",
     beforeDate: new Date("2025-12-06T00:00:00Z"),
     totalMissingTokens: 3100 * 44201, // 3,100 requests × 44,201 median tokens
   },
@@ -72,6 +79,7 @@ export const CACHE_TOKEN_ADJUSTMENTS: CacheTokenAdjustment[] = [
     orgId: "63452b7b-54e6-470c-a9e7-a69b2e17a4cf",
     model: "claude-3.7-sonnet",
     provider: "anthropic",
+    clickhouseProvider: "helicone",
     beforeDate: new Date("2025-12-06T00:00:00Z"),
     totalMissingTokens: 1519 * 18270, // 1,519 requests × 18,270 median tokens
   },
@@ -79,6 +87,7 @@ export const CACHE_TOKEN_ADJUSTMENTS: CacheTokenAdjustment[] = [
     orgId: "63452b7b-54e6-470c-a9e7-a69b2e17a4cf",
     model: "claude-4.5-haiku",
     provider: "anthropic",
+    clickhouseProvider: "helicone",
     beforeDate: new Date("2025-12-06T00:00:00Z"),
     totalMissingTokens: 1492 * 14875, // 1,492 requests × 14,875 median tokens
   },
@@ -122,9 +131,10 @@ export function getTotalCacheTokenAdjustment(orgId: string): number {
 }
 
 /**
- * Get all cache token adjustments for an org, grouped by model.
+ * Get all cache token adjustments for an org, grouped by model+clickhouseProvider.
  * Used for spend breakdown display.
  * Returns both the USD adjustment and the missing token count.
+ * Key format: "model:clickhouseProvider" (e.g., "claude-sonnet-4:helicone")
  */
 export function getCacheTokenAdjustmentsByModel(
   orgId: string,
@@ -140,11 +150,12 @@ export function getCacheTokenAdjustmentsByModel(
     if (a.orgId === orgId && startDate < a.beforeDate) {
       const pricePerToken = getCacheWritePricePerToken(a.model, a.provider);
       const amount = a.totalMissingTokens * pricePerToken;
-      const existing = adjustments.get(a.model) || {
+      const key = `${a.model}:${a.clickhouseProvider}`;
+      const existing = adjustments.get(key) || {
         amountUsd: 0,
         missingTokens: 0,
       };
-      adjustments.set(a.model, {
+      adjustments.set(key, {
         amountUsd: existing.amountUsd + amount,
         missingTokens: existing.missingTokens + a.totalMissingTokens,
       });
