@@ -5,6 +5,7 @@ import { ENVIRONMENT } from "../../lib/clients/constant";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { WalletState } from "../../types/wallet";
+import { getTotalCacheTokenAdjustment } from "../../utils/cacheTokenAdjustments";
 
 // Timeout constants for wallet API calls
 const WALLET_STATE_FETCH_TIMEOUT = 3000; // 3 seconds for batch wallet state fetching
@@ -305,13 +306,15 @@ export class AdminWalletManager extends BaseManager {
 
     // Transform all orgs with spend data (no wallet states yet)
     const organizations = allOrgsResult.data.map((org) => {
+      const baseSpend = spendMap.get(org.org_id) || 0;
+      const cacheAdjustment = getTotalCacheTokenAdjustment(org.org_id);
       return {
         orgId: org.org_id,
         orgName: org.org_name || "Unknown",
         stripeCustomerId: org.stripe_customer_id || "",
         totalPayments: org.total_amount_received / 100,
         paymentsCount: org.payments_count,
-        clickhouseTotalSpend: spendMap.get(org.org_id) || 0,
+        clickhouseTotalSpend: baseSpend + cacheAdjustment,
         lastPaymentDate: org.last_payment_date
           ? Number(org.last_payment_date) * 1000
           : null,
@@ -537,6 +540,8 @@ export class AdminWalletManager extends BaseManager {
     // Combine the data
     const organizations = orgsResult.data.map((org) => {
       const walletState = walletStateMap.get(org.org_id) || {};
+      const baseSpend = clickhouseSpendMap.get(org.org_id) || 0;
+      const cacheAdjustment = getTotalCacheTokenAdjustment(org.org_id);
 
       return {
         orgId: org.org_id,
@@ -544,7 +549,7 @@ export class AdminWalletManager extends BaseManager {
         stripeCustomerId: org.stripe_customer_id || "",
         totalPayments: org.total_amount_received / 100, // Convert cents to dollars
         paymentsCount: org.payments_count,
-        clickhouseTotalSpend: clickhouseSpendMap.get(org.org_id) || 0,
+        clickhouseTotalSpend: baseSpend + cacheAdjustment,
         lastPaymentDate: org.last_payment_date
           ? Number(org.last_payment_date) * 1000
           : null, // Convert seconds to milliseconds
