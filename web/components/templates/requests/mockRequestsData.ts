@@ -78,7 +78,19 @@ const generateMockRequest = (
   const isStream = Math.random() > 0.7; // 30% chance of being a stream
   const promptTokens = Math.floor(Math.random() * 40) + 10;
   const completionTokens = Math.floor(Math.random() * 60) + 20;
-  const totalTokens = promptTokens + completionTokens;
+  // Randomly add cache tokens (about 30% of requests have cache tokens)
+  const hasCacheTokens = Math.random() > 0.7;
+  const promptCacheReadTokens = hasCacheTokens
+    ? Math.floor(Math.random() * 20)
+    : 0;
+  const promptCacheWriteTokens = hasCacheTokens
+    ? Math.floor(Math.random() * 10)
+    : 0;
+  const totalTokens =
+    promptTokens +
+    completionTokens +
+    promptCacheReadTokens +
+    promptCacheWriteTokens;
 
   // Random feedback (about 30% of requests have feedback)
   const hasFeedback = Math.random() > 0.7;
@@ -266,8 +278,8 @@ const generateMockRequest = (
       totalTokens: totalTokens,
       promptTokens: promptTokens,
       completionTokens: completionTokens,
-      promptCacheReadTokens: 0,
-      promptCacheWriteTokens: 0,
+      promptCacheReadTokens: promptCacheReadTokens,
+      promptCacheWriteTokens: promptCacheWriteTokens,
       latency: Math.floor(Math.random() * 2000) + 500,
       user: `user-${Math.floor(Math.random() * 999)}`,
       status: {

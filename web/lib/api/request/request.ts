@@ -59,7 +59,7 @@ export async function getRequests(
     request.helicone_user as helicone_user,
     response.delay_ms as delay_ms,
     response.time_to_first_token as time_to_first_token,
-    (response.prompt_tokens + response.completion_tokens) as total_tokens,
+    (response.prompt_tokens + response.completion_tokens + COALESCE(response.prompt_cache_read_tokens, 0) + COALESCE(response.prompt_cache_write_tokens, 0)) as total_tokens,
     response.completion_tokens as completion_tokens,
     response.prompt_tokens as prompt_tokens,
     job_node_request.node_id as node_id,
