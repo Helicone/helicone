@@ -148,14 +148,11 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
     }
 
     // Get token counts and model information with validation
-    const promptTokens = Math.max(
-      0,
-      Math.floor(context.legacyUsage?.promptTokens || 0)
-    );
+    const promptTokens = Math.max(0, Math.floor(context.usage?.input || 0));
 
     const completionTokens = Math.max(
       0,
-      Math.floor(context.legacyUsage?.completionTokens || 0)
+      Math.floor(context.usage?.output || 0)
     );
 
     // Validate and sanitize model and provider names
