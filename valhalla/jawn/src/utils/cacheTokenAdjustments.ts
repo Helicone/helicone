@@ -43,42 +43,42 @@ export const CACHE_TOKEN_ADJUSTMENTS: CacheTokenAdjustment[] = [
   {
     orgId: "63452b7b-54e6-470c-a9e7-a69b2e17a4cf",
     model: "claude-sonnet-4",
-    provider: "ANTHROPIC",
+    provider: "anthropic",
     beforeDate: new Date("2025-12-06T00:00:00Z"),
     totalMissingTokens: 21436 * 16492, // 21,436 requests × 16,492 median tokens
   },
   {
     orgId: "63452b7b-54e6-470c-a9e7-a69b2e17a4cf",
     model: "claude-4.5-sonnet",
-    provider: "ANTHROPIC",
+    provider: "anthropic",
     beforeDate: new Date("2025-12-06T00:00:00Z"),
     totalMissingTokens: 18982 * 40496, // 18,982 requests × 40,496 median tokens
   },
   {
     orgId: "63452b7b-54e6-470c-a9e7-a69b2e17a4cf",
     model: "claude-opus-4",
-    provider: "ANTHROPIC",
+    provider: "anthropic",
     beforeDate: new Date("2025-12-06T00:00:00Z"),
     totalMissingTokens: 3689 * 32235, // 3,689 requests × 32,235 median tokens
   },
   {
     orgId: "63452b7b-54e6-470c-a9e7-a69b2e17a4cf",
     model: "claude-3.5-haiku",
-    provider: "ANTHROPIC",
+    provider: "anthropic",
     beforeDate: new Date("2025-12-06T00:00:00Z"),
     totalMissingTokens: 3100 * 44201, // 3,100 requests × 44,201 median tokens
   },
   {
     orgId: "63452b7b-54e6-470c-a9e7-a69b2e17a4cf",
     model: "claude-3.7-sonnet",
-    provider: "ANTHROPIC",
+    provider: "anthropic",
     beforeDate: new Date("2025-12-06T00:00:00Z"),
     totalMissingTokens: 1519 * 18270, // 1,519 requests × 18,270 median tokens
   },
   {
     orgId: "63452b7b-54e6-470c-a9e7-a69b2e17a4cf",
     model: "claude-4.5-haiku",
-    provider: "ANTHROPIC",
+    provider: "anthropic",
     beforeDate: new Date("2025-12-06T00:00:00Z"),
     totalMissingTokens: 1492 * 14875, // 1,492 requests × 14,875 median tokens
   },
