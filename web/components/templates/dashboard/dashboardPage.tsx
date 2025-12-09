@@ -51,9 +51,6 @@ import useSearchParams from "../../shared/utils/useSearchParams";
 import UnauthorizedView from "../requests/UnauthorizedView";
 import DashboardEmptyState from "./DashboardEmptyState";
 import { INITIAL_LAYOUT, SMALL_LAYOUT } from "./gridLayouts";
-import { useRouter } from "next/router";
-import { useHasWrappedData } from "../wrapped/useWrapped";
-import { Button } from "@/components/ui/button";
 
 // Gateway discount configuration
 const GATEWAY_DISCOUNT_MIN = 0.1; // 10%
@@ -89,11 +86,9 @@ export type DashboardMode = "requests" | "costs" | "errors";
 
 const DashboardPage = (props: DashboardPageProps) => {
   const { user } = props;
-  const router = useRouter();
   const searchParams = useSearchParams();
   const orgContext = useOrg();
   const filterStore = useFilterStore();
-  const { hasData: hasWrappedData } = useHasWrappedData();
   const filters = filterStore.filter
     ? toFilterNode(filterStore.filter)
     : ({} as FilterLeaf);
@@ -393,16 +388,6 @@ const DashboardPage = (props: DashboardPageProps) => {
             }
             rightActions={
               <div className="flex items-center gap-2">
-                {/* Wrapped 2025 Button */}
-                {hasWrappedData && (
-                  <Button
-                    variant="default"
-                    size="sm"
-                    onClick={() => router.push("/wrapped")}
-                  >
-                    👉 Merry Christmas!
-                  </Button>
-                )}
                 {/* Export button */}
                 {!shouldShowMockData && (
                   <DashboardExportButton
