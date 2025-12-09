@@ -221,18 +221,10 @@ export async function getRequestsClickhouseNoSort(
     )
     ORDER BY organization_id ${sortSQL}, toStartOfHour(request_created_at) ${sortSQL}, request_created_at ${sortSQL}
   `;
-  console.log("Clickhouse Query:", query);
-
-  const before = performance.now();
-
   const requests = await dbQueryClickhouse<HeliconeRequest>(
     query,
     builtFilter.argsAcc
   );
-
-  const after = performance.now();
-
-  console.log(`Clickhouse query took ${after - before} ms`);
 
   const s3Client = new S3Client(
     process.env.S3_ACCESS_KEY || undefined,
