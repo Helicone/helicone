@@ -1,4 +1,4 @@
-import { HeliconeChatCreateParams } from "@/prompts/types";
+import { HeliconeChatCreateParams } from "../../../prompts/types";
 
 // === REQUEST TYPES ===
 export type GeminiPart = {
