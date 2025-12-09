@@ -1,7 +1,7 @@
 import type { ModelConfig } from "../../../types";
 
 export const models = {
-  "claude-sonnet-4-5-20250929": {
+  "claude-sonnet-4.5-20250929": {
     name: "Anthropic: Claude Sonnet 4.5 (20250929)",
     author: "anthropic",
     description:

@@ -3,7 +3,7 @@ import type { ModelProviderConfig } from "../../../types";
 import { ClaudeHaiku4520251001ModelName } from "./model";
 
 export const endpoints = {
-  "claude-haiku-4-5-20251001:anthropic": {
+  "claude-haiku-4.5-20251001:anthropic": {
     provider: "anthropic",
     author: "anthropic",
     providerModelId: "claude-haiku-4-5-20251001",
@@ -38,7 +38,7 @@ export const endpoints = {
     },
     responseFormat: "ANTHROPIC",
   },
-  "claude-haiku-4-5-20251001:vertex": {
+  "claude-haiku-4.5-20251001:vertex": {
     provider: "vertex",
     author: "anthropic",
     providerModelId: "claude-haiku-4-5@20251001",
@@ -72,7 +72,7 @@ export const endpoints = {
     },
     responseFormat: "ANTHROPIC",
   },
-  "claude-haiku-4-5-20251001:bedrock": {
+  "claude-haiku-4.5-20251001:bedrock": {
     provider: "bedrock",
     author: "anthropic",
     providerModelId: "anthropic.claude-haiku-4-5-20251001-v1:0",
@@ -107,7 +107,7 @@ export const endpoints = {
     },
     responseFormat: "ANTHROPIC",
   },
-  "claude-haiku-4-5-20251001:openrouter": {
+  "claude-haiku-4.5-20251001:openrouter": {
     provider: "openrouter",
     author: "anthropic",
     providerModelId: "anthropic/claude-haiku-4.5",
@@ -134,10 +134,10 @@ export const endpoints = {
       "*": {},
     },
   },
-  "claude-haiku-4-5-20251001:helicone": {
+  "claude-haiku-4.5-20251001:helicone": {
     provider: "helicone",
     author: "anthropic",
-    providerModelId: "pa/claude-haiku-4-5-20251001",
+    providerModelId: "pa/claude-haiku-4.5-20251001",
     pricing: [
       {
         threshold: 0,

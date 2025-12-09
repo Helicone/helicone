@@ -45,7 +45,7 @@ export const models = {
     modality: { inputs: ["text", "image", "audio"], outputs: ["text"] },
     tokenizer: "Grok",
   },
-  "grok-4-1-fast-non-reasoning": {
+  "grok-4.1-fast-non-reasoning": {
     name: "xAI Grok 4.1 Fast Non-Reasoning",
     author: "xai",
     description:
@@ -56,7 +56,7 @@ export const models = {
     modality: { inputs: ["text", "image"], outputs: ["text", "image"] },
     tokenizer: "Grok",
   },
-  "grok-4-1-fast-reasoning": {
+  "grok-4.1-fast-reasoning": {
     name: "xAI Grok 4.1 Fast Reasoning",
     author: "xai",
     description:
