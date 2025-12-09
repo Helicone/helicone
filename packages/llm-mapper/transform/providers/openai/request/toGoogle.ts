@@ -1,4 +1,4 @@
-import { ExtendedHeliconeChatCreateParams, GeminiContent, GeminiGenerateContentRequest, GeminiGenerationConfig, GeminiPart, GeminiThinkingConfig, GeminiTool, GeminiToolConfig, GoogleReasoningOptions, ChatCompletionMessage } from "@/llm-mapper/transform/types/google";
+import { ExtendedHeliconeChatCreateParams, GeminiContent, GeminiGenerateContentRequest, GeminiGenerationConfig, GeminiPart, GeminiThinkingConfig, GeminiTool, GeminiToolConfig, GoogleReasoningOptions, ChatCompletionMessage } from "../../../types/google";
 import {
   HeliconeChatCompletionContentPart,
   HeliconeChatCreateParams,
