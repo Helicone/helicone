@@ -214,18 +214,25 @@ export async function getRequestsClickhouseNoSort(
       storage_location
     FROM request_response_rmt
     WHERE (
-      request_created_at >= (SELECT min(request_created_at) FROM top_requests)
-      AND request_created_at <= (SELECT max(request_created_at) FROM top_requests)
+      organization_id = {val_0 : String} AND
+      request_created_at >= (SELECT min(request_created_at) - interval '1 minute' FROM top_requests)
+      AND request_created_at <= (SELECT max(request_created_at) + interval '1 minute' FROM top_requests)
       AND request_id IN (SELECT request_id FROM top_requests)
-      and (${builtFilter.filter})
     )
     ORDER BY organization_id ${sortSQL}, toStartOfHour(request_created_at) ${sortSQL}, request_created_at ${sortSQL}
   `;
+  console.log("Clickhouse Query:", query);
+
+  const before = performance.now();
 
   const requests = await dbQueryClickhouse<HeliconeRequest>(
     query,
     builtFilter.argsAcc
   );
+
+  const after = performance.now();
+
+  console.log(`Clickhouse query took ${after - before} ms`);
 
   const s3Client = new S3Client(
     process.env.S3_ACCESS_KEY || undefined,
