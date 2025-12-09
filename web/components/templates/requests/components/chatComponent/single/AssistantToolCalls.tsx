@@ -84,6 +84,7 @@ export default function AssistantToolCalls({
           mappedRequest={mappedRequest!}
           messageIndex={messageIndex}
           onChatChange={onChatChange}
+          tools={mappedRequest?.schema.request?.tools}
         />
       ))}
     </div>

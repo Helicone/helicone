@@ -206,7 +206,7 @@ export async function getRequestsClickhouseNoSort(
     WHERE (
       (${builtFilter.filter})
     )
-    ORDER BY (organization_id, toStartOfHour(request_created_at), request_created_at) ${sortSQL}
+    ORDER BY organization_id ${sortSQL}, toStartOfHour(request_created_at) ${sortSQL}, request_created_at ${sortSQL}
     LIMIT ${limit}
     OFFSET ${offset}
   `;
