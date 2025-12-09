@@ -106,51 +106,65 @@ export const WrappedPage: React.FC = () => {
   }
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative h-screen overflow-y-auto snap-y snap-mandatory">
       {/* Background */}
       <WinterBackground />
 
+      {/* Back button */}
+      <div className="fixed left-6 top-6 z-20">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.push("/dashboard")}
+          className="text-white/70 hover:bg-white/10 hover:text-white"
+        >
+          <ArrowLeft size={16} className="mr-2" />
+          Dashboard
+        </Button>
+      </div>
+
       {/* Content */}
       <div className="relative z-10">
-        {/* Back button */}
-        <div className="fixed left-6 top-6 z-20">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push("/dashboard")}
-            className="text-white/70 hover:bg-white/10 hover:text-white"
-          >
-            <ArrowLeft size={16} className="mr-2" />
-            Dashboard
-          </Button>
+        {/* Sections */}
+        <div className="snap-start">
+          <HeroSection organizationName={org?.currentOrg?.name} />
+        </div>
+        <div className="snap-start">
+          <TotalRequestsSection totalRequests={stats.totalRequests} />
         </div>
 
-        {/* Sections */}
-        <HeroSection organizationName={org?.currentOrg?.name} />
-        <TotalRequestsSection totalRequests={stats.totalRequests} />
-
         {stats.topProviders.length > 0 && (
-          <FavoriteProvidersSection
-            providers={stats.topProviders}
-            totalRequests={stats.totalRequests}
-          />
+          <div className="snap-start">
+            <FavoriteProvidersSection
+              providers={stats.topProviders}
+              totalRequests={stats.totalRequests}
+            />
+          </div>
         )}
 
         {stats.topModels.length > 0 && (
-          <FavoriteModelsSection
-            models={stats.topModels}
-            totalRequests={stats.totalRequests}
-          />
+          <div className="snap-start">
+            <FavoriteModelsSection
+              models={stats.topModels}
+              totalRequests={stats.totalRequests}
+            />
+          </div>
         )}
 
-        <TotalTokensSection tokens={stats.totalTokens} />
+        <div className="snap-start">
+          <TotalTokensSection tokens={stats.totalTokens} />
+        </div>
 
         {stats.mostExpensiveRequest && (
-          <RequestSpotlightSection request={stats.mostExpensiveRequest} />
+          <div className="snap-start">
+            <RequestSpotlightSection request={stats.mostExpensiveRequest} />
+          </div>
         )}
 
         {/* Thank You Section */}
-        <ThankYouSection />
+        <div className="snap-start">
+          <ThankYouSection />
+        </div>
       </div>
     </div>
   );

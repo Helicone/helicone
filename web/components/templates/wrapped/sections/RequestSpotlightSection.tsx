@@ -253,7 +253,6 @@ export const RequestSpotlightSection: React.FC<RequestSpotlightSectionProps> = (
           </div>
           <h2
             className="text-5xl font-bold text-white sm:text-6xl md:text-7xl"
-            style={{ fontFamily: "Imbue, Georgia, serif" }}
           >
             Request Spotlight
           </h2>

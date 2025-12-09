@@ -254,7 +254,6 @@ export const FavoriteProvidersSection: React.FC<
         <div className="flex flex-col items-center gap-4">
           <h2
             className="text-5xl font-bold text-white sm:text-6xl md:text-7xl"
-            style={{ fontFamily: "Imbue, Georgia, serif" }}
           >
             Your Favorite Providers
           </h2>

@@ -131,7 +131,6 @@ export const TotalRequestsSection: React.FC<TotalRequestsSectionProps> = ({
           {/* Title */}
           <h2
             className="text-5xl font-bold text-white sm:text-6xl md:text-7xl"
-            style={{ fontFamily: "Imbue, Georgia, serif" }}
           >
             Total Requests
           </h2>

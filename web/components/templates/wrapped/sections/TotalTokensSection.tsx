@@ -199,7 +199,6 @@ export const TotalTokensSection: React.FC<TotalTokensSectionProps> = ({
           </div>
           <h2
             className="text-5xl font-bold text-white sm:text-6xl md:text-7xl"
-            style={{ fontFamily: "Imbue, Georgia, serif" }}
           >
             Token Usage
           </h2>

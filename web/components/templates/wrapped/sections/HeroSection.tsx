@@ -1,5 +1,6 @@
 import React from "react";
 import { ChevronDown } from "lucide-react";
+import Image from "next/image";
 
 interface HeroSectionProps {
   organizationName?: string;
@@ -20,18 +21,25 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         aria-hidden="true"
       >
         <span
-          className="select-none text-[35vw] font-bold leading-none text-white/[0.08]"
-          style={{ fontFamily: "Imbue, Georgia, serif" }}
+          className="select-none text-[28vw] font-bold leading-none text-white/[0.08]"
         >
           2025
         </span>
       </div>
 
       <div className="relative flex flex-col items-center gap-6">
+        {/* Helicone Logo */}
+        <Image
+          src="/assets/wrapped/logo-box.svg"
+          alt="Helicone"
+          width={80}
+          height={80}
+          className="mb-2"
+        />
+
         {/* Main heading */}
         <h1
           className="text-5xl font-bold tracking-tight text-white sm:text-6xl md:text-7xl"
-          style={{ fontFamily: "Imbue, Georgia, serif" }}
         >
           Your Helicone Wonderland
         </h1>
@@ -40,7 +48,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         {showOrgName && (
           <p
             className="text-xl italic text-[#0DA5E8] underline decoration-[#0DA5E8]/50 underline-offset-4 sm:text-2xl"
-            style={{ fontFamily: "Imbue, Georgia, serif" }}
           >
             {organizationName}
           </p>
