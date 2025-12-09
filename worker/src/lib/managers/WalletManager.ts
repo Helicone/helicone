@@ -35,6 +35,12 @@ export class WalletManager {
     }
 
     try {
+      // If this is a cached response, cancel the escrow without charging
+      if (cachedResponse) {
+        await this.walletStub.cancelEscrow(proxyRequest.escrowInfo.escrowId);
+        return ok(undefined);
+      }
+
       const { clickhouseLastCheckedAt } = await this.walletStub.finalizeEscrow(
         organizationId,
         proxyRequest.escrowInfo.escrowId,
