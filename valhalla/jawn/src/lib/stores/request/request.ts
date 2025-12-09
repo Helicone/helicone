@@ -176,7 +176,7 @@ export async function getRequestsClickhouseNoSort(
           request_created_at
       FROM request_response_rmt
       WHERE (${builtFilter.filter})
-      ORDER BY request_created_at DESC
+      ORDER BY request_created_at ${sortSQL}
       LIMIT ${limit}
       OFFSET ${offset}
     )
