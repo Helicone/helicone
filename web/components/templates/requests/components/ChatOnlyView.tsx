@@ -1,9 +1,17 @@
 import { cn } from "@/lib/utils";
 import { MappedLLMRequest, Message } from "@helicone-package/llm-mapper/types";
 import { useMemo, useState } from "react";
-import { Bot, User } from "lucide-react";
+import { Bot, User, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LuChevronDown } from "react-icons/lu";
+import dynamic from "next/dynamic";
+import { markdownComponents } from "@/components/shared/prompts/ResponsePanel";
+
+// Dynamically import ReactMarkdown with no SSR
+const ReactMarkdown = dynamic(() => import("react-markdown"), {
+  ssr: false,
+  loading: () => <div className="h-4 w-full animate-pulse rounded bg-muted" />,
+});
 
 interface ChatOnlyViewProps {
   mappedRequest: MappedLLMRequest;
@@ -11,35 +19,72 @@ interface ChatOnlyViewProps {
 
 const MESSAGE_LENGTH_THRESHOLD = 1000;
 
-// Filter to only user and assistant messages
-function filterChatMessages(messages: Message[]): Message[] {
-  return messages.filter((message) => {
+type ChatItem =
+  | { type: "message"; message: Message; isUser: boolean }
+  | { type: "tool_call"; name: string; id?: string };
+
+// Process messages and extract chat items including tool calls
+function processChatItems(messages: Message[]): ChatItem[] {
+  const items: ChatItem[] = [];
+
+  for (const message of messages) {
     const role = message.role?.toLowerCase();
-    // Only include user and assistant messages
-    // Exclude tool calls, system prompts, function calls, reasoning, etc.
-    if (role !== "user" && role !== "assistant") {
-      return false;
-    }
 
-    // For assistant messages, exclude those that only have tool_calls without content
-    if (role === "assistant") {
-      const hasContent = message.content && message.content.trim().length > 0;
-      const hasOnlyToolCalls =
-        message.tool_calls &&
-        message.tool_calls.length > 0 &&
-        !hasContent;
-      if (hasOnlyToolCalls) {
-        return false;
+    // Handle tool calls from assistant messages
+    if (role === "assistant" && message.tool_calls && message.tool_calls.length > 0) {
+      // If assistant has content, add it first
+      if (message.content && message.content.trim().length > 0) {
+        items.push({ type: "message", message, isUser: false });
       }
+      // Add tool calls
+      for (const toolCall of message.tool_calls) {
+        items.push({
+          type: "tool_call",
+          name: toolCall.name || "Unknown tool",
+          id: toolCall.id,
+        });
+      }
+      continue;
     }
 
-    // Include messages with actual content
-    return message.content && message.content.trim().length > 0;
-  });
+    // Skip non user/assistant messages
+    if (role !== "user" && role !== "assistant") {
+      continue;
+    }
+
+    // Skip messages without content
+    if (!message.content || message.content.trim().length === 0) {
+      continue;
+    }
+
+    items.push({
+      type: "message",
+      message,
+      isUser: role === "user",
+    });
+  }
+
+  return items;
+}
+
+interface ToolCallItemProps {
+  name: string;
+}
+
+function ToolCallItem({ name }: ToolCallItemProps) {
+  return (
+    <div className="flex items-center gap-1.5 py-1 pl-11">
+      <Wrench size={12} className="text-slate-400 dark:text-slate-500" />
+      <span className="text-xs text-slate-500 dark:text-slate-400">
+        {name}
+      </span>
+    </div>
+  );
 }
 
 interface ChatBubbleProps {
   message: Message;
+  isUser: boolean;
   index: number;
   expandedMessages: Record<number, boolean>;
   toggleMessage: (index: number) => void;
@@ -47,11 +92,11 @@ interface ChatBubbleProps {
 
 function ChatBubble({
   message,
+  isUser,
   index,
   expandedMessages,
   toggleMessage,
 }: ChatBubbleProps) {
-  const isUser = message.role?.toLowerCase() === "user";
   const content = message.content || "";
   const isLongMessage = content.length > MESSAGE_LENGTH_THRESHOLD;
   const isExpanded = expandedMessages[index];
@@ -63,46 +108,47 @@ function ChatBubble({
   return (
     <div
       className={cn(
-        "flex w-full gap-3",
-        isUser ? "flex-row-reverse" : "flex-row"
+        "flex w-full",
+        isUser ? "justify-end" : "justify-start"
       )}
     >
-      {/* Avatar */}
-      <div
-        className={cn(
-          "flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full",
-          isUser
-            ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
-            : "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300"
-        )}
-      >
-        {isUser ? <User size={16} /> : <Bot size={16} />}
-      </div>
-
       {/* Message bubble */}
       <div
         className={cn(
-          "flex max-w-[75%] flex-col gap-1 rounded-2xl px-4 py-2",
+          "flex max-w-[80%] flex-col gap-1 rounded-2xl px-4 py-3",
           isUser
-            ? "rounded-tr-sm bg-blue-100 text-blue-900 dark:bg-blue-900/40 dark:text-blue-100"
-            : "rounded-tl-sm bg-purple-100 text-purple-900 dark:bg-purple-900/40 dark:text-purple-100"
+            ? "rounded-tr-sm bg-blue-100 dark:bg-blue-900/40"
+            : "rounded-tl-sm bg-purple-100 dark:bg-purple-900/40"
         )}
       >
-        {/* Role label */}
-        <span
+        {/* Role label with inline icon */}
+        <div
           className={cn(
-            "text-xs font-medium",
+            "flex items-center gap-1.5 text-xs font-medium",
             isUser
               ? "text-blue-600 dark:text-blue-400"
               : "text-purple-600 dark:text-purple-400"
           )}
         >
+          {isUser ? <User size={12} /> : <Bot size={12} />}
           {isUser ? "User" : "Assistant"}
-        </span>
+        </div>
 
-        {/* Message content */}
-        <div className="whitespace-pre-wrap break-words text-sm">
-          {displayContent}
+        {/* Message content with markdown */}
+        <div
+          className={cn(
+            "text-sm",
+            isUser
+              ? "text-blue-900 dark:text-blue-100"
+              : "text-purple-900 dark:text-purple-100"
+          )}
+        >
+          <ReactMarkdown
+            components={markdownComponents}
+            className="w-full whitespace-pre-wrap break-words [&_a]:underline [&_code]:bg-black/5 [&_code]:dark:bg-white/10"
+          >
+            {displayContent}
+          </ReactMarkdown>
         </div>
 
         {/* Expand/collapse button for long messages */}
@@ -146,7 +192,7 @@ export default function ChatOnlyView({ mappedRequest }: ChatOnlyViewProps) {
     }));
   };
 
-  const chatMessages = useMemo(() => {
+  const chatItems = useMemo(() => {
     const requestMessages = mappedRequest.schema.request?.messages ?? [];
     const responseMessages = mappedRequest.schema.response?.messages ?? [];
     const allMessages = [...requestMessages, ...responseMessages];
@@ -178,18 +224,15 @@ export default function ChatOnlyView({ mappedRequest }: ChatOnlyViewProps) {
         ];
       }
 
-      if (!message.content) {
-        return acc;
-      }
-
       return [...acc, message];
     }, []);
 
-    // Filter to only user and assistant messages with content
-    return filterChatMessages(flattenedMessages);
+    return processChatItems(flattenedMessages);
   }, [mappedRequest]);
 
-  if (chatMessages.length === 0) {
+  const messageCount = chatItems.filter((item) => item.type === "message").length;
+
+  if (messageCount === 0) {
     return (
       <div className="flex h-full items-center justify-center p-8">
         <p className="text-sm text-muted-foreground">
@@ -199,17 +242,29 @@ export default function ChatOnlyView({ mappedRequest }: ChatOnlyViewProps) {
     );
   }
 
+  let messageIndex = 0;
+
   return (
-    <div className="flex flex-col gap-4 p-4 pt-14">
-      {chatMessages.map((message, index) => (
-        <ChatBubble
-          key={message.id || `chat-${index}`}
-          message={message}
-          index={index}
-          expandedMessages={expandedMessages}
-          toggleMessage={toggleMessage}
-        />
-      ))}
+    <div className="flex flex-col gap-2 p-4 pt-14">
+      {chatItems.map((item, idx) => {
+        if (item.type === "tool_call") {
+          return <ToolCallItem key={`tool-${idx}`} name={item.name} />;
+        }
+
+        const currentIndex = messageIndex;
+        messageIndex++;
+
+        return (
+          <ChatBubble
+            key={item.message.id || `chat-${idx}`}
+            message={item.message}
+            isUser={item.isUser}
+            index={currentIndex}
+            expandedMessages={expandedMessages}
+            toggleMessage={toggleMessage}
+          />
+        );
+      })}
     </div>
   );
 }
