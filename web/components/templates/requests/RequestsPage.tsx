@@ -74,6 +74,7 @@ import { useFilterUIDefinitions } from "@/filterAST/filterUIDefinitions/useFilte
 import { FilterUIDefinition } from "@/filterAST/filterUIDefinitions/types";
 import { FilterAST } from "@/filterAST/filterAst";
 import { GET_FILTER_ARGS_TOOL_CONTEXT } from "@/lib/agent/tools";
+import { useHasWrappedData } from "../wrapped/useWrapped";
 
 interface RequestsPageV2Props {
   currentPage: number;
@@ -143,6 +144,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   /* -------------------------------------------------------------------------- */
   const orgContext = useOrg();
   const router = useRouter();
+  const { hasData: hasWrappedData } = useHasWrappedData();
   const searchParams = useSearchParams();
   const { store: filterStore, helpers: filterHelpers } = useFilterAST();
   const [drawerSize, setDrawerSize] = useLocalStorage(
@@ -715,6 +717,17 @@ export default function RequestsPage(props: RequestsPageV2Props) {
           }
           rightActions={
             <div className="flex items-center gap-2">
+              {/* Wrapped button - only shows when org has 2025 data */}
+              {hasWrappedData && (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => router.push("/wrapped")}
+                >
+                  👉 Merry Christmas!
+                </Button>
+              )}
+
               {/* Add to dataset button - only shows when items are selected */}
               {selectedIds.length > 0 && (
                 <Button

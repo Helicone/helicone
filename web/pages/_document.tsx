@@ -17,6 +17,17 @@ class MyDocument extends Document {
     return (
       <Html>
         <Head>
+          {/* Google Fonts - Imbue for Wrapped page. Can remove this font after. */}
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link
+            rel="preconnect"
+            href="https://fonts.gstatic.com"
+            crossOrigin="anonymous"
+          />
+          <link
+            href="https://fonts.googleapis.com/css2?family=Imbue:opsz,wght@10..100,100..900&display=swap"
+            rel="stylesheet"
+          />
           {/* eslint-disable-next-line @next/next/no-sync-scripts */}
           <script src="/__ENV.js" />
           {/* Google tag (gtag.js) */}
