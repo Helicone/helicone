@@ -1,17 +1,27 @@
 import { cn } from "@/lib/utils";
-import { MappedLLMRequest, Message } from "@helicone-package/llm-mapper/types";
+import {
+  FunctionCall,
+  MappedLLMRequest,
+  Message,
+  Tool,
+} from "@helicone-package/llm-mapper/types";
 import { useMemo, useState } from "react";
-import { Bot, User, Wrench } from "lucide-react";
+import {
+  Bot,
+  User,
+  Wrench,
+  ChevronDownIcon,
+  ChevronRightIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LuChevronDown } from "react-icons/lu";
-import dynamic from "next/dynamic";
-import { markdownComponents } from "@/components/shared/prompts/ResponsePanel";
-
-// Dynamically import ReactMarkdown with no SSR
-const ReactMarkdown = dynamic(() => import("react-markdown"), {
-  ssr: false,
-  loading: () => <div className="h-4 w-full animate-pulse rounded bg-muted" />,
-});
+import {
+  Collapsible,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { JsonRenderer } from "./chatComponent/single/JsonRenderer";
+import { Muted } from "@/components/ui/typography";
+import { Streamdown } from "streamdown";
 
 interface ChatOnlyViewProps {
   mappedRequest: MappedLLMRequest;
@@ -21,7 +31,7 @@ const MESSAGE_LENGTH_THRESHOLD = 1000;
 
 type ChatItem =
   | { type: "message"; message: Message; isUser: boolean }
-  | { type: "tool_call"; name: string; id?: string };
+  | { type: "tool_call"; toolCall: FunctionCall };
 
 // Process messages and extract chat items including tool calls
 function processChatItems(messages: Message[]): ChatItem[] {
@@ -31,7 +41,11 @@ function processChatItems(messages: Message[]): ChatItem[] {
     const role = message.role?.toLowerCase();
 
     // Handle tool calls from assistant messages
-    if (role === "assistant" && message.tool_calls && message.tool_calls.length > 0) {
+    if (
+      role === "assistant" &&
+      message.tool_calls &&
+      message.tool_calls.length > 0
+    ) {
       // If assistant has content, add it first
       if (message.content && message.content.trim().length > 0) {
         items.push({ type: "message", message, isUser: false });
@@ -40,8 +54,7 @@ function processChatItems(messages: Message[]): ChatItem[] {
       for (const toolCall of message.tool_calls) {
         items.push({
           type: "tool_call",
-          name: toolCall.name || "Unknown tool",
-          id: toolCall.id,
+          toolCall,
         });
       }
       continue;
@@ -68,16 +81,64 @@ function processChatItems(messages: Message[]): ChatItem[] {
 }
 
 interface ToolCallItemProps {
-  name: string;
+  toolCall: FunctionCall;
+  tools?: Tool[];
 }
 
-function ToolCallItem({ name }: ToolCallItemProps) {
+function ToolCallItem({ toolCall, tools }: ToolCallItemProps) {
+  const [isArgumentsOpen, setIsArgumentsOpen] = useState(false);
+  const [isDescriptionOpen, setIsDescriptionOpen] = useState(false);
+
+  const toolDefinition = tools?.find((t) => t.name === toolCall.name);
+
   return (
-    <div className="flex items-center gap-1.5 py-1 pl-11">
-      <Wrench size={12} className="text-slate-400 dark:text-slate-500" />
-      <span className="text-xs text-slate-500 dark:text-slate-400">
-        {name}
-      </span>
+    <div className="flex flex-col gap-1 py-1 pl-11">
+      <div className="flex items-center gap-2">
+        <Wrench size={12} className="text-slate-400 dark:text-slate-500" />
+        <span className="text-xs text-slate-500 dark:text-slate-400">
+          {toolCall.name || "Unknown tool"}
+        </span>
+        <div className="flex items-center gap-1">
+          <Collapsible
+            open={isArgumentsOpen}
+            onOpenChange={setIsArgumentsOpen}
+          >
+            <CollapsibleTrigger className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-muted-foreground hover:bg-accent">
+              {isArgumentsOpen ? (
+                <ChevronDownIcon size={12} />
+              ) : (
+                <ChevronRightIcon size={12} />
+              )}
+              <span>Arguments</span>
+            </CollapsibleTrigger>
+          </Collapsible>
+          {toolDefinition?.description && (
+            <Collapsible
+              open={isDescriptionOpen}
+              onOpenChange={setIsDescriptionOpen}
+            >
+              <CollapsibleTrigger className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-muted-foreground hover:bg-accent">
+                {isDescriptionOpen ? (
+                  <ChevronDownIcon size={12} />
+                ) : (
+                  <ChevronRightIcon size={12} />
+                )}
+                <span>Description</span>
+              </CollapsibleTrigger>
+            </Collapsible>
+          )}
+        </div>
+      </div>
+      {isArgumentsOpen && (
+        <div className="pl-5">
+          <JsonRenderer data={toolCall.arguments} showCopyButton={false} />
+        </div>
+      )}
+      {isDescriptionOpen && toolDefinition?.description && (
+        <div className="pl-5">
+          <Muted className="text-xs">{toolDefinition.description}</Muted>
+        </div>
+      )}
     </div>
   );
 }
@@ -143,12 +204,7 @@ function ChatBubble({
               : "text-purple-900 dark:text-purple-100"
           )}
         >
-          <ReactMarkdown
-            components={markdownComponents}
-            className="w-full whitespace-pre-wrap break-words [&_a]:underline [&_code]:bg-black/5 [&_code]:dark:bg-white/10"
-          >
-            {displayContent}
-          </ReactMarkdown>
+          <Streamdown>{displayContent}</Streamdown>
         </div>
 
         {/* Expand/collapse button for long messages */}
@@ -230,7 +286,10 @@ export default function ChatOnlyView({ mappedRequest }: ChatOnlyViewProps) {
     return processChatItems(flattenedMessages);
   }, [mappedRequest]);
 
-  const messageCount = chatItems.filter((item) => item.type === "message").length;
+  const tools = mappedRequest.schema.request?.tools;
+  const messageCount = chatItems.filter(
+    (item) => item.type === "message"
+  ).length;
 
   if (messageCount === 0) {
     return (
@@ -248,7 +307,13 @@ export default function ChatOnlyView({ mappedRequest }: ChatOnlyViewProps) {
     <div className="flex flex-col gap-2 p-4 pt-14">
       {chatItems.map((item, idx) => {
         if (item.type === "tool_call") {
-          return <ToolCallItem key={`tool-${idx}`} name={item.name} />;
+          return (
+            <ToolCallItem
+              key={`tool-${idx}`}
+              toolCall={item.toolCall}
+              tools={tools}
+            />
+          );
         }
 
         const currentIndex = messageIndex;

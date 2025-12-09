@@ -23,7 +23,7 @@ import {
   PiSpeakerHighBold,
   PiTextTBold,
 } from "react-icons/pi";
-import ReactMarkdown from "react-markdown";
+import { Streamdown } from "streamdown";
 
 type MessageType =
   | "text"
@@ -638,9 +638,9 @@ const SessionUpdate: React.FC<SessionUpdateProps> = ({ content }) => {
               isExpanded ? "max-h-full opacity-100" : "max-h-6 opacity-70"
             }`}
           >
-            <ReactMarkdown className="prose prose-sm dark:prose-invert prose-headings:text-slate-50 prose-p:text-slate-200 prose-a:text-cyan-200 hover:prose-a:text-cyan-100 prose-blockquote:border-slate-400 prose-blockquote:text-slate-300 prose-strong:text-white prose-em:text-slate-300 prose-code:text-yellow-200 prose-pre:bg-slate-800/50 prose-pre:text-slate-200 prose-ol:text-slate-200 prose-ul:text-slate-200 prose-li:text-slate-200 [&_ol>li::marker]:text-white [&_ul>li::marker]:text-white">
-              {sessionData.instructions}
-            </ReactMarkdown>
+            <div className="prose prose-sm dark:prose-invert prose-headings:text-slate-50 prose-p:text-slate-200 prose-a:text-cyan-200 hover:prose-a:text-cyan-100 prose-blockquote:border-slate-400 prose-blockquote:text-slate-300 prose-strong:text-white prose-em:text-slate-300 prose-code:text-yellow-200 prose-pre:bg-slate-800/50 prose-pre:text-slate-200 prose-ol:text-slate-200 prose-ul:text-slate-200 prose-li:text-slate-200 [&_ol>li::marker]:text-white [&_ul>li::marker]:text-white">
+              <Streamdown>{sessionData.instructions}</Streamdown>
+            </div>
           </div>
         </div>
       )}
