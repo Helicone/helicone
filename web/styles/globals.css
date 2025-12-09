@@ -204,3 +204,20 @@
   @apply text-slate-400 dark:text-slate-600;
 }
 
+/* StreamDown code block styling */
+[data-streamdown="code-block"] {
+  @apply rounded-lg border border-border bg-muted;
+}
+
+[data-streamdown="code-block"] pre {
+  @apply bg-slate-100 dark:bg-slate-900 rounded-lg p-4 overflow-x-auto;
+}
+
+[data-streamdown="code-block"] code {
+  @apply text-sm font-mono;
+}
+
+[data-streamdown="inline-code"] {
+  @apply bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 rounded text-sm font-mono;
+}
+

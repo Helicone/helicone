@@ -3,7 +3,6 @@ import {
   FunctionCall,
   MappedLLMRequest,
   Message,
-  Tool,
 } from "@helicone-package/llm-mapper/types";
 import { useMemo, useState } from "react";
 import {
@@ -20,7 +19,6 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { JsonRenderer } from "./chatComponent/single/JsonRenderer";
-import { Muted } from "@/components/ui/typography";
 import { Streamdown } from "streamdown";
 
 interface ChatOnlyViewProps {
@@ -31,11 +29,19 @@ const MESSAGE_LENGTH_THRESHOLD = 1000;
 
 type ChatItem =
   | { type: "message"; message: Message; isUser: boolean }
-  | { type: "tool_call"; toolCall: FunctionCall };
+  | { type: "tool_call"; toolCall: FunctionCall; response?: string };
 
 // Process messages and extract chat items including tool calls
 function processChatItems(messages: Message[]): ChatItem[] {
   const items: ChatItem[] = [];
+
+  // First, build a map of tool responses by tool_call_id
+  const toolResponses: Record<string, string> = {};
+  for (const message of messages) {
+    if (message.role?.toLowerCase() === "tool" && message.tool_call_id) {
+      toolResponses[message.tool_call_id] = message.content || "";
+    }
+  }
 
   for (const message of messages) {
     const role = message.role?.toLowerCase();
@@ -50,13 +56,19 @@ function processChatItems(messages: Message[]): ChatItem[] {
       if (message.content && message.content.trim().length > 0) {
         items.push({ type: "message", message, isUser: false });
       }
-      // Add tool calls
+      // Add tool calls with their responses
       for (const toolCall of message.tool_calls) {
         items.push({
           type: "tool_call",
           toolCall,
+          response: toolCall.id ? toolResponses[toolCall.id] : undefined,
         });
       }
+      continue;
+    }
+
+    // Skip tool response messages (already processed above)
+    if (role === "tool") {
       continue;
     }
 
@@ -82,14 +94,24 @@ function processChatItems(messages: Message[]): ChatItem[] {
 
 interface ToolCallItemProps {
   toolCall: FunctionCall;
-  tools?: Tool[];
+  response?: string;
 }
 
-function ToolCallItem({ toolCall, tools }: ToolCallItemProps) {
+function ToolCallItem({ toolCall, response }: ToolCallItemProps) {
   const [isArgumentsOpen, setIsArgumentsOpen] = useState(false);
-  const [isDescriptionOpen, setIsDescriptionOpen] = useState(false);
+  const [isResponseOpen, setIsResponseOpen] = useState(false);
 
-  const toolDefinition = tools?.find((t) => t.name === toolCall.name);
+  // Try to parse response as JSON for better display
+  const parseResponse = (resp: string | undefined) => {
+    if (!resp) return null;
+    try {
+      return JSON.parse(resp);
+    } catch {
+      return resp;
+    }
+  };
+
+  const parsedResponse = parseResponse(response);
 
   return (
     <div className="flex flex-col gap-1 py-1 pl-11">
@@ -98,45 +120,45 @@ function ToolCallItem({ toolCall, tools }: ToolCallItemProps) {
         <span className="text-xs text-slate-500 dark:text-slate-400">
           {toolCall.name || "Unknown tool"}
         </span>
-        <div className="flex items-center gap-1">
-          <Collapsible
-            open={isArgumentsOpen}
-            onOpenChange={setIsArgumentsOpen}
-          >
+      </div>
+      <div className="flex items-center gap-2 pl-5">
+        <Collapsible open={isArgumentsOpen} onOpenChange={setIsArgumentsOpen}>
+          <CollapsibleTrigger className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-muted-foreground hover:bg-accent">
+            {isArgumentsOpen ? (
+              <ChevronDownIcon size={12} />
+            ) : (
+              <ChevronRightIcon size={12} />
+            )}
+            <span>Arguments</span>
+          </CollapsibleTrigger>
+        </Collapsible>
+        {response !== undefined && (
+          <Collapsible open={isResponseOpen} onOpenChange={setIsResponseOpen}>
             <CollapsibleTrigger className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-muted-foreground hover:bg-accent">
-              {isArgumentsOpen ? (
+              {isResponseOpen ? (
                 <ChevronDownIcon size={12} />
               ) : (
                 <ChevronRightIcon size={12} />
               )}
-              <span>Arguments</span>
+              <span>Response</span>
             </CollapsibleTrigger>
           </Collapsible>
-          {toolDefinition?.description && (
-            <Collapsible
-              open={isDescriptionOpen}
-              onOpenChange={setIsDescriptionOpen}
-            >
-              <CollapsibleTrigger className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-muted-foreground hover:bg-accent">
-                {isDescriptionOpen ? (
-                  <ChevronDownIcon size={12} />
-                ) : (
-                  <ChevronRightIcon size={12} />
-                )}
-                <span>Description</span>
-              </CollapsibleTrigger>
-            </Collapsible>
-          )}
-        </div>
+        )}
       </div>
       {isArgumentsOpen && (
         <div className="pl-5">
           <JsonRenderer data={toolCall.arguments} showCopyButton={false} />
         </div>
       )}
-      {isDescriptionOpen && toolDefinition?.description && (
+      {isResponseOpen && parsedResponse && (
         <div className="pl-5">
-          <Muted className="text-xs">{toolDefinition.description}</Muted>
+          {typeof parsedResponse === "string" ? (
+            <span className="text-xs text-muted-foreground whitespace-pre-wrap">
+              {parsedResponse}
+            </span>
+          ) : (
+            <JsonRenderer data={parsedResponse} showCopyButton={false} />
+          )}
         </div>
       )}
     </div>
@@ -286,7 +308,6 @@ export default function ChatOnlyView({ mappedRequest }: ChatOnlyViewProps) {
     return processChatItems(flattenedMessages);
   }, [mappedRequest]);
 
-  const tools = mappedRequest.schema.request?.tools;
   const messageCount = chatItems.filter(
     (item) => item.type === "message"
   ).length;
@@ -311,7 +332,7 @@ export default function ChatOnlyView({ mappedRequest }: ChatOnlyViewProps) {
             <ToolCallItem
               key={`tool-${idx}`}
               toolCall={item.toolCall}
-              tools={tools}
+              response={item.response}
             />
           );
         }
