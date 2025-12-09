@@ -266,7 +266,7 @@ const renderTextContent = (
   chatMode: ChatMode,
   mappedRequest: MappedLLMRequest,
   messageIndex: number,
-  mode: "rendered" | "raw" | "json" | "debug",
+  mode: "rendered" | "chat" | "raw" | "json" | "debug",
   options: {
     isPartOfContentArray?: boolean;
     parentIndex?: number;
@@ -345,7 +345,7 @@ const renderContentByType = (
   chatMode: ChatMode,
   mappedRequest: MappedLLMRequest,
   messageIndex: number,
-  mode: "rendered" | "raw" | "json" | "debug",
+  mode: "rendered" | "chat" | "raw" | "json" | "debug",
   options: {
     isPartOfContentArray?: boolean;
     parentIndex?: number;
