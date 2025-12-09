@@ -618,7 +618,9 @@ async function log(
           orgData.organizationId
         );
 
-      if (proxyRequest.escrowInfo) {
+      // Only finalize escrow if this is NOT a cached response
+      // Cached responses should not be charged to the wallet
+      if (proxyRequest.escrowInfo && !cachedResponse) {
         // Convert cost from USD to cents (cost is in USD dollars, wallet expects cents)
         const costInCents = cost !== undefined ? cost * 100 : undefined;
 
@@ -627,8 +629,7 @@ async function log(
             orgData.organizationId,
             proxyRequest,
             costInCents,
-            statusCode,
-            cachedResponse
+            statusCode
           );
         if (escrowFinalizationResult.error !== null) {
           console.error(
