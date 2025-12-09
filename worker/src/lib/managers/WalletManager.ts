@@ -35,7 +35,6 @@ export class WalletManager {
     }
 
     try {
-
       const { clickhouseLastCheckedAt } = await this.walletStub.finalizeEscrow(
         organizationId,
         proxyRequest.escrowInfo.escrowId,
