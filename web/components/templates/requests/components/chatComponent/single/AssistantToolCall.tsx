@@ -38,6 +38,7 @@ export default function AssistantToolCall({
   tools,
 }: AssistantToolCallProps) {
   const [isDescriptionOpen, setIsDescriptionOpen] = useState(false);
+  const [isArgumentsOpen, setIsArgumentsOpen] = useState(true);
 
   // Find the tool definition to get the description
   const toolDefinition = tools?.find((t) => t.name === tool.name);
@@ -176,37 +177,48 @@ export default function AssistantToolCall({
             </Button>
           </div>
         ) : (
-          <Collapsible
-            open={isDescriptionOpen}
-            onOpenChange={setIsDescriptionOpen}
-          >
-            <CollapsibleTrigger
-              className="flex items-center gap-1"
-              disabled={!toolDefinition?.description}
-            >
-              {toolDefinition?.description ? (
-                isDescriptionOpen ? (
-                  <ChevronDownIcon size={14} className="text-muted-foreground" />
-                ) : (
-                  <ChevronRightIcon
-                    size={14}
-                    className="text-muted-foreground"
-                  />
-                )
-              ) : null}
-              <XSmall className="font-mono font-semibold">{tool.name}</XSmall>
-            </CollapsibleTrigger>
-            {toolDefinition?.description && (
-              <CollapsibleContent className="mt-2 pl-5">
-                <Muted className="text-xs">{toolDefinition.description}</Muted>
-              </CollapsibleContent>
-            )}
-          </Collapsible>
+          <div className="flex items-center gap-3">
+            <XSmall className="font-mono font-semibold">{tool.name}</XSmall>
+            <div className="flex items-center gap-2">
+              <Collapsible
+                open={isArgumentsOpen}
+                onOpenChange={setIsArgumentsOpen}
+              >
+                <CollapsibleTrigger className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-muted-foreground hover:bg-accent">
+                  {isArgumentsOpen ? (
+                    <ChevronDownIcon size={12} />
+                  ) : (
+                    <ChevronRightIcon size={12} />
+                  )}
+                  <span>Arguments</span>
+                </CollapsibleTrigger>
+              </Collapsible>
+              {toolDefinition?.description && (
+                <Collapsible
+                  open={isDescriptionOpen}
+                  onOpenChange={setIsDescriptionOpen}
+                >
+                  <CollapsibleTrigger className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-muted-foreground hover:bg-accent">
+                    {isDescriptionOpen ? (
+                      <ChevronDownIcon size={12} />
+                    ) : (
+                      <ChevronRightIcon size={12} />
+                    )}
+                    <span>Description</span>
+                  </CollapsibleTrigger>
+                </Collapsible>
+              )}
+            </div>
+          </div>
         )}
       </div>
-      {!playgroundMode ? (
+      {!playgroundMode && isArgumentsOpen && (
         <JsonRenderer data={tool.arguments} showCopyButton={false} />
-      ) : (
+      )}
+      {!playgroundMode && isDescriptionOpen && toolDefinition?.description && (
+        <Muted className="text-xs">{toolDefinition.description}</Muted>
+      )}
+      {playgroundMode && (
         <MarkdownEditor
           placeholder="{}"
           language="json"
