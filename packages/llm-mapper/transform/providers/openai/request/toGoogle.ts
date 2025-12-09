@@ -1,91 +1,9 @@
+import { ExtendedHeliconeChatCreateParams, GeminiContent, GeminiGenerateContentRequest, GeminiGenerationConfig, GeminiPart, GeminiThinkingConfig, GeminiTool, GeminiToolConfig, GoogleReasoningOptions, ChatCompletionMessage } from "@/llm-mapper/transform/types/google";
 import {
   HeliconeChatCompletionContentPart,
   HeliconeChatCreateParams,
 } from "@helicone-package/prompts/types";
 import { ChatCompletionTool } from "openai/resources/chat/completions";
-
-type GeminiPart = {
-  text?: string;
-  inlineData?: {
-    mimeType?: string;
-    data: string;
-  };
-  fileData?: {
-    fileUri: string;
-  };
-  functionCall?: {
-    name?: string;
-    args?: Record<string, any>;
-  };
-  functionResponse?: {
-    name: string;
-    response: Record<string, any>;
-  };
-};
-
-type GeminiContent = {
-  role: "user" | "model" | "system";
-  parts: GeminiPart[];
-};
-
-type GeminiTool = {
-  functionDeclarations: Array<{
-    name: string;
-    description?: string;
-    parameters?: Record<string, any>;
-  }>;
-};
-
-type GeminiThinkingConfig = {
-  includeThoughts?: boolean;
-  thinkingLevel?: "low" | "high";
-  thinkingBudget?: number;
-};
-
-type GeminiGenerationConfig = {
-  temperature?: number;
-  topP?: number;
-  topK?: number;
-  maxOutputTokens?: number;
-  stopSequences?: string[];
-  candidateCount?: number;
-  presencePenalty?: number;
-  frequencyPenalty?: number;
-  thinkingConfig?: GeminiThinkingConfig;
-};
-
-type GeminiToolConfig = {
-  function_calling_config: {
-    mode: "AUTO" | "ANY" | "NONE";
-    allowed_function_names?: string[];
-  };
-};
-
-export interface GeminiGenerateContentRequest {
-  contents: GeminiContent[];
-  system_instruction?: GeminiContent;
-  generationConfig?: GeminiGenerationConfig;
-  tools?: GeminiTool[];
-  toolConfig?: GeminiToolConfig;
-}
-
-type ChatCompletionMessage =
-  NonNullable<HeliconeChatCreateParams["messages"]>[number];
-
-type ExtendedHeliconeChatCreateParams = HeliconeChatCreateParams & {
-  max_output_tokens?: number | null;
-  top_k?: number | null;
-};
-
-/**
- * Extended reasoning options for Google-specific thinking configuration.
- */
-interface GoogleReasoningOptions {
-  /** Token budget for thinking (Gemini 2.5 models) */
-  budget_tokens?: number;
-  /** Thinking level (Gemini 3+ models) */
-  thinking_level?: "low" | "high";
-}
 
 export function toGoogle(
   openAIBody: HeliconeChatCreateParams
