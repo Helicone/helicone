@@ -774,7 +774,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "context": 200000,
       "crossRegion": false,
       "maxTokens": 64000,
-      "modelId": "claude-opus-4-5",
+      "modelId": "claude-opus-4-5-20251101",
       "parameters": [
         "include_reasoning",
         "max_tokens",
