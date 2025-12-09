@@ -192,6 +192,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "qwen3-coder:canopywave": {
+      "context": 262144,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "qwen/qwen3-coder",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "canopywave",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "qwen3-coder:deepinfra": {
       "context": 262144,
       "crossRegion": false,
@@ -748,7 +774,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "context": 200000,
       "crossRegion": false,
       "maxTokens": 64000,
-      "modelId": "claude-opus-4-5",
+      "modelId": "claude-opus-4-5-20251101",
       "parameters": [
         "include_reasoning",
         "max_tokens",
@@ -5465,6 +5491,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "nebius",
   ],
   "alibaba/qwen3": [
+    "canopywave",
     "deepinfra",
     "deepinfra",
     "deepinfra",
@@ -5803,6 +5830,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "alibaba/qwen3": {
+    "canopywave": [
+      {
+        "input": 2.2e-7,
+        "output": 9.5e-7,
+        "threshold": 0,
+      },
+    ],
     "deepinfra": [
       {
         "input": 3e-7,
@@ -8076,6 +8110,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "qwen3-coder",
       "providers": [
+        "canopywave",
         "deepinfra",
       ],
     },
@@ -8146,7 +8181,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "bedrock",
     },
     {
-      "modelCount": 2,
+      "modelCount": 3,
       "provider": "canopywave",
     },
     {
@@ -8316,8 +8351,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 243,
-  "totalModelProviderConfigs": 243,
+  "totalEndpoints": 244,
+  "totalModelProviderConfigs": 244,
   "totalModelsWithPtb": 91,
   "totalProviders": 21,
 }

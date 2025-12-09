@@ -92,7 +92,8 @@ export default function BillingOnboardingPage() {
           <div className="flex flex-col gap-2">
             <H1>Set up billing</H1>
             <Muted>
-              Choose how you'd like to pay for AI model usage through Helicone.
+              Choose how you&apos;d like to pay for AI model usage through
+              Helicone.
             </Muted>
           </div>
 
@@ -111,7 +112,7 @@ export default function BillingOnboardingPage() {
                     {hasCredits &&
                       `You have $${(creditData?.balance ?? 0).toFixed(2)} in credits. `}
                     {hasProviderKeys && "You have provider keys configured. "}
-                    You're ready to continue!
+                    You&apos;re ready to continue!
                   </Small>
                 </div>
               </div>
