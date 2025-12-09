@@ -20,6 +20,9 @@ import {
 } from "@/components/ui/collapsible";
 import { JsonRenderer } from "./chatComponent/single/JsonRenderer";
 import { Streamdown } from "streamdown";
+import type { BundledTheme } from "shiki";
+
+const shikiTheme: [BundledTheme, BundledTheme] = ["vitesse-light", "vitesse-dark"];
 
 interface ChatOnlyViewProps {
   mappedRequest: MappedLLMRequest;
@@ -226,7 +229,7 @@ function ChatBubble({
               : "text-purple-900 dark:text-purple-100"
           )}
         >
-          <Streamdown>{displayContent}</Streamdown>
+          <Streamdown shikiTheme={shikiTheme}>{displayContent}</Streamdown>
         </div>
 
         {/* Expand/collapse button for long messages */}

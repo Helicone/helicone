@@ -7,6 +7,9 @@ import {
   MappedLLMRequest,
 } from "@helicone-package/llm-mapper/types";
 import { Streamdown } from "streamdown";
+import type { BundledTheme } from "shiki";
+
+const shikiTheme: [BundledTheme, BundledTheme] = ["vitesse-light", "vitesse-dark"];
 
 interface AssistantToolCallsProps {
   content?: string;
@@ -62,7 +65,7 @@ export default function AssistantToolCalls({
       ) : (
         content && (
           <div className="w-full whitespace-pre-wrap break-words p-2 text-xs">
-            <Streamdown>{content}</Streamdown>
+            <Streamdown shikiTheme={shikiTheme}>{content}</Streamdown>
           </div>
         )
       )}

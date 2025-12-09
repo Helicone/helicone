@@ -210,11 +210,16 @@
 }
 
 [data-streamdown="code-block"] pre {
-  @apply bg-slate-100 dark:bg-slate-900 rounded-lg p-4 overflow-x-auto;
+  @apply rounded-lg p-4 overflow-x-auto;
 }
 
 [data-streamdown="code-block"] code {
   @apply text-sm font-mono;
+  text-shadow: none !important;
+}
+
+[data-streamdown="code-block"] code span {
+  text-shadow: none !important;
 }
 
 [data-streamdown="inline-code"] {

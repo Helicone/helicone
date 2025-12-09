@@ -130,7 +130,7 @@ const ContentWrapper = ({
 };
 
 const renderToolMessage = (
-  content: string,
+  displayContent: string,
   message: Message,
   playgroundMode: boolean,
   mappedRequest?: MappedLLMRequest,
@@ -141,6 +141,7 @@ const renderToolMessage = (
     return (
       <ToolMessage
         message={message}
+        displayContent={displayContent}
         playgroundMode={playgroundMode}
         mappedRequest={mappedRequest}
         messageIndex={messageIndex}
