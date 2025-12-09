@@ -98,42 +98,90 @@ export class ProviderKeysManager {
     orgId: string,
     keyCuid?: string
   ): Promise<ProviderKey | null> {
-    const keys = await this.getProviderKeys(orgId);
-    const validKey = this.chooseProviderKey(keys ?? [], provider, providerModelId, keyCuid);
+    let kvFailed = false;
+    let keys: ProviderKey[] | null = null;
 
-    if (!validKey) {
-      const keys = await this.store.getProviderKeysWithFetch(
-        provider,
-        orgId,
-        keyCuid
-      );
+    try {
+      keys = await this.getProviderKeys(orgId);
+      const validKey = this.chooseProviderKey(keys ?? [], provider, providerModelId, keyCuid);
 
-      if (!keys) return null;
-
-      const existingKeys = await getFromKVCacheOnly(
-        `provider_keys_${orgId}`,
-        this.env,
-        43200 // 12 hours
-      );
-      if (existingKeys) {
-        const existingKeysData = JSON.parse(existingKeys) as ProviderKey[];
-        existingKeysData.push(...keys);
-        await storeInCache(
-          `provider_keys_${orgId}`,
-          JSON.stringify(existingKeysData),
-          this.env,
-          43200 // 12 hours
-        );
-      } else {
-        await storeInCache(
-          `provider_keys_${orgId}`,
-          JSON.stringify(keys),
-          this.env,
-          43200 // 12 hours
-        );
+      if (validKey) {
+        return validKey;
       }
-      return this.chooseProviderKey(keys, provider, providerModelId, keyCuid);
+      // this is a cache miss, not a failure, so check DB
+    } catch (error) {
+      // KV failure
+      console.error("KV cache failed, falling back to DO:", error);
+      kvFailed = true;
     }
-    return validKey;
+
+    if (kvFailed && this.env.PROVIDER_KEY_CACHE) {
+      try {
+        const doId = this.env.PROVIDER_KEY_CACHE.idFromName(orgId);
+        const doStub: any = this.env.PROVIDER_KEY_CACHE.get(doId);
+        const doKeys: ProviderKey[] | null = await doStub.getProviderKeys(orgId);
+
+        if (doKeys && doKeys.length > 0) {
+          const validKeyFromDO = this.chooseProviderKey(doKeys, provider, providerModelId, keyCuid);
+          if (validKeyFromDO) {
+            return validKeyFromDO;
+          }
+        }
+      } catch (error) {
+        console.error("DO cache also failed, falling back to Postgres:", error);
+      }
+    }
+
+    // DO fail, check DB
+    const keysFromDb = await this.store.getProviderKeysWithFetch(
+      provider,
+      orgId,
+      keyCuid
+    );
+
+    if (!keysFromDb) return null;
+
+    if (this.env.PROVIDER_KEY_CACHE) {
+      try {
+        const doId = this.env.PROVIDER_KEY_CACHE.idFromName(orgId);
+        const doStub: any = this.env.PROVIDER_KEY_CACHE.get(doId);
+        await doStub.storeProviderKeys(orgId, keysFromDb);
+      } catch (error) {
+        console.error("Failed to update DO cache from Postgres:", error);
+      }
+    }
+
+    // Update KV cache (only if it didn't fail)
+    if (!kvFailed) {
+      try {
+        const existingKeys = await getFromKVCacheOnly(
+          `provider_keys_${orgId}`,
+          this.env,
+          43200 // 12 hours
+        );
+        if (existingKeys) {
+          const existingKeysData = JSON.parse(existingKeys) as ProviderKey[];
+          existingKeysData.push(...keysFromDb);
+          await storeInCache(
+            `provider_keys_${orgId}`,
+            JSON.stringify(existingKeysData),
+            this.env,
+            43200 // 12 hours
+          );
+        } else {
+          await storeInCache(
+            `provider_keys_${orgId}`,
+            JSON.stringify(keysFromDb),
+            this.env,
+            43200 // 12 hours
+          );
+        }
+      } catch (error) {
+        console.error("Failed to update KV cache after Postgres fetch:", error);
+        // Non-fatal, we got the data from Postgres
+      }
+    }
+
+    return this.chooseProviderKey(keysFromDb, provider, providerModelId, keyCuid);
   }
 }
