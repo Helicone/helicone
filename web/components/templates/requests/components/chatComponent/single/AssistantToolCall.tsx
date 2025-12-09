@@ -1,15 +1,22 @@
 import {
   FunctionCall,
   MappedLLMRequest,
+  Tool,
 } from "@helicone-package/llm-mapper/types";
 import { JsonRenderer } from "./JsonRenderer";
 import MarkdownEditor from "@/components/shared/markdownEditor";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Trash2Icon } from "lucide-react";
+import { ChevronDownIcon, ChevronRightIcon, Trash2Icon } from "lucide-react";
 import { PiToolboxBold } from "react-icons/pi";
-import { XSmall } from "@/components/ui/typography";
+import { XSmall, Muted } from "@/components/ui/typography";
 import PlaygroundToolAttributes from "../PlaygroundToolAttributes";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { useState } from "react";
 
 interface AssistantToolCallProps {
   tool: FunctionCall;
@@ -18,6 +25,7 @@ interface AssistantToolCallProps {
   mappedRequest: MappedLLMRequest;
   messageIndex?: number;
   onChatChange?: (_mappedRequest: MappedLLMRequest) => void;
+  tools?: Tool[];
 }
 
 export default function AssistantToolCall({
@@ -27,7 +35,12 @@ export default function AssistantToolCall({
   mappedRequest,
   messageIndex,
   onChatChange,
+  tools,
 }: AssistantToolCallProps) {
+  const [isDescriptionOpen, setIsDescriptionOpen] = useState(false);
+
+  // Find the tool definition to get the description
+  const toolDefinition = tools?.find((t) => t.name === tool.name);
   const updateMessageToolCallField = (field: string, value: string) => {
     if (!mappedRequest || !onChatChange || messageIndex === undefined) {
       return;
@@ -163,7 +176,32 @@ export default function AssistantToolCall({
             </Button>
           </div>
         ) : (
-          <XSmall className="font-mono font-semibold">{tool.name}</XSmall>
+          <Collapsible
+            open={isDescriptionOpen}
+            onOpenChange={setIsDescriptionOpen}
+          >
+            <CollapsibleTrigger
+              className="flex items-center gap-1"
+              disabled={!toolDefinition?.description}
+            >
+              {toolDefinition?.description ? (
+                isDescriptionOpen ? (
+                  <ChevronDownIcon size={14} className="text-muted-foreground" />
+                ) : (
+                  <ChevronRightIcon
+                    size={14}
+                    className="text-muted-foreground"
+                  />
+                )
+              ) : null}
+              <XSmall className="font-mono font-semibold">{tool.name}</XSmall>
+            </CollapsibleTrigger>
+            {toolDefinition?.description && (
+              <CollapsibleContent className="mt-2 pl-5">
+                <Muted className="text-xs">{toolDefinition.description}</Muted>
+              </CollapsibleContent>
+            )}
+          </Collapsible>
         )}
       </div>
       {!playgroundMode ? (
