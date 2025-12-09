@@ -36,6 +36,12 @@ export class WalletManager {
     }
 
     try {
+      // If this is a cached response, cancel the escrow without charging
+      if (cachedResponse) {
+        await this.walletStub.cancelEscrow(proxyRequest.escrowInfo.escrowId);
+        return ok(undefined);
+      }
+
       const { clickhouseLastCheckedAt } = await this.walletStub.finalizeEscrow(
         organizationId,
         proxyRequest.escrowInfo.escrowId,
@@ -49,10 +55,9 @@ export class WalletManager {
         // anthropic, and other providers, may return a 200 status code for streams
         // even when an error occurs in the middle of the event stream. Therefore,
         // we cannot use those events to add the (provider, model) to the disallow list.
-        !proxyRequest.isStream &&
-        (cachedResponse === undefined || cachedResponse === null)
+        !proxyRequest.isStream
       ) {
-        // if the cost is 0 and we're not using a cached response, we need to add the request to the disallow list
+        // if the cost is 0, we need to add the request to the disallow list
         // so that we guard against abuse
         await this.walletStub.addToDisallowList(
           proxyRequest.requestId,

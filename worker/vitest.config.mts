@@ -7,6 +7,7 @@ export default defineConfig({
       "./test/ai-gateway/vitest.config.mts",
       "./test/cache/vitest.config.mts",
       "./test/alerts/vitest.config.mts",
+      "./test/managers/vitest.config.mts",
     ],
   },
 });
