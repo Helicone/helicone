@@ -59,7 +59,7 @@ Helicone's AI Gateway provides a unified interface for reasoning across provider
     {
       reasoning_effort: "low" | "medium" | "high",
       reasoning_options: {
-        budget_tokens: 8000  // Optional, for Anthropic
+        budget_tokens: 8000  // Optional token budget
       }
     }
     ```
@@ -71,7 +71,7 @@ Helicone's AI Gateway provides a unified interface for reasoning across provider
         effort: "low" | "medium" | "high"
       },
       reasoning_options: {
-        budget_tokens: 8000  // Optional, for Anthropic
+        budget_tokens: 8000  // Optional token budget
       }
     }
     ```
@@ -89,6 +89,27 @@ Helicone's AI Gateway provides a unified interface for reasoning across provider
 <Note>
 For Anthropic models, the default is 4096 max completion tokens with 2048 budget reasoning tokens.
 </Note>
+
+### reasoning_options.budget_tokens
+
+The `budget_tokens` parameter sets the maximum number of tokens the model can use for reasoning.
+
+<Warning>
+**For Google (Gemini) models:** `reasoning_effort` is **required** to enable thinking. Passing `budget_tokens` alone will **not** enable reasoning - you must also specify `reasoning_effort`.
+</Warning>
+
+```typescript
+// ✅ Correct: reasoning_effort enables thinking, budget_tokens limits it
+{
+  reasoning_effort: "high",
+  reasoning_options: { budget_tokens: 4096 }
+}
+
+// ❌ Incorrect for Gemini: budget_tokens alone does nothing
+{
+  reasoning_options: { budget_tokens: 4096 }  // Reasoning will be disabled
+}
+```
 
 ---
 

@@ -52,10 +52,44 @@ describe("Google Reasoning/Thinking Support", () => {
       });
     });
 
-    it("should pass through budget_tokens as thinkingBudget", () => {
+    it("should use thinkingBudget=-1 for reasoning_effort on Gemini 2.5 models", () => {
+      const openAIRequest: HeliconeChatCreateParams = {
+        model: "gemini-2.5-flash",
+        messages: [{ role: "user", content: "Test" }],
+        reasoning_effort: "high",
+      };
+
+      const googleRequest = toGoogle(openAIRequest);
+
+      // Gemini 2.5 doesn't support thinkingLevel, so use dynamic budget instead
+      expect(googleRequest.generationConfig?.thinkingConfig).toEqual({
+        includeThoughts: true,
+        thinkingBudget: -1,
+      });
+    });
+
+    it("should disable thinking when only budget_tokens is provided (without reasoning_effort)", () => {
       const openAIRequest: HeliconeChatCreateParams = {
         model: "gemini-2.5-flash",
         messages: [{ role: "user", content: "What is 2+2?" }],
+        reasoning_options: {
+          budget_tokens: 100,
+        },
+      };
+
+      const googleRequest = toGoogle(openAIRequest);
+
+      // budget_tokens alone does NOT enable thinking - reasoning_effort is required
+      expect(googleRequest.generationConfig?.thinkingConfig).toEqual({
+        thinkingBudget: 0,
+      });
+    });
+
+    it("should apply budget_tokens when reasoning_effort is also provided", () => {
+      const openAIRequest: HeliconeChatCreateParams = {
+        model: "gemini-2.5-flash",
+        messages: [{ role: "user", content: "What is 2+2?" }],
+        reasoning_effort: "high",
         reasoning_options: {
           budget_tokens: 100,
         },
@@ -98,9 +132,9 @@ describe("Google Reasoning/Thinking Support", () => {
 
       const googleRequest = toGoogle(openAIRequest);
 
+      // Gemini 2.5 doesn't support thinkingLevel, so budget_tokens takes precedence
       expect(googleRequest.generationConfig?.thinkingConfig).toEqual({
         includeThoughts: true,
-        thinkingLevel: "high",
         thinkingBudget: 2048,
       });
     });
@@ -124,10 +158,11 @@ describe("Google Reasoning/Thinking Support", () => {
       });
     });
 
-    it("should handle budget_tokens=-1 for dynamic thinking", () => {
+    it("should handle budget_tokens=-1 for dynamic thinking when reasoning_effort is set", () => {
       const openAIRequest: HeliconeChatCreateParams = {
         model: "gemini-2.5-flash",
         messages: [{ role: "user", content: "Test" }],
+        reasoning_effort: "high",
         reasoning_options: {
           budget_tokens: -1,
         },

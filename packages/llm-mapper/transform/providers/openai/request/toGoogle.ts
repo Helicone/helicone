@@ -163,10 +163,6 @@ export function toGoogle(
     }
   }
 
-  // Debug: Log outbound Google request
-  console.log("[toGoogle] OpenAI input:", JSON.stringify(openAIBody, null, 2));
-  console.log("[toGoogle] Google output:", JSON.stringify(geminiBody, null, 2));
-
   return geminiBody;
 }
 
@@ -236,6 +232,20 @@ function buildGenerationConfig(
 }
 
 /**
+ * Checks if the model supports thinkingLevel (Gemini 3+ models).
+ * Gemini 2.5 models only support thinkingBudget.
+ */
+function supportsThinkingLevel(model: string): boolean {
+  const modelLower = model.toLowerCase();
+  const geminiMatch = modelLower.match(/gemini-(\d+)/);
+  if (geminiMatch) {
+    const majorVersion = parseInt(geminiMatch[1], 10);
+    return majorVersion >= 3;
+  }
+  return false;
+}
+
+/**
  * Maps OpenAI reasoning_effort to Google thinkingLevel.
  */
 function mapReasoningEffortToThinkingLevel(
@@ -248,23 +258,43 @@ function mapReasoningEffortToThinkingLevel(
 /**
  * Builds the Google thinking configuration from OpenAI reasoning parameters.
  *
- * Supports both:
- * - reasoning_effort: "low" | "medium" | "high" -> thinkingLevel
- * - reasoning_options.budget_tokens -> thinkingBudget
+ * IMPORTANT: For Google models, reasoning_effort is REQUIRED to enable thinking.
+ * budget_tokens alone does NOT enable thinking - it only sets the budget when
+ * reasoning_effort is also provided.
+ *
+ * Supports:
+ * - reasoning_effort: "low" | "medium" | "high" -> thinkingLevel (for Gemini 3+)
+ *   or thinkingBudget: -1 (for Gemini 2.5 models that don't support thinkingLevel)
+ * - reasoning_options.budget_tokens -> thinkingBudget (only when reasoning_effort is set)
  * - reasoning_options.thinking_level -> thinkingLevel (overrides reasoning_effort)
  *
- * If no reasoning parameters are provided, explicitly disables thinking
- * by setting thinkingBudget to 0.
+ * If no reasoning_effort is provided, thinking is disabled (thinkingBudget: 0).
  */
 function buildThinkingConfig(
   body: HeliconeChatCreateParams,
   _maxOutputTokens?: number
 ): GeminiThinkingConfig {
   const reasoningEffort = body.reasoning_effort;
-  const reasoningOptions = body.reasoning_options as GoogleReasoningOptions | undefined;
+  const reasoningOptions = body.reasoning_options as
+    | GoogleReasoningOptions
+    | undefined;
 
-  // If no reasoning configuration, disable thinking by setting budget to 0
-  if (!reasoningEffort && !reasoningOptions) {
+  // If reasoning_options.thinking_level is explicitly set, use it
+  if (reasoningOptions?.thinking_level !== undefined) {
+    const thinkingConfig: GeminiThinkingConfig = {
+      includeThoughts: true,
+      thinkingLevel: reasoningOptions.thinking_level,
+    };
+    // Also apply budget_tokens if provided
+    if (reasoningOptions.budget_tokens !== undefined) {
+      thinkingConfig.thinkingBudget = reasoningOptions.budget_tokens;
+    }
+    return thinkingConfig;
+  }
+
+  // reasoning_effort is required to enable thinking for Google models
+  // budget_tokens alone does NOT enable thinking
+  if (!reasoningEffort) {
     return {
       thinkingBudget: 0,
     };
@@ -274,23 +304,23 @@ function buildThinkingConfig(
     includeThoughts: true,
   };
 
-  // Handle reasoning_effort -> thinkingLevel
-  if (reasoningEffort) {
+  const model = body.model || "";
+  const modelSupportsThinkingLevel = supportsThinkingLevel(model);
+
+  // Handle reasoning_effort
+  if (modelSupportsThinkingLevel) {
+    // Gemini 3+ models: use thinkingLevel
     thinkingConfig.thinkingLevel = mapReasoningEffortToThinkingLevel(
       reasoningEffort as "low" | "medium" | "high"
     );
+  } else {
+    // Gemini 2.5 models: use dynamic thinkingBudget (-1)
+    thinkingConfig.thinkingBudget = -1;
   }
 
-  // reasoning_options can override or add to the config
-  if (reasoningOptions) {
-    if (reasoningOptions.budget_tokens !== undefined) {
-      thinkingConfig.thinkingBudget = reasoningOptions.budget_tokens;
-    }
-
-    // thinking_level in reasoning_options overrides reasoning_effort
-    if (reasoningOptions.thinking_level !== undefined) {
-      thinkingConfig.thinkingLevel = reasoningOptions.thinking_level;
-    }
+  // Apply budget_tokens if provided (only effective when reasoning_effort is set)
+  if (reasoningOptions?.budget_tokens !== undefined) {
+    thinkingConfig.thinkingBudget = reasoningOptions.budget_tokens;
   }
 
   return thinkingConfig;
