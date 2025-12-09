@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Registry Snapshots archived endpoints snapshot 1`] = `{}`;
 
@@ -2246,6 +2246,65 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "temperature",
         "tool_choice",
         "tools",
+        "top_p",
+      ],
+      "provider": "vertex",
+      "ptbEnabled": true,
+      "regions": [
+        "global",
+      ],
+    },
+  },
+  "google/gemini-3-pro-image": {
+    "gemini-3-pro-image-preview:google-ai-studio": {
+      "context": 65536,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "gemini-3-pro-image-preview",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "google-ai-studio",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-3-pro-image-preview:openrouter": {
+      "context": 65536,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "google/gemini-3-pro-image-preview",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-3-pro-image-preview:vertex": {
+      "context": 65536,
+      "crossRegion": true,
+      "maxTokens": 32768,
+      "modelId": "gemini-3-pro-image-preview",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
         "top_p",
       ],
       "provider": "vertex",
@@ -5633,6 +5692,11 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "vertex",
   ],
+  "google/gemini-3-pro-image": [
+    "google-ai-studio",
+    "openrouter",
+    "vertex",
+  ],
   "google/gemma": [
     "chutes",
     "openrouter",
@@ -6938,6 +7002,44 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "google/gemini-3-pro-image": {
+    "google-ai-studio": [
+      {
+        "input": 0.000002,
+        "output": 0.000012,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000004,
+        "output": 0.000018,
+        "threshold": 200000,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.00000211,
+        "output": 0.00001266,
+        "threshold": 0,
+      },
+      {
+        "input": 0.00000422,
+        "output": 0.00001899,
+        "threshold": 200000,
+      },
+    ],
+    "vertex": [
+      {
+        "input": 0.000002,
+        "output": 0.000012,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000004,
+        "output": 0.000018,
+        "threshold": 200000,
+      },
+    ],
+  },
   "google/gemma": {
     "chutes": [
       {
@@ -7679,6 +7781,14 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "gemini-3-pro-image-preview",
+      "providers": [
+        "google-ai-studio",
+        "openrouter",
+        "vertex",
+      ],
+    },
+    {
       "model": "gemini-3-pro-preview",
       "providers": [
         "google-ai-studio",
@@ -8205,7 +8315,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "fireworks",
     },
     {
-      "modelCount": 4,
+      "modelCount": 5,
       "provider": "google-ai-studio",
     },
     {
@@ -8233,7 +8343,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "openai",
     },
     {
-      "modelCount": 55,
+      "modelCount": 56,
       "provider": "openrouter",
     },
     {
@@ -8241,7 +8351,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "perplexity",
     },
     {
-      "modelCount": 16,
+      "modelCount": 17,
       "provider": "vertex",
     },
     {
@@ -8275,6 +8385,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "gemini-2.5-flash",
     "gemini-2.5-flash-lite",
     "gemini-2.5-pro",
+    "gemini-3-pro-image-preview",
     "gemini-3-pro-preview",
     "gemma-3-12b-it",
     "gemma2-9b-it",
@@ -8351,9 +8462,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 244,
-  "totalModelProviderConfigs": 244,
-  "totalModelsWithPtb": 91,
+  "totalEndpoints": 247,
+  "totalModelProviderConfigs": 247,
+  "totalModelsWithPtb": 92,
   "totalProviders": 21,
 }
 `;
