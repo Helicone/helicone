@@ -6,6 +6,7 @@ import {
 import { generateStream } from "@/lib/api/llm/generate-stream";
 import { processStream } from "@/lib/api/llm/process-stream";
 import { useGetRequestWithBodies } from "@/services/hooks/requests";
+import { useModelRegistry } from "@/services/hooks/useModelRegistry";
 import { openAIMessageToHeliconeMessage } from "@helicone-package/llm-mapper/mappers/openai/chat";
 import {
   openaiChatMapper,
@@ -222,6 +223,16 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const router = useRouter();
   const { initializeColorMap } = useVariableColorMapStore();
 
+  // Model registry for validating supported models
+  const { data: playgroundModels, isLoading: modelsLoading } =
+    useModelRegistry();
+
+  // Track unsupported model warning
+  const [unsupportedModelWarning, setUnsupportedModelWarning] = useState<{
+    originalModel: string;
+    fallbackModel: string;
+  } | null>(null);
+
   useEffect(() => {
     if (requestId && promptVersionId) {
       setNotification(
@@ -255,6 +266,41 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   );
 
   const [selectedModel, setSelectedModel] = useState<string>("gpt-4o-mini");
+
+  // Track the original model from request/prompt before validation
+  const [originalModelFromData, setOriginalModelFromData] = useState<
+    string | null
+  >(null);
+
+  // Default fallback model
+  const DEFAULT_FALLBACK_MODEL = "gpt-4o-mini";
+
+  // Effect to validate model when registry loads or original model changes
+  useEffect(() => {
+    if (modelsLoading || !playgroundModels || playgroundModels.length === 0) {
+      return;
+    }
+
+    // If we have an original model from data that needs validation
+    if (originalModelFromData) {
+      const isModelSupported = playgroundModels.some(
+        (m) => m.id === originalModelFromData,
+      );
+
+      if (!isModelSupported) {
+        setUnsupportedModelWarning({
+          originalModel: originalModelFromData,
+          fallbackModel: DEFAULT_FALLBACK_MODEL,
+        });
+        setSelectedModel(DEFAULT_FALLBACK_MODEL);
+      } else {
+        setUnsupportedModelWarning(null);
+        setSelectedModel(originalModelFromData);
+      }
+      // Clear the original model after processing
+      setOriginalModelFromData(null);
+    }
+  }, [modelsLoading, playgroundModels, originalModelFromData]);
 
   const [defaultContent, setDefaultContent] = useState<MappedLLMRequest | null>(
     null,
@@ -351,8 +397,10 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
       );
 
       const model = promptVersionData.promptBody.model;
-      // Model will be set when registry loads
-      setSelectedModel(model || "");
+      // Store original model for validation when registry loads
+      if (model) {
+        setOriginalModelFromData(model);
+      }
 
       setMappedContent(convertedContent);
       setDefaultContent(convertedContent);
@@ -474,8 +522,10 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
     }
     if (requestData?.data && !isRequestLoading && !requestPromptVersionId) {
       const model = requestData.data.model;
-      // Model will be set when registry loads
-      setSelectedModel(model || "");
+      // Store original model for validation when registry loads
+      if (model) {
+        setOriginalModelFromData(model);
+      }
 
       const content = heliconeRequestToMappedContent(requestData.data);
       let contentWithIds = {
@@ -1222,6 +1272,10 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                 error={error}
                 isLoading={isStreaming}
                 createPrompt={createPrompt}
+                unsupportedModelWarning={unsupportedModelWarning}
+                onDismissUnsupportedModelWarning={() =>
+                  setUnsupportedModelWarning(null)
+                }
               />
             )}
           </ResizablePanel>

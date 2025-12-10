@@ -3,6 +3,7 @@ import { err, ok, Result } from "../../packages/common/result";
 import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
+import { PTB_BILLING_FILTER } from "../../utils/cacheTokenAdjustments";
 
 interface TimeSeriesDataPoint {
   timestamp: string; // ISO string
@@ -151,7 +152,7 @@ export class AdminWalletAnalyticsManager extends BaseManager {
           request_created_at >= {val_0: DateTime64(3)}
           AND request_created_at < {val_1: DateTime64(3)}
           AND cost > 0
-          AND is_passthrough_billing = true
+          AND ${PTB_BILLING_FILTER}
         GROUP BY period_timestamp
         ORDER BY period_timestamp ASC
       `;

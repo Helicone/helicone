@@ -20,7 +20,6 @@ export default {
         "2xl": "1400px",
       },
     },
-    fontFamily: {},
     transparent: "transparent",
     current: "currentColor",
     extend: {

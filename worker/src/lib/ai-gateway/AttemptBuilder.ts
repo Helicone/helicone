@@ -170,23 +170,18 @@ export class AttemptBuilder {
     }
 
     const providerData = providerDataResult.data;
-
-    // Get BYOK attempts
-    const byokAttempts = await this.buildByokAttempts(
-      modelSpec,
-      providerData,
-      orgId,
-      bodyMapping,
-      plugins
-    );
-
-    // Always build PTB attempts (feature flag removed)
-    const ptbAttempts = await this.buildPtbAttempts(
-      modelSpec,
-      providerData,
-      bodyMapping,
-      plugins
-    );
+      
+    // Build BYOK and PTB attempts in parallel since they're independent
+    const [byokAttempts, ptbAttempts] = await Promise.all([
+      this.buildByokAttempts(
+        modelSpec,
+        providerData,
+        orgId,
+        bodyMapping,
+        plugins
+      ),
+      this.buildPtbAttempts(modelSpec, providerData, bodyMapping, plugins),
+    ]);
     return [...byokAttempts, ...ptbAttempts];
   }
 

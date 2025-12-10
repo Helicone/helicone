@@ -1,0 +1,288 @@
+---
+title: "DSPy"
+sidebarTitle: "DSPy"
+description: "Integrate Helicone AI Gateway with DSPy to access 100+ LLM providers with unified observability and optimization."
+"twitter:title": "DSPy Integration - Helicone OSS LLM Observability"
+iconType: "solid"
+---
+
+import { strings } from "/snippets/strings.mdx";
+import Star from "/snippets/star.mdx";
+
+## Introduction
+
+[DSPy](https://dspy.ai) is a declarative framework for building modular AI software with structured code instead of brittle prompts, offering algorithms that compile AI programs into effective prompts and weights for language models across classifiers, RAG pipelines, and agent loops.
+
+## Integration Steps
+
+<Steps>
+  <Step title={strings.generateKey}>
+    <div dangerouslySetInnerHTML={{ __html: strings.generateKeyInstructions }} />
+  </Step>
+
+  <Step title={strings.setApiKey}>
+    Create a `.env` file in your project.
+
+    ```env
+    HELICONE_API_KEY=sk-helicone-...
+    ```
+  </Step>
+
+  <Step title={strings.installSDK("DSPy")}>
+    <p>{strings.installRequiredDependencies}</p>
+
+    ```bash Python
+    pip install dspy
+    ```
+  </Step>
+
+  <Step title={strings.startUsing("DSPy")}>
+    <p>{strings.viewRequestsInDashboard}</p>
+
+    ```python Python
+    import dspy
+    import os
+    from dotenv import load_dotenv
+
+    load_dotenv()
+
+    # Configure DSPy to use Helicone AI Gateway
+    lm = dspy.LM(
+      'gpt-4o-mini',  # or any other model from the Helicone model registry
+      api_key=os.getenv('HELICONE_API_KEY'),
+      api_base='https://ai-gateway.helicone.ai/'
+    )
+
+    dspy.configure(lm=lm)
+
+    print(lm("Hello, world!"))
+    ```
+
+    <div dangerouslySetInnerHTML={{ __html: strings.modelRegistryDescription }} />
+  </Step>
+
+  <Step title={strings.verifyInHelicone}>
+    <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("DSPy") }} />
+
+    <Star />
+  </Step>
+</Steps>
+
+## Complete Working Examples
+
+### Basic Chain of Thought
+
+```python Python
+import dspy
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Configure Helicone AI Gateway
+lm = dspy.LM(
+    'gpt-4o-mini',
+    api_key=os.getenv('HELICONE_API_KEY'),
+    api_base='https://ai-gateway.helicone.ai/v1'
+)
+dspy.configure(lm=lm)
+
+# Define a module
+qa = dspy.ChainOfThought('question -> answer')
+
+# Run inference
+response = qa(question="How many floors are in the castle David Gregory inherited?")
+
+print('Answer:', response.answer)
+print('Reasoning:', response.reasoning)
+```
+
+### Custom Generation Configuration
+
+Configure temperature, max_tokens, and other parameters:
+
+```python Python
+import dspy
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Configure with custom generation parameters
+lm = dspy.LM(
+    'gpt-4o-mini',
+    api_key=os.getenv('HELICONE_API_KEY'),
+    api_base='https://ai-gateway.helicone.ai/v1',
+    temperature=0.9,
+    max_tokens=2000
+)
+dspy.configure(lm=lm)
+
+# Use with any DSPy module
+predict = dspy.Predict("question -> creative_answer")
+response = predict(question="Write a creative story about AI")
+print(response.creative_answer)
+```
+
+### Tracking with Custom Properties
+
+Add custom properties to track and filter your requests in the Helicone dashboard:
+
+```python Python
+import dspy
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Configure with custom Helicone headers
+lm = dspy.LM(
+    'gpt-4o-mini',
+    api_key=os.getenv('HELICONE_API_KEY'),
+    api_base='https://ai-gateway.helicone.ai/v1',
+    extra_headers={
+        # Session tracking
+        'Helicone-Session-Id': 'dspy-example-session',
+        'Helicone-Session-Name': 'Question Answering',
+
+        # User tracking
+        'Helicone-User-Id': 'user-123',
+
+        # Custom properties for filtering
+        'Helicone-Property-Environment': 'production',
+        'Helicone-Property-Module': 'chain-of-thought',
+        'Helicone-Property-Version': '1.0.0'
+    }
+)
+dspy.configure(lm=lm)
+
+# Use normally
+qa = dspy.ChainOfThought('question -> answer')
+response = qa(question="What is DSPy?")
+print(response.answer)
+```
+
+## Helicone Prompts Integration
+
+Use Helicone Prompts for centralized prompt management with DSPy signatures:
+
+```python Python
+import dspy
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Configure with prompt parameters
+lm = dspy.LM(
+    'gpt-4o-mini',
+    api_key=os.getenv('HELICONE_API_KEY'),
+    api_base='https://ai-gateway.helicone.ai/v1',
+    extra_body={
+        'prompt_id': 'customer-support-prompt-id',
+        'version_id': 'version-uuid',
+        'environment': 'production',
+        'inputs': {
+            'customer_name': 'Sarah',
+            'issue_type': 'technical'
+        }
+    }
+)
+dspy.configure(lm=lm)
+```
+
+<Note>
+  Learn more about [Prompts with AI Gateway](/gateway/concepts/prompt-caching).
+</Note>
+
+## Advanced Features
+
+### Rate Limiting
+
+Configure rate limits for your DSPy applications:
+
+```python Python
+lm = dspy.LM(
+    'gpt-4o-mini',
+    api_key=os.getenv('HELICONE_API_KEY'),
+    api_base='https://ai-gateway.helicone.ai/v1',
+    extra_headers={
+        'Helicone-Rate-Limit-Policy': 'basic-100'
+    }
+)
+```
+
+### Caching
+
+Enable intelligent caching to reduce costs:
+
+```python Python
+lm = dspy.LM(
+    'gpt-4o-mini',
+    api_key=os.getenv('HELICONE_API_KEY'),
+    api_base='https://ai-gateway.helicone.ai/v1',
+    cache=True  # DSPy's built-in caching works with Helicone
+)
+```
+
+### Session Tracking for Multi-Turn Conversations
+
+Track entire conversation flows in DSPy programs:
+
+```python Python
+import uuid
+
+session_id = str(uuid.uuid4())
+
+lm = dspy.LM(
+    'gpt-4o-mini',
+    api_key=os.getenv('HELICONE_API_KEY'),
+    api_base='https://ai-gateway.helicone.ai/v1',
+    extra_headers={
+        'Helicone-Session-Id': session_id,
+        'Helicone-Session-Name': 'Customer Support',
+        'Helicone-Session-Path': '/support/chat'
+    }
+)
+dspy.configure(lm=lm)
+
+# All calls in this session will be grouped together
+qa = dspy.ChainOfThought('question -> answer')
+
+# Multiple turns
+response1 = qa(question="What is your return policy?")
+response2 = qa(question="How long does shipping take?")
+response3 = qa(question="Do you ship internationally?")
+
+# View the full conversation in Helicone Sessions
+```
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="AI Gateway Overview" icon="arrow-progress" href="/gateway/overview">
+    Learn about Helicone's AI Gateway features and capabilities
+  </Card>
+  <Card title="Provider Routing" icon="route" href="/gateway/provider-routing">
+    Configure intelligent routing and automatic failover
+  </Card>
+  <Card title="Model Registry" icon="database" href="https://helicone.ai/models">
+    Browse all available models and providers
+  </Card>
+  <Card title="Prompt Management" icon="code" href="/gateway/concepts/prompt-caching">
+    Version and manage prompts with Helicone Prompts
+  </Card>
+  <Card title="Custom Properties" icon="tags" href="/features/advanced-usage/custom-properties">
+    Add metadata to track and filter your requests
+  </Card>
+  <Card title="Sessions" icon="link" href="/features/sessions">
+    Track multi-turn conversations and user sessions
+  </Card>
+  <Card title="Rate Limiting" icon="gauge" href="/features/advanced-usage/custom-rate-limits">
+    Configure rate limits for your applications
+  </Card>
+  <Card title="Caching" icon="bolt" href="/features/advanced-usage/caching">
+    Reduce costs and latency with intelligent caching
+  </Card>
+</CardGroup>
+
