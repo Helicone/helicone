@@ -97,7 +97,8 @@
       "mcp__chrome-devtools__fill_form",
       "mcp__chrome-devtools__press_key",
       "Bash(yarn install)",
-      "Bash(npx vitest:*)"
+      "Bash(npx vitest:*)",
+      "WebFetch(domain:streamdown.ai)"
     ],
     "deny": []
   },

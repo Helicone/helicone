@@ -130,7 +130,7 @@ const ContentWrapper = ({
 };
 
 const renderToolMessage = (
-  content: string,
+  displayContent: string,
   message: Message,
   playgroundMode: boolean,
   mappedRequest?: MappedLLMRequest,
@@ -141,6 +141,7 @@ const renderToolMessage = (
     return (
       <ToolMessage
         message={message}
+        displayContent={displayContent}
         playgroundMode={playgroundMode}
         mappedRequest={mappedRequest}
         messageIndex={messageIndex}
@@ -162,7 +163,7 @@ const renderToolMessage = (
     );
   }
   try {
-    const parsedContent = JSON.parse(content);
+    const parsedContent = JSON.parse(displayContent);
     return (
       <div className="rounded-lg bg-muted p-4">
         <JsonRenderer data={parsedContent} />
@@ -171,7 +172,7 @@ const renderToolMessage = (
   } catch {
     return (
       <pre className="whitespace-pre-wrap break-words p-4 text-xs">
-        {content}
+        {displayContent}
       </pre>
     );
   }
@@ -266,7 +267,7 @@ const renderTextContent = (
   chatMode: ChatMode,
   mappedRequest: MappedLLMRequest,
   messageIndex: number,
-  mode: "rendered" | "raw" | "json" | "debug",
+  mode: "rendered" | "chat" | "raw" | "json" | "debug",
   options: {
     isPartOfContentArray?: boolean;
     parentIndex?: number;
@@ -345,7 +346,7 @@ const renderContentByType = (
   chatMode: ChatMode,
   mappedRequest: MappedLLMRequest,
   messageIndex: number,
-  mode: "rendered" | "raw" | "json" | "debug",
+  mode: "rendered" | "chat" | "raw" | "json" | "debug",
   options: {
     isPartOfContentArray?: boolean;
     parentIndex?: number;
@@ -575,8 +576,8 @@ export default function ChatMessage({
                   name: undefined,
                   ...(prevRole === "assistant" && newRole !== "assistant"
                     ? {
-                        tool_calls: undefined,
-                      }
+                      tool_calls: undefined,
+                    }
                     : {}),
                 };
               }
@@ -791,23 +792,23 @@ export default function ChatMessage({
       {(chatMode !== "PLAYGROUND_OUTPUT" ||
         (chatMode === "PLAYGROUND_OUTPUT" &&
           message._type === "contentArray")) && (
-        <ChatMessageTopBar
-          popoverOpen={popoverOpen}
-          setPopoverOpen={setPopoverOpen}
-          dragHandle={dragHandle}
-          chatMode={chatMode}
-          message={message}
-          changeMessageRole={changeMessageRole}
-          messageIndex={messageIndex}
-          attributes={attributes}
-          listeners={listeners}
-          addToolCall={addToolCall}
-          deleteMessage={deleteMessage}
-          onAddText={addTextToMessage}
-          onAddImage={addImageToMessage}
-          onCopyContent={() => navigator.clipboard.writeText(content)}
-        />
-      )}
+          <ChatMessageTopBar
+            popoverOpen={popoverOpen}
+            setPopoverOpen={setPopoverOpen}
+            dragHandle={dragHandle}
+            chatMode={chatMode}
+            message={message}
+            changeMessageRole={changeMessageRole}
+            messageIndex={messageIndex}
+            attributes={attributes}
+            listeners={listeners}
+            addToolCall={addToolCall}
+            deleteMessage={deleteMessage}
+            onAddText={addTextToMessage}
+            onAddImage={addImageToMessage}
+            onCopyContent={() => navigator.clipboard.writeText(content)}
+          />
+        )}
       <div
         className={cn(
           "relative flex w-full flex-col",
@@ -876,15 +877,13 @@ export default function ChatMessage({
             className="flex items-center gap-1.5 py-2 text-xs text-muted-foreground transition-colors hover:text-foreground"
           >
             <LuChevronDown
-              className={`h-4 w-4 transition-transform duration-200 ${
-                isExpanded ? "rotate-180" : ""
-              }`}
+              className={`h-4 w-4 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""
+                }`}
             />
             {isExpanded
               ? "Show less"
-              : `Show ${
-                  content.length - MESSAGE_LENGTH_THRESHOLD
-                } more characters`}
+              : `Show ${content.length - MESSAGE_LENGTH_THRESHOLD
+              } more characters`}
           </Button>
         )}
       </div>

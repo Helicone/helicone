@@ -6,6 +6,7 @@ const typeMap: Record<string, Message["_type"]> = {
   input_text: "message",
   input_image: "image",
   input_file: "file",
+  output_text: "message", // Assistant messages that come back as input have output_text type
 };
 
 interface OpenAIResponseRequest {
@@ -404,6 +405,9 @@ const convertRequestInputToMessages = (
             };
 
             if (content.type === "input_text" && content.text) {
+              baseResponse.content = content.text;
+            } else if (content.type === "output_text" && content.text) {
+              // Handle output_text from assistant messages that are sent back as input
               baseResponse.content = content.text;
             } else if (content.type === "input_image") {
               baseResponse.detail = content.detail;
@@ -841,6 +845,26 @@ export const mapOpenAIResponse = ({
     ...request,
     model: model || request.model,
   });
+
+  // Convert instructions field to a system message at the beginning of messages array
+  if (request.instructions && mappedRequest.messages) {
+    const systemMessage: Message = {
+      _type: "message",
+      role: "system",
+      content: request.instructions,
+      id: "instructions-system-msg",
+    };
+    mappedRequest.messages = [systemMessage, ...mappedRequest.messages];
+  } else if (request.instructions && !mappedRequest.messages) {
+    // If there are no messages but there are instructions, create messages array with just the system message
+    const systemMessage: Message = {
+      _type: "message",
+      role: "system",
+      content: request.instructions,
+      id: "instructions-system-msg",
+    };
+    mappedRequest.messages = [systemMessage];
+  }
 
   // Create the LlmSchema structure
   const schema: LlmSchema = {

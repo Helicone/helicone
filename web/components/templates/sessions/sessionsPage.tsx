@@ -460,8 +460,8 @@ const SessionsPage = (props: SessionsPageProps) => {
               tableRef={tableRef}
               defaultData={sessionsWithId}
               defaultColumns={getColumns()}
-              skeletonLoading={isLoading}
-              dataLoading={isLoading}
+              skeletonLoading={isSessionsLoading}
+              dataLoading={isSessionsLoading}
               activeColumns={activeColumns}
               setActiveColumns={setActiveColumns}
               rowLink={(row: TSessions) =>
@@ -475,6 +475,7 @@ const SessionsPage = (props: SessionsPageProps) => {
               onRowSelect={onRowSelectHandler}
               onSelectAll={selectAll}
               selectedIds={selectedIds}
+              loadingText="Loading sessions..."
             />
           </div>
 

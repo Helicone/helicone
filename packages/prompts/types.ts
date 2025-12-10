@@ -188,11 +188,92 @@ export type HeliconePromptParams = {
   inputs?: Record<string, any>;
 };
 
+/**
+ * Reasoning options for controlling thinking/reasoning behavior.
+ */
 export interface HeliconeReasoningOptions {
   reasoning_options?: {
-    budget_tokens: number;
-  }
-};
+    /**
+     * Token budget for thinking.
+     * - For Google Gemini 2.5: Maps to thinkingConfig.thinkingBudget
+     * - Use -1 for dynamic thinking
+     */
+    budget_tokens?: number;
+
+    /**
+     * Thinking level for Google Gemini 3+ models.
+     * - "low" for faster, less detailed reasoning
+     * - "high" for more detailed reasoning
+     */
+    thinking_level?: "low" | "high";
+  };
+}
+
+/**
+ * Configuration for context editing strategies.
+ *
+ * Context editing automatically manages conversation context as it grows,
+ * optimizing costs and staying within context window limits through
+ * server-side API strategies.
+ *
+ * Currently only supported for Anthropic models. When using with other providers,
+ * the context_editing field will be stripped from the request.
+ *
+ * @see https://docs.anthropic.com/en/docs/build-with-claude/context-editing
+ */
+export interface ContextEditingConfig {
+  /**
+   * Whether context editing is enabled.
+   */
+  enabled: boolean;
+
+  /**
+   * Optional strategy for clearing old tool uses when context exceeds thresholds.
+   * Only applicable for Anthropic models.
+   */
+  clear_tool_uses?: {
+    /**
+     * Token threshold at which to trigger clearing (default: 100000)
+     */
+    trigger?: number;
+    /**
+     * Number of recent tool uses to preserve (default: 3)
+     */
+    keep?: number;
+    /**
+     * Minimum tokens to clear per activation
+     */
+    clear_at_least?: number;
+    /**
+     * Tool names to exclude from clearing
+     */
+    exclude_tools?: string[];
+    /**
+     * Whether to also clear tool call inputs (default: false)
+     */
+    clear_tool_inputs?: boolean;
+  };
+
+  /**
+   * Optional strategy for clearing thinking blocks when extended thinking is enabled.
+   * Only applicable for Anthropic models with thinking enabled.
+   */
+  clear_thinking?: {
+    /**
+     * Number of assistant turns with thinking to preserve, or "all" for maximum cache hits.
+     * Default: 1
+     */
+    keep?: number | "all";
+  };
+}
+
+export interface HeliconeContextEditingOptions {
+  /**
+   * Context editing configuration for managing conversation context.
+   * Only supported for Anthropic models - will be stripped for other providers.
+   */
+  context_editing?: ContextEditingConfig;
+}
 
 /**
  * OpenAI ChatCompletion parameters extended with Helicone prompt template support.
@@ -240,7 +321,7 @@ export interface HeliconeReasoningOptions {
  * ```
  */
 export type HeliconeChatCreateParams = ChatCompletionCreateParamsNonStreamingPartialMessages &
-  HeliconePromptParams & HeliconeReasoningOptions;
+  HeliconePromptParams & HeliconeReasoningOptions & HeliconeContextEditingOptions;
 
 /**
  * OpenAI ChatCompletion parameters extended with Helicone prompt template support for streaming responses.

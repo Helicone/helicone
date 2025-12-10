@@ -13,7 +13,6 @@ export const endpoints = {
         input: 0.00000029,
         output: 0.00000059,
         request: 0.0,
-        image: 0.0,
         audio: 0.0,
         web_search: 0.0,
       },
@@ -152,6 +151,40 @@ export const endpoints = {
     ],
     ptbEnabled: true,
     quantization: "fp4",
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "qwen3-coder:canopywave": {
+    providerModelId: "qwen/qwen3-coder",
+    provider: "canopywave",
+    author: "alibaba",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000022, // $0.22 per million input tokens
+        output: 0.00000095, // $0.95 per million output tokens
+      },
+    ],
+    contextLength: 262_144,
+    maxCompletionTokens: 65_536,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "top_k",
+      "seed",
+      "min_p",
+      "response_format",
+    ],
+    ptbEnabled: true,
+    quantization: "fp8",
     endpointConfigs: {
       "*": {},
     },

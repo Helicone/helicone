@@ -154,9 +154,14 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     const completionAudioTokens = completionDetails.audio_tokens ?? 0;
     const reasoningTokens = completionDetails.reasoning_tokens ?? 0;
 
-    // AI Gateway fields
-    const cacheWrite5mTokens = usage.prompt_tokens_details?.cache_write_details?.write_5m_tokens ?? 0;
-    const cacheWrite1hTokens = usage.prompt_tokens_details?.cache_write_details?.write_1h_tokens ?? 0;
+    // AI Gateway fields - cache write tokens
+    // First try to get the detailed breakdown (5m vs 1h), then fall back to total cache_write_tokens
+    const cacheWriteDetails = promptDetails.cache_write_details;
+    const cacheWriteTokensTotal = promptDetails.cache_write_tokens ?? 0;
+
+    // If we have detailed breakdown, use it; otherwise treat all cache writes as 5m (the common case)
+    const cacheWrite5mTokens = cacheWriteDetails?.write_5m_tokens ?? cacheWriteTokensTotal;
+    const cacheWrite1hTokens = cacheWriteDetails?.write_1h_tokens ?? 0;
 
     const effectivePromptTokens = Math.max(
       0,

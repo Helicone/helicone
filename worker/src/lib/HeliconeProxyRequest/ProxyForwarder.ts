@@ -11,8 +11,6 @@ import { checkPromptSecurity } from "../clients/PromptSecurityClient";
 import { S3Client } from "../clients/S3Client";
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 import { DBWrapper } from "../db/DBWrapper";
-import { RequestResponseStore } from "../db/RequestResponseStore";
-import { Valhalla } from "../db/valhalla";
 import { DBLoggable } from "../dbLogger/DBLoggable";
 import { Moderator } from "../managers/ModerationManager";
 import { RateLimitManager } from "../managers/RateLimitManager";
@@ -613,33 +611,39 @@ async function log(
       const walletStub = env.WALLET.get(walletId);
       const walletManager = new WalletManager(env, ctx, walletStub);
 
-      const checkTopOffPromise =
-        walletManager.walletStub.checkAndScheduleAutoTopoffAlarm(
-          orgData.organizationId
-        );
-
-      if (proxyRequest.escrowInfo) {
-        // Convert cost from USD to cents (cost is in USD dollars, wallet expects cents)
-        const costInCents = cost !== undefined ? cost * 100 : undefined;
-
-        const escrowFinalizationResult =
-          await walletManager.finalizeEscrowAndSyncSpend(
-            orgData.organizationId,
-            proxyRequest,
-            costInCents,
-            statusCode,
-            cachedResponse
+      
+      if (!cachedResponse) {
+        const checkTopOffPromise =
+          walletManager.walletStub.checkAndScheduleAutoTopoffAlarm(
+            orgData.organizationId
           );
-        if (escrowFinalizationResult.error !== null) {
-          console.error(
-            "Error finalizing escrow and syncing spend",
-            escrowFinalizationResult.error
-          );
+
+        if (proxyRequest.escrowInfo) {
+          // Convert cost from USD to cents (cost is in USD dollars, wallet expects cents)
+          const costInCents = cost !== undefined ? cost * 100 : undefined;
+
+          const escrowFinalizationResult =
+            await walletManager.finalizeEscrowAndSyncSpend(
+              orgData.organizationId,
+              proxyRequest,
+              costInCents,
+              statusCode
+            );
+          if (escrowFinalizationResult.error !== null) {
+            console.error(
+              "Error finalizing escrow and syncing spend",
+              escrowFinalizationResult.error
+            );
+          }
+        }
+
+        // Wait for top-off check to complete
+        await checkTopOffPromise;
+      } else {
+        if (proxyRequest.escrowInfo) {
+          await walletStub.cancelEscrow(proxyRequest.escrowInfo.escrowId);
         }
       }
-
-      // Wait for top-off check to complete
-      await checkTopOffPromise;
 
       // Update rate limit counters if not a cached response
       if (

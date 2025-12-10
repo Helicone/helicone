@@ -103,19 +103,19 @@ export const authMiddleware = async (
 
     (req as any).authParams = authParams.data;
 
-    const onFinish = logHttpRequestInClickhouse(
-      {
-        method: `${req.method}`,
-        url: `${req.originalUrl}`,
-        userAgent: `${req.headers["user-agent"] ?? ""}`,
-      },
-      {
-        status: res.statusCode,
-      },
-      authParams.data
-    );
+    // const onFinish = logHttpRequestInClickhouse(
+    //   {
+    //     method: `${req.method}`,
+    //     url: `${req.originalUrl}`,
+    //     userAgent: `${req.headers["user-agent"] ?? ""}`,
+    //   },
+    //   {
+    //     status: res.statusCode,
+    //   },
+    //   authParams.data
+    // );
 
-    res.on("finish", onFinish);
+    // res.on("finish", onFinish);
 
     if (
       req.path.startsWith("/v1/admin") &&

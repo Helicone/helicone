@@ -235,4 +235,14 @@ export const costs: ModelRow[] = [
       completion_token: 0.0000001,
     },
   },
+  {
+    model: {
+      operator: "equals",
+      value: "accounts/fireworks/models/kimi-k2-thinking",
+    },
+    cost: {
+      prompt_token: 0.0000006,
+      completion_token: 0.0000025,
+    },
+  },
 ];

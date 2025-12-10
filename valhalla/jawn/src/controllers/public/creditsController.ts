@@ -1,7 +1,13 @@
 import { Controller, Get, Query, Request, Route, Security, Tags } from "tsoa";
 import type { JawnAuthenticatedRequest } from "../../types/request";
-import { CreditsManager } from "../../managers/creditsManager";
+import {
+  CreditsManager,
+  ModelSpend,
+  PTBInvoice,
+  SpendBreakdownResponse,
+} from "../../managers/creditsManager";
 import { err, isError, ok, Result } from "../../packages/common/result";
+import { OrgDiscount } from "../../utils/discountCalculator";
 
 export interface PurchasedCredits {
   id: string;
@@ -83,5 +89,74 @@ export class CreditsController extends Controller {
     }
 
     return ok({ totalSpend: result.data });
+  }
+
+  @Get("/spend/breakdown")
+  public async getSpendBreakdown(
+    @Request() request: JawnAuthenticatedRequest,
+    @Query() timeRange?: "7d" | "30d" | "90d" | "all",
+    @Query() startDate?: string,
+    @Query() endDate?: string
+  ): Promise<Result<SpendBreakdownResponse, string>> {
+    const creditsManager = new CreditsManager(request.authParams);
+
+    // Use custom date range if provided
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        this.setStatus(400);
+        return err("Invalid date format. Use ISO 8601 format.");
+      }
+      const result = await creditsManager.getSpendBreakdownByDateRange(
+        start,
+        end
+      );
+      if (isError(result)) {
+        this.setStatus(400);
+        return err(result.error);
+      }
+      return ok(result.data);
+    }
+
+    // Fall back to preset time range
+    const result = await creditsManager.getSpendBreakdown(timeRange ?? "30d");
+
+    if (isError(result)) {
+      this.setStatus(400);
+      return err(result.error);
+    }
+
+    return ok(result.data);
+  }
+
+  @Get("/invoices")
+  public async listInvoices(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<PTBInvoice[], string>> {
+    const creditsManager = new CreditsManager(request.authParams);
+    const result = await creditsManager.listInvoices();
+
+    if (isError(result)) {
+      this.setStatus(400);
+      return err(result.error);
+    }
+
+    return ok(result.data);
+  }
+
+  @Get("/discounts")
+  public async getDiscounts(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<OrgDiscount[], string>> {
+    const creditsManager = new CreditsManager(request.authParams);
+    const result = await creditsManager.getDiscounts();
+
+    if (isError(result)) {
+      this.setStatus(400);
+      return err(result.error);
+    }
+
+    return ok(result.data);
   }
 }

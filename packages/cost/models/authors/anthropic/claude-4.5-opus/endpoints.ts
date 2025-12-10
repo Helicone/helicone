@@ -4,7 +4,7 @@ import { ClaudeOpus45ModelName } from "./model";
 
 export const endpoints = {
   "claude-4.5-opus:anthropic": {
-    providerModelId: "claude-opus-4-5",
+    providerModelId: "claude-opus-4-5-20251101",
     provider: "anthropic",
     author: "anthropic",
     version: "20251101",

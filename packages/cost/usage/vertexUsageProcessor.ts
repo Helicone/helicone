@@ -189,6 +189,7 @@ export class VertexUsageProcessor implements IUsageProcessor {
   ): Promise<Result<ModelUsage, string>> {
     if (parseInput.model.includes("claude")) {
       // Both bedrock and vertex don't support 1h buckets like Anthropic does.
+      // bedrock and vertex use the same usage format for claude models.
       return new BedrockUsageProcessor().parse(parseInput);
     } else {
       return new VertexOpenAIUsageProcessor().parse(parseInput);
