@@ -80,7 +80,7 @@ export class StripeLogHandler extends AbstractLogHandler {
         value: "1",
       },
     };
-    this.stripeTraceUsages.push(requet_event);
+    this.stripeTraceUsages.push(request_event);
 
     const byte_event: StripeMeterEvent = {
       identifier: `org_${organizationId}_request_${context.message.log.request.id}`,
