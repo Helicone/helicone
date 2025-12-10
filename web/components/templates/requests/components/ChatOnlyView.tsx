@@ -117,53 +117,55 @@ function ToolCallItem({ toolCall, response }: ToolCallItemProps) {
   const parsedResponse = parseResponse(response);
 
   return (
-    <div className="flex flex-col gap-1 py-1 pl-11">
-      <div className="flex items-center gap-2">
-        <Wrench size={12} className="text-slate-400 dark:text-slate-500" />
-        <span className="text-xs text-slate-500 dark:text-slate-400">
-          {toolCall.name || "Unknown tool"}
-        </span>
-      </div>
-      <div className="flex items-center gap-2 pl-5">
-        <Collapsible open={isArgumentsOpen} onOpenChange={setIsArgumentsOpen}>
-          <CollapsibleTrigger className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-muted-foreground hover:bg-accent">
-            {isArgumentsOpen ? (
-              <ChevronDownIcon size={12} />
-            ) : (
-              <ChevronRightIcon size={12} />
-            )}
-            <span>Arguments</span>
-          </CollapsibleTrigger>
-        </Collapsible>
-        {response !== undefined && (
-          <Collapsible open={isResponseOpen} onOpenChange={setIsResponseOpen}>
+    <div className="flex w-full justify-start pl-4">
+      <div className="flex max-w-[80%] flex-col gap-1 py-1">
+        <div className="flex items-center gap-2">
+          <Wrench size={12} className="text-slate-500 dark:text-slate-400" />
+          <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
+            {toolCall.name || "Unknown tool"}
+          </span>
+        </div>
+        <div className="flex flex-col gap-1 pl-5">
+          <Collapsible open={isArgumentsOpen} onOpenChange={setIsArgumentsOpen}>
             <CollapsibleTrigger className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-muted-foreground hover:bg-accent">
-              {isResponseOpen ? (
+              {isArgumentsOpen ? (
                 <ChevronDownIcon size={12} />
               ) : (
                 <ChevronRightIcon size={12} />
               )}
-              <span>Response</span>
+              <span>Arguments</span>
             </CollapsibleTrigger>
           </Collapsible>
-        )}
-      </div>
-      {isArgumentsOpen && (
-        <div className="pl-5">
-          <JsonRenderer data={toolCall.arguments} showCopyButton={false} />
-        </div>
-      )}
-      {isResponseOpen && parsedResponse && (
-        <div className="pl-5">
-          {typeof parsedResponse === "string" ? (
-            <span className="text-xs text-muted-foreground whitespace-pre-wrap">
-              {parsedResponse}
-            </span>
-          ) : (
-            <JsonRenderer data={parsedResponse} showCopyButton={false} />
+          {isArgumentsOpen && (
+            <div className="pl-5">
+              <JsonRenderer data={toolCall.arguments} showCopyButton={false} />
+            </div>
+          )}
+          {response !== undefined && (
+            <Collapsible open={isResponseOpen} onOpenChange={setIsResponseOpen}>
+              <CollapsibleTrigger className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-muted-foreground hover:bg-accent">
+                {isResponseOpen ? (
+                  <ChevronDownIcon size={12} />
+                ) : (
+                  <ChevronRightIcon size={12} />
+                )}
+                <span>Response</span>
+              </CollapsibleTrigger>
+            </Collapsible>
+          )}
+          {isResponseOpen && parsedResponse && (
+            <div className="pl-5">
+              {typeof parsedResponse === "string" ? (
+                <span className="text-xs text-muted-foreground whitespace-pre-wrap">
+                  {parsedResponse}
+                </span>
+              ) : (
+                <JsonRenderer data={parsedResponse} showCopyButton={false} />
+              )}
+            </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

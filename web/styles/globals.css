@@ -224,5 +224,6 @@
 
 [data-streamdown="inline-code"] {
   @apply bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 rounded text-sm font-mono;
+  word-break: break-all;
 }
 

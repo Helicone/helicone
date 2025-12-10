@@ -50,7 +50,7 @@ function ToolCard({ tool, isLast }: ToolCardProps) {
               size={14}
               className={cn(
                 "transition-transform duration-200",
-                isDescriptionOpen && "rotate-180"
+                !isDescriptionOpen && "-rotate-90"
               )}
             />
             <span>Description</span>
@@ -74,7 +74,7 @@ function ToolCard({ tool, isLast }: ToolCardProps) {
               size={14}
               className={cn(
                 "transition-transform duration-200",
-                isParametersOpen && "rotate-180"
+                !isParametersOpen && "-rotate-90"
               )}
             />
             <span>Parameters</span>
