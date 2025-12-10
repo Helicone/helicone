@@ -47,6 +47,7 @@
                   "gateway/integrations/overview",
                   "gateway/integrations/claude-agent-sdk",
                   "gateway/integrations/codex",
+                  "gateway/integrations/dpsy",
                   "gateway/integrations/llamaindex",
                   "gateway/integrations/langchain",
                   "gateway/integrations/langfuse",
