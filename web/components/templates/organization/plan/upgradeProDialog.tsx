@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,14 +10,11 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Check, Plus, Minus } from "lucide-react";
+import { Check } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { FeatureName } from "@/hooks/useProFeature";
-import { useCostForPrompts } from "../../pricing/hooks";
 import { P, Muted } from "@/components/ui/typography";
 import { InfoBox } from "@/components/ui/helicone/infoBox";
 
@@ -26,16 +23,8 @@ export type Addons = {
   prompts: boolean;
 };
 
-type AddonKey = "pro" | "prompts";
-
-type PricingAddon = {
-  key: AddonKey;
-  name: string;
-  price: number;
-  description: string;
-};
-
-const TEAM_BUNDLE_PRICE = 200;
+const PRO_PRICE = 79;
+const TEAM_PRICE = 799;
 
 const FEATURE_MESSAGES: Record<string, string> = {
   time_filter: "Extended time filters require Pro plan.",
@@ -71,25 +60,6 @@ export const UpgradeProDialog = ({
 }: UpgradeProDialogProps) => {
   const org = useOrg();
   const [selectedPlan, setSelectedPlan] = useState<"pro" | "team">("pro");
-  const [selectedAddons, setSelectedAddons] = useState<Addons>({
-    pro: true,
-    prompts: true,
-  });
-  const [seats, setSeats] = useState(1);
-  const promptsPrice = useCostForPrompts();
-
-  useEffect(() => {
-    if (open && featureName) {
-      const featureKey = featureName.toLowerCase() as keyof Addons;
-
-      if (featureKey in selectedAddons) {
-        setSelectedAddons((prev) => ({
-          ...prev,
-          [featureKey]: true,
-        }));
-      }
-    }
-  }, [open, featureName, selectedAddons]);
 
   const subscription = useQuery({
     queryKey: ["subscription", org?.currentOrg?.id],
@@ -103,19 +73,14 @@ export const UpgradeProDialog = ({
   });
 
   const upgradeToPro = useMutation({
-    mutationFn: async (variables: { addons: Addons; seats?: number }) => {
+    mutationFn: async () => {
       const jawn = getJawnClient(org?.currentOrg?.id);
       const endpoint =
         subscription.data?.data?.status === "canceled"
           ? "/v1/stripe/subscription/existing-customer/upgrade-to-pro"
           : "/v1/stripe/subscription/new-customer/upgrade-to-pro";
       const result = await jawn.POST(endpoint, {
-        body: {
-          addons: {
-            prompts: variables.addons.prompts,
-          },
-          seats: variables.seats,
-        },
+        body: {},
       });
       return result;
     },
@@ -132,39 +97,6 @@ export const UpgradeProDialog = ({
       return result;
     },
   });
-
-  const handleSeatChange = (increment: number) => {
-    setSeats((prev) => Math.max(1, prev + increment));
-  };
-
-  const ADDONS: PricingAddon[] = useMemo(
-    () => [
-      {
-        key: "pro",
-        name: "Pro Plan",
-        price: 20,
-        description:
-          "No log limits, sessions, cache, user analytics, and more.",
-      },
-      {
-        key: "prompts",
-        name: "Prompts",
-        price: promptsPrice.data?.data || 50,
-        description: "Create, version and test prompts",
-      },
-    ],
-    [promptsPrice.data],
-  );
-
-  const proAddon = ADDONS.find((a) => a.key === "pro")!;
-
-  const proTotalPrice = useMemo(() => {
-    const base = proAddon.price * seats;
-    const promptsCost = selectedAddons.prompts
-      ? promptsPrice.data?.data || 50
-      : 0;
-    return base + promptsCost;
-  }, [seats, proAddon.price, selectedAddons.prompts, promptsPrice.data]);
 
   // Get description text with case insensitivity
   const descriptionText = featureName
@@ -224,100 +156,35 @@ export const UpgradeProDialog = ({
                   <div>
                     <P className="font-semibold">Pro Plan</P>
                     <Muted className="text-sm">
-                      ${proAddon.price}/seat/month
+                      Unlimited seats, $6/GB usage
                     </Muted>
                   </div>
-                  <P className="text-lg font-bold">${proTotalPrice}/mo</P>
+                  <P className="text-lg font-bold">${PRO_PRICE}/mo</P>
                 </div>
 
-                {/* Always visible features */}
+                {/* Features */}
                 <div className="mt-2 space-y-0.5">
                   <div className="flex items-center gap-2">
-                    <div className="h-1 w-1 rounded-full bg-muted-foreground/50" />
+                    <Check size={12} className="text-primary" />
+                    <Muted className="text-xs">Unlimited seats</Muted>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check size={12} className="text-primary" />
+                    <Muted className="text-xs">Unlimited requests</Muted>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check size={12} className="text-primary" />
                     <Muted className="text-xs">
-                      Unlimited requests (pay as you go)
+                      Prompts, sessions, cache & more
                     </Muted>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="h-1 w-1 rounded-full bg-muted-foreground/50" />
-                    <Muted className="text-xs">
-                      Advanced analytics & sessions
-                    </Muted>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="h-1 w-1 rounded-full bg-muted-foreground/50" />
-                    <Muted className="text-xs">
-                      Cache, rate limiting, custom properties
-                    </Muted>
+                    <Check size={12} className="text-primary" />
+                    <Muted className="text-xs">1 month log retention</Muted>
                   </div>
                 </div>
               </div>
             </div>
-
-            {selectedPlan === "pro" && (
-              <div className="space-y-3 border-t pt-3">
-                <div className="flex items-center justify-between">
-                  <P className="text-sm">Number of seats:</P>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-7 w-7"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        handleSeatChange(-1);
-                      }}
-                      type="button"
-                    >
-                      <Minus size={14} />
-                    </Button>
-                    <P className="w-10 text-center text-sm font-medium">
-                      {seats}
-                    </P>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-7 w-7"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        handleSeatChange(1);
-                      }}
-                      type="button"
-                    >
-                      <Plus size={14} />
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      id="prompts"
-                      checked={selectedAddons.prompts}
-                      onCheckedChange={(checked) => {
-                        setSelectedAddons((prev) => ({
-                          ...prev,
-                          prompts: !!checked,
-                        }));
-                      }}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                    <Label
-                      htmlFor="prompts"
-                      className="cursor-pointer text-sm"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      Prompts workspace
-                    </Label>
-                  </div>
-                  <Muted className="text-sm font-medium">
-                    +${promptsPrice.data?.data || 50}/mo
-                  </Muted>
-                </div>
-              </div>
-            )}
           </label>
 
           {/* Team Bundle Option */}
@@ -333,13 +200,13 @@ export const UpgradeProDialog = ({
             <div className="flex-1">
               <div className="flex items-start justify-between">
                 <div>
-                  <P className="font-semibold">Team Bundle</P>
-                  <Muted className="text-sm">Best value for teams</Muted>
+                  <P className="font-semibold">Team</P>
+                  <Muted className="text-sm">For growing teams</Muted>
                 </div>
-                <P className="text-lg font-bold">$200/mo</P>
+                <P className="text-lg font-bold">${TEAM_PRICE}/mo</P>
               </div>
 
-              {/* Always visible features */}
+              {/* Features */}
               <div className="mt-2 space-y-0.5">
                 <div className="flex items-center gap-2">
                   <Check size={12} className="text-primary" />
@@ -347,17 +214,23 @@ export const UpgradeProDialog = ({
                 </div>
                 <div className="flex items-center gap-2">
                   <Check size={12} className="text-primary" />
-                  <Muted className="text-xs">Unlimited seats included</Muted>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check size={12} className="text-primary" />
-                  <Muted className="text-xs">Prompts workspace included</Muted>
+                  <Muted className="text-xs">5 organizations</Muted>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check size={12} className="text-primary" />
                   <Muted className="text-xs">
-                    Best for teams with 3+ members
+                    SOC-2, HIPAA compliance
                   </Muted>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check size={12} className="text-primary" />
+                  <Muted className="text-xs">
+                    3 months retention, configurable
+                  </Muted>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check size={12} className="text-primary" />
+                  <Muted className="text-xs">Dedicated Slack & support</Muted>
                 </div>
               </div>
             </div>
@@ -374,10 +247,7 @@ export const UpgradeProDialog = ({
                 window.open(result.data, "_blank");
               }
             } else {
-              const result = await upgradeToPro.mutateAsync({
-                addons: selectedAddons,
-                seats,
-              });
+              const result = await upgradeToPro.mutateAsync();
               if (result.data) {
                 window.open(result.data, "_blank");
               }

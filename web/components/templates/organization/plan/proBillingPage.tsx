@@ -13,25 +13,11 @@ import { logger } from "@/lib/telemetry/logger";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { InvoiceSheet } from "./InvoiceSheet";
-import { Switch } from "@/components/ui/switch";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { useState } from "react";
-import { useCallback } from "react";
-import { useCostForPrompts } from "../../pricing/hooks";
 import { Badge } from "@/components/ui/badge";
 import { CalendarIcon } from "lucide-react";
 
 export const ProPlanCard = () => {
   const org = useOrg();
-  const [isPromptsDialogOpen, setIsPromptsDialogOpen] = useState(false);
-  const costForPrompts = useCostForPrompts();
 
   const subscription = useQuery({
     queryKey: ["subscription", org?.currentOrg?.id],
@@ -63,40 +49,6 @@ export const ProPlanCard = () => {
     },
   });
 
-  const addProductToSubscription = useMutation({
-    mutationFn: async (productType: "alerts" | "prompts") => {
-      const jawn = getJawnClient(org?.currentOrg?.id);
-      const result = await jawn.POST(
-        "/v1/stripe/subscription/add-ons/{productType}",
-        {
-          params: {
-            path: {
-              productType,
-            },
-          },
-        },
-      );
-      return result;
-    },
-  });
-
-  const deleteProductFromSubscription = useMutation({
-    mutationFn: async (productType: "alerts" | "prompts") => {
-      const jawn = getJawnClient(org?.currentOrg?.id);
-      const result = await jawn.DELETE(
-        "/v1/stripe/subscription/add-ons/{productType}",
-        {
-          params: {
-            path: {
-              productType,
-            },
-          },
-        },
-      );
-      return result;
-    },
-  });
-
   const isTrialActive =
     subscription.data?.data?.trial_end &&
     new Date(subscription.data.data.trial_end * 1000) > new Date() &&
@@ -105,25 +57,6 @@ export const ProPlanCard = () => {
         new Date(subscription.data.data.current_period_start * 1000));
 
   const isSubscriptionEnding = subscription.data?.data?.cancel_at_period_end;
-
-  const hasPrompts = subscription.data?.data?.items?.some(
-    (item: any) => item.price.product?.name === "Prompts" && item.quantity > 0,
-  );
-
-  const handlePromptsToggle = () => {
-    setIsPromptsDialogOpen(true);
-  };
-
-  const confirmPromptsChange = async () => {
-    if (!hasPrompts) {
-      await addProductToSubscription.mutateAsync("prompts");
-    } else {
-      await deleteProductFromSubscription.mutateAsync("prompts");
-    }
-    setIsPromptsDialogOpen(false);
-
-    subscription.refetch();
-  };
 
   const getBillingCycleDates = () => {
     if (
@@ -140,22 +73,6 @@ export const ProPlanCard = () => {
     }
     return "N/A";
   };
-
-  const getDialogDescription = useCallback(
-    (isEnabling: boolean, feature: string, price: string) => {
-      let description = isEnabling
-        ? `You are about to enable ${feature}. This will add ${price}/mo to your subscription.`
-        : `You are about to disable ${feature}. This will remove ${price}/mo from your subscription.`;
-
-      if (isTrialActive && isEnabling) {
-        description +=
-          " You will not be charged for this feature while on your trial.";
-      }
-
-      return description;
-    },
-    [isTrialActive],
-  );
 
   return (
     <div className="flex max-w-5xl flex-row gap-6 pb-8">
@@ -189,39 +106,11 @@ export const ProPlanCard = () => {
               </p>
             </div>
           )}
-          {isTrialActive && (
-            <div className="text-sm text-slate-500">
-              All add-ons are free during your trial
-            </div>
-          )}
           <div className="space-y-4">
-            <div className="flex items-center justify-between py-3">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-slate-900">
-                    Prompts{" "}
-                    {isTrialActive ? (
-                      <span className="text-slate-400 line-through">
-                        ${costForPrompts.data?.data ?? "loading..."}/mo
-                      </span>
-                    ) : (
-                      <span>
-                        (${costForPrompts.data?.data ?? "loading..."}/mo)
-                      </span>
-                    )}
-                  </h3>
-                </div>
-                {isTrialActive && (
-                  <p className="text-sm text-slate-500">
-                    Create, version and test prompts
-                  </p>
-                )}
-              </div>
-              <Switch
-                checked={hasPrompts}
-                onCheckedChange={handlePromptsToggle}
-                className="data-[state=checked]:bg-sky-600"
-              />
+            <div className="rounded-lg border border-sky-100 bg-sky-50 p-4">
+              <p className="text-sm text-sky-700">
+                <span className="font-semibold">Prompts included</span> - Create, version and test prompts at no extra cost
+              </p>
             </div>
           </div>
 
@@ -273,34 +162,6 @@ export const ProPlanCard = () => {
           </Col>
         </CardContent>
       </Card>
-
-      <Dialog open={isPromptsDialogOpen} onOpenChange={setIsPromptsDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>
-              {!hasPrompts ? "Enable Prompts" : "Disable Prompts"}
-            </DialogTitle>
-            <DialogDescription>
-              {getDialogDescription(
-                !hasPrompts,
-                "Prompts",
-                `$${costForPrompts.data?.data ?? "loading..."}`,
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsPromptsDialogOpen(false);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button onClick={confirmPromptsChange}>Confirm</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       <div className="flex flex-col gap-6">
         <Card className="flex flex-col">

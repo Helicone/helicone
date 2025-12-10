@@ -1,6 +1,8 @@
 import { Package, FlaskConical, ClipboardCheck } from "lucide-react";
 
-export const ADDONS = [
+// Legacy add-ons for grandfathered users
+// Note: Prompts is now included in Pro/Team plans for new users
+export const LEGACY_ADDONS = [
   {
     id: "prompts",
     name: "Prompts",
@@ -23,6 +25,9 @@ export const ADDONS = [
     icon: <ClipboardCheck className="h-6 w-6 text-sky-500" />,
   },
 ] as const;
+
+// Current add-ons (prompts now included in base plans)
+export const ADDONS = [] as const;
 
 export const Tiers = [
   {
@@ -65,13 +70,13 @@ export const TIER_DISPLAY_INFO: Record<
     text: "Pro",
     className:
       "text-xs text-purple-500 bg-purple-50 px-2 py-[2px] rounded-md font-semibold",
-    variants: ["pro-20240913", "pro-20250202"],
+    variants: ["pro-20240913", "pro-20250202", "pro-20251210"],
   },
   team: {
     text: "Team",
     className:
       "text-xs text-indigo-500 bg-indigo-50 px-2 py-[2px] rounded-md font-semibold",
-    variants: ["team-20250130"],
+    variants: ["team-20250130", "team-20251210"],
   },
   growth: {
     text: "Growth",

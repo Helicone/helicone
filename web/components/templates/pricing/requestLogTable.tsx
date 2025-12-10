@@ -9,6 +9,7 @@ import {
 
 interface RequestLogTableProps {}
 
+// Legacy per-request pricing for grandfathered users
 const BASE_LOG_PRICING: {
   lower: number;
   upper: number;
@@ -48,10 +49,17 @@ const BASE_LOG_PRICING: {
 
 const MULTIPLIER = 1.3;
 
+// Legacy pricing export for grandfathered users
 export const HELICONE_LOG_PRICING = BASE_LOG_PRICING.map((pricing) => ({
   ...pricing,
   rate: pricing.rate * MULTIPLIER,
 }));
+
+// New byte-based pricing
+export const BYTE_PRICING = {
+  ratePerGB: 6, // $6 per GB
+  freeGB: 1, // First 1 GB free
+};
 
 const RequestLogTable = (props: RequestLogTableProps) => {
   const {} = props;
@@ -61,31 +69,19 @@ const RequestLogTable = (props: RequestLogTableProps) => {
       <Table>
         <TableHead>
           <TableRow className="border-b border-gray-300">
-            <TableHeaderCell className="text-black">Lower Band</TableHeaderCell>
-            <TableHeaderCell className="text-black">Upper Band</TableHeaderCell>
-            <TableHeaderCell className="text-black">
-              Rate per log
-            </TableHeaderCell>
+            <TableHeaderCell className="text-black">Storage</TableHeaderCell>
+            <TableHeaderCell className="text-black">Rate</TableHeaderCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {HELICONE_LOG_PRICING.map((pricing, index) => (
-            <TableRow key={index}>
-              <TableCell className="text-gray-600">
-                {new Intl.NumberFormat("us").format(pricing.lower).toString()}
-              </TableCell>
-              <TableCell className="text-gray-600">
-                {pricing.upper === Number.MAX_SAFE_INTEGER
-                  ? "∞"
-                  : new Intl.NumberFormat("us")
-                      .format(pricing.upper)
-                      .toString()}
-              </TableCell>
-              <TableCell className="text-black">
-                {pricing.lower === 0 ? "Free" : `$${pricing.rate.toFixed(7)}`}
-              </TableCell>
-            </TableRow>
-          ))}
+          <TableRow>
+            <TableCell className="text-gray-600">First 1 GB</TableCell>
+            <TableCell className="text-black">Free</TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell className="text-gray-600">Additional storage</TableCell>
+            <TableCell className="text-black">$6/GB</TableCell>
+          </TableRow>
         </TableBody>
       </Table>
     </div>
