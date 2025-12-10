@@ -10,6 +10,10 @@
  */
 
 import { registry } from "@helicone-package/cost/models/registry";
+import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
+
+export const PTB_BILLING_FILTER = `is_passthrough_billing = true
+          AND cache_reference_id = '${DEFAULT_UUID}'`;
 
 export interface CacheTokenAdjustment {
   orgId: string;
@@ -135,7 +139,12 @@ export function getCacheTokenAdjustment(
   startDate: Date,
   endDate: Date
 ): number {
-  const adjustment = findAdjustment(orgId, model, clickhouseProvider, startDate);
+  const adjustment = findAdjustment(
+    orgId,
+    model,
+    clickhouseProvider,
+    startDate
+  );
   if (!adjustment) return 0;
   return calculateAdjustmentUsd(adjustment);
 }

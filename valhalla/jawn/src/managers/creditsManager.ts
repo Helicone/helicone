@@ -16,7 +16,10 @@ import {
   getOrgDiscounts,
   findDiscount,
 } from "../utils/discountCalculator";
-import { getCacheTokenAdjustmentsByModel } from "../utils/cacheTokenAdjustments";
+import {
+  getCacheTokenAdjustmentsByModel,
+  PTB_BILLING_FILTER,
+} from "../utils/cacheTokenAdjustments";
 
 export interface PTBInvoice {
   id: string;
@@ -187,7 +190,7 @@ export class CreditsManager extends BaseManager {
           sum(cost) / ${COST_PRECISION_MULTIPLIER} as cost
         FROM request_response_rmt
         WHERE organization_id = {val_0 : String}
-          AND is_passthrough_billing = true
+          AND ${PTB_BILLING_FILTER}
           AND request_created_at >= {val_1 : DateTime64(3)}
           AND request_created_at < {val_2 : DateTime64(3)}
         GROUP BY model, provider
