@@ -44,6 +44,17 @@ const SignIn = ({
       return;
     }
 
+    // Get the returnTo parameter for redirecting after sign in
+    const returnTo = router.query.returnTo as string | undefined;
+
+    // Determine the destination after sign in
+    const getRedirectDestination = () => {
+      const { pi_session } = router.query;
+      if (pi_session) return "/pi/onboarding";
+      if (returnTo && returnTo.startsWith("/")) return returnTo;
+      return "/dashboard";
+    };
+
     if (
       unauthorized === "true" &&
       heliconeAuthClient &&
@@ -51,7 +62,7 @@ const SignIn = ({
     ) {
       if (!refreshed) {
         // FIX: Clear the unauthorized parameter when redirecting to prevent infinite loop
-        const { unauthorized: _, ...cleanQuery } = router.query;
+        const { unauthorized: _, returnTo: __, ...cleanQuery } = router.query;
         router
           .push({
             pathname: "/signin",
@@ -63,19 +74,19 @@ const SignIn = ({
             setRedirectCount((prev) => prev + 1);
           });
       } else {
-        // If already refreshed, redirect to dashboard
-        const { unauthorized: _, ...cleanQuery } = router.query;
+        // If already refreshed, redirect to intended destination or dashboard
+        const { unauthorized: _, returnTo: __, ...cleanQuery } = router.query;
         router.push({
-          pathname: "/dashboard",
+          pathname: getRedirectDestination(),
           query: cleanQuery,
         });
       }
       return;
     } else if (heliconeAuthClient.user?.id) {
-      const { pi_session, unauthorized: _, ...restQuery } = router.query;
+      const { pi_session, unauthorized: _, returnTo: __, ...restQuery } = router.query;
       router.push({
-        pathname: pi_session ? "/pi/onboarding" : "/dashboard",
-        query: restQuery, // FIX: Don't include unauthorized in the query
+        pathname: getRedirectDestination(),
+        query: restQuery, // FIX: Don't include unauthorized or returnTo in the query
       });
     }
   }, [
@@ -120,7 +131,10 @@ const SignIn = ({
                 return;
               }
               setNotification("Success. Redirecting...", "success");
-              router.push("/dashboard");
+              // Redirect to returnTo path if provided, otherwise dashboard
+              const returnTo = router.query.returnTo as string | undefined;
+              const destination = returnTo && returnTo.startsWith("/") ? returnTo : "/dashboard";
+              router.push(destination);
             }}
             handleGoogleSubmit={async () => {
               const { error } = await heliconeAuthClient.signInWithOAuth({
