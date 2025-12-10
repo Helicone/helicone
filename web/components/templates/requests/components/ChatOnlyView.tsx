@@ -117,54 +117,92 @@ function ToolCallItem({ toolCall, response }: ToolCallItemProps) {
   const parsedResponse = parseResponse(response);
 
   return (
-    <div className="flex w-full justify-start pl-4">
-      <div className="flex max-w-[80%] flex-col gap-1 py-1">
-        <div className="flex items-center gap-2">
-          <Wrench size={12} className="text-slate-500 dark:text-slate-400" />
-          <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
-            {toolCall.name || "Unknown tool"}
-          </span>
-        </div>
-        <div className="flex flex-col gap-1 pl-5">
-          <Collapsible open={isArgumentsOpen} onOpenChange={setIsArgumentsOpen}>
+    <div className="flex flex-col gap-1 py-1">
+      <div className="flex items-center gap-2">
+        <Wrench size={12} className="text-slate-500 dark:text-slate-400" />
+        <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
+          {toolCall.name || "Unknown tool"}
+        </span>
+      </div>
+      <div className="flex flex-col gap-1 pl-5">
+        <Collapsible open={isArgumentsOpen} onOpenChange={setIsArgumentsOpen}>
+          <CollapsibleTrigger className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-muted-foreground hover:bg-accent">
+            {isArgumentsOpen ? (
+              <ChevronDownIcon size={12} />
+            ) : (
+              <ChevronRightIcon size={12} />
+            )}
+            <span>Arguments</span>
+          </CollapsibleTrigger>
+        </Collapsible>
+        {isArgumentsOpen && (
+          <div className="pl-5">
+            <JsonRenderer data={toolCall.arguments} showCopyButton={false} />
+          </div>
+        )}
+        {response !== undefined && (
+          <Collapsible open={isResponseOpen} onOpenChange={setIsResponseOpen}>
             <CollapsibleTrigger className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-muted-foreground hover:bg-accent">
-              {isArgumentsOpen ? (
+              {isResponseOpen ? (
                 <ChevronDownIcon size={12} />
               ) : (
                 <ChevronRightIcon size={12} />
               )}
-              <span>Arguments</span>
+              <span>Response</span>
             </CollapsibleTrigger>
           </Collapsible>
-          {isArgumentsOpen && (
-            <div className="pl-5">
-              <JsonRenderer data={toolCall.arguments} showCopyButton={false} />
-            </div>
+        )}
+        {isResponseOpen && parsedResponse && (
+          <div className="pl-5">
+            {typeof parsedResponse === "string" ? (
+              <span className="text-xs text-muted-foreground whitespace-pre-wrap">
+                {parsedResponse}
+              </span>
+            ) : (
+              <JsonRenderer data={parsedResponse} showCopyButton={false} />
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+interface ToolCallGroupProps {
+  toolCalls: { toolCall: FunctionCall; response?: string }[];
+}
+
+function ToolCallGroup({ toolCalls }: ToolCallGroupProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="flex w-full justify-start pl-4">
+      <div className="flex max-w-[80%] flex-col gap-1 py-1">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          {isOpen ? (
+            <ChevronDownIcon size={12} />
+          ) : (
+            <ChevronRightIcon size={12} />
           )}
-          {response !== undefined && (
-            <Collapsible open={isResponseOpen} onOpenChange={setIsResponseOpen}>
-              <CollapsibleTrigger className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-muted-foreground hover:bg-accent">
-                {isResponseOpen ? (
-                  <ChevronDownIcon size={12} />
-                ) : (
-                  <ChevronRightIcon size={12} />
-                )}
-                <span>Response</span>
-              </CollapsibleTrigger>
-            </Collapsible>
-          )}
-          {isResponseOpen && parsedResponse && (
-            <div className="pl-5">
-              {typeof parsedResponse === "string" ? (
-                <span className="text-xs text-muted-foreground whitespace-pre-wrap">
-                  {parsedResponse}
-                </span>
-              ) : (
-                <JsonRenderer data={parsedResponse} showCopyButton={false} />
-              )}
-            </div>
-          )}
-        </div>
+          <Wrench size={12} />
+          <span>
+            {toolCalls.length} tool use{toolCalls.length !== 1 ? "s" : ""}
+          </span>
+        </button>
+        {isOpen && (
+          <div className="flex flex-col pl-5 border-l border-border ml-1.5">
+            {toolCalls.map((tc, idx) => (
+              <ToolCallItem
+                key={idx}
+                toolCall={tc.toolCall}
+                response={tc.response}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -327,17 +365,46 @@ export default function ChatOnlyView({ mappedRequest }: ChatOnlyViewProps) {
     );
   }
 
+  // Group consecutive tool calls together
+  const groupedItems = useMemo(() => {
+    const result: (
+      | { type: "message"; message: Message; isUser: boolean }
+      | { type: "tool_group"; toolCalls: { toolCall: FunctionCall; response?: string }[] }
+    )[] = [];
+
+    let currentToolGroup: { toolCall: FunctionCall; response?: string }[] = [];
+
+    for (const item of chatItems) {
+      if (item.type === "tool_call") {
+        currentToolGroup.push({ toolCall: item.toolCall, response: item.response });
+      } else {
+        // Flush any accumulated tool calls as a group
+        if (currentToolGroup.length > 0) {
+          result.push({ type: "tool_group", toolCalls: currentToolGroup });
+          currentToolGroup = [];
+        }
+        result.push(item);
+      }
+    }
+
+    // Flush remaining tool calls
+    if (currentToolGroup.length > 0) {
+      result.push({ type: "tool_group", toolCalls: currentToolGroup });
+    }
+
+    return result;
+  }, [chatItems]);
+
   let messageIndex = 0;
 
   return (
     <div className="flex flex-col gap-2 p-4 pt-14">
-      {chatItems.map((item, idx) => {
-        if (item.type === "tool_call") {
+      {groupedItems.map((item, idx) => {
+        if (item.type === "tool_group") {
           return (
-            <ToolCallItem
-              key={`tool-${idx}`}
-              toolCall={item.toolCall}
-              response={item.response}
+            <ToolCallGroup
+              key={`tool-group-${idx}`}
+              toolCalls={item.toolCalls}
             />
           );
         }
