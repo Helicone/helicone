@@ -10,11 +10,18 @@
  */
 
 import { registry } from "@helicone-package/cost/models/registry";
+import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
+
+export const PTB_BILLING_FILTER = `is_passthrough_billing = true
+          AND cache_reference_id = '${DEFAULT_UUID}'`;
 
 export interface CacheTokenAdjustment {
   orgId: string;
   model: string;
+  /** Provider for pricing lookup (e.g., "anthropic") */
   provider: string;
+  /** Provider in ClickHouse to match against (e.g., "helicone" for AI Gateway requests) */
+  clickhouseProvider: string;
   /** Only apply adjustment for requests before this date (when fix was deployed) */
   beforeDate: Date;
   /** Total missing cache write tokens (count × median tokens per request) */
@@ -43,64 +50,76 @@ export const CACHE_TOKEN_ADJUSTMENTS: CacheTokenAdjustment[] = [
   {
     orgId: "63452b7b-54e6-470c-a9e7-a69b2e17a4cf",
     model: "claude-sonnet-4",
-    provider: "ANTHROPIC",
+    provider: "anthropic",
+    clickhouseProvider: "helicone",
     beforeDate: new Date("2025-12-06T00:00:00Z"),
     totalMissingTokens: 21436 * 16492, // 21,436 requests × 16,492 median tokens
   },
   {
     orgId: "63452b7b-54e6-470c-a9e7-a69b2e17a4cf",
     model: "claude-4.5-sonnet",
-    provider: "ANTHROPIC",
+    provider: "anthropic",
+    clickhouseProvider: "helicone",
     beforeDate: new Date("2025-12-06T00:00:00Z"),
     totalMissingTokens: 18982 * 40496, // 18,982 requests × 40,496 median tokens
   },
   {
     orgId: "63452b7b-54e6-470c-a9e7-a69b2e17a4cf",
     model: "claude-opus-4",
-    provider: "ANTHROPIC",
+    provider: "anthropic",
+    clickhouseProvider: "helicone",
     beforeDate: new Date("2025-12-06T00:00:00Z"),
     totalMissingTokens: 3689 * 32235, // 3,689 requests × 32,235 median tokens
   },
   {
     orgId: "63452b7b-54e6-470c-a9e7-a69b2e17a4cf",
     model: "claude-3.5-haiku",
-    provider: "ANTHROPIC",
+    provider: "anthropic",
+    clickhouseProvider: "helicone",
     beforeDate: new Date("2025-12-06T00:00:00Z"),
     totalMissingTokens: 3100 * 44201, // 3,100 requests × 44,201 median tokens
   },
   {
     orgId: "63452b7b-54e6-470c-a9e7-a69b2e17a4cf",
     model: "claude-3.7-sonnet",
-    provider: "ANTHROPIC",
+    provider: "anthropic",
+    clickhouseProvider: "helicone",
     beforeDate: new Date("2025-12-06T00:00:00Z"),
     totalMissingTokens: 1519 * 18270, // 1,519 requests × 18,270 median tokens
   },
   {
     orgId: "63452b7b-54e6-470c-a9e7-a69b2e17a4cf",
     model: "claude-4.5-haiku",
-    provider: "ANTHROPIC",
+    provider: "anthropic",
+    clickhouseProvider: "helicone",
     beforeDate: new Date("2025-12-06T00:00:00Z"),
     totalMissingTokens: 1492 * 14875, // 1,492 requests × 14,875 median tokens
   },
 ];
 
 /**
- * Get cache token adjustment for a specific org/model/date range.
- * Returns the additional USD to add to the invoice line item.
+ * Find a matching adjustment for the given criteria.
+ * Central matching logic used by all public functions.
  */
-export function getCacheTokenAdjustment(
+function findAdjustment(
   orgId: string,
   model: string,
-  startDate: Date,
-  endDate: Date
-): number {
-  const adjustment = CACHE_TOKEN_ADJUSTMENTS.find(
-    (a) => a.orgId === orgId && a.model === model && startDate < a.beforeDate // Only apply if invoice period starts before fix date
+  clickhouseProvider: string,
+  startDate: Date
+): CacheTokenAdjustment | undefined {
+  return CACHE_TOKEN_ADJUSTMENTS.find(
+    (a) =>
+      a.orgId === orgId &&
+      a.model === model &&
+      a.clickhouseProvider === clickhouseProvider &&
+      startDate < a.beforeDate
   );
+}
 
-  if (!adjustment) return 0;
-
-  // Get price from registry
+/**
+ * Calculate USD amount for an adjustment.
+ */
+function calculateAdjustmentUsd(adjustment: CacheTokenAdjustment): number {
   const pricePerToken = getCacheWritePricePerToken(
     adjustment.model,
     adjustment.provider
@@ -109,22 +128,42 @@ export function getCacheTokenAdjustment(
 }
 
 /**
+ * Get cache token adjustment for a specific org/model/provider/date range.
+ * Returns the additional USD to add to the invoice line item.
+ * @param clickhouseProvider - The provider as stored in ClickHouse (e.g., "helicone")
+ */
+export function getCacheTokenAdjustment(
+  orgId: string,
+  model: string,
+  clickhouseProvider: string,
+  startDate: Date,
+  endDate: Date
+): number {
+  const adjustment = findAdjustment(
+    orgId,
+    model,
+    clickhouseProvider,
+    startDate
+  );
+  if (!adjustment) return 0;
+  return calculateAdjustmentUsd(adjustment);
+}
+
+/**
  * Get total cache token adjustment for an org (for summary).
  */
 export function getTotalCacheTokenAdjustment(orgId: string): number {
   return CACHE_TOKEN_ADJUSTMENTS.filter((a) => a.orgId === orgId).reduce(
-    (sum, a) => {
-      const pricePerToken = getCacheWritePricePerToken(a.model, a.provider);
-      return sum + a.totalMissingTokens * pricePerToken;
-    },
+    (sum, a) => sum + calculateAdjustmentUsd(a),
     0
   );
 }
 
 /**
- * Get all cache token adjustments for an org, grouped by model.
+ * Get all cache token adjustments for an org, grouped by model+clickhouseProvider.
  * Used for spend breakdown display.
  * Returns both the USD adjustment and the missing token count.
+ * Key format: "model:clickhouseProvider" (e.g., "claude-sonnet-4:helicone")
  */
 export function getCacheTokenAdjustmentsByModel(
   orgId: string,
@@ -137,14 +176,15 @@ export function getCacheTokenAdjustmentsByModel(
   >();
 
   for (const a of CACHE_TOKEN_ADJUSTMENTS) {
-    if (a.orgId === orgId && startDate < a.beforeDate) {
-      const pricePerToken = getCacheWritePricePerToken(a.model, a.provider);
-      const amount = a.totalMissingTokens * pricePerToken;
-      const existing = adjustments.get(a.model) || {
+    if (findAdjustment(a.orgId, a.model, a.clickhouseProvider, startDate)) {
+      if (a.orgId !== orgId) continue; // Only include this org's adjustments
+      const amount = calculateAdjustmentUsd(a);
+      const key = `${a.model}:${a.clickhouseProvider}`;
+      const existing = adjustments.get(key) || {
         amountUsd: 0,
         missingTokens: 0,
       };
-      adjustments.set(a.model, {
+      adjustments.set(key, {
         amountUsd: existing.amountUsd + amount,
         missingTokens: existing.missingTokens + a.totalMissingTokens,
       });

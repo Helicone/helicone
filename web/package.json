@@ -135,6 +135,7 @@
     "recharts": "^2.13.3",
     "rss-parser": "^3.13.0",
     "sonner": "^2.0.1",
+    "streamdown": "^1.6.10",
     "string-similarity-js": "^2.1.4",
     "stripe": "^17.7.0",
     "tailwind-merge": "^2.5.2",

@@ -9,6 +9,7 @@ import {
 import {
   getCacheTokenAdjustment,
   getTotalCacheTokenAdjustment,
+  PTB_BILLING_FILTER,
 } from "../../utils/cacheTokenAdjustments";
 import Stripe from "stripe";
 import { SecretManager } from "@helicone-package/secrets/SecretManager";
@@ -45,7 +46,7 @@ export class InvoicingManager {
         SELECT sum(cost) / ${COST_PRECISION_MULTIPLIER} as total_cost
         FROM request_response_rmt
         WHERE organization_id = {val_0 : String}
-          AND is_passthrough_billing = true
+          AND ${PTB_BILLING_FILTER}
       `;
 
       const spendResult = await dbQueryClickhouse<{ total_cost: string }>(
@@ -139,7 +140,7 @@ export class InvoicingManager {
           sum(cost) / ${COST_PRECISION_MULTIPLIER} as cost
         FROM request_response_rmt
         WHERE organization_id = {val_0 : String}
-          AND is_passthrough_billing = true
+          AND ${PTB_BILLING_FILTER}
           AND request_created_at >= {val_1 : DateTime64(3)}
           AND request_created_at < {val_2 : DateTime64(3)}
         GROUP BY model, provider
@@ -203,10 +204,11 @@ export class InvoicingManager {
       for (const item of spendResult.data) {
         const baseSubtotalUsd = parseFloat(item.cost);
 
-        // Add cache token adjustment if applicable
+        // Add cache token adjustment if applicable (only for matching clickhouseProvider)
         const cacheAdjustmentUsd = getCacheTokenAdjustment(
           this.orgId,
           item.model,
+          item.provider,
           startDate,
           endDate
         );
