@@ -71,7 +71,7 @@ export class StripeLogHandler extends AbstractLogHandler {
       return await super.handle(context);
     }
 
-    const requet_event: StripeMeterEvent = {
+    const request_event: StripeMeterEvent = {
       identifier: `org_${organizationId}_request_${context.message.log.request.id}`,
       event_name: "requests_sum",
       timestamp: context.message.log.request.requestCreatedAt.toISOString(),
