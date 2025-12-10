@@ -223,7 +223,7 @@ export default function Chat({
 
   return (
     <div className="flex h-full w-full flex-col">
-      <div className="border-b">
+      <div className="border-b border-border">
         <ToolsRenderer tools={tools} chatMode={mode} />
       </div>
       {renderMessages()}

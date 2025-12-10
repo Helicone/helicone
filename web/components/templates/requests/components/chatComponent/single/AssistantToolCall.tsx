@@ -1,15 +1,22 @@
 import {
   FunctionCall,
   MappedLLMRequest,
+  Tool,
 } from "@helicone-package/llm-mapper/types";
 import { JsonRenderer } from "./JsonRenderer";
 import MarkdownEditor from "@/components/shared/markdownEditor";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Trash2Icon } from "lucide-react";
+import { ChevronDownIcon, ChevronRightIcon, Trash2Icon } from "lucide-react";
 import { PiToolboxBold } from "react-icons/pi";
-import { XSmall } from "@/components/ui/typography";
+import { XSmall, Muted } from "@/components/ui/typography";
 import PlaygroundToolAttributes from "../PlaygroundToolAttributes";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { useState } from "react";
 
 interface AssistantToolCallProps {
   tool: FunctionCall;
@@ -18,6 +25,7 @@ interface AssistantToolCallProps {
   mappedRequest: MappedLLMRequest;
   messageIndex?: number;
   onChatChange?: (_mappedRequest: MappedLLMRequest) => void;
+  tools?: Tool[];
 }
 
 export default function AssistantToolCall({
@@ -27,7 +35,13 @@ export default function AssistantToolCall({
   mappedRequest,
   messageIndex,
   onChatChange,
+  tools,
 }: AssistantToolCallProps) {
+  const [isDescriptionOpen, setIsDescriptionOpen] = useState(false);
+  const [isArgumentsOpen, setIsArgumentsOpen] = useState(true);
+
+  // Find the tool definition to get the description
+  const toolDefinition = tools?.find((t) => t.name === tool.name);
   const updateMessageToolCallField = (field: string, value: string) => {
     if (!mappedRequest || !onChatChange || messageIndex === undefined) {
       return;
@@ -163,12 +177,48 @@ export default function AssistantToolCall({
             </Button>
           </div>
         ) : (
-          <XSmall className="font-mono font-semibold">{tool.name}</XSmall>
+          <div className="flex items-center gap-3">
+            <XSmall className="font-mono font-semibold">{tool.name}</XSmall>
+            <div className="flex items-center gap-2">
+              <Collapsible
+                open={isArgumentsOpen}
+                onOpenChange={setIsArgumentsOpen}
+              >
+                <CollapsibleTrigger className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-muted-foreground hover:bg-accent">
+                  {isArgumentsOpen ? (
+                    <ChevronDownIcon size={12} />
+                  ) : (
+                    <ChevronRightIcon size={12} />
+                  )}
+                  <span>Arguments</span>
+                </CollapsibleTrigger>
+              </Collapsible>
+              {toolDefinition?.description && (
+                <Collapsible
+                  open={isDescriptionOpen}
+                  onOpenChange={setIsDescriptionOpen}
+                >
+                  <CollapsibleTrigger className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-muted-foreground hover:bg-accent">
+                    {isDescriptionOpen ? (
+                      <ChevronDownIcon size={12} />
+                    ) : (
+                      <ChevronRightIcon size={12} />
+                    )}
+                    <span>Description</span>
+                  </CollapsibleTrigger>
+                </Collapsible>
+              )}
+            </div>
+          </div>
         )}
       </div>
-      {!playgroundMode ? (
+      {!playgroundMode && isArgumentsOpen && (
         <JsonRenderer data={tool.arguments} showCopyButton={false} />
-      ) : (
+      )}
+      {!playgroundMode && isDescriptionOpen && toolDefinition?.description && (
+        <Muted className="text-xs">{toolDefinition.description}</Muted>
+      )}
+      {playgroundMode && (
         <MarkdownEditor
           placeholder="{}"
           language="json"

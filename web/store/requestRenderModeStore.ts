@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 
 export const MODE_LABELS = {
   rendered: "Rendered",
+  chat: "Chat",
   raw: "Raw",
   json: "JSON",
   debug: "Debug",
