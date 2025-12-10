@@ -4,35 +4,158 @@
  */
 import { ModelRow } from "../../../interfaces/Cost";
 
+// Amazon Nova model pricing from AWS Bedrock
+// https://aws.amazon.com/bedrock/pricing/
+// Prices per token (converted from per 1M tokens)
+// Nova Micro: $0.035 input / $0.14 output per 1M tokens
+// Nova Lite: $0.06 input / $0.24 output per 1M tokens
+// Nova Pro: $0.80 input / $3.20 output per 1M tokens
+// Nova Premier: $2.50 input / $12.50 output per 1M tokens
+// Prompt caching: 25% of base input price for cache reads
+
 export const costs: ModelRow[] = [
+  // Nova Micro - US regions (default)
   {
     model: {
       operator: "equals",
       value: "amazon.nova-micro-v1%3A0",
     },
     cost: {
-      prompt_token: 0.000046,
-      completion_token: 0.000184,
+      prompt_token: 3.5e-8,
+      completion_token: 1.4e-7,
+      prompt_cache_read_token: 3.5e-8 * 0.25,
     },
   },
+  // Nova Micro - EU regions
+  {
+    model: {
+      operator: "equals",
+      value: "eu.amazon.nova-micro-v1%3A0",
+    },
+    cost: {
+      prompt_token: 3.5e-8,
+      completion_token: 1.4e-7,
+      prompt_cache_read_token: 3.5e-8 * 0.25,
+    },
+  },
+  // Nova Micro - US prefixed
+  {
+    model: {
+      operator: "equals",
+      value: "us.amazon.nova-micro-v1%3A0",
+    },
+    cost: {
+      prompt_token: 3.5e-8,
+      completion_token: 1.4e-7,
+      prompt_cache_read_token: 3.5e-8 * 0.25,
+    },
+  },
+  // Nova Lite - US regions (default)
   {
     model: {
       operator: "equals",
       value: "amazon.nova-lite-v1%3A0",
     },
     cost: {
-      prompt_token: 0.000078,
-      completion_token: 0.000312,
+      prompt_token: 6e-8,
+      completion_token: 2.4e-7,
+      prompt_cache_read_token: 6e-8 * 0.25,
     },
   },
+  // Nova Lite - EU regions
+  {
+    model: {
+      operator: "equals",
+      value: "eu.amazon.nova-lite-v1%3A0",
+    },
+    cost: {
+      prompt_token: 6e-8,
+      completion_token: 2.4e-7,
+      prompt_cache_read_token: 6e-8 * 0.25,
+    },
+  },
+  // Nova Lite - US prefixed
+  {
+    model: {
+      operator: "equals",
+      value: "us.amazon.nova-lite-v1%3A0",
+    },
+    cost: {
+      prompt_token: 6e-8,
+      completion_token: 2.4e-7,
+      prompt_cache_read_token: 6e-8 * 0.25,
+    },
+  },
+  // Nova Pro - US regions (default)
   {
     model: {
       operator: "equals",
       value: "amazon.nova-pro-v1%3A0",
     },
     cost: {
-      prompt_token: 0.00105,
-      completion_token: 0.0042,
+      prompt_token: 8e-7,
+      completion_token: 3.2e-6,
+      prompt_cache_read_token: 8e-7 * 0.25,
+    },
+  },
+  // Nova Pro - EU regions
+  {
+    model: {
+      operator: "equals",
+      value: "eu.amazon.nova-pro-v1%3A0",
+    },
+    cost: {
+      prompt_token: 8e-7,
+      completion_token: 3.2e-6,
+      prompt_cache_read_token: 8e-7 * 0.25,
+    },
+  },
+  // Nova Pro - US prefixed
+  {
+    model: {
+      operator: "equals",
+      value: "us.amazon.nova-pro-v1%3A0",
+    },
+    cost: {
+      prompt_token: 8e-7,
+      completion_token: 3.2e-6,
+      prompt_cache_read_token: 8e-7 * 0.25,
+    },
+  },
+  // Nova Premier - US regions (default)
+  {
+    model: {
+      operator: "equals",
+      value: "amazon.nova-premier-v1%3A0",
+    },
+    cost: {
+      prompt_token: 2.5e-6,
+      completion_token: 1.25e-5,
+      prompt_cache_read_token: 2.5e-6 * 0.25,
+    },
+  },
+  // Nova Premier - EU regions
+  {
+    model: {
+      operator: "equals",
+      value: "eu.amazon.nova-premier-v1%3A0",
+    },
+    cost: {
+      prompt_token: 2.5e-6,
+      completion_token: 1.25e-5,
+      prompt_cache_read_token: 2.5e-6 * 0.25,
+    },
+  },
+  // Nova Premier - US prefixed
+  {
+    model: {
+      operator: "equals",
+      value: "us.amazon.nova-premier-v1%3A0",
+    },
+    cost: {
+      prompt_token: 2.5e-6,
+      completion_token: 1.25e-5,
+      prompt_cache_read_token: 2.5e-6 * 0.25,
     },
   },
 ];
