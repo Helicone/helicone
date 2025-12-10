@@ -18,6 +18,26 @@ function getContent(filePath: string) {
   }
 }
 
+/**
+ * Generate static params for all changelog entries at build time.
+ * This enables static generation and proper sitemap inclusion.
+ */
+export async function generateStaticParams() {
+  const changelogDir = path.join(process.cwd(), "app", "changelog", "changes");
+
+  try {
+    const entries = fs.readdirSync(changelogDir, { withFileTypes: true });
+    return entries
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => ({
+        "file-path": entry.name,
+      }));
+  } catch (error) {
+    console.error("Error reading changelog directory:", error);
+    return [];
+  }
+}
+
 export default async function Home({
   params,
 }: {

@@ -1,5 +1,5 @@
 import { getMetadata } from "@/components/templates/blog/getMetaData";
-import { promises as fs } from "fs";
+import { promises as fs, readdirSync } from "fs";
 import { serialize } from "next-mdx-remote/serialize";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -14,6 +14,26 @@ import { Button } from "@/components/ui/button";
 import { Check, ChevronRight, ChevronLeft } from "lucide-react";
 import { TwitterShareButton } from "@/components/blog/TwitterShareButton";
 import { HEADSHOTS } from "../page";
+
+/**
+ * Generate static params for all blog posts at build time.
+ * This enables static generation and proper sitemap inclusion.
+ */
+export async function generateStaticParams() {
+  const blogDir = path.join(process.cwd(), "app", "blog", "blogs");
+
+  try {
+    const entries = readdirSync(blogDir, { withFileTypes: true });
+    return entries
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => ({
+        "file-path": entry.name,
+      }));
+  } catch (error) {
+    console.error("Error reading blog directory:", error);
+    return [];
+  }
+}
 
 export default async function Home({
   params,
