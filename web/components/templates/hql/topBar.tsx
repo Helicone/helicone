@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { Save } from "lucide-react";
+import { Save, Play } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Play } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { ApiCommandDialog } from "./ApiCommandDialog";
 
 interface TopBarProps {
   currentQuery: {
@@ -47,6 +47,8 @@ export default function TopBar({
         </div>
 
         <div className="flex items-center gap-2">
+          <ApiCommandDialog sql={currentQuery.sql} />
+
           <Button
             variant="action"
             size="sm"
