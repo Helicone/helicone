@@ -12,34 +12,42 @@ import { HandlerContext } from "./HandlerContext";
 import { cacheResultCustom } from "../../utils/cacheResult";
 import { IntegrationManager } from "../../managers/IntegrationManager";
 
-const AVAILABLE_MODELS_IN_STRIPE = [
+/**
+ * Set of all valid Stripe model identifiers.
+ * Stripe uses hyphens instead of dots in version numbers.
+ */
+const AVAILABLE_MODELS_IN_STRIPE = new Set([
+  // Anthropic models
   "anthropic/claude-3-5-haiku",
+  "anthropic/claude-haiku-4-5",
   "anthropic/claude-3-7-sonnet",
   "anthropic/claude-3-haiku",
   "anthropic/claude-opus-4",
   "anthropic/claude-opus-4-1",
   "anthropic/claude-sonnet-4",
-  "anthropic/claude-sonnet-4-above200k",
-  "google/gemini-2.0-flash",
-  "google/gemini-2.0-flash-lite",
-  "google/gemini-2.5-flash",
-  "google/gemini-2.5-flash-audio",
-  "google/gemini-2.5-flash-image-preview",
-  "google/gemini-2.5-flash-lite",
-  "google/gemini-2.5-flash-lite-audio",
-  "google/gemini-2.5-flash-preview-native-audio-dialog",
-  "google/gemini-2.5-flash-preview-native-audio-dialog-audio",
-  "google/gemini-2.5-flash-preview-native-audio-dialog-audio-video",
-  "google/gemini-2.5-flash-preview-tts",
-  "google/gemini-2.5-pro",
-  "google/gemini-2.5-pro-above200k",
-  "google/gemini-2.5-pro-preview-tts",
-  "google/gemini-live-2.5-flash-preview",
-  "google/gemini-live-2.5-flash-preview-audio",
-  "google/gemini-live-2.5-flash-preview-audio-video",
-  "openai/gpt-4.1",
-  "openai/gpt-4.1-mini",
-  "openai/gpt-4.1-nano",
+  "anthropic/claude-sonnet-4-5",
+  // Google Gemini models
+  "google/gemini-2-0-flash",
+  "google/gemini-2-0-flash-lite",
+  "google/gemini-2-5-flash",
+  "google/gemini-2-5-flash-audio",
+  "google/gemini-2-5-flash-image-preview",
+  "google/gemini-2-5-flash-lite",
+  "google/gemini-2-5-flash-lite-audio",
+  "google/gemini-2-5-flash-preview-native-audio-dialog",
+  "google/gemini-2-5-flash-preview-native-audio-dialog-audio",
+  "google/gemini-2-5-flash-preview-native-audio-dialog-audio-video",
+  "google/gemini-2-5-flash-preview-tts",
+  "google/gemini-2-5-pro",
+  "google/gemini-2-5-pro-above200k",
+  "google/gemini-2-5-pro-preview-tts",
+  "google/gemini-live-2-5-flash-preview",
+  "google/gemini-live-2-5-flash-preview-audio",
+  "google/gemini-live-2-5-flash-preview-audio-video",
+  // OpenAI models
+  "openai/gpt-4-1",
+  "openai/gpt-4-1-mini",
+  "openai/gpt-4-1-nano",
   "openai/gpt-4o",
   "openai/gpt-4o-mini",
   "openai/gpt-5",
@@ -52,7 +60,64 @@ const AVAILABLE_MODELS_IN_STRIPE = [
   "openai/o3-mini",
   "openai/o3-pro",
   "openai/o4-mini",
-];
+  // Perplexity models
+  "perplexity/sonar-reasoning-pro",
+  "perplexity/sonar-pro",
+  "perplexity/sonar-deep-research",
+  "perplexity/sonar-reasoning",
+  "perplexity/sonar",
+]);
+
+/**
+ * Maps internal Helicone model names to Stripe's expected format.
+ *
+ * Key differences:
+ * - Stripe uses hyphens instead of dots in version numbers
+ *   (e.g., "claude-3.5-haiku" -> "claude-3-5-haiku")
+ * - Stripe uses hyphens instead of dots in model version suffixes
+ *   (e.g., "gpt-4.1" -> "gpt-4-1")
+ *
+ * @param internalModel - The internal model name in format "provider/model-name"
+ * @returns The Stripe-formatted model name, or null if not supported
+ */
+export function mapModelToStripeFormat(
+  internalModel: string
+): string | null {
+  // Convert dots to hyphens for Stripe compatibility
+  // This handles version numbers like "3.5" -> "3-5", "4.1" -> "4-1", etc.
+  const stripeModel = internalModel.replace(/\./g, "-");
+
+  // Check if the mapped model exists in Stripe's available models
+  if (AVAILABLE_MODELS_IN_STRIPE.has(stripeModel)) {
+    return stripeModel;
+  }
+
+  return null;
+}
+
+/**
+ * Checks if a model (in either internal or Stripe format) is available in Stripe.
+ *
+ * @param model - The model name to check
+ * @returns true if the model is available in Stripe
+ */
+export function isModelAvailableInStripe(model: string): boolean {
+  // Check direct match (already in Stripe format)
+  if (AVAILABLE_MODELS_IN_STRIPE.has(model)) {
+    return true;
+  }
+  // Check if internal format maps to a valid Stripe model
+  return mapModelToStripeFormat(model) !== null;
+}
+
+/**
+ * Gets all available Stripe model identifiers.
+ *
+ * @returns Array of all Stripe model identifiers
+ */
+export function getAvailableStripeModels(): string[] {
+  return Array.from(AVAILABLE_MODELS_IN_STRIPE);
+}
 
 const DEFAULT_CACHE_REFERENCE_ID = "00000000-0000-0000-0000-000000000000";
 type StripeMeterEvent = Stripe.V2.Billing.MeterEventStreamCreateParams.Event;
@@ -187,7 +252,10 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
       100
     ); // Limit length
 
-    if (!AVAILABLE_MODELS_IN_STRIPE.includes(formattedModel)) {
+    // Map internal model format to Stripe format (dots -> hyphens for version numbers)
+    const stripeModel = mapModelToStripeFormat(formattedModel);
+
+    if (!stripeModel) {
       context.processedLog.request.properties = {
         ...(context.processedLog.request.properties || {}),
         "helicone-stripe-integration-status": "skipped",
@@ -226,7 +294,7 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
           stripe_customer_id: stripeCustomerId,
           value: promptTokens.toString(),
           token_type: "input",
-          model: formattedModel,
+          model: stripeModel,
         },
       };
       this.stripeTraceUsages[organizationId].push(promptEvent);
@@ -248,7 +316,7 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
           stripe_customer_id: stripeCustomerId,
           value: completionTokens.toString(),
           token_type: "output",
-          model: formattedModel,
+          model: stripeModel,
         },
       };
       this.stripeTraceUsages[organizationId].push(completionEvent);
@@ -267,7 +335,7 @@ export class StripeIntegrationHandler extends AbstractLogHandler {
         ...(context.processedLog.request.properties || {}),
         "helicone-stripe-integration-status": "processed",
         "helicone-stripe-customer-id": stripeCustomerId,
-        "helicone-stripe-model": formattedModel,
+        "helicone-stripe-model": stripeModel,
       };
     }
 
