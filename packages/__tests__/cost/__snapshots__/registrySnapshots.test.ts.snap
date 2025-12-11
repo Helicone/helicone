@@ -2572,6 +2572,28 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "llama-3.3-70b-instruct:nebius": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "meta-llama/Llama-3.3-70B-Instruct",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "repetition_penalty",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "nebius",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "llama-3.3-70b-instruct:novita": {
       "context": 131072,
       "crossRegion": false,
@@ -5720,6 +5742,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "groq",
     "groq",
     "nebius",
+    "nebius",
     "novita",
     "novita",
     "novita",
@@ -8073,6 +8096,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "llama-3.3-70b-instruct",
       "providers": [
+        "nebius",
         "novita",
         "openrouter",
       ],
@@ -8324,7 +8348,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "mistral",
     },
     {
-      "modelCount": 3,
+      "modelCount": 4,
       "provider": "nebius",
     },
     {
