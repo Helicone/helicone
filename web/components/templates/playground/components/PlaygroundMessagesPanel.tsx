@@ -31,6 +31,11 @@ interface PlaygroundMessagesPanelProps {
   error: string | null;
   isLoading?: boolean;
   createPrompt?: boolean;
+  unsupportedModelWarning?: {
+    originalModel: string;
+    fallbackModel: string;
+  } | null;
+  onDismissUnsupportedModelWarning?: () => void;
 }
 
 const PlaygroundMessagesPanel = ({
@@ -52,6 +57,8 @@ const PlaygroundMessagesPanel = ({
   error,
   isLoading,
   createPrompt,
+  unsupportedModelWarning,
+  onDismissUnsupportedModelWarning,
 }: PlaygroundMessagesPanelProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
@@ -253,6 +260,8 @@ const PlaygroundMessagesPanel = ({
           error={error}
           isLoading={isLoading}
           createPrompt={createPrompt}
+          unsupportedModelWarning={unsupportedModelWarning}
+          onDismissUnsupportedModelWarning={onDismissUnsupportedModelWarning}
         />
       </div>
     </div>

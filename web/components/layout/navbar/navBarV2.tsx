@@ -185,12 +185,6 @@ const NavBarV2 = (props: NavBarV2Props) => {
                       Documentation
                     </Link>
                     <Link
-                      href="/roadmap"
-                      className="text-md font-semibold text-gray-900 dark:text-gray-300"
-                    >
-                      Roadmap
-                    </Link>
-                    <Link
                       href="https://github.com/Helicone/helicone"
                       target="_blank"
                       rel="noopener noreferrer"

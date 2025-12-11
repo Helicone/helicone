@@ -192,6 +192,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "qwen3-coder:canopywave": {
+      "context": 262144,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "qwen/qwen3-coder",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "canopywave",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "qwen3-coder:deepinfra": {
       "context": 262144,
       "crossRegion": false,
@@ -748,7 +774,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "context": 200000,
       "crossRegion": false,
       "maxTokens": 64000,
-      "modelId": "claude-opus-4-5",
+      "modelId": "claude-opus-4-5-20251101",
       "parameters": [
         "include_reasoning",
         "max_tokens",
@@ -2487,6 +2513,28 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "llama-3.3-70b-instruct:nebius": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "meta-llama/Llama-3.3-70B-Instruct",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "repetition_penalty",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "nebius",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "llama-3.3-70b-instruct:novita": {
       "context": 131072,
       "crossRegion": false,
@@ -3129,6 +3177,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "kimi-k2-thinking:canopywave": {
+      "context": 262144,
+      "crossRegion": false,
+      "maxTokens": 262144,
+      "modelId": "moonshotai/kimi-k2-thinking",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "canopywave",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -4554,6 +4625,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "openai/oss": {
+    "gpt-oss-120b:baseten": {
+      "context": 128072,
+      "crossRegion": false,
+      "maxTokens": 128072,
+      "modelId": "openai/gpt-oss-120b",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "baseten",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-oss-120b:cerebras": {
       "context": 131072,
       "crossRegion": false,
@@ -5422,6 +5513,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "nebius",
   ],
   "alibaba/qwen3": [
+    "canopywave",
     "deepinfra",
     "deepinfra",
     "deepinfra",
@@ -5586,6 +5678,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "groq",
     "groq",
     "nebius",
+    "nebius",
     "novita",
     "novita",
     "novita",
@@ -5607,6 +5700,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   ],
   "moonshotai/kimi-k2": [
     "baseten",
+    "canopywave",
     "deepinfra",
     "deepinfra",
     "fireworks",
@@ -5702,6 +5796,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
   ],
   "openai/oss": [
+    "baseten",
     "cerebras",
     "deepinfra",
     "groq",
@@ -5758,6 +5853,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "alibaba/qwen3": {
+    "canopywave": [
+      {
+        "input": 2.2e-7,
+        "output": 9.5e-7,
+        "threshold": 0,
+      },
+    ],
     "deepinfra": [
       {
         "input": 3e-7,
@@ -6968,6 +7070,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 0,
       },
     ],
+    "canopywave": [
+      {
+        "input": 4.8e-7,
+        "output": 0.000002,
+        "threshold": 0,
+      },
+    ],
     "deepinfra": [
       {
         "input": 5.5e-7,
@@ -7257,6 +7366,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "openai/oss": {
+    "baseten": [
+      {
+        "input": 1e-7,
+        "output": 5e-7,
+        "threshold": 0,
+      },
+    ],
     "cerebras": [
       {
         "input": 3.5e-7,
@@ -7745,6 +7861,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "gpt-oss-120b",
       "providers": [
+        "baseten",
         "cerebras",
         "deepinfra",
         "groq",
@@ -7846,6 +7963,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "kimi-k2-thinking",
       "providers": [
+        "canopywave",
         "deepinfra",
         "fireworks",
         "novita",
@@ -7875,6 +7993,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "llama-3.3-70b-instruct",
       "providers": [
+        "nebius",
         "novita",
         "openrouter",
       ],
@@ -8015,6 +8134,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "qwen3-coder",
       "providers": [
+        "canopywave",
         "deepinfra",
       ],
     },
@@ -8077,7 +8197,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "azure",
     },
     {
-      "modelCount": 1,
+      "modelCount": 2,
       "provider": "baseten",
     },
     {
@@ -8085,7 +8205,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "bedrock",
     },
     {
-      "modelCount": 1,
+      "modelCount": 3,
       "provider": "canopywave",
     },
     {
@@ -8125,7 +8245,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "mistral",
     },
     {
-      "modelCount": 3,
+      "modelCount": 4,
       "provider": "nebius",
     },
     {
@@ -8255,8 +8375,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 241,
-  "totalModelProviderConfigs": 241,
+  "totalEndpoints": 245,
+  "totalModelProviderConfigs": 245,
   "totalModelsWithPtb": 91,
   "totalProviders": 21,
 }

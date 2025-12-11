@@ -230,6 +230,9 @@ describe("VertexProvider", () => {
         expect(parsed.generationConfig).toEqual({
           temperature: 0.5,
           maxOutputTokens: 1024,
+          thinkingConfig: {
+            thinkingBudget: 0,
+          },
         });
       });
 

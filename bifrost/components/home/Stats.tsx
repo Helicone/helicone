@@ -68,10 +68,7 @@ const Stats = ({
             {humanReadableNumber(totalValuesData?.total_requests ?? 0)}
           </span>{" "}
           requests processed,{" "}
-          <span className="text-brand">
-            {humanReadableNumber(totalValuesData?.total_tokens ?? 0)}
-          </span>{" "}
-          tokens logged and <span className="text-brand">18.3 million</span>{" "}
+          <span className="text-brand">1 Trillion</span> tokens a month, <span className="text-brand">18.3 million</span>{" "}
           users tracked
         </h1>
       </div>

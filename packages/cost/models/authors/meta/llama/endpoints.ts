@@ -484,6 +484,36 @@ export const endpoints = {
       "*": {},
     },
   },
+  "llama-3.3-70b-instruct:nebius": {
+    provider: "nebius",
+    author: "meta-llama",
+    providerModelId: "meta-llama/Llama-3.3-70B-Instruct",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000013, // $0.13/1M tokens
+        output: 0.0000004, // $0.40/1M tokens
+      },
+    ],
+    quantization: "fp8",
+    contextLength: 128_000,
+    maxCompletionTokens: 128_000,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "frequency_penalty",
+      "presence_penalty",
+      "top_k",
+      "repetition_penalty",
+      "tools",
+      "tool_choice",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
   "llama-3.1-8b-instant:openrouter": {
     provider: "openrouter",
     author: "meta-llama",
