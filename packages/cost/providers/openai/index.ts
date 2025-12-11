@@ -880,6 +880,17 @@ const baseCosts: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "gpt-5.2",
+    },
+    cost: {
+      prompt_token: 0.00000175,
+      completion_token: 0.000014,
+      prompt_cache_read_token: 0.000000175,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
       value: "codex-mini-latest",
     },
     cost: {
