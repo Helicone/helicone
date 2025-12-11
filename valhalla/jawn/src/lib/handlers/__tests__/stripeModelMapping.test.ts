@@ -2,7 +2,7 @@ import {
   mapModelToStripeFormat,
   isModelAvailableInStripe,
   getAvailableStripeModels,
-} from "../StripeIntegrationHandler";
+} from "../../../../../packages/stripe-mapping";
 
 describe("Stripe Model Mapping", () => {
   describe("mapModelToStripeFormat", () => {
