@@ -73,13 +73,14 @@ export const endpoints = {
       "temperature",
       "top_p",
       "logprobs",
-    ],
-    unsupportedParameters: [
       "presence_penalty",
       "frequency_penalty",
-      "top_logprobs",
       "logit_bias",
       "max_tokens",
+      "top_logprobs",
+      "verbosity",
+    ],
+    unsupportedParameters: [
     ],
     ptbEnabled: true,
     endpointConfigs: {
@@ -112,6 +113,7 @@ export const endpoints = {
       "max_completion_tokens",
       "response_format",
       "stop",
+      "verbosity",
     ],
     unsupportedParameters: [
       "temperature",
@@ -122,7 +124,6 @@ export const endpoints = {
       "top_logprobs",
       "logit_bias",
       "max_tokens",
-      "verbosity",
     ],
     ptbEnabled: true,
     endpointConfigs: {
@@ -150,17 +151,17 @@ export const endpoints = {
       "max_completion_tokens",
       "response_format",
       "stop",
-    ],
-    unsupportedParameters: [
       "temperature",
       "top_p",
+      "logprobs",
       "presence_penalty",
       "frequency_penalty",
-      "logprobs",
-      "top_logprobs",
       "logit_bias",
       "max_tokens",
+      "top_logprobs",
       "verbosity",
+    ],
+    unsupportedParameters: [
     ],
     ptbEnabled: true,
     endpointConfigs: {
@@ -235,17 +236,17 @@ export const endpoints = {
       "max_completion_tokens",
       "response_format",
       "stop",
-    ],
-    unsupportedParameters: [
       "temperature",
       "top_p",
+      "logprobs",
       "presence_penalty",
       "frequency_penalty",
-      "logprobs",
-      "top_logprobs",
       "logit_bias",
       "max_tokens",
-      "n",
+      "top_logprobs",
+      "verbosity",
+    ],
+    unsupportedParameters: [
     ],
     ptbEnabled: true,
     endpointConfigs: {
