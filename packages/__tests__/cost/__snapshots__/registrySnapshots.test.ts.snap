@@ -4354,6 +4354,48 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "openai/gpt-5.2": {
+    "gpt-5.2:openai": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5.2",
+      "parameters": [
+        "max_completion_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.2:openrouter": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "openai/gpt-5.2",
+      "parameters": [
+        "max_completion_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
   "openai/o1": {
     "o1-mini:helicone": {
       "context": 128000,
@@ -5771,6 +5813,10 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "openrouter",
     "openrouter",
+    "openrouter",
+  ],
+  "openai/gpt-5.2": [
+    "openai",
     "openrouter",
   ],
   "openai/o1": [
@@ -7269,6 +7315,27 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "openai/gpt-5.2": {
+    "openai": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+        },
+        "input": 0.00000175,
+        "output": 0.000014,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.00000185,
+        "output": 0.00001477,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+  },
   "openai/o1": {
     "helicone": [
       {
@@ -7859,6 +7926,13 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "gpt-5.2",
+      "providers": [
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
       "model": "gpt-oss-120b",
       "providers": [
         "baseten",
@@ -8253,11 +8327,11 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "novita",
     },
     {
-      "modelCount": 21,
+      "modelCount": 22,
       "provider": "openai",
     },
     {
-      "modelCount": 55,
+      "modelCount": 56,
       "provider": "openrouter",
     },
     {
@@ -8319,6 +8393,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "gpt-5.1-chat-latest",
     "gpt-5.1-codex",
     "gpt-5.1-codex-mini",
+    "gpt-5.2",
     "gpt-oss-120b",
     "gpt-oss-20b",
     "grok-3",
@@ -8375,9 +8450,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 245,
-  "totalModelProviderConfigs": 245,
-  "totalModelsWithPtb": 91,
+  "totalEndpoints": 247,
+  "totalModelProviderConfigs": 247,
+  "totalModelsWithPtb": 92,
   "totalProviders": 21,
 }
 `;
