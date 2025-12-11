@@ -12,6 +12,23 @@ const getChangelogEntries = () => {
   return fs.readdirSync(changelogDir).map((file) => `/changelog/${file}`);
 };
 
+const getModelPages = () => {
+  const modelListPath = path.join(process.cwd(), "generated", "model-list.json");
+
+  if (!fs.existsSync(modelListPath)) {
+    console.warn("Warning: model-list.json not found. Model pages will not be included in sitemap.");
+    return [];
+  }
+
+  try {
+    const modelListData = JSON.parse(fs.readFileSync(modelListPath, "utf-8"));
+    return modelListData.models.map((modelId) => `/model/${encodeURIComponent(modelId)}`);
+  } catch (error) {
+    console.error("Error reading model-list.json:", error);
+    return [];
+  }
+};
+
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
   siteUrl: SITE_URL,
@@ -29,6 +46,8 @@ module.exports = {
   additionalPaths: async (config) => {
     const blogPosts = getBlogPosts();
     const changelogEntries = getChangelogEntries();
+    const modelPages = getModelPages();
+
     return [
       ...blogPosts.map((path) => ({
         loc: path,
@@ -39,6 +58,11 @@ module.exports = {
         loc: path,
         changefreq: "weekly",
         priority: 0.6,
+      })),
+      ...modelPages.map((path) => ({
+        loc: path,
+        changefreq: "weekly",
+        priority: 0.8,
       })),
     ];
   },

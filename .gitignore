@@ -1,5 +1,6 @@
 scripts/
 !valhalla/jawn/scripts/
+!bifrost/scripts/
 dist/
 server.py
 .agent/

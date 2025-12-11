@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3002",
+    "prebuild": "npx tsx scripts/generate-model-list.ts",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -76,10 +77,11 @@
     "@types/react-dom": "^18",
     "@types/react-simple-maps": "^3.0.6",
     "@types/rss": "^0.0.32",
-    "eslint": "^8",
+    "eslint": "^9.39.1",
     "eslint-config-next": "14.2.3",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
+    "tsx": "^4.0.0",
     "typescript": "^5"
   }
 }

@@ -37,3 +37,6 @@ next-env.d.ts
 
 
 package-lock.json
+
+# generated files (created during build)
+/generated/
