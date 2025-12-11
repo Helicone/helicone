@@ -12,15 +12,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { DraggableAttributes } from "@dnd-kit/core";
 import type { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
 import { Message } from "@helicone-package/llm-mapper/types";
-import { Trash2Icon, ClipboardIcon, ClipboardCheckIcon } from "lucide-react";
+import {
+  Trash2Icon,
+  ClipboardIcon,
+  ClipboardCheckIcon,
+  Languages,
+  Loader2,
+} from "lucide-react";
 import { ReactNode, useState } from "react";
 import { LuPlus } from "react-icons/lu";
 import { ChatMode } from "../Chat";
 import { RoleBadge, getHeaderTint } from "./RoleBadge";
 import { cn } from "@/lib/utils";
+
+interface TranslationState {
+  isLoading: boolean;
+  isShowingTranslation: boolean;
+  error: string | null;
+  translatedText: string | null;
+}
 
 interface ChatMessageTopBarProps {
   dragHandle?: ReactNode;
@@ -37,6 +55,10 @@ interface ChatMessageTopBarProps {
   onAddText?: () => void;
   onAddImage?: () => void;
   onCopyContent?: () => void;
+  onTranslate?: () => void;
+  translationState?: TranslationState;
+  isTranslationConfigured?: boolean;
+  targetLanguage?: string;
 }
 
 const ROLE_OPTIONS = [
@@ -97,6 +119,10 @@ export default function ChatMessageTopBar({
   onAddText,
   onAddImage,
   onCopyContent,
+  onTranslate,
+  translationState,
+  isTranslationConfigured,
+  targetLanguage,
 }: ChatMessageTopBarProps) {
   const [copied, setCopied] = useState(false);
 
@@ -159,6 +185,36 @@ export default function ChatMessageTopBar({
                   <ClipboardIcon className="h-3 w-3" />
                 )}
               </Button>
+            )}
+            {isTranslationConfigured && onTranslate && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className={cn(
+                      "h-4 w-4 text-muted-foreground hover:text-foreground",
+                      translationState?.isShowingTranslation &&
+                        "text-sky-500 dark:text-sky-400"
+                    )}
+                    onClick={onTranslate}
+                    disabled={translationState?.isLoading}
+                  >
+                    {translationState?.isLoading ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <Languages className="h-3 w-3" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  {translationState?.isShowingTranslation
+                    ? "Show original"
+                    : translationState?.translatedText
+                      ? `Show ${targetLanguage} translation`
+                      : `Translate to ${targetLanguage}`}
+                </TooltipContent>
+              </Tooltip>
             )}
           </div>
         )}

@@ -7,7 +7,7 @@ import {
   NoSymbolIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
-import { KeyIcon, LinkIcon, Plug, Webhook, Lock } from "lucide-react";
+import { KeyIcon, LinkIcon, Plug, Webhook, Lock, Languages } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ReactNode } from "react";
@@ -82,6 +82,15 @@ const ACCOUNTS_TABS = [
   },
 ];
 
+const PREFERENCES_TABS = [
+  {
+    id: "translation",
+    title: "Translation",
+    icon: Languages,
+    href: "/settings/translation",
+  },
+];
+
 interface SettingsLayoutProps {
   children: ReactNode;
 }
@@ -143,6 +152,7 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
             <div className="space-y-8">
               {renderNavSection("Organization", organizationTabs)}
               {renderNavSection("Developer", DEVELOPER_TABS)}
+              {renderNavSection("Preferences", PREFERENCES_TABS)}
               {isBetterAuthEnabled &&
                 renderNavSection("Accounts", ACCOUNTS_TABS)}
             </div>
