@@ -34,6 +34,17 @@ export const models = {
     modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "DeepSeek"
   },
+  "deepseek-v3.2-speciale": {
+    name: "DeepSeek V3.2 Speciale",
+    author: "deepseek",
+    description:
+      "DeepSeek 3.2 Speciale is an advanced AI model engineered for superior reasoning and problem-solving, particularly in technical domains like coding and mathematics. This specialized version offers greater accuracy and nuanced understanding for complex tasks while remaining versatile for general conversation.",
+    contextLength: 163_840,
+    maxOutputTokens: 65_536,
+    created: "2025-09-22T00:00:00.000Z",
+    modality: { inputs: ["text"], outputs: ["text"] },
+    tokenizer: "DeepSeek"
+  },
 } satisfies Record<string, ModelConfig>;
 
 export type DeepSeekV3ModelName = keyof typeof models;
