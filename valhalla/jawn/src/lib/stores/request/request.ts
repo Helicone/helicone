@@ -171,11 +171,12 @@ export async function getRequestsClickhouseNoSort(
   const sortSQL = createdAtSort === "asc" ? "ASC" : "DESC";
   const query = `
     WITH top_requests AS (
-      SELECT 
+      SELECT
           request_id,
           request_created_at
       FROM request_response_rmt
       WHERE (${builtFilter.filter})
+        AND request_created_at <= now()
       ORDER BY request_created_at ${sortSQL}
       LIMIT ${limit}
       OFFSET ${offset}
@@ -298,6 +299,7 @@ export async function getRequestsClickhouse(
     FROM request_response_rmt
     WHERE (
       (${builtFilter.filter})
+      AND request_created_at <= now()
     )
     ${sortSQL !== undefined ? `ORDER BY ${sortSQL}` : ""}
     LIMIT ${limit}
