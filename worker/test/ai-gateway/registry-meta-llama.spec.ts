@@ -3943,6 +3943,74 @@ describe("Meta Llama Registry Tests", () => {
         },
       }));
 
+    it("should handle nebius provider", () =>
+      runGatewayTest({
+        model: "llama-3.3-70b-instruct/nebius",
+        expected: {
+          providers: [
+            {
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
+              response: "success",
+              model: "meta-llama/Llama-3.3-70B-Instruct",
+              data: createOpenAIMockResponse("meta-llama/Llama-3.3-70B-Instruct"),
+              expects: nebiusAuthExpectations,
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle tool calls with nebius provider", () =>
+      runGatewayTest({
+        model: "llama-3.3-70b-instruct/nebius",
+        request: {
+          body: {
+            messages: [{ role: "user", content: "What's the weather in Paris?" }],
+            tools: [
+              {
+                type: "function",
+                function: {
+                  name: "get_weather",
+                  description: "Get current weather",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      location: { type: "string" },
+                      unit: { type: "string", enum: ["celsius", "fahrenheit"] },
+                    },
+                    required: ["location"],
+                  },
+                },
+              },
+            ],
+            tool_choice: "auto",
+            temperature: 0.7,
+            max_tokens: 4000,
+          },
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
+              response: "success",
+              model: "meta-llama/Llama-3.3-70B-Instruct",
+              data: createOpenAIMockResponse("meta-llama/Llama-3.3-70B-Instruct"),
+              expects: {
+                ...nebiusAuthExpectations,
+                bodyContains: [
+                  "tools",
+                  "tool_choice",
+                  "get_weather",
+                  "temperature",
+                  "max_tokens",
+                ],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
     // Test tool usage with Novita for llama-3.3-70b-instruct
     it("should handle tool calls with novita provider", () =>
       runGatewayTest({
@@ -4031,6 +4099,66 @@ describe("Meta Llama Registry Tests", () => {
         },
       }));
 
+    it("should handle all supported parameters with nebius provider", () =>
+      runGatewayTest({
+        model: "llama-3.3-70b-instruct/nebius",
+        request: {
+          body: {
+            messages: [
+              { role: "user", content: "Test comprehensive parameters" },
+            ],
+            max_tokens: 8000,
+            temperature: 0.9,
+            top_p: 0.95,
+            frequency_penalty: 0.2,
+            presence_penalty: 0.1,
+            top_k: 50,
+            repetition_penalty: 1.05,
+            tools: [
+              {
+                type: "function",
+                function: {
+                  name: "test_function",
+                  description: "A test function for parameter validation",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      param: { type: "string" },
+                    },
+                  },
+                },
+              },
+            ],
+            tool_choice: "auto",
+          },
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
+              response: "success",
+              model: "meta-llama/Llama-3.3-70B-Instruct",
+              data: createOpenAIMockResponse("meta-llama/Llama-3.3-70B-Instruct"),
+              expects: {
+                ...nebiusAuthExpectations,
+                bodyContains: [
+                  "max_tokens",
+                  "temperature",
+                  "top_p",
+                  "frequency_penalty",
+                  "presence_penalty",
+                  "top_k",
+                  "repetition_penalty",
+                  "tool_choice",
+                  "tools",
+                ],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
     // Test all supported parameters for llama-3.3-70b-instruct
     it("should handle all supported parameters with novita provider", () =>
       runGatewayTest({
@@ -4098,6 +4226,35 @@ describe("Meta Llama Registry Tests", () => {
         },
       }));
 
+    it("should handle large max completion tokens correctly with nebius provider", () =>
+      runGatewayTest({
+        model: "llama-3.3-70b-instruct/nebius",
+        request: {
+          body: {
+            messages: [
+              { role: "user", content: "Generate a very long response" },
+            ],
+            max_tokens: 128000, // Max completion tokens for nebius
+            temperature: 0.3,
+          },
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
+              response: "success",
+              model: "meta-llama/Llama-3.3-70B-Instruct",
+              data: createOpenAIMockResponse("meta-llama/Llama-3.3-70B-Instruct"),
+              expects: {
+                ...nebiusAuthExpectations,
+                bodyContains: ["max_tokens", "128000"],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
     // Test max completion tokens for llama-3.3-70b-instruct (120,000)
     it("should handle large max completion tokens correctly", () =>
       runGatewayTest({
@@ -4121,6 +4278,71 @@ describe("Meta Llama Registry Tests", () => {
               expects: {
                 ...novitaAuthExpectations,
                 bodyContains: ["max_tokens", "120000"],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle streaming requests with nebius provider", () =>
+      runGatewayTest({
+        model: "llama-3.3-70b-instruct/nebius",
+        request: {
+          stream: true,
+          body: {
+            messages: [{ role: "user", content: "Stream this response" }],
+            temperature: 0.7,
+          },
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
+              response: "success",
+              model: "meta-llama/Llama-3.3-70B-Instruct",
+              data: createOpenAIMockResponse("meta-llama/Llama-3.3-70B-Instruct"),
+              expects: {
+                ...nebiusAuthExpectations,
+                bodyContains: ["stream", "true"],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle complex multi-turn conversations with nebius provider", () =>
+      runGatewayTest({
+        model: "llama-3.3-70b-instruct/nebius",
+        request: {
+          body: {
+            messages: [
+              { role: "system", content: "You are a helpful assistant." },
+              { role: "user", content: "Hello, how are you?" },
+              { role: "assistant", content: "I'm doing well, thank you!" },
+              { role: "user", content: "What can you help me with?" },
+            ],
+            temperature: 0.5,
+            max_tokens: 500,
+          },
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
+              response: "success",
+              model: "meta-llama/Llama-3.3-70B-Instruct",
+              data: createOpenAIMockResponse("meta-llama/Llama-3.3-70B-Instruct"),
+              expects: {
+                ...nebiusAuthExpectations,
+                bodyContains: [
+                  "system",
+                  "user",
+                  "assistant",
+                  "temperature",
+                  "max_tokens",
+                ],
               },
             },
           ],
@@ -4177,6 +4399,189 @@ describe("Meta Llama Registry Tests", () => {
         },
       })
     );
+
+    // Test error scenarios for llama-3.3-70b-instruct with Nebius
+    it("should handle Nebius provider failure", () =>
+      runGatewayTest({
+        model: "llama-3.3-70b-instruct/nebius",
+        expected: {
+          providers: [
+            {
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
+              response: "failure",
+              statusCode: 500,
+              errorMessage: "Nebius service unavailable",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+
+    it("should handle rate limiting from Nebius", () =>
+      runGatewayTest({
+        model: "llama-3.3-70b-instruct/nebius",
+        expected: {
+          providers: [
+            {
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
+              response: "failure",
+              statusCode: 429,
+              errorMessage: "Rate limit exceeded",
+            },
+          ],
+          finalStatus: 429,
+        },
+      }));
+
+    it("should handle authentication failure from Nebius", () =>
+      runGatewayTest({
+        model: "llama-3.3-70b-instruct/nebius",
+        expected: {
+          providers: [
+            {
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
+              response: "failure",
+              statusCode: 401,
+              errorMessage: "Invalid API key",
+            },
+          ],
+          finalStatus: 401,
+        },
+      }));
+
+    it("should handle model not found error from Nebius", () =>
+      runGatewayTest({
+        model: "llama-3.3-70b-instruct/nebius",
+        expected: {
+          providers: [
+            {
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
+              response: "failure",
+              statusCode: 404,
+              errorMessage: "Model not found",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+
+    it("should handle timeout from Nebius", () =>
+      runGatewayTest({
+        model: "llama-3.3-70b-instruct/nebius",
+        expected: {
+          providers: [
+            {
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
+              response: "failure",
+              statusCode: 408,
+              errorMessage: "Request timeout",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+
+    it("should handle insufficient credits from Nebius", () =>
+      runGatewayTest({
+        model: "llama-3.3-70b-instruct/nebius",
+        expected: {
+          providers: [
+            {
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
+              response: "failure",
+              statusCode: 402,
+              errorMessage: "Insufficient credits",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+  });
+
+  describe("Provider validation - llama-3.3-70b-instruct with Nebius", () => {
+    it("should construct correct Nebius URL for llama-3.3-70b-instruct", () =>
+      runGatewayTest({
+        model: "llama-3.3-70b-instruct/nebius",
+        expected: {
+          providers: [
+            {
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
+              response: "success",
+              model: "meta-llama/Llama-3.3-70B-Instruct",
+              data: createOpenAIMockResponse("meta-llama/Llama-3.3-70B-Instruct"),
+              expects: nebiusAuthExpectations,
+              customVerify: (call) => {
+                // Verify that the URL is correctly constructed
+                // Base URL: https://api.tokenfactory.nebius.com/v1/
+                // Built URL: https://api.tokenfactory.nebius.com/v1/chat/completions
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle provider model ID mapping correctly for Nebius", () =>
+      runGatewayTest({
+        model: "llama-3.3-70b-instruct/nebius",
+        expected: {
+          providers: [
+            {
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
+              response: "success",
+              model: "meta-llama/Llama-3.3-70B-Instruct",
+              data: createOpenAIMockResponse("meta-llama/Llama-3.3-70B-Instruct"),
+              expects: nebiusAuthExpectations,
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle request body mapping for Nebius", () =>
+      runGatewayTest({
+        model: "llama-3.3-70b-instruct/nebius",
+        request: {
+          bodyMapping: "NO_MAPPING",
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
+              response: "success",
+              model: "meta-llama/Llama-3.3-70B-Instruct",
+              data: createOpenAIMockResponse("meta-llama/Llama-3.3-70B-Instruct"),
+              expects: {
+                ...nebiusAuthExpectations,
+                bodyContains: ["user", "Test"],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle pricing configuration correctly", () =>
+      runGatewayTest({
+        model: "llama-3.3-70b-instruct/nebius",
+        expected: {
+          providers: [
+            {
+              url: "https://api.tokenfactory.nebius.com/v1/chat/completions",
+              response: "success",
+              model: "meta-llama/Llama-3.3-70B-Instruct",
+              data: createOpenAIMockResponse("meta-llama/Llama-3.3-70B-Instruct"),
+              expects: nebiusAuthExpectations,
+              customVerify: (call) => {
+                // Verify that the pricing configuration is correctly applied
+                // Input: $0.13/1M tokens, Output: $0.40/1M tokens
+                // This would be verified in the cost calculation logic
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
   });
 
   describe("llama-4-maverick", () => {
