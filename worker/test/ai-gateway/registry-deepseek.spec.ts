@@ -1432,7 +1432,7 @@ describe("DeepSeek Registry Tests", () => {
     });
 
     describe("deepseek-v3.2 with Canopy Wave", () => {
-      it("should handle passthrough billing with novita provider", () =>
+      it("should handle passthrough billing with Canopy Wave provider", () =>
         runGatewayTest({
           model: "deepseek-v3.2/canopywave",
           request: {
