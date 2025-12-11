@@ -9109,6 +9109,25 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ModalityPricing": {
+				"description": "Per-modality pricing configuration.\nSupports input, cached input (as multiplier), and output rates.",
+				"properties": {
+					"input": {
+						"type": "number",
+						"format": "double"
+					},
+					"cachedInputMultiplier": {
+						"type": "number",
+						"format": "double"
+					},
+					"output": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
 			"ModelPricing": {
 				"properties": {
 					"threshold": {
@@ -9120,10 +9139,6 @@
 						"format": "double"
 					},
 					"output": {
-						"type": "number",
-						"format": "double"
-					},
-					"image": {
 						"type": "number",
 						"format": "double"
 					},
@@ -9159,13 +9174,17 @@
 						"type": "number",
 						"format": "double"
 					},
+					"image": {
+						"$ref": "#/components/schemas/ModalityPricing"
+					},
 					"audio": {
-						"type": "number",
-						"format": "double"
+						"$ref": "#/components/schemas/ModalityPricing"
 					},
 					"video": {
-						"type": "number",
-						"format": "double"
+						"$ref": "#/components/schemas/ModalityPricing"
+					},
+					"file": {
+						"$ref": "#/components/schemas/ModalityPricing"
 					},
 					"web_search": {
 						"type": "number",

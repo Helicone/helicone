@@ -358,6 +358,7 @@ export class ChatToResponsesStreamConverter {
               reasoning_tokens: c.usage.completion_tokens_details.reasoning_tokens,
             }
           : undefined,
+        modality_tokens: c.usage.modality_tokens,
       };
 
       const output: ResponsesResponseBody["output"] = [];

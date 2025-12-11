@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Registry Snapshots archived endpoints snapshot 1`] = `{}`;
 
@@ -5910,12 +5910,9 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "groq": [
       {
-        "audio": 0,
         "input": 2.9e-7,
         "output": 5.9e-7,
-        "request": 0,
         "threshold": 0,
-        "web_search": 0,
       },
     ],
     "nebius": [
@@ -6827,12 +6824,9 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "groq": [
       {
-        "audio": 0,
         "input": 7.5e-7,
         "output": 9.9e-7,
-        "request": 0,
         "threshold": 0,
-        "web_search": 0,
       },
     ],
     "openrouter": [
@@ -6846,7 +6840,10 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "google/gemini-2.5-flash": {
     "google-ai-studio": [
       {
-        "audio": 0.000001,
+        "audio": {
+          "cachedInputMultiplier": 0.1,
+          "input": 0.000001,
+        },
         "cacheMultipliers": {
           "cachedInput": 0.25,
           "write5m": 1,
@@ -6866,7 +6863,10 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "vertex": [
       {
-        "audio": 0.000001,
+        "audio": {
+          "cachedInputMultiplier": 0.1,
+          "input": 0.000001,
+        },
         "cacheMultipliers": {
           "cachedInput": 0.25,
           "write5m": 1,
@@ -6881,7 +6881,10 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "google/gemini-2.5-flash-lite": {
     "google-ai-studio": [
       {
-        "audio": 3e-7,
+        "audio": {
+          "cachedInputMultiplier": 0.0833333,
+          "input": 3e-7,
+        },
         "cacheMultipliers": {
           "cachedInput": 0.25,
           "write5m": 1,
@@ -6901,7 +6904,10 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "vertex": [
       {
-        "audio": 3e-7,
+        "audio": {
+          "cachedInputMultiplier": 0.0833333,
+          "input": 3e-7,
+        },
         "cacheMultipliers": {
           "cachedInput": 0.25,
           "write5m": 1,
@@ -7084,12 +7090,9 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "groq": [
       {
-        "audio": 0,
         "input": 1e-8,
         "output": 1e-8,
-        "request": 0,
         "threshold": 0,
-        "web_search": 0,
       },
     ],
     "nebius": [
@@ -7172,15 +7175,12 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "groq": [
       {
-        "audio": 0,
         "cacheMultipliers": {
           "cachedInput": 0.5,
         },
         "input": 0.000001,
         "output": 0.000003,
-        "request": 0,
         "threshold": 0,
-        "web_search": 0,
       },
     ],
     "novita": [
@@ -7461,20 +7461,16 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "deepinfra": [
       {
-        "audio": 0,
         "input": 4e-8,
         "output": 1.6e-7,
-        "request": 0,
         "threshold": 0,
         "web_search": 0.01,
       },
     ],
     "groq": [
       {
-        "audio": 0,
         "input": 1e-7,
         "output": 5e-7,
-        "request": 0,
         "threshold": 0,
         "web_search": 0.01,
       },
@@ -7499,7 +7495,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "perplexity/sonar": {
     "perplexity": [
       {
-        "audio": 0,
         "input": 0.000002,
         "output": 0.000008,
         "request": 0,
@@ -7511,7 +7506,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "xai/endpoints.ts": {
     "helicone": [
       {
-        "audio": 0,
         "cacheMultipliers": {
           "cachedInput": 0.25,
         },
@@ -7531,7 +7525,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "xai": [
       {
-        "audio": 0,
         "cacheMultipliers": {
           "cachedInput": 0.25,
         },

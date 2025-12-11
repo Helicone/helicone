@@ -3273,6 +3273,18 @@ Json: JsonObject;
       /** Format: double */
       tpd?: number;
     };
+    /**
+     * @description Per-modality pricing configuration.
+     * Supports input, cached input (as multiplier), and output rates.
+     */
+    ModalityPricing: {
+      /** Format: double */
+      input?: number;
+      /** Format: double */
+      cachedInputMultiplier?: number;
+      /** Format: double */
+      output?: number;
+    };
     ModelPricing: {
       /** Format: double */
       threshold: number;
@@ -3280,8 +3292,6 @@ Json: JsonObject;
       input: number;
       /** Format: double */
       output: number;
-      /** Format: double */
-      image?: number;
       cacheMultipliers?: {
         /** Format: double */
         write1h?: number;
@@ -3296,10 +3306,10 @@ Json: JsonObject;
       thinking?: number;
       /** Format: double */
       request?: number;
-      /** Format: double */
-      audio?: number;
-      /** Format: double */
-      video?: number;
+      image?: components["schemas"]["ModalityPricing"];
+      audio?: components["schemas"]["ModalityPricing"];
+      video?: components["schemas"]["ModalityPricing"];
+      file?: components["schemas"]["ModalityPricing"];
       /** Format: double */
       web_search?: number;
     };
