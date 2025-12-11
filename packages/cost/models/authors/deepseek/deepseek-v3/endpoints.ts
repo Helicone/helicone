@@ -222,7 +222,7 @@ export const endpoints = {
   "deepseek-v3.2:canopywave": {
     provider: "canopywave",
     author: "deepseek",
-    providerModelId: "deepseek/deepseek-v3.2",
+    providerModelId: "deepseek/deepseek-chat-v3.2",
     pricing: [
       {
         threshold: 0,
