@@ -1766,7 +1766,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "context": 128000,
       "crossRegion": false,
       "maxTokens": 16384,
-      "modelId": "deepseek/deepseek-v3.2",
+      "modelId": "deepseek/deepseek-chat-v3.2",
       "parameters": [
         "frequency_penalty",
         "logit_bias",
