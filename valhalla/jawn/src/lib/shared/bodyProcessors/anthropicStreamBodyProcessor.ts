@@ -1,6 +1,3 @@
-import { calculateModel } from "../../../utils/modelMapper";
-import { consolidateTextFields } from "../../../utils/streamParser";
-import { getTokenCountAnthropic } from "../../tokens/tokenCounter";
 import { PromiseGenericResult, ok } from "../../../packages/common/result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 import { isParseInputJson } from "./helpers";
@@ -25,9 +22,7 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
       });
     }
 
-    const { responseBody, requestBody, requestModel, modelOverride } =
-      parseInput;
-    const model = calculateModel(requestModel, undefined, modelOverride);
+    const { responseBody } = parseInput;
 
     // Store the original response body for later use
     const originalResponseBody = responseBody;
@@ -110,70 +105,38 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
     }
 
     try {
-      if (
-        model?.includes("claude-3") ||
-        model?.includes("claude-sonnet-4") ||
-        model?.includes("claude-opus-4") ||
-        // for AI SDK
-        model?.includes("claude-4")
-      ) {
-        const processedBody = {
-          ...processConsolidatedJsonForClaude3(processedLines),
-          // Store the original response body
-          streamed_data: originalResponseBody,
-        };
+      const processedBody = {
+        ...processConsolidatedJsonForClaude3(processedLines),
+        // Store the original response body
+        streamed_data: originalResponseBody,
+      };
 
-        if (
-          !processedBody?.usage?.output_tokens ||
-          !processedBody?.usage?.input_tokens
-        ) {
-          return ok({
-            processedBody: processedBody,
-          });
-        } else {
-          return ok({
-            processedBody: processedBody,
-            usage: {
-              totalTokens:
-                processedBody?.usage?.input_tokens +
-                processedBody?.usage?.output_tokens +
-                processedBody?.usage?.cache_creation_input_tokens +
-                processedBody?.usage?.cache_read_input_tokens,
-              promptTokens: processedBody?.usage?.input_tokens,
-              promptCacheWriteTokens:
-                processedBody?.usage?.cache_creation_input_tokens,
-              promptCacheReadTokens:
-                processedBody?.usage?.cache_read_input_tokens,
-              completionTokens: processedBody?.usage?.output_tokens,
-              promptCacheWrite5m:
-                processedBody?.usage?.cache_creation?.ephemeral_5m_input_tokens,
-              promptCacheWrite1h:
-                processedBody?.usage?.cache_creation?.ephemeral_1h_input_tokens,
-              heliconeCalculated: true,
-            },
-          });
-        }
-      } else {
-        const claudeData = {
-          ...processedLines[processedLines.length - 1],
-          completion: processedLines.map((d) => d.completion).join(""),
-        };
-        const completionTokens = await getTokenCountAnthropic(
-          claudeData.completion
-        );
-        const promptTokens = await getTokenCountAnthropic(
-          JSON.parse(requestBody ?? "{}")?.prompt ?? ""
-        );
+      if (
+        !processedBody?.usage?.output_tokens ||
+        !processedBody?.usage?.input_tokens
+      ) {
         return ok({
-          processedBody: {
-            ...consolidateTextFields(processedLines),
-            streamed_data: originalResponseBody,
-          },
+          processedBody: processedBody,
+        });
+      } else {
+        return ok({
+          processedBody: processedBody,
           usage: {
-            totalTokens: completionTokens + promptTokens,
-            promptTokens: promptTokens,
-            completionTokens: completionTokens,
-            heliconeCalculated: true,
+            totalTokens:
+              (processedBody?.usage?.input_tokens ?? 0) +
+              (processedBody?.usage?.output_tokens ?? 0) +
+              (processedBody?.usage?.cache_creation_input_tokens ?? 0) +
+              (processedBody?.usage?.cache_read_input_tokens ?? 0),
+            promptTokens: processedBody?.usage?.input_tokens,
+            promptCacheWriteTokens:
+              processedBody?.usage?.cache_creation_input_tokens,
+            promptCacheReadTokens:
+              processedBody?.usage?.cache_read_input_tokens,
+            completionTokens: processedBody?.usage?.output_tokens,
+            promptCacheWrite5m:
+              processedBody?.usage?.cache_creation?.ephemeral_5m_input_tokens,
+            promptCacheWrite1h:
+              processedBody?.usage?.cache_creation?.ephemeral_1h_input_tokens,
           },
         });
       }
@@ -268,82 +231,4 @@ function processConsolidatedJsonForClaude3(events: any[]): any {
   }
 
   return acc;
-}
-
-// This function is no longer used but kept for reference
-function recursivelyConsolidateAnthropicListForClaude3(delta: any[]): any {
-  return delta.reduce((acc, item) => {
-    if (Array.isArray(item)) {
-      return recursivelyConsolidateAnthropicListForClaude3(item);
-    }
-    if (typeof item !== "object") {
-      return item;
-    }
-
-    if (Object.keys(item).length === 0) {
-      return acc;
-    }
-    if (item.type === "message_delta") {
-      return recursivelyConsolidateAnthropic(acc, {
-        ...item.delta,
-        ...item,
-        type: undefined,
-      });
-    }
-
-    if (item.type === "ping") {
-      return acc;
-    }
-
-    if (item.type === "content_block_start") {
-      return acc;
-    }
-
-    if (item.type === "content_block_stop") {
-      return acc;
-    }
-
-    if (item.type === "content_block_delta") {
-      recursivelyConsolidateAnthropic(acc, {
-        content: [
-          {
-            type: "text",
-            text: item.delta.text,
-          },
-        ],
-      });
-    }
-
-    if (item.type === "message_start") {
-      return recursivelyConsolidateAnthropic(acc, item.message);
-    }
-
-    // console.log("Item Without Ignore Keys", item);
-
-    return recursivelyConsolidateAnthropic(acc, item);
-  }, {});
-}
-
-// This function is no longer used but kept for reference
-function recursivelyConsolidateAnthropic(body: any, delta: any): any {
-  Object.keys(delta).forEach((key) => {
-    if (key === "stop_reason") {
-      // console.log("Stop Reason", delta[key]);
-    }
-    if (key === "delta") {
-    } else if (key === "type") {
-      body[key] = delta[key];
-    } else if (body[key] === undefined || body[key] === null) {
-      body[key] = delta[key];
-    } else if (typeof body[key] === "object") {
-      body[key] = recursivelyConsolidateAnthropic(body[key], delta[key]);
-    } else if (typeof body[key] === "number") {
-      body[key] += delta[key];
-    } else if (typeof body[key] === "string") {
-      body[key] += delta[key];
-    } else {
-      throw new Error("Invalid");
-    }
-  });
-  return body;
 }

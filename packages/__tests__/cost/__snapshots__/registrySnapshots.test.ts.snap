@@ -2535,6 +2535,28 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "llama-3.3-70b-instruct:nebius": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "meta-llama/Llama-3.3-70B-Instruct",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "repetition_penalty",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "nebius",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "llama-3.3-70b-instruct:novita": {
       "context": 131072,
       "crossRegion": false,
@@ -4354,6 +4376,155 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "openai/gpt-5.2": {
+    "gpt-5.2-chat-latest:openai": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "gpt-5.2-chat-latest",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.2-chat-latest:openrouter": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "openai/gpt-5.2-chat-latest",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_completion_tokens",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+        "verbosity",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.2-pro:openai": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5.2-pro",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.2-pro:openrouter": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "openai/gpt-5.2-pro",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_completion_tokens",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+        "verbosity",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.2:openai": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5.2",
+      "parameters": [
+        "logprobs",
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+        "verbosity",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.2:openrouter": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "openai/gpt-5.2",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_completion_tokens",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+        "verbosity",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
   "openai/o1": {
     "o1-mini:helicone": {
       "context": 128000,
@@ -5679,6 +5850,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "groq",
     "groq",
     "nebius",
+    "nebius",
     "novita",
     "novita",
     "novita",
@@ -5769,6 +5941,14 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openai",
     "openrouter",
     "openrouter",
+    "openrouter",
+    "openrouter",
+    "openrouter",
+  ],
+  "openai/gpt-5.2": [
+    "openai",
+    "openai",
+    "openai",
     "openrouter",
     "openrouter",
     "openrouter",
@@ -7276,6 +7456,27 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "openai/gpt-5.2": {
+    "openai": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+        },
+        "input": 0.00000175,
+        "output": 0.000014,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.00000185,
+        "output": 0.00001477,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+  },
   "openai/o1": {
     "helicone": [
       {
@@ -7867,6 +8068,27 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "gpt-5.2",
+      "providers": [
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
+      "model": "gpt-5.2-chat-latest",
+      "providers": [
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
+      "model": "gpt-5.2-pro",
+      "providers": [
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
       "model": "gpt-oss-120b",
       "providers": [
         "baseten",
@@ -8001,6 +8223,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "llama-3.3-70b-instruct",
       "providers": [
+        "nebius",
         "novita",
         "openrouter",
       ],
@@ -8252,7 +8475,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "mistral",
     },
     {
-      "modelCount": 3,
+      "modelCount": 4,
       "provider": "nebius",
     },
     {
@@ -8260,11 +8483,11 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "novita",
     },
     {
-      "modelCount": 21,
+      "modelCount": 24,
       "provider": "openai",
     },
     {
-      "modelCount": 55,
+      "modelCount": 58,
       "provider": "openrouter",
     },
     {
@@ -8326,6 +8549,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "gpt-5.1-chat-latest",
     "gpt-5.1-codex",
     "gpt-5.1-codex-mini",
+    "gpt-5.2",
+    "gpt-5.2-chat-latest",
+    "gpt-5.2-pro",
     "gpt-oss-120b",
     "gpt-oss-20b",
     "grok-3",
@@ -8382,9 +8608,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 245,
-  "totalModelProviderConfigs": 245,
-  "totalModelsWithPtb": 91,
+  "totalEndpoints": 252,
+  "totalModelProviderConfigs": 252,
+  "totalModelsWithPtb": 94,
   "totalProviders": 21,
 }
 `;
