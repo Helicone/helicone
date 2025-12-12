@@ -22,15 +22,6 @@ const nextConfig = {
   reactStrictMode: false,
   swcMinify: true,
   transpilePackages: ["@helicone-package/cost", "@helicone-package/llm-mapper"],
-  webpack: (config) => {
-    config.module.rules.push({
-      test: /\.(graphql|gql)$/,
-      exclude: /node_modules/,
-      loader: "graphql-tag/loader",
-    });
-    config.resolve.extensions.push(".graphql"); // Add this line
-    return config;
-  },
   async redirects() {
     return [
       {
