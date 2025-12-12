@@ -12,6 +12,41 @@ const getChangelogEntries = () => {
   return fs.readdirSync(changelogDir).map((file) => `/changelog/${file}`);
 };
 
+/**
+ * Get model pages from the model registry API
+ * Fetches from the production Jawn service to get the list of models
+ */
+const getModelPages = async () => {
+  // Use the production API URL for sitemap generation
+  const JAWN_API_URL = process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE || "https://api.helicone.ai";
+
+  try {
+    const response = await fetch(`${JAWN_API_URL}/v1/public/model-registry/models`);
+
+    if (!response.ok) {
+      console.warn(`Failed to fetch models from API: ${response.status}`);
+      return [];
+    }
+
+    const result = await response.json();
+
+    if (!result.data?.models || !Array.isArray(result.data.models)) {
+      console.warn("Invalid response from model registry API");
+      return [];
+    }
+
+    const modelPages = result.data.models.map((model) =>
+      `/model/${encodeURIComponent(model.id)}`
+    );
+
+    console.log(`✨ [next-sitemap] Added ${modelPages.length} model pages to sitemap`);
+    return modelPages;
+  } catch (error) {
+    console.warn("Failed to fetch model pages for sitemap:", error.message);
+    return [];
+  }
+};
+
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
   siteUrl: SITE_URL,
@@ -29,6 +64,7 @@ module.exports = {
   additionalPaths: async (config) => {
     const blogPosts = getBlogPosts();
     const changelogEntries = getChangelogEntries();
+    const modelPages = await getModelPages();
     return [
       ...blogPosts.map((path) => ({
         loc: path,
@@ -39,6 +75,11 @@ module.exports = {
         loc: path,
         changefreq: "weekly",
         priority: 0.6,
+      })),
+      ...modelPages.map((path) => ({
+        loc: path,
+        changefreq: "weekly",
+        priority: 0.7,
       })),
     ];
   },
