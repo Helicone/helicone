@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Registry Snapshots archived endpoints snapshot 1`] = `{}`;
 
@@ -8612,9 +8612,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 246,
-  "totalModelProviderConfigs": 246,
-  "totalModelsWithPtb": 91,
+  "totalEndpoints": 252,
+  "totalModelProviderConfigs": 252,
+  "totalModelsWithPtb": 94,
   "totalProviders": 21,
 }
 `;
