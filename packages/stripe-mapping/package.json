@@ -1,0 +1,7 @@
+{
+  "name": "@helicone-package/stripe-mapping",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "sideEffects": false,
+  "version": "1.0.0"
+}

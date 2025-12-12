@@ -20,6 +20,7 @@ export const models = {
     created: "2025-01-01T00:00:00.000Z",
     modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "GPT",
+    stripeModelId: "o1-mini",
   },
 } satisfies Record<string, ModelConfig>;
 
