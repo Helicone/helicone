@@ -157,7 +157,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000027,
         output: 0.000001,
-      }
+      },
     ],
     quantization: "fp8",
     contextLength: 98_304,
@@ -178,7 +178,7 @@ export const endpoints = {
       "top_k",
       "min_p",
       "repetition_penalty",
-      "logit_bias"
+      "logit_bias",
     ],
     ptbEnabled: true,
     endpointConfigs: {
@@ -213,6 +213,36 @@ export const endpoints = {
       "min_p",
       "repetition_penalty",
       "logit_bias",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "deepseek-v3.2:baseten": {
+    provider: "baseten",
+    author: "deepseek",
+    providerModelId: "deepseek-ai/DeepSeek-V3.2",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000003, // $0.30 per 1M tokens
+        output: 0.00000045, // $0.45 per 1M tokens
+      },
+    ],
+    quantization: "fp8",
+    contextLength: 128_000,
+    maxCompletionTokens: 16_384,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "response_format",
+      "structured_outputs",
+      "top_k",
+      "tools",
+      "tool_choice",
     ],
     ptbEnabled: true,
     endpointConfigs: {
