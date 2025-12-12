@@ -1762,6 +1762,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "deepseek-v3.2:canopywave": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "deepseek/deepseek-chat-v3.2",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "canopywave",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "deepseek-v3.2:novita": {
       "context": 128000,
       "crossRegion": false,
@@ -5830,6 +5856,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
   ],
   "deepseek/deepseek-v3": [
+    "canopywave",
     "deepinfra",
     "deepinfra",
     "deepseek",
@@ -6952,6 +6979,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "deepseek/deepseek-v3": {
+    "canopywave": [
+      {
+        "input": 2.6e-7,
+        "output": 4e-7,
+        "threshold": 0,
+      },
+    ],
     "deepinfra": [
       {
         "cacheMultipliers": {
@@ -7941,6 +7975,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "deepseek-v3.2",
       "providers": [
+        "canopywave",
         "novita",
       ],
     },
@@ -8507,7 +8542,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "bedrock",
     },
     {
-      "modelCount": 3,
+      "modelCount": 4,
       "provider": "canopywave",
     },
     {
