@@ -176,7 +176,7 @@ export async function getRequestsClickhouseNoSort(
           request_created_at
       FROM request_response_rmt
       WHERE (${builtFilter.filter})
-        AND request_created_at <= now()
+        AND request_created_at <= now() + INTERVAL 1 MINUTE
       ORDER BY request_created_at ${sortSQL}
       LIMIT ${limit}
       OFFSET ${offset}
@@ -299,7 +299,7 @@ export async function getRequestsClickhouse(
     FROM request_response_rmt
     WHERE (
       (${builtFilter.filter})
-      AND request_created_at <= now()
+      AND request_created_at <= now() + INTERVAL 1 MINUTE
     )
     ${sortSQL !== undefined ? `ORDER BY ${sortSQL}` : ""}
     LIMIT ${limit}
