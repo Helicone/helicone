@@ -219,6 +219,40 @@ export const endpoints = {
       "*": {},
     },
   },
+  "deepseek-v3.2-speciale:canopywave": {
+    provider: "canopywave",
+    author: "deepseek",
+    providerModelId: "deepseek/deepseek-chat-v3.2-speciale",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000027, // $0.27 per 1M tokens
+        output: 0.00000041, // $0.41 per 1M tokens
+      },
+    ],
+    quantization: "fp8",
+    contextLength: 163_840,
+    maxCompletionTokens: 65_536,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "top_k",
+      "min_p",
+      "repetition_penalty",
+      "logit_bias",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${DeepSeekV3ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

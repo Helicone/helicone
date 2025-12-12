@@ -1762,6 +1762,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "deepseek-v3.2-speciale:canopywave": {
+      "context": 163840,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "deepseek/deepseek-chat-v3.2-speciale",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "canopywave",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "deepseek-v3.2:novita": {
       "context": 128000,
       "crossRegion": false,
@@ -5771,6 +5797,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
   ],
   "deepseek/deepseek-v3": [
+    "canopywave",
     "deepinfra",
     "deepinfra",
     "deepseek",
@@ -6891,6 +6918,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "deepseek/deepseek-v3": {
+    "canopywave": [
+      {
+        "input": 2.7e-7,
+        "output": 4.1e-7,
+        "threshold": 0,
+      },
+    ],
     "deepinfra": [
       {
         "cacheMultipliers": {
@@ -7850,6 +7884,12 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "deepseek-v3.2-speciale",
+      "providers": [
+        "canopywave",
+      ],
+    },
+    {
       "model": "ernie-4.5-21b-a3b-thinking",
       "providers": [
         "novita",
@@ -8404,7 +8444,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "bedrock",
     },
     {
-      "modelCount": 3,
+      "modelCount": 4,
       "provider": "canopywave",
     },
     {
@@ -8494,6 +8534,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "deepseek-v3",
     "deepseek-v3.1-terminus",
     "deepseek-v3.2",
+    "deepseek-v3.2-speciale",
     "ernie-4.5-21b-a3b-thinking",
     "gemini-2.5-flash",
     "gemini-2.5-flash-lite",
@@ -8577,9 +8618,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 251,
-  "totalModelProviderConfigs": 251,
-  "totalModelsWithPtb": 94,
+  "totalEndpoints": 246,
+  "totalModelProviderConfigs": 246,
+  "totalModelsWithPtb": 92,
   "totalProviders": 21,
 }
 `;
