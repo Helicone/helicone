@@ -23,6 +23,8 @@ interface TextMessageProps {
   mode: Mode;
   annotations?: Message["annotations"];
   showAnnotations?: boolean;
+  translatedContent?: string | null;
+  isShowingTranslation?: boolean;
 }
 export default function TextMessage({
   isPartOfContentArray,
@@ -36,7 +38,12 @@ export default function TextMessage({
   mode,
   annotations,
   showAnnotations,
+  translatedContent,
+  isShowingTranslation,
 }: TextMessageProps) {
+  // Use translated content if available and showing translation
+  const contentToDisplay =
+    isShowingTranslation && translatedContent ? translatedContent : displayContent;
   if (isJson(displayContent) && chatMode !== "PLAYGROUND_INPUT") {
     return (
       <div className="text-sm">
@@ -119,12 +126,17 @@ export default function TextMessage({
     />
   ) : (
     <>
-      {displayContent ? (
+      {contentToDisplay ? (
         <>
           <div className="w-full whitespace-pre-wrap break-words text-sm">
-            <Streamdown shikiTheme={shikiTheme}>{displayContent}</Streamdown>
+            {isShowingTranslation && (
+              <div className="mb-2 inline-flex items-center gap-1 rounded-md bg-sky-100 px-2 py-0.5 text-xs text-sky-700 dark:bg-sky-900/30 dark:text-sky-300">
+                Translated
+              </div>
+            )}
+            <Streamdown shikiTheme={shikiTheme}>{contentToDisplay}</Streamdown>
           </div>
-          {annotations && annotations.length > 0 && (
+          {annotations && annotations.length > 0 && !isShowingTranslation && (
             <CitationAnnotations
               annotations={annotations}
               showAnnotations={showAnnotations}
