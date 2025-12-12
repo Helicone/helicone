@@ -2927,8 +2927,9 @@ Json: JsonObject;
        * - If set to 'default', then the request will be processed with the standard
        *   pricing and performance for the selected model.
        * - If set to '[flex](https://platform.openai.com/docs/guides/flex-processing)' or
-       *   '[priority](https://openai.com/api-priority-processing/)', then the request
-       *   will be processed with the corresponding service tier.
+       *   'priority', then the request will be processed with the corresponding service
+       *   tier. [Contact sales](https://openai.com/contact-sales) to learn more about
+       *   Priority processing.
        * - When not set, the default behavior is 'auto'.
        *
        * When the `service_tier` parameter is set, the response body will include the
@@ -2938,7 +2939,12 @@ Json: JsonObject;
        * @enum {string|null}
        */
       service_tier?: "auto" | "default" | "flex" | "scale" | "priority" | null;
-      /** @deprecated */
+      /**
+       * @description This fingerprint represents the backend configuration that the model runs with.
+       *
+       * Can be used in conjunction with the `seed` request parameter to understand when
+       * backend changes have been made that might impact determinism.
+       */
       system_fingerprint?: string;
       /** @description Usage statistics for the completion request. */
       usage?: components["schemas"]["CompletionUsage"];

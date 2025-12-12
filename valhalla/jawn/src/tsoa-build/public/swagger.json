@@ -8873,11 +8873,11 @@
 							null
 						],
 						"nullable": true,
-						"description": "Specifies the processing type used for serving the request.\n\n- If set to 'auto', then the request will be processed with the service tier\n  configured in the Project settings. Unless otherwise configured, the Project\n  will use 'default'.\n- If set to 'default', then the request will be processed with the standard\n  pricing and performance for the selected model.\n- If set to '[flex](https://platform.openai.com/docs/guides/flex-processing)' or\n  '[priority](https://openai.com/api-priority-processing/)', then the request\n  will be processed with the corresponding service tier.\n- When not set, the default behavior is 'auto'.\n\nWhen the `service_tier` parameter is set, the response body will include the\n`service_tier` value based on the processing mode actually used to serve the\nrequest. This response value may be different from the value set in the\nparameter."
+						"description": "Specifies the processing type used for serving the request.\n\n- If set to 'auto', then the request will be processed with the service tier\n  configured in the Project settings. Unless otherwise configured, the Project\n  will use 'default'.\n- If set to 'default', then the request will be processed with the standard\n  pricing and performance for the selected model.\n- If set to '[flex](https://platform.openai.com/docs/guides/flex-processing)' or\n  'priority', then the request will be processed with the corresponding service\n  tier. [Contact sales](https://openai.com/contact-sales) to learn more about\n  Priority processing.\n- When not set, the default behavior is 'auto'.\n\nWhen the `service_tier` parameter is set, the response body will include the\n`service_tier` value based on the processing mode actually used to serve the\nrequest. This response value may be different from the value set in the\nparameter."
 					},
 					"system_fingerprint": {
 						"type": "string",
-						"deprecated": true
+						"description": "This fingerprint represents the backend configuration that the model runs with.\n\nCan be used in conjunction with the `seed` request parameter to understand when\nbackend changes have been made that might impact determinism."
 					},
 					"usage": {
 						"$ref": "#/components/schemas/CompletionUsage",
