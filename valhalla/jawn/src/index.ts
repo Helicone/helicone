@@ -17,7 +17,6 @@ import {
 } from "./lib/clients/kafkaConsumers/constant";
 import { webSocketProxyForwarder } from "./lib/proxy/WebSocketProxyForwarder";
 import { RequestWrapper } from "./lib/requestWrapper/requestWrapper";
-import { tokenRouter } from "./lib/routers/tokenRouter";
 import { DelayedOperationService } from "./lib/shared/delayedOperationService";
 import { runLoopsOnce, runMainLoops } from "./mainLoops";
 import { authFromRequest, authMiddleware } from "./middleware/auth";
@@ -179,8 +178,6 @@ unAuthenticatedRouter.use(
   swaggerUi.serve,
   swaggerUi.setup(publicSwaggerDoc as any)
 );
-
-unAuthenticatedRouter.use(tokenRouter);
 
 unAuthenticatedRouter.use("/download/swagger.json", (req, res) => {
   res.json(publicSwaggerDoc as any);
