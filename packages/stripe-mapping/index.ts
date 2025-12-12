@@ -23,6 +23,7 @@ const STRIPE_TO_HELICONE_MAPPING: { [key: string]: string } = {
   "anthropic/claude-opus-4-1": "anthropic/claude-opus-4.1",
   "anthropic/claude-sonnet-4": "anthropic/claude-sonnet-4", // No dots to convert
   "anthropic/claude-sonnet-4-5": "anthropic/claude-sonnet-4.5",
+  "anthropic/claude-sonnet-4-above200k": "anthropic/claude-sonnet-4-above200k", // No dots to convert
   
   // Google Gemini models
   "google/gemini-2-0-flash": "google/gemini-2.0-flash",

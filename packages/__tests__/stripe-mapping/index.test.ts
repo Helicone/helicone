@@ -60,9 +60,12 @@ describe("Stripe Model Mapping", () => {
     });
 
     it("should handle invalid input", () => {
-      expect(mapHeliconeModelToStripe(null as any)).toBe(null);
-      expect(mapHeliconeModelToStripe(undefined as any)).toBe(null);
-      expect(mapHeliconeModelToStripe(123 as any)).toBe(null);
+      // @ts-ignore
+      expect(mapHeliconeModelToStripe(null)).toBe(null);
+      // @ts-ignore
+      expect(mapHeliconeModelToStripe(undefined)).toBe(null);
+      // @ts-ignore
+      expect(mapHeliconeModelToStripe(123)).toBe(null);
       expect(mapHeliconeModelToStripe("")).toBe(null);
     });
 
@@ -86,9 +89,12 @@ describe("Stripe Model Mapping", () => {
     });
 
     it("should handle invalid input", () => {
-      expect(mapStripeModelToHelicone(null as any)).toBe(null);
-      expect(mapStripeModelToHelicone(undefined as any)).toBe(null);
-      expect(mapStripeModelToHelicone(123 as any)).toBe(null);
+      // @ts-ignore
+      expect(mapStripeModelToHelicone(null)).toBe(null);
+      // @ts-ignore
+      expect(mapStripeModelToHelicone(undefined)).toBe(null);
+      // @ts-ignore
+      expect(mapStripeModelToHelicone(123)).toBe(null);
     });
   });
 
@@ -112,9 +118,12 @@ describe("Stripe Model Mapping", () => {
     });
 
     it("should handle invalid input", () => {
-      expect(isModelSupportedInStripe(null as any)).toBe(false);
-      expect(isModelSupportedInStripe(undefined as any)).toBe(false);
-      expect(isModelSupportedInStripe(123 as any)).toBe(false);
+      // @ts-ignore
+      expect(isModelSupportedInStripe(null)).toBe(false);
+      // @ts-ignore
+      expect(isModelSupportedInStripe(undefined)).toBe(false);
+      // @ts-ignore
+      expect(isModelSupportedInStripe(123)).toBe(false);
     });
   });
 
