@@ -22,6 +22,7 @@ export const models = {
     created: "2025-01-27T00:00:00.000Z",
     modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "GPT",
+    stripeModelId: "sonar-pro",
   },
   "sonar-reasoning": {
     name: "Perplexity Sonar Reasoning",
@@ -33,6 +34,7 @@ export const models = {
     created: "2025-01-27T00:00:00.000Z",
     modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "GPT",
+    stripeModelId: "sonar-reasoning",
   },
   "sonar-reasoning-pro": {
     name: "Perplexity Sonar Reasoning Pro",
@@ -44,6 +46,7 @@ export const models = {
     created: "2025-01-27T00:00:00.000Z",
     modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "GPT",
+    stripeModelId: "sonar-reasoning-pro",
   },
   "sonar-deep-research": {
     name: "Perplexity Sonar Deep Research",
@@ -55,6 +58,7 @@ export const models = {
     created: "2025-01-27T00:00:00.000Z",
     modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "GPT",
+    stripeModelId: "sonar-deep-research",
   },
 } satisfies Record<string, ModelConfig>;
 

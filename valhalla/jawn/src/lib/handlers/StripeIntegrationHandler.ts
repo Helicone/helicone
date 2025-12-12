@@ -19,7 +19,7 @@ import {
   mapModelToStripeFormat,
   isModelAvailableInStripe,
   getAvailableStripeModels,
-} from "../../../../packages/stripe-mapping";
+} from "../../../../packages/cost/stripe-utils";
 
 const DEFAULT_CACHE_REFERENCE_ID = "00000000-0000-0000-0000-000000000000";
 type StripeMeterEvent = Stripe.V2.Billing.MeterEventStreamCreateParams.Event;

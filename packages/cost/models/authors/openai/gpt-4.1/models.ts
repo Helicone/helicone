@@ -11,6 +11,8 @@ export const models = {
     created: "2025-04-14T17:23:05.000Z",
     modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
+    stripeModelId: "gpt-4-1",
+    tokenizer: "GPT",
   },
   "gpt-4.1-mini": {
     name: "OpenAI GPT-4.1 Mini",
@@ -22,6 +24,8 @@ export const models = {
     created: "2025-04-14T17:23:01.000Z",
     modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
+    stripeModelId: "gpt-4-1-mini",
+    tokenizer: "GPT",
   },
   "gpt-4.1-nano": {
     name: "OpenAI GPT-4.1 Nano",
@@ -32,6 +36,8 @@ export const models = {
     maxOutputTokens: 32768,
     created: "2025-04-14T17:22:49.000Z",
     modality: { inputs: ["text", "image"], outputs: ["text"] },
+    tokenizer: "GPT",
+    stripeModelId: "gpt-4-1-nano",
     tokenizer: "GPT",
   },
   "gpt-4.1-mini-2025-04-14": {

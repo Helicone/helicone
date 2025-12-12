@@ -11,6 +11,7 @@ export const model = {
     created: "2025-07-22T09:04:36",
     modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "Gemini",
+    stripeModelId: "gemini-2-5-flash-lite",
   },
 } satisfies Record<string, ModelConfig>;
 
