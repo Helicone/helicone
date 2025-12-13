@@ -193,8 +193,26 @@ function QueryResult({
 
   if (!result || result.length === 0) {
     return (
-      <div className="p-4 text-center text-muted-foreground">
-        No results found.
+      <div className="flex flex-col">
+        <StatusBar
+          elapsedMilliseconds={queryStats.elapsedMilliseconds}
+          rowCount={0}
+          size={0}
+          rows={[]}
+          sql={sql}
+          queryLoading={loading}
+          viewMode={viewMode}
+          onViewModeChange={handleViewModeChange}
+        />
+        <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
+          <div className="rounded-full bg-muted p-3">
+            <Table2 size={24} className="text-muted-foreground" />
+          </div>
+          <p className="text-sm font-medium text-foreground">Query returned 0 rows</p>
+          <p className="text-xs text-muted-foreground">
+            The query executed successfully but no data matched your criteria.
+          </p>
+        </div>
       </div>
     );
   }

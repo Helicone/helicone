@@ -121,7 +121,7 @@ FROM request_response_rmt`,
     category: "analytics",
     sql: `SELECT
   provider,
-  SUM(cost_usd) as total_cost,
+  SUM(cost) as total_cost,
   COUNT(*) as request_count
 FROM request_response_rmt
 GROUP BY provider
@@ -134,8 +134,9 @@ ORDER BY total_cost DESC`,
     sql: `SELECT
   request_created_at,
   model,
+  provider,
   status,
-  error_message
+  latency
 FROM request_response_rmt
 WHERE status >= 400
 ORDER BY request_created_at DESC
@@ -191,6 +192,24 @@ export function parseSqlAndFindTableNameAndAliases(sql: string) {
   return tables;
 }
 
+// Helper to extract error message from various response formats
+function extractQueryError(data: any): string {
+  // Handle openapi-fetch error response: { error: { error: "message" } }
+  if (data?.error?.error && typeof data.error.error === "string") {
+    return data.error.error;
+  }
+  // Handle direct error object: { error: "message" }
+  if (data?.error && typeof data.error === "string") {
+    return data.error;
+  }
+  // Handle nested data error: { data: { error: "message" } }
+  if (data?.data?.error && typeof data.data.error === "string") {
+    return data.data.error;
+  }
+  // Fallback
+  return "An unexpected error occurred";
+}
+
 // Execute query mutation
 export const createExecuteQueryMutation = (
   setResult: React.Dispatch<
@@ -212,8 +231,8 @@ export const createExecuteQueryMutation = (
     onSuccess: (data: any) => {
       setQueryLoading(false);
       if (data.error || !data.data?.data) {
-        // @ts-ignore
-        setQueryError(data.error.error);
+        const errorMessage = extractQueryError(data);
+        setQueryError(errorMessage);
         setResult({
           rows: [],
           elapsedMilliseconds: 0,
@@ -231,7 +250,8 @@ export const createExecuteQueryMutation = (
       }
     },
     onError: (error: any) => {
-      setQueryError(error.message);
+      setQueryLoading(false);
+      setQueryError(error.message || "An unexpected error occurred");
       setResult({
         rows: [],
         elapsedMilliseconds: 0,

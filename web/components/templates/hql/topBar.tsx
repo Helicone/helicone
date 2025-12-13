@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Save, Play, X, Plus } from "lucide-react";
+import { Save, Play, X, Plus, Bot } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { clsx } from "clsx";
@@ -18,6 +18,7 @@ interface TopBarProps {
     sql: string;
   }) => void;
   handleRenameQuery: (newName: string) => void;
+  onOpenAssistant?: () => void;
   // Tab props - optional for backwards compatibility
   tabs?: QueryTab[];
   activeTabId?: string;
@@ -32,6 +33,7 @@ export default function TopBar({
   handleExecuteQuery,
   handleSaveQuery,
   handleRenameQuery,
+  onOpenAssistant,
   tabs,
   activeTabId,
   onTabSwitch,
@@ -108,6 +110,17 @@ export default function TopBar({
         </div>
 
         <div className="flex items-center gap-2">
+          {onOpenAssistant && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onOpenAssistant}
+            >
+              <Bot size={16} className="mr-1" />
+              Assistant
+            </Button>
+          )}
+
           <Button
             variant="action"
             size="sm"

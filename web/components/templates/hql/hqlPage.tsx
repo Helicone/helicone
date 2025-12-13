@@ -289,7 +289,7 @@ function HQLPage() {
       },
     );
 
-  const { setToolHandler } = useHeliconeAgent();
+  const { setToolHandler, setAgentChatOpen } = useHeliconeAgent();
 
   // Sync editor with stored tabs on mount (handles SSR hydration)
   useEffect(() => {
@@ -301,9 +301,28 @@ function HQLPage() {
   useEffect(() => {
     setToolHandler("hql-get-schema", async () => {
       if (clickhouseSchemas.data) {
+        // Add helpful context for the AI agent alongside the schema
+        const schemaWithNotes = {
+          schema: clickhouseSchemas.data,
+          importantNotes: [
+            "COST: Use the 'cost' column for cost in USD. Do NOT use 'provider_cost' - it may be null. The 'cost' column contains the calculated cost for each request.",
+            "TIMESTAMPS: Use 'request_created_at' for filtering and grouping by time. It's a DateTime64 column.",
+            "DATE GROUPING: Use toDate(request_created_at) when grouping by day, toStartOfWeek(request_created_at) for weeks, toStartOfMonth(request_created_at) for months.",
+            "AGGREGATIONS: For totals use SUM(cost), for averages use AVG(cost), for counts use COUNT(*).",
+            "MODEL: The 'model' column contains the LLM model name (e.g., 'gpt-4', 'claude-3-opus').",
+            "TOKENS: Use 'prompt_tokens' and 'completion_tokens' for token counts. 'total_tokens' = prompt_tokens + completion_tokens.",
+            "STATUS: The 'status' column contains the HTTP status code (200 = success, 4xx/5xx = errors).",
+            "LATENCY: Use 'latency_ms' for request latency in milliseconds.",
+          ],
+          exampleQueries: [
+            "Total cost by day: SELECT toDate(request_created_at) as date, SUM(cost) as total_cost FROM request_response_rmt GROUP BY date ORDER BY date",
+            "Cost by model: SELECT model, SUM(cost) as total_cost, COUNT(*) as requests FROM request_response_rmt GROUP BY model ORDER BY total_cost DESC",
+            "Average latency by model: SELECT model, AVG(latency_ms) as avg_latency FROM request_response_rmt GROUP BY model",
+          ],
+        };
         return {
           success: true,
-          message: JSON.stringify(clickhouseSchemas.data),
+          message: JSON.stringify(schemaWithNotes),
         };
       } else {
         return {
@@ -627,6 +646,7 @@ function HQLPage() {
               handleExecuteQuery={handleExecuteQuery}
               handleSaveQuery={handleSaveQuery}
               handleRenameQuery={updateCurrentTabName}
+              onOpenAssistant={() => setAgentChatOpen(true)}
               tabs={tabs}
               activeTabId={activeTabId}
               onTabSwitch={switchTab}
