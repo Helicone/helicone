@@ -29,12 +29,19 @@ function convertContentParts(
         return { type: "text", text: p.text };
       case "input_image": {
         if (p.image_url) {
-          return { type: "image_url", image_url: { url: p.image_url } };
+          return { type: "image_url", image_url: { url: p.image_url, detail: p.detail } };
         }
         // Chat Completions does not support file_id for images directly
         throw new Error(
           "input_image with file_id is not supported by Chat Completions"
         );
+      }
+      // Handle output_image when responses output is fed back as input
+      case "output_image": {
+        if (p.image_url) {
+          return { type: "image_url", image_url: { url: p.image_url, detail: p.detail } };
+        }
+        throw new Error("output_image missing image_url");
       }
       case "input_file":
         // Chat Completions API does not support arbitrary files as message parts

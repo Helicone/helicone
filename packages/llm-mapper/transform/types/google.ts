@@ -93,6 +93,11 @@ export interface GoogleContentPart {
   text?: string;
   thought?: boolean;
   functionCall?: GoogleFunctionCall;
+  inlineData?: {
+    mimeType?: string;
+    data: string;
+  };
+  thoughtSignature?: string;
 }
 
 export interface GoogleContent {

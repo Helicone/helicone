@@ -6,6 +6,7 @@ import {
   OpenAIToolCall,
   OpenAIUsage,
   OpenAIReasoningDetail,
+  ChatCompletionContentPartImage,
 } from "../../../types/openai";
 import {
   GoogleCandidate,
@@ -56,6 +57,7 @@ function mapCandidates(candidates: GoogleCandidate[]): OpenAIChoice[] {
     let tool_calls: OpenAIToolCall[] = [];
     let reasoning: string | undefined;
     let reasoning_details: OpenAIReasoningDetail[] | undefined;
+    let images: ChatCompletionContentPartImage[] | undefined;
 
     if (candidate.content) {
       const extracted = extractContent(candidate.content);
@@ -63,6 +65,7 @@ function mapCandidates(candidates: GoogleCandidate[]): OpenAIChoice[] {
       tool_calls = extracted.tool_calls;
       reasoning = extracted.reasoning;
       reasoning_details = extracted.reasoning_details;
+      images = extracted.images;
     }
 
     return {
@@ -73,6 +76,7 @@ function mapCandidates(candidates: GoogleCandidate[]): OpenAIChoice[] {
         ...(reasoning && { reasoning }),
         ...(reasoning_details && reasoning_details.length > 0 && { reasoning_details }),
         ...(tool_calls.length > 0 && { tool_calls }),
+        ...(images && images.length > 0 && { images }),
       } as OpenAIResponseMessage,
       finish_reason: mapGoogleFinishReason(candidate.finishReason),
       logprobs: null,
@@ -88,6 +92,7 @@ interface ExtractedContent {
   tool_calls: OpenAIToolCall[];
   reasoning?: string;
   reasoning_details?: OpenAIReasoningDetail[];
+  images?: ChatCompletionContentPartImage[];
 }
 
 /**
@@ -104,6 +109,7 @@ function extractContent(
   const textParts: string[] = [];
   const thinkingParts: string[] = [];
   const toolCalls: OpenAIToolCall[] = [];
+  const imageParts: ChatCompletionContentPartImage[] = [];
 
   for (const block of contents) {
     const parts = Array.isArray(block?.parts)
@@ -119,6 +125,15 @@ function extractContent(
 
       if (part.functionCall) {
         toolCalls.push(mapToolCall(part.functionCall, toolCalls.length));
+      } else if (part.inlineData) {
+        const mimeType = part.inlineData.mimeType || "image/png";
+        const dataUri = `data:${mimeType};base64,${part.inlineData.data}`;
+        imageParts.push({
+          type: "image_url",
+          image_url: {
+            url: dataUri,
+          },
+        });
       } else if (part.text) {
         // Check if this is a thinking part (Google uses thought: true)
         if (part.thought === true) {
@@ -143,6 +158,11 @@ function extractContent(
       thinking,
       signature: "", // Google doesn't provide signatures
     }));
+  }
+
+  // Add images if image parts were found
+  if (imageParts.length > 0) {
+    result.images = imageParts;
   }
 
   return result;

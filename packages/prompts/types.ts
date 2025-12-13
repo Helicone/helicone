@@ -127,6 +127,18 @@ export interface ReasoningDetail {
 }
 
 /**
+ * Image content part for image outputs in assistant messages.
+ * Used when models generate images as part of their response.
+ */
+export interface HeliconeContentPartImage {
+  type: "image_url";
+  image_url: {
+    url: string;
+    detail?: "auto" | "low" | "high";
+  };
+}
+
+/**
  * OpenAI message with optional cache control support
  */
 type HeliconeMessageParam<T> = Omit<T, 'content'> & {
@@ -134,6 +146,8 @@ type HeliconeMessageParam<T> = Omit<T, 'content'> & {
   cache_control?: CacheControl;
   reasoning?: string;
   reasoning_details?: ReasoningDetail[];
+  /** Image outputs from models that support image generation (e.g., Google Gemini) */
+  images?: HeliconeContentPartImage[];
 };
 
 export type HeliconeChatCompletionMessageParam = 

@@ -119,6 +119,31 @@ export class GoogleToOpenAIStreamConverter {
           );
 
           this.toolCallIndex += 1;
+        } else if (part.inlineData) {
+          // Handle image output from Google's image generation models
+          const mimeType = part.inlineData.mimeType || "image/png";
+          const dataUri = `data:${mimeType};base64,${part.inlineData.data}`;
+          chunks.push(
+            this.createChunk({
+              choices: [
+                {
+                  index: candidate.index ?? 0,
+                  delta: {
+                    images: [
+                      {
+                        type: "image_url",
+                        image_url: {
+                          url: dataUri,
+                        },
+                      },
+                    ],
+                  },
+                  logprobs: null,
+                  finish_reason: null,
+                },
+              ],
+            })
+          );
         } else if (part.text) {
           // Check if this is a thinking part (Google uses thought: true)
           if (part.thought === true) {
