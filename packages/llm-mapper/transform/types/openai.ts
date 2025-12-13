@@ -39,6 +39,7 @@ export interface OpenAIResponseMessage {
   function_call?: OpenAIFunctionCall;
   tool_calls?: OpenAIToolCall[];
   annotations?: OpenAIAnnotation[];
+  images?: ChatCompletionContentPartImage[];
 }
 
 export interface OpenAIAnnotation {
@@ -49,6 +50,16 @@ export interface OpenAIAnnotation {
     content?: string;
     start_index: number;
     end_index: number;
+  };
+}
+
+
+// Mimics the input structure for images in Chat Completion choices.
+export interface ChatCompletionContentPartImage {
+  type: "image_url";
+  image_url: {
+    url: string;
+    detail?: "auto" | "low" | "high";
   };
 }
 
@@ -80,6 +91,7 @@ export interface OpenAIDelta {
   };
   tool_calls?: OpenAIStreamingToolCall[];
   annotations?: OpenAIAnnotation[];
+  images?: ChatCompletionContentPartImage[];
 }
 
 // === LOGPROBS TYPES ===

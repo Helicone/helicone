@@ -1,4 +1,4 @@
-import { ChatCompletionChunk, OpenAIStreamEvent } from "../../../types/openai";
+import { ChatCompletionChunk, OpenAIStreamEvent, ChatCompletionContentPartImage } from "../../../types/openai";
 import {
   ResponsesStreamEvent,
   ResponseCreatedEvent,
@@ -11,6 +11,7 @@ import {
   ResponseReasoningSummaryTextDoneEvent,
   ResponseReasoningSummaryPartDoneEvent,
   ResponsesResponseBody,
+  ResponsesOutputContentPart,
 } from "../../../types/responses";
 
 interface ReasoningState {
@@ -33,6 +34,8 @@ export class ChatToResponsesStreamConverter {
   private partAdded: boolean = false;
   private emittedFunctionItems: Set<string> = new Set();
   private completedEmitted: boolean = false;
+  private imageBuffer: ChatCompletionContentPartImage[] = [];
+  private nextContentIndex: number = 0;
 
   private reasoningStates: ReasoningState[] = [];
   private currentReasoningIndex: number = -1;
@@ -236,6 +239,47 @@ export class ChatToResponsesStreamConverter {
         }
       }
 
+      // Handle image outputs
+      if (choice?.delta?.images && Array.isArray(choice.delta.images)) {
+        this.finalizeAllReasoning(events);
+        const msgOutputIndex = this.getMessageOutputIndex();
+
+        for (const img of choice.delta.images) {
+          // Ensure message item is added
+          if (!this.itemAdded) {
+            events.push({
+              type: "response.output_item.added",
+              output_index: msgOutputIndex,
+              item: {
+                id: `msg_${this.responseId}`,
+                type: "message",
+                status: "in_progress",
+                role: "assistant",
+                content: [],
+              },
+            });
+            this.itemAdded = true;
+          }
+
+          // Track content index (text is 0 if present, images start after)
+          const contentIndex = this.nextContentIndex++;
+          this.imageBuffer.push(img);
+
+          // Emit content part added for the image
+          events.push({
+            type: "response.content_part.added",
+            item_id: `msg_${this.responseId}`,
+            output_index: msgOutputIndex,
+            content_index: contentIndex,
+            part: {
+              type: "output_image",
+              image_url: img.image_url?.url || "",
+              detail: img.image_url?.detail,
+            },
+          });
+        }
+      }
+
       if (choice?.delta?.tool_calls && Array.isArray(choice.delta.tool_calls)) {
         this.finalizeAllReasoning(events);
 
@@ -288,24 +332,57 @@ export class ChatToResponsesStreamConverter {
         const msgOutputIndex = this.getMessageOutputIndex();
 
         if (this.itemAdded) {
-          const doneEvt: ResponseOutputTextDoneEvent = {
-            type: "response.output_text.done",
-            item_id: `msg_${this.responseId}`,
-            output_index: msgOutputIndex,
-            content_index: 0,
-            text: this.textBuffer,
-          };
-          events.push(doneEvt);
+          // Emit text done event if we have text content
+          if (this.textBuffer.length > 0) {
+            const doneEvt: ResponseOutputTextDoneEvent = {
+              type: "response.output_text.done",
+              item_id: `msg_${this.responseId}`,
+              output_index: msgOutputIndex,
+              content_index: 0,
+              text: this.textBuffer,
+            };
+            events.push(doneEvt);
 
-          if (this.partAdded) {
+            if (this.partAdded) {
+              events.push({
+                type: "response.content_part.done",
+                item_id: `msg_${this.responseId}`,
+                output_index: msgOutputIndex,
+                content_index: 0,
+                part: { type: "output_text", text: this.textBuffer, annotations: [] },
+              });
+            }
+          }
+
+          // Emit content part done events for images
+          let imageContentIndex = this.textBuffer.length > 0 ? 1 : 0;
+          for (const img of this.imageBuffer) {
             events.push({
               type: "response.content_part.done",
               item_id: `msg_${this.responseId}`,
               output_index: msgOutputIndex,
-              content_index: 0,
-              part: { type: "output_text", text: this.textBuffer, annotations: [] },
+              content_index: imageContentIndex++,
+              part: {
+                type: "output_image",
+                image_url: img.image_url?.url || "",
+                detail: img.image_url?.detail,
+              },
             });
           }
+
+          // Build the final message content
+          const finalContent: ResponsesOutputContentPart[] = [];
+          if (this.textBuffer.length > 0) {
+            finalContent.push({ type: "output_text", text: this.textBuffer, annotations: [] });
+          }
+          for (const img of this.imageBuffer) {
+            finalContent.push({
+              type: "output_image",
+              image_url: img.image_url?.url || "",
+              detail: img.image_url?.detail,
+            });
+          }
+
           events.push({
             type: "response.output_item.done",
             output_index: msgOutputIndex,
@@ -314,9 +391,7 @@ export class ChatToResponsesStreamConverter {
               type: "message",
               status: "completed",
               role: "assistant",
-              content: [
-                { type: "output_text", text: this.textBuffer, annotations: [] },
-              ],
+              content: finalContent,
             },
           });
         }
@@ -374,13 +449,29 @@ export class ChatToResponsesStreamConverter {
         }
       }
 
-      if (this.textBuffer.length > 0) {
+      // Build message content from text and images
+      const hasContent = this.textBuffer.length > 0 || this.imageBuffer.length > 0;
+      if (hasContent) {
+        const messageContent: ResponsesOutputContentPart[] = [];
+
+        if (this.textBuffer.length > 0) {
+          messageContent.push({ type: "output_text" as const, text: this.textBuffer, annotations: [] });
+        }
+
+        for (const img of this.imageBuffer) {
+          messageContent.push({
+            type: "output_image" as const,
+            image_url: img.image_url?.url || "",
+            detail: img.image_url?.detail,
+          });
+        }
+
         output.push({
           id: `msg_${this.responseId}`,
           type: "message" as const,
           status: "completed" as const,
           role: "assistant" as const,
-          content: [{ type: "output_text" as const, text: this.textBuffer, annotations: [] }],
+          content: messageContent,
         });
       }
 

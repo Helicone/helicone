@@ -179,9 +179,16 @@ export interface ResponsesOutputToolCallPart {
   arguments: string; // JSON string
 }
 
+export interface ResponsesOutputImagePart {
+  type: "output_image";
+  image_url: string; // data URI format
+  detail?: "high" | "low" | "auto";
+}
+
 export type ResponsesOutputContentPart =
   | ResponsesOutputTextPart
-  | ResponsesOutputToolCallPart;
+  | ResponsesOutputToolCallPart
+  | ResponsesOutputImagePart;
 
 export interface ResponsesMessageOutputItem {
   type: "message";
@@ -314,7 +321,7 @@ export interface ResponseContentPartDoneEvent extends BaseStreamEvent {
   item_id: string;
   output_index: number;
   content_index: number;
-  part: ResponsesOutputTextPart;
+  part: ResponsesOutputTextPart | ResponsesOutputImagePart;
 }
 
 export interface ResponseOutputTextDeltaEvent extends BaseStreamEvent {

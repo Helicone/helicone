@@ -391,7 +391,13 @@ const RefusalContent = z
     type: z.literal("refusal").default("refusal"),
     refusal: z.string(),
   });
-const OutputMessageContent = z.union([OutputTextContent, RefusalContent]);
+const OutputImageContent = z
+  .object({
+    type: z.literal("output_image").default("output_image"),
+    image_url: z.string(),
+    detail: z.enum(["low", "high", "auto"]).optional(),
+  });
+const OutputMessageContent = z.union([OutputTextContent, RefusalContent, OutputImageContent]);
 const OutputMessage = z
   .object({
     id: z.string(),
