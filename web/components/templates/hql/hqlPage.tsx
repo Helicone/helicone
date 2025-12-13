@@ -651,7 +651,17 @@ function HQLPage() {
           }
         }}
       >
-        <AlertDialogContent>
+        <AlertDialogContent
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              if (closeTabConfirm.tabId) {
+                performCloseTab(closeTabConfirm.tabId);
+              }
+              setCloseTabConfirm({ isOpen: false, tabId: null, tabName: "" });
+            }
+          }}
+        >
           <AlertDialogHeader>
             <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
             <AlertDialogDescription>

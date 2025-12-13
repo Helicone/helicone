@@ -48,7 +48,7 @@ export default function TopBar({
     <div className="flex w-full shrink-0 flex-col border-b bg-background dark:border-border">
       {/* Tab Bar - only shown when tabs are provided */}
       {showTabs && (
-        <div className="flex items-center overflow-x-auto border-b bg-muted/30 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border">
+        <div className="flex items-center overflow-x-auto border-b bg-muted/30 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {tabs.map((tab) => (
             <div
               key={tab.id}
@@ -60,7 +60,7 @@ export default function TopBar({
               )}
               onClick={() => onTabSwitch(tab.id)}
             >
-              <span className="max-w-[120px] truncate text-sm">
+              <span className="max-w-[120px] truncate text-sm text-foreground">
                 {tab.name}
               </span>
               {tab.isDirty && (
@@ -68,7 +68,7 @@ export default function TopBar({
               )}
               {tabs.length > 1 && (
                 <button
-                  className="ml-1 rounded p-0.5 opacity-0 hover:bg-muted group-hover:opacity-100"
+                  className="ml-1 rounded p-0.5 text-muted-foreground opacity-0 hover:bg-muted hover:text-foreground group-hover:opacity-100"
                   onClick={(e) => {
                     e.stopPropagation();
                     onTabClose(tab.id);
