@@ -812,6 +812,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "us-east-1",
       ],
     },
+    "claude-4.5-opus:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 64000,
+      "modelId": "pa/claude-opus-4-5",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "claude-4.5-opus:openrouter": {
       "context": 200000,
       "crossRegion": false,
@@ -5735,6 +5755,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   "anthropic/claude-4.5-opus": [
     "anthropic",
     "bedrock",
+    "helicone",
     "openrouter",
     "vertex",
   ],
@@ -6369,6 +6390,19 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       {
         "cacheMultipliers": {
           "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000005,
+        "output": 0.000025,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
           "write5m": 1.25,
         },
         "input": 0.000005,
@@ -7758,6 +7792,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "providers": [
         "anthropic",
         "bedrock",
+        "helicone",
         "openrouter",
         "vertex",
       ],
@@ -8471,7 +8506,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "groq",
     },
     {
-      "modelCount": 37,
+      "modelCount": 38,
       "provider": "helicone",
     },
     {
@@ -8612,8 +8647,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 252,
-  "totalModelProviderConfigs": 252,
+  "totalEndpoints": 253,
+  "totalModelProviderConfigs": 253,
   "totalModelsWithPtb": 94,
   "totalProviders": 21,
 }
