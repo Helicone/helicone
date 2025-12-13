@@ -1,4 +1,5 @@
 import { BaseStreamEvent } from "./common";
+import { ModalityTokenDetails } from "./common";
 
 // === REQUEST TYPES ===
 // OpenAI Responses API request types (subset used by Helicone mappings)
@@ -178,9 +179,16 @@ export interface ResponsesOutputToolCallPart {
   arguments: string; // JSON string
 }
 
+export interface ResponsesOutputImagePart {
+  type: "output_image";
+  image_url: string; // data URI format
+  detail?: "high" | "low" | "auto";
+}
+
 export type ResponsesOutputContentPart =
   | ResponsesOutputTextPart
-  | ResponsesOutputToolCallPart;
+  | ResponsesOutputToolCallPart
+  | ResponsesOutputImagePart;
 
 export interface ResponsesMessageOutputItem {
   type: "message";
@@ -224,6 +232,13 @@ export interface ResponsesUsage {
   };
   output_tokens_details?: {
     reasoning_tokens?: number;
+  };
+  // Per-modality token breakdown (matches OpenAIUsage.modality_tokens)
+  modality_tokens?: {
+    image?: ModalityTokenDetails;
+    audio?: ModalityTokenDetails;
+    video?: ModalityTokenDetails;
+    file?: ModalityTokenDetails;
   };
   // AI Gateway only - when cost calculation directly provided in usage
   cost?: number;
@@ -306,7 +321,7 @@ export interface ResponseContentPartDoneEvent extends BaseStreamEvent {
   item_id: string;
   output_index: number;
   content_index: number;
-  part: ResponsesOutputTextPart;
+  part: ResponsesOutputTextPart | ResponsesOutputImagePart;
 }
 
 export interface ResponseOutputTextDeltaEvent extends BaseStreamEvent {

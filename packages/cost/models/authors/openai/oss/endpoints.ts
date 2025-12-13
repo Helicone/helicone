@@ -11,8 +11,6 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000015,
         output: 0.00000075,
-        request: 0.0,
-        audio: 0.0,
         web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
       },
     ],
@@ -53,8 +51,6 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000001,
         output: 0.0000005,
-        request: 0.0,
-        audio: 0.0,
         web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
       },
     ],
@@ -200,8 +196,6 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000004,
         output: 0.00000016,
-        request: 0.0,
-        audio: 0.0,
         web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
       },
     ],

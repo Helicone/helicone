@@ -45,7 +45,10 @@ export class XAIUsageProcessor extends OpenAIUsageProcessor {
     }
 
     if (promptAudioTokens > 0 || completionAudioTokens > 0) {
-      modelUsage.audio = promptAudioTokens + completionAudioTokens;
+      modelUsage.audio = {
+        input: promptAudioTokens,
+        output: completionAudioTokens,
+      };
     }
 
     const rejectedTokens = completionDetails.rejected_prediction_tokens ?? 0;

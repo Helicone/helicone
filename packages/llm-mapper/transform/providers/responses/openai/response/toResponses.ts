@@ -1,9 +1,10 @@
-import { OpenAIResponseBody } from "../../../../types/openai";
+import { OpenAIResponseBody, ChatCompletionContentPartImage } from "../../../../types/openai";
 import {
   ResponsesResponseBody,
   ResponsesMessageOutputItem,
   ResponsesUsage,
   ResponsesReasoningItem,
+  ResponsesOutputContentPart,
 } from "../../../../types/responses";
 
 export function toResponses(body: OpenAIResponseBody): ResponsesResponseBody {
@@ -31,13 +32,36 @@ export function toResponses(body: OpenAIResponseBody): ResponsesResponseBody {
     output.push(reasoningItem);
   }
 
+  // Build message content from text and images
+  const messageContent: ResponsesOutputContentPart[] = [];
+
   if (message?.content) {
+    messageContent.push({
+      type: "output_text",
+      text: message.content,
+      annotations: message.annotations ?? [],
+    });
+  }
+
+  // Map images to output_image parts
+  if (message?.images && message.images.length > 0) {
+    for (const img of message.images) {
+      messageContent.push({
+        type: "output_image",
+        image_url: img.image_url?.url || "",
+        detail: img.image_url?.detail,
+      });
+    }
+  }
+
+  // Only create a message output item if we have content
+  if (messageContent.length > 0) {
     const msg: ResponsesMessageOutputItem = {
       id: `msg_${Math.random().toString(36).slice(2, 10)}`,
       type: "message",
       status: "completed",
       role: "assistant",
-      content: [{ type: "output_text", text: message.content, annotations: message.annotations ?? [] }],
+      content: messageContent,
     };
     output.push(msg);
   }
@@ -81,6 +105,7 @@ export function toResponses(body: OpenAIResponseBody): ResponsesResponseBody {
                 body.usage.completion_tokens_details.reasoning_tokens,
             }
           : undefined,
+        modality_tokens: body.usage.modality_tokens,
         cost: body.usage.cost,
       }
     : undefined;
