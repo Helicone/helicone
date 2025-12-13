@@ -9,12 +9,23 @@ import {
   mapGoogleUsage,
 } from "../response/toOpenai";
 
+/**
+ * Tracks a thinking block with accumulated text.
+ */
+interface ThinkingBlockState {
+  text: string;
+}
+
 export class GoogleToOpenAIStreamConverter {
   private messageId: string;
   private created: number;
   private model: string = "google/gemini";
   private sentInitial: boolean = false;
   private toolCallIndex: number = 0;
+  private thinkingBlocks: ThinkingBlockState[] = [];
+  // Google puts thoughtSignature on content parts, not thought parts
+  // so we collect it separately when we see it
+  private collectedSignature: string = "";
 
   constructor() {
     this.created = Math.floor(Date.now() / 1000);
@@ -36,6 +47,7 @@ export class GoogleToOpenAIStreamConverter {
 
       try {
         const event: GoogleStreamEvent = JSON.parse(jsonStr);
+        console.log("event", JSON.stringify(event, null, 2));
         const chunks = this.convert(event);
         for (const chunk of chunks) {
           onChunk(chunk);
@@ -91,6 +103,12 @@ export class GoogleToOpenAIStreamConverter {
           continue;
         }
 
+        // IMPORTANT: Collect thoughtSignature from ANY part FIRST, before other checks
+        // Google puts thoughtSignature on the final chunk, often with empty text ("")
+        if (part.thoughtSignature) {
+          this.collectedSignature = part.thoughtSignature;
+        }
+
         if (part.functionCall) {
           // Handle function calls (checked first since they may also have text)
           chunks.push(
@@ -122,6 +140,9 @@ export class GoogleToOpenAIStreamConverter {
         } else if (part.text) {
           // Check if this is a thinking part (Google uses thought: true)
           if (part.thought === true) {
+            // Track this thinking block for later emission with signature
+            this.thinkingBlocks.push({ text: part.text });
+
             // Emit thinking content as reasoning in the delta
             chunks.push(
               this.createChunk({
@@ -155,12 +176,24 @@ export class GoogleToOpenAIStreamConverter {
     }
 
     if (candidate.finishReason) {
+      // Collect all thinking blocks for reasoning_details
+      // Google provides a single signature for all thinking content combined
+      // Apply the same signature to ALL reasoning_details entries
+      const reasoning_details = this.thinkingBlocks
+        .filter((state) => state.text)
+        .map((state) => ({
+          thinking: state.text,
+          signature: this.collectedSignature,
+        }));
+
       chunks.push(
         this.createChunk({
           choices: [
             {
               index: candidate.index ?? 0,
-              delta: {},
+              delta: {
+                ...(reasoning_details.length > 0 && { reasoning_details }),
+              },
               logprobs: null,
               finish_reason: mapGoogleFinishReason(candidate.finishReason),
             },
