@@ -26,6 +26,16 @@ import {
   createExecuteQueryMutation,
 } from "./constants";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useHeliconeAgent } from "../agent/HeliconeAgentContext";
 import { useTheme } from "next-themes";
 import { FeatureWaitlist } from "@/components/templates/waitlist/FeatureWaitlist";
@@ -116,6 +126,13 @@ function HQLPage() {
   const [tabs, setTabsState] = useState<QueryTab[]>(getInitialTabs);
   const [activeTabId, setActiveTabIdState] = useState<string>(() => getInitialActiveTabId(tabs));
 
+  // Close tab confirmation modal state
+  const [closeTabConfirm, setCloseTabConfirm] = useState<{
+    isOpen: boolean;
+    tabId: string | null;
+    tabName: string;
+  }>({ isOpen: false, tabId: null, tabName: "" });
+
   // Get the current active tab
   const currentTab = tabs.find((t) => t.id === activeTabId) || tabs[0];
 
@@ -166,14 +183,8 @@ function HQLPage() {
     }, 0);
   }, [tabs, setTabs, setActiveTabId, setNotification]);
 
-  const closeTab = useCallback((tabId: string) => {
-    const tab = tabs.find((t) => t.id === tabId);
-    if (tab?.isDirty) {
-      if (!confirm(`"${tab.name}" has unsaved changes. Close anyway?`)) {
-        return;
-      }
-    }
-
+  // Helper to perform the actual tab close
+  const performCloseTab = useCallback((tabId: string) => {
     const newTabs = tabs.filter((t) => t.id !== tabId);
     if (newTabs.length === 0) {
       // Always keep at least one tab
@@ -200,6 +211,20 @@ function HQLPage() {
       setTabs(newTabs);
     }
   }, [tabs, activeTabId, setTabs, setActiveTabId]);
+
+  const closeTab = useCallback((tabId: string) => {
+    const tab = tabs.find((t) => t.id === tabId);
+    if (tab?.isDirty) {
+      // Show confirmation modal for dirty tabs
+      setCloseTabConfirm({
+        isOpen: true,
+        tabId,
+        tabName: tab.name,
+      });
+      return;
+    }
+    performCloseTab(tabId);
+  }, [tabs, performCloseTab]);
 
   const switchTab = useCallback((tabId: string) => {
     const tab = tabs.find((t) => t.id === tabId);
@@ -302,22 +327,23 @@ function HQLPage() {
     setToolHandler("hql-get-schema", async () => {
       if (clickhouseSchemas.data) {
         // Add helpful context for the AI agent alongside the schema
+        const COST_PRECISION_MULTIPLIER = 1_000_000_000;
         const schemaWithNotes = {
           schema: clickhouseSchemas.data,
           importantNotes: [
-            "COST: Use the 'cost' column for cost in USD. Do NOT use 'provider_cost' - it may be null. The 'cost' column contains the calculated cost for each request.",
+            `COST: The 'cost' column stores cost as an integer multiplied by ${COST_PRECISION_MULTIPLIER}. To get the actual cost in USD, you MUST divide by ${COST_PRECISION_MULTIPLIER}. Example: SUM(cost) / ${COST_PRECISION_MULTIPLIER} as total_cost_usd`,
             "TIMESTAMPS: Use 'request_created_at' for filtering and grouping by time. It's a DateTime64 column.",
             "DATE GROUPING: Use toDate(request_created_at) when grouping by day, toStartOfWeek(request_created_at) for weeks, toStartOfMonth(request_created_at) for months.",
-            "AGGREGATIONS: For totals use SUM(cost), for averages use AVG(cost), for counts use COUNT(*).",
+            `AGGREGATIONS: For cost totals use SUM(cost) / ${COST_PRECISION_MULTIPLIER}, for averages use AVG(cost) / ${COST_PRECISION_MULTIPLIER}, for counts use COUNT(*).`,
             "MODEL: The 'model' column contains the LLM model name (e.g., 'gpt-4', 'claude-3-opus').",
             "TOKENS: Use 'prompt_tokens' and 'completion_tokens' for token counts. 'total_tokens' = prompt_tokens + completion_tokens.",
             "STATUS: The 'status' column contains the HTTP status code (200 = success, 4xx/5xx = errors).",
-            "LATENCY: Use 'latency_ms' for request latency in milliseconds.",
+            "LATENCY: Use 'latency' for request latency in milliseconds.",
           ],
           exampleQueries: [
-            "Total cost by day: SELECT toDate(request_created_at) as date, SUM(cost) as total_cost FROM request_response_rmt GROUP BY date ORDER BY date",
-            "Cost by model: SELECT model, SUM(cost) as total_cost, COUNT(*) as requests FROM request_response_rmt GROUP BY model ORDER BY total_cost DESC",
-            "Average latency by model: SELECT model, AVG(latency_ms) as avg_latency FROM request_response_rmt GROUP BY model",
+            `Total cost by day: SELECT toDate(request_created_at) as date, SUM(cost) / ${COST_PRECISION_MULTIPLIER} as total_cost_usd FROM request_response_rmt GROUP BY date ORDER BY date`,
+            `Cost by model: SELECT model, SUM(cost) / ${COST_PRECISION_MULTIPLIER} as total_cost_usd, COUNT(*) as requests FROM request_response_rmt GROUP BY model ORDER BY total_cost_usd DESC`,
+            "Average latency by model: SELECT model, AVG(latency) as avg_latency_ms FROM request_response_rmt GROUP BY model",
           ],
         };
         return {
@@ -615,7 +641,41 @@ function HQLPage() {
   }
 
   return (
-    <ResizablePanelGroup direction="horizontal" className="h-screen w-full">
+    <>
+      {/* Close Tab Confirmation Modal */}
+      <AlertDialog
+        open={closeTabConfirm.isOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setCloseTabConfirm({ isOpen: false, tabId: null, tabName: "" });
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
+            <AlertDialogDescription>
+              &quot;{closeTabConfirm.tabName}&quot; has unsaved changes. Are you sure you want to close it?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={() => {
+                if (closeTabConfirm.tabId) {
+                  performCloseTab(closeTabConfirm.tabId);
+                }
+                setCloseTabConfirm({ isOpen: false, tabId: null, tabName: "" });
+              }}
+            >
+              Close Without Saving
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <ResizablePanelGroup direction="horizontal" className="h-screen w-full">
       <ResizablePanel
         defaultSize={25}
         minSize={18}
@@ -828,6 +888,7 @@ function HQLPage() {
         </ResizablePanelGroup>
       </ResizablePanel>
     </ResizablePanelGroup>
+    </>
   );
 }
 

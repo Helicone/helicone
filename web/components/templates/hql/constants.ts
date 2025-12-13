@@ -121,11 +121,11 @@ FROM request_response_rmt`,
     category: "analytics",
     sql: `SELECT
   provider,
-  SUM(cost) as total_cost,
+  SUM(cost) / 1000000000 as total_cost_usd,
   COUNT(*) as request_count
 FROM request_response_rmt
 GROUP BY provider
-ORDER BY total_cost DESC`,
+ORDER BY total_cost_usd DESC`,
   },
   {
     name: "Recent Errors",

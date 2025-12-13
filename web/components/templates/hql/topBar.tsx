@@ -47,7 +47,7 @@ export default function TopBar({
     <div className="flex w-full shrink-0 flex-col border-b bg-background dark:border-border">
       {/* Tab Bar - only shown when tabs are provided */}
       {showTabs && (
-        <div className="flex items-center overflow-x-auto border-b bg-muted/30">
+        <div className="flex items-center overflow-x-auto border-b bg-muted/30 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border">
           {tabs.map((tab) => (
             <div
               key={tab.id}
