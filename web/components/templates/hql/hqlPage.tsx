@@ -316,7 +316,9 @@ function HQLPage() {
 
   const { setToolHandler, setAgentChatOpen } = useHeliconeAgent();
 
-  // Sync editor with stored tabs on mount (handles SSR hydration)
+  // Sync editor with stored tabs on mount (handles SSR hydration).
+  // Empty deps intentional: tab switching is handled by switchTab().
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (currentTab && editorRef.current) {
       editorRef.current.setValue(currentTab.sql);
