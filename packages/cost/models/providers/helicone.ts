@@ -68,7 +68,7 @@ export class HeliconeProvider extends BaseProvider {
 
     // Convert responses API format to chat completions format first
     // This supports both OpenAI and Anthropic models with the responses API
-    if (context.bodyMapping === "RESPONSES") {
+    if (context.bodyMapping === "RESPONSES" && !endpoint.providerModelId.includes("gpt")) {
       updatedBody = context.toChatCompletions(updatedBody);
     }
 
