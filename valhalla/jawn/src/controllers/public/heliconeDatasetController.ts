@@ -67,17 +67,17 @@ export class HeliconeDatasetController extends Controller {
   > {
     const datasetManager = new DatasetManager(request.authParams);
 
-    const result = await datasetManager.addDataset({
-      ...requestBody,
-      datasetType: "helicone",
+    const result = await datasetManager.helicone.createDatasetWithRequests({
+      name: requestBody.datasetName,
+      requestIds: requestBody.requestIds,
+      meta: requestBody.meta,
     });
-    // const result = await promptManager.getPrompts(requestBody);
     if (result.error || !result.data) {
       console.log(result.error);
       this.setStatus(500);
       return err(result.error ?? "");
     } else {
-      this.setStatus(200); // set return status 201
+      this.setStatus(200);
       return ok({
         datasetId: result.data,
       });
