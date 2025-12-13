@@ -1,7 +1,7 @@
 import { components } from "@/lib/clients/jawnTypes/public";
 import { useClickhouseSchemas } from "@/services/hooks/heliconeSql";
 import { useMonaco, Editor } from "@monaco-editor/react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import TopBar from "./topBar";
 import { Directory } from "./directory";
 import QueryResult from "./QueryResult";
@@ -30,25 +30,65 @@ import { useHeliconeAgent } from "../agent/HeliconeAgentContext";
 import { useTheme } from "next-themes";
 import { FeatureWaitlist } from "@/components/templates/waitlist/FeatureWaitlist";
 
-const HQL_UNSAVED_QUERY_KEY = "hql-unsaved-query";
+// Tab system types
+export interface QueryTab {
+  id: string;
+  savedQueryId?: string;
+  name: string;
+  sql: string;
+  isDirty: boolean;
+}
 
-function getInitialQuery(): { id: string | undefined; name: string; sql: string } {
+const MAX_TABS = 10;
+const DEFAULT_SQL = "select * from request_response_rmt";
+
+const HQL_TABS_KEY = "hql-tabs";
+
+function generateTabId(): string {
+  return crypto.randomUUID();
+}
+
+function getInitialTabs(): QueryTab[] {
   if (typeof window === "undefined") {
-    return { id: undefined, name: "Untitled query", sql: "select * from request_response_rmt" };
+    return [{
+      id: generateTabId(),
+      name: "Untitled query",
+      sql: DEFAULT_SQL,
+      isDirty: false,
+    }];
   }
   try {
-    const saved = localStorage.getItem(HQL_UNSAVED_QUERY_KEY);
+    const saved = localStorage.getItem(HQL_TABS_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      // Only restore if it's an unsaved query (no id)
-      if (!parsed.id && parsed.sql) {
-        return { id: undefined, name: parsed.name || "Untitled query", sql: parsed.sql };
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
       }
     }
-  } catch (e) {
+  } catch {
     // Ignore parse errors
   }
-  return { id: undefined, name: "Untitled query", sql: "select * from request_response_rmt" };
+  return [{
+    id: generateTabId(),
+    name: "Untitled query",
+    sql: DEFAULT_SQL,
+    isDirty: false,
+  }];
+}
+
+function getInitialActiveTabId(tabs: QueryTab[]): string {
+  if (typeof window === "undefined" || tabs.length === 0) {
+    return tabs[0]?.id || generateTabId();
+  }
+  try {
+    const saved = localStorage.getItem(HQL_TABS_KEY + "-active");
+    if (saved && tabs.some(t => t.id === saved)) {
+      return saved;
+    }
+  } catch {
+    // Ignore
+  }
+  return tabs[0].id;
 }
 
 function HQLPage() {
@@ -61,7 +101,7 @@ function HQLPage() {
   const monaco = useMonaco();
   const clickhouseSchemas = useClickhouseSchemas();
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
-  const [activeTab, setActiveTab] = useState<"tables" | "queries">("tables");
+  const [activeTab, setActiveTab] = useState<"tables" | "queries">("queries");
 
   const [result, setResult] = useState<
     components["schemas"]["ExecuteSqlResponse"]
@@ -71,23 +111,159 @@ function HQLPage() {
     size: 0,
     rowCount: 0,
   });
-  const [currentQuery, setCurrentQueryState] = useState<{
-    id: string | undefined;
-    name: string;
-    sql: string;
-  }>(getInitialQuery);
 
-  // Wrapper to persist unsaved queries to localStorage
-  const setCurrentQuery = (query: { id: string | undefined; name: string; sql: string }) => {
-    setCurrentQueryState(query);
-    // Only persist if it's an unsaved query
-    if (!query.id) {
-      localStorage.setItem(HQL_UNSAVED_QUERY_KEY, JSON.stringify(query));
-    } else {
-      // Clear localStorage when loading a saved query
-      localStorage.removeItem(HQL_UNSAVED_QUERY_KEY);
-    }
+  // Multi-tab state
+  const [tabs, setTabsState] = useState<QueryTab[]>(getInitialTabs);
+  const [activeTabId, setActiveTabIdState] = useState<string>(() => getInitialActiveTabId(tabs));
+
+  // Get the current active tab
+  const currentTab = tabs.find((t) => t.id === activeTabId) || tabs[0];
+
+  // Compatibility layer: currentQuery derived from currentTab
+  const currentQuery = {
+    id: currentTab?.savedQueryId,
+    name: currentTab?.name || "Untitled query",
+    sql: currentTab?.sql || DEFAULT_SQL,
   };
+
+  // Persist tabs to localStorage
+  const setTabs = useCallback((newTabs: QueryTab[] | ((prev: QueryTab[]) => QueryTab[])) => {
+    setTabsState((prev) => {
+      const result = typeof newTabs === "function" ? newTabs(prev) : newTabs;
+      localStorage.setItem(HQL_TABS_KEY, JSON.stringify(result));
+      return result;
+    });
+  }, []);
+
+  const setActiveTabId = useCallback((id: string) => {
+    setActiveTabIdState(id);
+    localStorage.setItem(HQL_TABS_KEY + "-active", id);
+  }, []);
+
+  // Tab operations
+  const openNewTab = useCallback((query?: { name: string; sql: string; savedQueryId?: string }) => {
+    if (tabs.length >= MAX_TABS) {
+      setNotification("Maximum 10 tabs allowed. Close some tabs first.", "error");
+      return;
+    }
+
+    const newTab: QueryTab = {
+      id: generateTabId(),
+      savedQueryId: query?.savedQueryId,
+      name: query?.name || "Untitled query",
+      sql: query?.sql || DEFAULT_SQL,
+      isDirty: false,
+    };
+
+    setTabs([...tabs, newTab]);
+    setActiveTabId(newTab.id);
+
+    // Update editor
+    setTimeout(() => {
+      if (editorRef.current) {
+        editorRef.current.setValue(newTab.sql);
+      }
+    }, 0);
+  }, [tabs, setTabs, setActiveTabId, setNotification]);
+
+  const closeTab = useCallback((tabId: string) => {
+    const tab = tabs.find((t) => t.id === tabId);
+    if (tab?.isDirty) {
+      if (!confirm(`"${tab.name}" has unsaved changes. Close anyway?`)) {
+        return;
+      }
+    }
+
+    const newTabs = tabs.filter((t) => t.id !== tabId);
+    if (newTabs.length === 0) {
+      // Always keep at least one tab
+      const newTab: QueryTab = {
+        id: generateTabId(),
+        name: "Untitled query",
+        sql: DEFAULT_SQL,
+        isDirty: false,
+      };
+      setTabs([newTab]);
+      setActiveTabId(newTab.id);
+      if (editorRef.current) {
+        editorRef.current.setValue(newTab.sql);
+      }
+    } else {
+      if (activeTabId === tabId) {
+        const idx = tabs.findIndex((t) => t.id === tabId);
+        const newActiveTab = newTabs[Math.min(idx, newTabs.length - 1)];
+        setActiveTabId(newActiveTab.id);
+        if (editorRef.current) {
+          editorRef.current.setValue(newActiveTab.sql);
+        }
+      }
+      setTabs(newTabs);
+    }
+  }, [tabs, activeTabId, setTabs, setActiveTabId]);
+
+  const switchTab = useCallback((tabId: string) => {
+    const tab = tabs.find((t) => t.id === tabId);
+    if (tab) {
+      setActiveTabId(tabId);
+      if (editorRef.current) {
+        editorRef.current.setValue(tab.sql);
+      }
+    }
+  }, [tabs, setActiveTabId]);
+
+  const updateCurrentTabContent = useCallback((sql: string) => {
+    setTabs((prev) =>
+      prev.map((t) =>
+        t.id === activeTabId ? { ...t, sql, isDirty: true } : t
+      )
+    );
+  }, [activeTabId, setTabs]);
+
+  const updateCurrentTabName = useCallback((name: string) => {
+    setTabs((prev) =>
+      prev.map((t) =>
+        t.id === activeTabId ? { ...t, name } : t
+      )
+    );
+  }, [activeTabId, setTabs]);
+
+  // Handler for loading queries from sidebar (predefined or saved)
+  const handleLoadQuery = useCallback((query: { name: string; sql: string; savedQueryId?: string }) => {
+    // Check if current tab is empty/default
+    const isCurrentTabEmpty =
+      currentTab?.sql === DEFAULT_SQL && !currentTab?.isDirty && !currentTab?.savedQueryId;
+
+    if (isCurrentTabEmpty) {
+      // Load into current tab
+      setTabs((prev) =>
+        prev.map((t) =>
+          t.id === activeTabId
+            ? { ...t, name: query.name, sql: query.sql, savedQueryId: query.savedQueryId, isDirty: false }
+            : t
+        )
+      );
+      if (editorRef.current) {
+        editorRef.current.setValue(query.sql);
+      }
+    } else {
+      // Open in new tab
+      openNewTab(query);
+    }
+  }, [currentTab, activeTabId, setTabs, openNewTab]);
+
+  // Wrapper for setCurrentQuery compatibility
+  const setCurrentQuery = useCallback((query: { id: string | undefined; name: string; sql: string }) => {
+    setTabs((prev) =>
+      prev.map((t) =>
+        t.id === activeTabId
+          ? { ...t, savedQueryId: query.id, name: query.name, sql: query.sql, isDirty: false }
+          : t
+      )
+    );
+    if (editorRef.current && query.sql !== currentTab?.sql) {
+      editorRef.current.setValue(query.sql);
+    }
+  }, [activeTabId, currentTab, setTabs]);
   const [queryLoading, setQueryLoading] = useState(false);
   const [queryError, setQueryError] = useState<string | null>(null);
   const { mutate: handleExecuteQuery, mutateAsync: handleExecuteQueryAsync } =
@@ -115,11 +291,10 @@ function HQLPage() {
 
   const { setToolHandler } = useHeliconeAgent();
 
-  // Sync editor with localStorage on mount (handles SSR hydration)
+  // Sync editor with stored tabs on mount (handles SSR hydration)
   useEffect(() => {
-    const savedQuery = getInitialQuery();
-    if (savedQuery.sql !== "select * from request_response_rmt" && editorRef.current) {
-      editorRef.current.setValue(savedQuery.sql);
+    if (currentTab && editorRef.current) {
+      editorRef.current.setValue(currentTab.sql);
     }
   }, []);
 
@@ -187,9 +362,10 @@ function HQLPage() {
         };
 
         // Check for errors in response.error
-        if (response.error) {
+        const responseError = (response as { error?: unknown }).error;
+        if (responseError) {
           const errorMessage =
-            extractErrorMessage(response.error) ||
+            extractErrorMessage(responseError) ||
             "Query execution failed - unknown error";
           return {
             success: false,
@@ -198,9 +374,10 @@ function HQLPage() {
         }
 
         // Check for errors in response.data.error
-        if (response.data?.error) {
+        const dataError = (response.data as { error?: unknown } | undefined)?.error;
+        if (dataError) {
           const errorMessage =
-            extractErrorMessage(response.data.error) ||
+            extractErrorMessage(dataError) ||
             "Query execution failed";
           return {
             success: false,
@@ -433,6 +610,7 @@ function HQLPage() {
           setCurrentQuery={setCurrentQuery}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
+          onLoadQuery={handleLoadQuery}
         />
       </ResizablePanel>
       <ResizableHandle />
@@ -448,13 +626,13 @@ function HQLPage() {
               currentQuery={currentQuery}
               handleExecuteQuery={handleExecuteQuery}
               handleSaveQuery={handleSaveQuery}
-              handleRenameQuery={(newName) => {
-                setCurrentQuery({
-                  id: currentQuery.id,
-                  name: newName,
-                  sql: currentQuery.sql,
-                });
-              }}
+              handleRenameQuery={updateCurrentTabName}
+              tabs={tabs}
+              activeTabId={activeTabId}
+              onTabSwitch={switchTab}
+              onTabClose={closeTab}
+              onNewTab={() => openNewTab()}
+              maxTabs={MAX_TABS}
             />
             <div className="relative flex-1">
               <Editor
@@ -558,11 +736,7 @@ function HQLPage() {
                   );
                 }}
                 onChange={(value) => {
-                  setCurrentQuery({
-                    id: currentQuery.id,
-                    name: currentQuery.name,
-                    sql: value ?? "",
-                  });
+                  updateCurrentTabContent(value ?? "");
                   if (value) {
                     if (!monaco || !editorRef.current) return;
 

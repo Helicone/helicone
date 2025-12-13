@@ -71,6 +71,93 @@ export const CLICKHOUSE_KEYWORDS = [
 
 export const ALL_KEYWORDS = [...SQL_KEYWORDS, ...CLICKHOUSE_KEYWORDS];
 
+// Predefined example queries for users to learn from
+export interface PredefinedQuery {
+  name: string;
+  description: string;
+  sql: string;
+  category: "analytics" | "debugging";
+}
+
+export const PREDEFINED_QUERIES: PredefinedQuery[] = [
+  {
+    name: "Requests by Model",
+    description: "Count of requests grouped by model",
+    category: "analytics",
+    sql: `SELECT
+  model,
+  COUNT(*) as request_count
+FROM request_response_rmt
+GROUP BY model
+ORDER BY request_count DESC
+LIMIT 100`,
+  },
+  {
+    name: "Error Rate by Status",
+    description: "Error breakdown by status code",
+    category: "analytics",
+    sql: `SELECT
+  status,
+  COUNT(*) as count,
+  ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (), 2) as percentage
+FROM request_response_rmt
+GROUP BY status
+ORDER BY count DESC`,
+  },
+  {
+    name: "Latency Percentiles",
+    description: "P50, P90, P99 latency stats",
+    category: "analytics",
+    sql: `SELECT
+  quantile(0.5)(latency) as p50_ms,
+  quantile(0.9)(latency) as p90_ms,
+  quantile(0.99)(latency) as p99_ms,
+  AVG(latency) as avg_ms
+FROM request_response_rmt`,
+  },
+  {
+    name: "Cost by Provider",
+    description: "Total cost grouped by provider",
+    category: "analytics",
+    sql: `SELECT
+  provider,
+  SUM(cost_usd) as total_cost,
+  COUNT(*) as request_count
+FROM request_response_rmt
+GROUP BY provider
+ORDER BY total_cost DESC`,
+  },
+  {
+    name: "Recent Errors",
+    description: "Last 100 failed requests",
+    category: "debugging",
+    sql: `SELECT
+  request_created_at,
+  model,
+  status,
+  error_message
+FROM request_response_rmt
+WHERE status >= 400
+ORDER BY request_created_at DESC
+LIMIT 100`,
+  },
+  {
+    name: "Slow Requests",
+    description: "Requests with latency > 5 seconds",
+    category: "debugging",
+    sql: `SELECT
+  request_created_at,
+  model,
+  latency,
+  prompt_tokens,
+  completion_tokens
+FROM request_response_rmt
+WHERE latency > 5000
+ORDER BY latency DESC
+LIMIT 100`,
+  },
+];
+
 export const getTableNames = (
   schemas: {
     table_name: string;
@@ -157,9 +244,7 @@ export const createExecuteQueryMutation = (
 
 // Save query mutation
 export const useSaveQueryMutation = (
-  setCurrentQuery: React.Dispatch<
-    React.SetStateAction<{ id: string | undefined; name: string; sql: string }>
-  >,
+  setCurrentQuery: (query: { id: string | undefined; name: string; sql: string }) => void,
   setNotification: (_message: string, _type: "success" | "error") => void,
 ) => {
   const queryClient = useQueryClient();
