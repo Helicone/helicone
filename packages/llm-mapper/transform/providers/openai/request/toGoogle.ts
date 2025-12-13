@@ -38,7 +38,27 @@ export function toGoogle(
     }
 
     const role = mapRole(message.role);
-    const parts = mapContentToGeminiParts(message.content);
+    const parts: GeminiPart[] = [];
+
+    // For assistant messages with reasoning_details, add thinking parts FIRST
+    // (similar to Anthropic pattern where thinking blocks must precede content)
+    if (message.role === "assistant") {
+      const reasoningDetails = (message as any).reasoning_details;
+      if (reasoningDetails && Array.isArray(reasoningDetails)) {
+        for (const detail of reasoningDetails) {
+          if (detail.thinking) {
+            parts.push({
+              text: detail.thinking,
+              thought: true,
+              ...(detail.signature && { thoughtSignature: detail.signature }),
+            });
+          }
+        }
+      }
+    }
+
+    // Add regular content parts
+    parts.push(...mapContentToGeminiParts(message.content));
 
     if (message.role === "assistant") {
       const toolCallParts = mapToolCallsToParts(message);

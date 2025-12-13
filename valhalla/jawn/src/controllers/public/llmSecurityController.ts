@@ -92,7 +92,6 @@ export class LLMSecurityController extends Controller {
       });
 
       if (!response.ok) {
-        console.log("response");
         console.error(response);
         this.setStatus(response.status);
         return err(response.statusText);

@@ -296,6 +296,102 @@ describe("Google Reasoning/Thinking Support", () => {
       expect(openAIResponse.choices[0].message.reasoning).toBeUndefined();
       expect(openAIResponse.choices[0].message.reasoning_details).toBeUndefined();
     });
+
+    it("should preserve thoughtSignature in reasoning_details", () => {
+      // Google puts thoughtSignature on the content part, not the thought part
+      const googleResponse = {
+        candidates: [
+          {
+            content: {
+              role: "model",
+              parts: [
+                {
+                  text: "Let me think about this...",
+                  thought: true,
+                },
+                {
+                  text: "The answer is 42.",
+                  thoughtSignature: "EoaoSgqCqEoBcsjafFAvhG123456",
+                },
+              ],
+            },
+            finishReason: "STOP",
+          },
+        ],
+        modelVersion: "gemini-2.5-flash",
+        usageMetadata: {
+          promptTokenCount: 10,
+          candidatesTokenCount: 15,
+          thoughtsTokenCount: 10,
+          totalTokenCount: 35,
+        },
+        responseId: "resp_sig_1",
+        name: "test",
+      };
+
+      const openAIResponse = toOpenAI(googleResponse);
+
+      expect(openAIResponse.choices[0].message.content).toBe("The answer is 42.");
+      expect(openAIResponse.choices[0].message.reasoning).toBe(
+        "Let me think about this..."
+      );
+      expect(openAIResponse.choices[0].message.reasoning_details).toHaveLength(1);
+      expect(
+        openAIResponse.choices[0].message.reasoning_details?.[0].thinking
+      ).toBe("Let me think about this...");
+      expect(
+        openAIResponse.choices[0].message.reasoning_details?.[0].signature
+      ).toBe("EoaoSgqCqEoBcsjafFAvhG123456");
+    });
+
+    it("should handle multiple thinking parts with single signature", () => {
+      // Google provides a single signature for all thinking content
+      // The same signature should be applied to ALL reasoning_details
+      const googleResponse = {
+        candidates: [
+          {
+            content: {
+              role: "model",
+              parts: [
+                {
+                  text: "First thought...",
+                  thought: true,
+                },
+                {
+                  text: "Second thought...",
+                  thought: true,
+                },
+                {
+                  text: "Final answer.",
+                  thoughtSignature: "combined_signature_xyz",
+                },
+              ],
+            },
+            finishReason: "STOP",
+          },
+        ],
+        modelVersion: "gemini-2.5-flash",
+        usageMetadata: {
+          promptTokenCount: 5,
+          candidatesTokenCount: 10,
+          thoughtsTokenCount: 15,
+          totalTokenCount: 30,
+        },
+        responseId: "resp_sig_2",
+        name: "test",
+      };
+
+      const openAIResponse = toOpenAI(googleResponse);
+
+      expect(openAIResponse.choices[0].message.reasoning_details).toHaveLength(2);
+      // ALL thinking blocks should have the same signature
+      expect(
+        openAIResponse.choices[0].message.reasoning_details?.[0].signature
+      ).toBe("combined_signature_xyz");
+      expect(
+        openAIResponse.choices[0].message.reasoning_details?.[1].signature
+      ).toBe("combined_signature_xyz");
+    });
   });
 
   describe("Streaming Converter", () => {
@@ -382,6 +478,412 @@ describe("Google Reasoning/Thinking Support", () => {
 
       expect(reasoningChunk).toBeDefined();
       expect(contentChunk).toBeDefined();
+    });
+
+    it("should emit reasoning_details with thoughtSignature on finish", () => {
+      const converter = new GoogleToOpenAIStreamConverter();
+
+      // First event with thinking content (no signature on thought part)
+      const event1 = {
+        candidates: [
+          {
+            content: {
+              parts: [
+                {
+                  text: "Thinking about the problem...",
+                  thought: true,
+                },
+              ],
+            },
+          },
+        ],
+        modelVersion: "gemini-2.5-flash",
+      };
+
+      // Second event with regular content
+      const event2 = {
+        candidates: [
+          {
+            content: {
+              parts: [
+                {
+                  text: "The answer is 42.",
+                },
+              ],
+            },
+          },
+        ],
+        modelVersion: "gemini-2.5-flash",
+      };
+
+      // Third event with empty text and signature + finish (Google's actual format)
+      const event3 = {
+        candidates: [
+          {
+            content: {
+              parts: [
+                {
+                  text: "",
+                  thoughtSignature: "sig_streaming_123",
+                },
+              ],
+            },
+            finishReason: "STOP",
+          },
+        ],
+        usageMetadata: {
+          promptTokenCount: 10,
+          candidatesTokenCount: 15,
+          totalTokenCount: 25,
+        },
+        modelVersion: "gemini-2.5-flash",
+      };
+
+      converter.convert(event1 as any);
+      converter.convert(event2 as any);
+      const result3 = converter.convert(event3 as any);
+
+      // Find the finish chunk with reasoning_details
+      const finishChunk = result3.find(
+        (chunk) => chunk.choices[0]?.finish_reason === "stop"
+      );
+
+      expect(finishChunk).toBeDefined();
+      expect(finishChunk?.choices[0]?.delta?.reasoning_details).toBeDefined();
+      expect(finishChunk?.choices[0]?.delta?.reasoning_details).toHaveLength(1);
+      expect(
+        finishChunk?.choices[0]?.delta?.reasoning_details?.[0].thinking
+      ).toBe("Thinking about the problem...");
+      expect(
+        finishChunk?.choices[0]?.delta?.reasoning_details?.[0].signature
+      ).toBe("sig_streaming_123");
+    });
+
+    it("should handle multiple thinking blocks with signature on final empty-text chunk (real Google format)", () => {
+      const converter = new GoogleToOpenAIStreamConverter();
+
+      // Event 1: First thinking block
+      const event1 = {
+        candidates: [
+          {
+            content: {
+              parts: [
+                {
+                  text: "**Analyzing Joke Requirements**\n\nI've been dissecting the request, pinpointing the key ingredients: a joke, brevity being paramount, and the obvious goal of generating laughter. Now I'm shifting to brainstorming suitable categories for these short jokes.\n\n\n",
+                  thought: true,
+                },
+              ],
+              role: "model",
+            },
+            index: 0,
+          },
+        ],
+        usageMetadata: {
+          promptTokenCount: 23,
+          totalTokenCount: 23,
+          promptTokensDetails: [{ modality: "TEXT", tokenCount: 23 }],
+        },
+        modelVersion: "gemini-3-pro-preview",
+        responseId: "hdg8afaKJoyn_uMP_J_D4Ak",
+      };
+
+      // Event 2: Second thinking block
+      const event2 = {
+        candidates: [
+          {
+            content: {
+              parts: [
+                {
+                  text: "**Exploring Joke Types**\n\nI'm now focusing on different types of jokes that fit the brief. Puns are a strong contender; they're short and effective. Anti-jokes are interesting, though the context might add some length. Classic setup/punchline jokes, like the \"Why did the...\" style, are also on the table for their brevity and established format.\n\n\n",
+                  thought: true,
+                },
+              ],
+              role: "model",
+            },
+            index: 0,
+          },
+        ],
+        usageMetadata: {
+          promptTokenCount: 23,
+          totalTokenCount: 23,
+          promptTokensDetails: [{ modality: "TEXT", tokenCount: 23 }],
+        },
+        modelVersion: "gemini-3-pro-preview",
+        responseId: "hdg8afaKJoyn_uMP_J_D4Ak",
+      };
+
+      // Event 3: Content (the actual joke)
+      const event3 = {
+        candidates: [
+          {
+            content: {
+              parts: [
+                {
+                  text: "I threw a boomerang a few years ago. I now live in constant fear.",
+                },
+              ],
+              role: "model",
+            },
+            index: 0,
+          },
+        ],
+        usageMetadata: {
+          promptTokenCount: 23,
+          candidatesTokenCount: 16,
+          totalTokenCount: 161,
+          promptTokensDetails: [{ modality: "TEXT", tokenCount: 23 }],
+          thoughtsTokenCount: 122,
+        },
+        modelVersion: "gemini-3-pro-preview",
+        responseId: "hdg8afaKJoyn_uMP_J_D4Ak",
+      };
+
+      // Event 4: Final chunk with empty text, thoughtSignature, and finishReason
+      const event4 = {
+        candidates: [
+          {
+            content: {
+              parts: [
+                {
+                  text: "",
+                  thoughtSignature:
+                    "ErIECq8EAXLI2nxYfUMo5r6zgPuzMN4AvtzcJgkh468L48SHfeC7YmDPxQqI/rl/Y1MlWljgxiMuGnLG+Xd/zyv+8IqiyGKzi/BMyheXcAtu+TNF4OCJcGOZBALBhWUJ0awcSFEx0X9Emh/c2O4Krgfvo3pV77CH3lTar9d8+H6xwaUQSNBRr7yAHz07zMDAC82f68HF3US+oKnFBBZhq7QbuQwCFULDOhRHN1y9i/Se7lD7G2/8Ccs8dblyKOu5XG1VZ3lA",
+                },
+              ],
+              role: "model",
+            },
+            finishReason: "STOP",
+            index: 0,
+          },
+        ],
+        usageMetadata: {
+          promptTokenCount: 23,
+          candidatesTokenCount: 16,
+          totalTokenCount: 161,
+          promptTokensDetails: [{ modality: "TEXT", tokenCount: 23 }],
+          thoughtsTokenCount: 122,
+        },
+        modelVersion: "gemini-3-pro-preview",
+        responseId: "hdg8afaKJoyn_uMP_J_D4Ak",
+      };
+
+      // Process all events
+      const result1 = converter.convert(event1 as any);
+      const result2 = converter.convert(event2 as any);
+      const result3 = converter.convert(event3 as any);
+      const result4 = converter.convert(event4 as any);
+
+      // Verify reasoning chunks were emitted
+      const reasoningChunk1 = result1.find(
+        (chunk) => chunk.choices[0]?.delta?.reasoning !== undefined
+      );
+      const reasoningChunk2 = result2.find(
+        (chunk) => chunk.choices[0]?.delta?.reasoning !== undefined
+      );
+      const contentChunk = result3.find(
+        (chunk) => chunk.choices[0]?.delta?.content !== undefined
+      );
+
+      expect(reasoningChunk1).toBeDefined();
+      expect(reasoningChunk1?.choices[0].delta.reasoning).toContain(
+        "**Analyzing Joke Requirements**"
+      );
+
+      expect(reasoningChunk2).toBeDefined();
+      expect(reasoningChunk2?.choices[0].delta.reasoning).toContain(
+        "**Exploring Joke Types**"
+      );
+
+      expect(contentChunk).toBeDefined();
+      expect(contentChunk?.choices[0].delta.content).toBe(
+        "I threw a boomerang a few years ago. I now live in constant fear."
+      );
+
+      // Find the finish chunk with reasoning_details
+      const finishChunk = result4.find(
+        (chunk) => chunk.choices[0]?.finish_reason === "stop"
+      );
+
+      expect(finishChunk).toBeDefined();
+      expect(finishChunk?.choices[0]?.delta?.reasoning_details).toBeDefined();
+      expect(finishChunk?.choices[0]?.delta?.reasoning_details).toHaveLength(2);
+
+      // Both thinking blocks should have the SAME signature
+      expect(
+        finishChunk?.choices[0]?.delta?.reasoning_details?.[0].thinking
+      ).toContain("**Analyzing Joke Requirements**");
+      expect(
+        finishChunk?.choices[0]?.delta?.reasoning_details?.[0].signature
+      ).toBe(
+        "ErIECq8EAXLI2nxYfUMo5r6zgPuzMN4AvtzcJgkh468L48SHfeC7YmDPxQqI/rl/Y1MlWljgxiMuGnLG+Xd/zyv+8IqiyGKzi/BMyheXcAtu+TNF4OCJcGOZBALBhWUJ0awcSFEx0X9Emh/c2O4Krgfvo3pV77CH3lTar9d8+H6xwaUQSNBRr7yAHz07zMDAC82f68HF3US+oKnFBBZhq7QbuQwCFULDOhRHN1y9i/Se7lD7G2/8Ccs8dblyKOu5XG1VZ3lA"
+      );
+
+      expect(
+        finishChunk?.choices[0]?.delta?.reasoning_details?.[1].thinking
+      ).toContain("**Exploring Joke Types**");
+      expect(
+        finishChunk?.choices[0]?.delta?.reasoning_details?.[1].signature
+      ).toBe(
+        "ErIECq8EAXLI2nxYfUMo5r6zgPuzMN4AvtzcJgkh468L48SHfeC7YmDPxQqI/rl/Y1MlWljgxiMuGnLG+Xd/zyv+8IqiyGKzi/BMyheXcAtu+TNF4OCJcGOZBALBhWUJ0awcSFEx0X9Emh/c2O4Krgfvo3pV77CH3lTar9d8+H6xwaUQSNBRr7yAHz07zMDAC82f68HF3US+oKnFBBZhq7QbuQwCFULDOhRHN1y9i/Se7lD7G2/8Ccs8dblyKOu5XG1VZ3lA"
+      );
+    });
+
+    it("should capture signature even when thoughtSignature comes with empty string text", () => {
+      const converter = new GoogleToOpenAIStreamConverter();
+
+      // Single thinking event
+      const event1 = {
+        candidates: [
+          {
+            content: {
+              parts: [{ text: "Let me think...", thought: true }],
+              role: "model",
+            },
+            index: 0,
+          },
+        ],
+        modelVersion: "gemini-3-pro-preview",
+      };
+
+      // Final event: empty string text with signature (this is the key case!)
+      const event2 = {
+        candidates: [
+          {
+            content: {
+              parts: [
+                {
+                  text: "", // Empty string - falsy in JS!
+                  thoughtSignature: "test_signature_abc123",
+                },
+              ],
+              role: "model",
+            },
+            finishReason: "STOP",
+            index: 0,
+          },
+        ],
+        usageMetadata: {
+          promptTokenCount: 10,
+          candidatesTokenCount: 5,
+          totalTokenCount: 15,
+        },
+        modelVersion: "gemini-3-pro-preview",
+      };
+
+      converter.convert(event1 as any);
+      const result2 = converter.convert(event2 as any);
+
+      const finishChunk = result2.find(
+        (chunk) => chunk.choices[0]?.finish_reason === "stop"
+      );
+
+      expect(finishChunk).toBeDefined();
+      expect(finishChunk?.choices[0]?.delta?.reasoning_details).toHaveLength(1);
+      expect(
+        finishChunk?.choices[0]?.delta?.reasoning_details?.[0].signature
+      ).toBe("test_signature_abc123");
+    });
+  });
+
+  describe("Request Mapper (toGoogle) - Multi-turn with reasoning_details", () => {
+    it("should convert reasoning_details to thinking parts with thoughtSignature", () => {
+      const openAIRequest: HeliconeChatCreateParams = {
+        model: "gemini-2.5-flash",
+        messages: [
+          { role: "user", content: "What is 2+2?" },
+          {
+            role: "assistant",
+            content: "The answer is 4.",
+            reasoning_details: [
+              {
+                thinking: "Let me calculate 2+2...",
+                signature: "sig_from_previous_response",
+              },
+            ],
+          } as any,
+          { role: "user", content: "What about 3+3?" },
+        ],
+      };
+
+      const googleRequest = toGoogle(openAIRequest);
+
+      // Find the assistant message (model role)
+      const modelContent = googleRequest.contents.find(
+        (c) => c.role === "model"
+      );
+      expect(modelContent).toBeDefined();
+      expect(modelContent?.parts).toHaveLength(2);
+
+      // First part should be the thinking part with signature
+      const thinkingPart = modelContent?.parts[0];
+      expect(thinkingPart?.text).toBe("Let me calculate 2+2...");
+      expect(thinkingPart?.thought).toBe(true);
+      expect(thinkingPart?.thoughtSignature).toBe("sig_from_previous_response");
+
+      // Second part should be the regular content
+      const contentPart = modelContent?.parts[1];
+      expect(contentPart?.text).toBe("The answer is 4.");
+      expect(contentPart?.thought).toBeUndefined();
+    });
+
+    it("should handle multiple reasoning_details with signatures", () => {
+      const openAIRequest: HeliconeChatCreateParams = {
+        model: "gemini-2.5-flash",
+        messages: [
+          { role: "user", content: "Solve this complex problem" },
+          {
+            role: "assistant",
+            content: "Here is the solution.",
+            reasoning_details: [
+              { thinking: "First step...", signature: "sig_1" },
+              { thinking: "Second step...", signature: "sig_2" },
+            ],
+          } as any,
+          { role: "user", content: "Can you explain more?" },
+        ],
+      };
+
+      const googleRequest = toGoogle(openAIRequest);
+
+      const modelContent = googleRequest.contents.find(
+        (c) => c.role === "model"
+      );
+      expect(modelContent?.parts).toHaveLength(3);
+
+      // First two parts should be thinking parts
+      expect(modelContent?.parts[0]?.thought).toBe(true);
+      expect(modelContent?.parts[0]?.thoughtSignature).toBe("sig_1");
+      expect(modelContent?.parts[1]?.thought).toBe(true);
+      expect(modelContent?.parts[1]?.thoughtSignature).toBe("sig_2");
+
+      // Third part should be regular content
+      expect(modelContent?.parts[2]?.text).toBe("Here is the solution.");
+    });
+
+    it("should handle reasoning_details without signatures (empty string)", () => {
+      const openAIRequest: HeliconeChatCreateParams = {
+        model: "gemini-2.5-flash",
+        messages: [
+          { role: "user", content: "Hello" },
+          {
+            role: "assistant",
+            content: "Hi there!",
+            reasoning_details: [{ thinking: "Greeting the user...", signature: "" }],
+          } as any,
+          { role: "user", content: "How are you?" },
+        ],
+      };
+
+      const googleRequest = toGoogle(openAIRequest);
+
+      const modelContent = googleRequest.contents.find(
+        (c) => c.role === "model"
+      );
+      expect(modelContent?.parts).toHaveLength(2);
+
+      // Thinking part should exist but without thoughtSignature (since it's empty)
+      expect(modelContent?.parts[0]?.thought).toBe(true);
+      expect(modelContent?.parts[0]?.thoughtSignature).toBeUndefined();
     });
   });
 });
