@@ -267,14 +267,7 @@ export function HqlChart({ data, config }: HqlChartProps) {
                 <Cell key={`cell-${index}`} fill={getColor(index)} />
               ))}
             </Pie>
-            <Tooltip
-              formatter={(value: number) => formatValue(value)}
-              contentStyle={{
-                backgroundColor: "hsl(var(--background))",
-                border: "1px solid hsl(var(--border))",
-                borderRadius: "8px",
-              }}
-            />
+            <Tooltip content={<CustomTooltip />} />
             <Legend />
           </PieChart>
         );

@@ -665,7 +665,7 @@ function HQLPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
             <AlertDialogDescription>
-              &quot;{closeTabConfirm.tabName}&quot; has unsaved changes. Are you sure you want to close it?
+              {`"${closeTabConfirm.tabName}" has unsaved changes. Are you sure you want to close it?`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

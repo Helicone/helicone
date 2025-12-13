@@ -118,7 +118,7 @@ export function ChartConfig({
         });
       }
     }
-  }, [columns, config, categoricalColumns, numericColumns, onConfigChange]);
+  }, [columns, config, onConfigChange]);
 
   const handleChartTypeChange = (chartType: ChartType) => {
     if (!config) return;
