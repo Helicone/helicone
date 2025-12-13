@@ -47,7 +47,6 @@ export class GoogleToOpenAIStreamConverter {
 
       try {
         const event: GoogleStreamEvent = JSON.parse(jsonStr);
-        console.log("event", JSON.stringify(event, null, 2));
         const chunks = this.convert(event);
         for (const chunk of chunks) {
           onChunk(chunk);

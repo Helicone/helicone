@@ -101,7 +101,6 @@ export function toGoogle(
     }
   }
 
-  console.log("geminiBody", JSON.stringify(geminiBody, null, 2));
   return geminiBody;
 }
 
