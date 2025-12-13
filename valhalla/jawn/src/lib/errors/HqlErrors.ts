@@ -12,12 +12,13 @@ export enum HqlErrorCode {
   INVALID_TABLE = "HQL_INVALID_TABLE",
   SYNTAX_ERROR = "HQL_SYNTAX_ERROR",
   SQL_INJECTION_ATTEMPT = "HQL_SQL_INJECTION_ATTEMPT",
-  
+
   // Query Execution Errors
   QUERY_TIMEOUT = "HQL_QUERY_TIMEOUT",
   MEMORY_LIMIT_EXCEEDED = "HQL_MEMORY_LIMIT_EXCEEDED",
   ROW_LIMIT_EXCEEDED = "HQL_ROW_LIMIT_EXCEEDED",
   RESULT_LIMIT_EXCEEDED = "HQL_RESULT_LIMIT_EXCEEDED",
+  UNKNOWN_COLUMN = "HQL_UNKNOWN_COLUMN",
   EXECUTION_FAILED = "HQL_EXECUTION_FAILED",
   
   // Data Errors
@@ -58,11 +59,12 @@ export const HqlErrorMessages: Record<HqlErrorCode, string> = {
   [HqlErrorCode.INVALID_TABLE]: "Table is not allowed for querying",
   [HqlErrorCode.SYNTAX_ERROR]: "SQL syntax error",
   [HqlErrorCode.SQL_INJECTION_ATTEMPT]: "Query contains forbidden keywords",
-  
+
   [HqlErrorCode.QUERY_TIMEOUT]: "Query execution timeout (30 seconds). Please optimize your query.",
   [HqlErrorCode.MEMORY_LIMIT_EXCEEDED]: "Query exceeded memory limit. Please reduce the data scope.",
   [HqlErrorCode.ROW_LIMIT_EXCEEDED]: "Query attempted to read too many rows. Please add more filters.",
   [HqlErrorCode.RESULT_LIMIT_EXCEEDED]: "Query result exceeded maximum rows (10,000). Please add LIMIT clause.",
+  [HqlErrorCode.UNKNOWN_COLUMN]: "Unknown column in query",
   [HqlErrorCode.EXECUTION_FAILED]: "Query execution failed",
   
   [HqlErrorCode.NO_DATA_RETURNED]: "No data returned from query",
@@ -107,7 +109,8 @@ export const StatusCodeMap: Partial<Record<HqlErrorCode, number>> = {
   [HqlErrorCode.MEMORY_LIMIT_EXCEEDED]: 503,
   [HqlErrorCode.ROW_LIMIT_EXCEEDED]: 503,
   [HqlErrorCode.RESULT_LIMIT_EXCEEDED]: 503,
-  
+
+  [HqlErrorCode.UNKNOWN_COLUMN]: 400,
   [HqlErrorCode.EXECUTION_FAILED]: 500,
   [HqlErrorCode.SCHEMA_FETCH_FAILED]: 500,
   [HqlErrorCode.CSV_UPLOAD_FAILED]: 500,
@@ -146,6 +149,10 @@ export function parseClickhouseError(error: string): HqlErrorCode {
   }
   if (error.includes('max_result_rows')) {
     return HqlErrorCode.RESULT_LIMIT_EXCEEDED;
+  }
+  // Handle unknown identifier/column errors (ClickHouse error code 47)
+  if (error.includes('UNKNOWN_IDENTIFIER') || error.includes('Missing columns:')) {
+    return HqlErrorCode.UNKNOWN_COLUMN;
   }
   return HqlErrorCode.EXECUTION_FAILED;
 }

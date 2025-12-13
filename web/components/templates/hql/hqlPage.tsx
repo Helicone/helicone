@@ -30,6 +30,27 @@ import { useHeliconeAgent } from "../agent/HeliconeAgentContext";
 import { useTheme } from "next-themes";
 import { FeatureWaitlist } from "@/components/templates/waitlist/FeatureWaitlist";
 
+const HQL_UNSAVED_QUERY_KEY = "hql-unsaved-query";
+
+function getInitialQuery(): { id: string | undefined; name: string; sql: string } {
+  if (typeof window === "undefined") {
+    return { id: undefined, name: "Untitled query", sql: "select * from request_response_rmt" };
+  }
+  try {
+    const saved = localStorage.getItem(HQL_UNSAVED_QUERY_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Only restore if it's an unsaved query (no id)
+      if (!parsed.id && parsed.sql) {
+        return { id: undefined, name: parsed.name || "Untitled query", sql: parsed.sql };
+      }
+    }
+  } catch (e) {
+    // Ignore parse errors
+  }
+  return { id: undefined, name: "Untitled query", sql: "select * from request_response_rmt" };
+}
+
 function HQLPage() {
   const organization = useOrg();
   const { data: hasAccessToHQL, isLoading: isLoadingFeatureFlag } =
@@ -50,15 +71,23 @@ function HQLPage() {
     size: 0,
     rowCount: 0,
   });
-  const [currentQuery, setCurrentQuery] = useState<{
+  const [currentQuery, setCurrentQueryState] = useState<{
     id: string | undefined;
     name: string;
     sql: string;
-  }>({
-    id: undefined,
-    name: "Untitled query",
-    sql: "select * from request_response_rmt",
-  });
+  }>(getInitialQuery);
+
+  // Wrapper to persist unsaved queries to localStorage
+  const setCurrentQuery = (query: { id: string | undefined; name: string; sql: string }) => {
+    setCurrentQueryState(query);
+    // Only persist if it's an unsaved query
+    if (!query.id) {
+      localStorage.setItem(HQL_UNSAVED_QUERY_KEY, JSON.stringify(query));
+    } else {
+      // Clear localStorage when loading a saved query
+      localStorage.removeItem(HQL_UNSAVED_QUERY_KEY);
+    }
+  };
   const [queryLoading, setQueryLoading] = useState(false);
   const [queryError, setQueryError] = useState<string | null>(null);
   const { mutate: handleExecuteQuery, mutateAsync: handleExecuteQueryAsync } =
@@ -86,6 +115,14 @@ function HQLPage() {
 
   const { setToolHandler } = useHeliconeAgent();
 
+  // Sync editor with localStorage on mount (handles SSR hydration)
+  useEffect(() => {
+    const savedQuery = getInitialQuery();
+    if (savedQuery.sql !== "select * from request_response_rmt" && editorRef.current) {
+      editorRef.current.setValue(savedQuery.sql);
+    }
+  }, []);
+
   useEffect(() => {
     setToolHandler("hql-get-schema", async () => {
       if (clickhouseSchemas.data) {
@@ -109,6 +146,10 @@ function HQLPage() {
         name: "Untitled query",
         sql: query,
       });
+      // Also update the Monaco editor's value directly
+      if (editorRef.current) {
+        editorRef.current.setValue(query);
+      }
       return {
         success: true,
         message: "Query written successfully",
@@ -118,14 +159,67 @@ function HQLPage() {
 
   useEffect(() => {
     setToolHandler("hql-run-query", async () => {
-      const response = await handleExecuteQueryAsync(currentQuery.sql);
-      return {
-        success: !response.error && !response.data.error,
-        message:
-          response.error ||
-          response.data.error ||
-          JSON.stringify((response?.data?.data || response?.data) ?? {}),
-      };
+      try {
+        const response = await handleExecuteQueryAsync(currentQuery.sql);
+
+        // Helper to extract a valid error message string
+        const extractErrorMessage = (err: unknown): string | null => {
+          if (!err) return null;
+          if (typeof err === "string" && err !== "undefined") return err;
+          if (typeof err === "object") {
+            const errObj = err as Record<string, unknown>;
+            // Check for nested error string
+            if (
+              typeof errObj.error === "string" &&
+              errObj.error !== "undefined"
+            ) {
+              return errObj.error;
+            }
+            // Check for message property
+            if (
+              typeof errObj.message === "string" &&
+              errObj.message !== "undefined"
+            ) {
+              return errObj.message;
+            }
+          }
+          return null;
+        };
+
+        // Check for errors in response.error
+        if (response.error) {
+          const errorMessage =
+            extractErrorMessage(response.error) ||
+            "Query execution failed - unknown error";
+          return {
+            success: false,
+            message: errorMessage,
+          };
+        }
+
+        // Check for errors in response.data.error
+        if (response.data?.error) {
+          const errorMessage =
+            extractErrorMessage(response.data.error) ||
+            "Query execution failed";
+          return {
+            success: false,
+            message: errorMessage,
+          };
+        }
+
+        // Success case
+        return {
+          success: true,
+          message: JSON.stringify(response?.data?.data || response?.data || {}),
+        };
+      } catch (error) {
+        return {
+          success: false,
+          message:
+            error instanceof Error ? error.message : "Failed to execute query",
+        };
+      }
     });
   }, [currentQuery.sql]);
 
