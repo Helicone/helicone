@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { clsx } from "clsx";
 import { QueryTab } from "./hqlPage";
+import { ApiCommandDialog } from "./ApiCommandDialog";
 
 interface TopBarProps {
   currentQuery: {
@@ -120,6 +121,8 @@ export default function TopBar({
               Assistant
             </Button>
           )}
+
+          <ApiCommandDialog sql={currentQuery.sql} />
 
           <Button
             variant="action"

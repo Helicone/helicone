@@ -38,10 +38,14 @@ import { useMutation } from "@tanstack/react-query";
 import { $JAWN_API } from "@/lib/clients/jawn";
 import { components } from "@/lib/clients/jawnTypes/public";
 import useNotification from "@/components/shared/notification/useNotification";
-import { CircleCheckBig, CircleDashed, Table2, BarChart3 } from "lucide-react";
+import { AlertTriangle, CircleCheckBig, CircleDashed, Table2, BarChart3 } from "lucide-react";
 import { HqlErrorDisplay } from "./HqlErrorDisplay";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ChartConfig, ChartConfigState } from "./ChartConfig";
 import { HqlChart } from "./HqlChart";
+
+// Cost precision multiplier - costs are stored as integers multiplied by this value
+const COST_PRECISION_MULTIPLIER = 1_000_000_000;
 
 type ViewMode = "table" | "chart";
 
@@ -82,6 +86,16 @@ function QueryResult({
     }
     return Object.keys(result[0]);
   }, [result]);
+
+  // Check if any cost-related columns are present in the results
+  const hasCostColumn = useMemo(() => {
+    const costColumnPatterns = ["cost", "provider_total_cost"];
+    return columnKeys.some((key) =>
+      costColumnPatterns.some((pattern) =>
+        key.toLowerCase().includes(pattern.toLowerCase())
+      )
+    );
+  }, [columnKeys]);
 
   const columnDefs = useMemo<ColumnDef<Record<string, any>>[]>(() => {
     const indexCol: ColumnDef<Record<string, any>> = {
@@ -229,6 +243,23 @@ function QueryResult({
         viewMode={viewMode}
         onViewModeChange={handleViewModeChange}
       />
+      {hasCostColumn && (
+        <Alert variant="warning" className="mx-4 my-2">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Cost Values Are Stored as Integers</AlertTitle>
+          <AlertDescription>
+            Cost values in ClickHouse are stored multiplied by{" "}
+            <code className="rounded bg-amber-100 px-1 py-0.5 font-mono text-xs dark:bg-amber-900">
+              {COST_PRECISION_MULTIPLIER.toLocaleString()}
+            </code>{" "}
+            for precision. Divide by this value to get the actual USD cost:
+            <code className="mt-1 block rounded bg-slate-100 px-2 py-1 font-mono text-xs dark:bg-slate-800">
+              sum(cost) / {COST_PRECISION_MULTIPLIER.toLocaleString()} AS
+              total_cost_usd
+            </code>
+          </AlertDescription>
+        </Alert>
+      )}
       {viewMode === "table" ? (
         <Table>
           <TableHeader>
