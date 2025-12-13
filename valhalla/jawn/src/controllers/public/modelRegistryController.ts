@@ -18,14 +18,21 @@ type ModelCapability =
   | "caching"
   | "reasoning";
 
+interface SimplifiedModalityPricing {
+  input?: number;
+  cachedInput?: number;
+  output?: number;
+}
+
 interface SimplifiedPricing {
   prompt: number;
   completion: number;
-  audio?: number;
+  audio?: SimplifiedModalityPricing;
   thinking?: number;
   web_search?: number;
-  image?: number;
-  video?: number;
+  image?: SimplifiedModalityPricing;
+  video?: SimplifiedModalityPricing;
+  file?: SimplifiedModalityPricing;
   cacheRead?: number;
   cacheWrite?: number;
   threshold?: number;
@@ -176,15 +183,79 @@ export class ModelRegistryController extends Controller {
             const simplifiedPricing: SimplifiedPricing = {
               prompt: baseTier.input * 1000000,
               completion: baseTier.output * 1000000,
-              audio: baseTier.audio ? baseTier.audio * 1000000 : undefined,
+              audio: baseTier.audio
+                ? {
+                    input: baseTier.audio.input
+                      ? baseTier.audio.input * 1000000
+                      : undefined,
+                    cachedInput:
+                      baseTier.audio.input &&
+                      baseTier.audio.cachedInputMultiplier
+                        ? baseTier.audio.input *
+                          baseTier.audio.cachedInputMultiplier *
+                          1000000
+                        : undefined,
+                    output: baseTier.audio.output
+                      ? baseTier.audio.output * 1000000
+                      : undefined,
+                  }
+                : undefined,
               thinking: baseTier.thinking
                 ? baseTier.thinking * 1000000
                 : undefined,
               web_search: baseTier.web_search
                 ? baseTier.web_search * 1000000
                 : undefined,
-              image: baseTier.image ? baseTier.image * 1000000 : undefined,
-              video: baseTier.video ? baseTier.video * 1000000 : undefined,
+              image: baseTier.image
+                ? {
+                    input: baseTier.image.input
+                      ? baseTier.image.input * 1000000
+                      : undefined,
+                    cachedInput:
+                      baseTier.image.input &&
+                      baseTier.image.cachedInputMultiplier
+                        ? baseTier.image.input *
+                          baseTier.image.cachedInputMultiplier *
+                          1000000
+                        : undefined,
+                    output: baseTier.image.output
+                      ? baseTier.image.output * 1000000
+                      : undefined,
+                  }
+                : undefined,
+              video: baseTier.video
+                ? {
+                    input: baseTier.video.input
+                      ? baseTier.video.input * 1000000
+                      : undefined,
+                    cachedInput:
+                      baseTier.video.input &&
+                      baseTier.video.cachedInputMultiplier
+                        ? baseTier.video.input *
+                          baseTier.video.cachedInputMultiplier *
+                          1000000
+                        : undefined,
+                    output: baseTier.video.output
+                      ? baseTier.video.output * 1000000
+                      : undefined,
+                  }
+                : undefined,
+              file: baseTier.file
+                ? {
+                    input: baseTier.file.input
+                      ? baseTier.file.input * 1000000
+                      : undefined,
+                    cachedInput:
+                      baseTier.file.input && baseTier.file.cachedInputMultiplier
+                        ? baseTier.file.input *
+                          baseTier.file.cachedInputMultiplier *
+                          1000000
+                        : undefined,
+                    output: baseTier.file.output
+                      ? baseTier.file.output * 1000000
+                      : undefined,
+                  }
+                : undefined,
               cacheRead: baseTier.cacheMultipliers?.cachedInput
                 ? baseTier.input *
                   baseTier.cacheMultipliers.cachedInput *
@@ -200,13 +271,74 @@ export class ModelRegistryController extends Controller {
               pricingTiers = endpoint.pricing.map((tier) => ({
                 prompt: tier.input * 1000000,
                 completion: tier.output * 1000000,
-                audio: tier.audio ? tier.audio * 1000000 : undefined,
+                audio: tier.audio
+                  ? {
+                      input: tier.audio.input
+                        ? tier.audio.input * 1000000
+                        : undefined,
+                      cachedInput:
+                        tier.audio.input && tier.audio.cachedInputMultiplier
+                          ? tier.audio.input *
+                            tier.audio.cachedInputMultiplier *
+                            1000000
+                          : undefined,
+                      output: tier.audio.output
+                        ? tier.audio.output * 1000000
+                        : undefined,
+                    }
+                  : undefined,
                 thinking: tier.thinking ? tier.thinking * 1000000 : undefined,
                 web_search: tier.web_search
                   ? tier.web_search * 1000000
                   : undefined,
-                image: tier.image ? tier.image * 1000000 : undefined,
-                video: tier.video ? tier.video * 1000000 : undefined,
+                image: tier.image
+                  ? {
+                      input: tier.image.input
+                        ? tier.image.input * 1000000
+                        : undefined,
+                      cachedInput:
+                        tier.image.input && tier.image.cachedInputMultiplier
+                          ? tier.image.input *
+                            tier.image.cachedInputMultiplier *
+                            1000000
+                          : undefined,
+                      output: tier.image.output
+                        ? tier.image.output * 1000000
+                        : undefined,
+                    }
+                  : undefined,
+                video: tier.video
+                  ? {
+                      input: tier.video.input
+                        ? tier.video.input * 1000000
+                        : undefined,
+                      cachedInput:
+                        tier.video.input && tier.video.cachedInputMultiplier
+                          ? tier.video.input *
+                            tier.video.cachedInputMultiplier *
+                            1000000
+                          : undefined,
+                      output: tier.video.output
+                        ? tier.video.output * 1000000
+                        : undefined,
+                    }
+                  : undefined,
+                file: tier.file
+                  ? {
+                      input: tier.file.input
+                        ? tier.file.input * 1000000
+                        : undefined,
+                      cachedInput:
+                        tier.file.input && tier.file.cachedInputMultiplier
+                          ? tier.file.input *
+                            tier.file.cachedInputMultiplier *
+                            1000000
+                          : undefined,
+                      output: tier.file.output
+                        ? tier.file.output * 1000000
+                        : undefined,
+                    }
+                  : undefined,
                 cacheRead: tier.cacheMultipliers?.cachedInput
                   ? tier.input * tier.cacheMultipliers.cachedInput * 1000000
                   : undefined,
@@ -273,11 +405,11 @@ export class ModelRegistryController extends Controller {
         availableAuthors.add(model.author);
         model.endpoints.forEach((ep) => {
           availableProviders.add(ep.provider);
-          if (ep.pricing.audio && ep.pricing.audio > 0)
+          if (ep.pricing.audio?.input || ep.pricing.audio?.output)
             availableCapabilities.add("audio");
-          if (ep.pricing.video && ep.pricing.video > 0)
+          if (ep.pricing.video?.input || ep.pricing.video?.output)
             availableCapabilities.add("video");
-          if (ep.pricing.image && ep.pricing.image > 0)
+          if (ep.pricing.image?.input || ep.pricing.image?.output)
             availableCapabilities.add("image");
           if (ep.pricing.thinking && ep.pricing.thinking > 0)
             availableCapabilities.add("thinking");

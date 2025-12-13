@@ -1,7 +1,13 @@
-import type { ModelUsage } from "../usage/types";
-import type { ModelProviderConfig, ModelPricing } from "./types";
+import type { ModelUsage, ModalityUsage } from "../usage/types";
+import type { ModelProviderConfig, ModelPricing, ModalityPricing } from "./types";
 import type { ModelProviderName } from "./providers";
 import { registry } from "./registry";
+
+export interface ModalityCostBreakdown {
+  inputCost: number;
+  cachedInputCost: number;
+  outputCost: number;
+}
 
 export interface CostBreakdown {
   inputCost: number;
@@ -10,10 +16,14 @@ export interface CostBreakdown {
   cacheWrite5mCost: number;
   cacheWrite1hCost: number;
   thinkingCost: number;
-  audioCost: number;
-  videoCost: number;
+
+  // Per-modality cost breakdown
+  image?: ModalityCostBreakdown;
+  audio?: ModalityCostBreakdown;
+  video?: ModalityCostBreakdown;
+  file?: ModalityCostBreakdown;
+
   webSearchCost: number;
-  imageCost: number;
   requestCost: number;
   totalCost: number;
 }
@@ -152,7 +162,7 @@ function getThresholdValueFunction(provider: ModelProviderName): (usage: ModelUs
         }
       }
     default:
-      return (usage: ModelUsage, field: CostBreakdownField) => 0;
+      return () => 0;
   }
 }
 
@@ -189,10 +199,7 @@ export function calculateModelCostBreakdown(params: {
     cacheWrite5mCost: 0,
     cacheWrite1hCost: 0,
     thinkingCost: 0,
-    audioCost: 0,
-    videoCost: 0,
     webSearchCost: 0,
-    imageCost: 0,
     requestCost: 0,
     totalCost: 0,
   };
@@ -229,22 +236,23 @@ export function calculateModelCostBreakdown(params: {
     breakdown.thinkingCost = modelUsage.thinking * thinkingRate;
   }
 
-  if (modelUsage.audio) {
-    const audioRate = basePricing.audio ?? inputPricing.input;
-    breakdown.audioCost = modelUsage.audio * audioRate;
-  }
+  // Calculate per-modality costs
+  const modalities = ['image', 'audio', 'video', 'file'] as const;
+  for (const modality of modalities) {
+    const modalityUsage = modelUsage[modality];
+    const modalityPricing = basePricing[modality];
 
-  if (modelUsage.video) {
-    const videoRate = basePricing.video ?? basePricing.input;
-    breakdown.videoCost = modelUsage.video * videoRate;
+    if (modalityUsage && hasModalityTokens(modalityUsage)) {
+      breakdown[modality] = calculateModalityCost(
+        modalityUsage,
+        modalityPricing,
+        basePricing
+      );
+    }
   }
 
   if (modelUsage.web_search && basePricing.web_search) {
     breakdown.webSearchCost = modelUsage.web_search * basePricing.web_search;
-  }
-
-  if (modelUsage.image && basePricing.image) {
-    breakdown.imageCost = modelUsage.image * basePricing.image;
   }
 
   if (requestCount > 0 && basePricing.request) {
@@ -254,6 +262,15 @@ export function calculateModelCostBreakdown(params: {
   if (modelUsage.cost) {
     breakdown.totalCost = modelUsage.cost;
   } else {
+    // Sum up all costs including modality costs
+    const modalityTotalCost = modalities.reduce((sum, modality) => {
+      const modalityCosts = breakdown[modality];
+      if (modalityCosts) {
+        return sum + modalityCosts.inputCost + modalityCosts.cachedInputCost + modalityCosts.outputCost;
+      }
+      return sum;
+    }, 0);
+
     breakdown.totalCost =
       breakdown.inputCost +
       breakdown.outputCost +
@@ -261,12 +278,42 @@ export function calculateModelCostBreakdown(params: {
       breakdown.cacheWrite5mCost +
       breakdown.cacheWrite1hCost +
       breakdown.thinkingCost +
-      breakdown.audioCost +
-      breakdown.videoCost +
+      modalityTotalCost +
       breakdown.webSearchCost +
-      breakdown.imageCost +
       breakdown.requestCost;
   }
 
   return breakdown;
+}
+
+function hasModalityTokens(usage: ModalityUsage): boolean {
+  return (usage.input ?? 0) > 0 || (usage.cachedInput ?? 0) > 0 || (usage.output ?? 0) > 0;
+}
+
+/**
+ * Calculate costs for a single modality (image, audio, video, file).
+ * Uses fallback logic when specific modality pricing is not defined.
+ */
+function calculateModalityCost(
+  modalityUsage: ModalityUsage,
+  modalityPricing: ModalityPricing | undefined,
+  basePricing: ModelPricing
+): ModalityCostBreakdown {
+  // Input rate fallback: modality.input -> text input
+  const inputRate = modalityPricing?.input ?? basePricing.input;
+
+  // Cached multiplier fallback: modality.cachedInputMultiplier -> text cacheMultipliers.cachedInput -> 1.0
+  const cachedMultiplier =
+    modalityPricing?.cachedInputMultiplier ??
+    basePricing.cacheMultipliers?.cachedInput ??
+    1.0;
+
+  // Output rate fallback: modality.output -> text output
+  const outputRate = modalityPricing?.output ?? basePricing.output;
+
+  return {
+    inputCost: (modalityUsage.input ?? 0) * inputRate,
+    cachedInputCost: (modalityUsage.cachedInput ?? 0) * inputRate * cachedMultiplier,
+    outputCost: (modalityUsage.output ?? 0) * outputRate,
+  };
 }

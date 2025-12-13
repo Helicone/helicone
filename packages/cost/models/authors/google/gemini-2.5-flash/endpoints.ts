@@ -12,7 +12,10 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000003,
         output: 0.0000025,
-        audio: 0.000001,
+        audio: {
+          input: 0.000001, // $1/1M audio input tokens
+          cachedInputMultiplier: 0.1, // $0.1/1M cached audio (10% of input)
+        },
         cacheMultipliers: {
           cachedInput: 0.25,
           write5m: 1.0,
@@ -55,7 +58,10 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000003,
         output: 0.0000025,
-        audio: 0.000001,
+        audio: {
+          input: 0.000001, // $1/1M audio input tokens
+          cachedInputMultiplier: 0.1, // $0.1/1M cached audio (10% of input)
+        },
         cacheMultipliers: {
           cachedInput: 0.25,
           write5m: 1.0,

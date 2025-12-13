@@ -189,10 +189,48 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
       modelUsage.thinking = reasoningTokens;
     }
 
-    if (promptAudioTokens > 0 || completionAudioTokens > 0) {
-      // TODO: add audio output support since some models support it in the
-      // chat completions endpoint
-      modelUsage.audio = promptAudioTokens + completionAudioTokens;
+    // Handle audio tokens - use modality_tokens if available, otherwise fall back to legacy fields
+    const modalityTokens = usage.modality_tokens;
+    if (modalityTokens?.audio) {
+      // New structure with detailed breakdown
+      modelUsage.audio = {
+        input: modalityTokens.audio.input_tokens ?? 0,
+        cachedInput: modalityTokens.audio.cached_tokens ?? 0,
+        output: modalityTokens.audio.output_tokens ?? 0,
+      };
+    } else if (promptAudioTokens > 0 || completionAudioTokens > 0) {
+      // Backwards compatibility for old fields that only define audio input/output in prompt/completion details.
+      modelUsage.audio = {
+        input: promptAudioTokens,
+        output: completionAudioTokens,
+      };
+    }
+
+    // Handle image tokens from modality_tokens
+    if (modalityTokens?.image) {
+      modelUsage.image = {
+        input: modalityTokens.image.input_tokens ?? 0,
+        cachedInput: modalityTokens.image.cached_tokens ?? 0,
+        output: modalityTokens.image.output_tokens ?? 0,
+      };
+    }
+
+    // Handle video tokens from modality_tokens
+    if (modalityTokens?.video) {
+      modelUsage.video = {
+        input: modalityTokens.video.input_tokens ?? 0,
+        cachedInput: modalityTokens.video.cached_tokens ?? 0,
+        output: modalityTokens.video.output_tokens ?? 0,
+      };
+    }
+
+    // Handle file tokens from modality_tokens
+    if (modalityTokens?.file) {
+      modelUsage.file = {
+        input: modalityTokens.file.input_tokens ?? 0,
+        cachedInput: modalityTokens.file.cached_tokens ?? 0,
+        output: modalityTokens.file.output_tokens ?? 0,
+      };
     }
 
     const rejectedTokens = completionDetails.rejected_prediction_tokens ?? 0;

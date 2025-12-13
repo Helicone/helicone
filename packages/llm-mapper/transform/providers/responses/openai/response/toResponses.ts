@@ -81,6 +81,7 @@ export function toResponses(body: OpenAIResponseBody): ResponsesResponseBody {
                 body.usage.completion_tokens_details.reasoning_tokens,
             }
           : undefined,
+        modality_tokens: body.usage.modality_tokens,
         cost: body.usage.cost,
       }
     : undefined;

@@ -3209,8 +3209,9 @@ Json: JsonObject;
        * - If set to 'default', then the request will be processed with the standard
        *   pricing and performance for the selected model.
        * - If set to '[flex](https://platform.openai.com/docs/guides/flex-processing)' or
-       *   '[priority](https://openai.com/api-priority-processing/)', then the request
-       *   will be processed with the corresponding service tier.
+       *   'priority', then the request will be processed with the corresponding service
+       *   tier. [Contact sales](https://openai.com/contact-sales) to learn more about
+       *   Priority processing.
        * - When not set, the default behavior is 'auto'.
        *
        * When the `service_tier` parameter is set, the response body will include the
@@ -3220,7 +3221,12 @@ Json: JsonObject;
        * @enum {string|null}
        */
       service_tier?: "auto" | "default" | "flex" | "scale" | "priority" | null;
-      /** @deprecated */
+      /**
+       * @description This fingerprint represents the backend configuration that the model runs with.
+       *
+       * Can be used in conjunction with the `seed` request parameter to understand when
+       * backend changes have been made that might impact determinism.
+       */
       system_fingerprint?: string;
       /** @description Usage statistics for the completion request. */
       usage?: components["schemas"]["CompletionUsage"];
@@ -3267,6 +3273,18 @@ Json: JsonObject;
       /** Format: double */
       tpd?: number;
     };
+    /**
+     * @description Per-modality pricing configuration.
+     * Supports input, cached input (as multiplier), and output rates.
+     */
+    ModalityPricing: {
+      /** Format: double */
+      input?: number;
+      /** Format: double */
+      cachedInputMultiplier?: number;
+      /** Format: double */
+      output?: number;
+    };
     ModelPricing: {
       /** Format: double */
       threshold: number;
@@ -3274,8 +3292,6 @@ Json: JsonObject;
       input: number;
       /** Format: double */
       output: number;
-      /** Format: double */
-      image?: number;
       cacheMultipliers?: {
         /** Format: double */
         write1h?: number;
@@ -3290,10 +3306,10 @@ Json: JsonObject;
       thinking?: number;
       /** Format: double */
       request?: number;
-      /** Format: double */
-      audio?: number;
-      /** Format: double */
-      video?: number;
+      image?: components["schemas"]["ModalityPricing"];
+      audio?: components["schemas"]["ModalityPricing"];
+      video?: components["schemas"]["ModalityPricing"];
+      file?: components["schemas"]["ModalityPricing"];
       /** Format: double */
       web_search?: number;
     };
@@ -3385,21 +3401,27 @@ Json: JsonObject;
       /** Format: double */
       priority?: number;
     };
+    SimplifiedModalityPricing: {
+      /** Format: double */
+      input?: number;
+      /** Format: double */
+      cachedInput?: number;
+      /** Format: double */
+      output?: number;
+    };
     SimplifiedPricing: {
       /** Format: double */
       prompt: number;
       /** Format: double */
       completion: number;
-      /** Format: double */
-      audio?: number;
+      audio?: components["schemas"]["SimplifiedModalityPricing"];
       /** Format: double */
       thinking?: number;
       /** Format: double */
       web_search?: number;
-      /** Format: double */
-      image?: number;
-      /** Format: double */
-      video?: number;
+      image?: components["schemas"]["SimplifiedModalityPricing"];
+      video?: components["schemas"]["SimplifiedModalityPricing"];
+      file?: components["schemas"]["SimplifiedModalityPricing"];
       /** Format: double */
       cacheRead?: number;
       /** Format: double */
