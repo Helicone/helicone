@@ -9499,6 +9499,24 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"SimplifiedModalityPricing": {
+				"properties": {
+					"input": {
+						"type": "number",
+						"format": "double"
+					},
+					"cachedInput": {
+						"type": "number",
+						"format": "double"
+					},
+					"output": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
 			"SimplifiedPricing": {
 				"properties": {
 					"prompt": {
@@ -9510,8 +9528,7 @@
 						"format": "double"
 					},
 					"audio": {
-						"type": "number",
-						"format": "double"
+						"$ref": "#/components/schemas/SimplifiedModalityPricing"
 					},
 					"thinking": {
 						"type": "number",
@@ -9522,12 +9539,13 @@
 						"format": "double"
 					},
 					"image": {
-						"type": "number",
-						"format": "double"
+						"$ref": "#/components/schemas/SimplifiedModalityPricing"
 					},
 					"video": {
-						"type": "number",
-						"format": "double"
+						"$ref": "#/components/schemas/SimplifiedModalityPricing"
+					},
+					"file": {
+						"$ref": "#/components/schemas/SimplifiedModalityPricing"
 					},
 					"cacheRead": {
 						"type": "number",

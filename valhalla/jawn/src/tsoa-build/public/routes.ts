@@ -3053,16 +3053,27 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "SimplifiedModalityPricing": {
+        "dataType": "refObject",
+        "properties": {
+            "input": {"dataType":"double"},
+            "cachedInput": {"dataType":"double"},
+            "output": {"dataType":"double"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "SimplifiedPricing": {
         "dataType": "refObject",
         "properties": {
             "prompt": {"dataType":"double","required":true},
             "completion": {"dataType":"double","required":true},
-            "audio": {"dataType":"double"},
+            "audio": {"ref":"SimplifiedModalityPricing"},
             "thinking": {"dataType":"double"},
             "web_search": {"dataType":"double"},
-            "image": {"dataType":"double"},
-            "video": {"dataType":"double"},
+            "image": {"ref":"SimplifiedModalityPricing"},
+            "video": {"ref":"SimplifiedModalityPricing"},
+            "file": {"ref":"SimplifiedModalityPricing"},
             "cacheRead": {"dataType":"double"},
             "cacheWrite": {"dataType":"double"},
             "threshold": {"dataType":"double"},

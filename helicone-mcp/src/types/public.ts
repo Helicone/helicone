@@ -3401,21 +3401,27 @@ Json: JsonObject;
       /** Format: double */
       priority?: number;
     };
+    SimplifiedModalityPricing: {
+      /** Format: double */
+      input?: number;
+      /** Format: double */
+      cachedInput?: number;
+      /** Format: double */
+      output?: number;
+    };
     SimplifiedPricing: {
       /** Format: double */
       prompt: number;
       /** Format: double */
       completion: number;
-      /** Format: double */
-      audio?: number;
+      audio?: components["schemas"]["SimplifiedModalityPricing"];
       /** Format: double */
       thinking?: number;
       /** Format: double */
       web_search?: number;
-      /** Format: double */
-      image?: number;
-      /** Format: double */
-      video?: number;
+      image?: components["schemas"]["SimplifiedModalityPricing"];
+      video?: components["schemas"]["SimplifiedModalityPricing"];
+      file?: components["schemas"]["SimplifiedModalityPricing"];
       /** Format: double */
       cacheRead?: number;
       /** Format: double */
