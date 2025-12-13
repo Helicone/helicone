@@ -2,8 +2,8 @@
 # docker build -t valhalla .. -f dockerfile
 
 # Use an official Node.js runtime as the base image
-# Updated to latest version to address Go stdlib CVE-2025-47907
-FROM node:20.19.4-bookworm-slim
+# Updated to latest available LTS version to address security vulnerabilities
+FROM node:20.19.0-bookworm-slim
 
 ARG TARGETARCH
 
