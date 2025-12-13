@@ -66,6 +66,12 @@ export class HeliconeProvider extends BaseProvider {
       });
     }
 
+    // Convert responses API format to chat completions format first
+    // This supports both OpenAI and Anthropic models with the responses API
+    if (context.bodyMapping === "RESPONSES") {
+      updatedBody = context.toChatCompletions(updatedBody);
+    }
+
     if (isAnthropicModel) {
       const anthropicBody = context.toAnthropic(
         updatedBody,
@@ -77,12 +83,6 @@ export class HeliconeProvider extends BaseProvider {
       }
 
       return JSON.stringify(anthropicBody);
-    }
-
-    // TODO: when anthropic models are supported with Responses API
-    // move this converstion BEFORE toAnthropic
-    if (context.bodyMapping === "RESPONSES") {
-      updatedBody = context.toChatCompletions(updatedBody);
     }
 
     // Standard format - just pass through with correct model
