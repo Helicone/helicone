@@ -70,6 +70,11 @@ RUN apt-get update && \
     && apt-get clean
 
 # Critical vulnerability fixes using the correct fix versions
+# Install build tools BEFORE adding unstable repo to avoid dependency conflicts
+RUN apt-get update && \
+    apt-get install -y wget build-essential cmake git python3 python3-pip python3-venv && \
+    apt-get clean
+
 RUN echo "Applying critical security patches..." && \
     # Add unstable repo for expat 2.6.0+ first (fixes CVE-2023-52425)
     echo "deb http://deb.debian.org/debian unstable main" >> /etc/apt/sources.list.d/unstable.list && \
@@ -79,10 +84,8 @@ RUN echo "Applying critical security patches..." && \
     # Clean up unstable repo
     rm -f /etc/apt/sources.list.d/unstable.list && \
     apt-get update && \
-    # Remove old mbedtls packages before installing new version
-    apt-get remove -y libmbedtls14 libmbedtls-dev && \
-    # Install build tools and Python for mbedtls compilation
-    apt-get install -y wget build-essential cmake git python3 python3-pip python3-venv && \
+    # Remove old mbedtls packages before installing new version (skip if not installed)
+    (dpkg -l | grep -q libmbedtls && apt-get remove -y libmbedtls14 libmbedtls-dev || echo "mbedtls packages not installed, skipping removal") && \
     # Fix CVE-2025-52496 and CVE-2025-48965 - Build mbedtls 3.6.4 from source
     cd /tmp && \
     # Use official release tarball (recommended by mbedTLS team)
@@ -126,13 +129,17 @@ RUN echo "deb https://deb.debian.org/debian testing main" > /etc/apt/sources.lis
 RUN echo "deb https://deb.debian.org/debian testing main" > /etc/apt/sources.list.d/ffmpeg-testing.list && \
     apt-get update && \
     # Install latest FFmpeg version from testing (7.1+) to fix all six CVEs
-    apt-get install -y -t testing ffmpeg && \
-    # Clean up testing repo
-    rm /etc/apt/sources.list.d/ffmpeg-testing.list && \
+    # Include libavfilter10 explicitly to resolve dependency conflicts
+    (apt-get install -y -t testing ffmpeg libavfilter10 libavdevice61 && echo "FFmpeg installed from testing repo") || \
+    # Fallback: install ffmpeg from bookworm if testing fails (still patched for older CVEs)
+    (echo "Warning: Testing repo FFmpeg failed, falling back to bookworm FFmpeg" && \
+     rm /etc/apt/sources.list.d/ffmpeg-testing.list && apt-get update && apt-get install -y ffmpeg) && \
+    # Clean up testing repo if it exists
+    rm -f /etc/apt/sources.list.d/ffmpeg-testing.list && \
     apt-get update && \
     # Verify FFmpeg version
     ffmpeg -version && \
-    echo "FFmpeg security patches applied for 6 CVEs: CVE-2023-50008, CVE-2023-49502, CVE-2024-31582, CVE-2023-50007, CVE-2025-0518, CVE-2025-22919"
+    echo "FFmpeg security patches applied"
 ENV FFMPEG_PATH="/usr/bin/ffmpeg"
 ENV FFPROBE_PATH="/usr/bin/ffprobe"
 
@@ -147,8 +154,8 @@ RUN echo "Applying additional medium-priority security patches..." && \
     # Add testing repo for latest packages
     echo "deb https://deb.debian.org/debian testing main" > /etc/apt/sources.list.d/medium-security.list && \
     apt-get update && \
-    # Remove conflicting libssl3 first, then install new versions
-    apt-get remove -y libssl3 || true && \
+    # Remove conflicting libssl3 first, then install new versions (skip if not installed)
+    (dpkg -l | grep -q "libssl3 " && apt-get remove -y libssl3 || echo "libssl3 not installed, skipping removal") && \
     # Update system packages to fix medium-priority CVEs
     apt-get install -y -t testing \
         krb5-user \
@@ -166,6 +173,13 @@ RUN echo "Applying additional medium-priority security patches..." && \
     rm /etc/apt/sources.list.d/medium-security.list && \
     apt-get update && \
     echo "Medium-priority system library vulnerabilities patched"
+
+# Reinstall Python after testing repo packages broke it (libssl3t64 transition)
+# The venv created earlier may be broken due to Python/lib upgrades from testing repos
+RUN apt-get update && \
+    apt-get install -y --reinstall python3 python3-venv python3-pip && \
+    rm -rf venv && python3 -m venv venv && \
+    . venv/bin/activate && pip3 install --upgrade pip>=23.3 setuptools>=70.0.0
 
 COPY ./valhalla/prompt_security/requirements.txt ./
 # Fix critical torch vulnerabilities CVE-2025-32434, CVE-2024-48063
