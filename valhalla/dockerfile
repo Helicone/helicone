@@ -84,8 +84,8 @@ RUN echo "Applying critical security patches..." && \
     # Clean up unstable repo
     rm -f /etc/apt/sources.list.d/unstable.list && \
     apt-get update && \
-    # Remove old mbedtls packages before installing new version (ignore if not installed)
-    apt-get remove -y libmbedtls14 libmbedtls-dev || true && \
+    # Remove old mbedtls packages before installing new version (skip if not installed)
+    (dpkg -l | grep -q libmbedtls && apt-get remove -y libmbedtls14 libmbedtls-dev || echo "mbedtls packages not installed, skipping removal") && \
     # Fix CVE-2025-52496 and CVE-2025-48965 - Build mbedtls 3.6.4 from source
     cd /tmp && \
     # Use official release tarball (recommended by mbedTLS team)
@@ -130,9 +130,10 @@ RUN echo "deb https://deb.debian.org/debian testing main" > /etc/apt/sources.lis
     apt-get update && \
     # Install latest FFmpeg version from testing (7.1+) to fix all six CVEs
     # Include libavfilter10 explicitly to resolve dependency conflicts
-    apt-get install -y -t testing ffmpeg libavfilter10 libavdevice61 || \
+    (apt-get install -y -t testing ffmpeg libavfilter10 libavdevice61 && echo "FFmpeg installed from testing repo") || \
     # Fallback: install ffmpeg from bookworm if testing fails (still patched for older CVEs)
-    (rm /etc/apt/sources.list.d/ffmpeg-testing.list && apt-get update && apt-get install -y ffmpeg) && \
+    (echo "Warning: Testing repo FFmpeg failed, falling back to bookworm FFmpeg" && \
+     rm /etc/apt/sources.list.d/ffmpeg-testing.list && apt-get update && apt-get install -y ffmpeg) && \
     # Clean up testing repo if it exists
     rm -f /etc/apt/sources.list.d/ffmpeg-testing.list && \
     apt-get update && \
@@ -153,8 +154,8 @@ RUN echo "Applying additional medium-priority security patches..." && \
     # Add testing repo for latest packages
     echo "deb https://deb.debian.org/debian testing main" > /etc/apt/sources.list.d/medium-security.list && \
     apt-get update && \
-    # Remove conflicting libssl3 first, then install new versions
-    apt-get remove -y libssl3 || true && \
+    # Remove conflicting libssl3 first, then install new versions (skip if not installed)
+    (dpkg -l | grep -q "libssl3 " && apt-get remove -y libssl3 || echo "libssl3 not installed, skipping removal") && \
     # Update system packages to fix medium-priority CVEs
     apt-get install -y -t testing \
         krb5-user \
