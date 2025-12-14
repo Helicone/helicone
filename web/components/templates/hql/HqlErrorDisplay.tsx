@@ -96,6 +96,16 @@ const ERROR_DISPLAY_MAP: Record<
       "Export to CSV for larger datasets",
     ],
   },
+  [HqlErrorCode.UNKNOWN_COLUMN]: {
+    title: "Unknown Column",
+    severity: "error",
+    icon: XCircle,
+    suggestions: [
+      "Check column names against the schema",
+      "Use the Tables panel to see available columns",
+      "Column names are case-sensitive",
+    ],
+  },
   [HqlErrorCode.EXECUTION_FAILED]: {
     title: "Query Execution Failed",
     severity: "error",

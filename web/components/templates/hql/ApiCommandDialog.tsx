@@ -104,7 +104,7 @@ console.log(data);`;
         </Tooltip>
       </TooltipProvider>
 
-      <DialogContent width="700px">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>REST API Command</DialogTitle>
           <DialogDescription>
@@ -116,14 +116,14 @@ console.log(data);`;
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="curl" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+        <Tabs defaultValue="curl" className="w-full min-h-0 flex-1 flex flex-col">
+          <TabsList className="grid w-full grid-cols-3 shrink-0">
             <TabsTrigger value="curl">cURL</TabsTrigger>
             <TabsTrigger value="python">Python</TabsTrigger>
             <TabsTrigger value="node">Node.js</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="curl" className="mt-4">
+          <TabsContent value="curl" className="mt-4 min-h-0 flex-1 overflow-hidden">
             <CodeBlock
               code={curlCommand}
               language="bash"
@@ -132,7 +132,7 @@ console.log(data);`;
             />
           </TabsContent>
 
-          <TabsContent value="python" className="mt-4">
+          <TabsContent value="python" className="mt-4 min-h-0 flex-1 overflow-hidden">
             <CodeBlock
               code={pythonCommand}
               language="python"
@@ -141,7 +141,7 @@ console.log(data);`;
             />
           </TabsContent>
 
-          <TabsContent value="node" className="mt-4">
+          <TabsContent value="node" className="mt-4 min-h-0 flex-1 overflow-hidden">
             <CodeBlock
               code={nodeCommand}
               language="javascript"
@@ -151,7 +151,7 @@ console.log(data);`;
           </TabsContent>
         </Tabs>
 
-        <div className="mt-2 rounded-md border border-amber-200 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950">
+        <div className="mt-2 rounded-md border border-amber-200 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950 shrink-0">
           <p className="text-sm text-amber-800 dark:text-amber-200">
             <strong>Note:</strong> Cost values in the response are stored
             multiplied by 1,000,000,000 for precision. Divide by this value to
@@ -172,9 +172,9 @@ interface CodeBlockProps {
 
 function CodeBlock({ code, copied, onCopy }: CodeBlockProps) {
   return (
-    <div className="relative">
-      <pre className="max-h-[300px] overflow-auto rounded-md bg-slate-900 p-4 text-sm text-slate-100">
-        <code>{code}</code>
+    <div className="relative w-full overflow-hidden">
+      <pre className="max-h-[300px] w-full overflow-x-auto overflow-y-auto rounded-md bg-slate-900 p-4 text-sm text-slate-100">
+        <code className="block w-full whitespace-pre-wrap break-words">{code}</code>
       </pre>
       <Button
         variant="outline"

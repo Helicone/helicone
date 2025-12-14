@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { Save, Play } from "lucide-react";
+import { Save, Play, X, Plus, Bot } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { clsx } from "clsx";
+import { QueryTab } from "./hqlPage";
 import { ApiCommandDialog } from "./ApiCommandDialog";
 
 interface TopBarProps {
@@ -17,6 +19,14 @@ interface TopBarProps {
     sql: string;
   }) => void;
   handleRenameQuery: (newName: string) => void;
+  onOpenAssistant?: () => void;
+  // Tab props - optional for backwards compatibility
+  tabs?: QueryTab[];
+  activeTabId?: string;
+  onTabSwitch?: (tabId: string) => void;
+  onTabClose?: (tabId: string) => void;
+  onNewTab?: () => void;
+  maxTabs?: number;
 }
 
 export default function TopBar({
@@ -24,9 +34,63 @@ export default function TopBar({
   handleExecuteQuery,
   handleSaveQuery,
   handleRenameQuery,
+  onOpenAssistant,
+  tabs,
+  activeTabId,
+  onTabSwitch,
+  onTabClose,
+  onNewTab,
+  maxTabs,
 }: TopBarProps) {
+  const showTabs = tabs && tabs.length > 0 && activeTabId && onTabSwitch && onTabClose && onNewTab;
+
   return (
     <div className="flex w-full shrink-0 flex-col border-b bg-background dark:border-border">
+      {/* Tab Bar - only shown when tabs are provided */}
+      {showTabs && (
+        <div className="flex items-center overflow-x-auto border-b bg-muted/30 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {tabs.map((tab) => (
+            <div
+              key={tab.id}
+              className={clsx(
+                "group flex cursor-pointer items-center gap-1 border-r border-border px-3 py-2",
+                tab.id === activeTabId
+                  ? "border-b-2 border-b-primary bg-background"
+                  : "hover:bg-muted/50"
+              )}
+              onClick={() => onTabSwitch(tab.id)}
+            >
+              <span className="max-w-[120px] truncate text-sm text-foreground">
+                {tab.name}
+              </span>
+              {tab.isDirty && (
+                <span className="text-primary">*</span>
+              )}
+              {tabs.length > 1 && (
+                <button
+                  className="ml-1 rounded p-0.5 text-muted-foreground opacity-0 hover:bg-muted hover:text-foreground group-hover:opacity-100"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onTabClose(tab.id);
+                  }}
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+          ))}
+          {tabs.length < (maxTabs || 10) && (
+            <button
+              className="flex items-center gap-1 px-3 py-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              onClick={onNewTab}
+            >
+              <Plus size={16} />
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Query Controls */}
       <div className="flex items-center justify-between px-4 py-2">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
@@ -47,6 +111,17 @@ export default function TopBar({
         </div>
 
         <div className="flex items-center gap-2">
+          {onOpenAssistant && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onOpenAssistant}
+            >
+              <Bot size={16} className="mr-1" />
+              Assistant
+            </Button>
+          )}
+
           <ApiCommandDialog sql={currentQuery.sql} />
 
           <Button
