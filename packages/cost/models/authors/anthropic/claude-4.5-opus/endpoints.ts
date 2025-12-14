@@ -145,7 +145,7 @@ export const endpoints = {
   "claude-4.5-opus:helicone": {
     provider: "helicone",
     author: "anthropic",
-    providerModelId: "pa/claude-opus-4-5",
+    providerModelId: "pa/claude-opus-4-5-20251101",
     pricing: [
       {
         threshold: 0,
