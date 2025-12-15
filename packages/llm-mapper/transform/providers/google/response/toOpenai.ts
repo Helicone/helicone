@@ -101,15 +101,18 @@ interface ExtractedContent {
  * Google's thinking model responses contain parts with a `thought` boolean flag:
  * - Parts with `thought: true` contain thinking/reasoning summaries
  * - Parts with `thought: false` or no `thought` field contain the final answer
+ * - `thoughtSignature` may appear on ANY part (typically on content parts, not thought parts)
+ *   and must be preserved for multi-turn conversations
  */
 function extractContent(
   content: GoogleContent | GoogleContent[]
 ): ExtractedContent {
   const contents = Array.isArray(content) ? content : [content];
   const textParts: string[] = [];
-  const thinkingParts: string[] = [];
+  const thinkingTexts: string[] = [];
   const toolCalls: OpenAIToolCall[] = [];
   const imageParts: ChatCompletionContentPartImage[] = [];
+  let collectedSignature: string | undefined;
 
   for (const block of contents) {
     const parts = Array.isArray(block?.parts)
@@ -121,6 +124,11 @@ function extractContent(
     for (const part of parts) {
       if (!part) {
         continue;
+      }
+
+      // Collect thoughtSignature from ANY part (Google puts it on content parts, not thought parts)
+      if (part.thoughtSignature) {
+        collectedSignature = part.thoughtSignature;
       }
 
       if (part.functionCall) {
@@ -137,7 +145,7 @@ function extractContent(
       } else if (part.text) {
         // Check if this is a thinking part (Google uses thought: true)
         if (part.thought === true) {
-          thinkingParts.push(part.text);
+          thinkingTexts.push(part.text);
         } else {
           textParts.push(part.text);
         }
@@ -151,12 +159,14 @@ function extractContent(
   };
 
   // Add reasoning if thinking parts were found
-  if (thinkingParts.length > 0) {
-    result.reasoning = thinkingParts.join("");
-    // Google doesn't provide signatures like Anthropic, so we create details without signatures
-    result.reasoning_details = thinkingParts.map((thinking) => ({
+  if (thinkingTexts.length > 0) {
+    result.reasoning = thinkingTexts.join("");
+    // Preserve thoughtSignature in reasoning_details for multi-turn conversations
+    // Google provides a single signature for all thinking content combined
+    // Apply the same signature to ALL reasoning_details entries
+    result.reasoning_details = thinkingTexts.map((thinking) => ({
       thinking,
-      signature: "", // Google doesn't provide signatures
+      signature: collectedSignature || "",
     }));
   }
 

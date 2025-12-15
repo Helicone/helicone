@@ -3,6 +3,8 @@ import { HeliconeChatCreateParams } from "../../../prompts/types";
 // === REQUEST TYPES ===
 export type GeminiPart = {
   text?: string;
+  thought?: boolean;
+  thoughtSignature?: string;
   inlineData?: {
     mimeType?: string;
     data: string;
@@ -93,6 +95,7 @@ export interface GoogleFunctionCall {
 export interface GoogleContentPart {
   text?: string;
   thought?: boolean;
+  thoughtSignature?: string;
   functionCall?: GoogleFunctionCall;
   inlineData?: {
     mimeType?: string;
