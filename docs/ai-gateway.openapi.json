@@ -70,6 +70,20 @@
                       }
                     ]
                   },
+                  "top_k": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                          null
+                        ]
+                      }
+                    ]
+                  },
                   "user": {
                     "type": "string"
                   },
@@ -1295,6 +1309,21 @@
                       "enabled"
                     ],
                     "additionalProperties": false
+                  },
+                  "image_generation": {
+                    "type": "object",
+                    "properties": {
+                      "aspect_ratio": {
+                        "type": "string"
+                      },
+                      "image_size": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "aspect_ratio",
+                      "image_size"
+                    ]
                   }
                 },
                 "required": [
@@ -1327,6 +1356,20 @@
                     "type": "integer",
                     "minimum": 0,
                     "maximum": 20
+                  },
+                  "top_k": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                          null
+                        ]
+                      }
+                    ]
                   },
                   "temperature": {
                     "anyOf": [
@@ -2783,6 +2826,32 @@
                                             "required": [
                                               "refusal"
                                             ]
+                                          },
+                                          {
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "default": "output_image",
+                                                "type": "string",
+                                                "enum": [
+                                                  "output_image"
+                                                ]
+                                              },
+                                              "image_url": {
+                                                "type": "string"
+                                              },
+                                              "detail": {
+                                                "type": "string",
+                                                "enum": [
+                                                  "low",
+                                                  "high",
+                                                  "auto"
+                                                ]
+                                              }
+                                            },
+                                            "required": [
+                                              "image_url"
+                                            ]
                                           }
                                         ]
                                       }
@@ -3881,6 +3950,21 @@
                       "enabled"
                     ],
                     "additionalProperties": {}
+                  },
+                  "image_generation": {
+                    "type": "object",
+                    "properties": {
+                      "aspect_ratio": {
+                        "type": "string"
+                      },
+                      "image_size": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "aspect_ratio",
+                      "image_size"
+                    ]
                   }
                 },
                 "additionalProperties": false
