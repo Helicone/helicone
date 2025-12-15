@@ -35,6 +35,7 @@
                 "pages": [
                   "gateway/concepts/prompt-caching",
                   "gateway/concepts/reasoning",
+                  "gateway/concepts/image-generation",
                   "gateway/concepts/context-editing",
                   "gateway/web-search",
                   "gateway/concepts/error-handling",
