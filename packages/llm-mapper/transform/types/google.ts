@@ -101,7 +101,6 @@ export interface GoogleContentPart {
     mimeType?: string;
     data: string;
   };
-  thoughtSignature?: string;
 }
 
 export interface GoogleContent {
