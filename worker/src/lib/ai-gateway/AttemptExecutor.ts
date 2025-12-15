@@ -367,10 +367,58 @@ export class AttemptExecutor {
 
       return ok(response);
     } catch (error) {
+      // Classify the error for better diagnostics
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorName = error instanceof Error ? error.name : "UnknownError";
+
+      // Log the error with context
+      console.error(
+        `[AttemptExecutor] Request failed for ${endpoint.provider}/${endpoint.providerModelId}:`,
+        {
+          error: errorMessage,
+          errorName,
+          provider: endpoint.provider,
+          model: endpoint.providerModelId,
+        }
+      );
+
+      // Determine appropriate status code based on error type
+      let statusCode = 500;
+      let userMessage = errorMessage;
+
+      const lowerMessage = errorMessage.toLowerCase();
+      if (
+        lowerMessage.includes("network connection lost") ||
+        lowerMessage.includes("failed to fetch") ||
+        lowerMessage.includes("fetch failed")
+      ) {
+        statusCode = 502;
+        userMessage = `Network error connecting to ${endpoint.provider}. Please retry your request.`;
+      } else if (
+        lowerMessage.includes("timeout") ||
+        errorName === "AbortError" ||
+        lowerMessage.includes("aborted")
+      ) {
+        statusCode = 504;
+        userMessage = `Request to ${endpoint.provider} timed out. Please retry your request.`;
+      } else if (
+        lowerMessage.includes("econnrefused") ||
+        lowerMessage.includes("connection refused") ||
+        lowerMessage.includes("econnreset")
+      ) {
+        statusCode = 502;
+        userMessage = `Connection to ${endpoint.provider} was refused or reset. The provider may be temporarily unavailable.`;
+      }
+
       return err({
         type: "request_failed",
-        message: error instanceof Error ? error.message : "Unknown error",
-        statusCode: 500,
+        message: userMessage,
+        statusCode,
+        details: {
+          originalError: errorMessage,
+          provider: endpoint.provider,
+          model: endpoint.providerModelId,
+        },
       });
     }
   }

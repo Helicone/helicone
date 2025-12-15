@@ -185,22 +185,30 @@ export async function callProviderWithRetry(
   callProps: CallProps,
   retryOptions: RetryOptions
 ): Promise<Response> {
-  let lastResponse;
+  let lastResponse: Response | undefined;
+  let lastError: Error | undefined;
+  let totalAttempts = 0;
 
   try {
     // Use async-retry to call the forwardRequestToOpenAi function with exponential backoff
     await retry(
       async (bail, attempt) => {
+        totalAttempts = attempt;
         try {
           const res = await callProvider(callProps);
 
           lastResponse = res;
           // Throw an error if the status code is 429 or 5xx
           if (res.status === 429 || (res.status < 600 && res.status >= 500)) {
-            throw new Error(`Status code ${res.status}`);
+            const statusError = new Error(
+              `Provider returned status ${res.status}`
+            );
+            lastError = statusError;
+            throw statusError;
           }
           return res;
         } catch (e) {
+          lastError = e as Error;
           // If we reach the maximum number of retries, bail with the error
           if (attempt >= retryOptions.retries) {
             bail(e as Error);
@@ -212,18 +220,27 @@ export async function callProviderWithRetry(
       {
         ...retryOptions,
         onRetry: (error, attempt) => {
-          console.log(`Retry attempt ${attempt}. Error: ${error}`);
+          console.warn(
+            `[ProviderClient] Retry attempt ${attempt}/${retryOptions.retries} for ${callProps.apiBase}. Error: ${error.message}`
+          );
         },
       }
     );
   } catch (e) {
-    console.warn(
-      `Retried ${retryOptions.retries} times but still failed. Error: ${e}`
+    lastError = e as Error;
+    console.error(
+      `[ProviderClient] All ${totalAttempts} retry attempts exhausted for ${callProps.apiBase}. Final error: ${e instanceof Error ? e.message : String(e)}`
     );
   }
 
   if (lastResponse === undefined) {
-    throw new Error("500 An error occured while retrying your requests");
+    // Build a more informative error message
+    const errorDetails = lastError
+      ? `Last error: ${lastError.message}`
+      : "No response received";
+    throw new Error(
+      `An error occurred while retrying your request to ${callProps.apiBase} (${totalAttempts} attempts). ${errorDetails}`
+    );
   }
 
   return lastResponse;
