@@ -8751,8 +8751,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 255,
-  "totalModelProviderConfigs": 255,
+  "totalEndpoints": 256,
+  "totalModelProviderConfigs": 256,
   "totalModelsWithPtb": 95,
   "totalProviders": 21,
 }

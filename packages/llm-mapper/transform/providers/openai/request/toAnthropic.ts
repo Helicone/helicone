@@ -379,6 +379,11 @@ function mapMessages(
     };
 
     if (message.role === "assistant" || message.role === "user") {
+      // Check if assistant message has images - not supported by Anthropic
+      if (message.role === "assistant" && message.images && message.images.length > 0) {
+        throw new Error("Image outputs in assistant messages are not supported by Anthropic");
+      }
+
       const processedToolCallContent: AnthropicContentBlock[] = [];
 
       if (message.role === "assistant" && message.tool_calls) {

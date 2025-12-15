@@ -29,12 +29,19 @@ function convertContentParts(
         return { type: "text", text: p.text };
       case "input_image": {
         if (p.image_url) {
-          return { type: "image_url", image_url: { url: p.image_url } };
+          return { type: "image_url", image_url: { url: p.image_url, detail: p.detail } };
         }
         // Chat Completions does not support file_id for images directly
         throw new Error(
           "input_image with file_id is not supported by Chat Completions"
         );
+      }
+      // Handle output_image when responses output is fed back as input
+      case "output_image": {
+        if (p.image_url) {
+          return { type: "image_url", image_url: { url: p.image_url, detail: p.detail } };
+        }
+        throw new Error("output_image missing image_url");
       }
       case "input_file":
         // Chat Completions API does not support arbitrary files as message parts
@@ -215,6 +222,7 @@ export function toChatCompletions(
     max_tokens: body.max_output_tokens,
     temperature: body.temperature,
     top_p: body.top_p,
+    top_k: body.top_k,
     n: body.n,
     stream: body.stream,
     tools,
@@ -234,6 +242,7 @@ export function toChatCompletions(
     stream_options: body.stream_options,
     // Context editing passthrough (only supported by Anthropic - will be stripped for other providers)
     context_editing: body.context_editing,
+    image_generation: body.image_generation,
     // Deprecated passthroughs (supported by Chat Completions clients)
     function_call: body.function_call,
     functions: body.functions,
