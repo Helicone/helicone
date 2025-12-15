@@ -38,12 +38,16 @@ import { useMutation } from "@tanstack/react-query";
 import { $JAWN_API } from "@/lib/clients/jawn";
 import { components } from "@/lib/clients/jawnTypes/public";
 import useNotification from "@/components/shared/notification/useNotification";
-import { AlertTriangle, CircleCheckBig, CircleDashed } from "lucide-react";
+import { AlertTriangle, CircleCheckBig, CircleDashed, Table2, BarChart3 } from "lucide-react";
 import { HqlErrorDisplay } from "./HqlErrorDisplay";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ChartConfig, ChartConfigState } from "./ChartConfig";
+import { HqlChart } from "./HqlChart";
 
 // Cost precision multiplier - costs are stored as integers multiplied by this value
 const COST_PRECISION_MULTIPLIER = 1_000_000_000;
+
+type ViewMode = "table" | "chart";
 
 interface QueryResultProps {
   sql: string;
@@ -53,6 +57,8 @@ interface QueryResultProps {
   queryStats: components["schemas"]["ExecuteSqlResponse"];
   enableAdminLinks?: boolean;
 }
+const HQL_VIEW_MODE_KEY = "hql-view-mode";
+
 function QueryResult({
   sql,
   result,
@@ -61,6 +67,19 @@ function QueryResult({
   queryStats,
   enableAdminLinks = false,
 }: QueryResultProps) {
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    if (typeof window === "undefined") return "table";
+    const saved = localStorage.getItem(HQL_VIEW_MODE_KEY);
+    return saved === "chart" ? "chart" : "table";
+  });
+  const [chartConfig, setChartConfig] = useState<ChartConfigState | null>(null);
+
+  // Persist view mode to localStorage
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    localStorage.setItem(HQL_VIEW_MODE_KEY, mode);
+  };
+
   const columnKeys = useMemo(() => {
     if (!result || result.length === 0) {
       return [];
@@ -188,8 +207,26 @@ function QueryResult({
 
   if (!result || result.length === 0) {
     return (
-      <div className="p-4 text-center text-muted-foreground">
-        No results found.
+      <div className="flex flex-col">
+        <StatusBar
+          elapsedMilliseconds={queryStats.elapsedMilliseconds}
+          rowCount={0}
+          size={0}
+          rows={[]}
+          sql={sql}
+          queryLoading={loading}
+          viewMode={viewMode}
+          onViewModeChange={handleViewModeChange}
+        />
+        <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
+          <div className="rounded-full bg-muted p-3">
+            <Table2 size={24} className="text-muted-foreground" />
+          </div>
+          <p className="text-sm font-medium text-foreground">Query returned 0 rows</p>
+          <p className="text-xs text-muted-foreground">
+            The query executed successfully but no data matched your criteria.
+          </p>
+        </div>
       </div>
     );
   }
@@ -203,6 +240,8 @@ function QueryResult({
         rows={result}
         sql={sql}
         queryLoading={loading}
+        viewMode={viewMode}
+        onViewModeChange={handleViewModeChange}
       />
       {hasCostColumn && (
         <Alert variant="warning" className="mx-4 my-2">
@@ -221,38 +260,50 @@ function QueryResult({
           </AlertDescription>
         </Alert>
       )}
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows.map((row) => (
-            <TableRow
-              key={row.id}
-              data-state={row.getIsSelected() && "selected"}
-            >
-              {row.getVisibleCells().map((cell) => (
-                <TableCell key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      {viewMode === "table" ? (
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && "selected"}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      ) : (
+        <div className="flex flex-col gap-4 p-4">
+          <ChartConfig
+            columns={columnKeys}
+            data={result}
+            config={chartConfig}
+            onConfigChange={setChartConfig}
+          />
+          {chartConfig && <HqlChart data={result} config={chartConfig} />}
+        </div>
+      )}
     </div>
   );
 }
@@ -263,12 +314,16 @@ const StatusBar = ({
   size,
   sql,
   queryLoading,
+  viewMode,
+  onViewModeChange,
 }: components["schemas"]["ExecuteSqlResponse"] & {
   sql: string;
   queryLoading: boolean;
+  viewMode: ViewMode;
+  onViewModeChange: (mode: ViewMode) => void;
 }) => {
   return (
-    <div className="flex items-center justify-between border-b border-tremor-brand-subtle bg-background px-4 py-1">
+    <div className="sticky top-0 z-10 flex items-center justify-between border-b border-tremor-brand-subtle bg-background px-4 py-1">
       <div className="flex items-center gap-6 text-xs text-muted-foreground">
         <span className="flex items-center">
           {queryLoading ? (
@@ -283,7 +338,42 @@ const StatusBar = ({
           {queryLoading ? "?" : size} bytes)
         </span>
       </div>
-      {!queryLoading && <ExportButton sql={sql} />}
+      <div className="flex items-center gap-2">
+        {/* View mode toggle */}
+        <div className="flex items-center rounded-md border border-border bg-muted/50 p-0.5">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={viewMode === "table" ? "secondary" : "ghost"}
+                  size="sm"
+                  className="h-7 w-7 p-0"
+                  onClick={() => onViewModeChange("table")}
+                >
+                  <Table2 size={14} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Table view</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={viewMode === "chart" ? "secondary" : "ghost"}
+                  size="sm"
+                  className="h-7 w-7 p-0"
+                  onClick={() => onViewModeChange("chart")}
+                >
+                  <BarChart3 size={14} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Chart view</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+        {!queryLoading && <ExportButton sql={sql} />}
+      </div>
     </div>
   );
 };
