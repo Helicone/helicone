@@ -242,6 +242,7 @@ export function toChatCompletions(
     stream_options: body.stream_options,
     // Context editing passthrough (only supported by Anthropic - will be stripped for other providers)
     context_editing: body.context_editing,
+    image_generation: body.image_generation,
     // Deprecated passthroughs (supported by Chat Completions clients)
     function_call: body.function_call,
     functions: body.functions,

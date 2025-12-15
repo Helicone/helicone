@@ -308,6 +308,11 @@ const ClearThinkingConfig = z
   })
   .strict();
 
+const ImageGenerationConfig = z.object({
+  aspect_ratio: z.string(),
+  image_size: z.string(),
+});
+
 const ContextEditingConfig = z
   .object({
     enabled: z.boolean(),
@@ -400,6 +405,7 @@ const CreateChatCompletionRequest = z
     // Context editing configuration for managing conversation context
     // Only supported for Anthropic models - will be stripped for other providers
     context_editing: ContextEditingConfig.optional(),
+    image_generation: ImageGenerationConfig.optional(),
   })
   .strict();
 

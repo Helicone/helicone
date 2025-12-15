@@ -115,6 +115,11 @@ export interface ResponsesContextEditingConfig {
   };
 }
 
+export interface ResponsesImageGenerationConfig {
+  aspect_ratio: string; // e.g "16:9"
+  image_size: string; // e.g "2K"
+}
+
 export interface ResponsesRequestBody {
   model: string;
   input: string | ResponsesInputItem[];
@@ -158,6 +163,7 @@ export interface ResponsesRequestBody {
    * Only supported for Anthropic models - will be stripped for other providers.
    */
   context_editing?: ResponsesContextEditingConfig;
+  image_generation?: ResponsesImageGenerationConfig;
   // Deprecated parameters (pass-through if present)
   function_call?: string | { name: string };
   functions?: Array<any>;

@@ -158,6 +158,11 @@ export type HeliconeChatCompletionMessageParam =
   | HeliconeMessageParam<ChatCompletionToolMessageParam>
   | HeliconeMessageParam<ChatCompletionFunctionMessageParam>
 
+export interface HeliconeImageGenerationConfig {
+  aspect_ratio: string; // e.g "16:9"
+  image_size: string; // e.g "2K"
+}
+
 /**
  * Additional configuration options for Helicone chat completions.
  * These parameters extend the standard OpenAI chat completion parameters
@@ -179,6 +184,13 @@ export type HeliconeChatCompletionExtraConfig = {
    * ```
    */
   top_k?: number;
+
+  /**
+   * Configuration for image generation.
+   * Only supported by certain providers (e.g., Google).
+   * Will be ignored by providers that don't support this parameter.
+   */
+  image_generation?: HeliconeImageGenerationConfig;
 }
 
 /**
@@ -322,11 +334,30 @@ export interface HeliconeContextEditingOptions {
  *   prompt_id: "123",
  *   model: "gpt-4o",
  *   
- *   // Optional: only for reasoning models
+ *   // Optional: reasoning configuration for reasoning models
  *   reasoning_options: {
  *     // For Anthropic models
  *     budget_tokens: 1000,
+ *     // For Google models
+ *     thinking_level: "high",
  *   },
+ *   
+ *   // Optional: context editing for Anthropic models
+ *   context_editing: {
+ *     enabled: true,
+ *     clear_tool_uses: {
+ *       trigger: 100000,
+ *       keep: 3,
+ *     },
+ *     clear_thinking: {
+ *       keep: 1,
+ *     },
+ *   },
+ *   
+ *   // Optional: image generation config for Google models
+ *   aspect_ratio: "16:9",
+ *   image_size: "2K",
+ *   
  *   messages: [
  *     // Message-level cache control (string content)
  *     {

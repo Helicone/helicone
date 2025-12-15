@@ -1,8 +1,9 @@
-import { GeminiContent, GeminiGenerateContentRequest, GeminiGenerationConfig, GeminiPart, GeminiThinkingConfig, GeminiTool, GeminiToolConfig, GoogleReasoningOptions } from "../../../types/google";
+import { GeminiContent, GeminiGenerateContentRequest, GeminiGenerationConfig, GeminiImageConfig, GeminiPart, GeminiThinkingConfig, GeminiTool, GeminiToolConfig, GoogleReasoningOptions } from "../../../types/google";
 import {
   HeliconeChatCompletionContentPart,
   HeliconeChatCreateParams,
   HeliconeChatCompletionMessageParam,
+  HeliconeImageGenerationConfig,
 } from "@helicone-package/prompts/types";
 import { ChatCompletionTool } from "openai/resources/chat/completions";
 
@@ -149,6 +150,11 @@ function buildGenerationConfig(
     config.thinkingConfig = thinkingConfig;
   }
 
+  const imageConfig = buildImageConfig(body);
+  if (imageConfig) {
+    config.imageConfig = imageConfig;
+  }
+
   return Object.keys(config).length > 0 ? config : undefined;
 }
 
@@ -245,6 +251,20 @@ function buildThinkingConfig(
   }
 
   return thinkingConfig;
+}
+
+function buildImageConfig(body: HeliconeChatCreateParams): GeminiImageConfig | undefined {
+  const heliconeImageConfig = body.image_generation;
+
+  if (heliconeImageConfig === undefined) {
+    return undefined;
+  }
+
+  const imageConfig: GeminiImageConfig = {
+    aspectRatio: heliconeImageConfig.aspect_ratio,
+    imageSize: heliconeImageConfig.image_size
+  };
+  return imageConfig;
 }
 
 function buildTools(body: HeliconeChatCreateParams): GeminiTool[] | undefined {

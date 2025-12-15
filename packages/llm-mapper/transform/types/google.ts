@@ -39,6 +39,11 @@ export type GeminiThinkingConfig = {
   thinkingBudget?: number;
 };
 
+export type GeminiImageConfig = {
+  aspectRatio: string; // e.g "16:9"
+  imageSize: string; // e.g "2K"
+}
+
 export type GeminiGenerationConfig = {
   temperature?: number;
   topP?: number;
@@ -49,6 +54,7 @@ export type GeminiGenerationConfig = {
   presencePenalty?: number;
   frequencyPenalty?: number;
   thinkingConfig?: GeminiThinkingConfig;
+  imageConfig?: GeminiImageConfig;
 };
 
 export type GeminiToolConfig = {
