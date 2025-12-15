@@ -138,6 +138,7 @@ export interface ResponsesRequestBody {
   stream?: boolean;
   temperature?: number;
   top_p?: number;
+  top_k?: number;
   truncation?: "auto" | "disabled";
   user?: string;
   tools?: ResponsesToolDefinition[];

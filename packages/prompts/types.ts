@@ -159,18 +159,41 @@ export type HeliconeChatCompletionMessageParam =
   | HeliconeMessageParam<ChatCompletionFunctionMessageParam>
 
 /**
+ * Additional configuration options for Helicone chat completions.
+ * These parameters extend the standard OpenAI chat completion parameters
+ * with provider-specific options that may not be available in all models.
+ */
+export type HeliconeChatCompletionExtraConfig = {
+  /**
+   * Limits the number of highest probability vocabulary tokens to consider for generation.
+   * Only supported by certain providers (e.g., Anthropic, Google).
+   * Will be ignored by providers that don't support this parameter.
+   * 
+   * @example
+   * ```typescript
+   * const response = await openai.chat.completions.create({
+   *   model: "claude-3-sonnet-20240229",
+   *   top_k: 40,
+   *   messages: [{ role: "user", content: "Hello!" }]
+   * } as HeliconeChatCreateParams);
+   * ```
+   */
+  top_k?: number;
+}
+
+/**
  * Non-streaming completion params with optional messages
  */
 type ChatCompletionCreateParamsNonStreamingPartialMessages = Omit<ChatCompletionCreateParamsNonStreaming, 'messages'> & { 
   messages?: HeliconeChatCompletionMessageParam[] 
-};
+} & HeliconeChatCompletionExtraConfig;
 
 /**
  * Streaming completion params with optional messages
  */
 type ChatCompletionCreateParamsStreamingPartialMessages = Omit<ChatCompletionCreateParamsStreaming, 'messages'> & { 
   messages?: HeliconeChatCompletionMessageParam[] 
-};
+} & HeliconeChatCompletionExtraConfig;
 
 /**
  * Parameters for using Helicone prompt templates.

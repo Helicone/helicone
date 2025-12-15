@@ -222,6 +222,7 @@ export function toChatCompletions(
     max_tokens: body.max_output_tokens,
     temperature: body.temperature,
     top_p: body.top_p,
+    top_k: body.top_k,
     n: body.n,
     stream: body.stream,
     tools,

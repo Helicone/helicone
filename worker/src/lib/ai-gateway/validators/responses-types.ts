@@ -8,6 +8,7 @@ const ServiceTier = z.union([
 const ModelResponseProperties = z
   .object({
     top_logprobs: z.union([z.number(), z.null()]),
+    top_k: z.union([z.number(), z.null()]),
     temperature: z.union([z.number(), z.null()]),
     top_p: z.union([z.number(), z.null()]),
     user: z.string(),

@@ -1,10 +1,12 @@
-import { ExtendedHeliconeChatCreateParams, GeminiContent, GeminiGenerateContentRequest, GeminiGenerationConfig, GeminiPart, GeminiThinkingConfig, GeminiTool, GeminiToolConfig, GoogleReasoningOptions, ChatCompletionMessage } from "../../../types/google";
+import { GeminiContent, GeminiGenerateContentRequest, GeminiGenerationConfig, GeminiPart, GeminiThinkingConfig, GeminiTool, GeminiToolConfig, GoogleReasoningOptions } from "../../../types/google";
 import {
   HeliconeChatCompletionContentPart,
   HeliconeChatCreateParams,
   HeliconeChatCompletionMessageParam,
 } from "@helicone-package/prompts/types";
 import { ChatCompletionTool } from "openai/resources/chat/completions";
+
+type ChatCompletionMessage = NonNullable<HeliconeChatCreateParams["messages"]>[number];
 
 export function toGoogle(
   openAIBody: HeliconeChatCreateParams
@@ -91,8 +93,6 @@ export function toGoogle(
 function buildGenerationConfig(
   body: HeliconeChatCreateParams
 ): GeminiGenerationConfig | undefined {
-  const bodyWithExtensions = body as ExtendedHeliconeChatCreateParams;
-
   const getNumberOrUndefined = (
     value?: number | null
   ): number | undefined => {
@@ -100,7 +100,6 @@ function buildGenerationConfig(
   };
 
   const maxOutputTokens =
-    getNumberOrUndefined(bodyWithExtensions.max_output_tokens) ??
     getNumberOrUndefined(body.max_completion_tokens) ??
     getNumberOrUndefined(body.max_tokens) ??
     undefined;
@@ -121,7 +120,7 @@ function buildGenerationConfig(
   if (topP !== undefined) {
     config.topP = topP;
   }
-  const topK = getNumberOrUndefined(bodyWithExtensions.top_k);
+  const topK = getNumberOrUndefined(body.top_k);
   if (topK !== undefined) {
     config.topK = topK;
   }

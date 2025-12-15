@@ -323,6 +323,7 @@ const CreateChatCompletionRequest = z
     top_logprobs: z.number().int().gte(0).lte(20).nullish(),
     temperature: z.union([z.number(), z.null()]).optional(),
     top_p: z.union([z.number(), z.null()]).optional(),
+    top_k: z.union([z.number(), z.null()]).optional(),
     user: z.string().optional(),
     safety_identifier: z.string().optional(),
     prompt_cache_key: z.string().optional(),

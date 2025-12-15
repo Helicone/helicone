@@ -69,11 +69,6 @@ export interface GeminiGenerateContentRequest {
 export type ChatCompletionMessage =
   NonNullable<HeliconeChatCreateParams["messages"]>[number];
 
-export type ExtendedHeliconeChatCreateParams = HeliconeChatCreateParams & {
-  max_output_tokens?: number | null;
-  top_k?: number | null;
-};
-
 /**
  * Extended reasoning options for Google-specific thinking configuration.
  */
