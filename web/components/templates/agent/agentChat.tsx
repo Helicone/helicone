@@ -32,7 +32,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
   const [isStreaming, setIsStreaming] = useState(false);
   const [isLoading, setisLoading] = useState(false);
   const [selectedModel, setSelectedModel] = useState(
-    "claude-3.7-sonnet, gpt-4o, gpt-4o-mini",
+    "claude-sonnet-4-5-20250514, gpt-5-mini, gpt-5",
   );
   const [messageQueue, setMessageQueue] = useState<QueuedMessage[]>([]);
 

@@ -29,6 +29,9 @@ describe("PTB request validation", () => {
 
     const body = (await response.json()) as any;
     expect(body.error).toContain("messages");
+    expect(body.error).toContain(
+      "https://docs.helicone.ai/rest/ai-gateway/post-v1-chat-completions"
+    );
   });
 
   it("allows BYOK requests with the same payload", async () => {

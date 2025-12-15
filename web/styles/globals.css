@@ -45,7 +45,7 @@
 
     /* Destructive Colors */
     --destructive: 0 72% 51%; /* hsl(0, 72%, 51%) */
-    --destructive-foreground: 0 75% 15%; /* hsl(0, 75%, 15%) */
+    --destructive-foreground: 0 0% 95%; /* off-white text on red background */
 
     /* Border Colors */
     --border: 214 32% 91%; /* hsl(214, 32%, 91%) */
