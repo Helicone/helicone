@@ -188,7 +188,10 @@ export class OpenRouterUsageProcessor implements IUsageProcessor {
     }
 
     if (promptAudioTokens > 0 || completionAudioTokens > 0) {
-      modelUsage.audio = promptAudioTokens + completionAudioTokens;
+      modelUsage.audio = {
+        input: promptAudioTokens,
+        output: completionAudioTokens,
+      };
     }
 
     return modelUsage;

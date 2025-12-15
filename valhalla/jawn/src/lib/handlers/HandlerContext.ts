@@ -263,8 +263,15 @@ export function getPromptTokens(
   modelUsage: ModelUsage | undefined,
   legacyUsage: Usage
 ): number | null {
-  if (modelUsage?.input) {
-    return modelUsage.input;
+  if (modelUsage) {
+    const modalityInput =
+      (modelUsage.audio?.input ?? 0) +
+      (modelUsage.image?.input ?? 0) +
+      (modelUsage.video?.input ?? 0) +
+      (modelUsage.file?.input ?? 0);
+    if (modelUsage.input > 0 || modalityInput > 0) {
+      return modelUsage.input + modalityInput;
+    }
   }
   return legacyUsage.promptTokens ?? null;
 }
@@ -273,8 +280,16 @@ export function getCompletionTokens(
   modelUsage: ModelUsage | undefined,
   legacyUsage: Usage
 ): number | null {
-  if (modelUsage?.output) {
-    return modelUsage.output;
+  if (modelUsage) {
+    const modalityOutput =
+      (modelUsage.audio?.output ?? 0) +
+      (modelUsage.image?.output ?? 0) +
+      (modelUsage.video?.output ?? 0) +
+      (modelUsage.file?.output ?? 0);
+    const thinking = modelUsage.thinking ?? 0;
+    if (modelUsage.output > 0 || modalityOutput > 0 || thinking > 0) {
+      return modelUsage.output + modalityOutput + thinking;
+    }
   }
   return legacyUsage.completionTokens ?? null;
 }
@@ -283,8 +298,11 @@ function getTotalTokens(
   modelUsage: ModelUsage | undefined,
   legacyUsage: Usage
 ): number | null {
-  if (modelUsage?.input || modelUsage?.output) {
-    return (modelUsage.input ?? 0) + (modelUsage.output ?? 0);
+  const promptTokens = getPromptTokens(modelUsage, legacyUsage);
+  const completionTokens = getCompletionTokens(modelUsage, legacyUsage);
+
+  if (promptTokens !== null || completionTokens !== null) {
+    return (promptTokens ?? 0) + (completionTokens ?? 0);
   }
   return legacyUsage.totalTokens ?? null;
 }
@@ -306,9 +324,16 @@ export function getPromptCacheReadTokens(
   modelUsage: ModelUsage | undefined,
   legacyUsage: Usage
 ): number | null {
-  const cacheDetails = modelUsage?.cacheDetails;
-  if (cacheDetails?.cachedInput) {
-    return cacheDetails.cachedInput;
+  if (modelUsage) {
+    const textCached = modelUsage.cacheDetails?.cachedInput ?? 0;
+    const modalityCached =
+      (modelUsage.audio?.cachedInput ?? 0) +
+      (modelUsage.image?.cachedInput ?? 0) +
+      (modelUsage.video?.cachedInput ?? 0) +
+      (modelUsage.file?.cachedInput ?? 0);
+    if (textCached > 0 || modalityCached > 0) {
+      return textCached + modalityCached;
+    }
   }
   return legacyUsage.promptCacheReadTokens ?? null;
 }
@@ -317,8 +342,18 @@ export function getPromptAudioTokens(
   modelUsage: ModelUsage | undefined,
   legacyUsage: Usage
 ): number | null {
-  if (modelUsage?.audio) {
-    return modelUsage.audio;
+  if (modelUsage?.audio?.input) {
+    return modelUsage.audio.input;
   }
   return legacyUsage.promptAudioTokens ?? null;
+}
+
+export function getCompletionAudioTokens(
+  modelUsage: ModelUsage | undefined,
+  legacyUsage: Usage
+): number | null {
+  if (modelUsage?.audio?.output) {
+    return modelUsage.audio.output;
+  }
+  return legacyUsage.completionAudioTokens ?? null;
 }

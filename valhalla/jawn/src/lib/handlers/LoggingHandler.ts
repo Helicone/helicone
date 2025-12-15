@@ -26,6 +26,7 @@ import {
   getPromptCacheWriteTokens,
   getPromptCacheReadTokens,
   getPromptAudioTokens,
+  getCompletionAudioTokens,
 } from "./HandlerContext";
 import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
 import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
@@ -481,7 +482,7 @@ export class LoggingHandler extends AbstractLogHandler {
       getPromptAudioTokens(modelUsage, legacyUsage) ?? 0
     );
     const completionAudioTokens = atLeastZero(
-      legacyUsage.completionAudioTokens ?? 0
+      getCompletionAudioTokens(modelUsage, legacyUsage) ?? 0
     );
     const orgParams = context.orgParams;
     const { requestText, responseText } =

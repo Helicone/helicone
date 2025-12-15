@@ -10,12 +10,12 @@ import {
 import {
   GoogleCandidate,
   GoogleContent,
-  GoogleContentPart,
   GoogleFunctionCall,
   GoogleResponseBody,
-  GoogleTokenDetail,
   GoogleUsageMetadata,
 } from "../../../types/google";
+import { mapGoogleUsageToModelUsage } from "../utils/mapGoogleUsageToModelUsage";
+import { mapModelUsageToOpenAI } from "@helicone-package/cost/usage/mapModelUsageToOpenAI";
 
 // Google Response Body -> OpenAI Response Body
 export function toOpenAI(
@@ -163,83 +163,8 @@ function mapToolCall(
 }
 
 export function mapGoogleUsage(usage: GoogleUsageMetadata): OpenAIUsage {
-  const aggregateModalityTokens = (
-    ...details: Array<GoogleTokenDetail[] | undefined>
-  ): Partial<Record<GoogleTokenDetail["modality"], number>> => {
-    const totals: Partial<Record<GoogleTokenDetail["modality"], number>> = {};
-
-    for (const detailList of details) {
-      for (const detail of detailList ?? []) {
-        if (!detail) {
-          continue;
-        }
-        const modality = detail.modality;
-        const tokenCount = detail.tokenCount ?? 0;
-        totals[modality] = (totals[modality] ?? 0) + tokenCount;
-      }
-    }
-
-    return totals;
-  };
-
-  const sumTokens = (details?: GoogleTokenDetail[]): number =>
-    details?.reduce((total, detail) => total + (detail?.tokenCount ?? 0), 0) ??
-    0;
-
-  const sumTokensByModality = (
-    details: GoogleTokenDetail[] | undefined,
-    modality: GoogleTokenDetail["modality"]
-  ): number =>
-    details?.reduce(
-      (total, detail) =>
-        total + (detail?.modality === modality ? detail.tokenCount ?? 0 : 0),
-      0
-    ) ?? 0;
-
-  const toolUsePromptTokens = usage.toolUsePromptTokenCount ?? 0;
-  const reasoningTokens = usage.thoughtsTokenCount ?? 0;
-  const prompt = (usage.promptTokenCount ?? 0) + toolUsePromptTokens;
-  const completion =
-    (usage.candidatesTokenCount || 0) + reasoningTokens;
-
-  const total = usage.totalTokenCount;
-
-  const promptAudioTokens =
-    sumTokensByModality(usage.promptTokenDetails, "AUDIO") +
-    sumTokensByModality(usage.toolUsePromptTokensDetails, "AUDIO") +
-    sumTokensByModality(usage.cacheTokenDetails, "AUDIO");
-
-  const completionModalityTotals = aggregateModalityTokens(
-    usage.candidatesTokensDetails
-  );
-
-  const completionAudioTokens =
-    completionModalityTotals.AUDIO ??
-    sumTokensByModality(usage.candidatesTokensDetails, "AUDIO");
-
-  const cachedTokens =
-    usage.cachedContentTokenCount ?? sumTokens(usage.cacheTokenDetails);
-
-  return {
-    prompt_tokens: prompt,
-    completion_tokens: completion,
-    total_tokens: total,
-    completion_tokens_details: {
-      reasoning_tokens: reasoningTokens,
-      audio_tokens: completionAudioTokens,
-      accepted_prediction_tokens: 0,
-      rejected_prediction_tokens: 0,
-    },
-    prompt_tokens_details: {
-      audio_tokens: promptAudioTokens,
-      cached_tokens: cachedTokens,
-      cache_write_tokens: 0,
-      cache_write_details: {
-        write_5m_tokens: 0,
-        write_1h_tokens: 0,
-      },
-    },
-  };
+  const modelUsage = mapGoogleUsageToModelUsage(usage);
+  return mapModelUsageToOpenAI(modelUsage);
 }
 
 export function mapGoogleFinishReason(
