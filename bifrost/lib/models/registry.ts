@@ -5,15 +5,32 @@ export function getProviderLogo(provider: string): string {
     openai: "/static/home/chatgpt.webp",
     anthropic: "/static/home/anthropic.webp",
     google: "/static/home/gemini.webp",
-    meta: "/static/home/logo2.webp",
+    meta: "/static/home/meta.webp",
+    "meta-llama": "/static/home/meta.webp",
     mistral: "/static/home/mistral.webp",
     cohere: "/static/home/logo3.webp",
     groq: "/static/home/groq.svg",
-    together: "/static/home/logo4.webp",
-    openrouter: "/static/home/logo4.webp",
+    together: "/static/home/togetherai.webp",
+    openrouter: "/static/home/openrouter.webp",
+    deepseek: "/static/home/deepseek.webp",
+    alibaba: "/static/home/alibaba.webp",
+    qwen: "/static/home/qwen.webp",
+    perplexity: "/static/home/perplexity.webp",
+    xai: "/static/home/xai.webp",
+    "x-ai": "/static/home/xai.webp",
+    ai21: "/static/home/ai21.webp",
+    amazon: "/static/home/amazon.webp",
+    nvidia: "/static/home/nvidia.webp",
+    microsoft: "/static/home/microsoft.webp",
+    moonshotai: "/static/home/moonshotai.webp",
+    baidu: "/static/home/baidu.webp",
+    zhipu: "/static/home/zhipu.webp",
+    zhipuai: "/static/home/zhipu.webp",
+    "z.ai": "/static/home/zai.webp",
+    zai: "/static/home/zai.webp",
   };
 
-  return logoMap[provider.toLowerCase()] || "/static/home/logo4.webp"; // Default logo
+  return logoMap[provider.toLowerCase()] || "/static/home/logo2.webp"; // Default logo
 }
 
 export interface ModelFamily {

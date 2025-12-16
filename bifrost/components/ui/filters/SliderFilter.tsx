@@ -18,19 +18,26 @@ interface SliderFilterProps {
   className?: string;
 }
 
+/**
+ * Exponential scaling factor for weighted sliders.
+ * Value of 2.5 provides optimal UX for price distributions where:
+ * - Most models are clustered in the lower range ($0-$10)
+ * - But the max extends to high values ($100-$200+)
+ * This gives finer control in the low range while still allowing access to high values.
+ */
+const WEIGHTED_POWER = 2.5;
+
 // Convert linear position (0-1) to weighted value
 function linearToWeighted(linear: number, min: number, max: number): number {
-  const power = 2.5;
-  const weightedRatio = Math.pow(linear, power);
+  const weightedRatio = Math.pow(linear, WEIGHTED_POWER);
   return min + weightedRatio * (max - min);
 }
 
 // Convert weighted value to linear position (0-1)
 function weightedToLinear(value: number, min: number, max: number): number {
   if (max === min) return 0;
-  const power = 2.5;
   const ratio = Math.max(0, (value - min) / (max - min));
-  return Math.pow(ratio, 1 / power);
+  return Math.pow(ratio, 1 / WEIGHTED_POWER);
 }
 
 // Snap value to appropriate step based on magnitude
@@ -147,13 +154,19 @@ export function SliderFilter({
     if (!showTicks) return [];
 
     if (weighted) {
-      const pricePoints = [0, 0.5, 1, 2, 5, 10, 20, 50, 100, 200];
-      return pricePoints
-        .filter((p) => p >= min && p <= max)
-        .map((p) => ({
-          position: weightedToLinear(p, min, max),
-          value: p,
-        }));
+      // Generate meaningful price points dynamically based on max value
+      const basePricePoints = [0, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000];
+      const pricePoints = basePricePoints.filter((p) => p >= min && p <= max);
+
+      // Ensure we always include the max value if it's not already in the list
+      if (max > 0 && !pricePoints.includes(max)) {
+        pricePoints.push(max);
+      }
+
+      return pricePoints.map((p) => ({
+        position: weightedToLinear(p, min, max),
+        value: p,
+      }));
     }
 
     return Array.from({ length: tickCount + 1 }, (_, i) => ({

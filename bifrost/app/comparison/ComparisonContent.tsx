@@ -386,13 +386,13 @@ export default function ComparisonContent() {
               {/* Providers */}
               <div className="grid grid-cols-3 gap-4 py-3">
                 <div className="text-sm text-gray-600 dark:text-gray-400">
-                  {model1Data.endpoints.map((e) => e.provider).join(", ")}
+                  {model1Data.endpoints?.map((e) => e.provider).join(", ") || "N/A"}
                 </div>
                 <div className="text-sm text-center text-gray-500 dark:text-gray-400 font-medium">
                   Available Providers
                 </div>
                 <div className="text-sm text-right text-gray-600 dark:text-gray-400">
-                  {model2Data.endpoints.map((e) => e.provider).join(", ")}
+                  {model2Data.endpoints?.map((e) => e.provider).join(", ") || "N/A"}
                 </div>
               </div>
             </div>

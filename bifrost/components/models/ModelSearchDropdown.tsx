@@ -66,9 +66,15 @@ export function ModelSearchDropdown({
   };
 
   const formatCost = (model: ModelRegistryItem) => {
-    const minCost = Math.min(
-      ...model.endpoints.map((e) => (e.pricing.prompt + e.pricing.completion) / 2)
-    );
+    if (!model.endpoints?.length) return "N/A";
+
+    const costs = model.endpoints
+      .filter((e) => e.pricing?.prompt !== undefined && e.pricing?.completion !== undefined)
+      .map((e) => (e.pricing.prompt + e.pricing.completion) / 2);
+
+    if (!costs.length) return "N/A";
+
+    const minCost = Math.min(...costs);
     if (minCost === 0) return "Free";
     if (minCost < 1) return `$${minCost.toFixed(2)}/M`;
     return `$${minCost.toFixed(0)}/M`;
