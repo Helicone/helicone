@@ -24,11 +24,14 @@ export function toAnthropic(
   }
 ): AnthropicRequestBody {
   const includeCache = options?.includeCacheBreakpoints !== false;
+  
+  // Determine max_tokens with default fallback
+  const maxTokens = openAIBody.max_completion_tokens ?? openAIBody.max_tokens ?? 4096;
+  
   const antBody: AnthropicRequestBody = {
     model: providerModelId || openAIBody.model,
     messages: [],
-    max_tokens:
-      openAIBody.max_completion_tokens ?? openAIBody.max_tokens ?? 1024,
+    max_tokens: maxTokens,
     temperature: openAIBody.temperature ?? undefined,
     top_p: openAIBody.top_p ?? undefined,
 
@@ -36,17 +39,17 @@ export function toAnthropic(
   };
 
   if (openAIBody.reasoning_effort) {
-    if (!openAIBody.reasoning_options) {
-      throw new Error("reasoning_options are required for Anthropic models");
-    }
+    let budgetTokens: number;
     
-    if (!openAIBody.reasoning_options.budget_tokens) {
-      throw new Error("reasoning_options.budget_tokens are required for Anthropic models");
+    if (openAIBody.reasoning_options?.budget_tokens) {
+      budgetTokens = openAIBody.reasoning_options.budget_tokens;
+    } else {
+      budgetTokens = Math.floor(maxTokens / 2);
     }
 
     antBody.thinking = {
       type: "enabled",
-      budget_tokens: openAIBody.reasoning_options.budget_tokens,
+      budget_tokens: budgetTokens,
     };
 
     // temperature 1 is required for Anthropic models to enable reasoning
@@ -376,6 +379,11 @@ function mapMessages(
     };
 
     if (message.role === "assistant" || message.role === "user") {
+      // Check if assistant message has images - not supported by Anthropic
+      if (message.role === "assistant" && message.images && message.images.length > 0) {
+        throw new Error("Image outputs in assistant messages are not supported by Anthropic");
+      }
+
       const processedToolCallContent: AnthropicContentBlock[] = [];
 
       if (message.role === "assistant" && message.tool_calls) {

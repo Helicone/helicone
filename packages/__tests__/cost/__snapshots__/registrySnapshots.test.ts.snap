@@ -192,6 +192,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "qwen3-coder:canopywave": {
+      "context": 262144,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "qwen/qwen3-coder",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "canopywave",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "qwen3-coder:deepinfra": {
       "context": 262144,
       "crossRegion": false,
@@ -748,7 +774,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "context": 200000,
       "crossRegion": false,
       "maxTokens": 64000,
-      "modelId": "claude-opus-4-5",
+      "modelId": "claude-opus-4-5-20251101",
       "parameters": [
         "include_reasoning",
         "max_tokens",
@@ -784,6 +810,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "ptbEnabled": true,
       "regions": [
         "us-east-1",
+      ],
+    },
+    "claude-4.5-opus:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 64000,
+      "modelId": "pa/claude-opus-4-5-20251101",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
       ],
     },
     "claude-4.5-opus:openrouter": {
@@ -1736,6 +1782,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "deepseek-v3.2:canopywave": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "deepseek/deepseek-chat-v3.2",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "canopywave",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "deepseek-v3.2:novita": {
       "context": 128000,
       "crossRegion": false,
@@ -2229,6 +2301,65 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "google/gemini-3-pro-image": {
+    "gemini-3-pro-image-preview:google-ai-studio": {
+      "context": 65536,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "gemini-3-pro-image-preview",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "google-ai-studio",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-3-pro-image-preview:openrouter": {
+      "context": 65536,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "google/gemini-3-pro-image-preview",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-3-pro-image-preview:vertex": {
+      "context": 65536,
+      "crossRegion": true,
+      "maxTokens": 32768,
+      "modelId": "gemini-3-pro-image-preview",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "vertex",
+      "ptbEnabled": true,
+      "regions": [
+        "global",
+      ],
+    },
+  },
   "google/gemma": {
     "gemma2-9b-it:chutes": {
       "context": 8192,
@@ -2482,6 +2613,28 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "llama-3.3-70b-instruct:nebius": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "meta-llama/Llama-3.3-70B-Instruct",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "repetition_penalty",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "nebius",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -3129,6 +3282,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "kimi-k2-thinking:canopywave": {
+      "context": 262144,
+      "crossRegion": false,
+      "maxTokens": 262144,
+      "modelId": "moonshotai/kimi-k2-thinking",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "canopywave",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -4283,6 +4459,155 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "openai/gpt-5.2": {
+    "gpt-5.2-chat-latest:openai": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "gpt-5.2-chat-latest",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.2-chat-latest:openrouter": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "openai/gpt-5.2-chat-latest",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_completion_tokens",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+        "verbosity",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.2-pro:openai": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5.2-pro",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.2-pro:openrouter": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "openai/gpt-5.2-pro",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_completion_tokens",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+        "verbosity",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.2:openai": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5.2",
+      "parameters": [
+        "logprobs",
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+        "verbosity",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.2:openrouter": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "openai/gpt-5.2",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_completion_tokens",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+        "verbosity",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
   "openai/o1": {
     "o1-mini:helicone": {
       "context": 128000,
@@ -4554,6 +4879,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "openai/oss": {
+    "gpt-oss-120b:baseten": {
+      "context": 128072,
+      "crossRegion": false,
+      "maxTokens": 128072,
+      "modelId": "openai/gpt-oss-120b",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "baseten",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-oss-120b:cerebras": {
       "context": 131072,
       "crossRegion": false,
@@ -5422,6 +5767,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "nebius",
   ],
   "alibaba/qwen3": [
+    "canopywave",
     "deepinfra",
     "deepinfra",
     "deepinfra",
@@ -5468,6 +5814,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   "anthropic/claude-4.5-opus": [
     "anthropic",
     "bedrock",
+    "helicone",
     "openrouter",
     "vertex",
   ],
@@ -5530,6 +5877,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
   ],
   "deepseek/deepseek-v3": [
+    "canopywave",
     "deepinfra",
     "deepinfra",
     "deepseek",
@@ -5563,6 +5911,11 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "vertex",
   ],
+  "google/gemini-3-pro-image": [
+    "google-ai-studio",
+    "openrouter",
+    "vertex",
+  ],
   "google/gemma": [
     "chutes",
     "openrouter",
@@ -5586,6 +5939,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "groq",
     "groq",
     "nebius",
+    "nebius",
     "novita",
     "novita",
     "novita",
@@ -5607,6 +5961,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   ],
   "moonshotai/kimi-k2": [
     "baseten",
+    "canopywave",
     "deepinfra",
     "deepinfra",
     "fireworks",
@@ -5679,6 +6034,14 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "openrouter",
   ],
+  "openai/gpt-5.2": [
+    "openai",
+    "openai",
+    "openai",
+    "openrouter",
+    "openrouter",
+    "openrouter",
+  ],
   "openai/o1": [
     "helicone",
     "helicone",
@@ -5702,6 +6065,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
   ],
   "openai/oss": [
+    "baseten",
     "cerebras",
     "deepinfra",
     "groq",
@@ -5758,6 +6122,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "alibaba/qwen3": {
+    "canopywave": [
+      {
+        "input": 2.2e-7,
+        "output": 9.5e-7,
+        "threshold": 0,
+      },
+    ],
     "deepinfra": [
       {
         "input": 3e-7,
@@ -5767,13 +6138,9 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "groq": [
       {
-        "audio": 0,
-        "image": 0,
         "input": 2.9e-7,
         "output": 5.9e-7,
-        "request": 0,
         "threshold": 0,
-        "web_search": 0,
       },
     ],
     "nebius": [
@@ -6084,6 +6451,19 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       {
         "cacheMultipliers": {
           "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000005,
+        "output": 0.000025,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
           "write5m": 1.25,
         },
         "input": 0.000005,
@@ -6633,6 +7013,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "deepseek/deepseek-v3": {
+    "canopywave": [
+      {
+        "input": 2.6e-7,
+        "output": 4e-7,
+        "threshold": 0,
+      },
+    ],
     "deepinfra": [
       {
         "cacheMultipliers": {
@@ -6685,13 +7072,9 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "groq": [
       {
-        "audio": 0,
-        "image": 0,
         "input": 7.5e-7,
         "output": 9.9e-7,
-        "request": 0,
         "threshold": 0,
-        "web_search": 0,
       },
     ],
     "openrouter": [
@@ -6705,13 +7088,15 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "google/gemini-2.5-flash": {
     "google-ai-studio": [
       {
-        "audio": 0.000001,
+        "audio": {
+          "cachedInputMultiplier": 0.1,
+          "input": 0.000001,
+        },
         "cacheMultipliers": {
           "cachedInput": 0.25,
           "write5m": 1,
         },
         "cacheStoragePerHour": 0.000001,
-        "image": 0.001238,
         "input": 3e-7,
         "output": 0.0000025,
         "threshold": 0,
@@ -6726,13 +7111,15 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "vertex": [
       {
-        "audio": 0.000001,
+        "audio": {
+          "cachedInputMultiplier": 0.1,
+          "input": 0.000001,
+        },
         "cacheMultipliers": {
           "cachedInput": 0.25,
           "write5m": 1,
         },
         "cacheStoragePerHour": 0.000001,
-        "image": 0.001238,
         "input": 3e-7,
         "output": 0.0000025,
         "threshold": 0,
@@ -6742,7 +7129,10 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "google/gemini-2.5-flash-lite": {
     "google-ai-studio": [
       {
-        "audio": 3e-7,
+        "audio": {
+          "cachedInputMultiplier": 0.0833333,
+          "input": 3e-7,
+        },
         "cacheMultipliers": {
           "cachedInput": 0.25,
           "write5m": 1,
@@ -6762,7 +7152,10 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "vertex": [
       {
-        "audio": 3e-7,
+        "audio": {
+          "cachedInputMultiplier": 0.0833333,
+          "input": 3e-7,
+        },
         "cacheMultipliers": {
           "cachedInput": 0.25,
           "write5m": 1,
@@ -6863,6 +7256,44 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "google/gemini-3-pro-image": {
+    "google-ai-studio": [
+      {
+        "input": 0.000002,
+        "output": 0.000012,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000004,
+        "output": 0.000018,
+        "threshold": 200000,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.00000211,
+        "output": 0.00001266,
+        "threshold": 0,
+      },
+      {
+        "input": 0.00000422,
+        "output": 0.00001899,
+        "threshold": 200000,
+      },
+    ],
+    "vertex": [
+      {
+        "input": 0.000002,
+        "output": 0.000012,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000004,
+        "output": 0.000018,
+        "threshold": 200000,
+      },
+    ],
+  },
   "google/gemma": {
     "chutes": [
       {
@@ -6907,13 +7338,9 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "groq": [
       {
-        "audio": 0,
-        "image": 0,
         "input": 1e-8,
         "output": 1e-8,
-        "request": 0,
         "threshold": 0,
-        "web_search": 0,
       },
     ],
     "nebius": [
@@ -6973,6 +7400,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 0,
       },
     ],
+    "canopywave": [
+      {
+        "input": 4.8e-7,
+        "output": 0.000002,
+        "threshold": 0,
+      },
+    ],
     "deepinfra": [
       {
         "input": 5.5e-7,
@@ -6989,16 +7423,12 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "groq": [
       {
-        "audio": 0,
         "cacheMultipliers": {
           "cachedInput": 0.5,
         },
-        "image": 0,
         "input": 0.000001,
         "output": 0.000003,
-        "request": 0,
         "threshold": 0,
-        "web_search": 0,
       },
     ],
     "novita": [
@@ -7166,6 +7596,27 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "openai/gpt-5.2": {
+    "openai": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+        },
+        "input": 0.00000175,
+        "output": 0.000014,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.00000185,
+        "output": 0.00001477,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+  },
   "openai/o1": {
     "helicone": [
       {
@@ -7263,6 +7714,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "openai/oss": {
+    "baseten": [
+      {
+        "input": 1e-7,
+        "output": 5e-7,
+        "threshold": 0,
+      },
+    ],
     "cerebras": [
       {
         "input": 3.5e-7,
@@ -7272,22 +7730,16 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "deepinfra": [
       {
-        "audio": 0,
-        "image": 0,
         "input": 4e-8,
         "output": 1.6e-7,
-        "request": 0,
         "threshold": 0,
         "web_search": 0.01,
       },
     ],
     "groq": [
       {
-        "audio": 0,
-        "image": 0,
         "input": 1e-7,
         "output": 5e-7,
-        "request": 0,
         "threshold": 0,
         "web_search": 0.01,
       },
@@ -7312,8 +7764,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "perplexity/sonar": {
     "perplexity": [
       {
-        "audio": 0,
-        "image": 0,
         "input": 0.000002,
         "output": 0.000008,
         "request": 0,
@@ -7325,11 +7775,9 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "xai/endpoints.ts": {
     "helicone": [
       {
-        "audio": 0,
         "cacheMultipliers": {
           "cachedInput": 0.25,
         },
-        "image": 0,
         "input": 3e-7,
         "output": 5e-7,
         "request": 0,
@@ -7346,11 +7794,9 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "xai": [
       {
-        "audio": 0,
         "cacheMultipliers": {
           "cachedInput": 0.25,
         },
-        "image": 0,
         "input": 3e-7,
         "output": 5e-7,
         "request": 0,
@@ -7441,6 +7887,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "providers": [
         "anthropic",
         "bedrock",
+        "helicone",
         "openrouter",
         "vertex",
       ],
@@ -7563,6 +8010,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "deepseek-v3.2",
       "providers": [
+        "canopywave",
         "novita",
       ],
     },
@@ -7590,6 +8038,14 @@ exports[`Registry Snapshots verify registry state 1`] = `
     },
     {
       "model": "gemini-2.5-pro",
+      "providers": [
+        "google-ai-studio",
+        "openrouter",
+        "vertex",
+      ],
+    },
+    {
+      "model": "gemini-3-pro-image-preview",
       "providers": [
         "google-ai-studio",
         "openrouter",
@@ -7754,8 +8210,30 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "gpt-5.2",
+      "providers": [
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
+      "model": "gpt-5.2-chat-latest",
+      "providers": [
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
+      "model": "gpt-5.2-pro",
+      "providers": [
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
       "model": "gpt-oss-120b",
       "providers": [
+        "baseten",
         "cerebras",
         "deepinfra",
         "groq",
@@ -7857,6 +8335,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "kimi-k2-thinking",
       "providers": [
+        "canopywave",
         "deepinfra",
         "fireworks",
         "novita",
@@ -7886,6 +8365,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "llama-3.3-70b-instruct",
       "providers": [
+        "nebius",
         "novita",
         "openrouter",
       ],
@@ -8026,6 +8506,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "qwen3-coder",
       "providers": [
+        "canopywave",
         "deepinfra",
       ],
     },
@@ -8088,7 +8569,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "azure",
     },
     {
-      "modelCount": 1,
+      "modelCount": 2,
       "provider": "baseten",
     },
     {
@@ -8096,7 +8577,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "bedrock",
     },
     {
-      "modelCount": 1,
+      "modelCount": 4,
       "provider": "canopywave",
     },
     {
@@ -8120,7 +8601,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "fireworks",
     },
     {
-      "modelCount": 4,
+      "modelCount": 5,
       "provider": "google-ai-studio",
     },
     {
@@ -8128,7 +8609,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "groq",
     },
     {
-      "modelCount": 37,
+      "modelCount": 38,
       "provider": "helicone",
     },
     {
@@ -8136,7 +8617,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "mistral",
     },
     {
-      "modelCount": 3,
+      "modelCount": 4,
       "provider": "nebius",
     },
     {
@@ -8144,11 +8625,11 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "novita",
     },
     {
-      "modelCount": 21,
+      "modelCount": 24,
       "provider": "openai",
     },
     {
-      "modelCount": 55,
+      "modelCount": 59,
       "provider": "openrouter",
     },
     {
@@ -8156,7 +8637,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "perplexity",
     },
     {
-      "modelCount": 16,
+      "modelCount": 17,
       "provider": "vertex",
     },
     {
@@ -8190,6 +8671,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "gemini-2.5-flash",
     "gemini-2.5-flash-lite",
     "gemini-2.5-pro",
+    "gemini-3-pro-image-preview",
     "gemini-3-pro-preview",
     "gemma-3-12b-it",
     "gemma2-9b-it",
@@ -8210,6 +8692,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "gpt-5.1-chat-latest",
     "gpt-5.1-codex",
     "gpt-5.1-codex-mini",
+    "gpt-5.2",
+    "gpt-5.2-chat-latest",
+    "gpt-5.2-pro",
     "gpt-oss-120b",
     "gpt-oss-20b",
     "grok-3",
@@ -8266,9 +8751,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 241,
-  "totalModelProviderConfigs": 241,
-  "totalModelsWithPtb": 91,
+  "totalEndpoints": 256,
+  "totalModelProviderConfigs": 256,
+  "totalModelsWithPtb": 95,
   "totalProviders": 21,
 }
 `;

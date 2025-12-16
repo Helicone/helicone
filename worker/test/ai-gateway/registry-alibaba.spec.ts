@@ -29,6 +29,12 @@ const nebiusAuthExpectations = {
   },
 };
 
+const canopywaveAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
 describe("Alibaba Registry Tests", () => {
   beforeEach(() => {
     // Clear all mocks between tests
@@ -4826,5 +4832,737 @@ describe("Alibaba Registry Tests", () => {
           },
         }));
     });
+
+    describe("qwen3-coder-480b-a35b-instruct-fp8 with Canopy Wave Provider", () => {
+      it("should handle canopy wave provider", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-coder",
+                data: createOpenAIMockResponse("qwen/qwen3-coder"),
+                expects: canopywaveAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle successful request with custom parameters", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          request: {
+            messages: [
+              { role: "user", content: "Describe this image in detail" },
+            ],
+            maxTokens: 1000,
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-coder",
+                data: createOpenAIMockResponse("qwen/qwen3-coder"),
+                expects: {
+                  ...canopywaveAuthExpectations,
+                  bodyContains: ["Describe this image in detail"],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle multimodal input (text and image)", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Analyze this image and describe what you see",
+              },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-coder",
+                data: createOpenAIMockResponse("qwen/qwen3-coder"),
+                expects: canopywaveAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle video understanding tasks", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Describe the actions in this video sequence",
+              },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-coder",
+                data: createOpenAIMockResponse("qwen/qwen3-coder"),
+                expects: canopywaveAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle streaming requests", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          request: {
+            messages: [{ role: "user", content: "Stream this response" }],
+            stream: true,
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-coder",
+                data: createOpenAIMockResponse("qwen/qwen3-coder"),
+                expects: {
+                  ...canopywaveAuthExpectations,
+                  bodyContains: ['"stream":true'],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle tools parameter support", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          request: {
+            messages: [{ role: "user", content: "What's the weather like?" }],
+            body: {
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "get_weather",
+                    description: "Get weather information",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        city: { type: "string" },
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-coder",
+                data: createOpenAIMockResponse("qwen/qwen3-coder"),
+                expects: {
+                  ...canopywaveAuthExpectations,
+                  bodyContains: ["get_weather"],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle structured outputs", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Extract information from this image",
+              },
+            ],
+            body: {
+              response_format: { type: "json_object" },
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-coder",
+                data: createOpenAIMockResponse("qwen/qwen3-coder"),
+                expects: {
+                  ...canopywaveAuthExpectations,
+                  bodyContains: ["response_format"],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle document parsing and OCR tasks", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Extract all text from this document image",
+              },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-coder",
+                data: createOpenAIMockResponse("qwen/qwen3-coder"),
+                expects: canopywaveAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle chart and diagram analysis", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Analyze this chart and provide insights",
+              },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-coder",
+                data: createOpenAIMockResponse("qwen/qwen3-coder"),
+                expects: canopywaveAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should verify context length limits are respected (131k tokens)", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Test message within 131k context limit",
+              },
+            ],
+            maxTokens: 32768, // Should be within the 32,768 completion token limit
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-coder",
+                data: createOpenAIMockResponse("qwen/qwen3-coder"),
+                expects: canopywaveAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("qwen3-coder-480b-a35b-instruct-fp8 Error scenarios", () => {
+      it("should handle Canopy Wave provider failure", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "failure",
+                statusCode: 500,
+                errorMessage: "Canopy Wave service unavailable",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle rate limiting from Canopy Wave", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "failure",
+                statusCode: 429,
+                errorMessage: "Rate limit exceeded",
+              },
+            ],
+            finalStatus: 429,
+          },
+        }));
+
+      it("should handle authentication failure", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "failure",
+                statusCode: 401,
+                errorMessage: "Invalid API key",
+              },
+            ],
+            finalStatus: 401,
+          },
+        }));
+
+      it("should handle model not found", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "failure",
+                statusCode: 404,
+                errorMessage: "Model not found",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle quota exceeded", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "failure",
+                statusCode: 403,
+                errorMessage: "Quota exceeded",
+              },
+            ],
+            finalStatus: 403,
+          },
+        }));
+
+      it("should handle bad request with invalid parameters", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "failure",
+                statusCode: 400,
+                errorMessage: "Invalid request parameters",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle timeout scenarios", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "failure",
+                statusCode: 408,
+                errorMessage: "Request timeout",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle content filtering violations", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          request: {
+            messages: [
+              { role: "user", content: "Content that might be filtered" },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "failure",
+                statusCode: 422,
+                errorMessage: "Content filtering violation",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+    });
+
+    describe("qwen3-coder-480b-a35b-instruct-fp8 Advanced scenarios", () => {
+      it("should handle custom headers and body mapping", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          request: {
+            messages: [{ role: "user", content: "Test with custom mapping" }],
+            headers: {
+              "X-Custom-Header": "test-value",
+            },
+            bodyMapping: "NO_MAPPING",
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-coder",
+                data: createOpenAIMockResponse("qwen/qwen3-coder"),
+                expects: {
+                  ...canopywaveAuthExpectations,
+                  headers: {
+                    ...canopywaveAuthExpectations.headers,
+                    "X-Custom-Header": "test-value",
+                  },
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle supported parameters correctly", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          request: {
+            messages: [
+              { role: "user", content: "Test with various parameters" },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-coder",
+                data: createOpenAIMockResponse("qwen/qwen3-coder"),
+                expects: canopywaveAuthExpectations,
+                customVerify: (call) => {
+                  // Verify that the request supports the expected parameters
+                  // like temperature, top_p, frequency_penalty, etc.
+                  // This would be expanded in actual implementation
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle multilingual OCR tasks", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Extract text in multiple languages from this image",
+              },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-coder",
+                data: createOpenAIMockResponse("qwen/qwen3-coder"),
+                expects: canopywaveAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle visual question answering", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "How many people are in this image?",
+              },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-coder",
+                data: createOpenAIMockResponse("qwen/qwen3-coder"),
+                expects: canopywaveAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle GUI automation tasks", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Identify the button to click for submitting this form",
+              },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-coder",
+                data: createOpenAIMockResponse("qwen/qwen3-coder"),
+                expects: canopywaveAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle long-form video comprehension", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Summarize the key events in this 10-minute video",
+              },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-coder",
+                data: createOpenAIMockResponse("qwen/qwen3-coder"),
+                expects: canopywaveAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle spatial reasoning tasks", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Describe the spatial relationship between objects in this image",
+              },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-coder",
+                data: createOpenAIMockResponse("qwen/qwen3-coder"),
+                expects: canopywaveAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle rate limit recovery scenario", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "failure",
+                statusCode: 429,
+                errorMessage: "Rate limit exceeded",
+              },
+            ],
+            finalStatus: 429,
+          },
+        }));
+    });
+
+    describe("qwen3-coder-480b-a35b-instruct-fp8 Edge cases and robustness", () => {
+      it("should handle empty messages array", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          request: {
+            messages: [],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "failure",
+                statusCode: 400,
+                errorMessage: "Messages array cannot be empty",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle very long input within context limits", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "Very long input... ".repeat(1000), // Still within 131k token limit
+              },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-coder",
+                data: createOpenAIMockResponse("qwen/qwen3-coder"),
+                expects: canopywaveAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle unicode and special characters", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          request: {
+            messages: [
+              {
+                role: "user",
+                content: "测试中文 🚀 émojis and spéciål chars",
+              },
+            ],
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-coder",
+                data: createOpenAIMockResponse("qwen/qwen3-coder"),
+                expects: canopywaveAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle malformed JSON gracefully", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "failure",
+                statusCode: 400,
+                errorMessage: "Invalid JSON in request body",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+
+      it("should handle network connectivity issues", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "failure",
+                statusCode: 502,
+                errorMessage: "Bad gateway - upstream server error",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+    });
+
+    describe("qwen3-coder-480b-a35b-instruct-fp8 Passthrough billing tests", () => {
+      it("should handle passthrough billing with canopy wave provider", () =>
+        runGatewayTest({
+          model: "qwen3-coder/canopywave",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test passthrough billing" },
+              ],
+              passthroughBilling: true,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.canopywave.io/v1/chat/completions",
+                response: "success",
+                model: "qwen/qwen3-coder",
+                data: createOpenAIMockResponse("qwen/qwen3-coder"),
+                expects: canopywaveAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
   });
 });

@@ -4,7 +4,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { components } from "@/lib/clients/jawnTypes/public";
 import { Dispatch, SetStateAction, useMemo, useState } from "react";
 import { clsx } from "clsx";
-import { ChevronDown, ChevronRight, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Trash2, Lightbulb, BarChart3, Bug } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   ContextMenu,
@@ -14,7 +14,12 @@ import {
 } from "@/components/ui/context-menu";
 import { useMutation } from "@tanstack/react-query";
 import useNotification from "@/components/shared/notification/useNotification";
-import { useDeleteQueryMutation, useSaveQueryMutation } from "./constants";
+import {
+  useDeleteQueryMutation,
+  useSaveQueryMutation,
+  PREDEFINED_QUERIES,
+  PredefinedQuery,
+} from "./constants";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -36,15 +41,14 @@ interface DirectoryProps {
     name: string;
     sql: string;
   };
-  setCurrentQuery: Dispatch<
-    SetStateAction<{
-      id: string | undefined;
-      name: string;
-      sql: string;
-    }>
-  >;
+  setCurrentQuery: (query: {
+    id: string | undefined;
+    name: string;
+    sql: string;
+  }) => void;
   activeTab: "tables" | "queries";
   setActiveTab: Dispatch<SetStateAction<"tables" | "queries">>;
+  onLoadQuery: (query: { name: string; sql: string; savedQueryId?: string }) => void;
 }
 
 export function Directory({
@@ -53,6 +57,7 @@ export function Directory({
   setCurrentQuery,
   activeTab,
   setActiveTab,
+  onLoadQuery,
 }: DirectoryProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const { setNotification } = useNotification();
@@ -89,17 +94,6 @@ export function Directory({
         <button
           className={clsx(
             "flex-1 truncate border-b-2 px-2 py-3 text-sm font-medium sm:px-4",
-            activeTab === "tables"
-              ? "border-primary text-primary"
-              : "border-transparent text-muted-foreground hover:text-foreground",
-          )}
-          onClick={() => setActiveTab("tables")}
-        >
-          Tables
-        </button>
-        <button
-          className={clsx(
-            "flex-1 truncate border-b-2 px-2 py-3 text-sm font-medium sm:px-4",
             activeTab === "queries"
               ? "border-primary text-primary"
               : "border-transparent text-muted-foreground hover:text-foreground",
@@ -109,6 +103,17 @@ export function Directory({
           }}
         >
           Queries
+        </button>
+        <button
+          className={clsx(
+            "flex-1 truncate border-b-2 px-2 py-3 text-sm font-medium sm:px-4",
+            activeTab === "tables"
+              ? "border-primary text-primary"
+              : "border-transparent text-muted-foreground hover:text-foreground",
+          )}
+          onClick={() => setActiveTab("tables")}
+        >
+          Tables
         </button>
       </section>
 
@@ -175,6 +180,7 @@ export function Directory({
                 isLoading={isLoading}
                 currentQuery={currentQuery}
                 setCurrentQuery={setCurrentQuery}
+                onLoadQuery={onLoadQuery}
               />
             )}
           </div>
@@ -236,6 +242,7 @@ function QueryList({
   isLoading,
   currentQuery,
   setCurrentQuery,
+  onLoadQuery,
 }: {
   queries: components["schemas"]["HqlSavedQuery"][];
   isLoading: boolean;
@@ -244,13 +251,12 @@ function QueryList({
     name: string;
     sql: string;
   };
-  setCurrentQuery: Dispatch<
-    SetStateAction<{
-      id: string | undefined;
-      name: string;
-      sql: string;
-    }>
-  >;
+  setCurrentQuery: (query: {
+    id: string | undefined;
+    name: string;
+    sql: string;
+  }) => void;
+  onLoadQuery: (query: { name: string; sql: string; savedQueryId?: string }) => void;
 }) {
   const { setNotification } = useNotification();
   const [selectedQueries, setSelectedQueries] = useState<Set<string>>(
@@ -303,8 +309,49 @@ function QueryList({
     }
   };
 
+  const [examplesExpanded, setExamplesExpanded] = useState(true);
+
   return (
     <>
+      {/* Predefined Example Queries */}
+      <div className="mb-4">
+        <button
+          className="mb-2 flex w-full items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
+          onClick={() => setExamplesExpanded(!examplesExpanded)}
+        >
+          {examplesExpanded ? (
+            <ChevronDown size={14} />
+          ) : (
+            <ChevronRight size={14} />
+          )}
+          <Lightbulb size={14} />
+          <span>Examples</span>
+        </button>
+        {examplesExpanded && (
+          <div className="space-y-1 pl-1">
+            {PREDEFINED_QUERIES.map((query, index) => (
+              <div
+                key={index}
+                className="group flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 hover:bg-muted/50"
+                onClick={() => onLoadQuery({ name: query.name, sql: query.sql })}
+              >
+                {query.category === "analytics" ? (
+                  <BarChart3 size={14} className="flex-shrink-0 text-blue-500" />
+                ) : (
+                  <Bug size={14} className="flex-shrink-0 text-orange-500" />
+                )}
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm">{query.name}</div>
+                  <div className="truncate text-xs text-muted-foreground">
+                    {query.description}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Show current unsaved query */}
       {!currentQuery.id && (
         <div className="mb-3">
@@ -366,10 +413,10 @@ function QueryList({
                       className="flex items-center gap-2 truncate pr-2 text-sm"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setCurrentQuery({
-                          id: query.id,
+                        onLoadQuery({
                           name: query.name,
                           sql: query.sql,
+                          savedQueryId: query.id,
                         });
                       }}
                     >

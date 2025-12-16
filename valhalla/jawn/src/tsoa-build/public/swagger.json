@@ -3170,6 +3170,9 @@
 					},
 					"cost": {
 						"$ref": "#/components/schemas/SortDirection"
+					},
+					"time_to_first_token": {
+						"$ref": "#/components/schemas/SortDirection"
 					}
 				},
 				"type": "object",
@@ -9106,6 +9109,25 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ModalityPricing": {
+				"description": "Per-modality pricing configuration.\nSupports input, cached input (as multiplier), and output rates.",
+				"properties": {
+					"input": {
+						"type": "number",
+						"format": "double"
+					},
+					"cachedInputMultiplier": {
+						"type": "number",
+						"format": "double"
+					},
+					"output": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
 			"ModelPricing": {
 				"properties": {
 					"threshold": {
@@ -9117,10 +9139,6 @@
 						"format": "double"
 					},
 					"output": {
-						"type": "number",
-						"format": "double"
-					},
-					"image": {
 						"type": "number",
 						"format": "double"
 					},
@@ -9156,13 +9174,17 @@
 						"type": "number",
 						"format": "double"
 					},
+					"image": {
+						"$ref": "#/components/schemas/ModalityPricing"
+					},
 					"audio": {
-						"type": "number",
-						"format": "double"
+						"$ref": "#/components/schemas/ModalityPricing"
 					},
 					"video": {
-						"type": "number",
-						"format": "double"
+						"$ref": "#/components/schemas/ModalityPricing"
+					},
+					"file": {
+						"$ref": "#/components/schemas/ModalityPricing"
 					},
 					"web_search": {
 						"type": "number",
@@ -9477,6 +9499,24 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"SimplifiedModalityPricing": {
+				"properties": {
+					"input": {
+						"type": "number",
+						"format": "double"
+					},
+					"cachedInput": {
+						"type": "number",
+						"format": "double"
+					},
+					"output": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
 			"SimplifiedPricing": {
 				"properties": {
 					"prompt": {
@@ -9488,8 +9528,7 @@
 						"format": "double"
 					},
 					"audio": {
-						"type": "number",
-						"format": "double"
+						"$ref": "#/components/schemas/SimplifiedModalityPricing"
 					},
 					"thinking": {
 						"type": "number",
@@ -9500,12 +9539,13 @@
 						"format": "double"
 					},
 					"image": {
-						"type": "number",
-						"format": "double"
+						"$ref": "#/components/schemas/SimplifiedModalityPricing"
 					},
 					"video": {
-						"type": "number",
-						"format": "double"
+						"$ref": "#/components/schemas/SimplifiedModalityPricing"
+					},
+					"file": {
+						"$ref": "#/components/schemas/SimplifiedModalityPricing"
 					},
 					"cacheRead": {
 						"type": "number",
@@ -12353,6 +12393,291 @@
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ResultSuccess__totalSpend-number__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ModelSpend": {
+				"properties": {
+					"model": {
+						"type": "string"
+					},
+					"provider": {
+						"type": "string"
+					},
+					"promptTokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"completionTokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"cacheReadTokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"cacheWriteTokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"pricing": {
+						"properties": {
+							"cacheWritePer1M": {
+								"type": "number",
+								"format": "double"
+							},
+							"cacheReadPer1M": {
+								"type": "number",
+								"format": "double"
+							},
+							"outputPer1M": {
+								"type": "number",
+								"format": "double"
+							},
+							"inputPer1M": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"outputPer1M",
+							"inputPer1M"
+						],
+						"type": "object",
+						"nullable": true
+					},
+					"subtotal": {
+						"type": "number",
+						"format": "double"
+					},
+					"discountPercent": {
+						"type": "number",
+						"format": "double"
+					},
+					"total": {
+						"type": "number",
+						"format": "double"
+					},
+					"cacheAdjustment": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"model",
+					"provider",
+					"promptTokens",
+					"completionTokens",
+					"cacheReadTokens",
+					"cacheWriteTokens",
+					"pricing",
+					"subtotal",
+					"discountPercent",
+					"total"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SpendBreakdownResponse": {
+				"properties": {
+					"models": {
+						"items": {
+							"$ref": "#/components/schemas/ModelSpend"
+						},
+						"type": "array"
+					},
+					"totalCost": {
+						"type": "number",
+						"format": "double"
+					},
+					"timeRange": {
+						"properties": {
+							"end": {
+								"type": "string"
+							},
+							"start": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"end",
+							"start"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"models",
+					"totalCost",
+					"timeRange"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_SpendBreakdownResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/SpendBreakdownResponse"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_SpendBreakdownResponse.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_SpendBreakdownResponse_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"PTBInvoice": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"organizationId": {
+						"type": "string"
+					},
+					"stripeInvoiceId": {
+						"type": "string",
+						"nullable": true
+					},
+					"hostedInvoiceUrl": {
+						"type": "string",
+						"nullable": true
+					},
+					"startDate": {
+						"type": "string"
+					},
+					"endDate": {
+						"type": "string"
+					},
+					"amountCents": {
+						"type": "number",
+						"format": "double"
+					},
+					"notes": {
+						"type": "string",
+						"nullable": true
+					},
+					"createdAt": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"organizationId",
+					"stripeInvoiceId",
+					"hostedInvoiceUrl",
+					"startDate",
+					"endDate",
+					"amountCents",
+					"notes",
+					"createdAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_PTBInvoice-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/PTBInvoice"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_PTBInvoice-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_PTBInvoice-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"OrgDiscount": {
+				"properties": {
+					"provider": {
+						"type": "string",
+						"nullable": true
+					},
+					"model": {
+						"type": "string",
+						"nullable": true
+					},
+					"percent": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"provider",
+					"model",
+					"percent"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_OrgDiscount-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/OrgDiscount"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_OrgDiscount-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_OrgDiscount-Array_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -22522,6 +22847,115 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/Result__totalSpend-number_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Credits"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/credits/spend/breakdown": {
+			"get": {
+				"operationId": "GetSpendBreakdown",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_SpendBreakdownResponse.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Credits"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "timeRange",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"7d",
+								"30d",
+								"90d",
+								"all"
+							]
+						}
+					},
+					{
+						"in": "query",
+						"name": "startDate",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "endDate",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/credits/invoices": {
+			"get": {
+				"operationId": "ListInvoices",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_PTBInvoice-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Credits"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/credits/discounts": {
+			"get": {
+				"operationId": "GetDiscounts",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_OrgDiscount-Array.string_"
 								}
 							}
 						}

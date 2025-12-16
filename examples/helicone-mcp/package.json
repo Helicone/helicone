@@ -1,0 +1,34 @@
+{
+  "name": "helicone-claude-agent-examples",
+  "version": "1.0.0",
+  "description": "Examples of using Helicone AI Gateway with Claude Agent SDK via MCP",
+  "main": "basic-agent.js",
+  "type": "module",
+  "scripts": {
+    "test": "node test-connection.js",
+    "basic": "node basic-agent.js",
+    "production": "node production-agent.js",
+    "custom": "node custom-agent.js",
+    "self-analyzing": "node self-analyzing-agent.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.1.54",
+    "@helicone/mcp": "^0.1.6",
+    "@modelcontextprotocol/sdk": "^1.20.2",
+    "dotenv": "^16.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  },
+  "keywords": [
+    "helicone",
+    "claude",
+    "agent-sdk",
+    "ai-gateway",
+    "mcp",
+    "observability",
+    "llm"
+  ],
+  "author": "Helicone, Inc.",
+  "license": "Apache-2.0"
+}

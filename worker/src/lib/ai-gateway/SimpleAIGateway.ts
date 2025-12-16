@@ -440,7 +440,10 @@ export class SimpleAIGateway {
 
   // reasoning_options reserved for providers with custom reasoning logic
   private requiresReasoningOptions(providerModelId: string): boolean {
-    return providerModelId.includes("claude");
+    return (
+      providerModelId.includes("claude") ||
+      providerModelId.includes("gemini")
+    );
   }
 
   private async expandPrompt(
@@ -573,7 +576,8 @@ export class SimpleAIGateway {
       }
 
       // Output now is in Chat Completions format
-      if (bodyMapping === "RESPONSES" && provider !== "openai") {
+      const nativelySupportsResponsesAPI = provider === "openai" || (provider === "helicone" && providerModelId.includes("gpt"));
+      if (bodyMapping === "RESPONSES" && !nativelySupportsResponsesAPI) {
         if (isStream) {
           finalMappedResponse = oaiChat2responsesStreamResponse(finalMappedResponse);
         } else {

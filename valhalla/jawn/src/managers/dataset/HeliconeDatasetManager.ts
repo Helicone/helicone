@@ -300,6 +300,63 @@ export class HeliconeDatasetManager extends BaseManager {
     }
   }
 
+  async createDataset(params: {
+    name: string;
+    meta?: Record<string, any>;
+  }): Promise<Result<string, string>> {
+    try {
+      const sql = `
+        INSERT INTO helicone_dataset (name, organization, dataset_type, meta)
+        VALUES ($1, $2, 'helicone', $3)
+        RETURNING id
+      `;
+
+      const result = await dbExecute<{ id: string }>(sql, [
+        params.name,
+        this.authParams.organizationId,
+        params.meta ? JSON.stringify(params.meta) : null,
+      ]);
+
+      if (result.error || !result.data || result.data.length === 0) {
+        return err(result.error ?? "Failed to create dataset");
+      }
+
+      return ok(result.data[0].id);
+    } catch (error) {
+      return err(`Error creating dataset: ${error}`);
+    }
+  }
+
+  async createDatasetWithRequests(params: {
+    name: string;
+    requestIds: string[];
+    meta?: Record<string, any>;
+  }): Promise<Result<string, string>> {
+    // First create the dataset
+    const datasetResult = await this.createDataset({
+      name: params.name,
+      meta: params.meta,
+    });
+
+    if (datasetResult.error || !datasetResult.data) {
+      return datasetResult;
+    }
+
+    const datasetId = datasetResult.data;
+
+    // If there are request IDs, add them to the dataset
+    if (params.requestIds && params.requestIds.length > 0) {
+      const addResult = await this.addRequests(datasetId, params.requestIds);
+      if (addResult.error) {
+        // If adding requests fails, we should clean up the dataset
+        await this.deleteDataset(datasetId);
+        return err(addResult.error);
+      }
+    }
+
+    return ok(datasetId);
+  }
+
   async deleteDataset(datasetId: string): Promise<Result<null, string>> {
     try {
       const sql = `

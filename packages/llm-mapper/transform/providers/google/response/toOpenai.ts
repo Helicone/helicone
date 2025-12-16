@@ -5,15 +5,18 @@ import {
   OpenAIResponseMessage,
   OpenAIToolCall,
   OpenAIUsage,
+  OpenAIReasoningDetail,
+  ChatCompletionContentPartImage,
 } from "../../../types/openai";
 import {
   GoogleCandidate,
   GoogleContent,
   GoogleFunctionCall,
   GoogleResponseBody,
-  GoogleTokenDetail,
   GoogleUsageMetadata,
 } from "../../../types/google";
+import { mapGoogleUsageToModelUsage } from "../utils/mapGoogleUsageToModelUsage";
+import { mapModelUsageToOpenAI } from "@helicone-package/cost/usage/mapModelUsageToOpenAI";
 
 // Google Response Body -> OpenAI Response Body
 export function toOpenAI(
@@ -52,17 +55,28 @@ function mapCandidates(candidates: GoogleCandidate[]): OpenAIChoice[] {
   return candidates.map((candidate, index) => {
     let content: string[] = [];
     let tool_calls: OpenAIToolCall[] = [];
+    let reasoning: string | undefined;
+    let reasoning_details: OpenAIReasoningDetail[] | undefined;
+    let images: ChatCompletionContentPartImage[] | undefined;
+
     if (candidate.content) {
-      const { content: extracted_content, tool_calls: extracted_tool_calls } = extractContent(candidate.content);
-      content = extracted_content;
-      tool_calls = extracted_tool_calls;
+      const extracted = extractContent(candidate.content);
+      content = extracted.content;
+      tool_calls = extracted.tool_calls;
+      reasoning = extracted.reasoning;
+      reasoning_details = extracted.reasoning_details;
+      images = extracted.images;
     }
+
     return {
       index: candidate.index ?? index,
       message: {
         role: "assistant",
         content: content.length > 0 ? content.join("") : null,
+        ...(reasoning && { reasoning }),
+        ...(reasoning_details && reasoning_details.length > 0 && { reasoning_details }),
         ...(tool_calls.length > 0 && { tool_calls }),
+        ...(images && images.length > 0 && { images }),
       } as OpenAIResponseMessage,
       finish_reason: mapGoogleFinishReason(candidate.finishReason),
       logprobs: null,
@@ -70,12 +84,35 @@ function mapCandidates(candidates: GoogleCandidate[]): OpenAIChoice[] {
   });
 }
 
+/**
+ * Represents extracted content from Google's response.
+ */
+interface ExtractedContent {
+  content: string[];
+  tool_calls: OpenAIToolCall[];
+  reasoning?: string;
+  reasoning_details?: OpenAIReasoningDetail[];
+  images?: ChatCompletionContentPartImage[];
+}
+
+/**
+ * Extracts content, tool calls, and thinking/reasoning from Google's response parts.
+ *
+ * Google's thinking model responses contain parts with a `thought` boolean flag:
+ * - Parts with `thought: true` contain thinking/reasoning summaries
+ * - Parts with `thought: false` or no `thought` field contain the final answer
+ * - `thoughtSignature` may appear on ANY part (typically on content parts, not thought parts)
+ *   and must be preserved for multi-turn conversations
+ */
 function extractContent(
   content: GoogleContent | GoogleContent[]
-): { content: string[]; tool_calls: OpenAIToolCall[] } {
+): ExtractedContent {
   const contents = Array.isArray(content) ? content : [content];
   const textParts: string[] = [];
+  const thinkingTexts: string[] = [];
   const toolCalls: OpenAIToolCall[] = [];
+  const imageParts: ChatCompletionContentPartImage[] = [];
+  let collectedSignature: string | undefined;
 
   for (const block of contents) {
     const parts = Array.isArray(block?.parts)
@@ -89,15 +126,56 @@ function extractContent(
         continue;
       }
 
-      if (part.text) {
-        textParts.push(part.text);
-      } else if (part.functionCall) {
+      // Collect thoughtSignature from ANY part (Google puts it on content parts, not thought parts)
+      if (part.thoughtSignature) {
+        collectedSignature = part.thoughtSignature;
+      }
+
+      if (part.functionCall) {
         toolCalls.push(mapToolCall(part.functionCall, toolCalls.length));
+      } else if (part.inlineData) {
+        const mimeType = part.inlineData.mimeType || "image/png";
+        const dataUri = `data:${mimeType};base64,${part.inlineData.data}`;
+        imageParts.push({
+          type: "image_url",
+          image_url: {
+            url: dataUri,
+          },
+        });
+      } else if (part.text) {
+        // Check if this is a thinking part (Google uses thought: true)
+        if (part.thought === true) {
+          thinkingTexts.push(part.text);
+        } else {
+          textParts.push(part.text);
+        }
       }
     }
   }
 
-  return { content: textParts, tool_calls: toolCalls };
+  const result: ExtractedContent = {
+    content: textParts,
+    tool_calls: toolCalls,
+  };
+
+  // Add reasoning if thinking parts were found
+  if (thinkingTexts.length > 0) {
+    result.reasoning = thinkingTexts.join("");
+    // Preserve thoughtSignature in reasoning_details for multi-turn conversations
+    // Google provides a single signature for all thinking content combined
+    // Apply the same signature to ALL reasoning_details entries
+    result.reasoning_details = thinkingTexts.map((thinking) => ({
+      thinking,
+      signature: collectedSignature || "",
+    }));
+  }
+
+  // Add images if image parts were found
+  if (imageParts.length > 0) {
+    result.images = imageParts;
+  }
+
+  return result;
 }
 
 function mapToolCall(
@@ -115,83 +193,8 @@ function mapToolCall(
 }
 
 export function mapGoogleUsage(usage: GoogleUsageMetadata): OpenAIUsage {
-  const aggregateModalityTokens = (
-    ...details: Array<GoogleTokenDetail[] | undefined>
-  ): Partial<Record<GoogleTokenDetail["modality"], number>> => {
-    const totals: Partial<Record<GoogleTokenDetail["modality"], number>> = {};
-
-    for (const detailList of details) {
-      for (const detail of detailList ?? []) {
-        if (!detail) {
-          continue;
-        }
-        const modality = detail.modality;
-        const tokenCount = detail.tokenCount ?? 0;
-        totals[modality] = (totals[modality] ?? 0) + tokenCount;
-      }
-    }
-
-    return totals;
-  };
-
-  const sumTokens = (details?: GoogleTokenDetail[]): number =>
-    details?.reduce((total, detail) => total + (detail?.tokenCount ?? 0), 0) ??
-    0;
-
-  const sumTokensByModality = (
-    details: GoogleTokenDetail[] | undefined,
-    modality: GoogleTokenDetail["modality"]
-  ): number =>
-    details?.reduce(
-      (total, detail) =>
-        total + (detail?.modality === modality ? detail.tokenCount ?? 0 : 0),
-      0
-    ) ?? 0;
-
-  const toolUsePromptTokens = usage.toolUsePromptTokenCount ?? 0;
-  const reasoningTokens = usage.thoughtsTokenCount ?? 0;
-  const prompt = (usage.promptTokenCount ?? 0) + toolUsePromptTokens;
-  const completion =
-    (usage.candidatesTokenCount || 0) + reasoningTokens;
-
-  const total = usage.totalTokenCount;
-
-  const promptAudioTokens =
-    sumTokensByModality(usage.promptTokenDetails, "AUDIO") +
-    sumTokensByModality(usage.toolUsePromptTokensDetails, "AUDIO") +
-    sumTokensByModality(usage.cacheTokenDetails, "AUDIO");
-
-  const completionModalityTotals = aggregateModalityTokens(
-    usage.candidatesTokensDetails
-  );
-
-  const completionAudioTokens =
-    completionModalityTotals.AUDIO ??
-    sumTokensByModality(usage.candidatesTokensDetails, "AUDIO");
-
-  const cachedTokens =
-    usage.cachedContentTokenCount ?? sumTokens(usage.cacheTokenDetails);
-
-  return {
-    prompt_tokens: prompt,
-    completion_tokens: completion,
-    total_tokens: total,
-    completion_tokens_details: {
-      reasoning_tokens: reasoningTokens,
-      audio_tokens: completionAudioTokens,
-      accepted_prediction_tokens: 0,
-      rejected_prediction_tokens: 0,
-    },
-    prompt_tokens_details: {
-      audio_tokens: promptAudioTokens,
-      cached_tokens: cachedTokens,
-      cache_write_tokens: 0,
-      cache_write_details: {
-        write_5m_tokens: 0,
-        write_1h_tokens: 0,
-      },
-    },
-  };
+  const modelUsage = mapGoogleUsageToModelUsage(usage);
+  return mapModelUsageToOpenAI(modelUsage);
 }
 
 export function mapGoogleFinishReason(

@@ -1,74 +1,13 @@
+import { GeminiContent, GeminiGenerateContentRequest, GeminiGenerationConfig, GeminiImageConfig, GeminiPart, GeminiThinkingConfig, GeminiTool, GeminiToolConfig, GoogleReasoningOptions } from "../../../types/google";
 import {
   HeliconeChatCompletionContentPart,
   HeliconeChatCreateParams,
+  HeliconeChatCompletionMessageParam,
+  HeliconeImageGenerationConfig,
 } from "@helicone-package/prompts/types";
 import { ChatCompletionTool } from "openai/resources/chat/completions";
 
-type GeminiPart = {
-  text?: string;
-  inlineData?: {
-    mimeType?: string;
-    data: string;
-  };
-  fileData?: {
-    fileUri: string;
-  };
-  functionCall?: {
-    name?: string;
-    args?: Record<string, any>;
-  };
-  functionResponse?: {
-    name: string;
-    response: Record<string, any>;
-  };
-};
-
-type GeminiContent = {
-  role: "user" | "model" | "system";
-  parts: GeminiPart[];
-};
-
-type GeminiTool = {
-  functionDeclarations: Array<{
-    name: string;
-    description?: string;
-    parameters?: Record<string, any>;
-  }>;
-};
-
-type GeminiGenerationConfig = {
-  temperature?: number;
-  topP?: number;
-  topK?: number;
-  maxOutputTokens?: number;
-  stopSequences?: string[];
-  candidateCount?: number;
-  presencePenalty?: number;
-  frequencyPenalty?: number;
-};
-
-type GeminiToolConfig = {
-  function_calling_config: {
-    mode: "AUTO" | "ANY" | "NONE";
-    allowed_function_names?: string[];
-  };
-};
-
-export interface GeminiGenerateContentRequest {
-  contents: GeminiContent[];
-  system_instruction?: GeminiContent;
-  generationConfig?: GeminiGenerationConfig;
-  tools?: GeminiTool[];
-  toolConfig?: GeminiToolConfig;
-}
-
-type ChatCompletionMessage =
-  NonNullable<HeliconeChatCreateParams["messages"]>[number];
-
-type ExtendedHeliconeChatCreateParams = HeliconeChatCreateParams & {
-  max_output_tokens?: number | null;
-  top_k?: number | null;
-};
+type ChatCompletionMessage = NonNullable<HeliconeChatCreateParams["messages"]>[number];
 
 export function toGoogle(
   openAIBody: HeliconeChatCreateParams
@@ -103,11 +42,34 @@ export function toGoogle(
     }
 
     const role = mapRole(message.role);
-    const parts = mapContentToGeminiParts(message.content);
+    const parts: GeminiPart[] = [];
+
+    // For assistant messages with reasoning_details, add thinking parts FIRST
+    // (similar to Anthropic pattern where thinking blocks must precede content)
+    if (message.role === "assistant") {
+      const reasoningDetails = (message as any).reasoning_details;
+      if (reasoningDetails && Array.isArray(reasoningDetails)) {
+        for (const detail of reasoningDetails) {
+          if (detail.thinking) {
+            parts.push({
+              text: detail.thinking,
+              thought: true,
+              ...(detail.signature && { thoughtSignature: detail.signature }),
+            });
+          }
+        }
+      }
+    }
+
+    // Add regular content parts
+    parts.push(...mapContentToGeminiParts(message.content));
 
     if (message.role === "assistant") {
       const toolCallParts = mapToolCallsToParts(message);
       parts.push(...toolCallParts);
+
+      const imageParts = mapImagesToParts(message);
+      parts.push(...imageParts);
     }
 
     if (parts.length === 0) {
@@ -152,8 +114,6 @@ export function toGoogle(
 function buildGenerationConfig(
   body: HeliconeChatCreateParams
 ): GeminiGenerationConfig | undefined {
-  const bodyWithExtensions = body as ExtendedHeliconeChatCreateParams;
-
   const getNumberOrUndefined = (
     value?: number | null
   ): number | undefined => {
@@ -161,7 +121,6 @@ function buildGenerationConfig(
   };
 
   const maxOutputTokens =
-    getNumberOrUndefined(bodyWithExtensions.max_output_tokens) ??
     getNumberOrUndefined(body.max_completion_tokens) ??
     getNumberOrUndefined(body.max_tokens) ??
     undefined;
@@ -182,7 +141,7 @@ function buildGenerationConfig(
   if (topP !== undefined) {
     config.topP = topP;
   }
-  const topK = getNumberOrUndefined(bodyWithExtensions.top_k);
+  const topK = getNumberOrUndefined(body.top_k);
   if (topK !== undefined) {
     config.topK = topK;
   }
@@ -205,7 +164,127 @@ function buildGenerationConfig(
     config.frequencyPenalty = frequencyPenalty;
   }
 
+  // Handle reasoning/thinking configuration
+  const thinkingConfig = buildThinkingConfig(body, maxOutputTokens);
+  if (thinkingConfig) {
+    config.thinkingConfig = thinkingConfig;
+  }
+
+  const imageConfig = buildImageConfig(body);
+  if (imageConfig) {
+    config.imageConfig = imageConfig;
+  }
+
   return Object.keys(config).length > 0 ? config : undefined;
+}
+
+/**
+ * Checks if the model supports thinkingLevel (Gemini 3+ models).
+ * Gemini 2.5 models only support thinkingBudget.
+ */
+function supportsThinkingLevel(model: string): boolean {
+  const modelLower = model.toLowerCase();
+  const geminiMatch = modelLower.match(/gemini-(\d+)/);
+  if (geminiMatch) {
+    const majorVersion = parseInt(geminiMatch[1], 10);
+    return majorVersion >= 3;
+  }
+  return false;
+}
+
+/**
+ * Maps OpenAI reasoning_effort to Google thinkingLevel.
+ */
+function mapReasoningEffortToThinkingLevel(
+  effort: "low" | "medium" | "high"
+): "low" | "high" {
+  // Google only supports "low" and "high", so map "medium" to "low"
+  return effort === "high" ? "high" : "low";
+}
+
+/**
+ * Builds the Google thinking configuration from OpenAI reasoning parameters.
+ *
+ * IMPORTANT: For Google models, reasoning_effort is REQUIRED to enable thinking.
+ * budget_tokens alone does NOT enable thinking - it only sets the budget when
+ * reasoning_effort is also provided.
+ *
+ * Supports:
+ * - reasoning_effort: "low" | "medium" | "high" -> thinkingLevel (for Gemini 3+)
+ *   or thinkingBudget: -1 (for Gemini 2.5 models that don't support thinkingLevel)
+ * - reasoning_options.budget_tokens -> thinkingBudget (only when reasoning_effort is set)
+ * - reasoning_options.thinking_level -> thinkingLevel (overrides reasoning_effort)
+ *
+ * If no reasoning_effort is provided, thinking is disabled (thinkingBudget: 0).
+ */
+function buildThinkingConfig(
+  body: HeliconeChatCreateParams,
+  _maxOutputTokens?: number
+): GeminiThinkingConfig {
+  const reasoningEffort = body.reasoning_effort;
+  const reasoningOptions = body.reasoning_options as
+    | GoogleReasoningOptions
+    | undefined;
+
+  // If reasoning_options.thinking_level is explicitly set, use it
+  if (reasoningOptions?.thinking_level !== undefined) {
+    const thinkingConfig: GeminiThinkingConfig = {
+      includeThoughts: true,
+      thinkingLevel: reasoningOptions.thinking_level,
+    };
+    // Also apply budget_tokens if provided
+    if (reasoningOptions.budget_tokens !== undefined) {
+      thinkingConfig.thinkingBudget = reasoningOptions.budget_tokens;
+    }
+    return thinkingConfig;
+  }
+
+  // reasoning_effort is required to enable thinking for Google models
+  // budget_tokens alone does NOT enable thinking
+  if (!reasoningEffort) {
+    return {
+      thinkingBudget: 0,
+    };
+  }
+
+  const thinkingConfig: GeminiThinkingConfig = {
+    includeThoughts: true,
+  };
+
+  const model = body.model || "";
+  const modelSupportsThinkingLevel = supportsThinkingLevel(model);
+
+  // Handle reasoning_effort
+  if (modelSupportsThinkingLevel) {
+    // Gemini 3+ models: use thinkingLevel
+    thinkingConfig.thinkingLevel = mapReasoningEffortToThinkingLevel(
+      reasoningEffort as "low" | "medium" | "high"
+    );
+  } else {
+    // Gemini 2.5 models: use dynamic thinkingBudget (-1)
+    thinkingConfig.thinkingBudget = -1;
+  }
+
+  // Apply budget_tokens if provided (only effective when reasoning_effort is set)
+  if (reasoningOptions?.budget_tokens !== undefined) {
+    thinkingConfig.thinkingBudget = reasoningOptions.budget_tokens;
+  }
+
+  return thinkingConfig;
+}
+
+function buildImageConfig(body: HeliconeChatCreateParams): GeminiImageConfig | undefined {
+  const heliconeImageConfig = body.image_generation;
+
+  if (heliconeImageConfig === undefined) {
+    return undefined;
+  }
+
+  const imageConfig: GeminiImageConfig = {
+    aspectRatio: heliconeImageConfig.aspect_ratio,
+    imageSize: heliconeImageConfig.image_size
+  };
+  return imageConfig;
 }
 
 function buildTools(body: HeliconeChatCreateParams): GeminiTool[] | undefined {
@@ -442,4 +521,34 @@ function parseArguments(
   } catch {
     return { raw: value };
   }
+}
+
+/**
+ * Maps images from assistant messages to Gemini inlineData parts.
+ * This handles image outputs that were generated by previous model responses.
+ */
+function mapImagesToParts(message: HeliconeChatCompletionMessageParam): GeminiPart[] {
+  const parts: GeminiPart[] = [];
+
+  if (!message.images) {
+    return parts;
+  }
+
+  for (const image of message.images) {
+    if (image.type === "image_url" && image.image_url?.url) {
+      const dataUri = image.image_url.url;
+      if (dataUri.startsWith("data:")) {
+        const [meta, data] = dataUri.split(",");
+        let mimeType = meta.split(";")[0].replace("data:", "");
+        if (!mimeType || mimeType.trim() === "") {
+          mimeType = "image/png";
+        }
+        parts.push({
+          inlineData: { mimeType, data },
+        });
+      }
+    }
+  }
+
+  return parts;
 }

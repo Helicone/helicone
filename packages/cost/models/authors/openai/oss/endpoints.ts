@@ -11,9 +11,6 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000015,
         output: 0.00000075,
-        request: 0.0,
-        image: 0.0,
-        audio: 0.0,
         web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
       },
     ],
@@ -54,9 +51,6 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000001,
         output: 0.0000005,
-        request: 0.0,
-        image: 0.0,
-        audio: 0.0,
         web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
       },
     ],
@@ -202,9 +196,6 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000004,
         output: 0.00000016,
-        request: 0.0,
-        image: 0.0,
-        audio: 0.0,
         web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
       },
     ],
@@ -254,6 +245,33 @@ export const endpoints = {
       "seed",
       "logprobs",
       "top_logprobs",
+      "tools",
+      "tool_choice",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "gpt-oss-120b:baseten": {
+    providerModelId: "openai/gpt-oss-120b",
+    provider: "baseten",
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000001, // $0.10/1M tokens
+        output: 0.0000005, // $0.50/1M tokens
+      },
+    ],
+    contextLength: 128_072,
+    maxCompletionTokens: 128_072,
+    supportedParameters: [
+      "structured_outputs",
+      "response_format",
+      "max_tokens",
+      "temperature",
+      "stop",
       "tools",
       "tool_choice",
     ],

@@ -1,0 +1,443 @@
+Integrating multiple LLM providers is a nightmare most AI engineering teams face. Different API formats, scattered credentials, no unified observability, and zero fallback when providers go down.
+
+An **AI Gateway** is a specialized middleware layer that sits between your applications and LLM providers, handling that complexity for you.
+
+![What is an AI Gateway](/static/blog/what-is-ai-gateway/ai-gateway-cover.webp)
+
+In this guide, we'll break down exactly what an AI Gateway is, how it differs from traditional API gateways, and why it's become an essential infrastructure for production AI applications.
+
+If you're evaluating different options, check out our [comprehensive comparison of the top LLM gateways in 2025](/blog/top-llm-gateways-comparison-2025).
+
+## Table of Contents
+
+## What is an AI Gateway?
+
+An AI Gateway is a specialized middleware platform that manages interactions between your applications and Large Language Model (LLM) providers like OpenAI, Anthropic, Google, and others.
+
+Think of it as an intelligent router that is purposefully built for AI traffic.
+
+Unlike traditional API gateways that handle general web traffic, AI Gateways are engineered specifically for the unique challenges of AI workloads:
+
+- **Multi-model access** through a unified interface (rather than using multiple SDKs, endpoints, and API keys)
+- **Intelligent request routing** based on cost, latency, or availability (rather than manually routing requests or handling that complex logic yourself)
+- **Automatic failovers** when providers experience issues (rather than showing an error to users when providers go down)
+- **Token-based rate limiting** and usage tracking (rather than request-based rate limiting)
+- **Built-in observability** for AI-specific metrics (rather than scattered request logs across different dashboards)
+- **Response caching** for repeated queries (rather than making redundant LLM calls)
+
+### ❌ Without an AI Gateway
+
+```typescript
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+// Different SDKs, different formats, different error handling...
+let response;
+try {
+  // Try OpenAI first
+  response = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [{ role: "user", content: "Hello!" }]
+  });
+} catch (error) {
+  // OpenAI failed, try Anthropic
+  try {
+    const anthropicResponse = await anthropic.messages.create({
+      model: "claude-sonnet-4",
+      max_tokens: 1024,
+      messages: [{ role: "user", content: "Hello!" }]
+    });
+    // Transform Anthropic response to match OpenAI format
+    response = {
+      choices: [{
+        message: {
+          content: anthropicResponse.content[0].text
+        }
+      }]
+    };
+  } catch (anthropicError) {
+    // Both failed - now what?
+    throw new Error("All providers failed");
+  }
+}
+```
+
+### ✅ With an AI Gateway
+
+```typescript
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY
+});
+
+const response = await client.chat.completions.create({
+  model: "claude-sonnet-4",  // Or gpt-4o, gemini-2.5-flash, etc. If one fails, it will automatically try the next best available provider.
+  messages: [{ role: "user", content: "Hello!" }]
+});
+```
+
+## How Does an AI Gateway Work?
+
+An AI Gateway operates as a control plane for how your applications interact with LLMs. Here's the flow:
+
+1. **Request Interception**: Your app sends a request to the AI Gateway's endpoint
+2. **Policy Application**: The gateway applies transformations, rate limits, and security checks (like prompt injection detection, PII redaction, etc.)
+3. **Intelligent Routing**: Based on your configuration, it routes to the optimal provider (based on cost, latency, or availability)
+4. **Response Handling**: The gateway logs metrics, normalizes the response, and returns it
+
+Behind the scenes, the AI Gateway handles:
+
+- **[Token-based observability](https://docs.helicone.ai/features/advanced-usage/cost-tracking)** and usage tracking
+- **[Rate limiting](https://docs.helicone.ai/features/advanced-usage/custom-rate-limits)** to control costs and prevent abuse
+- **[Automatic retries](https://docs.helicone.ai/features/advanced-usage/automatic-retries)** with exponential backoff
+- **[Model fallbacks](https://docs.helicone.ai/gateway/provider-routing)** when providers become unavailable
+- **[Response caching](https://docs.helicone.ai/features/advanced-usage/caching)** for repeated queries
+
+For example, when a user submits a query to your AI-powered customer support tool, the AI Gateway:
+
+1. Validates the request and checks rate limits
+2. Routes to the configured LLM provider
+3. Monitors for PII or sensitive data
+4. Logs the interaction with full observability
+5. Returns the response in a standardized format
+
+## AI Gateway vs API Gateway: What's the Difference?
+
+While both serve as middleware layers managing traffic between clients and backend services, they're built for fundamentally different purposes.
+
+| Capability | Traditional API Gateway | AI Gateway |
+|------------|------------------------|------------|
+| **Primary Focus** | General API traffic management | LLM-specific workload orchestration |
+| **Rate Limiting** | Request-based (RPM, RPD) | Token-based + request-based |
+| **Observability** | Latency, errors, throughput | + Token usage, cost tracking, prompt logging |
+| **Routing Logic** | Path/header-based | Cost-aware, latency-aware, model-specific |
+| **Caching** | Response caching | Semantic caching for similar prompts |
+| **Security** | Auth, TLS, IP filtering | + Prompt injection detection, PII redaction |
+| **Load Balancing** | Round-robin, weighted | Health-aware, provider-specific quotas |
+
+### Why Traditional API Gateways Fall Short for AI
+
+Traditional API gateways weren't designed for the unique characteristics of AI workloads:
+
+**1. Token Economics**
+
+AI APIs charge by token, not by request. A gateway that only tracks request counts can't help you understand or control costs.
+
+**2. Non-Deterministic Responses**
+
+The same prompt can produce different outputs. Traditional caching strategies don't account for semantic similarity.
+
+**3. Provider Variability**
+
+AI providers have different API formats, rate limits, and failure modes. A generic gateway can't intelligently route between them.
+
+**4. Prompt Security**
+
+AI applications face unique threats like prompt injection attacks that require specialized detection and filtering.
+
+## Key Features of AI Gateways
+
+### 1. Unified API Interface
+
+AI Gateways impose a canonical API format, enabling seamless integration across providers. You write code once and access any model:
+
+```typescript
+// Same code works for any provider
+const response = await client.chat.completions.create({
+  model: "gpt-4o",  // Or claude-sonnet-4, gemini-2.5-pro, etc.
+  messages: [{ role: "user", content: "Explain quantum computing" }]
+});
+```
+
+### 2. Intelligent Routing & Load Balancing
+
+Route requests based on cost, latency, or custom criteria. Advanced gateways track provider health in real-time:
+
+```typescript
+// Automatic fallback chain
+model: "gpt-4o/openai,claude-sonnet-4/anthropic,gemini-2.5-flash/google"
+```
+
+If OpenAI is down or rate-limited, traffic automatically flows to Claude, then Gemini. Your application stays online without manual intervention.
+
+### 3. Cost Management & Optimization
+
+AI Gateways track token usage and [costs](https://docs.helicone.ai/features/advanced-usage/cost-tracking) across all providers, enabling:
+
+- Per-request **cost attribution**
+- Budget **alerts** and limits
+- **Cost-optimized routing** to cheapest available provider
+- **Response caching** to eliminate redundant API calls
+
+### 4. Observability & Monitoring
+
+Unlike traditional logging, AI-specific observability includes:
+
+- **Token usage** per request, user, and feature
+- **Prompt/response logging** for debugging and compliance
+- **Latency metrics** including time-to-first-token
+- **Error categorization** by type and provider
+
+### 5. Security & Compliance
+
+AI Gateways provide specialized security features:
+
+- **[Prompt injection detection](https://docs.helicone.ai/features/advanced-usage/llm-security)** to prevent manipulation
+- **PII redaction** before data reaches models
+- **Credential management** keeping API keys secure
+- **Audit trails** for regulatory compliance
+
+### 6. Caching Strategies
+
+Intelligent caching for AI workloads:
+
+```typescript
+// Enable caching for repeated queries
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
+  defaultHeaders: {
+    "Helicone-Cache-Enabled": "true"
+  }
+});
+```
+
+Some gateways offer **semantic caching**: recognizing that "What's the weather?" and "Tell me the current weather" might return the same cached response. This is particularly useful for tasks like customer support, where the same question may be asked in different ways.
+
+## Why AI Gateways Are Becoming Essential
+
+### Most Teams Use Multiple Providers
+
+Over 90% of AI teams now run 5+ models in production. As teams scale their AI operations, they need to optimize for:
+
+- **Cost**: Using cheaper models for simple tasks, more advanced (and costly) models for complex tasks
+- **Capability**: Matching model strengths to use cases
+- **Reliability**: Avoiding single points of failure by using multiple providers
+- **Compliance**: Meeting data residency requirements
+
+### LLM Reliability Equals User Trust
+
+LLMs are still largely unrealiable: hallucinations, provider outages, dynamic responses, etc. Without an AI Gateway, you'd have no visibility into:
+
+- Request logs scattered across each provider's dashboard
+- No unified view of costs or performance
+- Debugging requires stitching together multiple data sources
+- Usage patterns invisible until the monthly bill arrives
+
+### Provider Outages
+
+As AI becomes a more integral part of your product, provider outages mean profit losses.
+
+When your customer support chatbot goes down because OpenAI is having issues, your customers just see a broken product.
+
+AI Gateways provide the redundancy and failover capabilities production systems require.
+
+## Getting Started with an AI Gateway
+
+Here's how to implement an [AI Gateway](/blog/how-to-gateway) in your application:
+
+### Step 1: Choose Your Gateway
+
+Consider these factors:
+- **Self-hosted vs. cloud-hosted**: Do you need data to stay on-premises? Do you have resources to maintain your own infrastructure?
+- **Provider support**: Does it support all the models you use?
+- **Observability features**: What level of visibility do you need?
+- **Pricing model**: Per-request fees, markups, or flat rate?
+
+### Step 2: Update Your Base URL
+
+Most AI Gateways work as drop-in replacements using the OpenAI API. Just change the endpoint:
+
+```typescript
+// Before
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: "https://api.openai.com/v1"
+});
+
+// After
+const client = new OpenAI({
+  apiKey: process.env.HELICONE_API_KEY,
+  baseURL: "https://ai-gateway.helicone.ai"
+});
+```
+
+### Step 3: Configure Routing and Fallbacks
+
+Set up intelligent routing based on your priorities using [provider routing](https://docs.helicone.ai/gateway/provider-routing):
+
+```typescript
+// Route to best provider automatically
+model: "gpt-4o-mini"
+
+// Or specify a fallback chain
+model: "gpt-4o/openai,claude-sonnet-4/anthropic"
+```
+
+### Step 4: Add Observability
+
+Tag requests with metadata for granular tracking using [custom properties](https://docs.helicone.ai/features/advanced-usage/custom-properties):
+
+```typescript
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
+  defaultHeaders: {
+    "Helicone-Property-Feature": "customer-support",
+    "Helicone-Property-Environment": "production",
+    "Helicone-User-Id": userId
+  }
+});
+```
+
+### Step 5: Monitor and Optimize
+
+Use the gateway's dashboard to:
+- Track costs by feature, user, or model
+- Identify slow or failing requests
+- Optimize routing based on real performance data
+- Set up [alerts](https://docs.helicone.ai/features/alerts) for anomalies
+
+You can also use [sessions](https://docs.helicone.ai/features/sessions) to track multi-turn conversations and analyze user interactions.
+
+## Best Practices for AI Gateway Implementation
+
+### 1. Start Simple, Scale Gradually
+
+Begin with basic request logging, then add features as needed:
+
+```typescript
+// Week 1: Basic integration
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY
+});
+
+// Week 2: Add user tracking
+defaultHeaders: { "Helicone-User-Id": userId }
+
+// Week 3: Enable caching
+defaultHeaders: { "Helicone-Cache-Enabled": "true" }
+
+// Week 4: Configure fallbacks
+model: "gpt-4o,claude-sonnet-4"
+```
+
+### 2. Implement Proper Error Handling
+
+Account for gateway-specific scenarios:
+
+```typescript
+try {
+  const response = await client.chat.completions.create({...});
+} catch (error) {
+  if (error.status === 429) {
+    // Rate limited - check if budget exceeded or provider limit
+  } else if (error.status === 503) {
+    // All providers unavailable - implement local fallback
+  }
+}
+```
+
+### 3. Use Custom Properties for Segmentation
+
+Tag requests with business context:
+
+```typescript
+headers: {
+  "Helicone-Property-Feature": "content-generator",
+  "Helicone-Property-Customer-Tier": "enterprise",
+  "Helicone-Property-Environment": "production"
+}
+```
+
+This enables filtering and analysis by any dimension that matters to your business.
+
+### 4. Monitor Token Efficiency
+
+Track tokens per successful outcome, not just per request:
+
+- Tokens per customer support resolution
+- Tokens per content piece generated
+- Tokens per code review completed
+
+This reveals optimization opportunities that raw token counts miss.
+
+### 5. Plan for Provider Diversity
+
+Don't put all your eggs in one basket:
+
+```typescript
+// Configure multiple providers from day one
+model: "gpt-4o/openai,claude-sonnet-4/anthropic,gemini-2.5-pro/google"
+```
+
+Even if you primarily use one provider, having fallbacks configured means you're ready when issues occur.
+
+## Conclusion
+
+As the complexity of AI applications increases, AI Gateways are becoming essential infrastructure for production workloads.
+
+They solve the core challenges of multi-provider management, observability, reliability, and cost control teams face as they scale.
+
+**Key takeaways:**
+
+- AI Gateways are purpose-built for LLM workloads, offering features traditional API gateways can't provide
+- The unified interface eliminates SDK sprawl and simplifies multi-provider architectures
+- Built-in observability provides visibility into costs, performance, and usage patterns
+- Automatic failovers and intelligent routing ensure reliability at scale
+- Early adoption prevents technical debt and accelerates development
+
+<CallToAction
+  title="Try Helicone AI Gateway ⚡️"
+  description="Access 100+ models through one API with built-in observability, automatic fallbacks, and zero markup pricing. Get started in minutes."
+  primaryButtonText="Start Free"
+  primaryButtonLink="https://helicone.ai/signup"
+  secondaryButtonText="Read the Docs"
+  secondaryButtonLink="https://docs.helicone.ai/gateway/overview"
+/>
+
+## You might also be interested in
+
+- <a href="https://www.helicone.ai/blog/top-llm-gateways-comparison-2025" target="_blank" rel="noopener">Top 5 LLM Gateways Comparison (2025)</a>
+- <a href="https://www.helicone.ai/blog/how-to-gateway" target="_blank" rel="noopener">How to Use Helicone AI Gateway</a>
+- <a href="https://www.helicone.ai/blog/ai-best-practices" target="_blank" rel="noopener">Best Practices for Building Production-Ready AI Applications</a>
+
+<FAQ
+  items={[
+    {
+      question: "What is an AI Gateway?",
+      answer: "An AI Gateway is a specialized middleware platform that manages interactions between your applications and LLM providers like OpenAI, Anthropic, and Google. It provides a unified API interface, intelligent routing, automatic failovers, cost tracking, and built-in observability, purposefully built for AI workloads."
+    },
+    {
+      question: "How is an AI Gateway different from an API Gateway?",
+      answer: "While both manage API traffic, AI Gateways are specifically designed for LLM workloads. They offer token-based rate limiting (not just request-based), semantic caching, prompt injection detection, cost tracking per token, and intelligent routing between AI providers. Traditional API gateways lack these AI-specific capabilities."
+    },
+    {
+      question: "Why do I need an AI Gateway?",
+      answer: "AI Gateways solve critical production challenges: managing multiple LLM providers through one interface, automatic failovers when providers go down, unified cost tracking across all models, security features like prompt injection detection, and comprehensive observability for debugging and optimization."
+    },
+    {
+      question: "How does an AI Gateway reduce costs?",
+      answer: "AI Gateways reduce costs through intelligent routing to cheaper providers, response caching for repeated queries, token usage tracking to identify inefficient prompts, and budget alerts to prevent overspending. Some teams report up to 90% cost savings from caching alone."
+    },
+    {
+      question: "Can I use my existing OpenAI code with an AI Gateway?",
+      answer: "Yes! Most AI Gateways are OpenAI SDK compatible. You typically just change the base URL and API key. Your existing code should continue to work while you gain access to multiple providers, observability, and reliability features."
+    },
+    {
+      question: "What providers do AI Gateways support?",
+      answer: "Leading AI Gateways support 100+ models across major providers including OpenAI, Anthropic, Google, AWS Bedrock, Azure OpenAI, Mistral, Cohere, and many more. Some also support custom or self-hosted models."
+    },
+    {
+      question: "How do AI Gateways handle provider outages?",
+      answer: "AI Gateways provide automatic failover capabilities. When a provider experiences issues, traffic automatically routes to backup providers. Health-aware routing continuously monitors provider status and removes failing endpoints from rotation until they recover."
+    },
+    {
+      question: "Is an AI Gateway secure for enterprise use?",
+      answer: "Enterprise-grade AI Gateways offer comprehensive security features including SOC2/HIPAA/GDPR compliance, prompt injection detection, PII redaction, credential management, SSO integration, and detailed audit trails. Many support self-hosting for maximum data control."
+    }
+  ]}
+/>
+
+<Questions />

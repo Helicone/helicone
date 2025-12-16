@@ -695,6 +695,15 @@ export interface paths {
   "/v1/credits/totalSpend": {
     get: operations["GetTotalSpend"];
   };
+  "/v1/credits/spend/breakdown": {
+    get: operations["GetSpendBreakdown"];
+  };
+  "/v1/credits/invoices": {
+    get: operations["ListInvoices"];
+  };
+  "/v1/credits/discounts": {
+    get: operations["GetDiscounts"];
+  };
   "/v1/public/alert-banner": {
     get: operations["GetAlertBanners"];
     patch: operations["UpdateAlertBannerActive"];
@@ -1570,6 +1579,7 @@ export interface components {
         [key: string]: components["schemas"]["SortDirection"];
       };
       cost?: components["schemas"]["SortDirection"];
+      time_to_first_token?: components["schemas"]["SortDirection"];
     };
     RequestQueryParams: {
       filter: components["schemas"]["RequestFilterNode"];
@@ -3263,6 +3273,18 @@ Json: JsonObject;
       /** Format: double */
       tpd?: number;
     };
+    /**
+     * @description Per-modality pricing configuration.
+     * Supports input, cached input (as multiplier), and output rates.
+     */
+    ModalityPricing: {
+      /** Format: double */
+      input?: number;
+      /** Format: double */
+      cachedInputMultiplier?: number;
+      /** Format: double */
+      output?: number;
+    };
     ModelPricing: {
       /** Format: double */
       threshold: number;
@@ -3270,8 +3292,6 @@ Json: JsonObject;
       input: number;
       /** Format: double */
       output: number;
-      /** Format: double */
-      image?: number;
       cacheMultipliers?: {
         /** Format: double */
         write1h?: number;
@@ -3286,10 +3306,10 @@ Json: JsonObject;
       thinking?: number;
       /** Format: double */
       request?: number;
-      /** Format: double */
-      audio?: number;
-      /** Format: double */
-      video?: number;
+      image?: components["schemas"]["ModalityPricing"];
+      audio?: components["schemas"]["ModalityPricing"];
+      video?: components["schemas"]["ModalityPricing"];
+      file?: components["schemas"]["ModalityPricing"];
       /** Format: double */
       web_search?: number;
     };
@@ -3381,21 +3401,27 @@ Json: JsonObject;
       /** Format: double */
       priority?: number;
     };
+    SimplifiedModalityPricing: {
+      /** Format: double */
+      input?: number;
+      /** Format: double */
+      cachedInput?: number;
+      /** Format: double */
+      output?: number;
+    };
     SimplifiedPricing: {
       /** Format: double */
       prompt: number;
       /** Format: double */
       completion: number;
-      /** Format: double */
-      audio?: number;
+      audio?: components["schemas"]["SimplifiedModalityPricing"];
       /** Format: double */
       thinking?: number;
       /** Format: double */
       web_search?: number;
-      /** Format: double */
-      image?: number;
-      /** Format: double */
-      video?: number;
+      image?: components["schemas"]["SimplifiedModalityPricing"];
+      video?: components["schemas"]["SimplifiedModalityPricing"];
+      file?: components["schemas"]["SimplifiedModalityPricing"];
       /** Format: double */
       cacheRead?: number;
       /** Format: double */
@@ -4081,6 +4107,81 @@ Json: JsonObject;
       error: null;
     };
     "Result__totalSpend-number_.string_": components["schemas"]["ResultSuccess__totalSpend-number__"] | components["schemas"]["ResultError_string_"];
+    ModelSpend: {
+      model: string;
+      provider: string;
+      /** Format: double */
+      promptTokens: number;
+      /** Format: double */
+      completionTokens: number;
+      /** Format: double */
+      cacheReadTokens: number;
+      /** Format: double */
+      cacheWriteTokens: number;
+      pricing: {
+        /** Format: double */
+        cacheWritePer1M?: number;
+        /** Format: double */
+        cacheReadPer1M?: number;
+        /** Format: double */
+        outputPer1M: number;
+        /** Format: double */
+        inputPer1M: number;
+      } | null;
+      /** Format: double */
+      subtotal: number;
+      /** Format: double */
+      discountPercent: number;
+      /** Format: double */
+      total: number;
+      /** Format: double */
+      cacheAdjustment?: number;
+    };
+    SpendBreakdownResponse: {
+      models: components["schemas"]["ModelSpend"][];
+      /** Format: double */
+      totalCost: number;
+      timeRange: {
+        end: string;
+        start: string;
+      };
+    };
+    ResultSuccess_SpendBreakdownResponse_: {
+      data: components["schemas"]["SpendBreakdownResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_SpendBreakdownResponse.string_": components["schemas"]["ResultSuccess_SpendBreakdownResponse_"] | components["schemas"]["ResultError_string_"];
+    PTBInvoice: {
+      id: string;
+      organizationId: string;
+      stripeInvoiceId: string | null;
+      hostedInvoiceUrl: string | null;
+      startDate: string;
+      endDate: string;
+      /** Format: double */
+      amountCents: number;
+      notes: string | null;
+      createdAt: string;
+    };
+    "ResultSuccess_PTBInvoice-Array_": {
+      data: components["schemas"]["PTBInvoice"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PTBInvoice-Array.string_": components["schemas"]["ResultSuccess_PTBInvoice-Array_"] | components["schemas"]["ResultError_string_"];
+    OrgDiscount: {
+      provider: string | null;
+      model: string | null;
+      /** Format: double */
+      percent: number;
+    };
+    "ResultSuccess_OrgDiscount-Array_": {
+      data: components["schemas"]["OrgDiscount"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_OrgDiscount-Array.string_": components["schemas"]["ResultSuccess_OrgDiscount-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array_": {
       data: {
           updated_at: string;
@@ -8003,6 +8104,43 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__totalSpend-number_.string_"];
+        };
+      };
+    };
+  };
+  GetSpendBreakdown: {
+    parameters: {
+      query?: {
+        timeRange?: "7d" | "30d" | "90d" | "all";
+        startDate?: string;
+        endDate?: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_SpendBreakdownResponse.string_"];
+        };
+      };
+    };
+  };
+  ListInvoices: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PTBInvoice-Array.string_"];
+        };
+      };
+    };
+  };
+  GetDiscounts: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_OrgDiscount-Array.string_"];
         };
       };
     };
