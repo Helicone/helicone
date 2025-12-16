@@ -1,17 +1,19 @@
 import { providers } from "@helicone-package/cost/providers/mappings";
 
-function getProviderLogo(provider: string): string {
+export function getProviderLogo(provider: string): string {
   const logoMap: Record<string, string> = {
-    OPENAI: "/static/home/chatgpt.webp",
-    ANTHROPIC: "/static/home/anthropic.webp",
-    GOOGLE: "/static/home/gemini.webp",
-    META: "/static/home/logo2.webp",
-    MISTRAL: "/static/home/mistral.webp",
-    COHERE: "/static/home/logo3.webp",
-    GROQ: "/static/home/groq.svg",
+    openai: "/static/home/chatgpt.webp",
+    anthropic: "/static/home/anthropic.webp",
+    google: "/static/home/gemini.webp",
+    meta: "/static/home/logo2.webp",
+    mistral: "/static/home/mistral.webp",
+    cohere: "/static/home/logo3.webp",
+    groq: "/static/home/groq.svg",
+    together: "/static/home/logo4.webp",
+    openrouter: "/static/home/logo4.webp",
   };
 
-  return logoMap[provider] || "/static/home/logo4.webp"; // Default logo
+  return logoMap[provider.toLowerCase()] || "/static/home/logo4.webp"; // Default logo
 }
 
 export interface ModelFamily {
