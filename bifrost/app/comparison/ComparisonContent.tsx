@@ -15,24 +15,9 @@ import {
 import { getJawnClient } from "@/lib/clients/jawn";
 import { components } from "@/lib/clients/jawnTypes/public";
 import { capitalizeModality } from "@/lib/constants/modalities";
+import { getProviderLogo } from "@/lib/models/registry";
 
 type ModelRegistryItem = components["schemas"]["ModelRegistryItem"];
-
-// Helper to get provider logo
-function getProviderLogo(provider: string): string {
-  const logoMap: Record<string, string> = {
-    openai: "/static/home/chatgpt.webp",
-    anthropic: "/static/home/anthropic.webp",
-    google: "/static/home/gemini.webp",
-    meta: "/static/home/logo2.webp",
-    mistral: "/static/home/mistral.webp",
-    cohere: "/static/home/logo3.webp",
-    groq: "/static/home/groq.svg",
-    together: "/static/home/logo4.webp",
-    openrouter: "/static/home/logo4.webp",
-  };
-  return logoMap[provider.toLowerCase()] || "/static/home/logo4.webp";
-}
 
 const formatContext = (value: number) => {
   if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
