@@ -166,7 +166,7 @@ export default function ComparisonContent() {
 
   // Get pricing info for a model
   const getModelPricing = (model: ModelRegistryItem) => {
-    const endpoint = model.endpoints[0];
+    const endpoint = model.endpoints && model.endpoints.length > 0 ? model.endpoints[0] : undefined;
     if (!endpoint) return { input: 0, output: 0 };
     const pricing =
       endpoint.pricingTiers && endpoint.pricingTiers.length > 0
