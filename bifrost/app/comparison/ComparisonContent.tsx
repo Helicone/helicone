@@ -241,11 +241,13 @@ export default function ComparisonContent() {
                     disabled={model.id === secondModel}
                   >
                     <div className="flex items-center gap-2">
-                      <img
-                        src={getProviderLogo(model.author)}
-                        alt={`${model.author} logo`}
-                        className="w-5 h-5 rounded-full object-cover"
-                      />
+                      <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+                        <img
+                          src={getProviderLogo(model.author)}
+                          alt={`${model.author} logo`}
+                          className="w-4 h-4 object-contain"
+                        />
+                      </div>
                       <span className="truncate">{model.name}</span>
                     </div>
                   </SelectItem>
@@ -269,11 +271,13 @@ export default function ComparisonContent() {
                     disabled={model.id === firstModel}
                   >
                     <div className="flex items-center gap-2">
-                      <img
-                        src={getProviderLogo(model.author)}
-                        alt={`${model.author} logo`}
-                        className="w-5 h-5 rounded-full object-cover"
-                      />
+                      <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+                        <img
+                          src={getProviderLogo(model.author)}
+                          alt={`${model.author} logo`}
+                          className="w-4 h-4 object-contain"
+                        />
+                      </div>
                       <span className="truncate">{model.name}</span>
                     </div>
                   </SelectItem>
@@ -295,11 +299,13 @@ export default function ComparisonContent() {
             {/* Model Headers */}
             <div className="grid grid-cols-3 gap-4 mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center gap-3">
-                <img
-                  src={getProviderLogo(model1Data.author)}
-                  alt={model1Data.author}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
+                <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+                  <img
+                    src={getProviderLogo(model1Data.author)}
+                    alt={model1Data.author}
+                    className="w-5 h-5 object-contain"
+                  />
+                </div>
                 <div>
                   <div className="font-semibold text-gray-900 dark:text-gray-100">
                     {model1Data.name}
@@ -317,11 +323,13 @@ export default function ComparisonContent() {
                   </div>
                   <div className="text-xs text-gray-500">{model2Data.author}</div>
                 </div>
-                <img
-                  src={getProviderLogo(model2Data.author)}
-                  alt={model2Data.author}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
+                <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+                  <img
+                    src={getProviderLogo(model2Data.author)}
+                    alt={model2Data.author}
+                    className="w-5 h-5 object-contain"
+                  />
+                </div>
               </div>
             </div>
 
@@ -462,11 +470,13 @@ export default function ComparisonContent() {
                     onClick={() => handleModelCardClick(model.id)}
                   >
                     <div className="flex items-center gap-2">
-                      <img
-                        src={getProviderLogo(model.author)}
-                        alt={`${model.author} logo`}
-                        className="w-8 h-8 rounded-full object-cover flex-shrink-0"
-                      />
+                      <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                        <img
+                          src={getProviderLogo(model.author)}
+                          alt={`${model.author} logo`}
+                          className="w-4 h-4 object-contain"
+                        />
+                      </div>
                       <div className="min-w-0 flex-1">
                         <div
                           className={`text-sm font-medium truncate ${
