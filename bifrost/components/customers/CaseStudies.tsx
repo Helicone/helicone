@@ -55,6 +55,7 @@ export type CaseStudyStructure = {
 
 const caseStudies: CaseStudyStructure[] = [
   { dynamicEntry: { folderName: "deepai" } },
+  { dynamicEntry: { folderName: "branddev" } },
   { dynamicEntry: { folderName: "sunrun" } },
   { dynamicEntry: { folderName: "cogna" } },
   { dynamicEntry: { folderName: "tusk" } },
