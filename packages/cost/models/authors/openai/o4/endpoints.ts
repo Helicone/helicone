@@ -64,7 +64,7 @@ export const endpoints = {
       "max_completion_tokens",
       "response_format",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },
