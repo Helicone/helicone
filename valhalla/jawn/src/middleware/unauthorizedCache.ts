@@ -2,15 +2,14 @@ import { NextFunction, Request, Response } from "express";
 import { KVCache } from "../lib/cache/kvCache";
 import { stringToNumberHash } from "../utils/helpers";
 
-const kvCache = new KVCache(24 * 60 * 60 * 1000); // 24 hours
-
 function getCacheKey(text: string): string {
   return `cache:${stringToNumberHash(text)}`;
 }
 
 export const unauthorizedCacheMiddleware =
-  (cacheKeyMiddle: string) =>
-  async (req: Request, res: Response, next: NextFunction) => {
+  (cacheKeyMiddle: string, ttlMs: number = 24 * 60 * 60 * 1000) => {
+  const kvCache = new KVCache(ttlMs);
+  return async (req: Request, res: Response, next: NextFunction) => {
     if (req.headers["authorization"] || req.headers["helicone-authorization"]) {
       res.status(401).send({
         message: "CANNOT USE UNAUTHORIZED CACHE WITH AUTHENTICATED ROUTES",
@@ -42,3 +41,4 @@ export const unauthorizedCacheMiddleware =
 
     next();
   };
+};
