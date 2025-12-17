@@ -6767,9 +6767,6 @@
 					"model": {
 						"type": "string"
 					},
-					"provider": {
-						"type": "string"
-					},
 					"author": {
 						"type": "string"
 					},
@@ -6777,17 +6774,7 @@
 						"type": "number",
 						"format": "double"
 					},
-					"previousPeriodTokens": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
 					"percentChange": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"rankChange": {
 						"type": "number",
 						"format": "double",
 						"nullable": true
@@ -6796,12 +6783,9 @@
 				"required": [
 					"rank",
 					"model",
-					"provider",
 					"author",
 					"totalTokens",
-					"previousPeriodTokens",
-					"percentChange",
-					"rankChange"
+					"percentChange"
 				],
 				"type": "object",
 				"additionalProperties": false

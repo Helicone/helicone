@@ -1,19 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatTokens, formatPercentChange } from "@/utils/formatters";
 
 interface LeaderboardEntry {
   rank: number;
   model: string;
-  provider: string;
   author: string;
   totalTokens: number;
-  previousPeriodTokens: number | null;
   percentChange: number | null;
-  rankChange: number | null;
 }
 
 interface ModelLeaderboardProps {
@@ -24,9 +21,6 @@ interface ModelLeaderboardProps {
 function LeaderboardRow({ item }: { item: LeaderboardEntry }) {
   const isNew = item.percentChange === null;
   const isPositive = item.percentChange !== null && item.percentChange >= 0;
-  const hasRankChange =
-    !isNew && item.rankChange !== null && item.rankChange !== 0;
-  const rankUp = item.rankChange !== null && item.rankChange > 0;
 
   return (
     <div className="flex items-center justify-between py-4 border-b border-gray-100 dark:border-gray-800/50 last:border-b-0">
@@ -43,43 +37,25 @@ function LeaderboardRow({ item }: { item: LeaderboardEntry }) {
           </div>
         </div>
       </div>
-      <div className="flex items-center gap-3">
-        {hasRankChange && (
+      <div className="flex flex-col items-end">
+        <span className="text-xs font-normal tabular-nums text-gray-900 dark:text-gray-100">
+          {formatTokens(item.totalTokens)} tokens
+        </span>
+        {isNew ? (
+          <span className="text-[10px] font-medium px-1 py-0.5 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mt-0.5">
+            NEW
+          </span>
+        ) : (
           <span
-            className={`flex items-center gap-0.5 text-xs font-medium ${
-              rankUp
+            className={`text-xs font-medium mt-0.5 ${
+              isPositive
                 ? "text-green-600 dark:text-green-400"
                 : "text-red-600 dark:text-red-400"
             }`}
           >
-            {rankUp ? (
-              <ChevronUp className="h-3 w-3" />
-            ) : (
-              <ChevronDown className="h-3 w-3" />
-            )}
-            {Math.abs(item.rankChange!)}
+            {formatPercentChange(item.percentChange!)}
           </span>
         )}
-        <div className="flex flex-col items-end">
-          <span className="text-xs font-normal tabular-nums text-gray-900 dark:text-gray-100">
-            {formatTokens(item.totalTokens)} tokens
-          </span>
-          {isNew ? (
-            <span className="text-[10px] font-medium px-1 py-0.5 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mt-0.5">
-              NEW
-            </span>
-          ) : (
-            <span
-              className={`text-xs font-medium mt-0.5 ${
-                isPositive
-                  ? "text-green-600 dark:text-green-400"
-                  : "text-red-600 dark:text-red-400"
-              }`}
-            >
-              {formatPercentChange(item.percentChange!)}
-            </span>
-          )}
-        </div>
       </div>
     </div>
   );

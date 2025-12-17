@@ -2478,16 +2478,11 @@ Json: JsonObject;
       /** Format: double */
       rank: number;
       model: string;
-      provider: string;
       author: string;
       /** Format: double */
       totalTokens: number;
       /** Format: double */
-      previousPeriodTokens: number | null;
-      /** Format: double */
       percentChange: number | null;
-      /** Format: double */
-      rankChange: number | null;
     };
     ModelUsageResponse: {
       timeSeries: components["schemas"]["ModelUsageTimeSeriesDataPoint"][];

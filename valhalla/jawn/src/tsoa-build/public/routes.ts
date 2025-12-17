@@ -2168,12 +2168,9 @@ const models: TsoaRoute.Models = {
         "properties": {
             "rank": {"dataType":"double","required":true},
             "model": {"dataType":"string","required":true},
-            "provider": {"dataType":"string","required":true},
             "author": {"dataType":"string","required":true},
             "totalTokens": {"dataType":"double","required":true},
-            "previousPeriodTokens": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
             "percentChange": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "rankChange": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
         },
         "additionalProperties": false,
     },

@@ -32,12 +32,9 @@ interface TimeSeriesDataPoint {
 interface LeaderboardEntry {
   rank: number;
   model: string;
-  provider: string;
   author: string;
   totalTokens: number;
-  previousPeriodTokens: number | null;
   percentChange: number | null;
-  rankChange: number | null;
 }
 
 interface ModelUsageResponse {
