@@ -25,11 +25,7 @@
     "@peculiar/x509": "1.13.0"
   },
   "devDependencies": {
-    "@jest/globals": "^30.2.0",
-    "@jest/types": "^30.2.0",
-    "@types/jest": "^30.0.0",
     "husky": "^9.1.7",
-    "jest": "^30.2.0",
-    "ts-jest": "^29.4.6"
+    "ts-jest": "^29.4.1"
   }
 }
