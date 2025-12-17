@@ -6722,6 +6722,284 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ModelTokens": {
+				"properties": {
+					"model": {
+						"type": "string"
+					},
+					"totalTokens": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"model",
+					"totalTokens"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ModelUsageTimeSeriesDataPoint": {
+				"properties": {
+					"time": {
+						"type": "string"
+					},
+					"models": {
+						"items": {
+							"$ref": "#/components/schemas/ModelTokens"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"time",
+					"models"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ModelUsageLeaderboardEntry": {
+				"properties": {
+					"rank": {
+						"type": "number",
+						"format": "double"
+					},
+					"model": {
+						"type": "string"
+					},
+					"provider": {
+						"type": "string"
+					},
+					"author": {
+						"type": "string"
+					},
+					"totalTokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"previousPeriodTokens": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"percentChange": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"rankChange": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					}
+				},
+				"required": [
+					"rank",
+					"model",
+					"provider",
+					"author",
+					"totalTokens",
+					"previousPeriodTokens",
+					"percentChange",
+					"rankChange"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ModelUsageResponse": {
+				"properties": {
+					"timeSeries": {
+						"items": {
+							"$ref": "#/components/schemas/ModelUsageTimeSeriesDataPoint"
+						},
+						"type": "array"
+					},
+					"leaderboard": {
+						"items": {
+							"$ref": "#/components/schemas/ModelUsageLeaderboardEntry"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"timeSeries",
+					"leaderboard"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_ModelUsageResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/ModelUsageResponse"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ModelUsageResponse.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ModelUsageResponse_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"StatsTimeFrame": {
+				"type": "string",
+				"enum": [
+					"24h",
+					"7d",
+					"30d",
+					"3m",
+					"1y"
+				]
+			},
+			"AuthorTokens": {
+				"properties": {
+					"author": {
+						"type": "string"
+					},
+					"totalTokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"percentage": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"author",
+					"totalTokens",
+					"percentage"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"MarketShareTimeSeriesDataPoint": {
+				"properties": {
+					"time": {
+						"type": "string"
+					},
+					"authors": {
+						"items": {
+							"$ref": "#/components/schemas/AuthorTokens"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"time",
+					"authors"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"MarketShareLeaderboardEntry": {
+				"properties": {
+					"rank": {
+						"type": "number",
+						"format": "double"
+					},
+					"author": {
+						"type": "string"
+					},
+					"totalTokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"marketShare": {
+						"type": "number",
+						"format": "double"
+					},
+					"rankChange": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"marketShareChange": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					}
+				},
+				"required": [
+					"rank",
+					"author",
+					"totalTokens",
+					"marketShare",
+					"rankChange",
+					"marketShareChange"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"MarketShareResponse": {
+				"properties": {
+					"timeSeries": {
+						"items": {
+							"$ref": "#/components/schemas/MarketShareTimeSeriesDataPoint"
+						},
+						"type": "array"
+					},
+					"leaderboard": {
+						"items": {
+							"$ref": "#/components/schemas/MarketShareLeaderboardEntry"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"timeSeries",
+					"leaderboard"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_MarketShareResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/MarketShareResponse"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_MarketShareResponse.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_MarketShareResponse_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"SessionResult": {
 				"properties": {
 					"created_at": {
@@ -19146,6 +19424,72 @@
 						}
 					}
 				}
+			}
+		},
+		"/v1/public/stats/model-usage": {
+			"get": {
+				"operationId": "GetModelUsage",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ModelUsageResponse.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get model usage statistics for the AI Gateway.\nReturns time series data and a leaderboard of top models by total tokens.",
+				"tags": [
+					"Stats"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "Time range: \"24h\", \"7d\", \"30d\", \"3m\", or \"1y\"",
+						"in": "query",
+						"name": "timeframe",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/StatsTimeFrame"
+						}
+					}
+				]
+			}
+		},
+		"/v1/public/stats/market-share": {
+			"get": {
+				"operationId": "GetMarketShare",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_MarketShareResponse.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get market share statistics by model author for the AI Gateway.\nReturns time series data (100% stacked) and a leaderboard of top 9 authors + others.",
+				"tags": [
+					"Stats"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "Time range: \"24h\", \"7d\", \"30d\", \"3m\", or \"1y\"",
+						"in": "query",
+						"name": "timeframe",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/StatsTimeFrame"
+						}
+					}
+				]
 			}
 		},
 		"/v1/session/query": {
