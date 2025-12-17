@@ -3,6 +3,8 @@ import { HeliconeChatCreateParams } from "../../../prompts/types";
 // === REQUEST TYPES ===
 export type GeminiPart = {
   text?: string;
+  thought?: boolean;
+  thoughtSignature?: string;
   inlineData?: {
     mimeType?: string;
     data: string;
@@ -39,6 +41,11 @@ export type GeminiThinkingConfig = {
   thinkingBudget?: number;
 };
 
+export type GeminiImageConfig = {
+  aspectRatio: string; // e.g "16:9"
+  imageSize: string; // e.g "2K"
+}
+
 export type GeminiGenerationConfig = {
   temperature?: number;
   topP?: number;
@@ -49,6 +56,7 @@ export type GeminiGenerationConfig = {
   presencePenalty?: number;
   frequencyPenalty?: number;
   thinkingConfig?: GeminiThinkingConfig;
+  imageConfig?: GeminiImageConfig;
 };
 
 export type GeminiToolConfig = {
@@ -69,11 +77,6 @@ export interface GeminiGenerateContentRequest {
 export type ChatCompletionMessage =
   NonNullable<HeliconeChatCreateParams["messages"]>[number];
 
-export type ExtendedHeliconeChatCreateParams = HeliconeChatCreateParams & {
-  max_output_tokens?: number | null;
-  top_k?: number | null;
-};
-
 /**
  * Extended reasoning options for Google-specific thinking configuration.
  */
@@ -92,7 +95,12 @@ export interface GoogleFunctionCall {
 export interface GoogleContentPart {
   text?: string;
   thought?: boolean;
+  thoughtSignature?: string;
   functionCall?: GoogleFunctionCall;
+  inlineData?: {
+    mimeType?: string;
+    data: string;
+  };
 }
 
 export interface GoogleContent {

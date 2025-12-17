@@ -12,9 +12,6 @@ export const endpoints = {
         threshold: 0,
         input: 0.000001,
         output: 0.000003,
-        request: 0.0,
-        audio: 0.0,
-        web_search: 0.0,
         cacheMultipliers: {
           cachedInput: 0.5,
         },

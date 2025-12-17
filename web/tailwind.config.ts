@@ -283,9 +283,6 @@ export default {
   ],
   plugins: [
     require("tailwind-scrollbar"),
-    require("@assistant-ui/react/tailwindcss")({
-      components: ["default-theme"],
-    }),
     require("tailwindcss-animate"),
     require("@tailwindcss/typography"),
     plugin(function ({ addVariant }) {
