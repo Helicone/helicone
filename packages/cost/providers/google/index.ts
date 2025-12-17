@@ -219,6 +219,17 @@ export const costs: ModelRow[] = [
       prompt_cache_read_token: 0.0000002,
     },
   },
+  {
+    model: {
+      operator: "includes",
+      value: "gemini-3-flash-preview",
+    },
+    cost: {
+      prompt_token: 0.0000005,
+      completion_token: 0.000003,
+      prompt_cache_read_token: 0.00000005,
+    },
+  },
 ];
 
 export const modelDetails: ModelDetailsMap = {
