@@ -9,49 +9,6 @@ interface JsonObject { [key: string]: JsonValue; }
 
 
 export interface paths {
-  "/v1/webhooks": {
-    get: operations["GetWebhooks"];
-    post: operations["NewWebhook"];
-  };
-  "/v1/webhooks/{webhookId}": {
-    delete: operations["DeleteWebhook"];
-  };
-  "/v1/webhooks/{webhookId}/test": {
-    post: operations["TestWebhook"];
-  };
-  "/v1/public/waitlist/feature": {
-    post: operations["AddToWaitlist"];
-  };
-  "/v1/public/waitlist/feature/status": {
-    get: operations["IsOnWaitlist"];
-  };
-  "/v1/public/waitlist/feature/count": {
-    get: operations["GetWaitlistCount"];
-  };
-  "/v1/public/waitlist/feature/share": {
-    post: operations["TrackShare"];
-  };
-  "/v1/vault/add": {
-    post: operations["AddKey"];
-  };
-  "/v1/vault/keys": {
-    get: operations["GetKeys"];
-  };
-  "/v1/vault/key/{providerKeyId}": {
-    get: operations["GetKeyById"];
-  };
-  "/v1/vault/update/{id}": {
-    patch: operations["UpdateKey"];
-  };
-  "/v1/user/metrics-overview/query": {
-    post: operations["GetUserMetricsOverview"];
-  };
-  "/v1/user/metrics/query": {
-    post: operations["GetUserMetrics"];
-  };
-  "/v1/user/query": {
-    post: operations["GetUsers"];
-  };
   "/v1/api-keys/provider-key/{providerKeyId}": {
     get: operations["GetProviderKey"];
     delete: operations["DeleteProviderKey"];
@@ -160,33 +117,6 @@ export interface paths {
   };
   "/v1/prompt-2025/query/total-versions": {
     post: operations["GetPrompt2025TotalVersions"];
-  };
-  "/v1/request/count/query": {
-    post: operations["GetRequestCount"];
-  };
-  "/v1/request/query": {
-    post: operations["GetRequests"];
-  };
-  "/v1/request/query-clickhouse": {
-    post: operations["GetRequestsClickhouse"];
-  };
-  "/v1/request/{requestId}": {
-    get: operations["GetRequestById"];
-  };
-  "/v1/request/query-ids": {
-    post: operations["GetRequestsByIds"];
-  };
-  "/v1/request/{requestId}/feedback": {
-    post: operations["FeedbackRequest"];
-  };
-  "/v1/request/{requestId}/property": {
-    put: operations["PutProperty"];
-  };
-  "/v1/request/{requestId}/assets/{assetId}": {
-    post: operations["GetRequestAssetById"];
-  };
-  "/v1/request/{requestId}/score": {
-    post: operations["AddScores"];
   };
   "/v1/prompt/has-prompts": {
     get: operations["HasPrompts"];
@@ -393,6 +323,82 @@ export interface paths {
   };
   "/v1/integration/{integrationId}/stripe/test-meter-event": {
     post: operations["TestStripeMeterEvent"];
+  };
+  "/v1/request/count/query": {
+    post: operations["GetRequestCount"];
+  };
+  "/v1/request/query": {
+    post: operations["GetRequests"];
+  };
+  "/v1/request/query-clickhouse": {
+    post: operations["GetRequestsClickhouse"];
+  };
+  "/v1/request/{requestId}": {
+    get: operations["GetRequestById"];
+  };
+  "/v1/request/query-ids": {
+    post: operations["GetRequestsByIds"];
+  };
+  "/v1/request/{requestId}/feedback": {
+    post: operations["FeedbackRequest"];
+  };
+  "/v1/request/{requestId}/property": {
+    put: operations["PutProperty"];
+  };
+  "/v1/request/{requestId}/assets/{assetId}": {
+    post: operations["GetRequestAssetById"];
+  };
+  "/v1/request/{requestId}/score": {
+    post: operations["AddScores"];
+  };
+  "/v1/wrapped/2025": {
+    get: operations["GetWrapped2025Stats"];
+  };
+  "/v1/wrapped/2025/check": {
+    get: operations["CheckHasWrapped2025Data"];
+  };
+  "/v1/webhooks": {
+    get: operations["GetWebhooks"];
+    post: operations["NewWebhook"];
+  };
+  "/v1/webhooks/{webhookId}": {
+    delete: operations["DeleteWebhook"];
+  };
+  "/v1/webhooks/{webhookId}/test": {
+    post: operations["TestWebhook"];
+  };
+  "/v1/public/waitlist/feature": {
+    post: operations["AddToWaitlist"];
+  };
+  "/v1/public/waitlist/feature/status": {
+    get: operations["IsOnWaitlist"];
+  };
+  "/v1/public/waitlist/feature/count": {
+    get: operations["GetWaitlistCount"];
+  };
+  "/v1/public/waitlist/feature/share": {
+    post: operations["TrackShare"];
+  };
+  "/v1/vault/add": {
+    post: operations["AddKey"];
+  };
+  "/v1/vault/keys": {
+    get: operations["GetKeys"];
+  };
+  "/v1/vault/key/{providerKeyId}": {
+    get: operations["GetKeyById"];
+  };
+  "/v1/vault/update/{id}": {
+    patch: operations["UpdateKey"];
+  };
+  "/v1/user/metrics-overview/query": {
+    post: operations["GetUserMetricsOverview"];
+  };
+  "/v1/user/metrics/query": {
+    post: operations["GetUserMetrics"];
+  };
+  "/v1/user/query": {
+    post: operations["GetUsers"];
   };
   "/v1/trace/custom/v1/log": {
     post: operations["LogCustomTraceLegacy"];
@@ -736,357 +742,6 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
-    ResultSuccess_unknown_: {
-      data: unknown;
-      /** @enum {number|null} */
-      error: null;
-    };
-    ResultError_unknown_: {
-      /** @enum {number|null} */
-      data: null;
-      error: unknown;
-    };
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.any_": {
-      [key: string]: unknown;
-    };
-    WebhookData: {
-      destination: string;
-      config: components["schemas"]["Record_string.any_"];
-      includeData?: boolean;
-    };
-    "ResultSuccess__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array_": {
-      data: {
-          hmac_key: string;
-          config: string;
-          version: string;
-          destination: string;
-          created_at: string;
-          id: string;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    ResultError_string_: {
-      /** @enum {number|null} */
-      data: null;
-      error: string;
-    };
-    "Result__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array.string_": components["schemas"]["ResultSuccess__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_null_: {
-      /** @enum {number|null} */
-      data: null;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__success-boolean--message-string__": {
-      data: {
-        message: string;
-        success: boolean;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__success-boolean--message-string_.string_": components["schemas"]["ResultSuccess__success-boolean--message-string__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array__": {
-      data: {
-        sharedPlatforms?: string[];
-        alreadyOnList?: boolean;
-        /** Format: double */
-        position?: number;
-        success: boolean;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array_.string_": components["schemas"]["ResultSuccess__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__isOnWaitlist-boolean__": {
-      data: {
-        isOnWaitlist: boolean;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__isOnWaitlist-boolean_.string_": components["schemas"]["ResultSuccess__isOnWaitlist-boolean__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__count-number__": {
-      data: {
-        /** Format: double */
-        count: number;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__count-number_.string_": components["schemas"]["ResultSuccess__count-number__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__success-boolean--newPosition_63_-number--message-string__": {
-      data: {
-        message: string;
-        /** Format: double */
-        newPosition?: number;
-        success: boolean;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__success-boolean--newPosition_63_-number--message-string_.string_": components["schemas"]["ResultSuccess__success-boolean--newPosition_63_-number--message-string__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__id-string__": {
-      data: {
-        id: string;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__id-string_.string_": components["schemas"]["ResultSuccess__id-string__"] | components["schemas"]["ResultError_string_"];
-    AddVaultKeyParams: {
-      key: string;
-      provider: string;
-      name?: string;
-    };
-    DecryptedProviderKey: {
-      cuid?: string | null;
-      provider_secret_key: string | null;
-      provider_key_name: string | null;
-      provider_name: string | null;
-      provider_key: string | null;
-      org_id: string | null;
-      id: string | null;
-    };
-    "ResultSuccess_DecryptedProviderKey-Array_": {
-      data: components["schemas"]["DecryptedProviderKey"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_DecryptedProviderKey-Array.string_": components["schemas"]["ResultSuccess_DecryptedProviderKey-Array_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_DecryptedProviderKey_: {
-      data: components["schemas"]["DecryptedProviderKey"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_DecryptedProviderKey.string_": components["schemas"]["ResultSuccess_DecryptedProviderKey_"] | components["schemas"]["ResultError_string_"];
-    HistogramRow: {
-      range_start: string;
-      range_end: string;
-      /** Format: double */
-      value: number;
-    };
-    "ResultSuccess__request_count-HistogramRow-Array--user_cost-HistogramRow-Array__": {
-      data: {
-        user_cost: components["schemas"]["HistogramRow"][];
-        request_count: components["schemas"]["HistogramRow"][];
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__request_count-HistogramRow-Array--user_cost-HistogramRow-Array_.string_": components["schemas"]["ResultSuccess__request_count-HistogramRow-Array--user_cost-HistogramRow-Array__"] | components["schemas"]["ResultError_string_"];
-    /** @description Make all properties in T optional */
-    Partial_TextOperators_: {
-      "not-equals"?: string;
-      equals?: string;
-      like?: string;
-      ilike?: string;
-      contains?: string;
-      "not-contains"?: string;
-    };
-    /** @description Make all properties in T optional */
-    Partial_NumberOperators_: {
-      /** Format: double */
-      "not-equals"?: number;
-      /** Format: double */
-      equals?: number;
-      /** Format: double */
-      gte?: number;
-      /** Format: double */
-      lte?: number;
-      /** Format: double */
-      lt?: number;
-      /** Format: double */
-      gt?: number;
-    };
-    /** @description Make all properties in T optional */
-    Partial_TimestampOperatorsTyped_: {
-      /** Format: date-time */
-      equals?: string;
-      /** Format: date-time */
-      gte?: string;
-      /** Format: date-time */
-      lte?: string;
-      /** Format: date-time */
-      lt?: string;
-      /** Format: date-time */
-      gt?: string;
-    };
-    /** @description Make all properties in T optional */
-    Partial_UserViewToOperators_: {
-      user_user_id?: components["schemas"]["Partial_TextOperators_"];
-      user_active_for?: components["schemas"]["Partial_NumberOperators_"];
-      user_first_active?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
-      user_last_active?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
-      user_total_requests?: components["schemas"]["Partial_NumberOperators_"];
-      user_average_requests_per_day_active?: components["schemas"]["Partial_NumberOperators_"];
-      user_average_tokens_per_request?: components["schemas"]["Partial_NumberOperators_"];
-      user_total_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      user_total_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      user_cost?: components["schemas"]["Partial_NumberOperators_"];
-    };
-    /** @description Make all properties in T optional */
-    Partial_BooleanOperators_: {
-      equals?: boolean;
-    };
-    /** @description Make all properties in T optional */
-    Partial_VectorOperators_: {
-      contains?: string;
-    };
-    /** @description Make all properties in T optional */
-    Partial_RequestResponseRMTToOperators_: {
-      country_code?: components["schemas"]["Partial_TextOperators_"];
-      latency?: components["schemas"]["Partial_NumberOperators_"];
-      cost?: components["schemas"]["Partial_NumberOperators_"];
-      provider?: components["schemas"]["Partial_TextOperators_"];
-      time_to_first_token?: components["schemas"]["Partial_NumberOperators_"];
-      status?: components["schemas"]["Partial_NumberOperators_"];
-      request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
-      response_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
-      model?: components["schemas"]["Partial_TextOperators_"];
-      user_id?: components["schemas"]["Partial_TextOperators_"];
-      organization_id?: components["schemas"]["Partial_TextOperators_"];
-      node_id?: components["schemas"]["Partial_TextOperators_"];
-      job_id?: components["schemas"]["Partial_TextOperators_"];
-      threat?: components["schemas"]["Partial_BooleanOperators_"];
-      request_id?: components["schemas"]["Partial_TextOperators_"];
-      prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      prompt_cache_read_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      prompt_cache_write_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      total_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      target_url?: components["schemas"]["Partial_TextOperators_"];
-      property_key?: {
-        equals: string;
-      };
-      properties?: {
-        [key: string]: components["schemas"]["Partial_TextOperators_"];
-      };
-      search_properties?: {
-        [key: string]: components["schemas"]["Partial_TextOperators_"];
-      };
-      scores?: {
-        [key: string]: components["schemas"]["Partial_TextOperators_"];
-      };
-      scores_column?: components["schemas"]["Partial_TextOperators_"];
-      request_body?: components["schemas"]["Partial_VectorOperators_"];
-      response_body?: components["schemas"]["Partial_VectorOperators_"];
-      cache_enabled?: components["schemas"]["Partial_BooleanOperators_"];
-      cache_reference_id?: components["schemas"]["Partial_TextOperators_"];
-      cached?: components["schemas"]["Partial_BooleanOperators_"];
-      assets?: components["schemas"]["Partial_TextOperators_"];
-      "helicone-score-feedback"?: components["schemas"]["Partial_BooleanOperators_"];
-      prompt_id?: components["schemas"]["Partial_TextOperators_"];
-      prompt_version?: components["schemas"]["Partial_TextOperators_"];
-      request_referrer?: components["schemas"]["Partial_TextOperators_"];
-      is_passthrough_billing?: components["schemas"]["Partial_BooleanOperators_"];
-    };
-    /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.users_view-or-request_response_rmt_": {
-      users_view?: components["schemas"]["Partial_UserViewToOperators_"];
-      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
-    };
-    "FilterLeafSubset_users_view-or-request_response_rmt_": components["schemas"]["Pick_FilterLeaf.users_view-or-request_response_rmt_"];
-    UserFilterNode: components["schemas"]["FilterLeafSubset_users_view-or-request_response_rmt_"] | components["schemas"]["UserFilterBranch"] | "all";
-    UserFilterBranch: {
-      right: components["schemas"]["UserFilterNode"];
-      /** @enum {string} */
-      operator: "or" | "and";
-      left: components["schemas"]["UserFilterNode"];
-    };
-    /** @enum {string} */
-    PSize: "p50" | "p75" | "p95" | "p99" | "p99.9";
-    UserMetricsResult: {
-      id: string;
-      user_id: string;
-      /** Format: double */
-      active_for: number;
-      first_active: string;
-      last_active: string;
-      /** Format: double */
-      total_requests: number;
-      /** Format: double */
-      average_requests_per_day_active: number;
-      /** Format: double */
-      average_tokens_per_request: number;
-      /** Format: double */
-      total_completion_tokens: number;
-      /** Format: double */
-      total_prompt_tokens: number;
-      /** Format: double */
-      cost: number;
-    };
-    "ResultSuccess__users-UserMetricsResult-Array--count-number--hasUsers-boolean__": {
-      data: {
-        hasUsers: boolean;
-        /** Format: double */
-        count: number;
-        users: components["schemas"]["UserMetricsResult"][];
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__users-UserMetricsResult-Array--count-number--hasUsers-boolean_.string_": components["schemas"]["ResultSuccess__users-UserMetricsResult-Array--count-number--hasUsers-boolean__"] | components["schemas"]["ResultError_string_"];
-    /** @enum {string} */
-    SortDirection: "asc" | "desc";
-    SortLeafUsers: {
-      id?: components["schemas"]["SortDirection"];
-      user_id?: components["schemas"]["SortDirection"];
-      active_for?: components["schemas"]["SortDirection"];
-      first_active?: components["schemas"]["SortDirection"];
-      last_active?: components["schemas"]["SortDirection"];
-      total_requests?: components["schemas"]["SortDirection"];
-      average_requests_per_day_active?: components["schemas"]["SortDirection"];
-      average_tokens_per_request?: components["schemas"]["SortDirection"];
-      total_prompt_tokens?: components["schemas"]["SortDirection"];
-      total_completion_tokens?: components["schemas"]["SortDirection"];
-      cost?: components["schemas"]["SortDirection"];
-      rate_limited_count?: components["schemas"]["SortDirection"];
-    };
-    UserMetricsQueryParams: {
-      filter: components["schemas"]["UserFilterNode"];
-      /** Format: double */
-      offset: number;
-      /** Format: double */
-      limit: number;
-      timeFilter?: {
-        /** Format: double */
-        endTimeUnixSeconds: number;
-        /** Format: double */
-        startTimeUnixSeconds: number;
-      };
-      /** Format: double */
-      timeZoneDifferenceMinutes?: number;
-      sort?: components["schemas"]["SortLeafUsers"];
-    };
-    "ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array_": {
-      data: {
-          /** Format: double */
-          cost: number;
-          user_id: string;
-          /** Format: double */
-          completion_tokens: number;
-          /** Format: double */
-          prompt_tokens: number;
-          /** Format: double */
-          count: number;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array.string_": components["schemas"]["ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array_"] | components["schemas"]["ResultError_string_"];
-    UserQueryParams: {
-      userIds?: string[];
-      timeFilter?: {
-        /** Format: double */
-        endTimeUnixSeconds: number;
-        /** Format: double */
-        startTimeUnixSeconds: number;
-      };
-    };
     /** @description Construct a type with a set of properties K of type T */
     "Record_string.string_": {
       [key: string]: string;
@@ -1098,6 +753,19 @@ export interface components {
       providerSecretKey?: string;
       providerKey: string;
       providerName: string;
+    };
+    DecryptedProviderKey: {
+      cuid?: string | null;
+      provider_secret_key: string | null;
+      provider_key_name: string | null;
+      provider_name: string | null;
+      provider_key: string | null;
+      org_id: string | null;
+      id: string | null;
+    };
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.any_": {
+      [key: string]: unknown;
     };
     ProviderKeyRow: {
       id: string;
@@ -1116,6 +784,11 @@ export interface components {
       };
       /** @enum {number|null} */
       error: null;
+    };
+    ResultError_string_: {
+      /** @enum {number|null} */
+      data: null;
+      error: string;
     };
     "Result__id-string--providerName-string_.string_": components["schemas"]["ResultSuccess__id-string--providerName-string__"] | components["schemas"]["ResultError_string_"];
     UpdateProviderKeyRequest: {
@@ -1180,6 +853,13 @@ export interface components {
       name?: string;
       last_mile_config?: unknown;
     };
+    ResultSuccess_null_: {
+      /** @enum {number|null} */
+      data: null;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
     EvaluatorExperiment: {
       experiment_name: string;
       experiment_created_at: string;
@@ -1434,6 +1114,14 @@ export interface components {
       };
       functions?: unknown[];
     };
+    "ResultSuccess__id-string__": {
+      data: {
+        id: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__id-string_.string_": components["schemas"]["ResultSuccess__id-string__"] | components["schemas"]["ResultError_string_"];
     ResultSuccess_number_: {
       /** Format: double */
       data: number;
@@ -1484,6 +1172,498 @@ export interface components {
       error: null;
     };
     "Result_PromptVersionCounts.string_": components["schemas"]["ResultSuccess_PromptVersionCounts_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__hasPrompts-boolean__": {
+      data: {
+        hasPrompts: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__hasPrompts-boolean_.string_": components["schemas"]["ResultSuccess__hasPrompts-boolean__"] | components["schemas"]["ResultError_string_"];
+    PromptsResult: {
+      id: string;
+      user_defined_id: string;
+      description: string;
+      pretty_name: string;
+      created_at: string;
+      /** Format: double */
+      major_version: number;
+      metadata?: components["schemas"]["Record_string.any_"];
+    };
+    "ResultSuccess_PromptsResult-Array_": {
+      data: components["schemas"]["PromptsResult"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptsResult-Array.string_": components["schemas"]["ResultSuccess_PromptsResult-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description Make all properties in T optional */
+    Partial_TextOperators_: {
+      "not-equals"?: string;
+      equals?: string;
+      like?: string;
+      ilike?: string;
+      contains?: string;
+      "not-contains"?: string;
+    };
+    /** @description Make all properties in T optional */
+    Partial_PromptToOperators_: {
+      id?: components["schemas"]["Partial_TextOperators_"];
+      user_defined_id?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_FilterLeaf.prompt_v2_": {
+      prompt_v2?: components["schemas"]["Partial_PromptToOperators_"];
+    };
+    FilterLeafSubset_prompt_v2_: components["schemas"]["Pick_FilterLeaf.prompt_v2_"];
+    PromptsFilterNode: components["schemas"]["FilterLeafSubset_prompt_v2_"] | components["schemas"]["PromptsFilterBranch"] | "all";
+    PromptsFilterBranch: {
+      right: components["schemas"]["PromptsFilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      left: components["schemas"]["PromptsFilterNode"];
+    };
+    PromptsQueryParams: {
+      filter: components["schemas"]["PromptsFilterNode"];
+    };
+    PromptResult: {
+      id: string;
+      user_defined_id: string;
+      description: string;
+      pretty_name: string;
+      /** Format: double */
+      major_version: number;
+      latest_version_id: string;
+      latest_model_used: string;
+      created_at: string;
+      last_used: string;
+      versions: string[];
+      metadata?: components["schemas"]["Record_string.any_"];
+    };
+    ResultSuccess_PromptResult_: {
+      data: components["schemas"]["PromptResult"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptResult.string_": components["schemas"]["ResultSuccess_PromptResult_"] | components["schemas"]["ResultError_string_"];
+    PromptQueryParams: {
+      timeFilter: {
+        end: string;
+        start: string;
+      };
+    };
+    CreatePromptResponse: {
+      id: string;
+      prompt_version_id: string;
+    };
+    ResultSuccess_CreatePromptResponse_: {
+      data: components["schemas"]["CreatePromptResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_CreatePromptResponse.string_": components["schemas"]["ResultSuccess_CreatePromptResponse_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__metadata-Record_string.any___": {
+      data: {
+        metadata: components["schemas"]["Record_string.any_"];
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__metadata-Record_string.any__.string_": components["schemas"]["ResultSuccess__metadata-Record_string.any___"] | components["schemas"]["ResultError_string_"];
+    PromptEditSubversionLabelParams: {
+      label: string;
+    };
+    PromptEditSubversionTemplateParams: {
+      heliconeTemplate: unknown;
+      experimentId?: string;
+    };
+    PromptVersionResult: {
+      id: string;
+      /** Format: double */
+      minor_version: number;
+      /** Format: double */
+      major_version: number;
+      prompt_v2: string;
+      model: string;
+      helicone_template: string;
+      created_at: string;
+      metadata: components["schemas"]["Record_string.any_"];
+      parent_prompt_version?: string | null;
+      experiment_id?: string | null;
+      updated_at?: string;
+    };
+    ResultSuccess_PromptVersionResult_: {
+      data: components["schemas"]["PromptVersionResult"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptVersionResult.string_": components["schemas"]["ResultSuccess_PromptVersionResult_"] | components["schemas"]["ResultError_string_"];
+    PromptCreateSubversionParams: {
+      newHeliconeTemplate: unknown;
+      isMajorVersion?: boolean;
+      metadata?: components["schemas"]["Record_string.any_"];
+      experimentId?: string;
+      bumpForMajorPromptVersionId?: string;
+    };
+    PromptInputRecord: {
+      id: string;
+      inputs: components["schemas"]["Record_string.string_"];
+      dataset_row_id?: string;
+      source_request: string;
+      prompt_version: string;
+      created_at: string;
+      response_body?: string;
+      request_body?: string;
+      auto_prompt_inputs: unknown[];
+    };
+    "ResultSuccess_PromptInputRecord-Array_": {
+      data: components["schemas"]["PromptInputRecord"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptInputRecord-Array.string_": components["schemas"]["ResultSuccess_PromptInputRecord-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array_": {
+      data: {
+          meta: components["schemas"]["Record_string.any_"];
+          dataset: string;
+          /** Format: double */
+          num_hypotheses: number;
+          created_at: string;
+          id: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array.string_": components["schemas"]["ResultSuccess__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_PromptVersionResult-Array_": {
+      data: components["schemas"]["PromptVersionResult"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptVersionResult-Array.string_": components["schemas"]["ResultSuccess_PromptVersionResult-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description Make all properties in T optional */
+    Partial_NumberOperators_: {
+      /** Format: double */
+      "not-equals"?: number;
+      /** Format: double */
+      equals?: number;
+      /** Format: double */
+      gte?: number;
+      /** Format: double */
+      lte?: number;
+      /** Format: double */
+      lt?: number;
+      /** Format: double */
+      gt?: number;
+    };
+    /** @description Make all properties in T optional */
+    Partial_PromptVersionsToOperators_: {
+      minor_version?: components["schemas"]["Partial_NumberOperators_"];
+      major_version?: components["schemas"]["Partial_NumberOperators_"];
+      id?: components["schemas"]["Partial_TextOperators_"];
+      prompt_v2?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_FilterLeaf.prompts_versions_": {
+      prompts_versions?: components["schemas"]["Partial_PromptVersionsToOperators_"];
+    };
+    FilterLeafSubset_prompts_versions_: components["schemas"]["Pick_FilterLeaf.prompts_versions_"];
+    PromptVersionsFilterNode: components["schemas"]["FilterLeafSubset_prompts_versions_"] | components["schemas"]["PromptVersionsFilterBranch"] | "all";
+    PromptVersionsFilterBranch: {
+      right: components["schemas"]["PromptVersionsFilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      left: components["schemas"]["PromptVersionsFilterNode"];
+    };
+    PromptVersionsQueryParams: {
+      filter?: components["schemas"]["PromptVersionsFilterNode"];
+      includeExperimentVersions?: boolean;
+    };
+    PromptVersionResultCompiled: {
+      id: string;
+      /** Format: double */
+      minor_version: number;
+      /** Format: double */
+      major_version: number;
+      prompt_v2: string;
+      model: string;
+      prompt_compiled: unknown;
+    };
+    ResultSuccess_PromptVersionResultCompiled_: {
+      data: components["schemas"]["PromptVersionResultCompiled"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptVersionResultCompiled.string_": components["schemas"]["ResultSuccess_PromptVersionResultCompiled_"] | components["schemas"]["ResultError_string_"];
+    PromptVersiosQueryParamsCompiled: {
+      filter?: components["schemas"]["PromptVersionsFilterNode"];
+      includeExperimentVersions?: boolean;
+      inputs: components["schemas"]["Record_string.string_"];
+    };
+    PromptVersionResultFilled: {
+      id: string;
+      /** Format: double */
+      minor_version: number;
+      /** Format: double */
+      major_version: number;
+      prompt_v2: string;
+      model: string;
+      filled_helicone_template: unknown;
+    };
+    ResultSuccess_PromptVersionResultFilled_: {
+      data: components["schemas"]["PromptVersionResultFilled"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptVersionResultFilled.string_": components["schemas"]["ResultSuccess_PromptVersionResultFilled_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__experimentId-string__": {
+      data: {
+        experimentId: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__experimentId-string_.string_": components["schemas"]["ResultSuccess__experimentId-string__"] | components["schemas"]["ResultError_string_"];
+    ExperimentV2: {
+      id: string;
+      name: string;
+      original_prompt_version: string;
+      copied_original_prompt_version: string | null;
+      input_keys: string[] | null;
+      created_at: string;
+    };
+    "ResultSuccess_ExperimentV2-Array_": {
+      data: components["schemas"]["ExperimentV2"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ExperimentV2-Array.string_": components["schemas"]["ResultSuccess_ExperimentV2-Array_"] | components["schemas"]["ResultError_string_"];
+    ExperimentV2Output: {
+      id: string;
+      request_id: string;
+      is_original: boolean;
+      prompt_version_id: string;
+      created_at: string;
+      input_record_id: string;
+    };
+    ExperimentV2Row: {
+      id: string;
+      inputs: components["schemas"]["Record_string.string_"];
+      prompt_version: string;
+      requests: components["schemas"]["ExperimentV2Output"][];
+      auto_prompt_inputs: unknown[];
+    };
+    ExtendedExperimentData: {
+      id: string;
+      name: string;
+      original_prompt_version: string;
+      copied_original_prompt_version: string | null;
+      input_keys: string[] | null;
+      created_at: string;
+      rows: components["schemas"]["ExperimentV2Row"][];
+    };
+    ResultSuccess_ExtendedExperimentData_: {
+      data: components["schemas"]["ExtendedExperimentData"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ExtendedExperimentData.string_": components["schemas"]["ResultSuccess_ExtendedExperimentData_"] | components["schemas"]["ResultError_string_"];
+    CreateNewPromptVersionForExperimentParams: {
+      newHeliconeTemplate: unknown;
+      isMajorVersion?: boolean;
+      metadata?: components["schemas"]["Record_string.any_"];
+      experimentId?: string;
+      bumpForMajorPromptVersionId?: string;
+      parentPromptVersionId: string;
+    };
+Json: JsonObject;
+    ExperimentV2PromptVersion: {
+      created_at: string | null;
+      experiment_id: string | null;
+      helicone_template: components["schemas"]["Json"] | null;
+      id: string;
+      /** Format: double */
+      major_version: number;
+      metadata: components["schemas"]["Json"] | null;
+      /** Format: double */
+      minor_version: number;
+      model: string | null;
+      organization: string;
+      prompt_v2: string;
+      soft_delete: boolean | null;
+    };
+    "ResultSuccess_ExperimentV2PromptVersion-Array_": {
+      data: components["schemas"]["ExperimentV2PromptVersion"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ExperimentV2PromptVersion-Array.string_": components["schemas"]["ResultSuccess_ExperimentV2PromptVersion-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_string_: {
+      data: string;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_string.string_": components["schemas"]["ResultSuccess_string_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_boolean_: {
+      data: boolean;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_boolean.string_": components["schemas"]["ResultSuccess_boolean_"] | components["schemas"]["ResultError_string_"];
+    ScoreV2: {
+      valueType: string;
+      value: number | string;
+      /** Format: double */
+      max: number;
+      /** Format: double */
+      min: number;
+    };
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.ScoreV2_": {
+      [key: string]: components["schemas"]["ScoreV2"];
+    };
+    "ResultSuccess_Record_string.ScoreV2__": {
+      data: components["schemas"]["Record_string.ScoreV2_"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Record_string.ScoreV2_.string_": components["schemas"]["ResultSuccess_Record_string.ScoreV2__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_ScoreV2-or-null_": {
+      data: components["schemas"]["ScoreV2"] | null;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ScoreV2-or-null.string_": components["schemas"]["ResultSuccess_ScoreV2-or-null_"] | components["schemas"]["ResultError_string_"];
+    CreateCloudGatewayCheckoutSessionRequest: {
+      /** Format: double */
+      amount: number;
+      returnUrl?: string;
+    };
+    UpgradeToProRequest: {
+      addons?: {
+        evals?: boolean;
+        experiments?: boolean;
+        prompts?: boolean;
+        alerts?: boolean;
+      };
+      /** Format: double */
+      seats?: number;
+      /** @enum {string} */
+      ui_mode?: "embedded" | "hosted";
+    };
+    UpgradeToTeamBundleRequest: {
+      /** @enum {string} */
+      ui_mode?: "embedded" | "hosted";
+    };
+    LLMUsage: {
+      model: string;
+      provider: string;
+      /** Format: double */
+      prompt_tokens: number;
+      /** Format: double */
+      completion_tokens: number;
+      /** Format: double */
+      total_count: number;
+      /** Format: double */
+      amount: number;
+      description: string;
+      totalCost: {
+        /** Format: double */
+        prompt_token: number;
+        /** Format: double */
+        completion_token: number;
+      };
+    };
+    PaymentIntentRecord: {
+      id: string;
+      /** Format: double */
+      amount: number;
+      /** Format: double */
+      created: number;
+      status: string;
+      isRefunded?: boolean;
+      /** Format: double */
+      refundedAmount?: number;
+      refundIds?: string[];
+    };
+    StripePaymentIntentsResponse: {
+      data: components["schemas"]["PaymentIntentRecord"][];
+      has_more: boolean;
+      next_page: string | null;
+      /** Format: double */
+      count: number;
+    };
+    AutoTopoffSettings: {
+      enabled: boolean;
+      /** Format: double */
+      thresholdCents: number;
+      /** Format: double */
+      topoffAmountCents: number;
+      stripePaymentMethodId: string | null;
+      lastTopoffAt: string | null;
+      /** Format: double */
+      consecutiveFailures: number;
+    };
+    UpdateAutoTopoffSettingsRequest: {
+      enabled: boolean;
+      /** Format: double */
+      thresholdCents: number;
+      /** Format: double */
+      topoffAmountCents: number;
+      stripePaymentMethodId: string;
+    };
+    PaymentMethod: {
+      id: string;
+      brand: string;
+      last4: string;
+      /** Format: double */
+      exp_month: number;
+      /** Format: double */
+      exp_year: number;
+    };
+    CreateSetupSessionRequest: {
+      returnUrl?: string;
+    };
+    IntegrationCreateParams: {
+      integration_name: string;
+      settings?: components["schemas"]["Json"];
+      active?: boolean;
+    };
+    Integration: {
+      integration_name?: string;
+      settings?: components["schemas"]["Json"];
+      active?: boolean;
+      id: string;
+    };
+    ResultSuccess_Array_Integration__: {
+      data: components["schemas"]["Integration"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Array_Integration_.string_": components["schemas"]["ResultSuccess_Array_Integration__"] | components["schemas"]["ResultError_string_"];
+    IntegrationUpdateParams: {
+      integration_name?: string;
+      settings?: components["schemas"]["Json"];
+      active?: boolean;
+    };
+    ResultSuccess_Integration_: {
+      data: components["schemas"]["Integration"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Integration.string_": components["schemas"]["ResultSuccess_Integration_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_Array__id-string--name-string___": {
+      data: {
+          name: string;
+          id: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Array__id-string--name-string__.string_": components["schemas"]["ResultSuccess_Array__id-string--name-string___"] | components["schemas"]["ResultError_string_"];
+    TestStripeMeterEventRequest: {
+      event_name: string;
+      customer_id: string;
+    };
     /** @description Make all properties in T optional */
     Partial_ResponseTableToOperators_: {
       body_tokens?: components["schemas"]["Partial_NumberOperators_"];
@@ -1516,11 +1696,80 @@ export interface components {
       prompt_id?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
+    Partial_BooleanOperators_: {
+      equals?: boolean;
+    };
+    /** @description Make all properties in T optional */
     Partial_FeedbackTableToOperators_: {
       id?: components["schemas"]["Partial_NumberOperators_"];
       created_at?: components["schemas"]["Partial_TimestampOperators_"];
       rating?: components["schemas"]["Partial_BooleanOperators_"];
       response_id?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_TimestampOperatorsTyped_: {
+      /** Format: date-time */
+      equals?: string;
+      /** Format: date-time */
+      gte?: string;
+      /** Format: date-time */
+      lte?: string;
+      /** Format: date-time */
+      lt?: string;
+      /** Format: date-time */
+      gt?: string;
+    };
+    /** @description Make all properties in T optional */
+    Partial_VectorOperators_: {
+      contains?: string;
+    };
+    /** @description Make all properties in T optional */
+    Partial_RequestResponseRMTToOperators_: {
+      country_code?: components["schemas"]["Partial_TextOperators_"];
+      latency?: components["schemas"]["Partial_NumberOperators_"];
+      cost?: components["schemas"]["Partial_NumberOperators_"];
+      provider?: components["schemas"]["Partial_TextOperators_"];
+      time_to_first_token?: components["schemas"]["Partial_NumberOperators_"];
+      status?: components["schemas"]["Partial_NumberOperators_"];
+      request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      response_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      model?: components["schemas"]["Partial_TextOperators_"];
+      user_id?: components["schemas"]["Partial_TextOperators_"];
+      organization_id?: components["schemas"]["Partial_TextOperators_"];
+      node_id?: components["schemas"]["Partial_TextOperators_"];
+      job_id?: components["schemas"]["Partial_TextOperators_"];
+      threat?: components["schemas"]["Partial_BooleanOperators_"];
+      request_id?: components["schemas"]["Partial_TextOperators_"];
+      prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      prompt_cache_read_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      prompt_cache_write_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      total_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      target_url?: components["schemas"]["Partial_TextOperators_"];
+      property_key?: {
+        equals: string;
+      };
+      properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      search_properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      scores?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      scores_column?: components["schemas"]["Partial_TextOperators_"];
+      request_body?: components["schemas"]["Partial_VectorOperators_"];
+      response_body?: components["schemas"]["Partial_VectorOperators_"];
+      cache_enabled?: components["schemas"]["Partial_BooleanOperators_"];
+      cache_reference_id?: components["schemas"]["Partial_TextOperators_"];
+      cached?: components["schemas"]["Partial_BooleanOperators_"];
+      assets?: components["schemas"]["Partial_TextOperators_"];
+      "helicone-score-feedback"?: components["schemas"]["Partial_BooleanOperators_"];
+      prompt_id?: components["schemas"]["Partial_TextOperators_"];
+      prompt_version?: components["schemas"]["Partial_TextOperators_"];
+      request_referrer?: components["schemas"]["Partial_TextOperators_"];
+      is_passthrough_billing?: components["schemas"]["Partial_BooleanOperators_"];
     };
     /** @description Make all properties in T optional */
     Partial_SessionsRequestResponseRMTToOperators_: {
@@ -1537,15 +1786,15 @@ export interface components {
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
     "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": {
-      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
+      values?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
       response?: components["schemas"]["Partial_ResponseTableToOperators_"];
       request?: components["schemas"]["Partial_RequestTableToOperators_"];
       feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
+      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
       sessions_request_response_rmt?: components["schemas"]["Partial_SessionsRequestResponseRMTToOperators_"];
       properties?: {
-        [key: string]: components["schemas"]["Partial_TextOperators_"];
-      };
-      values?: {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
     };
@@ -1557,6 +1806,8 @@ export interface components {
       operator: "or" | "and";
       left: components["schemas"]["RequestFilterNode"];
     };
+    /** @enum {string} */
+    SortDirection: "asc" | "desc";
     SortLeafRequest: {
       /** @enum {boolean} */
       random?: true;
@@ -1882,473 +2133,292 @@ export interface components {
     ScoreRequest: {
       scores: components["schemas"]["Scores"];
     };
-    "ResultSuccess__hasPrompts-boolean__": {
-      data: {
-        hasPrompts: boolean;
-      };
-      /** @enum {number|null} */
-      error: null;
+    ConversationMessage: {
+      role: string;
+      content: string;
     };
-    "Result__hasPrompts-boolean_.string_": components["schemas"]["ResultSuccess__hasPrompts-boolean__"] | components["schemas"]["ResultError_string_"];
-    PromptsResult: {
-      id: string;
-      user_defined_id: string;
-      description: string;
-      pretty_name: string;
-      created_at: string;
+    MostExpensiveRequest: {
+      requestId: string;
       /** Format: double */
-      major_version: number;
-      metadata?: components["schemas"]["Record_string.any_"];
-    };
-    "ResultSuccess_PromptsResult-Array_": {
-      data: components["schemas"]["PromptsResult"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptsResult-Array.string_": components["schemas"]["ResultSuccess_PromptsResult-Array_"] | components["schemas"]["ResultError_string_"];
-    /** @description Make all properties in T optional */
-    Partial_PromptToOperators_: {
-      id?: components["schemas"]["Partial_TextOperators_"];
-      user_defined_id?: components["schemas"]["Partial_TextOperators_"];
-    };
-    /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.prompt_v2_": {
-      prompt_v2?: components["schemas"]["Partial_PromptToOperators_"];
-    };
-    FilterLeafSubset_prompt_v2_: components["schemas"]["Pick_FilterLeaf.prompt_v2_"];
-    PromptsFilterNode: components["schemas"]["FilterLeafSubset_prompt_v2_"] | components["schemas"]["PromptsFilterBranch"] | "all";
-    PromptsFilterBranch: {
-      right: components["schemas"]["PromptsFilterNode"];
-      /** @enum {string} */
-      operator: "or" | "and";
-      left: components["schemas"]["PromptsFilterNode"];
-    };
-    PromptsQueryParams: {
-      filter: components["schemas"]["PromptsFilterNode"];
-    };
-    PromptResult: {
-      id: string;
-      user_defined_id: string;
-      description: string;
-      pretty_name: string;
-      /** Format: double */
-      major_version: number;
-      latest_version_id: string;
-      latest_model_used: string;
-      created_at: string;
-      last_used: string;
-      versions: string[];
-      metadata?: components["schemas"]["Record_string.any_"];
-    };
-    ResultSuccess_PromptResult_: {
-      data: components["schemas"]["PromptResult"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptResult.string_": components["schemas"]["ResultSuccess_PromptResult_"] | components["schemas"]["ResultError_string_"];
-    PromptQueryParams: {
-      timeFilter: {
-        end: string;
-        start: string;
-      };
-    };
-    CreatePromptResponse: {
-      id: string;
-      prompt_version_id: string;
-    };
-    ResultSuccess_CreatePromptResponse_: {
-      data: components["schemas"]["CreatePromptResponse"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_CreatePromptResponse.string_": components["schemas"]["ResultSuccess_CreatePromptResponse_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__metadata-Record_string.any___": {
-      data: {
-        metadata: components["schemas"]["Record_string.any_"];
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__metadata-Record_string.any__.string_": components["schemas"]["ResultSuccess__metadata-Record_string.any___"] | components["schemas"]["ResultError_string_"];
-    PromptEditSubversionLabelParams: {
-      label: string;
-    };
-    PromptEditSubversionTemplateParams: {
-      heliconeTemplate: unknown;
-      experimentId?: string;
-    };
-    PromptVersionResult: {
-      id: string;
-      /** Format: double */
-      minor_version: number;
-      /** Format: double */
-      major_version: number;
-      prompt_v2: string;
+      cost: number;
       model: string;
-      helicone_template: string;
-      created_at: string;
-      metadata: components["schemas"]["Record_string.any_"];
-      parent_prompt_version?: string | null;
-      experiment_id?: string | null;
-      updated_at?: string;
+      provider: string;
+      createdAt: string;
+      /** Format: double */
+      promptTokens: number;
+      /** Format: double */
+      completionTokens: number;
+      conversation: {
+        /** Format: double */
+        totalWords: number;
+        /** Format: double */
+        turnCount: number;
+        messages: components["schemas"]["ConversationMessage"][];
+      } | null;
     };
-    ResultSuccess_PromptVersionResult_: {
-      data: components["schemas"]["PromptVersionResult"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptVersionResult.string_": components["schemas"]["ResultSuccess_PromptVersionResult_"] | components["schemas"]["ResultError_string_"];
-    PromptCreateSubversionParams: {
-      newHeliconeTemplate: unknown;
-      isMajorVersion?: boolean;
-      metadata?: components["schemas"]["Record_string.any_"];
-      experimentId?: string;
-      bumpForMajorPromptVersionId?: string;
-    };
-    PromptInputRecord: {
-      id: string;
-      inputs: components["schemas"]["Record_string.string_"];
-      dataset_row_id?: string;
-      source_request: string;
-      prompt_version: string;
-      created_at: string;
-      response_body?: string;
-      request_body?: string;
-      auto_prompt_inputs: unknown[];
-    };
-    "ResultSuccess_PromptInputRecord-Array_": {
-      data: components["schemas"]["PromptInputRecord"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptInputRecord-Array.string_": components["schemas"]["ResultSuccess_PromptInputRecord-Array_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array_": {
-      data: {
-          meta: components["schemas"]["Record_string.any_"];
-          dataset: string;
+    WrappedStats: {
+      /** Format: double */
+      totalRequests: number;
+      topProviders: {
           /** Format: double */
-          num_hypotheses: number;
+          count: number;
+          provider: string;
+        }[];
+      topModels: {
+          /** Format: double */
+          count: number;
+          model: string;
+        }[];
+      totalTokens: {
+        /** Format: double */
+        total: number;
+        /** Format: double */
+        cacheRead: number;
+        /** Format: double */
+        cacheWrite: number;
+        /** Format: double */
+        completion: number;
+        /** Format: double */
+        prompt: number;
+      };
+      mostExpensiveRequest: components["schemas"]["MostExpensiveRequest"] | null;
+    };
+    ResultSuccess_WrappedStats_: {
+      data: components["schemas"]["WrappedStats"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_WrappedStats.string_": components["schemas"]["ResultSuccess_WrappedStats_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__hasData-boolean__": {
+      data: {
+        hasData: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__hasData-boolean_.string_": components["schemas"]["ResultSuccess__hasData-boolean__"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_unknown_: {
+      data: unknown;
+      /** @enum {number|null} */
+      error: null;
+    };
+    ResultError_unknown_: {
+      /** @enum {number|null} */
+      data: null;
+      error: unknown;
+    };
+    WebhookData: {
+      destination: string;
+      config: components["schemas"]["Record_string.any_"];
+      includeData?: boolean;
+    };
+    "ResultSuccess__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array_": {
+      data: {
+          hmac_key: string;
+          config: string;
+          version: string;
+          destination: string;
           created_at: string;
           id: string;
         }[];
       /** @enum {number|null} */
       error: null;
     };
-    "Result__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array.string_": components["schemas"]["ResultSuccess__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_PromptVersionResult-Array_": {
-      data: components["schemas"]["PromptVersionResult"][];
+    "Result__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array.string_": components["schemas"]["ResultSuccess__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__success-boolean--message-string__": {
+      data: {
+        message: string;
+        success: boolean;
+      };
       /** @enum {number|null} */
       error: null;
     };
-    "Result_PromptVersionResult-Array.string_": components["schemas"]["ResultSuccess_PromptVersionResult-Array_"] | components["schemas"]["ResultError_string_"];
+    "Result__success-boolean--message-string_.string_": components["schemas"]["ResultSuccess__success-boolean--message-string__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array__": {
+      data: {
+        sharedPlatforms?: string[];
+        alreadyOnList?: boolean;
+        /** Format: double */
+        position?: number;
+        success: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array_.string_": components["schemas"]["ResultSuccess__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__isOnWaitlist-boolean__": {
+      data: {
+        isOnWaitlist: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__isOnWaitlist-boolean_.string_": components["schemas"]["ResultSuccess__isOnWaitlist-boolean__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__count-number__": {
+      data: {
+        /** Format: double */
+        count: number;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__count-number_.string_": components["schemas"]["ResultSuccess__count-number__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__success-boolean--newPosition_63_-number--message-string__": {
+      data: {
+        message: string;
+        /** Format: double */
+        newPosition?: number;
+        success: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__success-boolean--newPosition_63_-number--message-string_.string_": components["schemas"]["ResultSuccess__success-boolean--newPosition_63_-number--message-string__"] | components["schemas"]["ResultError_string_"];
+    AddVaultKeyParams: {
+      key: string;
+      provider: string;
+      name?: string;
+    };
+    "ResultSuccess_DecryptedProviderKey-Array_": {
+      data: components["schemas"]["DecryptedProviderKey"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_DecryptedProviderKey-Array.string_": components["schemas"]["ResultSuccess_DecryptedProviderKey-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_DecryptedProviderKey_: {
+      data: components["schemas"]["DecryptedProviderKey"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_DecryptedProviderKey.string_": components["schemas"]["ResultSuccess_DecryptedProviderKey_"] | components["schemas"]["ResultError_string_"];
+    HistogramRow: {
+      range_start: string;
+      range_end: string;
+      /** Format: double */
+      value: number;
+    };
+    "ResultSuccess__request_count-HistogramRow-Array--user_cost-HistogramRow-Array__": {
+      data: {
+        user_cost: components["schemas"]["HistogramRow"][];
+        request_count: components["schemas"]["HistogramRow"][];
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__request_count-HistogramRow-Array--user_cost-HistogramRow-Array_.string_": components["schemas"]["ResultSuccess__request_count-HistogramRow-Array--user_cost-HistogramRow-Array__"] | components["schemas"]["ResultError_string_"];
     /** @description Make all properties in T optional */
-    Partial_PromptVersionsToOperators_: {
-      minor_version?: components["schemas"]["Partial_NumberOperators_"];
-      major_version?: components["schemas"]["Partial_NumberOperators_"];
-      id?: components["schemas"]["Partial_TextOperators_"];
-      prompt_v2?: components["schemas"]["Partial_TextOperators_"];
+    Partial_UserViewToOperators_: {
+      user_user_id?: components["schemas"]["Partial_TextOperators_"];
+      user_active_for?: components["schemas"]["Partial_NumberOperators_"];
+      user_first_active?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      user_last_active?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      user_total_requests?: components["schemas"]["Partial_NumberOperators_"];
+      user_average_requests_per_day_active?: components["schemas"]["Partial_NumberOperators_"];
+      user_average_tokens_per_request?: components["schemas"]["Partial_NumberOperators_"];
+      user_total_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      user_total_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      user_cost?: components["schemas"]["Partial_NumberOperators_"];
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.prompts_versions_": {
-      prompts_versions?: components["schemas"]["Partial_PromptVersionsToOperators_"];
+    "Pick_FilterLeaf.users_view-or-request_response_rmt_": {
+      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
+      users_view?: components["schemas"]["Partial_UserViewToOperators_"];
     };
-    FilterLeafSubset_prompts_versions_: components["schemas"]["Pick_FilterLeaf.prompts_versions_"];
-    PromptVersionsFilterNode: components["schemas"]["FilterLeafSubset_prompts_versions_"] | components["schemas"]["PromptVersionsFilterBranch"] | "all";
-    PromptVersionsFilterBranch: {
-      right: components["schemas"]["PromptVersionsFilterNode"];
+    "FilterLeafSubset_users_view-or-request_response_rmt_": components["schemas"]["Pick_FilterLeaf.users_view-or-request_response_rmt_"];
+    UserFilterNode: components["schemas"]["FilterLeafSubset_users_view-or-request_response_rmt_"] | components["schemas"]["UserFilterBranch"] | "all";
+    UserFilterBranch: {
+      right: components["schemas"]["UserFilterNode"];
       /** @enum {string} */
       operator: "or" | "and";
-      left: components["schemas"]["PromptVersionsFilterNode"];
+      left: components["schemas"]["UserFilterNode"];
     };
-    PromptVersionsQueryParams: {
-      filter?: components["schemas"]["PromptVersionsFilterNode"];
-      includeExperimentVersions?: boolean;
-    };
-    PromptVersionResultCompiled: {
+    /** @enum {string} */
+    PSize: "p50" | "p75" | "p95" | "p99" | "p99.9";
+    UserMetricsResult: {
       id: string;
+      user_id: string;
       /** Format: double */
-      minor_version: number;
+      active_for: number;
+      first_active: string;
+      last_active: string;
       /** Format: double */
-      major_version: number;
-      prompt_v2: string;
-      model: string;
-      prompt_compiled: unknown;
-    };
-    ResultSuccess_PromptVersionResultCompiled_: {
-      data: components["schemas"]["PromptVersionResultCompiled"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptVersionResultCompiled.string_": components["schemas"]["ResultSuccess_PromptVersionResultCompiled_"] | components["schemas"]["ResultError_string_"];
-    PromptVersiosQueryParamsCompiled: {
-      filter?: components["schemas"]["PromptVersionsFilterNode"];
-      includeExperimentVersions?: boolean;
-      inputs: components["schemas"]["Record_string.string_"];
-    };
-    PromptVersionResultFilled: {
-      id: string;
+      total_requests: number;
       /** Format: double */
-      minor_version: number;
+      average_requests_per_day_active: number;
       /** Format: double */
-      major_version: number;
-      prompt_v2: string;
-      model: string;
-      filled_helicone_template: unknown;
+      average_tokens_per_request: number;
+      /** Format: double */
+      total_completion_tokens: number;
+      /** Format: double */
+      total_prompt_tokens: number;
+      /** Format: double */
+      cost: number;
     };
-    ResultSuccess_PromptVersionResultFilled_: {
-      data: components["schemas"]["PromptVersionResultFilled"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptVersionResultFilled.string_": components["schemas"]["ResultSuccess_PromptVersionResultFilled_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__experimentId-string__": {
+    "ResultSuccess__users-UserMetricsResult-Array--count-number--hasUsers-boolean__": {
       data: {
-        experimentId: string;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__experimentId-string_.string_": components["schemas"]["ResultSuccess__experimentId-string__"] | components["schemas"]["ResultError_string_"];
-    ExperimentV2: {
-      id: string;
-      name: string;
-      original_prompt_version: string;
-      copied_original_prompt_version: string | null;
-      input_keys: string[] | null;
-      created_at: string;
-    };
-    "ResultSuccess_ExperimentV2-Array_": {
-      data: components["schemas"]["ExperimentV2"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ExperimentV2-Array.string_": components["schemas"]["ResultSuccess_ExperimentV2-Array_"] | components["schemas"]["ResultError_string_"];
-    ExperimentV2Output: {
-      id: string;
-      request_id: string;
-      is_original: boolean;
-      prompt_version_id: string;
-      created_at: string;
-      input_record_id: string;
-    };
-    ExperimentV2Row: {
-      id: string;
-      inputs: components["schemas"]["Record_string.string_"];
-      prompt_version: string;
-      requests: components["schemas"]["ExperimentV2Output"][];
-      auto_prompt_inputs: unknown[];
-    };
-    ExtendedExperimentData: {
-      id: string;
-      name: string;
-      original_prompt_version: string;
-      copied_original_prompt_version: string | null;
-      input_keys: string[] | null;
-      created_at: string;
-      rows: components["schemas"]["ExperimentV2Row"][];
-    };
-    ResultSuccess_ExtendedExperimentData_: {
-      data: components["schemas"]["ExtendedExperimentData"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ExtendedExperimentData.string_": components["schemas"]["ResultSuccess_ExtendedExperimentData_"] | components["schemas"]["ResultError_string_"];
-    CreateNewPromptVersionForExperimentParams: {
-      newHeliconeTemplate: unknown;
-      isMajorVersion?: boolean;
-      metadata?: components["schemas"]["Record_string.any_"];
-      experimentId?: string;
-      bumpForMajorPromptVersionId?: string;
-      parentPromptVersionId: string;
-    };
-Json: JsonObject;
-    ExperimentV2PromptVersion: {
-      created_at: string | null;
-      experiment_id: string | null;
-      helicone_template: components["schemas"]["Json"] | null;
-      id: string;
-      /** Format: double */
-      major_version: number;
-      metadata: components["schemas"]["Json"] | null;
-      /** Format: double */
-      minor_version: number;
-      model: string | null;
-      organization: string;
-      prompt_v2: string;
-      soft_delete: boolean | null;
-    };
-    "ResultSuccess_ExperimentV2PromptVersion-Array_": {
-      data: components["schemas"]["ExperimentV2PromptVersion"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ExperimentV2PromptVersion-Array.string_": components["schemas"]["ResultSuccess_ExperimentV2PromptVersion-Array_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_string_: {
-      data: string;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_string.string_": components["schemas"]["ResultSuccess_string_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_boolean_: {
-      data: boolean;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_boolean.string_": components["schemas"]["ResultSuccess_boolean_"] | components["schemas"]["ResultError_string_"];
-    ScoreV2: {
-      valueType: string;
-      value: number | string;
-      /** Format: double */
-      max: number;
-      /** Format: double */
-      min: number;
-    };
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.ScoreV2_": {
-      [key: string]: components["schemas"]["ScoreV2"];
-    };
-    "ResultSuccess_Record_string.ScoreV2__": {
-      data: components["schemas"]["Record_string.ScoreV2_"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Record_string.ScoreV2_.string_": components["schemas"]["ResultSuccess_Record_string.ScoreV2__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_ScoreV2-or-null_": {
-      data: components["schemas"]["ScoreV2"] | null;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ScoreV2-or-null.string_": components["schemas"]["ResultSuccess_ScoreV2-or-null_"] | components["schemas"]["ResultError_string_"];
-    CreateCloudGatewayCheckoutSessionRequest: {
-      /** Format: double */
-      amount: number;
-      returnUrl?: string;
-    };
-    UpgradeToProRequest: {
-      addons?: {
-        evals?: boolean;
-        experiments?: boolean;
-        prompts?: boolean;
-        alerts?: boolean;
-      };
-      /** Format: double */
-      seats?: number;
-      /** @enum {string} */
-      ui_mode?: "embedded" | "hosted";
-    };
-    UpgradeToTeamBundleRequest: {
-      /** @enum {string} */
-      ui_mode?: "embedded" | "hosted";
-    };
-    LLMUsage: {
-      model: string;
-      provider: string;
-      /** Format: double */
-      prompt_tokens: number;
-      /** Format: double */
-      completion_tokens: number;
-      /** Format: double */
-      total_count: number;
-      /** Format: double */
-      amount: number;
-      description: string;
-      totalCost: {
+        hasUsers: boolean;
         /** Format: double */
-        prompt_token: number;
-        /** Format: double */
-        completion_token: number;
+        count: number;
+        users: components["schemas"]["UserMetricsResult"][];
       };
-    };
-    PaymentIntentRecord: {
-      id: string;
-      /** Format: double */
-      amount: number;
-      /** Format: double */
-      created: number;
-      status: string;
-      isRefunded?: boolean;
-      /** Format: double */
-      refundedAmount?: number;
-      refundIds?: string[];
-    };
-    StripePaymentIntentsResponse: {
-      data: components["schemas"]["PaymentIntentRecord"][];
-      has_more: boolean;
-      next_page: string | null;
-      /** Format: double */
-      count: number;
-    };
-    AutoTopoffSettings: {
-      enabled: boolean;
-      /** Format: double */
-      thresholdCents: number;
-      /** Format: double */
-      topoffAmountCents: number;
-      stripePaymentMethodId: string | null;
-      lastTopoffAt: string | null;
-      /** Format: double */
-      consecutiveFailures: number;
-    };
-    UpdateAutoTopoffSettingsRequest: {
-      enabled: boolean;
-      /** Format: double */
-      thresholdCents: number;
-      /** Format: double */
-      topoffAmountCents: number;
-      stripePaymentMethodId: string;
-    };
-    PaymentMethod: {
-      id: string;
-      brand: string;
-      last4: string;
-      /** Format: double */
-      exp_month: number;
-      /** Format: double */
-      exp_year: number;
-    };
-    CreateSetupSessionRequest: {
-      returnUrl?: string;
-    };
-    IntegrationCreateParams: {
-      integration_name: string;
-      settings?: components["schemas"]["Json"];
-      active?: boolean;
-    };
-    Integration: {
-      integration_name?: string;
-      settings?: components["schemas"]["Json"];
-      active?: boolean;
-      id: string;
-    };
-    ResultSuccess_Array_Integration__: {
-      data: components["schemas"]["Integration"][];
       /** @enum {number|null} */
       error: null;
     };
-    "Result_Array_Integration_.string_": components["schemas"]["ResultSuccess_Array_Integration__"] | components["schemas"]["ResultError_string_"];
-    IntegrationUpdateParams: {
-      integration_name?: string;
-      settings?: components["schemas"]["Json"];
-      active?: boolean;
+    "Result__users-UserMetricsResult-Array--count-number--hasUsers-boolean_.string_": components["schemas"]["ResultSuccess__users-UserMetricsResult-Array--count-number--hasUsers-boolean__"] | components["schemas"]["ResultError_string_"];
+    SortLeafUsers: {
+      id?: components["schemas"]["SortDirection"];
+      user_id?: components["schemas"]["SortDirection"];
+      active_for?: components["schemas"]["SortDirection"];
+      first_active?: components["schemas"]["SortDirection"];
+      last_active?: components["schemas"]["SortDirection"];
+      total_requests?: components["schemas"]["SortDirection"];
+      average_requests_per_day_active?: components["schemas"]["SortDirection"];
+      average_tokens_per_request?: components["schemas"]["SortDirection"];
+      total_prompt_tokens?: components["schemas"]["SortDirection"];
+      total_completion_tokens?: components["schemas"]["SortDirection"];
+      cost?: components["schemas"]["SortDirection"];
+      rate_limited_count?: components["schemas"]["SortDirection"];
     };
-    ResultSuccess_Integration_: {
-      data: components["schemas"]["Integration"];
-      /** @enum {number|null} */
-      error: null;
+    UserMetricsQueryParams: {
+      filter: components["schemas"]["UserFilterNode"];
+      /** Format: double */
+      offset: number;
+      /** Format: double */
+      limit: number;
+      timeFilter?: {
+        /** Format: double */
+        endTimeUnixSeconds: number;
+        /** Format: double */
+        startTimeUnixSeconds: number;
+      };
+      /** Format: double */
+      timeZoneDifferenceMinutes?: number;
+      sort?: components["schemas"]["SortLeafUsers"];
     };
-    "Result_Integration.string_": components["schemas"]["ResultSuccess_Integration_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_Array__id-string--name-string___": {
+    "ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array_": {
       data: {
-          name: string;
-          id: string;
+          /** Format: double */
+          cost: number;
+          user_id: string;
+          /** Format: double */
+          completion_tokens: number;
+          /** Format: double */
+          prompt_tokens: number;
+          /** Format: double */
+          count: number;
         }[];
       /** @enum {number|null} */
       error: null;
     };
-    "Result_Array__id-string--name-string__.string_": components["schemas"]["ResultSuccess_Array__id-string--name-string___"] | components["schemas"]["ResultError_string_"];
-    TestStripeMeterEventRequest: {
-      event_name: string;
-      customer_id: string;
+    "Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array.string_": components["schemas"]["ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array_"] | components["schemas"]["ResultError_string_"];
+    UserQueryParams: {
+      userIds?: string[];
+      timeFilter?: {
+        /** Format: double */
+        endTimeUnixSeconds: number;
+        /** Format: double */
+        startTimeUnixSeconds: number;
+      };
     };
     ValidationError: {
       field: string;
@@ -4260,243 +4330,6 @@ export type external = Record<string, never>;
 
 export interface operations {
 
-  GetWebhooks: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array.string_"];
-        };
-      };
-    };
-  };
-  NewWebhook: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["WebhookData"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_unknown_"];
-        };
-      };
-    };
-  };
-  DeleteWebhook: {
-    parameters: {
-      path: {
-        webhookId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  TestWebhook: {
-    parameters: {
-      path: {
-        webhookId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__success-boolean--message-string_.string_"];
-        };
-      };
-    };
-  };
-  AddToWaitlist: {
-    requestBody: {
-      content: {
-        "application/json": {
-          feature: string;
-          email: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array_.string_"];
-        };
-      };
-    };
-  };
-  IsOnWaitlist: {
-    parameters: {
-      query: {
-        email: string;
-        feature: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__isOnWaitlist-boolean_.string_"];
-        };
-      };
-    };
-  };
-  GetWaitlistCount: {
-    parameters: {
-      query: {
-        feature: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__count-number_.string_"];
-        };
-      };
-    };
-  };
-  TrackShare: {
-    requestBody: {
-      content: {
-        "application/json": {
-          /** @enum {string} */
-          platform: "twitter" | "linkedin";
-          feature: string;
-          email: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__success-boolean--newPosition_63_-number--message-string_.string_"];
-        };
-      };
-    };
-  };
-  AddKey: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["AddVaultKeyParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__id-string_.string_"];
-        };
-      };
-    };
-  };
-  GetKeys: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_DecryptedProviderKey-Array.string_"];
-        };
-      };
-    };
-  };
-  GetKeyById: {
-    parameters: {
-      path: {
-        providerKeyId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_DecryptedProviderKey.string_"];
-        };
-      };
-    };
-  };
-  UpdateKey: {
-    parameters: {
-      path: {
-        id: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          active?: boolean;
-          name?: string;
-          key?: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  GetUserMetricsOverview: {
-    requestBody: {
-      content: {
-        "application/json": {
-          useInterquartile: boolean;
-          pSize: components["schemas"]["PSize"];
-          filter: components["schemas"]["UserFilterNode"];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__request_count-HistogramRow-Array--user_cost-HistogramRow-Array_.string_"];
-        };
-      };
-    };
-  };
-  GetUserMetrics: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UserMetricsQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__users-UserMetricsResult-Array--count-number--hasUsers-boolean_.string_"];
-        };
-      };
-    };
-  };
-  GetUsers: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UserQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array.string_"];
-        };
-      };
-    };
-  };
   GetProviderKey: {
     parameters: {
       path: {
@@ -5209,167 +5042,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_PromptVersionCounts.string_"];
-        };
-      };
-    };
-  };
-  GetRequestCount: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["RequestQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_number.string_"];
-        };
-      };
-    };
-  };
-  GetRequests: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["RequestQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
-        };
-      };
-    };
-  };
-  GetRequestsClickhouse: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["RequestQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
-        };
-      };
-    };
-  };
-  GetRequestById: {
-    parameters: {
-      query?: {
-        includeBody?: boolean;
-      };
-      path: {
-        requestId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_HeliconeRequest.string_"];
-        };
-      };
-    };
-  };
-  GetRequestsByIds: {
-    requestBody: {
-      content: {
-        "application/json": {
-          requestIds: string[];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
-        };
-      };
-    };
-  };
-  FeedbackRequest: {
-    parameters: {
-      path: {
-        requestId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          rating: boolean;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  PutProperty: {
-    parameters: {
-      path: {
-        requestId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          value: string;
-          key: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  GetRequestAssetById: {
-    parameters: {
-      path: {
-        requestId: string;
-        assetId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_HeliconeRequestAsset.string_"];
-        };
-      };
-    };
-  };
-  AddScores: {
-    parameters: {
-      path: {
-        requestId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ScoreRequest"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };
@@ -6576,6 +6248,424 @@ export interface operations {
       };
     };
   };
+  GetRequestCount: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RequestQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_number.string_"];
+        };
+      };
+    };
+  };
+  GetRequests: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RequestQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
+        };
+      };
+    };
+  };
+  GetRequestsClickhouse: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RequestQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
+        };
+      };
+    };
+  };
+  GetRequestById: {
+    parameters: {
+      query?: {
+        includeBody?: boolean;
+      };
+      path: {
+        requestId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HeliconeRequest.string_"];
+        };
+      };
+    };
+  };
+  GetRequestsByIds: {
+    requestBody: {
+      content: {
+        "application/json": {
+          requestIds: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
+        };
+      };
+    };
+  };
+  FeedbackRequest: {
+    parameters: {
+      path: {
+        requestId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          rating: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  PutProperty: {
+    parameters: {
+      path: {
+        requestId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          value: string;
+          key: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetRequestAssetById: {
+    parameters: {
+      path: {
+        requestId: string;
+        assetId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HeliconeRequestAsset.string_"];
+        };
+      };
+    };
+  };
+  AddScores: {
+    parameters: {
+      path: {
+        requestId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ScoreRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetWrapped2025Stats: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_WrappedStats.string_"];
+        };
+      };
+    };
+  };
+  CheckHasWrapped2025Data: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__hasData-boolean_.string_"];
+        };
+      };
+    };
+  };
+  GetWebhooks: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array.string_"];
+        };
+      };
+    };
+  };
+  NewWebhook: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["WebhookData"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_unknown_"];
+        };
+      };
+    };
+  };
+  DeleteWebhook: {
+    parameters: {
+      path: {
+        webhookId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  TestWebhook: {
+    parameters: {
+      path: {
+        webhookId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__success-boolean--message-string_.string_"];
+        };
+      };
+    };
+  };
+  AddToWaitlist: {
+    requestBody: {
+      content: {
+        "application/json": {
+          feature: string;
+          email: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array_.string_"];
+        };
+      };
+    };
+  };
+  IsOnWaitlist: {
+    parameters: {
+      query: {
+        email: string;
+        feature: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__isOnWaitlist-boolean_.string_"];
+        };
+      };
+    };
+  };
+  GetWaitlistCount: {
+    parameters: {
+      query: {
+        feature: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__count-number_.string_"];
+        };
+      };
+    };
+  };
+  TrackShare: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @enum {string} */
+          platform: "twitter" | "linkedin";
+          feature: string;
+          email: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__success-boolean--newPosition_63_-number--message-string_.string_"];
+        };
+      };
+    };
+  };
+  AddKey: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AddVaultKeyParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string_.string_"];
+        };
+      };
+    };
+  };
+  GetKeys: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_DecryptedProviderKey-Array.string_"];
+        };
+      };
+    };
+  };
+  GetKeyById: {
+    parameters: {
+      path: {
+        providerKeyId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_DecryptedProviderKey.string_"];
+        };
+      };
+    };
+  };
+  UpdateKey: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          active?: boolean;
+          name?: string;
+          key?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetUserMetricsOverview: {
+    requestBody: {
+      content: {
+        "application/json": {
+          useInterquartile: boolean;
+          pSize: components["schemas"]["PSize"];
+          filter: components["schemas"]["UserFilterNode"];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__request_count-HistogramRow-Array--user_cost-HistogramRow-Array_.string_"];
+        };
+      };
+    };
+  };
+  GetUserMetrics: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserMetricsQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__users-UserMetricsResult-Array--count-number--hasUsers-boolean_.string_"];
+        };
+      };
+    };
+  };
+  GetUsers: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array.string_"];
+        };
+      };
+    };
+  };
   LogCustomTraceLegacy: {
     requestBody: {
       content: {
@@ -6864,7 +6954,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["ResultError_string_"] | components["schemas"]["ResultSuccess_unknown-Array_"] | components["schemas"]["ResultSuccess_string_"] | {
+          "application/json": components["schemas"]["ResultError_string_"] | components["schemas"]["ResultSuccess_string_"] | components["schemas"]["ResultSuccess_unknown-Array_"] | {
             error: unknown;
             data: {
               ok: boolean;
@@ -6896,7 +6986,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["ResultError_string_"] | components["schemas"]["ResultSuccess_unknown-Array_"] | components["schemas"]["ResultSuccess_string_"] | {
+          "application/json": components["schemas"]["ResultError_string_"] | components["schemas"]["ResultSuccess_string_"] | components["schemas"]["ResultSuccess_unknown-Array_"] | {
             error: unknown;
             data: {
               ok: boolean;
@@ -7571,7 +7661,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_string_"];
+          "application/json": components["schemas"]["ResultError_string_"] | components["schemas"]["ResultSuccess_unknown_"];
         };
       };
     };
