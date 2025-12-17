@@ -51,15 +51,15 @@ const CTA = () => {
                 "rotate-[-3deg]"
               )}
             >
-              <h1>Reliable</h1>
+              <h2>Ship reliable</h2>
             </div>
-            <h1>AI applications</h1>
+            <h2>agents</h2>
           </div>
-          <h1>starting today</h1>
+          <h2>starting today</h2>
         </div>
         <Link href="https://us.helicone.ai/signup" className="z-[10]">
           <Button
-            size="lg"
+            size="default"
             className="md:gap-3 text-base md:text-[40px] py-[18px] md:py-12 px-4 md:px-12 bg-brand hover:bg-brand/100 text-white font-normal rounded-lg md:rounded-2xl z-[10]"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}

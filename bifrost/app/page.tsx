@@ -3,15 +3,18 @@ import { Layout } from "@/app/components/Layout";
 import Integrations from "@/components/templates/landing/integrations";
 import dynamic from "next/dynamic";
 import LazyLoadComponent from "@/components/shared/LazyLoadComponent";
-import { cn, ISLAND_WIDTH } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 const AiGateway = dynamic(() => import("@/components/home/AiGateway"));
 const BigDashboard = dynamic(() => import("@/components/home/BigDashboard"));
 const Companies = dynamic(() => import("@/components/home/Companies"));
 const CTA = dynamic(() => import("@/components/home/CTA"));
+const EmailBanner = dynamic(() => import("@/components/home/EmailBanner"));
 const FAQ = dynamic(() => import("@/components/home/FAQ"));
+const StepsCards = dynamic(() => import("@/components/home/StepsCards"));
 const Log = dynamic(() => import("@/components/home/Log"));
 const OpenSource = dynamic(() => import("@/components/home/OpenSource"));
+const Problem = dynamic(() => import("@/components/home/Problem"));
 const Production = dynamic(() => import("@/components/home/Production"));
 const Prototype = dynamic(() => import("@/components/home/Prototype"));
 const Quote2 = dynamic(() => import("@/components/home/Quote2"));
@@ -54,16 +57,25 @@ export default async function Home() {
             <Companies className={cn("bg-[#f2f9fc]")} />
           </LazyLoadComponent>
           <LazyLoadComponent fallback={<LoadingSection />}>
+            <StepsCards />
+          </LazyLoadComponent>
+          <LazyLoadComponent fallback={<LoadingSection />}>
+            <Quote3 />
+          </LazyLoadComponent>
+          <LazyLoadComponent fallback={<LoadingSection />}>
             <Integrations />
+          </LazyLoadComponent>
+          <LazyLoadComponent fallback={<LoadingSection />}>
+            <OpenSource />
           </LazyLoadComponent>
           <LazyLoadComponent fallback={<LoadingSection />}>
             <Quote2 />
           </LazyLoadComponent>
           <LazyLoadComponent fallback={<LoadingSection />}>
-            <AiGateway />
+            <Problem />
           </LazyLoadComponent>
           <LazyLoadComponent fallback={<LoadingSection />}>
-            <Log />
+            <EmailBanner />
           </LazyLoadComponent>
           <LazyLoadComponent fallback={<LoadingSection />}>
             <Production />
@@ -75,13 +87,7 @@ export default async function Home() {
             <Stats totalValuesData={totalValuesData} />
           </LazyLoadComponent>
           <LazyLoadComponent fallback={<LoadingSection />}>
-            <OpenSource />
-          </LazyLoadComponent>
-          <LazyLoadComponent fallback={<LoadingSection />}>
             <FAQ />
-          </LazyLoadComponent>
-          <LazyLoadComponent fallback={<LoadingSection />}>
-            <Quote3 />
           </LazyLoadComponent>
           <LazyLoadComponent fallback={<LoadingSection height="h-64" />}>
             <CTA />

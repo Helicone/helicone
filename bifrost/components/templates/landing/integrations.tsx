@@ -24,17 +24,17 @@ const Integrations = (props: IntegrationsProps) => {
 
   const CODE_SNIPPETS = {
     gpt4: {
-      formattedName: "GPT-4o",
+      formattedName: "OpenAI",
       logo: "/static/openai.webp",
       typescript: `import OpenAI from "openai";
 
 const client = new OpenAI({
   baseURL: "https://ai-gateway.helicone.ai",
-  apiKey: process.env.HELICONE_API_KEY,
+  apiKey: process.env.HELICONE_API_KEY
 });
 
 const response = await client.chat.completions.create({
-  model: "gpt-4o-mini",  // Just change the model name!
+  model: "gpt-4o-mini",  // or any other 100+ models!
   messages: [{ role: "user", content: "Hello!" }]
 });`,
       python: `from openai import OpenAI
@@ -45,7 +45,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-  model="gpt-4o-mini",  # Just change the model name!
+  model="gpt-4o-mini",  # Or 100+ other models!
   messages=[{"role": "user", "content": "Hello!"}]
 )`,
       curl: `curl "https://ai-gateway.helicone.ai/v1/chat/completions" \\
@@ -58,17 +58,17 @@ response = client.chat.completions.create(
       docsLink: "https://docs.helicone.ai/gateway/overview",
     },
     claude: {
-      formattedName: "Claude",
+      formattedName: "Anthropic",
       logo: "/static/anthropic.webp",
       typescript: `import OpenAI from "openai";
 
 const client = new OpenAI({
   baseURL: "https://ai-gateway.helicone.ai",
-  apiKey: process.env.HELICONE_API_KEY,
+  apiKey: process.env.HELICONE_API_KEY
 });
 
 const response = await client.chat.completions.create({
-  model: "claude-sonnet-4",  // Just change the model name!
+  model: "claude-sonnet-4",  // or any other 100+ models!
   messages: [{ role: "user", content: "Hello!" }]
 });`,
       python: `from openai import OpenAI
@@ -79,7 +79,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-  model="claude-sonnet-4",  # Just change the model name!
+  model="claude-sonnet-4",  # Or 100+ other models!
   messages=[{"role": "user", "content": "Hello!"}]
 )`,
       curl: `curl "https://ai-gateway.helicone.ai/v1/chat/completions" \\
@@ -98,11 +98,11 @@ response = client.chat.completions.create(
 
 const client = new OpenAI({
   baseURL: "https://ai-gateway.helicone.ai",
-  apiKey: process.env.HELICONE_API_KEY,
+  apiKey: process.env.HELICONE_API_KEY
 });
 
 const response = await client.chat.completions.create({
-  model: "gemini-2.0-flash-exp",  // Just change the model name!
+  model: "gemini-2.0-flash-exp",  // or any other 100+ models!
   messages: [{ role: "user", content: "Hello!" }]
 });`,
       python: `from openai import OpenAI
@@ -113,7 +113,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-  model="gemini-2.0-flash-exp",  # Just change the model name!
+  model="gemini-2.0-flash-exp",  # Or 100+ other models!
   messages=[{"role": "user", "content": "Hello!"}]
 )`,
       curl: `curl "https://ai-gateway.helicone.ai/v1/chat/completions" \\
@@ -132,11 +132,11 @@ response = client.chat.completions.create(
 
 const client = new OpenAI({
   baseURL: "https://ai-gateway.helicone.ai",
-  apiKey: process.env.HELICONE_API_KEY,
+  apiKey: process.env.HELICONE_API_KEY
 });
 
 const response = await client.chat.completions.create({
-  model: "deepseek-v3.2",  // Just change the model name!
+  model: "deepseek-v3.2",  // or 100+ other models!
   messages: [{ role: "user", content: "Hello!" }]
 });`,
       python: `from openai import OpenAI
@@ -147,7 +147,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-  model="llama-3.3-70b",  # Just change the model name!
+  model="llama-3.3-70b",  # Or 100+ other models!
   messages=[{"role": "user", "content": "Hello!"}]
 )`,
       curl: `curl "https://ai-gateway.helicone.ai/v1/chat/completions" \\
@@ -160,44 +160,6 @@ response = client.chat.completions.create(
       docsLink: "https://docs.helicone.ai/gateway/overview",
     },
   };
-
-  const ADDITIONAL_PROVIDERS = [
-    {
-      name: "Vercel AI SDK",
-      logo: "/static/vercel.webp",
-      href: "https://docs.helicone.ai/getting-started/integration-method/vercelai",
-    },
-    {
-      name: "TogetherAI",
-      logo: "/static/together.webp",
-      href: "https://docs.helicone.ai/getting-started/integration-method/together",
-    },
-    {
-      name: "AWS Bedrock",
-      logo: "/static/aws-bedrock.webp",
-      href: "https://docs.helicone.ai/integrations/bedrock/",
-    },
-    {
-      name: "LangChain",
-      logo: "/static/langchain.webp",
-      href: "https://docs.helicone.ai/integrations/openai/langchain",
-    },
-    {
-      name: "Groq",
-      logo: "/static/groq.webp",
-      href: "https://docs.helicone.ai/integrations/groq/",
-    },
-    {
-      name: "LiteLLM",
-      logo: "/static/litellm.webp",
-      href: "https://docs.helicone.ai/getting-started/integration-method/litellm",
-    },
-    {
-      name: "Azure OpenAI",
-      logo: "/static/azure.webp",
-      href: "https://docs.helicone.ai/getting-started/integration/azure",
-    },
-  ];
 
   const [currentProvider, setCurrentProvider] =
     useState<keyof typeof CODE_SNIPPETS>("gpt4");
@@ -249,16 +211,21 @@ response = client.chat.completions.create(
   };
 
   return (
-    <div className={cn(ISLAND_WIDTH, "py-16 md:py-32 flex flex-col gap-10")}>
+    <div
+      className={cn(
+        ISLAND_WIDTH,
+        " bg-white sm:bg-gradient-to-b sm:from-white sm:to-[#F2F9FC] sm:pb-40bg-[#f2f9fc] py-16 md:py-32 flex flex-col gap-10"
+      )}
+    >
       <div className="flex flex-col gap-6">
         <div className="flex flex-col lg:flex-row gap-y-8 justify-between items-center">
           <div className="flex flex-col gap-5">
             <h2 className="text-3xl sm:text-5xl font-semibold text-accent-foreground">
-              One SDK for <span className="text-brand">100+ Models</span>
+              One key, <span className="text-brand">100+ models</span>
             </h2>
             <p className="text-lg font-normal sm:text-xl text-muted-foreground">
-              Access every AI model through the OpenAI SDK. Switch providers by
-              changing the model name—no code rewrites needed.
+              Switch providers by changing just the model name in your OpenAI
+              SDK request - automatic failover and observability by default.
             </p>
             <div className="flex flex-col items-start gap-4">
               {/* Main providers with code examples */}
@@ -293,10 +260,8 @@ response = client.chat.completions.create(
               {/* All models link */}
               <div className="flex flex-wrap items-center gap-3">
                 <span className="text-sm text-muted-foreground">
-                  Plus 100+ more models from providers like:
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  Mistral, Groq, Together AI, AWS Bedrock, Azure, and more
+                  Plus 100+ more models from providers like: Mistral, Groq,
+                  Together AI, Azure, and more..
                 </span>
               </div>
             </div>
@@ -348,12 +313,12 @@ response = client.chat.completions.create(
             </Button>
           </Link>
           <p className="text-sm text-landing-secondary">
-            No credit card required, 7-day free trial
+            No credit card required
           </p>
         </div>
         <Link href="https://helicone.ai/models" target="_blank" rel="noopener">
           <Button variant="ghost" size="landing_page">
-            View all 100+ models
+            View all models supported
             <ArrowUpRight className="size-4 md:size-6" />
           </Button>
         </Link>

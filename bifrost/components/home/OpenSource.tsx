@@ -4,6 +4,7 @@ import { Button } from "../ui/button";
 import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import ContributorsImg from "@/public/static/home/community.webp";
+import DashboardImg from "@/public/static/platform/dashboard.webp";
 import DeployImg from "@/public/static/deploy-cube.png";
 import Link from "next/link";
 
@@ -154,11 +155,10 @@ const OpenSource = async () => {
       <div className="flex justify-between items-end">
         <div className="flex flex-col gap-4">
           <h2 className="font-semibold text-4xl sm:text-5xl leading-[120%]  text-black">
-            Proudly <span className="text-brand">open-source</span>
+            Built for agents, <span className="text-brand">loved by teams</span>
           </h2>
           <p className="text-lg sm:text-xl font-light leading-relaxed text-landing-description">
-            We value transparency and believe the best products are built in
-            community.
+
           </p>
         </div>
         <a
@@ -196,23 +196,24 @@ const OpenSource = async () => {
         <Link
           href="https://github.com/helicone/helicone"
           target="_blank"
-          className="col-span-1 md:col-span-2 p-6 bg-slate-50 rounded-xl border border-slate-200 relative hover:bg-slate-100 transition-colors flex flex-col h-full justify-between"
+          className="col-span-1 md:col-span-2 px-6 pt-6 pb-2 sm:pb-6 bg-slate-50 rounded-xl border border-slate-200 relative hover:bg-slate-100 transition-colors flex flex-col h-full"
         >
           <div className="flex flex-col gap-2">
-            <p className="text-sm text-slate-500">Become a contributor</p>
+            <p className="text-sm text-slate-500">For PMs</p>
 
             <div className="flex items-center gap-2">
               <h3 className="text-xl sm:text-2xl font-semibold text-black">
-                Join our community
+                Track cost per workflow
               </h3>
               <ArrowUpRight className="w-4 h-4 text-brand" />
             </div>
           </div>
           <p className="text-base sm:text-lg max-w-[380px] text-wrap">
-            Share insights, get support, and learn from other AI engineers.
+            See spend by agent, user, or task - not just by model. Set rate limits. Get alerts. Cut costs without cutting quality.
           </p>
-          <br />
-          <Image src={ContributorsImg} alt="Contributors" className="w-full" />
+          <div className="h-[200px] flex justify-end">
+            <CostCalculatorSvg />
+          </div>
         </Link>
         <Link
           href="https://docs.helicone.ai/ai-gateway/quickstart"
@@ -221,17 +222,14 @@ const OpenSource = async () => {
         >
           <div className="flex flex-col gap-4 sm:gap-10">
             <div className="flex flex-col gap-2">
-              <p className="text-sm text-slate-500">AI Engineers</p>
+              <p className="text-sm text-slate-500">For Product Teams</p>
               <div className="flex items-center gap-2">
-                <h3 className="text-xl sm:text-2xl font-semibold text-black">
-                  Deploy your own AI Gateway
-                </h3>
+                <h3 className="text-xl sm:text-2xl font-semibold text-black">One SDK to access every model</h3>
                 <ArrowUpRight className="w-4 h-4 text-brand" />
               </div>
             </div>
             <p className="text-base sm:text-lg max-w-[486px] text-wrap">
-              Whether through single-click deployment or our production-ready
-              HELM chart, self-host the AI Gateway in your own infrastructure.
+              Route to OpenAI, Anthropic, Gemini, and 100+ models. Automatic failover. Centralized access conrol. Observability built-in by default.
             </p>
           </div>
           <Image
@@ -247,23 +245,19 @@ const OpenSource = async () => {
         >
           <div className="flex flex-col gap-4 sm:gap-10">
             <div className="flex flex-col gap-2">
-              <p className="text-sm text-slate-500">Built by Helicone</p>
+              <p className="text-sm text-slate-500">For Agent Builders</p>
               <div className="flex items-center gap-2">
                 <h3 className="text-xl sm:text-2xl font-semibold text-black">
-                  API Cost Calculator
+                  Debug multi-step workflows
                 </h3>
                 <ArrowUpRight className="w-4 h-4 text-brand" />
               </div>
             </div>
             <p className="text-base sm:text-lg max-w-[486px] text-wrap">
-              Compare LLM costs with the largest open-source API pricing
-              database with 300+ models and providers such as OpenAI, Anthropic
-              and more.
+              See the full execution path of every agent run. Group calls by session. Find failures in minutes.
             </p>
           </div>
-          <div className="h-[200px]">
-            <CostCalculatorSvg />
-          </div>
+          <Image src={DashboardImg} alt="Contributors" className="self-end w-1/3" />
         </Link>
       </div>
     </div>

@@ -1,14 +1,11 @@
 "use client";
 
 import { cn, ISLAND_WIDTH } from "@/lib/utils";
-
-import { PlusIcon, XIcon } from "lucide-react";
-import { useState } from "react";
 import Image from "next/image";
 
 const Quote2 = () => {
   return (
-    <div className="bg-[#f2f9fc] pt-12 pb-14 lg:pb-24 lg:px-16">
+    <div className="bg-white sm:bg-gradient-to-b sm:from-white sm:to-[#F2F9FC] pt-12 pb-14 lg:pb-24 lg:px-16">
       <div className={cn(ISLAND_WIDTH)}>
         <div className="flex flex-col gap-y-8 items-center">
           <h2 className="text-2xl md:text-[40px] tracking-tight leading-normal md:leading-[52px] font-semibold text-[#ACB3BA] w-full max-w-[816px] text-wrap text-center mx-auto">

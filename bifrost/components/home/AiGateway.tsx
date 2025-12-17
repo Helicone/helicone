@@ -33,13 +33,13 @@ const AiGateway = () => {
           </div>
           <div className="flex flex-col items-start md:items-end gap-6 text-left md:text-right">
             <h2 className="font-semibold text-4xl sm:text-5xl leading-[120%] max-w-[600px] text-wrap text-black">
-              <span className="text-brand">Smart & Speedy</span>
+              <span className="text-brand">Call tools with</span>
               <br />
-              LLM Routing
+              any model
             </h2>
             <p className="text-lg max-w-[520px] text-landing-description font-light leading-relaxed">
-              We make sure you always have the best model for your request, so
-              you can focus on shipping features.
+              Route to any model easily handling multi-model workflows and
+              tracking sessions by user, task, or any custom property.
             </p>
           </div>
           <div className="flex gap-3 items-center">
