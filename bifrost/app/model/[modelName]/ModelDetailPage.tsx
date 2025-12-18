@@ -26,6 +26,7 @@ import { components } from "@/lib/clients/jawnTypes/public";
 import { StandardParameter } from "@helicone-package/cost/models/types";
 import { capitalizeModality } from "@/lib/constants/modalities";
 import { ModelSearchDropdown } from "@/components/models/ModelSearchDropdown";
+import { ModelUsageSection } from "./ModelUsageSection";
 
 type ModelRegistryItem = components["schemas"]["ModelRegistryItem"];
 
@@ -636,6 +637,13 @@ completion = client.chat.completions.create(
                   );
                 })}
             </div>
+          </div>
+        </div>
+
+        {/* Usage Stats Section */}
+        <div className="bg-white dark:bg-gray-900">
+          <div className="max-w-6xl mx-auto px-4">
+            <ModelUsageSection modelId={model.id} />
           </div>
         </div>
 

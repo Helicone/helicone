@@ -2376,6 +2376,89 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_ProviderUsageResponse_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "AuthorStatsResponse": {
+        "dataType": "refObject",
+        "properties": {
+            "author": {"dataType":"string","required":true},
+            "totalTokens": {"dataType":"double","required":true},
+            "timeSeries": {"dataType":"array","array":{"dataType":"refObject","ref":"ModelUsageTimeSeriesDataPoint"},"required":true},
+            "leaderboard": {"dataType":"array","array":{"dataType":"refObject","ref":"ModelUsageLeaderboardEntry"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_AuthorStatsResponse_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"ref":"AuthorStatsResponse","required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_AuthorStatsResponse.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_AuthorStatsResponse_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ProviderStatsResponse": {
+        "dataType": "refObject",
+        "properties": {
+            "provider": {"dataType":"string","required":true},
+            "totalTokens": {"dataType":"double","required":true},
+            "timeSeries": {"dataType":"array","array":{"dataType":"refObject","ref":"ModelUsageTimeSeriesDataPoint"},"required":true},
+            "leaderboard": {"dataType":"array","array":{"dataType":"refObject","ref":"ModelUsageLeaderboardEntry"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_ProviderStatsResponse_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"ref":"ProviderStatsResponse","required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_ProviderStatsResponse.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_ProviderStatsResponse_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ModelStatsTimeSeriesDataPoint": {
+        "dataType": "refObject",
+        "properties": {
+            "time": {"dataType":"string","required":true},
+            "totalTokens": {"dataType":"double","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ModelStatsResponse": {
+        "dataType": "refObject",
+        "properties": {
+            "model": {"dataType":"string","required":true},
+            "totalTokens": {"dataType":"double","required":true},
+            "timeSeries": {"dataType":"array","array":{"dataType":"refObject","ref":"ModelStatsTimeSeriesDataPoint"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_ModelStatsResponse_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"ref":"ModelStatsResponse","required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_ModelStatsResponse.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_ModelStatsResponse_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "SessionResult": {
         "dataType": "refObject",
         "properties": {
@@ -9258,6 +9341,99 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getProviderUsage',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsStatsController_getAuthorStats: Record<string, TsoaRoute.ParameterSchema> = {
+                author: {"in":"path","name":"author","required":true,"dataType":"string"},
+                timeframe: {"default":"7d","in":"query","name":"timeframe","ref":"StatsTimeFrame"},
+        };
+        app.get('/v1/public/stats/authors/:author',
+            ...(fetchMiddlewares<RequestHandler>(StatsController)),
+            ...(fetchMiddlewares<RequestHandler>(StatsController.prototype.getAuthorStats)),
+
+            async function StatsController_getAuthorStats(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsStatsController_getAuthorStats, request, response });
+
+                const controller = new StatsController();
+
+              await templateService.apiHandler({
+                methodName: 'getAuthorStats',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsStatsController_getProviderStats: Record<string, TsoaRoute.ParameterSchema> = {
+                provider: {"in":"path","name":"provider","required":true,"dataType":"string"},
+                timeframe: {"default":"7d","in":"query","name":"timeframe","ref":"StatsTimeFrame"},
+        };
+        app.get('/v1/public/stats/providers/:provider',
+            ...(fetchMiddlewares<RequestHandler>(StatsController)),
+            ...(fetchMiddlewares<RequestHandler>(StatsController.prototype.getProviderStats)),
+
+            async function StatsController_getProviderStats(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsStatsController_getProviderStats, request, response });
+
+                const controller = new StatsController();
+
+              await templateService.apiHandler({
+                methodName: 'getProviderStats',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsStatsController_getModelStats: Record<string, TsoaRoute.ParameterSchema> = {
+                model: {"in":"path","name":"model","required":true,"dataType":"string"},
+                timeframe: {"default":"1y","in":"query","name":"timeframe","ref":"StatsTimeFrame"},
+        };
+        app.get('/v1/public/stats/models/:model',
+            ...(fetchMiddlewares<RequestHandler>(StatsController)),
+            ...(fetchMiddlewares<RequestHandler>(StatsController.prototype.getModelStats)),
+
+            async function StatsController_getModelStats(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsStatsController_getModelStats, request, response });
+
+                const controller = new StatsController();
+
+              await templateService.apiHandler({
+                methodName: 'getModelStats',
                 controller,
                 response,
                 next,

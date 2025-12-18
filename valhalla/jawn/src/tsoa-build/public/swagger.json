@@ -7344,6 +7344,199 @@
 					}
 				]
 			},
+			"AuthorStatsResponse": {
+				"properties": {
+					"author": {
+						"type": "string"
+					},
+					"totalTokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"timeSeries": {
+						"items": {
+							"$ref": "#/components/schemas/ModelUsageTimeSeriesDataPoint"
+						},
+						"type": "array"
+					},
+					"leaderboard": {
+						"items": {
+							"$ref": "#/components/schemas/ModelUsageLeaderboardEntry"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"author",
+					"totalTokens",
+					"timeSeries",
+					"leaderboard"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_AuthorStatsResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/AuthorStatsResponse"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_AuthorStatsResponse.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_AuthorStatsResponse_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ProviderStatsResponse": {
+				"properties": {
+					"provider": {
+						"type": "string"
+					},
+					"totalTokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"timeSeries": {
+						"items": {
+							"$ref": "#/components/schemas/ModelUsageTimeSeriesDataPoint"
+						},
+						"type": "array"
+					},
+					"leaderboard": {
+						"items": {
+							"$ref": "#/components/schemas/ModelUsageLeaderboardEntry"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"provider",
+					"totalTokens",
+					"timeSeries",
+					"leaderboard"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_ProviderStatsResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/ProviderStatsResponse"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ProviderStatsResponse.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ProviderStatsResponse_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ModelStatsTimeSeriesDataPoint": {
+				"properties": {
+					"time": {
+						"type": "string"
+					},
+					"totalTokens": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"time",
+					"totalTokens"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ModelStatsResponse": {
+				"properties": {
+					"model": {
+						"type": "string"
+					},
+					"totalTokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"timeSeries": {
+						"items": {
+							"$ref": "#/components/schemas/ModelStatsTimeSeriesDataPoint"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"model",
+					"totalTokens",
+					"timeSeries"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_ModelStatsResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/ModelStatsResponse"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ModelStatsResponse.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ModelStatsResponse_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"SessionResult": {
 				"properties": {
 					"created_at": {
@@ -19909,6 +20102,132 @@
 				],
 				"security": [],
 				"parameters": [
+					{
+						"description": "Time range: \"24h\", \"7d\", \"30d\", \"3m\", or \"1y\"",
+						"in": "query",
+						"name": "timeframe",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/StatsTimeFrame"
+						}
+					}
+				]
+			}
+		},
+		"/v1/public/stats/authors/{author}": {
+			"get": {
+				"operationId": "GetAuthorStats",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_AuthorStatsResponse.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get statistics for a specific model author.\nReturns time series data and a leaderboard of top models by that author.",
+				"tags": [
+					"Stats"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "The author identifier (e.g., \"openai\", \"anthropic\")",
+						"in": "path",
+						"name": "author",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "Time range: \"24h\", \"7d\", \"30d\", \"3m\", or \"1y\"",
+						"in": "query",
+						"name": "timeframe",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/StatsTimeFrame"
+						}
+					}
+				]
+			}
+		},
+		"/v1/public/stats/providers/{provider}": {
+			"get": {
+				"operationId": "GetProviderStats",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ProviderStatsResponse.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get statistics for a specific inference provider.\nReturns time series data and a leaderboard of top models on that provider.",
+				"tags": [
+					"Stats"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "The provider identifier (e.g., \"openai\", \"anthropic\")",
+						"in": "path",
+						"name": "provider",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "Time range: \"24h\", \"7d\", \"30d\", \"3m\", or \"1y\"",
+						"in": "query",
+						"name": "timeframe",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/StatsTimeFrame"
+						}
+					}
+				]
+			}
+		},
+		"/v1/public/stats/models/{model}": {
+			"get": {
+				"operationId": "GetModelStats",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ModelStatsResponse.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get usage statistics for a specific model.\nReturns time series data showing token usage over time.",
+				"tags": [
+					"Stats"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "The model identifier (e.g., \"gpt-4\", \"claude-3-opus\")",
+						"in": "path",
+						"name": "model",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
 					{
 						"description": "Time range: \"24h\", \"7d\", \"30d\", \"3m\", or \"1y\"",
 						"in": "query",
