@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { marked } from "marked";
+import DOMPurify from "dompurify";
 import { highlight, languages } from "prismjs";
 import "prismjs/components/prism-markdown";
 import "prismjs/components/prism-markup-templating";
@@ -72,9 +73,10 @@ const TextbookCourse: React.FC<TextbookCourseProps> = ({
 
   const renderMarkdown = (content: string): JSX.Element => {
     const html = marked.parse(content) as string;
+    const sanitizedHtml = DOMPurify.sanitize(html);
     return (
       <div
-        dangerouslySetInnerHTML={{ __html: html }}
+        dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
         className="prose prose-indigo max-w-none"
         style={{
           fontFamily: '"Fira Code", "Fira Mono", monospace',

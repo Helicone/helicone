@@ -15,6 +15,7 @@ import {
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { createHighlighter } from "shiki";
+import DOMPurify from "dompurify";
 
 // Create a singleton highlighter instance
 const highlighterPromise = createHighlighter({
@@ -296,8 +297,13 @@ const ShikiHighlightedCode: React.FC<{
         lang: language,
         theme: "github-dark",
       });
+      // Sanitize the HTML to prevent XSS attacks
+      const sanitizedHtml = DOMPurify.sanitize(html, {
+        ALLOWED_TAGS: ["pre", "code", "span", "div"],
+        ALLOWED_ATTR: ["class", "style"],
+      });
       // Apply custom CSS to override any center alignment and add rounded corners
-      const formattedHtml = html.replace(
+      const formattedHtml = sanitizedHtml.replace(
         /<pre class="shiki"/,
         '<pre class="shiki rounded-lg" style="text-align: left;"',
       );

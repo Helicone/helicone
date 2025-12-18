@@ -17,6 +17,18 @@ import { Input } from "@/components/ui/input";
 import { InfoBox } from "@/components/ui/helicone/infoBox";
 import { logger } from "@/lib/telemetry/logger";
 
+// XSS protection helpers
+const escapeHtml = (str: string): string =>
+  str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+const escapeRegExp = (str: string): string =>
+  str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 interface SettingType {
   name: string;
   settings: any;
@@ -382,10 +394,12 @@ const AdminSettings = () => {
               <div className="divide-y">
                 {settings.map((setting: SettingType) => {
                   // Highlight matching parts in the name when searching
-                  let displayName = setting.name;
+                  // Escape HTML to prevent XSS, then escape regex special chars
+                  let displayName = escapeHtml(setting.name);
                   if (searchQuery) {
-                    const regex = new RegExp(`(${searchQuery})`, "gi");
-                    displayName = setting.name.replace(
+                    const escapedQuery = escapeRegExp(escapeHtml(searchQuery));
+                    const regex = new RegExp(`(${escapedQuery})`, "gi");
+                    displayName = displayName.replace(
                       regex,
                       '<mark class="bg-yellow-200 dark:bg-yellow-800 px-1 rounded">$1</mark>',
                     );

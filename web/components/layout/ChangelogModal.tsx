@@ -5,6 +5,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ChangelogItem } from "./auth/types";
+import DOMPurify from "dompurify";
 
 const ChangelogModal = ({
   open,
@@ -36,7 +37,9 @@ const ChangelogModal = ({
             )}
             <div
               className="prose prose-sm dark:prose-invert prose-h2:text-base prose-h3:text-base"
-              dangerouslySetInnerHTML={{ __html: changelog["content:encoded"] }}
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(changelog["content:encoded"]),
+              }}
             />
           </div>
         </DialogContent>
