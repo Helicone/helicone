@@ -15,6 +15,7 @@ export const CHART_COLORS = {
   yellow: "hsl(48, 100%, 50%)", // Bright yellow
   indigo: "hsl(243, 100%, 62%)", // Vivid indigo
   teal: "hsl(173, 100%, 35%)", // Deep teal
+  projection: "hsla(240, 4%, 46%, 0.4)",
 } as const;
 
 // Color arrays for multi-line charts
