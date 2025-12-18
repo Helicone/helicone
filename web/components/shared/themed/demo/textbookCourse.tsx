@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { marked } from "marked";
-import DOMPurify from "dompurify";
+import DOMPurify from "isomorphic-dompurify";
 import { highlight, languages } from "prismjs";
 import "prismjs/components/prism-markdown";
 import "prismjs/components/prism-markup-templating";
