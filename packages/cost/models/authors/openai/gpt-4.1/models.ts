@@ -46,6 +46,18 @@ export const models = {
     tokenizer: "GPT",
     pinnedVersionOfModel: "gpt-4.1-mini",
   },
+  "gpt-4.1-nano-2025-04-14": {
+    name: "OpenAI GPT-4.1 Nano",
+    author: "openai",
+    description:
+      "For tasks that demand low latency, GPT-4.1 nano is the fastest and cheapest model in the GPT-4.1 series. It delivers exceptional performance at a small size with its 1 million token context window, and scores 80.1% on MMLU, 50.3% on GPQA, and 9.8% on Aider polyglot coding – even higher than GPT-4o mini. It's ideal for tasks like classification or autocompletion.",
+    contextLength: 1047576,
+    maxOutputTokens: 32768,
+    created: "2025-04-14T17:22:49.000Z",
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
+    tokenizer: "GPT",
+    pinnedVersionOfModel: "gpt-4.1-nano",
+  },
 } satisfies Record<string, ModelConfig>;
 
 export type GPT41ModelName = keyof typeof models;
