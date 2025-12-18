@@ -112,7 +112,7 @@ export class ModelUsageStatsManager {
     const top9Data = top9Result.data ?? [];
     const top9Set = new Set(top9Data.map((r) => r.model));
     const inClause = top9Data.length > 0 
-    ? top9Data.map((r) => `'${r.provider}'`).join(",")
+      ? top9Data.map((r) => `'${r.model}'`).join(",") 
       : "''";
 
     // Step 2: Get "other" total + previous period data + time series (parallel)
