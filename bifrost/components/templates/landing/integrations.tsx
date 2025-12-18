@@ -10,7 +10,7 @@ import { toast, Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight, ChevronRight } from "lucide-react";
 import { createHighlighter } from "shiki";
-import DOMPurify from "dompurify";
+import DOMPurify from "isomorphic-dompurify";
 
 // Create a singleton highlighter instance
 const highlighterPromise = createHighlighter({

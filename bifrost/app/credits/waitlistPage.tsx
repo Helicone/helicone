@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/accordion";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import DOMPurify from "dompurify";
+import DOMPurify from "isomorphic-dompurify";
 
 export default function WaitlistPage() {
   const [waitlistCount, setWaitlistCount] = useState<number | null>(null);

@@ -26,7 +26,7 @@ import { components } from "@/lib/clients/jawnTypes/public";
 import { StandardParameter } from "@helicone-package/cost/models/types";
 import { capitalizeModality } from "@/lib/constants/modalities";
 import { ModelSearchDropdown } from "@/components/models/ModelSearchDropdown";
-import DOMPurify from "dompurify";
+import DOMPurify from "isomorphic-dompurify";
 
 type ModelRegistryItem = components["schemas"]["ModelRegistryItem"];
 
