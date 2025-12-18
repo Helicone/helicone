@@ -2323,6 +2323,77 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "google/gemini-3-flash-preview": {
+    "gemini-3-flash-preview:google-ai-studio": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "gemini-3-flash-preview",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "google-ai-studio",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-3-flash-preview:openrouter": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "google/gemini-3-flash-preview",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-3-flash-preview:vertex": {
+      "context": 1048576,
+      "crossRegion": true,
+      "maxTokens": 65536,
+      "modelId": "gemini-3-flash-preview",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "vertex",
+      "ptbEnabled": true,
+      "regions": [
+        "global",
+      ],
+    },
+  },
   "google/gemini-3-pro-image": {
     "gemini-3-pro-image-preview:google-ai-studio": {
       "context": 65536,
@@ -5934,6 +6005,11 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "vertex",
   ],
+  "google/gemini-3-flash-preview": [
+    "google-ai-studio",
+    "openrouter",
+    "vertex",
+  ],
   "google/gemini-3-pro-image": [
     "google-ai-studio",
     "openrouter",
@@ -7286,6 +7362,43 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "google/gemini-3-flash-preview": {
+    "google-ai-studio": [
+      {
+        "audio": {
+          "cachedInputMultiplier": 0.1,
+          "input": 0.000001,
+        },
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+        },
+        "input": 5e-7,
+        "output": 0.000003,
+        "threshold": 0,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 5.2775e-7,
+        "output": 0.000003165,
+        "threshold": 0,
+      },
+    ],
+    "vertex": [
+      {
+        "audio": {
+          "cachedInputMultiplier": 0.1,
+          "input": 0.000001,
+        },
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+        },
+        "input": 5e-7,
+        "output": 0.000003,
+        "threshold": 0,
+      },
+    ],
+  },
   "google/gemini-3-pro-image": {
     "google-ai-studio": [
       {
@@ -8076,6 +8189,14 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "gemini-3-flash-preview",
+      "providers": [
+        "google-ai-studio",
+        "openrouter",
+        "vertex",
+      ],
+    },
+    {
       "model": "gemini-3-pro-image-preview",
       "providers": [
         "google-ai-studio",
@@ -8632,7 +8753,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "fireworks",
     },
     {
-      "modelCount": 5,
+      "modelCount": 6,
       "provider": "google-ai-studio",
     },
     {
@@ -8660,7 +8781,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "openai",
     },
     {
-      "modelCount": 59,
+      "modelCount": 60,
       "provider": "openrouter",
     },
     {
@@ -8668,7 +8789,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "perplexity",
     },
     {
-      "modelCount": 17,
+      "modelCount": 18,
       "provider": "vertex",
     },
     {
@@ -8702,6 +8823,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "gemini-2.5-flash",
     "gemini-2.5-flash-lite",
     "gemini-2.5-pro",
+    "gemini-3-flash-preview",
     "gemini-3-pro-image-preview",
     "gemini-3-pro-preview",
     "gemma-3-12b-it",
@@ -8782,9 +8904,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 257,
-  "totalModelProviderConfigs": 257,
-  "totalModelsWithPtb": 95,
+  "totalEndpoints": 259,
+  "totalModelProviderConfigs": 259,
+  "totalModelsWithPtb": 96,
   "totalProviders": 21,
 }
 `;
