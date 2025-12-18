@@ -2075,6 +2075,8 @@ Json: JsonObject;
       /** Format: double */
       completion_tokens: number | null;
       /** Format: double */
+      reasoning_tokens: number | null;
+      /** Format: double */
       prompt_audio_tokens: number | null;
       /** Format: double */
       completion_audio_tokens: number | null;
