@@ -309,7 +309,7 @@ function QueryList({
     }
   };
 
-  const [examplesExpanded, setExamplesExpanded] = useState(true);
+  const [examplesExpanded, setExamplesExpanded] = useState(false);
 
   return (
     <>
