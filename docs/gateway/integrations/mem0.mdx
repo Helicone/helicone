@@ -1,0 +1,230 @@
+---
+title: "Mem0 Integration"
+sidebarTitle: "Mem0"
+description: "Integrate Helicone AI Gateway with Mem0 to add persistent memory to your AI applications with full observability."
+"twitter:title": "Mem0 Integration - Helicone OSS LLM Observability"
+iconType: "solid"
+---
+
+import { strings } from "/snippets/strings.mdx";
+import Star from "/snippets/star.mdx";
+
+## Introduction
+
+[Mem0](https://mem0.ai) is an intelligent memory layer for AI applications that enables personalized interactions by remembering user preferences, adapting to individual needs, and learning over time.
+
+## Integration Steps
+
+<Steps>
+  <Step title={strings.generateKey}>
+    <div dangerouslySetInnerHTML={{ __html: strings.generateKeyInstructions }} />
+
+    ```env
+    HELICONE_API_KEY=sk-helicone-...
+    ```
+  </Step>
+
+  <Step title={strings.installRequiredDependencies}>
+    ```bash
+    pip install mem0ai openai python-dotenv
+    ```
+  </Step>
+
+  <Step title={strings.startUsing("Mem0")}>
+    Point Mem0's LLM and embedder to Helicone's AI gateway.
+
+    ```python
+    import os
+    from mem0 import Memory
+    from dotenv import load_dotenv
+
+    load_dotenv()
+
+    config = {
+        "llm": {
+            "provider": "openai",
+            "config": {
+                "model": "gpt-4o-mini",
+                "api_key": os.environ["HELICONE_API_KEY"],
+                "openai_base_url": "https://ai-gateway.helicone.ai/v1"
+            }
+        },
+        "embedder": {
+            "provider": "openai",
+            "config": {
+                "model": "text-embedding-3-small"
+            }
+        },
+    }
+
+    memory = Memory.from_config(config)
+    ```
+
+    <div dangerouslySetInnerHTML={{ __html: strings.modelRegistryDescription }} />
+  </Step>
+
+  <Step title="Make requests with Mem0">
+    ```python
+    # OpenAI client for chat completions
+    client = OpenAI(
+        api_key=os.environ["HELICONE_API_KEY"],
+        base_url="https://ai-gateway.helicone.ai/v1"
+    )
+
+    def chat(message: str, user_id: str = "user") -> str:
+        # Retrieve relevant memories
+        memories = memory.search(query=message, user_id=user_id, limit=3)
+        memories_str = "\n".join(f"- {m['memory']}" for m in memories.get("results", []))
+
+        # Generate response
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": f"You are a helpful AI. User memories: {memories_str}"},
+                {"role": "user", "content": message}
+            ]
+        )
+
+        assistant_response = response.choices[0].message.content
+
+        # Store conversation in memory
+        memory.add([
+            {"role": "user", "content": message},
+            {"role": "assistant", "content": assistant_response}
+        ], user_id=user_id)
+
+        return assistant_response
+
+    # Example usage
+    print(chat("Hi, I'm Alex and I love basketball."))
+    print(chat("What do you remember about me?"))
+    ```
+  </Step>
+
+  <Step title={strings.viewRequestsInDashboard}>
+    <div dangerouslySetInnerHTML={{ __html: strings.viewRequestsInDashboardDescription("Mem0") }} />
+
+    - Memory extraction and embedding requests
+    - Token usage and costs
+    - Latency metrics
+    - Request/response bodies
+
+    <Star />
+  </Step>
+</Steps>
+
+## Complete Working Example
+
+```python
+import os
+from openai import OpenAI
+from mem0 import Memory
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Configure Mem0 with Helicone AI Gateway
+config = {
+    "llm": {
+        "provider": "openai",
+        "config": {
+            "model": "gpt-4o-mini",
+            "api_key": os.environ["HELICONE_API_KEY"],
+            "openai_base_url": "https://ai-gateway.helicone.ai/v1"
+        }
+    },
+    "embedder": {
+        "provider": "openai",
+        "config": {
+            "model": "text-embedding-3-small"
+        }
+    },
+}
+
+memory = Memory.from_config(config)
+
+# OpenAI client for chat completions
+client = OpenAI(
+    api_key=os.environ["HELICONE_API_KEY"],
+    base_url="https://ai-gateway.helicone.ai/v1"
+)
+
+
+def chat(message: str, user_id: str = "user") -> str:
+    # Retrieve relevant memories
+    memories = memory.search(query=message, user_id=user_id, limit=3)
+    memories_str = "\n".join(f"- {m['memory']}" for m in memories.get("results", []))
+
+    # Generate response
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": f"You are a helpful AI.\n\nUser memories:\n{memories_str}"},
+            {"role": "user", "content": message}
+        ],
+    )
+
+    assistant_response = response.choices[0].message.content
+
+    # Store conversation in memory
+    memory.add([
+        {"role": "user", "content": message},
+        {"role": "assistant", "content": assistant_response}
+    ], user_id=user_id)
+
+    return assistant_response
+
+
+# Example usage
+print(chat("Hi, I'm Alex and I love basketball."))
+print(chat("What do you remember about me?"))
+```
+
+## Custom Vector Store
+
+Configure Mem0 with a persistent vector store:
+
+```python
+config = {
+    "llm": {
+        "provider": "openai",
+        "config": {
+            "model": "gpt-4o-mini",
+            "api_key": os.environ["HELICONE_API_KEY"],
+            "openai_base_url": "https://ai-gateway.helicone.ai/v1"
+        }
+    },
+    "embedder": {
+        "provider": "openai",
+        "config": {
+            "model": "text-embedding-3-small"
+        }
+    },
+    "vector_store": {
+        "provider": "chroma",
+        "config": {
+            "collection_name": "memories",
+            "path": "./chroma_data"
+        }
+    },
+}
+
+memory = Memory.from_config(config)
+```
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="AI Gateway Overview" icon="arrow-progress" href="/gateway/overview">
+    Learn about Helicone's AI Gateway features and capabilities
+  </Card>
+  <Card title="Provider Routing" icon="route" href="/gateway/provider-routing">
+    Configure intelligent routing and automatic failover
+  </Card>
+  <Card title="Model Registry" icon="database" href="https://helicone.ai/models">
+    Browse all available models and providers
+  </Card>
+  <Card title="Mem0 Documentation" icon="book" href="https://docs.mem0.ai">
+    Official Mem0 documentation
+  </Card>
+</CardGroup>
