@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/accordion";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import DOMPurify from "dompurify";
 
 export default function WaitlistPage() {
   const [waitlistCount, setWaitlistCount] = useState<number | null>(null);
@@ -79,8 +80,14 @@ const response = await client.chat.completions.create({
           theme: "github-dark",
         });
 
+        // Sanitize the HTML to prevent XSS attacks
+        const sanitizedHtml = DOMPurify.sanitize(html, {
+          ALLOWED_TAGS: ["pre", "code", "span", "div"],
+          ALLOWED_ATTR: ["class", "style"],
+        });
+
         if (mounted) {
-          setHighlightedCode(html);
+          setHighlightedCode(sanitizedHtml);
         }
       } catch (error) {
         console.error("Failed to highlight code:", error);

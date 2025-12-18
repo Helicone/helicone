@@ -10,6 +10,7 @@ import { toast, Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight, ChevronRight } from "lucide-react";
 import { createHighlighter } from "shiki";
+import DOMPurify from "dompurify";
 
 // Create a singleton highlighter instance
 const highlighterPromise = createHighlighter({
@@ -229,7 +230,12 @@ response = client.chat.completions.create(
               : "python",
         theme: "github-dark",
       });
-      setHighlightedCode(html);
+      // Sanitize the HTML to prevent XSS attacks
+      const sanitizedHtml = DOMPurify.sanitize(html, {
+        ALLOWED_TAGS: ["pre", "code", "span", "div"],
+        ALLOWED_ATTR: ["class", "style"],
+      });
+      setHighlightedCode(sanitizedHtml);
     };
 
     updateHighlightedCode();

@@ -26,6 +26,7 @@ import { components } from "@/lib/clients/jawnTypes/public";
 import { StandardParameter } from "@helicone-package/cost/models/types";
 import { capitalizeModality } from "@/lib/constants/modalities";
 import { ModelSearchDropdown } from "@/components/models/ModelSearchDropdown";
+import DOMPurify from "dompurify";
 
 type ModelRegistryItem = components["schemas"]["ModelRegistryItem"];
 
@@ -199,8 +200,14 @@ completion = client.chat.completions.create(
           theme: "github-dark",
         });
 
+        // Sanitize the HTML to prevent XSS attacks
+        const sanitizedHtml = DOMPurify.sanitize(html, {
+          ALLOWED_TAGS: ["pre", "code", "span", "div"],
+          ALLOWED_ATTR: ["class", "style"],
+        });
+
         if (mounted) {
-          setHighlightedCode(html);
+          setHighlightedCode(sanitizedHtml);
         }
       } catch (error) {
         console.error("Failed to highlight code:", error);
