@@ -101,18 +101,6 @@ export const models = {
     tokenizer: "GPT",
     pinnedVersionOfModel: "gpt-5-nano",
   },
-  "gpt-5-chat-2025-08-07": {
-    name: "OpenAI GPT-5 Chat",
-    author: "openai",
-    description:
-      "GPT-5 Chat is a dated snapshot of the conversational version of GPT-5 optimized for dialogue interactions. It features a 128K context window and 16K max output tokens, making it ideal for focused conversations. This version is pinned to ensure consistency across deployments.",
-    contextLength: 128000,
-    maxOutputTokens: 16384,
-    created: "2025-08-07T00:00:00.000Z",
-    modality: { inputs: ["text", "image"], outputs: ["text"] },
-    tokenizer: "GPT",
-    pinnedVersionOfModel: "gpt-5-chat-latest",
-  },
   "gpt-5-pro-2025-10-01": {
     name: "OpenAI: GPT-5 Pro",
     author: "openai",

@@ -34,18 +34,6 @@ export const models = {
     modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
   },
-  "gpt-4o-mini-search-preview-2025-03-11": {
-    name: "OpenAI GPT-4o-mini Search Preview",
-    author: "openai",
-    description:
-      "GPT-4o mini is OpenAI's most cost-effective model with enhanced web search capabilities. This preview version supports both text and image inputs with text outputs. As their most advanced small model, it is many multiples more affordable than other recent frontier models, and more than 60% cheaper than GPT-3.5 Turbo. It maintains SOTA intelligence while being significantly more cost-effective, with integrated web search functionality.",
-    contextLength: 128000,
-    maxOutputTokens: 16384,
-    created: "2025-03-11T00:00:00.000Z",
-    modality: { inputs: ["text", "image"], outputs: ["text"] },
-    tokenizer: "GPT",
-    pinnedVersionOfModel: "gpt-4o-mini",
-  },
 } satisfies Record<string, ModelConfig>;
 
 export type GPT4oModelName = keyof typeof models;
