@@ -21,6 +21,7 @@ import { DelayedOperationService } from "./lib/shared/delayedOperationService";
 import { runLoopsOnce, runMainLoops } from "./mainLoops";
 import { authFromRequest, authMiddleware } from "./middleware/auth";
 import { IS_RATE_LIMIT_ENABLED, limiter } from "./middleware/ratelimitter";
+import { unauthorizedCacheMiddleware } from "./middleware/unauthorizedCache";
 import { RegisterRoutes as registerPrivateTSOARoutes } from "./tsoa-build/private/routes";
 import { RegisterRoutes as registerPublicTSOARoutes } from "./tsoa-build/public/routes";
 import * as publicSwaggerDoc from "./tsoa-build/public/swagger.json";
@@ -183,10 +184,10 @@ unAuthenticatedRouter.use("/download/swagger.json", (req, res) => {
   res.json(publicSwaggerDoc as any);
 });
 
-// v1APIRouter.use(
-//   "/v1/public/dataisbeautiful",
-//   unauthorizedCacheMiddleware("/v1/public/dataisbeautiful")
-// );
+v1APIRouter.use(
+  "/v1/public/stats",
+  unauthorizedCacheMiddleware("stats", 4 * 60 * 60 * 1000)
+);
 
 v1APIRouter.use(authMiddleware);
 

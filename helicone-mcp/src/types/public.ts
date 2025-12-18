@@ -418,6 +418,27 @@ export interface paths {
   "/v1/test/gateway-request": {
     post: operations["SendTestRequest"];
   };
+  "/v1/public/stats/model-usage": {
+    /**
+     * @description Get model usage statistics for the AI Gateway.
+     * Returns time series data and a leaderboard of top models by total tokens.
+     */
+    get: operations["GetModelUsage"];
+  };
+  "/v1/public/stats/market-share": {
+    /**
+     * @description Get market share statistics by model author for the AI Gateway.
+     * Returns time series data (100% stacked) and a leaderboard of top 9 authors + others.
+     */
+    get: operations["GetMarketShare"];
+  };
+  "/v1/public/stats/provider-usage": {
+    /**
+     * @description Get provider usage statistics for the AI Gateway.
+     * Returns time series data and a leaderboard of top 9 providers + others.
+     */
+    get: operations["GetProviderUsage"];
+  };
   "/v1/session/query": {
     post: operations["GetSessions"];
   };
@@ -2521,6 +2542,99 @@ Json: JsonObject;
     SendTestRequestRequest: {
       apiKey: string;
     };
+    ModelTokens: {
+      model: string;
+      /** Format: double */
+      totalTokens: number;
+    };
+    ModelUsageTimeSeriesDataPoint: {
+      time: string;
+      models: components["schemas"]["ModelTokens"][];
+    };
+    ModelUsageLeaderboardEntry: {
+      /** Format: double */
+      rank: number;
+      model: string;
+      author: string;
+      /** Format: double */
+      totalTokens: number;
+      /** Format: double */
+      percentChange: number | null;
+    };
+    ModelUsageResponse: {
+      timeSeries: components["schemas"]["ModelUsageTimeSeriesDataPoint"][];
+      leaderboard: components["schemas"]["ModelUsageLeaderboardEntry"][];
+    };
+    ResultSuccess_ModelUsageResponse_: {
+      data: components["schemas"]["ModelUsageResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ModelUsageResponse.string_": components["schemas"]["ResultSuccess_ModelUsageResponse_"] | components["schemas"]["ResultError_string_"];
+    /** @enum {string} */
+    StatsTimeFrame: "24h" | "7d" | "30d" | "3m" | "1y";
+    AuthorTokens: {
+      author: string;
+      /** Format: double */
+      totalTokens: number;
+      /** Format: double */
+      percentage: number;
+    };
+    MarketShareTimeSeriesDataPoint: {
+      time: string;
+      authors: components["schemas"]["AuthorTokens"][];
+    };
+    MarketShareLeaderboardEntry: {
+      /** Format: double */
+      rank: number;
+      author: string;
+      /** Format: double */
+      totalTokens: number;
+      /** Format: double */
+      marketShare: number;
+      /** Format: double */
+      rankChange: number | null;
+      /** Format: double */
+      marketShareChange: number | null;
+    };
+    MarketShareResponse: {
+      timeSeries: components["schemas"]["MarketShareTimeSeriesDataPoint"][];
+      leaderboard: components["schemas"]["MarketShareLeaderboardEntry"][];
+    };
+    ResultSuccess_MarketShareResponse_: {
+      data: components["schemas"]["MarketShareResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_MarketShareResponse.string_": components["schemas"]["ResultSuccess_MarketShareResponse_"] | components["schemas"]["ResultError_string_"];
+    ProviderTokens: {
+      provider: string;
+      /** Format: double */
+      totalTokens: number;
+    };
+    ProviderUsageTimeSeriesDataPoint: {
+      time: string;
+      providers: components["schemas"]["ProviderTokens"][];
+    };
+    ProviderUsageLeaderboardEntry: {
+      /** Format: double */
+      rank: number;
+      provider: string;
+      /** Format: double */
+      totalTokens: number;
+      /** Format: double */
+      percentChange: number | null;
+    };
+    ProviderUsageResponse: {
+      timeSeries: components["schemas"]["ProviderUsageTimeSeriesDataPoint"][];
+      leaderboard: components["schemas"]["ProviderUsageLeaderboardEntry"][];
+    };
+    ResultSuccess_ProviderUsageResponse_: {
+      data: components["schemas"]["ProviderUsageResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ProviderUsageResponse.string_": components["schemas"]["ResultSuccess_ProviderUsageResponse_"] | components["schemas"]["ResultError_string_"];
     SessionResult: {
       created_at: string;
       latest_request_created_at: string;
@@ -6744,6 +6858,66 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["SendTestRequestResponse"];
+        };
+      };
+    };
+  };
+  /**
+   * @description Get model usage statistics for the AI Gateway.
+   * Returns time series data and a leaderboard of top models by total tokens.
+   */
+  GetModelUsage: {
+    parameters: {
+      query?: {
+        /** @description Time range: "24h", "7d", "30d", "3m", or "1y" */
+        timeframe?: components["schemas"]["StatsTimeFrame"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ModelUsageResponse.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * @description Get market share statistics by model author for the AI Gateway.
+   * Returns time series data (100% stacked) and a leaderboard of top 9 authors + others.
+   */
+  GetMarketShare: {
+    parameters: {
+      query?: {
+        /** @description Time range: "24h", "7d", "30d", "3m", or "1y" */
+        timeframe?: components["schemas"]["StatsTimeFrame"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_MarketShareResponse.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * @description Get provider usage statistics for the AI Gateway.
+   * Returns time series data and a leaderboard of top 9 providers + others.
+   */
+  GetProviderUsage: {
+    parameters: {
+      query?: {
+        /** @description Time range: "24h", "7d", "30d", "3m", or "1y" */
+        timeframe?: components["schemas"]["StatsTimeFrame"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ProviderUsageResponse.string_"];
         };
       };
     };
