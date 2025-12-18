@@ -150,7 +150,7 @@ export function ModelUsageChart({
   isLoading,
   timeframe,
 }: ModelUsageChartProps) {
-  const { chartData, models, chartConfig, showProjection, lastBarIndex } = useMemo(() => {
+  const { chartData, models, chartConfig, showProjection } = useMemo(() => {
     const modelSet = new Set<string>();
     data.forEach((point) => {
       point.models.forEach((m) => modelSet.add(m.model));
@@ -200,7 +200,7 @@ export function ModelUsageChart({
       };
     });
 
-    return { chartData, models, chartConfig, showProjection, lastBarIndex: data.length - 1 };
+    return { chartData, models, chartConfig, showProjection };
   }, [data, timeframe]);
 
   if (isLoading) {
