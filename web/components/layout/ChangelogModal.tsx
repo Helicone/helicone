@@ -5,7 +5,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ChangelogItem } from "./auth/types";
-import DOMPurify from "dompurify";
+import DOMPurify from "isomorphic-dompurify";
 
 const ChangelogModal = ({
   open,
