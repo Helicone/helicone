@@ -12,7 +12,6 @@ import {
 import { cn } from "@/lib/utils";
 import {
   X,
-  Briefcase,
   Mail,
   BookHeart,
   ChevronRight,
@@ -311,15 +310,6 @@ const additionalComponents: LinkItem[] = [
     icon: <Mail className="size-5 navbar-icon-style" />,
   },
   {
-    title: "Careers",
-    link: {
-      href: "https://app.dover.com/jobs/helicone",
-      isExternal: true,
-    },
-    description: "Join our team",
-    icon: <Briefcase className="size-5 navbar-icon-style" />,
-  },
-  {
     title: "GitHub",
     link: {
       href: "https://github.com/helicone/helicone",
@@ -489,18 +479,6 @@ const NavBar = (props: NavBarProps) => {
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
-              {/* Careers */}
-              <NavigationMenuItem>
-                <Link
-                  href="https://app.dover.com/jobs/helicone"
-                  legacyBehavior
-                  passHref
-                >
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    Careers
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
 
