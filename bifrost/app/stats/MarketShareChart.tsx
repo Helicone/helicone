@@ -88,7 +88,7 @@ function CustomTooltip({
       </div>
       <div className="space-y-2">
         {sortedPayload.map((item) => {
-          const authorKey = item.dataKey; // Authors use dataKey directly without sanitization
+          const authorKey = item.dataKey;
           const author = chartConfig[authorKey]?.label || authorKey;
           const originalAuthor = originalPoint?.authors.find(
             (a) => a.author === authorKey
@@ -137,14 +137,12 @@ export function MarketShareChart({ data, isLoading, timeframe = "1y" }: MarketSh
     });
     const authors = Array.from(authorSet);
 
-    // Calculate time progress for the last data point
     const lastTimestamp = data.length > 0 ? data[data.length - 1].time : "";
     const timeProgress = lastTimestamp
       ? calculateTimeProgress(lastTimestamp, timeframe)
       : 0;
     const showProjection = shouldShowProjection(data.length, timeProgress);
 
-    // Calculate projected token additions for each author
     const projectedTokens: Record<string, number> = {};
     if (showProjection) {
       authors.forEach((author) => {
@@ -168,11 +166,9 @@ export function MarketShareChart({ data, isLoading, timeframe = "1y" }: MarketSh
         0
       );
 
-      // For the last bar with projections, calculate projected percentages
       const isLastBar = index === data.length - 1;
       let totalProjectedTokens = 0;
       if (isLastBar && showProjection) {
-        // Calculate total projected tokens for the last bar
         const currentTotal = point.authors.reduce((sum, a) => sum + a.totalTokens, 0);
         const projectedAdditions = Object.values(projectedTokens).reduce((sum, v) => sum + v, 0);
         totalProjectedTokens = currentTotal + projectedAdditions;
@@ -185,11 +181,8 @@ export function MarketShareChart({ data, isLoading, timeframe = "1y" }: MarketSh
           totalPercentage > 0 ? (rawPercentage / totalPercentage) * 100 : 0;
         entry[author] = normalizedPercentage;
 
-        // Add projection percentage for the last bar
-        // The projection shows what additional % each author would have
         if (isLastBar && showProjection && totalProjectedTokens > 0) {
           const projectedAddition = projectedTokens[author] ?? 0;
-          // Convert token projection to percentage of total projected tokens
           const projectedPercentageAddition = (projectedAddition / totalProjectedTokens) * 100;
           entry[`${author}_projection`] = projectedPercentageAddition;
         } else {
@@ -273,7 +266,6 @@ export function MarketShareChart({ data, isLoading, timeframe = "1y" }: MarketSh
               radius={0}
             />
           ))}
-          {/* Projection bars - stacked on top of actual data */}
           {showProjection &&
             authors.map((author) => (
               <Bar

@@ -63,8 +63,6 @@ function CustomTooltip({ active, payload, chartConfig, showProjection }: CustomT
   const rawTime = payload[0]?.payload?.rawTime as string | undefined;
   const isLastBar = payload[0]?.payload?.isLastBar as boolean | undefined;
 
-  // Filter out projection entries from the main display and zero values
-  // Combine actual + projection values for each provider
   const providerValues: Record<string, { actual: number; projection: number; fill: string }> = {};
 
   payload.forEach((item) => {
@@ -159,7 +157,6 @@ export function ProviderUsageChart({
     });
     const providers = Array.from(providerSet);
 
-    // Calculate time progress for the last data point
     const lastTimestamp = data.length > 0 ? data[data.length - 1].time : "";
     const timeProgress = lastTimestamp
       ? calculateTimeProgress(lastTimestamp, timeframe)
@@ -177,9 +174,7 @@ export function ProviderUsageChart({
         const value = found?.totalTokens ?? 0;
         entry[sanitizeProviderName(provider)] = value;
 
-        // Add projection values for the last bar
         if (index === data.length - 1 && showProjection) {
-          // Get all values for this provider across time
           const providerValues = data.map((p) => {
             const prov = p.providers.find((pr) => pr.provider === provider);
             return prov?.totalTokens ?? 0;
@@ -199,7 +194,6 @@ export function ProviderUsageChart({
         label: provider,
         color: CHART_COLOR_PALETTE[index % CHART_COLOR_PALETTE.length],
       };
-      // Add projection config
       chartConfig[`${sanitizeProviderName(provider)}_projection`] = {
         label: `${provider} (projected)`,
         color: CHART_COLORS.projection,
@@ -258,7 +252,6 @@ export function ProviderUsageChart({
               radius={0}
             />
           ))}
-          {/* Projection bars - stacked on top of actual data */}
           {showProjection &&
             providers.map((provider) => (
               <Bar

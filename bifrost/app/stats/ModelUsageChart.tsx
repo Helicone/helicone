@@ -62,8 +62,6 @@ function CustomTooltip({ active, payload, chartConfig, showProjection }: CustomT
   const rawTime = payload[0]?.payload?.rawTime as string | undefined;
   const isLastBar = payload[0]?.payload?.isLastBar as boolean | undefined;
 
-  // Filter out projection entries from the main display and zero values
-  // Combine actual + projection values for each model
   const modelValues: Record<string, { actual: number; projection: number; fill: string }> = {};
 
   payload.forEach((item) => {
@@ -159,7 +157,6 @@ export function ModelUsageChart({
     });
     const models = Array.from(modelSet);
 
-    // Calculate time progress for the last data point
     const lastTimestamp = data.length > 0 ? data[data.length - 1].time : "";
     const timeProgress = lastTimestamp
       ? calculateTimeProgress(lastTimestamp, timeframe)
@@ -177,9 +174,7 @@ export function ModelUsageChart({
         const value = found?.totalTokens ?? 0;
         entry[sanitizeModelName(model)] = value;
 
-        // Add projection values for the last bar
         if (index === data.length - 1 && showProjection) {
-          // Get all values for this model across time
           const modelValues = data.map((p) => {
             const m = p.models.find((m) => m.model === model);
             return m?.totalTokens ?? 0;
@@ -199,7 +194,6 @@ export function ModelUsageChart({
         label: model,
         color: CHART_COLOR_PALETTE[index % CHART_COLOR_PALETTE.length],
       };
-      // Add projection config
       chartConfig[`${sanitizeModelName(model)}_projection`] = {
         label: `${model} (projected)`,
         color: CHART_COLORS.projection,
@@ -258,7 +252,6 @@ export function ModelUsageChart({
               radius={0}
             />
           ))}
-          {/* Projection bars - stacked on top of actual data */}
           {showProjection &&
             models.map((model) => (
               <Bar
