@@ -4123,94 +4123,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
-    "gpt-4o-search-preview-2025-03-11:azure": {
-      "context": 128000,
-      "crossRegion": false,
-      "maxTokens": 16384,
-      "modelId": "gpt-4o-search-preview-2025-03-11",
-      "parameters": [
-        "frequency_penalty",
-        "max_tokens",
-        "presence_penalty",
-        "response_format",
-        "seed",
-        "stop",
-        "temperature",
-        "tool_choice",
-        "tools",
-        "top_p",
-      ],
-      "provider": "azure",
-      "ptbEnabled": true,
-      "regions": [
-        "*",
-      ],
-    },
-    "gpt-4o-search-preview-2025-03-11:helicone": {
-      "context": 128000,
-      "crossRegion": false,
-      "maxTokens": 16384,
-      "modelId": "pa/gt-4p-sp",
-      "parameters": [
-        "frequency_penalty",
-        "max_tokens",
-        "presence_penalty",
-        "stop",
-        "temperature",
-        "top_p",
-      ],
-      "provider": "helicone",
-      "ptbEnabled": true,
-      "regions": [
-        "*",
-      ],
-    },
-    "gpt-4o-search-preview-2025-03-11:openai": {
-      "context": 128000,
-      "crossRegion": false,
-      "maxTokens": 16384,
-      "modelId": "gpt-4o-search-preview-2025-03-11",
-      "parameters": [
-        "frequency_penalty",
-        "max_tokens",
-        "presence_penalty",
-        "response_format",
-        "seed",
-        "stop",
-        "temperature",
-        "tool_choice",
-        "tools",
-        "top_p",
-      ],
-      "provider": "openai",
-      "ptbEnabled": true,
-      "regions": [
-        "*",
-      ],
-    },
-    "gpt-4o-search-preview-2025-03-11:openrouter": {
-      "context": 128000,
-      "crossRegion": false,
-      "maxTokens": 16384,
-      "modelId": "openai/gpt-4o-search-preview-2025-03-11",
-      "parameters": [
-        "frequency_penalty",
-        "max_tokens",
-        "presence_penalty",
-        "response_format",
-        "seed",
-        "stop",
-        "temperature",
-        "tool_choice",
-        "tools",
-        "top_p",
-      ],
-      "provider": "openrouter",
-      "ptbEnabled": true,
-      "regions": [
-        "*",
-      ],
-    },
     "gpt-4o:azure": {
       "context": 128000,
       "crossRegion": false,
@@ -4331,6 +4243,21 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "stop",
       ],
       "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-2025-08-07:novita": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "novita",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -4593,6 +4520,21 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "gpt-5-mini-2025-08-07:novita": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5-mini-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-5-mini-2025-08-07:openai": {
       "context": 400000,
       "crossRegion": false,
@@ -4741,6 +4683,21 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "gpt-5-nano-2025-08-07:novita": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5-nano-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-5-nano-2025-08-07:openai": {
       "context": 400000,
       "crossRegion": false,
@@ -4832,6 +4789,112 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "gpt-5-pro-2025-10-01:azure": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "gpt-5-pro-2025-10-01",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "azure",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-pro-2025-10-01:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5-pro-2025-10-01",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-pro-2025-10-01:novita": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5-pro-2025-10-01",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-pro-2025-10-01:openai": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "gpt-5-pro-2025-10-01",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-pro-2025-10-01:openrouter": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "openai/gpt-5-pro-2025-10-01",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-pro:azure": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "gpt-5-pro",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "azure",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-5-pro:helicone": {
       "context": 128000,
       "crossRegion": false,
@@ -4842,6 +4905,44 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "stop",
       ],
       "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-pro:openai": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "gpt-5-pro",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-pro:openrouter": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "openai/gpt-5-pro",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openrouter",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -4989,6 +5090,21 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "stop",
       ],
       "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.1-2025-11-13:novita": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5.1-2025-11-13",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "novita",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -6733,17 +6849,13 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "azure",
     "azure",
     "azure",
-    "azure",
     "helicone",
     "helicone",
     "helicone",
-    "helicone",
     "openai",
     "openai",
     "openai",
     "openai",
-    "openai",
-    "openrouter",
     "openrouter",
     "openrouter",
     "openrouter",
@@ -6756,6 +6868,8 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "azure",
     "azure",
     "azure",
+    "azure",
+    "azure",
     "helicone",
     "helicone",
     "helicone",
@@ -6766,6 +6880,11 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "helicone",
     "helicone",
     "helicone",
+    "helicone",
+    "novita",
+    "novita",
+    "novita",
+    "novita",
     "openai",
     "openai",
     "openai",
@@ -6775,6 +6894,10 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openai",
     "openai",
     "openai",
+    "openai",
+    "openai",
+    "openrouter",
+    "openrouter",
     "openrouter",
     "openrouter",
     "openrouter",
@@ -6788,6 +6911,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   "openai/gpt-5.1": [
     "azure",
     "helicone",
+    "novita",
     "openai",
     "openai",
     "openai",
@@ -8346,41 +8470,40 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "openai/gpt-5": {
     "azure": [
       {
-        "cacheMultipliers": {
-          "cachedInput": 0.104,
-        },
-        "input": 2.5e-7,
-        "output": 0.000002,
+        "input": 0.000015,
+        "output": 0.00012,
         "threshold": 0,
         "web_search": 0.01,
       },
     ],
     "helicone": [
       {
-        "cacheMultipliers": {
-          "cachedInput": 0.1,
-        },
-        "input": 2.5e-7,
-        "output": 0.000002,
+        "input": 0.000015,
+        "output": 0.00012,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "novita": [
+      {
+        "input": 0.000015,
+        "output": 0.00012,
         "threshold": 0,
         "web_search": 0.01,
       },
     ],
     "openai": [
       {
-        "cacheMultipliers": {
-          "cachedInput": 0.1,
-        },
-        "input": 2.5e-7,
-        "output": 0.000002,
+        "input": 0.000015,
+        "output": 0.00012,
         "threshold": 0,
         "web_search": 0.01,
       },
     ],
     "openrouter": [
       {
-        "input": 2.6e-7,
-        "output": 0.00000211,
+        "input": 0.00001583,
+        "output": 0.0001266,
         "threshold": 0,
         "web_search": 0.01,
       },
@@ -8399,6 +8522,17 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
     "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+        },
+        "input": 0.00000125,
+        "output": 0.00001,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "novita": [
       {
         "cacheMultipliers": {
           "cachedInput": 0.1,
@@ -8994,15 +9128,6 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
-      "model": "gpt-4o-search-preview-2025-03-11",
-      "providers": [
-        "azure",
-        "helicone",
-        "openai",
-        "openrouter",
-      ],
-    },
-    {
       "model": "gpt-5",
       "providers": [
         "azure",
@@ -9016,6 +9141,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "providers": [
         "azure",
         "helicone",
+        "novita",
         "openai",
         "openrouter",
       ],
@@ -9059,6 +9185,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "providers": [
         "azure",
         "helicone",
+        "novita",
         "openai",
         "openrouter",
       ],
@@ -9076,6 +9203,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "providers": [
         "azure",
         "helicone",
+        "novita",
         "openai",
         "openrouter",
       ],
@@ -9083,7 +9211,20 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "gpt-5-pro",
       "providers": [
+        "azure",
         "helicone",
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
+      "model": "gpt-5-pro-2025-10-01",
+      "providers": [
+        "azure",
+        "helicone",
+        "novita",
+        "openai",
+        "openrouter",
       ],
     },
     {
@@ -9098,6 +9239,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "providers": [
         "azure",
         "helicone",
+        "novita",
         "openai",
         "openrouter",
       ],
@@ -9479,7 +9621,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "anthropic",
     },
     {
-      "modelCount": 18,
+      "modelCount": 19,
       "provider": "azure",
     },
     {
@@ -9535,15 +9677,15 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "nebius",
     },
     {
-      "modelCount": 15,
+      "modelCount": 20,
       "provider": "novita",
     },
     {
-      "modelCount": 32,
+      "modelCount": 33,
       "provider": "openai",
     },
     {
-      "modelCount": 68,
+      "modelCount": 69,
       "provider": "openrouter",
     },
     {
@@ -9599,7 +9741,6 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "gpt-4o",
     "gpt-4o-mini",
     "gpt-4o-mini-search-preview-2025-03-11",
-    "gpt-4o-search-preview-2025-03-11",
     "gpt-5",
     "gpt-5-2025-08-07",
     "gpt-5-chat-2025-08-07",
@@ -9610,6 +9751,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "gpt-5-nano",
     "gpt-5-nano-2025-08-07",
     "gpt-5-pro",
+    "gpt-5-pro-2025-10-01",
     "gpt-5.1",
     "gpt-5.1-2025-11-13",
     "gpt-5.1-chat-latest",
@@ -9674,8 +9816,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 292,
-  "totalModelProviderConfigs": 292,
+  "totalEndpoints": 300,
+  "totalModelProviderConfigs": 300,
   "totalModelsWithPtb": 104,
   "totalProviders": 21,
 }
