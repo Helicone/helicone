@@ -37,7 +37,10 @@ function linearRegression(values: number[]): { slope: number; intercept: number 
 
 /**
  * Calculate the projected value for the last bar based on trend analysis.
+ *
  * Uses linear regression on previous data points to project the final value.
+ * Since data has a 4-hour cache, pace-based projection will typically be behind,
+ * so we default to trend trajectory and only use pace if it projects higher.
  *
  * @param values - Array of numeric values (one per time bucket)
  * @param lastBarTimeProgress - Progress through the last bucket (0-1, e.g., 0.5 = halfway)
@@ -53,42 +56,24 @@ export function calculateProjection(
 
   const lastValue = values[values.length - 1];
 
-  // If no progress has been made, we can't project
-  if (lastBarTimeProgress === 0) {
-    return 0;
-  }
+  // Linear regression on previous complete buckets (excluding partial last bucket)
+  // This gives us the trend trajectory
+  const previousValues = values.slice(0, -1);
+  const { slope, intercept } = linearRegression(previousValues);
 
-  // Method 1: Simple extrapolation based on current progress
-  // If we're 50% through the bucket and have 100 tokens, project 200 total
-  const simpleProjection = lastValue / lastBarTimeProgress;
-
-  // Method 2: Linear regression on ALL values (including partial last bucket)
-  // This captures the trend and projects where we should be
-  const { slope, intercept } = linearRegression(values);
+  // Project what this bucket should be based on trend
   const lastIndex = values.length - 1;
-  // Project what the full bucket value should be based on trend
   const trendProjection = intercept + slope * lastIndex;
 
-  // Method 3: For the last bar specifically, use the trend to predict what
-  // the full value should be, but also consider current pace
-  // If the current pace (simple projection) is higher than trend, use a blend
-  // that favors the higher value (optimistic but grounded)
+  // Pace-based projection: extrapolate current value based on time progress
+  // Only use this if it's HIGHER than trend (since cached data is behind)
+  const paceProjection = lastValue / lastBarTimeProgress;
 
-  // Weight: favor simple projection more as we have more data in the current bucket
-  // At 50% progress, give equal weight. At 90% progress, heavily favor simple.
-  const simpleWeight = Math.min(lastBarTimeProgress * 1.2, 0.95);
+  // Use trend as default, but take pace if it's higher
+  const projection = Math.max(trendProjection, paceProjection);
 
-  // Take the maximum of trend and simple, then blend slightly toward the other
-  // This ensures we don't underproject when there's clear growth
-  const maxProjection = Math.max(simpleProjection, trendProjection);
-  const minProjection = Math.min(simpleProjection, trendProjection);
-
-  // Blend: mostly use the higher projection, but pull slightly toward the lower
-  // to avoid being overly optimistic
-  const blendedProjection = maxProjection * 0.85 + minProjection * 0.15;
-
-  // The projection bar should only show the additional projected amount
-  const projectedAddition = Math.max(0, blendedProjection - lastValue);
+  // The projection bar shows only the additional amount beyond current value
+  const projectedAddition = Math.max(0, projection - lastValue);
 
   return projectedAddition;
 }
