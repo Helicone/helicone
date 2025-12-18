@@ -7379,7 +7379,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "openrouter": [
       {
-        "input": 5.2775e-7,
+        "input": 5.275e-7,
         "output": 0.000003165,
         "threshold": 0,
       },
@@ -8904,8 +8904,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 259,
-  "totalModelProviderConfigs": 259,
+  "totalEndpoints": 260,
+  "totalModelProviderConfigs": 260,
   "totalModelsWithPtb": 96,
   "totalProviders": 21,
 }
