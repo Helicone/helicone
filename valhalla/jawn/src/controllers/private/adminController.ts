@@ -2365,8 +2365,11 @@ export class AdminController extends Controller {
 
     const limit = body.limit ?? 100;
 
-    // Execute HQL query using HeliconeSqlManager
-    // Note: We use a dummy org ID since this is admin-only and bypasses org filtering
+    // SECURITY: Admin HQL endpoint bypasses org-level row policies
+    // We use executeAdminSql which:
+    // 1. Uses prod_user credentials (not hql_user with row policies)
+    // 2. Skips S3 enrichment to prevent cross-org data access
+    // 3. Still applies vocabulary validation and table restrictions
     const heliconeSqlManager = new HeliconeSqlManager({
       organizationId: ADMIN_ORG_ID,
       userId: request.authParams.userId,

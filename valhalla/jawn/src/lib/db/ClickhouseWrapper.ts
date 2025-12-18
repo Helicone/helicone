@@ -123,7 +123,9 @@ export class ClickhouseClientWrapper {
 
       // Check for SQL_helicone_organization_id variations with regex
       // This catches different cases, underscore variations, and potential injection attempts
-      const forbiddenPattern = /sql[_\s]*helicone[_\s]*organization[_\s]*id/i;
+      // Using .* instead of character class to catch any obfuscation attempt
+      const forbiddenPattern =
+        /sql.{0,5}helicone.{0,5}organization.{0,5}id/is;
       if (forbiddenPattern.test(query)) {
         return {
           data: null,

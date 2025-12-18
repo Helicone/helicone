@@ -12,6 +12,7 @@ import {
   parseClickhouseError,
 } from "../lib/errors/HqlErrors";
 import { AST, Parser } from "node-sql-parser";
+import { validateAstVocabulary } from "../lib/sql/hqlVocabularyValidator";
 import { HqlStore } from "../lib/stores/HqlStore";
 import { z } from "zod";
 import { S3Client } from "../lib/shared/db/s3Client";
@@ -223,7 +224,19 @@ export class HeliconeSqlManager {
       
       // Always get first statement to prevent SQL injection
       const normalizedAst = normalizeAst(ast)[0];
-      
+
+      // Validate AST vocabulary (whitelist check for functions/operators)
+      const vocabularyValidation = validateAstVocabulary(normalizedAst);
+      if (isError(vocabularyValidation)) {
+        withActiveSpan()?.setTag("error.type", "INVALID_SQL_CONSTRUCT");
+        withActiveSpan()?.setTag("error.phase", "vocabulary_validation");
+        withActiveSpan()?.setTag(
+          "error.message",
+          vocabularyValidation.error.details || ""
+        );
+        return vocabularyValidation;
+      }
+
       // Add limit to prevent excessive data retrieval
       let limitedAst;
       try {
@@ -332,6 +345,18 @@ export class HeliconeSqlManager {
 
       // Always get first statement to prevent SQL injection
       const normalizedAst = normalizeAst(ast)[0];
+
+      // Validate AST vocabulary (whitelist check for functions/operators)
+      const vocabularyValidation = validateAstVocabulary(normalizedAst);
+      if (isError(vocabularyValidation)) {
+        withActiveSpan()?.setTag("error.type", "INVALID_SQL_CONSTRUCT");
+        withActiveSpan()?.setTag("error.phase", "vocabulary_validation");
+        withActiveSpan()?.setTag(
+          "error.message",
+          vocabularyValidation.error.details || ""
+        );
+        return vocabularyValidation;
+      }
 
       // Add limit to prevent excessive data retrieval
       let limitedAst;
