@@ -39,6 +39,12 @@ const chutesAuthExpectations = {
   },
 };
 
+const basetenAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
 describe("DeepSeek Registry Tests", () => {
   beforeEach(() => {
     // Clear all mocks between tests
@@ -233,6 +239,23 @@ describe("DeepSeek Registry Tests", () => {
                 model: "deepseek/deepseek-v3.2-exp",
                 data: createOpenAIMockResponse("deepseek/deepseek-v3.2-exp"),
                 expects: novitaAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle baseten provider", () =>
+        runGatewayTest({
+          model: "deepseek-v3.2/baseten",
+          expected: {
+            providers: [
+              {
+                url: "https://inference.baseten.co/v1/chat/completions",
+                response: "success",
+                model: "deepseek-ai/DeepSeek-V3.2",
+                data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.2"),
+                expects: basetenAuthExpectations,
               },
             ],
             finalStatus: 200,
@@ -754,6 +777,56 @@ describe("DeepSeek Registry Tests", () => {
       }));
   });
 
+  describe("Error scenarios - Baseten Provider with DeepSeek V3.2", () => {
+    it("should handle Baseten provider failure", () =>
+      runGatewayTest({
+        model: "deepseek-v3.2/baseten",
+        expected: {
+          providers: [
+            {
+              url: "https://inference.baseten.co/v1/chat/completions",
+              response: "failure",
+              statusCode: 500,
+              errorMessage: "Baseten service unavailable",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+
+    it("should handle rate limiting from Baseten", () =>
+      runGatewayTest({
+        model: "deepseek-v3.2/baseten",
+        expected: {
+          providers: [
+            {
+              url: "https://inference.baseten.co/v1/chat/completions",
+              response: "failure",
+              statusCode: 429,
+              errorMessage: "Rate limit exceeded",
+            },
+          ],
+          finalStatus: 429,
+        },
+      }));
+
+    it("should handle authentication failure from Baseten", () =>
+      runGatewayTest({
+        model: "deepseek-v3.2/baseten",
+        expected: {
+          providers: [
+            {
+              url: "https://inference.baseten.co/v1/chat/completions",
+              response: "failure",
+              statusCode: 401,
+              errorMessage: "Invalid API key",
+            },
+          ],
+          finalStatus: 401,
+        },
+      }));
+  });
+
   describe("Error scenarios - Canopy Wave Provider with DeepSeek V3.2", () => {
     it("should handle Canopy Wave provider failure", () =>
       runGatewayTest({
@@ -1078,6 +1151,68 @@ describe("DeepSeek Registry Tests", () => {
               data: createOpenAIMockResponse("deepseek/deepseek-v3.2-exp"),
               expects: {
                 ...novitaAuthExpectations,
+                bodyContains: ["user", "Test"],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should construct correct Baseten URL for DeepSeek V3.2", () =>
+      runGatewayTest({
+        model: "deepseek-v3.2/baseten",
+        expected: {
+          providers: [
+            {
+              url: "https://inference.baseten.co/v1/chat/completions",
+              response: "success",
+              model: "deepseek-ai/DeepSeek-V3.2",
+              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.2"),
+              expects: basetenAuthExpectations,
+              customVerify: (_call) => {
+                // Verify that the URL is correctly constructed
+                // Base URL: https://inference.baseten.co/v1/
+                // Built URL: https://inference.baseten.co/v1/chat/completions
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle provider model ID mapping correctly for Baseten", () =>
+      runGatewayTest({
+        model: "deepseek-v3.2/baseten",
+        expected: {
+          providers: [
+            {
+              url: "https://inference.baseten.co/v1/chat/completions",
+              response: "success",
+              model: "deepseek-ai/DeepSeek-V3.2", // Should map to the correct provider model ID
+              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.2"),
+              expects: basetenAuthExpectations,
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle request body mapping for Baseten", () =>
+      runGatewayTest({
+        model: "deepseek-v3.2/baseten",
+        request: {
+          bodyMapping: "NO_MAPPING",
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://inference.baseten.co/v1/chat/completions",
+              response: "success",
+              model: "deepseek-ai/DeepSeek-V3.2",
+              data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.2"),
+              expects: {
+                ...basetenAuthExpectations,
                 bodyContains: ["user", "Test"],
               },
             },
@@ -1424,6 +1559,31 @@ describe("DeepSeek Registry Tests", () => {
                 model: "deepseek/deepseek-v3.2-exp",
                 data: createOpenAIMockResponse("deepseek/deepseek-v3.2-exp"),
                 expects: novitaAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("deepseek-v3.2 with Baseten", () => {
+      it("should handle passthrough billing with baseten provider", () =>
+        runGatewayTest({
+          model: "deepseek-v3.2/baseten",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "Test passthrough billing" }],
+              passthroughBilling: true,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://inference.baseten.co/v1/chat/completions",
+                response: "success",
+                model: "deepseek-ai/DeepSeek-V3.2",
+                data: createOpenAIMockResponse("deepseek-ai/DeepSeek-V3.2"),
+                expects: basetenAuthExpectations,
               },
             ],
             finalStatus: 200,
