@@ -6984,6 +6984,122 @@
 					}
 				]
 			},
+			"ProviderTokens": {
+				"properties": {
+					"provider": {
+						"type": "string"
+					},
+					"totalTokens": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"provider",
+					"totalTokens"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ProviderUsageTimeSeriesDataPoint": {
+				"properties": {
+					"time": {
+						"type": "string"
+					},
+					"providers": {
+						"items": {
+							"$ref": "#/components/schemas/ProviderTokens"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"time",
+					"providers"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ProviderUsageLeaderboardEntry": {
+				"properties": {
+					"rank": {
+						"type": "number",
+						"format": "double"
+					},
+					"provider": {
+						"type": "string"
+					},
+					"totalTokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"percentChange": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					}
+				},
+				"required": [
+					"rank",
+					"provider",
+					"totalTokens",
+					"percentChange"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ProviderUsageResponse": {
+				"properties": {
+					"timeSeries": {
+						"items": {
+							"$ref": "#/components/schemas/ProviderUsageTimeSeriesDataPoint"
+						},
+						"type": "array"
+					},
+					"leaderboard": {
+						"items": {
+							"$ref": "#/components/schemas/ProviderUsageLeaderboardEntry"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"timeSeries",
+					"leaderboard"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_ProviderUsageResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/ProviderUsageResponse"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ProviderUsageResponse.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ProviderUsageResponse_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"SessionResult": {
 				"properties": {
 					"created_at": {
@@ -19459,6 +19575,39 @@
 					}
 				},
 				"description": "Get market share statistics by model author for the AI Gateway.\nReturns time series data (100% stacked) and a leaderboard of top 9 authors + others.",
+				"tags": [
+					"Stats"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "Time range: \"24h\", \"7d\", \"30d\", \"3m\", or \"1y\"",
+						"in": "query",
+						"name": "timeframe",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/StatsTimeFrame"
+						}
+					}
+				]
+			}
+		},
+		"/v1/public/stats/provider-usage": {
+			"get": {
+				"operationId": "GetProviderUsage",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ProviderUsageResponse.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get provider usage statistics for the AI Gateway.\nReturns time series data and a leaderboard of top 9 providers + others.",
 				"tags": [
 					"Stats"
 				],

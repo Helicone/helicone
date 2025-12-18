@@ -51,6 +51,28 @@ export interface MarketShareResponse {
   leaderboard: MarketShareLeaderboardEntry[];
 }
 
+interface ProviderTokens {
+  provider: string;
+  totalTokens: number;
+}
+
+interface ProviderUsageTimeSeriesDataPoint {
+  time: string;
+  providers: ProviderTokens[];
+}
+
+interface ProviderUsageLeaderboardEntry {
+  rank: number;
+  provider: string;
+  totalTokens: number;
+  percentChange: number | null;
+}
+
+export interface ProviderUsageResponse {
+  timeSeries: ProviderUsageTimeSeriesDataPoint[];
+  leaderboard: ProviderUsageLeaderboardEntry[];
+}
+
 const TOTAL_TOKENS_EXPR = `total_prompt_tokens + total_completion_tokens + total_completion_audio_tokens + total_prompt_audio_tokens + total_prompt_cache_write_tokens + total_prompt_cache_read_tokens`;
 const BASE_WHERE_CLAUSE = `model != '' AND provider != 'CUSTOM'`;
 
@@ -348,6 +370,141 @@ export class ModelUsageStatsManager {
             })),
         };
       });
+
+    return ok({ timeSeries, leaderboard });
+  }
+
+  /**
+   * Get provider usage: top 9 providers + "other" with time series and leaderboard.
+   */
+  async getProviderUsage(
+    timeframe: StatsTimeFrame
+  ): Promise<Result<ProviderUsageResponse, string>> {
+    const { interval, bucket } = TIME_CONFIG[timeframe];
+
+    const top9Query = `
+      SELECT provider, sum(${TOTAL_TOKENS_EXPR}) as total_tokens
+      FROM request_stats
+      WHERE hour >= now() - ${interval} AND ${BASE_WHERE_CLAUSE}
+      GROUP BY provider
+      ORDER BY total_tokens DESC
+      LIMIT 9
+    `;
+
+    const top9Result = await clickhouseDb.dbQuery<{
+      provider: string;
+      total_tokens: number;
+    }>(top9Query, []);
+    if (top9Result.error) return err(top9Result.error);
+
+    const top9Data = top9Result.data ?? [];
+    const top9Set = new Set(top9Data.map((r) => r.provider));
+    const inClause = top9Data.length > 0
+      ? top9Data.map((r) => `'${r.provider}'`).join(",")
+      : "''";
+
+    const otherQuery = `
+      SELECT sum(${TOTAL_TOKENS_EXPR}) as total_tokens
+      FROM request_stats
+      WHERE hour >= now() - ${interval} AND ${BASE_WHERE_CLAUSE}
+        AND provider NOT IN (${inClause})
+    `;
+
+    const prevTop9Query = `
+      SELECT provider, sum(${TOTAL_TOKENS_EXPR}) as total_tokens
+      FROM request_stats
+      WHERE hour >= now() - ${interval} - ${interval}
+        AND hour < now() - ${interval}
+        AND ${BASE_WHERE_CLAUSE}
+        AND provider IN (${inClause})
+      GROUP BY provider
+    `;
+
+    const prevOtherQuery = `
+      SELECT sum(${TOTAL_TOKENS_EXPR}) as total_tokens
+      FROM request_stats
+      WHERE hour >= now() - ${interval} - ${interval}
+        AND hour < now() - ${interval}
+        AND ${BASE_WHERE_CLAUSE}
+        AND provider NOT IN (${inClause})
+    `;
+
+    const timeSeriesQuery = `
+      SELECT
+        toStartOfInterval(hour, ${bucket}, 'UTC') as time_bucket,
+        provider,
+        sum(${TOTAL_TOKENS_EXPR}) as total_tokens
+      FROM request_stats
+      WHERE hour >= now() - ${interval} AND ${BASE_WHERE_CLAUSE}
+      GROUP BY time_bucket, provider
+    `;
+
+    const [otherResult, prevTop9Result, prevOtherResult, timeSeriesResult] =
+      await Promise.all([
+        clickhouseDb.dbQuery<{ total_tokens: number }>(otherQuery, []),
+        clickhouseDb.dbQuery<{ provider: string; total_tokens: number }>(prevTop9Query, []),
+        clickhouseDb.dbQuery<{ total_tokens: number }>(prevOtherQuery, []),
+        clickhouseDb.dbQuery<{ time_bucket: string; provider: string; total_tokens: number }>(timeSeriesQuery, []),
+      ]);
+
+    if (otherResult.error) return err(otherResult.error);
+    if (prevTop9Result.error) return err(prevTop9Result.error);
+    if (prevOtherResult.error) return err(prevOtherResult.error);
+    if (timeSeriesResult.error) return err(timeSeriesResult.error);
+
+    const prevTokensMap = new Map<string, number>();
+    for (const row of prevTop9Result.data ?? []) {
+      prevTokensMap.set(row.provider, Number(row.total_tokens));
+    }
+    const prevOtherTokens = Number(prevOtherResult.data?.[0]?.total_tokens ?? 0);
+
+    const otherTokens = Number(otherResult.data?.[0]?.total_tokens ?? 0);
+    const leaderboard: ProviderUsageLeaderboardEntry[] = [];
+
+    for (let i = 0; i < top9Data.length; i++) {
+      const { provider, total_tokens } = top9Data[i];
+      const currentTokens = Number(total_tokens);
+      const prevTokens = prevTokensMap.get(provider);
+
+      leaderboard.push({
+        rank: i + 1,
+        provider,
+        totalTokens: currentTokens,
+        percentChange:
+          prevTokens && prevTokens > 0
+            ? ((currentTokens - prevTokens) / prevTokens) * 100
+            : null,
+      });
+    }
+
+    leaderboard.push({
+      rank: 10,
+      provider: "other",
+      totalTokens: otherTokens,
+      percentChange:
+        prevOtherTokens > 0
+          ? ((otherTokens - prevOtherTokens) / prevOtherTokens) * 100
+          : null,
+    });
+
+    const timeSeriesMap = new Map<string, Map<string, number>>();
+    for (const row of timeSeriesResult.data ?? []) {
+      const displayProvider = top9Set.has(row.provider) ? row.provider : "other";
+      if (!timeSeriesMap.has(row.time_bucket)) {
+        timeSeriesMap.set(row.time_bucket, new Map());
+      }
+      const providerMap = timeSeriesMap.get(row.time_bucket)!;
+      providerMap.set(displayProvider, (providerMap.get(displayProvider) ?? 0) + Number(row.total_tokens));
+    }
+
+    const timeSeries: ProviderUsageTimeSeriesDataPoint[] = Array.from(timeSeriesMap.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([time, providerMap]) => ({
+        time,
+        providers: Array.from(providerMap.entries())
+          .sort((a, b) => b[1] - a[1])
+          .map(([provider, tokens]) => ({ provider, totalTokens: tokens })),
+      }));
 
     return ok({ timeSeries, leaderboard });
   }

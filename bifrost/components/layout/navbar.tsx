@@ -289,15 +289,15 @@ const mainComponents: LinkItem[] = [
     description: "Browse and compare AI models",
     icon: <Scale className="size-5 navbar-icon-style" />,
   },
-  {
-    title: "Stats",
-    link: {
-      href: "/stats",
-      isExternal: false,
-    },
-    description: "View AI Gateway usage statistics",
-    icon: <BarChart3 className="size-5 navbar-icon-style" />,
-  },
+  // {
+  //   title: "Stats",
+  //   link: {
+  //     href: "/stats",
+  //     isExternal: false,
+  //   },
+  //   description: "View AI Gateway usage statistics",
+  //   icon: <BarChart3 className="size-5 navbar-icon-style" />,
+  // },
 ];
 
 const additionalComponents: LinkItem[] = [

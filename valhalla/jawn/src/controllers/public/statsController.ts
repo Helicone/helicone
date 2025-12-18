@@ -4,6 +4,7 @@ import {
   MarketShareResponse,
   ModelUsageResponse,
   ModelUsageStatsManager,
+  ProviderUsageResponse,
 } from "../../managers/ModelUsageStatsManager";
 
 export type StatsTimeFrame = "24h" | "7d" | "30d" | "3m" | "1y";
@@ -45,6 +46,28 @@ export class StatsController extends Controller {
   ): Promise<Result<MarketShareResponse, string>> {
     const manager = new ModelUsageStatsManager();
     const result = await manager.getMarketShare(timeframe);
+
+    if (result.error) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+
+    return result;
+  }
+
+  /**
+   * Get provider usage statistics for the AI Gateway.
+   * Returns time series data and a leaderboard of top 9 providers + others.
+   *
+   * @param timeframe Time range: "24h", "7d", "30d", "3m", or "1y"
+   */
+  @Get("/provider-usage")
+  public async getProviderUsage(
+    @Query() timeframe: StatsTimeFrame = "7d"
+  ): Promise<Result<ProviderUsageResponse, string>> {
+    const manager = new ModelUsageStatsManager();
+    const result = await manager.getProviderUsage(timeframe);
 
     if (result.error) {
       this.setStatus(500);

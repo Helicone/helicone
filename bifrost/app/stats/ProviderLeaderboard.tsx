@@ -7,19 +7,18 @@ import { formatTokens, formatPercentChange } from "@/utils/formatters";
 
 interface LeaderboardEntry {
   rank: number;
-  model: string;
-  author: string;
+  provider: string;
   totalTokens: number;
   percentChange: number | null;
 }
 
-interface ModelLeaderboardProps {
+interface ProviderLeaderboardProps {
   data: LeaderboardEntry[];
   isLoading: boolean;
 }
 
 function LeaderboardRow({ item }: { item: LeaderboardEntry }) {
-  const isOther = item.model.toLowerCase() === "other";
+  const isOther = item.provider.toLowerCase() === "other";
   const isNew = item.percentChange === null;
   const isPositive = item.percentChange !== null && item.percentChange >= 0;
 
@@ -29,14 +28,9 @@ function LeaderboardRow({ item }: { item: LeaderboardEntry }) {
         <span className="text-sm text-gray-400 dark:text-gray-500 w-6 tabular-nums">
           {item.rank}.
         </span>
-        <div>
-          <span className="text-sm font-normal text-gray-900 dark:text-gray-100">
-            {item.model}
-          </span>
-          <div className="text-xs text-gray-500 dark:text-gray-400">
-            by {item.author}
-          </div>
-        </div>
+        <span className="text-sm font-normal text-gray-900 dark:text-gray-100">
+          {item.provider}
+        </span>
       </div>
       <div className="flex flex-col items-end">
         <span className="text-xs font-normal tabular-nums text-gray-900 dark:text-gray-100">
@@ -62,7 +56,10 @@ function LeaderboardRow({ item }: { item: LeaderboardEntry }) {
   );
 }
 
-export function ModelLeaderboard({ data, isLoading }: ModelLeaderboardProps) {
+export function ProviderLeaderboard({
+  data,
+  isLoading,
+}: ProviderLeaderboardProps) {
   const [showAll, setShowAll] = useState(false);
 
   if (isLoading) {
@@ -111,12 +108,12 @@ export function ModelLeaderboard({ data, isLoading }: ModelLeaderboardProps) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-16">
         <div>
           {leftColumn.map((item) => (
-            <LeaderboardRow key={item.model} item={item} />
+            <LeaderboardRow key={item.provider} item={item} />
           ))}
         </div>
         <div>
           {rightColumn.map((item) => (
-            <LeaderboardRow key={item.model} item={item} />
+            <LeaderboardRow key={item.provider} item={item} />
           ))}
         </div>
       </div>

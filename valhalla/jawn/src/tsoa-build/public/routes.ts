@@ -2258,6 +2258,58 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_MarketShareResponse_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ProviderTokens": {
+        "dataType": "refObject",
+        "properties": {
+            "provider": {"dataType":"string","required":true},
+            "totalTokens": {"dataType":"double","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ProviderUsageTimeSeriesDataPoint": {
+        "dataType": "refObject",
+        "properties": {
+            "time": {"dataType":"string","required":true},
+            "providers": {"dataType":"array","array":{"dataType":"refObject","ref":"ProviderTokens"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ProviderUsageLeaderboardEntry": {
+        "dataType": "refObject",
+        "properties": {
+            "rank": {"dataType":"double","required":true},
+            "provider": {"dataType":"string","required":true},
+            "totalTokens": {"dataType":"double","required":true},
+            "percentChange": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ProviderUsageResponse": {
+        "dataType": "refObject",
+        "properties": {
+            "timeSeries": {"dataType":"array","array":{"dataType":"refObject","ref":"ProviderUsageTimeSeriesDataPoint"},"required":true},
+            "leaderboard": {"dataType":"array","array":{"dataType":"refObject","ref":"ProviderUsageLeaderboardEntry"},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_ProviderUsageResponse_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"ref":"ProviderUsageResponse","required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_ProviderUsageResponse.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_ProviderUsageResponse_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "SessionResult": {
         "dataType": "refObject",
         "properties": {
@@ -9048,6 +9100,36 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getMarketShare',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsStatsController_getProviderUsage: Record<string, TsoaRoute.ParameterSchema> = {
+                timeframe: {"default":"7d","in":"query","name":"timeframe","ref":"StatsTimeFrame"},
+        };
+        app.get('/v1/public/stats/provider-usage',
+            ...(fetchMiddlewares<RequestHandler>(StatsController)),
+            ...(fetchMiddlewares<RequestHandler>(StatsController.prototype.getProviderUsage)),
+
+            async function StatsController_getProviderUsage(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsStatsController_getProviderUsage, request, response });
+
+                const controller = new StatsController();
+
+              await templateService.apiHandler({
+                methodName: 'getProviderUsage',
                 controller,
                 response,
                 next,

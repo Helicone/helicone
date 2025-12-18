@@ -74,6 +74,7 @@ function LeaderboardItem({
   entry: LeaderboardEntry;
   colorIndex: number;
 }) {
+  const isOther = entry.author.toLowerCase() === "others";
   const color = CHART_COLOR_PALETTE[colorIndex % CHART_COLOR_PALETTE.length];
   const marketShare = isFinite(entry.marketShare) ? entry.marketShare : 0;
   const totalTokens = isFinite(entry.totalTokens) ? entry.totalTokens : 0;
@@ -93,7 +94,7 @@ function LeaderboardItem({
         </span>
       </div>
       <div className="w-10 flex justify-end">
-        <RankChangeIndicator rankChange={entry.rankChange} />
+        {!isOther && <RankChangeIndicator rankChange={entry.rankChange} />}
       </div>
       <div className="text-right min-w-[70px]">
         <div className="text-sm font-medium text-gray-900 dark:text-gray-100 tabular-nums">

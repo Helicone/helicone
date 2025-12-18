@@ -426,6 +426,13 @@ export interface paths {
      */
     get: operations["GetMarketShare"];
   };
+  "/v1/public/stats/provider-usage": {
+    /**
+     * @description Get provider usage statistics for the AI Gateway.
+     * Returns time series data and a leaderboard of top 9 providers + others.
+     */
+    get: operations["GetProviderUsage"];
+  };
   "/v1/session/query": {
     post: operations["GetSessions"];
   };
@@ -2530,6 +2537,34 @@ Json: JsonObject;
       error: null;
     };
     "Result_MarketShareResponse.string_": components["schemas"]["ResultSuccess_MarketShareResponse_"] | components["schemas"]["ResultError_string_"];
+    ProviderTokens: {
+      provider: string;
+      /** Format: double */
+      totalTokens: number;
+    };
+    ProviderUsageTimeSeriesDataPoint: {
+      time: string;
+      providers: components["schemas"]["ProviderTokens"][];
+    };
+    ProviderUsageLeaderboardEntry: {
+      /** Format: double */
+      rank: number;
+      provider: string;
+      /** Format: double */
+      totalTokens: number;
+      /** Format: double */
+      percentChange: number | null;
+    };
+    ProviderUsageResponse: {
+      timeSeries: components["schemas"]["ProviderUsageTimeSeriesDataPoint"][];
+      leaderboard: components["schemas"]["ProviderUsageLeaderboardEntry"][];
+    };
+    ResultSuccess_ProviderUsageResponse_: {
+      data: components["schemas"]["ProviderUsageResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ProviderUsageResponse.string_": components["schemas"]["ResultSuccess_ProviderUsageResponse_"] | components["schemas"]["ResultError_string_"];
     SessionResult: {
       created_at: string;
       latest_request_created_at: string;
@@ -6773,6 +6808,26 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_MarketShareResponse.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * @description Get provider usage statistics for the AI Gateway.
+   * Returns time series data and a leaderboard of top 9 providers + others.
+   */
+  GetProviderUsage: {
+    parameters: {
+      query?: {
+        /** @description Time range: "24h", "7d", "30d", "3m", or "1y" */
+        timeframe?: components["schemas"]["StatsTimeFrame"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ProviderUsageResponse.string_"];
         };
       };
     };

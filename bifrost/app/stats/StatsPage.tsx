@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { BarChart3, PieChart } from "lucide-react";
+import { BarChart3, PieChart, Server } from "lucide-react";
 import { ModelUsageChart } from "./ModelUsageChart";
 import { ModelLeaderboard } from "./ModelLeaderboard";
 import { MarketShareChart } from "./MarketShareChart";
 import { MarketShareLeaderboard } from "./MarketShareLeaderboard";
+import { ProviderUsageChart } from "./ProviderUsageChart";
+import { ProviderLeaderboard } from "./ProviderLeaderboard";
 
 type LeaderboardTimeFrame = "24h" | "7d" | "30d";
 
@@ -67,6 +69,28 @@ interface MarketShareResponse {
   leaderboard: MarketShareLeaderboardEntry[];
 }
 
+interface ProviderTokens {
+  provider: string;
+  totalTokens: number;
+}
+
+interface ProviderTimeSeriesDataPoint {
+  time: string;
+  providers: ProviderTokens[];
+}
+
+interface ProviderLeaderboardEntry {
+  rank: number;
+  provider: string;
+  totalTokens: number;
+  percentChange: number | null;
+}
+
+interface ProviderUsageResponse {
+  timeSeries: ProviderTimeSeriesDataPoint[];
+  leaderboard: ProviderLeaderboardEntry[];
+}
+
 const JAWN_BASE_URL =
   process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE || "http://localhost:8585";
 
@@ -112,6 +136,8 @@ export function StatsPage() {
     useState<LeaderboardTimeFrame>("7d");
   const [marketShareTimeframe, setMarketShareTimeframe] =
     useState<LeaderboardTimeFrame>("7d");
+  const [providerTimeframe, setProviderTimeframe] =
+    useState<LeaderboardTimeFrame>("7d");
 
   const { data: chartData, isLoading: chartLoading } = useQuery({
     queryKey: ["model-usage-stats-chart"],
@@ -138,6 +164,20 @@ export function StatsPage() {
     queryFn: () =>
       fetchStats<MarketShareResponse>("market-share", marketShareTimeframe),
   });
+
+  const { data: providerChartData, isLoading: providerChartLoading } = useQuery(
+    {
+      queryKey: ["provider-usage-stats-chart"],
+      queryFn: () => fetchStats<ProviderUsageResponse>("provider-usage", "1y"),
+    }
+  );
+
+  const { data: providerLeaderboardData, isLoading: providerLeaderboardLoading } =
+    useQuery({
+      queryKey: ["provider-usage-stats-leaderboard", providerTimeframe],
+      queryFn: () =>
+        fetchStats<ProviderUsageResponse>("provider-usage", providerTimeframe),
+    });
 
   return (
     <div className="bg-white dark:bg-black min-h-screen py-16 lg:py-16 w-[60%] mx-auto">
@@ -215,6 +255,44 @@ export function StatsPage() {
             <MarketShareLeaderboard
               data={marketShareLeaderboardData?.leaderboard ?? []}
               isLoading={marketShareLeaderboardLoading}
+            />
+          </div>
+        </div>
+
+        <div className="py-8 border-t border-gray-200 dark:border-gray-800">
+          <div className="mb-6">
+            <div className="flex items-center gap-2 mb-1">
+              <Server className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                Inference Providers
+              </h2>
+            </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Compare Helicone AI Gateway token usage by inference provider
+            </p>
+          </div>
+
+          <div className="border border-gray-200 dark:border-gray-800 px-2 pt-8">
+            <ProviderUsageChart
+              data={providerChartData?.timeSeries ?? []}
+              isLoading={providerChartLoading}
+              timeframe="1y"
+            />
+          </div>
+
+          <div className="mt-8">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-base font-medium text-gray-900 dark:text-gray-100">
+                Top Providers
+              </h3>
+              <TimeframeSelector
+                value={providerTimeframe}
+                onChange={setProviderTimeframe}
+              />
+            </div>
+            <ProviderLeaderboard
+              data={providerLeaderboardData?.leaderboard ?? []}
+              isLoading={providerLeaderboardLoading}
             />
           </div>
         </div>
