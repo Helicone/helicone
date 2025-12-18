@@ -17,7 +17,6 @@ import { formatTokens, formatTooltipDate } from "@/utils/formatters";
 import {
   calculateProjection,
   calculateTimeProgress,
-  shouldShowProjection,
 } from "@/utils/projectionUtils";
 
 interface AuthorTokens {
@@ -53,7 +52,6 @@ interface CustomTooltipProps {
   }>;
   chartConfig: ChartConfig;
   rawData: TimeSeriesDataPoint[];
-  showProjection?: boolean;
   projectedTokens?: Record<string, number>;
 }
 
@@ -62,7 +60,6 @@ function CustomTooltip({
   payload,
   chartConfig,
   rawData,
-  showProjection,
   projectedTokens,
 }: CustomTooltipProps) {
   if (!active || !payload?.length) return null;
@@ -74,7 +71,7 @@ function CustomTooltip({
     .filter((item) => item.value > 0 && !item.dataKey.endsWith("_projection"))
     .sort((a, b) => b.value - a.value);
 
-  const hasProjections = isLastBar && showProjection && projectedTokens;
+  const hasProjections = isLastBar && projectedTokens;
 
   return (
     <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-lg rounded-lg p-3 min-w-[220px]">
@@ -130,7 +127,7 @@ function CustomTooltip({
 }
 
 export function MarketShareChart({ data, isLoading, timeframe = "1y" }: MarketShareChartProps) {
-  const { chartData, authors, chartConfig, showProjection, projectedTokens } = useMemo(() => {
+  const { chartData, authors, chartConfig, projectedTokens } = useMemo(() => {
     const authorSet = new Set<string>();
     data.forEach((point) => {
       point.authors.forEach((a) => authorSet.add(a.author));
@@ -141,18 +138,15 @@ export function MarketShareChart({ data, isLoading, timeframe = "1y" }: MarketSh
     const timeProgress = lastTimestamp
       ? calculateTimeProgress(lastTimestamp, timeframe)
       : 0;
-    const showProjection = shouldShowProjection(data.length, timeProgress);
 
     const projectedTokens: Record<string, number> = {};
-    if (showProjection) {
-      authors.forEach((author) => {
-        const authorTokenValues = data.map((p) => {
-          const a = p.authors.find((a) => a.author === author);
-          return a?.totalTokens ?? 0;
-        });
-        projectedTokens[author] = calculateProjection(authorTokenValues, timeProgress);
+    authors.forEach((author) => {
+      const authorTokenValues = data.map((p) => {
+        const a = p.authors.find((a) => a.author === author);
+        return a?.totalTokens ?? 0;
       });
-    }
+      projectedTokens[author] = calculateProjection(authorTokenValues, timeProgress);
+    });
 
     const chartData = data.map((point, index) => {
       const entry: Record<string, string | number | boolean> = {
@@ -168,7 +162,7 @@ export function MarketShareChart({ data, isLoading, timeframe = "1y" }: MarketSh
 
       const isLastBar = index === data.length - 1;
       let totalProjectedTokens = 0;
-      if (isLastBar && showProjection) {
+      if (isLastBar) {
         const currentTotal = point.authors.reduce((sum, a) => sum + a.totalTokens, 0);
         const projectedAdditions = Object.values(projectedTokens).reduce((sum, v) => sum + v, 0);
         totalProjectedTokens = currentTotal + projectedAdditions;
@@ -181,7 +175,7 @@ export function MarketShareChart({ data, isLoading, timeframe = "1y" }: MarketSh
           totalPercentage > 0 ? (rawPercentage / totalPercentage) * 100 : 0;
         entry[author] = normalizedPercentage;
 
-        if (isLastBar && showProjection && totalProjectedTokens > 0) {
+        if (isLastBar && totalProjectedTokens > 0) {
           const projectedAddition = projectedTokens[author] ?? 0;
           const projectedPercentageAddition = (projectedAddition / totalProjectedTokens) * 100;
           entry[`${author}_projection`] = projectedPercentageAddition;
@@ -204,7 +198,7 @@ export function MarketShareChart({ data, isLoading, timeframe = "1y" }: MarketSh
       };
     });
 
-    return { chartData, authors, chartConfig, showProjection, projectedTokens };
+    return { chartData, authors, chartConfig, projectedTokens };
   }, [data, timeframe]);
 
   if (isLoading) {
@@ -252,7 +246,6 @@ export function MarketShareChart({ data, isLoading, timeframe = "1y" }: MarketSh
               <CustomTooltip
                 chartConfig={chartConfig}
                 rawData={data}
-                showProjection={showProjection}
                 projectedTokens={projectedTokens}
               />
             }
@@ -266,16 +259,15 @@ export function MarketShareChart({ data, isLoading, timeframe = "1y" }: MarketSh
               radius={0}
             />
           ))}
-          {showProjection &&
-            authors.map((author) => (
-              <Bar
-                key={`${author}_projection`}
-                dataKey={`${author}_projection`}
-                stackId="a"
-                fill={CHART_COLORS.projection}
-                radius={0}
-              />
-            ))}
+          {authors.map((author) => (
+            <Bar
+              key={`${author}_projection`}
+              dataKey={`${author}_projection`}
+              stackId="a"
+              fill={CHART_COLORS.projection}
+              radius={0}
+            />
+          ))}
         </BarChart>
       </ResponsiveContainer>
     </ChartContainer>

@@ -21,7 +21,6 @@ import {
 import {
   calculateProjection,
   calculateTimeProgress,
-  shouldShowProjection,
 } from "@/utils/projectionUtils";
 
 interface ProviderTokens {
@@ -54,10 +53,9 @@ interface CustomTooltipProps {
     payload: Record<string, unknown>;
   }>;
   chartConfig: ChartConfig;
-  showProjection?: boolean;
 }
 
-function CustomTooltip({ active, payload, chartConfig, showProjection }: CustomTooltipProps) {
+function CustomTooltip({ active, payload, chartConfig }: CustomTooltipProps) {
   if (!active || !payload?.length) return null;
 
   const rawTime = payload[0]?.payload?.rawTime as string | undefined;
@@ -96,7 +94,7 @@ function CustomTooltip({ active, payload, chartConfig, showProjection }: CustomT
         <span className="text-sm font-medium text-foreground">
           {rawTime ? formatTooltipDate(rawTime) : ""}
         </span>
-        {isLastBar && showProjection && totalProjection > 0 && (
+        {isLastBar && totalProjection > 0 && (
           <span className="ml-2 text-xs text-gray-400">(projected)</span>
         )}
       </div>
@@ -150,7 +148,7 @@ export function ProviderUsageChart({
   isLoading,
   timeframe,
 }: ProviderUsageChartProps) {
-  const { chartData, providers, chartConfig, showProjection } = useMemo(() => {
+  const { chartData, providers, chartConfig } = useMemo(() => {
     const providerSet = new Set<string>();
     data.forEach((point) => {
       point.providers.forEach((p) => providerSet.add(p.provider));
@@ -161,7 +159,6 @@ export function ProviderUsageChart({
     const timeProgress = lastTimestamp
       ? calculateTimeProgress(lastTimestamp, timeframe)
       : 0;
-    const showProjection = shouldShowProjection(data.length, timeProgress);
 
     const chartData = data.map((point, index) => {
       const entry: Record<string, string | number | boolean> = {
@@ -174,7 +171,7 @@ export function ProviderUsageChart({
         const value = found?.totalTokens ?? 0;
         entry[sanitizeProviderName(provider)] = value;
 
-        if (index === data.length - 1 && showProjection) {
+        if (index === data.length - 1) {
           const providerValues = data.map((p) => {
             const prov = p.providers.find((pr) => pr.provider === provider);
             return prov?.totalTokens ?? 0;
@@ -200,7 +197,7 @@ export function ProviderUsageChart({
       };
     });
 
-    return { chartData, providers, chartConfig, showProjection };
+    return { chartData, providers, chartConfig };
   }, [data, timeframe]);
 
   if (isLoading) {
@@ -241,7 +238,7 @@ export function ProviderUsageChart({
           />
           <Tooltip
             cursor={{ fill: "rgba(0, 0, 0, 0.03)" }}
-            content={<CustomTooltip chartConfig={chartConfig} showProjection={showProjection} />}
+            content={<CustomTooltip chartConfig={chartConfig} />}
           />
           {providers.map((provider, index) => (
             <Bar
@@ -252,16 +249,15 @@ export function ProviderUsageChart({
               radius={0}
             />
           ))}
-          {showProjection &&
-            providers.map((provider) => (
-              <Bar
-                key={`${provider}_projection`}
-                dataKey={`${sanitizeProviderName(provider)}_projection`}
-                stackId="a"
-                fill={CHART_COLORS.projection}
-                radius={0}
-              />
-            ))}
+          {providers.map((provider) => (
+            <Bar
+              key={`${provider}_projection`}
+              dataKey={`${sanitizeProviderName(provider)}_projection`}
+              stackId="a"
+              fill={CHART_COLORS.projection}
+              radius={0}
+            />
+          ))}
         </BarChart>
       </ResponsiveContainer>
     </ChartContainer>

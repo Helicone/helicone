@@ -21,7 +21,6 @@ import {
 import {
   calculateProjection,
   calculateTimeProgress,
-  shouldShowProjection,
 } from "@/utils/projectionUtils";
 
 interface ModelTokens {
@@ -53,10 +52,9 @@ interface CustomTooltipProps {
     payload: Record<string, unknown>;
   }>;
   chartConfig: ChartConfig;
-  showProjection?: boolean;
 }
 
-function CustomTooltip({ active, payload, chartConfig, showProjection }: CustomTooltipProps) {
+function CustomTooltip({ active, payload, chartConfig }: CustomTooltipProps) {
   if (!active || !payload?.length) return null;
 
   const rawTime = payload[0]?.payload?.rawTime as string | undefined;
@@ -95,7 +93,7 @@ function CustomTooltip({ active, payload, chartConfig, showProjection }: CustomT
         <span className="text-sm font-medium text-foreground">
           {rawTime ? formatTooltipDate(rawTime) : ""}
         </span>
-        {isLastBar && showProjection && totalProjection > 0 && (
+        {isLastBar && totalProjection > 0 && (
           <span className="ml-2 text-xs text-gray-400">(projected)</span>
         )}
       </div>
@@ -150,7 +148,7 @@ export function ModelUsageChart({
   isLoading,
   timeframe,
 }: ModelUsageChartProps) {
-  const { chartData, models, chartConfig, showProjection } = useMemo(() => {
+  const { chartData, models, chartConfig } = useMemo(() => {
     const modelSet = new Set<string>();
     data.forEach((point) => {
       point.models.forEach((m) => modelSet.add(m.model));
@@ -161,7 +159,6 @@ export function ModelUsageChart({
     const timeProgress = lastTimestamp
       ? calculateTimeProgress(lastTimestamp, timeframe)
       : 0;
-    const showProjection = shouldShowProjection(data.length, timeProgress);
 
     const chartData = data.map((point, index) => {
       const entry: Record<string, string | number | boolean> = {
@@ -174,7 +171,7 @@ export function ModelUsageChart({
         const value = found?.totalTokens ?? 0;
         entry[sanitizeModelName(model)] = value;
 
-        if (index === data.length - 1 && showProjection) {
+        if (index === data.length - 1) {
           const modelValues = data.map((p) => {
             const m = p.models.find((m) => m.model === model);
             return m?.totalTokens ?? 0;
@@ -200,7 +197,7 @@ export function ModelUsageChart({
       };
     });
 
-    return { chartData, models, chartConfig, showProjection };
+    return { chartData, models, chartConfig };
   }, [data, timeframe]);
 
   if (isLoading) {
@@ -241,7 +238,7 @@ export function ModelUsageChart({
           />
           <Tooltip
             cursor={{ fill: "rgba(0, 0, 0, 0.03)" }}
-            content={<CustomTooltip chartConfig={chartConfig} showProjection={showProjection} />}
+            content={<CustomTooltip chartConfig={chartConfig} />}
           />
           {models.map((model, index) => (
             <Bar
@@ -252,16 +249,15 @@ export function ModelUsageChart({
               radius={0}
             />
           ))}
-          {showProjection &&
-            models.map((model) => (
-              <Bar
-                key={`${model}_projection`}
-                dataKey={`${sanitizeModelName(model)}_projection`}
-                stackId="a"
-                fill={CHART_COLORS.projection}
-                radius={0}
-              />
-            ))}
+          {models.map((model) => (
+            <Bar
+              key={`${model}_projection`}
+              dataKey={`${sanitizeModelName(model)}_projection`}
+              stackId="a"
+              fill={CHART_COLORS.projection}
+              radius={0}
+            />
+          ))}
         </BarChart>
       </ResponsiveContainer>
     </ChartContainer>

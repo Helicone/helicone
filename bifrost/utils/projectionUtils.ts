@@ -84,13 +84,3 @@ export function calculateTimeProgress(
   return progress;
 }
 
-export function shouldShowProjection(
-  dataLength: number,
-  timeProgress: number
-): boolean {
-  if (dataLength < 3) {
-    return false;
-  }
-
-  return timeProgress > 0.05 && timeProgress < 0.95;
-}
