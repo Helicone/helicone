@@ -34,18 +34,6 @@ export const models = {
     modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
   },
-  "gpt-4o-search-preview-2025-03-11": {
-    name: "OpenAI GPT-4o Search Preview",
-    author: "openai",
-    description:
-      'GPT-4o ("o" for "omni") is OpenAI\'s latest AI model with enhanced web search capabilities. This preview version supports both text and image inputs with text outputs, maintains the intelligence level of GPT-4 Turbo while being twice as fast and 50% more cost-effective. It includes improved performance in processing non-English languages and enhanced visual capabilities, plus integrated web search functionality.',
-    contextLength: 128000,
-    maxOutputTokens: 16384,
-    created: "2025-03-11T00:00:00.000Z",
-    modality: { inputs: ["text", "image"], outputs: ["text"] },
-    tokenizer: "GPT",
-    pinnedVersionOfModel: "gpt-4o",
-  },
   "gpt-4o-mini-search-preview-2025-03-11": {
     name: "OpenAI GPT-4o-mini Search Preview",
     author: "openai",
