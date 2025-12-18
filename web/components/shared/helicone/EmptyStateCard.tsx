@@ -15,7 +15,7 @@ import {
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { createHighlighter } from "shiki";
-import DOMPurify from "dompurify";
+import DOMPurify from "isomorphic-dompurify";
 
 // Create a singleton highlighter instance
 const highlighterPromise = createHighlighter({
