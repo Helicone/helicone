@@ -14,6 +14,8 @@ import { Plugin } from "@helicone-package/cost/models/types";
 import { Attempt, AttemptError, DisallowListEntry, EscrowInfo } from "./types";
 import { ant2oaiResponse } from "../clients/llmmapper/router/oai2ant/nonStream";
 import { ant2oaiStreamResponse } from "../clients/llmmapper/router/oai2ant/stream";
+import { goog2oaiResponse } from "../clients/llmmapper/router/oai2google/nonStream";
+import { goog2oaiStreamResponse } from "../clients/llmmapper/router/oai2google/stream";
 import {
   validateOpenAIChatPayload,
   validateOpenAIResponsePayload,
@@ -29,7 +31,10 @@ import {
   toOpenAIStreamResponse,
 } from "@helicone-package/llm-mapper/transform/providers/normalizeResponse";
 import { DataDogTracer, TraceContext } from "../monitoring/DataDogTracer";
-import { ResponsesAPIEnabledProviders } from "@helicone-package/cost/models/providers";
+import {
+  ResponsesAPIEnabledProviders,
+  ContextEditingEnabledProviders,
+} from "@helicone-package/cost/models/providers";
 import { oaiChat2responsesResponse } from "../clients/llmmapper/router/oaiChat2responses/nonStream";
 import { oaiChat2responsesStreamResponse } from "../clients/llmmapper/router/oaiChat2responses/stream";
 import { validateProvider } from "@helicone-package/cost/models/provider-helpers";
@@ -140,6 +145,12 @@ export class SimpleAIGateway {
       }
       this.metrics.markPromptRequestEnd();
       finalBody = expandResult.data.body;
+    }
+
+    if (!this.requiresReasoningOptions(finalBody.model)) {
+      // Both Responses API and Chat Completions format contain optional reasoning_options
+      // Strip it before sending to provider that doesn't support it
+      delete finalBody.reasoning_options;
     }
 
     const errors: Array<AttemptError> = [];
@@ -265,6 +276,15 @@ export class SimpleAIGateway {
       }
       // Set gateway attempt to request wrapper
       this.requestWrapper.setGatewayAttempt(attempt);
+
+      // Strip context_editing for providers that don't support it
+      if (
+        finalBody.context_editing &&
+        !ContextEditingEnabledProviders.includes(attempt.endpoint.provider)
+      ) {
+        const { context_editing, ...bodyWithoutContextEditing } = finalBody;
+        finalBody = bodyWithoutContextEditing;
+      }
 
       const result = await this.attemptExecutor.execute({
         attempt,
@@ -418,6 +438,14 @@ export class SimpleAIGateway {
     );
   }
 
+  // reasoning_options reserved for providers with custom reasoning logic
+  private requiresReasoningOptions(providerModelId: string): boolean {
+    return (
+      providerModelId.includes("claude") ||
+      providerModelId.includes("gemini")
+    );
+  }
+
   private async expandPrompt(
     parsedBody: any
   ): Promise<Result<{ body: any }, Response>> {
@@ -508,57 +536,56 @@ export class SimpleAIGateway {
     }
 
     const mappingType = attempt.endpoint.modelConfig.responseFormat ?? "OPENAI";
+    const provider = attempt.endpoint.provider;
+    const providerModelId = attempt.endpoint.providerModelId;
     const contentType = response.headers.get("content-type");
     const isStream =
       contentType?.includes("text/event-stream") ||
       contentType?.includes("application/vnd.amazon.eventstream");
-
+    
+    let finalMappedResponse = response;
     try {
       if (mappingType === "OPENAI") {
-        // If the request body mapping is Responses, convert Chat Completions
-        // output to Responses API output for non-OpenAI providers.
-        const provider = attempt.endpoint.provider;
-        const providerModelId = attempt.endpoint.providerModelId;
-
-        if (bodyMapping === "RESPONSES" && provider !== "openai") {
-          if (isStream) {
-            const mapped = oaiChat2responsesStreamResponse(response);
-            return ok(mapped);
-          } else {
-            const mapped = await oaiChat2responsesResponse(response);
-            return ok(mapped);
-          }
-        }
-
         // Otherwise, response is already in OpenAI format; normalize usage
         if (isStream) {
-          const normalizedResponse = toOpenAIStreamResponse(
-            response,
+          finalMappedResponse = toOpenAIStreamResponse(
+            finalMappedResponse,
             provider,
             providerModelId
           );
-          return ok(normalizedResponse);
         } else {
-          const normalizedResponse = await toOpenAIResponse(
-            response,
+          finalMappedResponse = await toOpenAIResponse(
+            finalMappedResponse,
             provider,
             providerModelId,
             isStream
           );
-          return ok(normalizedResponse);
         }
       } else if (mappingType === "ANTHROPIC") {
-        // Convert OpenAI format to Anthropic format
         if (isStream) {
-          const mappedResponse = ant2oaiStreamResponse(response);
-          return ok(mappedResponse);
+          finalMappedResponse = ant2oaiStreamResponse(finalMappedResponse);
         } else {
-          const mappedResponse = await ant2oaiResponse(response);
-          return ok(mappedResponse);
+          finalMappedResponse = await ant2oaiResponse(finalMappedResponse);
+        }
+      } else if (mappingType === "GOOGLE") {
+        if (isStream) {
+          finalMappedResponse = goog2oaiStreamResponse(finalMappedResponse);
+        } else {
+          finalMappedResponse = await goog2oaiResponse(finalMappedResponse);
         }
       }
 
-      return ok(response);
+      // Output now is in Chat Completions format
+      const nativelySupportsResponsesAPI = provider === "openai" || (provider === "helicone" && providerModelId.includes("gpt"));
+      if (bodyMapping === "RESPONSES" && !nativelySupportsResponsesAPI) {
+        if (isStream) {
+          finalMappedResponse = oaiChat2responsesStreamResponse(finalMappedResponse);
+        } else {
+          finalMappedResponse = await oaiChat2responsesResponse(finalMappedResponse);
+        }
+      }
+
+      return ok(finalMappedResponse);
     } catch (error) {
       console.error("Failed to map response:", error);
       return err(

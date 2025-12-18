@@ -45,6 +45,28 @@ export const models = {
     modality: { inputs: ["text", "image", "audio"], outputs: ["text"] },
     tokenizer: "Grok",
   },
+  "grok-4-1-fast-non-reasoning": {
+    name: "xAI Grok 4.1 Fast Non-Reasoning",
+    author: "xai",
+    description:
+      "A frontier multimodal model optimized specifically for high-performance agentic tool calling.",
+    contextLength: 2000000,
+    maxOutputTokens: 30000,
+    created: "2025-11-17T00:00:00.000Z",
+    modality: { inputs: ["text", "image"], outputs: ["text", "image"] },
+    tokenizer: "Grok",
+  },
+  "grok-4-1-fast-reasoning": {
+    name: "xAI Grok 4.1 Fast Reasoning",
+    author: "xai",
+    description:
+      "A frontier multimodal model optimized for high-performance agentic tool calling with reasoning capabilities.",
+    contextLength: 2000000,
+    maxOutputTokens: 2000000,
+    created: "2025-11-17T00:00:00.000Z",
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
+    tokenizer: "Grok",
+  },
   "grok-3": {
     name: "xAI Grok 3",
     author: "xai",

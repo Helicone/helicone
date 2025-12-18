@@ -20,7 +20,8 @@
     },
     {
       "source": "/open-stats",
-      "destination": "https://us.helicone.ai/open-stats"
+      "destination": "https://helicone.ai",
+      "permanent": true
     },
     {
       "source": "/gateway",

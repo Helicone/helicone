@@ -161,7 +161,7 @@ describe("normalizeAIGatewayResponse", () => {
         model: "gpt-4",
         output: [
           {
-            id: "fc_call_abc123",
+            id: "call_abc123",
             type: "function_call",
             status: "completed",
             name: "get_weather",
@@ -489,6 +489,195 @@ data: [DONE]
       expect(parsed.usage.prompt_tokens).toBe(75);
       expect(parsed.usage.completion_tokens).toBe(25);
       expect(parsed.usage.total_tokens).toBe(100);
+    });
+  });
+
+  describe("Gemini response format", () => {
+    it("should convert Gemini non-streaming responses to OpenAI format", async () => {
+      const geminiResponse = {
+        candidates: [
+          {
+            content: {
+              role: "model",
+              parts: [{ text: "Hello from Gemini!" }],
+            },
+            finishReason: "STOP",
+          },
+        ],
+        modelVersion: "gemini-1.5-pro",
+        usageMetadata: {
+          promptTokenCount: 12,
+          candidatesTokenCount: 8,
+          totalTokenCount: 20,
+        },
+      };
+
+      const result = await normalizeAIGatewayResponse({
+        responseText: JSON.stringify(geminiResponse),
+        isStream: false,
+        provider: "vertex",
+        providerModelId: "gemini-1.5-pro",
+        responseFormat: "GOOGLE",
+      });
+
+      const parsed = JSON.parse(result);
+      expect(parsed.object).toBe("chat.completion");
+      expect(parsed.model).toBe("gemini-1.5-pro");
+      expect(parsed.choices[0].message.content).toBe("Hello from Gemini!");
+      expect(parsed.usage).toBeDefined();
+      expect(parsed.usage.prompt_tokens).toBeGreaterThanOrEqual(0);
+      expect(parsed.usage.completion_tokens).toBeGreaterThanOrEqual(0);
+    });
+
+    it("should convert Gemini streaming responses to OpenAI SSE format", async () => {
+      const geminiStream = [
+        'data: {"candidates":[{"content":{"parts":[{"text":"Hello"}]}}]}',
+        'data: {"candidates":[{"content":{"parts":[{"text":" world"}]},"finishReason":"STOP"}],"usageMetadata":{"promptTokenCount":5,"candidatesTokenCount":3,"totalTokenCount":8}}',
+        "data: [DONE]",
+      ].join("\n\n");
+
+      const result = await normalizeAIGatewayResponse({
+        responseText: geminiStream,
+        isStream: true,
+        provider: "vertex",
+        providerModelId: "gemini-1.5-pro",
+        responseFormat: "GOOGLE",
+      });
+
+      expect(result).toContain('"object":"chat.completion.chunk"');
+      expect(result).toContain('"content":"Hello"');
+      expect(result).toContain('"content":" world"');
+      expect(result).toContain('"finish_reason":"stop"');
+      expect(result).toContain('"prompt_tokens":5');
+      expect(result).toContain("data: [DONE]");
+    });
+
+    it("should extract thinking/reasoning from Gemini responses with thought parts", async () => {
+      const geminiResponseWithThinking = {
+        candidates: [
+          {
+            content: {
+              role: "model",
+              parts: [
+                { text: "Let me think about this problem step by step...", thought: true },
+                { text: "The answer is 42." },
+              ],
+            },
+            finishReason: "STOP",
+          },
+        ],
+        modelVersion: "gemini-2.5-flash-thinking",
+        usageMetadata: {
+          promptTokenCount: 10,
+          candidatesTokenCount: 15,
+          thoughtsTokenCount: 20,
+          totalTokenCount: 45,
+        },
+      };
+
+      const result = await normalizeAIGatewayResponse({
+        responseText: JSON.stringify(geminiResponseWithThinking),
+        isStream: false,
+        provider: "vertex",
+        providerModelId: "gemini-2.5-flash-thinking",
+        responseFormat: "GOOGLE",
+      });
+
+      const parsed = JSON.parse(result);
+
+      // Should have content without thinking text
+      expect(parsed.choices[0].message.content).toBe("The answer is 42.");
+
+      // Should have reasoning from thinking parts
+      expect(parsed.choices[0].message.reasoning).toBe("Let me think about this problem step by step...");
+
+      // Should have reasoning_details
+      expect(parsed.choices[0].message.reasoning_details).toBeDefined();
+      expect(parsed.choices[0].message.reasoning_details.length).toBe(1);
+      expect(parsed.choices[0].message.reasoning_details[0].thinking).toBe(
+        "Let me think about this problem step by step..."
+      );
+
+      // Usage should include reasoning tokens
+      expect(parsed.usage.completion_tokens_details.reasoning_tokens).toBe(20);
+    });
+
+    it("should handle Gemini streaming responses with thinking parts", async () => {
+      const geminiStreamWithThinking = [
+        'data: {"candidates":[{"content":{"parts":[{"text":"Thinking about it...","thought":true}]}}],"modelVersion":"gemini-2.5-flash"}',
+        'data: {"candidates":[{"content":{"parts":[{"text":"The answer is yes."}]}}]}',
+        'data: {"candidates":[{"finishReason":"STOP"}],"usageMetadata":{"promptTokenCount":5,"candidatesTokenCount":10,"thoughtsTokenCount":5,"totalTokenCount":20}}',
+        "data: [DONE]",
+      ].join("\n\n");
+
+      const result = await normalizeAIGatewayResponse({
+        responseText: geminiStreamWithThinking,
+        isStream: true,
+        provider: "vertex",
+        providerModelId: "gemini-2.5-flash",
+        responseFormat: "GOOGLE",
+      });
+
+      // Should contain reasoning in delta
+      expect(result).toContain('"reasoning":"Thinking about it..."');
+
+      // Should contain regular content
+      expect(result).toContain('"content":"The answer is yes."');
+
+      // Should have usage with reasoning tokens
+      expect(result).toContain('"reasoning_tokens":5');
+    });
+
+    it("should handle multiple thinking parts in Gemini response", async () => {
+      const geminiResponseWithMultipleThoughts = {
+        candidates: [
+          {
+            content: {
+              role: "model",
+              parts: [
+                { text: "First, let me analyze...", thought: true },
+                { text: "Then, considering...", thought: true },
+                { text: "Based on my analysis, the answer is X." },
+              ],
+            },
+            finishReason: "STOP",
+          },
+        ],
+        modelVersion: "gemini-3-pro",
+        usageMetadata: {
+          promptTokenCount: 15,
+          candidatesTokenCount: 20,
+          thoughtsTokenCount: 30,
+          totalTokenCount: 65,
+        },
+      };
+
+      const result = await normalizeAIGatewayResponse({
+        responseText: JSON.stringify(geminiResponseWithMultipleThoughts),
+        isStream: false,
+        provider: "vertex",
+        providerModelId: "gemini-3-pro",
+        responseFormat: "GOOGLE",
+      });
+
+      const parsed = JSON.parse(result);
+
+      // Content should only be from non-thinking parts
+      expect(parsed.choices[0].message.content).toBe("Based on my analysis, the answer is X.");
+
+      // Reasoning should be all thinking parts joined
+      expect(parsed.choices[0].message.reasoning).toBe(
+        "First, let me analyze...Then, considering..."
+      );
+
+      // Should have reasoning_details for each thinking part
+      expect(parsed.choices[0].message.reasoning_details.length).toBe(2);
+      expect(parsed.choices[0].message.reasoning_details[0].thinking).toBe(
+        "First, let me analyze..."
+      );
+      expect(parsed.choices[0].message.reasoning_details[1].thinking).toBe(
+        "Then, considering..."
+      );
     });
   });
 });

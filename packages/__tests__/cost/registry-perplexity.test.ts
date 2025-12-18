@@ -172,12 +172,13 @@ describe("Perplexity Model Registry", () => {
       expect(pricing.web_search).toBe(0.005); // $5.00 per 1K searches
     });
 
-    it("should have zero cost for audio and image", () => {
+    it("should have no audio or image pricing defined", () => {
       Object.values(perplexityEndpoints).forEach((endpoint) => {
         const ep = endpoint as ModelProviderConfig;
         const pricing = ep.pricing[0];
-        expect(pricing.audio).toBe(0);
-        expect(pricing.image).toBe(0);
+        // Perplexity doesn't support audio/image modalities
+        expect(pricing.audio).toBe(undefined);
+        expect(pricing.image).toBe(undefined);
       });
     });
   });

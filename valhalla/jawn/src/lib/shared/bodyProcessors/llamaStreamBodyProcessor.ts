@@ -1,5 +1,3 @@
-import { calculateModel } from "../../../utils/modelMapper";
-import { getTokenCountAnthropic } from "../../tokens/tokenCounter";
 import { PromiseGenericResult, ok } from "../../../packages/common/result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 import { isParseInputJson } from "./helpers";
@@ -14,9 +12,7 @@ export class LlamaStreamBodyProcessor implements IBodyProcessor {
       });
     }
 
-    const { responseBody, requestBody, requestModel, modelOverride } =
-      parseInput;
-    const model = calculateModel(requestModel, undefined, modelOverride);
+    const { responseBody } = parseInput;
 
     const originalResponseBody = responseBody;
     const eventLines = responseBody.split("\n");
@@ -155,20 +151,6 @@ export class LlamaStreamBodyProcessor implements IBodyProcessor {
             heliconeCalculated: false,
           };
         }
-      }
-
-      if (!usage) {
-        const completionTokens = await getTokenCountAnthropic(completionText);
-        const promptTokens = await getTokenCountAnthropic(
-          JSON.parse(requestBody ?? "{}")?.messages?.map((m: any) => m.content).join("") ?? ""
-        );
-        
-        usage = {
-          totalTokens: completionTokens + promptTokens,
-          promptTokens: promptTokens,
-          completionTokens: completionTokens,
-          heliconeCalculated: true,
-        };
       }
 
       return ok({

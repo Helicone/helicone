@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { getJawnClient } from "@/lib/clients/jawn";
@@ -20,7 +19,9 @@ import {
   X,
   Filter,
   Info,
+  GitCompare,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useModelFiltering } from "@/hooks/useModelFiltering";
 import { Model, SortOption } from "@/lib/filters/modelFilters";
 import { components } from "@/lib/clients/jawnTypes/public";
@@ -40,6 +41,7 @@ import {
   OUTPUT_MODALITIES,
   MODALITY_LABELS,
 } from "@/lib/constants/modalities";
+import Link from "next/link";
 
 type ModelRegistryResponse = components["schemas"]["ModelRegistryResponse"];
 
@@ -63,7 +65,7 @@ export function ModelRegistryPage() {
   );
   const [priceRange, setPriceRange] = useState<[number, number]>([
     Number(searchParams.get("priceMin") || 0),
-    Number(searchParams.get("priceMax") || 50),
+    Number(searchParams.get("priceMax") || 200),
   ]);
   const [minContextSize, setMinContextSize] = useState<number>(
     Number(searchParams.get("contextMin") || 0)
@@ -91,6 +93,7 @@ export function ModelRegistryPage() {
   const [sortBy, setSortBy] = useState<SortOption>(
     (searchParams.get("sort") as SortOption) || "newest"
   );
+
 
   // Use client-side filtering hook
   const { filteredModels, totalModels, availableFilters, isFiltered } =
@@ -142,7 +145,8 @@ export function ModelRegistryPage() {
 
         if (response.data?.data) {
           const data = response.data.data as ModelRegistryResponse;
-          setAllModels(data.models);
+          // Cast to Model[] - the API types have slight differences but runtime data is compatible
+          setAllModels(data.models as unknown as Model[]);
         }
       } catch (error) {
         console.error("Failed to load models:", error);
@@ -156,6 +160,9 @@ export function ModelRegistryPage() {
 
   // Update URL when filters change
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === "undefined") return;
+
     const params = new URLSearchParams();
 
     if (searchQuery) params.set("search", searchQuery);
@@ -163,7 +170,7 @@ export function ModelRegistryPage() {
       params.set("providers", Array.from(selectedProviders).sort().join(","));
     }
     if (priceRange[0] > 0) params.set("priceMin", priceRange[0].toString());
-    if (priceRange[1] < 50) params.set("priceMax", priceRange[1].toString());
+    if (priceRange[1] < 200) params.set("priceMax", priceRange[1].toString());
     if (minContextSize > 0) params.set("contextMin", minContextSize.toString());
     if (selectedCapabilities.size > 0) {
       params.set(
@@ -187,8 +194,8 @@ export function ModelRegistryPage() {
     if (sortBy !== "newest") params.set("sort", sortBy);
 
     const newUrl = params.toString()
-      ? `${window.location.pathname}?${params.toString()}`
-      : window.location.pathname;
+      ? `/models?${params.toString()}`
+      : "/models";
 
     router.push(newUrl, { scroll: false });
   }, [
@@ -296,12 +303,19 @@ export function ModelRegistryPage() {
                 value={priceRange}
                 onChange={(value) => setPriceRange(value as [number, number])}
                 min={0}
-                max={50}
-                step={0.1}
+                max={200}
                 formatLabel={(value) => {
                   const [min, max] = value as [number, number];
-                  return `$${min.toFixed(2)} - $${max.toFixed(2)} per M tokens`;
+                  const formatPrice = (v: number) =>
+                    v < 1 ? `$${v.toFixed(2)}` : `$${v.toFixed(0)}`;
+                  return `${formatPrice(min)} - ${formatPrice(max)}/M tokens`;
                 }}
+                formatValue={(value) => {
+                  if (value < 1) return `$${value.toFixed(2)}`;
+                  return `$${value.toFixed(0)}`;
+                }}
+                showTicks
+                weighted
               />
             </FilterSection>
 
@@ -320,10 +334,16 @@ export function ModelRegistryPage() {
                 label="Minimum"
                 formatLabel={(value) => {
                   const size = value as number;
-                  return size >= 1000
-                    ? `${(size / 1000).toFixed(0)}K tokens`
-                    : `${size} tokens`;
+                  if (size >= 1000000) return `${(size / 1000000).toFixed(1)}M tokens`;
+                  if (size >= 1000) return `${(size / 1000).toFixed(0)}K tokens`;
+                  return `${size} tokens`;
                 }}
+                formatValue={(value) => {
+                  if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+                  if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
+                  return `${value}`;
+                }}
+                showTicks
               />
             </FilterSection>
 
@@ -510,6 +530,14 @@ export function ModelRegistryPage() {
                     <SelectItem value="newest">Newest First</SelectItem>
                   </SelectContent>
                 </Select>
+
+                {/* Compare button */}
+                <Link href="/comparison">
+                  <Button variant="outline" size="sm" className="gap-2 h-10">
+                    <GitCompare className="h-4 w-4" />
+                    Compare
+                  </Button>
+                </Link>
               </div>
               <div className="flex items-center">
                 <span className="text-sm text-gray-500 dark:text-gray-400">
@@ -520,7 +548,7 @@ export function ModelRegistryPage() {
                   <button
                     onClick={() => {
                       setSelectedProviders(new Set());
-                      setPriceRange([0, 50]);
+                      setPriceRange([0, 200]);
                       setMinContextSize(0);
                       setSelectedCapabilities(new Set());
                       setSelectedInputModalities(new Set());
@@ -555,6 +583,7 @@ export function ModelRegistryPage() {
                   ...model.endpoints.map((e) => e.pricing.completion)
                 );
                 const isFree = minInputCost === 0;
+
                 const currentParams = searchParams.toString();
                 const modelUrl = `/model/${encodeURIComponent(model.id)}${currentParams ? `?${currentParams}` : ""}`;
 
@@ -571,7 +600,7 @@ export function ModelRegistryPage() {
                         <div className="flex items-center gap-2">
                           <span className="text-lg font-normal text-gray-900 dark:text-gray-100">
                             {model.name.replace(
-                              new RegExp(`^${model.author}:\s*`, "i"),
+                              new RegExp(`^${model.author}:\\s*`, "i"),
                               ""
                             )}
                           </span>
@@ -579,7 +608,7 @@ export function ModelRegistryPage() {
                             textToCopy={model.id}
                             tooltipContent={`Copy: ${model.id}`}
                             iconSize={14}
-                            className="pointer-events-auto p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                            className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 pointer-events-auto"
                           />
                           {model.pinnedVersionOfModel && (
                             <span className="text-xs font-normal text-amber-800 dark:text-amber-200 bg-amber-100 dark:bg-amber-900/40 px-2 py-0.5">
@@ -600,7 +629,7 @@ export function ModelRegistryPage() {
                       </td>
                     </tr>
 
-                    <tr className="cursor-pointer group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50 pointer-events-none">
+                    <tr className="pointer-events-none">
                       <td className="px-4 lg:px-6 pt-1 pb-6">
                         <div className="space-y-2">
                           {model.description && (

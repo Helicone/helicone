@@ -1,0 +1,378 @@
+---
+title: "Context Editing"
+description: "Automatically manage conversation context by clearing old tool uses and thinking blocks for long-running AI agent sessions"
+---
+
+Context editing enables automatic management of conversation context by intelligently clearing old tool uses and thinking blocks. This can greatly reduce costs in long-running sessions with minimal tradeoffs in context performance.
+
+<Info>
+Context editing is currently supported for **Anthropic models only**. The configuration is ignored when routing to other providers.
+</Info>
+
+## Why Context Editing
+
+<CardGroup cols={3}>
+<Card title="Prevent Context Overflow" icon="memory">
+  Automatically clear old tool results before hitting context limits
+</Card>
+<Card title="Reduce Token Costs" icon="dollar-sign">
+  Keep only relevant context, reducing input tokens on subsequent calls
+</Card>
+<Card title="Enable Long Sessions" icon="clock">
+  Run AI agents for longer periods without manual context management
+</Card>
+</CardGroup>
+
+---
+
+## Quick Start
+
+Enable context editing with a simple configuration. The AI Gateway handles the translation to Anthropic's native format.
+
+<CodeGroup>
+
+```typescript TypeScript
+import OpenAI from "openai";
+import { HeliconeChatCreateParams } from "@helicone/helpers";
+
+const client = new OpenAI({
+  apiKey: process.env.HELICONE_API_KEY,
+  baseURL: "https://ai-gateway.helicone.ai/v1",
+});
+
+const response = await client.chat.completions.create({
+  model: "claude-sonnet-4-20250514",
+  messages: [
+    { role: "system", content: "You are a helpful coding assistant." },
+    { role: "user", content: "Help me debug this application..." }
+    // ... many tool calls and responses
+  ],
+  tools: [/* your tools */],
+  context_editing: {
+    enabled: true
+  }
+} as HeliconeChatCreateParams);
+```
+
+```python Python
+import os
+from openai import OpenAI
+
+client = OpenAI(
+    api_key=os.environ.get("HELICONE_API_KEY"),
+    base_url="https://ai-gateway.helicone.ai/v1",
+)
+
+response = client.chat.completions.create(
+    model="claude-sonnet-4-20250514",
+    messages=[
+        {"role": "system", "content": "You are a helpful coding assistant."},
+        {"role": "user", "content": "Help me debug this application..."}
+        # ... many tool calls and responses
+    ],
+    tools=[# your tools],
+    context_editing={
+        "enabled": True
+    }
+)
+```
+
+```bash
+curl https://ai-gateway.helicone.ai/v1/chat/completions \
+  -H "Authorization: Bearer $HELICONE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "claude-sonnet-4-20250514",
+    "messages": [
+      {"role": "system", "content": "You are a helpful coding assistant."},
+      {"role": "user", "content": "Help me debug this application..."}
+    ],
+    "tools": [],
+    "context_editing": {
+      "enabled": true
+    }
+  }'
+```
+
+</CodeGroup>
+
+---
+
+## Configuration Options
+
+The `context_editing` object supports two strategies for managing context:
+
+### Clear Tool Uses
+
+Automatically clear old tool use results when context grows too large:
+
+```typescript
+context_editing: {
+  enabled: true,
+  clear_tool_uses: {
+    // Trigger clearing when input tokens exceed this threshold
+    trigger: 100000,
+
+    // Keep the most recent N tool uses
+    keep: 5,
+
+    // Ensure at least this many tokens are cleared
+    clear_at_least: 20000,
+
+    // Never clear results from these tools
+    exclude_tools: ["get_user_preferences", "read_config"],
+
+    // Clear tool inputs (arguments) but keep outputs
+    clear_tool_inputs: true
+  }
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `trigger` | number | Token threshold to trigger clearing |
+| `keep` | number | Number of recent tool uses to preserve |
+| `clear_at_least` | number | Minimum tokens to clear when triggered |
+| `exclude_tools` | string[] | Tool names that should never be cleared |
+| `clear_tool_inputs` | boolean | Clear tool inputs while keeping outputs |
+
+### Clear Thinking
+
+Manage thinking/reasoning blocks in multi-turn conversations:
+
+```typescript
+context_editing: {
+  enabled: true,
+  clear_thinking: {
+    // Keep the N most recent thinking turns, or "all" to keep everything
+    keep: 3
+  }
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `keep` | number \| "all" | Number of thinking turns to keep, or "all" |
+
+---
+
+## Complete Example
+
+Here's a full configuration for a long-running coding agent:
+
+<CodeGroup>
+
+```typescript TypeScript
+import OpenAI from "openai";
+import { HeliconeChatCreateParams } from "@helicone/helpers";
+
+const client = new OpenAI({
+  apiKey: process.env.HELICONE_API_KEY,
+  baseURL: "https://ai-gateway.helicone.ai/v1",
+});
+
+const response = await client.chat.completions.create({
+  model: "claude-sonnet-4-20250514",
+  messages: conversationHistory,
+  tools: [
+    {
+      type: "function",
+      function: {
+        name: "read_file",
+        description: "Read a file from the filesystem",
+        parameters: {
+          type: "object",
+          properties: {
+            path: { type: "string", description: "File path to read" }
+          },
+          required: ["path"]
+        }
+      }
+    },
+    {
+      type: "function",
+      function: {
+        name: "write_file",
+        description: "Write content to a file",
+        parameters: {
+          type: "object",
+          properties: {
+            path: { type: "string" },
+            content: { type: "string" }
+          },
+          required: ["path", "content"]
+        }
+      }
+    },
+    {
+      type: "function",
+      function: {
+        name: "run_command",
+        description: "Execute a shell command",
+        parameters: {
+          type: "object",
+          properties: {
+            command: { type: "string" }
+          },
+          required: ["command"]
+        }
+      }
+    }
+  ],
+  reasoning_effort: "medium",
+  context_editing: {
+    enabled: true,
+    clear_tool_uses: {
+      trigger: 150000,        // Trigger at 150k tokens
+      keep: 10,               // Keep last 10 tool uses
+      clear_at_least: 50000,  // Clear at least 50k tokens
+      exclude_tools: ["read_file"],  // Always keep file reads
+      clear_tool_inputs: true  // Clear large file contents from inputs
+    },
+    clear_thinking: {
+      keep: 5  // Keep last 5 thinking blocks
+    }
+  },
+  max_completion_tokens: 16000
+} as HeliconeChatCreateParams);
+```
+
+```python Python
+response = client.chat.completions.create(
+    model="claude-sonnet-4-20250514",
+    messages=conversation_history,
+    tools=[
+        {
+            "type": "function",
+            "function": {
+                "name": "read_file",
+                "description": "Read a file from the filesystem",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "path": {"type": "string", "description": "File path to read"}
+                    },
+                    "required": ["path"]
+                }
+            }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "write_file",
+                "description": "Write content to a file",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "path": {"type": "string"},
+                        "content": {"type": "string"}
+                    },
+                    "required": ["path", "content"]
+                }
+            }
+        }
+    ],
+    reasoning_effort="medium",
+    context_editing={
+        "enabled": True,
+        "clear_tool_uses": {
+            "trigger": 150000,
+            "keep": 10,
+            "clear_at_least": 50000,
+            "exclude_tools": ["read_file"],
+            "clear_tool_inputs": True
+        },
+        "clear_thinking": {
+            "keep": 5
+        }
+    },
+    max_completion_tokens=16000
+)
+```
+
+```bash
+curl https://ai-gateway.helicone.ai/v1/chat/completions \
+  -H "Authorization: Bearer $HELICONE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "claude-sonnet-4-20250514",
+    "messages": [...],
+    "tools": [...],
+    "reasoning_effort": "medium",
+    "context_editing": {
+      "enabled": true,
+      "clear_tool_uses": {
+        "trigger": 150000,
+        "keep": 10,
+        "clear_at_least": 50000,
+        "exclude_tools": ["read_file"],
+        "clear_tool_inputs": true
+      },
+      "clear_thinking": {
+        "keep": 5
+      }
+    },
+    "max_completion_tokens": 16000
+  }'
+```
+
+</CodeGroup>
+
+---
+
+## Responses API Support
+
+Context editing works with both the Chat Completions API and the [Responses API](/gateway/concepts/responses-api):
+
+```typescript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: process.env.HELICONE_API_KEY,
+  baseURL: "https://ai-gateway.helicone.ai/v1",
+});
+
+const response = await client.responses.create({
+  model: "claude-sonnet-4-20250514",
+  input: conversationInput,
+  tools: [/* your tools */],
+  context_editing: {
+    enabled: true,
+    clear_tool_uses: {
+      trigger: 100000,
+      keep: 5
+    }
+  }
+});
+```
+
+---
+
+## Default Behavior
+
+When `context_editing.enabled` is `true` but no specific strategies are provided, the AI Gateway uses sensible defaults:
+
+```typescript
+// Minimal configuration
+context_editing: {
+  enabled: true
+}
+
+// Equivalent to
+context_editing: {
+  enabled: true,
+  clear_tool_uses: {}  // Uses Anthropic defaults
+}
+```
+
+---
+
+## Related Features
+
+- [Reasoning](/gateway/concepts/reasoning) - Extended thinking that benefits from context editing
+- [Prompt Caching](/gateway/concepts/prompt-caching) - Cache static context for cost savings
+- [Sessions](/features/sessions) - Track and analyze long-running agent sessions
+
+<Card title="Learn More" href="https://docs.anthropic.com/en/docs/build-with-claude/context-editing">
+  Anthropic Context Editing Documentation
+</Card>

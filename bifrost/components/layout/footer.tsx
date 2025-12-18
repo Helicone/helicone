@@ -182,13 +182,6 @@ const Footer = () => {
           <a className="hover:underline" href="/pricing" target="_blank">
             Pricing
           </a>
-          <a
-            className="hover:underline"
-            href="https://us.helicone.ai/open-stats"
-            target="_blank"
-          >
-            Stats
-          </a>
           <a className="hover:underline" href="/community" target="_blank">
             Community
           </a>

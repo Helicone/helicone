@@ -1,0 +1,244 @@
+---
+title: "Image Generation"
+description: "Generate images through Helicone's AI Gateway using models with native image output like Nano Banana Pro"
+---
+
+Helicone's AI Gateway supports image generation through models with native image output capabilities. Use the unified OpenAI-compatible API to generate images - the Gateway handles provider-specific translations automatically.
+
+<Info>
+Image generation is currently supported for **Nano Banana Pro (gemini-3-pro-image-preview)** via Google AI Studio. Support for additional providers will be added in future updates.
+</Info>
+
+---
+
+## Quick Start
+
+<Tabs>
+  <Tab title="Chat Completions">
+    ```typescript
+    import OpenAI from "openai";
+
+    const client = new OpenAI({
+      apiKey: process.env.HELICONE_API_KEY,
+      baseURL: "https://ai-gateway.helicone.ai/v1",
+    });
+
+    const response = await client.chat.completions.create({
+      model: "gemini-3-pro-image-preview/google-ai-studio",
+      messages: [
+        { role: "user", content: "Generate an image of a sunset over mountains" }
+      ],
+      max_tokens: 8192
+    });
+
+    // Access generated images
+    const images = response.choices[0].message.images;
+    ```
+  </Tab>
+  <Tab title="Responses API">
+    ```typescript
+    import OpenAI from "openai";
+
+    const client = new OpenAI({
+      apiKey: process.env.HELICONE_API_KEY,
+      baseURL: "https://ai-gateway.helicone.ai/v1",
+    });
+
+    const response = await client.responses.create({
+      model: "gemini-3-pro-image-preview/google-ai-studio",
+      input: "Generate an image of a sunset over mountains",
+      max_output_tokens: 8192
+    });
+
+    // Access generated images from output
+    const messageOutput = response.output.find(item => item.type === "message");
+    const imageContent = messageOutput?.content.find(c => c.type === "output_image");
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## Configuration
+
+To enable image generation:
+
+1. Set the `model` to one that supports image output (currently `gemini-3-pro-image-preview/google-ai-studio`, also known as Nano Banana Pro)
+2. Optionally configure `image_generation` to control aspect ratio and size
+
+<Tabs>
+  <Tab title="Chat Completions">
+    ```typescript
+    {
+      model: "gemini-3-pro-image-preview/google-ai-studio",
+      messages: [...],
+      image_generation: {
+        aspect_ratio: "16:9",
+        image_size: "2K"
+      }
+    }
+    ```
+  </Tab>
+  <Tab title="Responses API">
+    ```typescript
+    {
+      model: "gemini-3-pro-image-preview/google-ai-studio",
+      input: "...",
+      image_generation: {
+        aspect_ratio: "16:9",
+        image_size: "2K"
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+### image_generation
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `aspect_ratio` | string | Image aspect ratio (e.g., `"16:9"`, `"1:1"`, `"9:16"`) |
+| `image_size` | string | Image resolution (e.g., `"2K"`, `"1K"`) |
+
+<Note>
+The `image_generation` field is optional. If omitted, the model uses default settings. However, if you specify `image_generation`, both `aspect_ratio` and `image_size` are required.
+</Note>
+
+---
+
+## Handling Responses
+
+### Chat Completions
+
+<Tabs>
+  <Tab title="Streaming">
+    When streaming, images arrive in chunks via the `images` delta field:
+
+    ```json
+    // Image chunks arrive in delta
+    {
+      "choices": [{
+        "delta": {
+          "images": [{
+            "type": "image_url",
+            "image_url": {
+              "url": "data:image/png;base64,iVBORw0KGgo..."
+            }
+          }]
+        }
+      }]
+    }
+    ```
+  </Tab>
+  <Tab title="Non-Streaming">
+    Non-streaming responses include images in the message:
+
+    ```json
+    {
+      "id": "chatcmpl-abc123",
+      "object": "chat.completion",
+      "model": "gemini-3-pro-image-preview",
+      "choices": [{
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "Here's the image you requested:",
+          "images": [{
+            "type": "image_url",
+            "image_url": {
+              "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
+            }
+          }]
+        },
+        "finish_reason": "stop"
+      }],
+      "usage": {
+        "prompt_tokens": 12,
+        "completion_tokens": 1024,
+        "total_tokens": 1036
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+### Responses API
+
+<Tabs>
+  <Tab title="Streaming">
+    Streaming events follow the Responses API format:
+
+    ```json
+    // Content part added for image
+    {
+      "type": "response.content_part.added",
+      "item_id": "msg_abc123",
+      "output_index": 0,
+      "content_index": 0,
+      "part": {
+        "type": "output_image",
+        "image_url": ""
+      }
+    }
+
+    // Content part done with full image
+    {
+      "type": "response.content_part.done",
+      "item_id": "msg_abc123",
+      "output_index": 0,
+      "content_index": 0,
+      "part": {
+        "type": "output_image",
+        "image_url": "data:image/png;base64,iVBORw0KGgo..."
+      }
+    }
+    ```
+  </Tab>
+  <Tab title="Non-Streaming">
+    ```json
+    {
+      "id": "resp_abc123",
+      "object": "response",
+      "status": "completed",
+      "model": "gemini-3-pro-image-preview",
+      "output": [
+        {
+          "id": "msg_abc123",
+          "type": "message",
+          "status": "completed",
+          "role": "assistant",
+          "content": [
+            {
+              "type": "output_text",
+              "text": "Here's the image you requested:"
+            },
+            {
+              "type": "output_image",
+              "image_url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
+            }
+          ]
+        }
+      ],
+      "usage": {
+        "input_tokens": 12,
+        "output_tokens": 1024
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## Supported Models
+
+| Model | Provider Route | Description |
+|-------|----------------|-------------|
+| `gemini-3-pro-image-preview/google-ai-studio` | Google AI Studio | Nano Banana Pro - Google's multimodal model with native image generation |
+
+---
+
+## Related
+
+- [Reasoning](/gateway/concepts/reasoning) - Enable reasoning for complex tasks
+- [Responses API](/gateway/concepts/responses-api) - Alternative API format with image support

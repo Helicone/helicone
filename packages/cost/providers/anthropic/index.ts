@@ -232,7 +232,7 @@ export const costs: ModelRow[] = [
   },
   {
     model: {
-      operator: "equals",
+      operator: "includes",
       value: "claude-opus-4-5",
     },
     cost: {
@@ -623,9 +623,9 @@ export const modelDetails: ModelDetailsMap = {
       ],
     },
   },
-  "claude-4.5-opus": {
-    matches: ["claude-opus-4-5"],
-    searchTerms: ["claude 4.5 opus", "claude-4.5-opus", "opus 4.5"],
+  "claude-opus-4-5": {
+    matches: ["claude-opus-4-5-20251101", "claude-opus-4-5"],
+    searchTerms: ["claude 4.5 opus", "claude-opus-4-5", "opus 4.5", "claude-opus-4-5-20251101"],
     info: {
       maxTokens: 200000,
       releaseDate: "2025-11-24",

@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { ArrowRightIcon, SearchIcon } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { SearchIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import {
@@ -13,114 +12,228 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getJawnClient } from "@/lib/clients/jawn";
+import { components } from "@/lib/clients/jawnTypes/public";
+import { capitalizeModality } from "@/lib/constants/modalities";
+import { getProviderLogo } from "@/lib/models/registry";
 
-// Import the new adapter functions
-import { getPopularModels, createComparisonPath } from "@/lib/models/registry";
+type ModelRegistryItem = components["schemas"]["ModelRegistryItem"];
+
+const formatContext = (value: number) => {
+  if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+  if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
+  return value.toString();
+};
+
+const formatCost = (value: number) => {
+  if (value === 0) return "Free";
+  if (value < 0.01) return `$${value.toFixed(4)}`;
+  if (value < 1) return `$${value.toFixed(2)}`;
+  return `$${value.toFixed(2)}`;
+};
 
 export default function ComparisonContent() {
-  // Get models from our registry adapter for initialization
-  const popularModels = getPopularModels();
-
-  // Find the Claude model ID by looking for "claude" in the name
-  const claudeModelId =
-    popularModels.find(
-      (m) =>
-        m.name.toLowerCase().includes("claude") &&
-        m.name.toLowerCase().includes("sonnet")
-    )?.id || "";
-
-  // Find the GPT-4o model ID to ensure it exists
-  const gpt4oModelId =
-    popularModels.find(
-      (m) =>
-        m.name.toLowerCase().includes("gpt-4o") ||
-        m.name.toLowerCase().includes("gpt4o")
-    )?.id || "";
-
-  // Pre-select models if they exist in the registry
-  const [firstModel, setFirstModel] = useState(gpt4oModelId);
-  const [secondModel, setSecondModel] = useState(claudeModelId);
-  const [searchTerm, setSearchTerm] = useState("");
+  const searchParams = useSearchParams();
   const router = useRouter();
 
-  const filteredModels = popularModels.filter(
-    (model) =>
-      model.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      model.provider.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // State
+  const [allModels, setAllModels] = useState<ModelRegistryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [firstModel, setFirstModel] = useState<string>("");
+  const [secondModel, setSecondModel] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const isCompareDisabled =
-    !firstModel || !secondModel || firstModel === secondModel;
+  // Query params
+  const model1Param = searchParams.get("model1");
+  const model2Param = searchParams.get("model2");
 
-  // Handle navigation when both models are selected
+  // Fetch all models from API
   useEffect(() => {
-    // Disabled automatic navigation since we now have the button
-    // This useEffect can be used for other initialization if needed
+    const fetchModels = async () => {
+      try {
+        const jawnClient = getJawnClient();
+        const response = await jawnClient.GET("/v1/public/model-registry/models");
+
+        if (response.data?.data?.models) {
+          setAllModels(response.data.data.models);
+        }
+      } catch (error) {
+        console.error("Failed to fetch models:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchModels();
+  }, []);
+
+  // Set initial model selections from query params once models are loaded
+  useEffect(() => {
+    if (allModels.length === 0) return;
+
+    if (model1Param && !firstModel) {
+      const found = allModels.find(
+        (m) =>
+          m.id === model1Param ||
+          m.id.toLowerCase() === model1Param.toLowerCase() ||
+          m.name.toLowerCase().includes(model1Param.toLowerCase())
+      );
+      if (found) setFirstModel(found.id);
+    }
+
+    if (model2Param && !secondModel) {
+      const found = allModels.find(
+        (m) =>
+          m.id === model2Param ||
+          m.id.toLowerCase() === model2Param.toLowerCase() ||
+          m.name.toLowerCase().includes(model2Param.toLowerCase())
+      );
+      if (found) setSecondModel(found.id);
+    }
+  }, [allModels, model1Param, model2Param, firstModel, secondModel]);
+
+  // Update URL when models change
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const params = new URLSearchParams();
+    if (firstModel) params.set("model1", firstModel);
+    if (secondModel) params.set("model2", secondModel);
+
+    const newUrl = params.toString() ? `/comparison?${params.toString()}` : "/comparison";
+    router.replace(newUrl, { scroll: false });
   }, [firstModel, secondModel, router]);
 
-  // Handle second model selection (also used for card clicks)
-  const handleSecondModelSelect = (modelId: string) => {
-    if (modelId === firstModel) return; // Prevent selecting the same model
-    setSecondModel(modelId);
-  };
+  // Get model objects for comparison
+  const model1Data = useMemo(
+    () => allModels.find((m) => m.id === firstModel) || null,
+    [allModels, firstModel]
+  );
+  const model2Data = useMemo(
+    () => allModels.find((m) => m.id === secondModel) || null,
+    [allModels, secondModel]
+  );
 
-  // Handle model card clicks with the same logic
+  // Filter models for search
+  const filteredModels = useMemo(() => {
+    if (!searchTerm.trim()) return allModels;
+    const query = searchTerm.toLowerCase();
+    return allModels.filter(
+      (model) =>
+        model.name.toLowerCase().includes(query) ||
+        model.id.toLowerCase().includes(query) ||
+        model.author.toLowerCase().includes(query)
+    );
+  }, [allModels, searchTerm]);
+
+  // Handle model card clicks - toggle selection
   const handleModelCardClick = (modelId: string) => {
-    if (!firstModel) {
-      setFirstModel(modelId);
-    } else if (firstModel !== modelId) {
-      // If first model is set and this is a different model, set as second and navigate
-      handleSecondModelSelect(modelId);
-    } else if (firstModel === modelId) {
+    if (firstModel === modelId) {
+      // Deselect first model
       setFirstModel("");
     } else if (secondModel === modelId) {
+      // Deselect second model
       setSecondModel("");
+    } else if (!firstModel) {
+      // Set as first model
+      setFirstModel(modelId);
+    } else if (!secondModel && modelId !== firstModel) {
+      // Set as second model
+      setSecondModel(modelId);
+    } else if (firstModel && secondModel) {
+      // Both selected, replace second model
+      setSecondModel(modelId);
     }
   };
 
+  // Check if comparison is ready
+  const showComparison = model1Data && model2Data;
+
+  // Get pricing info for a model
+  const getModelPricing = (model: ModelRegistryItem) => {
+    const endpoint = model.endpoints && model.endpoints.length > 0 ? model.endpoints[0] : undefined;
+    if (!endpoint) return { input: 0, output: 0 };
+    const pricing =
+      endpoint.pricingTiers && endpoint.pricingTiers.length > 0
+        ? endpoint.pricingTiers[0]
+        : endpoint.pricing;
+    return { input: pricing.prompt, output: pricing.completion };
+  };
+
+  // Compare values helper
+  const CompareValue = ({
+    label,
+    value1,
+    value2,
+    format = (v: string | number) => String(v),
+    higherIsBetter = true,
+  }: {
+    label: string;
+    value1: string | number;
+    value2: string | number;
+    format?: (v: string | number) => string;
+    higherIsBetter?: boolean;
+  }) => {
+    const num1 = typeof value1 === "number" ? value1 : parseFloat(value1) || 0;
+    const num2 = typeof value2 === "number" ? value2 : parseFloat(value2) || 0;
+    const isBetter1 = higherIsBetter ? num1 > num2 : num1 < num2;
+    const isBetter2 = higherIsBetter ? num2 > num1 : num2 < num1;
+
+    return (
+      <div className="grid grid-cols-3 gap-4 py-3 border-b border-gray-100 dark:border-gray-800">
+        <div
+          className={`text-sm ${isBetter1 ? "text-green-600 dark:text-green-400 font-medium" : "text-gray-600 dark:text-gray-400"}`}
+        >
+          {format(value1)}
+        </div>
+        <div className="text-sm text-center text-gray-500 dark:text-gray-400 font-medium">
+          {label}
+        </div>
+        <div
+          className={`text-sm text-right ${isBetter2 ? "text-green-600 dark:text-green-400 font-medium" : "text-gray-600 dark:text-gray-400"}`}
+        >
+          {format(value2)}
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="min-h-screen bg-white px-4 py-4 flex flex-col items-center">
-      {/* LLM Leaderboard Image */}
-      <div className="container mx-auto max-w-4xl pb-2 text-center">
-        <img
-          src="/static/llmleaderboard.webp"
-          alt="LLM Leaderboard"
-          className="mx-auto max-w-[150px] h-auto"
-        />
+    <div className="min-h-screen bg-white dark:bg-gray-950 px-4 py-8 flex flex-col items-center">
+      {/* Header */}
+      <div className="text-center max-w-3xl mx-auto mb-8">
+        <h1 className="text-4xl font-semibold mb-4">
+          Model <span className="text-brand">Comparison</span>
+        </h1>
+        <p className="text-lg text-gray-500 dark:text-gray-400 font-light px-4">
+          Compare costs, context lengths, and capabilities across AI models.
+        </p>
       </div>
 
-      {/* Main heading - match Hero.tsx style */}
-      <div className="text-center max-w-3xl mx-auto">
-        <h1 className="text-4xl font-semibold mb-4">
-          LLM Leaderboard <span className="text-brand">2025</span>
-        </h1>
-
-        <p className="text-lg text-landing-secondary font-light mb-6 px-4">
-          Make data-driven decisions with real-world performance metrics from
-          thousands of applications.
-        </p>
-
-        {/* Simple model selector right here */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6 max-w-2xl mx-auto">
-          <div className="w-full sm:w-[44%]">
+      {/* Model Selectors */}
+      <div className="w-full max-w-4xl mx-auto mb-6">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="w-full sm:w-[42%]">
             <Select value={firstModel} onValueChange={setFirstModel}>
-              <SelectTrigger className="w-full h-10 text-sm">
+              <SelectTrigger className="w-full h-12 text-sm">
                 <SelectValue placeholder="Select first model" />
               </SelectTrigger>
-              <SelectContent>
-                {popularModels.map((model) => (
+              <SelectContent className="max-h-80">
+                {allModels.map((model) => (
                   <SelectItem
                     key={model.id}
                     value={model.id}
                     disabled={model.id === secondModel}
                   >
                     <div className="flex items-center gap-2">
-                      <img
-                        src={model.logo}
-                        alt={`${model.provider} logo`}
-                        className="w-5 h-5 rounded-full object-cover"
-                      />
-                      <span>{model.name}</span>
+                      <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+                        <img
+                          src={getProviderLogo(model.author)}
+                          alt={`${model.author} logo`}
+                          className="w-4 h-4 object-contain"
+                        />
+                      </div>
+                      <span className="truncate">{model.name}</span>
                     </div>
                   </SelectItem>
                 ))}
@@ -128,27 +241,29 @@ export default function ComparisonContent() {
             </Select>
           </div>
 
-          <div className="flex-shrink-0 text-md px-2 font-bold">VS</div>
+          <div className="flex-shrink-0 text-lg px-3 font-bold text-gray-400">VS</div>
 
-          <div className="w-full sm:w-[44%]">
-            <Select value={secondModel} onValueChange={handleSecondModelSelect}>
-              <SelectTrigger className="w-full h-10 text-sm">
+          <div className="w-full sm:w-[42%]">
+            <Select value={secondModel} onValueChange={setSecondModel}>
+              <SelectTrigger className="w-full h-12 text-sm">
                 <SelectValue placeholder="Select second model" />
               </SelectTrigger>
-              <SelectContent>
-                {popularModels.map((model) => (
+              <SelectContent className="max-h-80">
+                {allModels.map((model) => (
                   <SelectItem
                     key={model.id}
                     value={model.id}
                     disabled={model.id === firstModel}
                   >
                     <div className="flex items-center gap-2">
-                      <img
-                        src={model.logo}
-                        alt={`${model.provider} logo`}
-                        className="w-5 h-5 rounded-full object-cover"
-                      />
-                      <span>{model.name}</span>
+                      <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+                        <img
+                          src={getProviderLogo(model.author)}
+                          alt={`${model.author} logo`}
+                          className="w-4 h-4 object-contain"
+                        />
+                      </div>
+                      <span className="truncate">{model.name}</span>
                     </div>
                   </SelectItem>
                 ))}
@@ -156,31 +271,141 @@ export default function ComparisonContent() {
             </Select>
           </div>
         </div>
-
-        {/* Compare button */}
-        <Link
-          href={
-            !isCompareDisabled
-              ? createComparisonPath(firstModel, secondModel)
-              : "#"
-          }
-          className="inline-block mb-6"
-        >
-          <button
-            disabled={isCompareDisabled}
-            className={`bg-brand py-2 px-6 text-sm font-medium flex gap-2 rounded-md items-center text-white ${
-              isCompareDisabled ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-          >
-            Compare Models <ArrowRightIcon size={16} strokeWidth={2.33} />
-          </button>
-        </Link>
       </div>
 
-      {/* Full model selector card */}
-      <div id="comparison" className="max-w-4xl mx-auto mt-12">
-        <Card className="p-6 md:p-8 border border-gray-200 rounded-lg">
-          <h2 className="text-xl font-semibold mb-6">Browse all models</h2>
+      {/* Comparison Panel - slides down when both models selected */}
+      <div
+        className={`w-full max-w-4xl mx-auto overflow-hidden transition-all duration-300 ease-in-out ${
+          showComparison ? "max-h-[800px] opacity-100 mb-8" : "max-h-0 opacity-0"
+        }`}
+      >
+        {showComparison && (
+          <Card className="p-6 border border-gray-200 dark:border-gray-800">
+            {/* Model Headers */}
+            <div className="grid grid-cols-3 gap-4 mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+                  <img
+                    src={getProviderLogo(model1Data.author)}
+                    alt={model1Data.author}
+                    className="w-5 h-5 object-contain"
+                  />
+                </div>
+                <div>
+                  <div className="font-semibold text-gray-900 dark:text-gray-100">
+                    {model1Data.name}
+                  </div>
+                  <div className="text-xs text-gray-500">{model1Data.author}</div>
+                </div>
+              </div>
+              <div className="flex items-center justify-center">
+                <span className="text-sm font-medium text-gray-400">Comparison</span>
+              </div>
+              <div className="flex items-center gap-3 justify-end">
+                <div className="text-right">
+                  <div className="font-semibold text-gray-900 dark:text-gray-100">
+                    {model2Data.name}
+                  </div>
+                  <div className="text-xs text-gray-500">{model2Data.author}</div>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+                  <img
+                    src={getProviderLogo(model2Data.author)}
+                    alt={model2Data.author}
+                    className="w-5 h-5 object-contain"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Comparison Rows */}
+            <div className="space-y-0">
+              <CompareValue
+                label="Context Length"
+                value1={model1Data.contextLength}
+                value2={model2Data.contextLength}
+                format={(v) => formatContext(Number(v))}
+                higherIsBetter={true}
+              />
+              <CompareValue
+                label="Max Output"
+                value1={model1Data.maxOutput || 0}
+                value2={model2Data.maxOutput || 0}
+                format={(v) => (Number(v) > 0 ? formatContext(Number(v)) : "—")}
+                higherIsBetter={true}
+              />
+              <CompareValue
+                label="Input Cost"
+                value1={getModelPricing(model1Data).input}
+                value2={getModelPricing(model2Data).input}
+                format={(v) => `${formatCost(Number(v))}/M`}
+                higherIsBetter={false}
+              />
+              <CompareValue
+                label="Output Cost"
+                value1={getModelPricing(model1Data).output}
+                value2={getModelPricing(model2Data).output}
+                format={(v) => `${formatCost(Number(v))}/M`}
+                higherIsBetter={false}
+              />
+
+              {/* Input Modalities */}
+              <div className="grid grid-cols-3 gap-4 py-3 border-b border-gray-100 dark:border-gray-800">
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  {model1Data.inputModalities?.length > 0
+                    ? model1Data.inputModalities.map(capitalizeModality).join(", ")
+                    : "Text"}
+                </div>
+                <div className="text-sm text-center text-gray-500 dark:text-gray-400 font-medium">
+                  Input Modalities
+                </div>
+                <div className="text-sm text-right text-gray-600 dark:text-gray-400">
+                  {model2Data.inputModalities?.length > 0
+                    ? model2Data.inputModalities.map(capitalizeModality).join(", ")
+                    : "Text"}
+                </div>
+              </div>
+
+              {/* Output Modalities */}
+              <div className="grid grid-cols-3 gap-4 py-3 border-b border-gray-100 dark:border-gray-800">
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  {model1Data.outputModalities?.length > 0
+                    ? model1Data.outputModalities.map(capitalizeModality).join(", ")
+                    : "Text"}
+                </div>
+                <div className="text-sm text-center text-gray-500 dark:text-gray-400 font-medium">
+                  Output Modalities
+                </div>
+                <div className="text-sm text-right text-gray-600 dark:text-gray-400">
+                  {model2Data.outputModalities?.length > 0
+                    ? model2Data.outputModalities.map(capitalizeModality).join(", ")
+                    : "Text"}
+                </div>
+              </div>
+
+              {/* Providers */}
+              <div className="grid grid-cols-3 gap-4 py-3">
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  {model1Data.endpoints?.map((e) => e.provider).join(", ") || "N/A"}
+                </div>
+                <div className="text-sm text-center text-gray-500 dark:text-gray-400 font-medium">
+                  Available Providers
+                </div>
+                <div className="text-sm text-right text-gray-600 dark:text-gray-400">
+                  {model2Data.endpoints?.map((e) => e.provider).join(", ") || "N/A"}
+                </div>
+              </div>
+            </div>
+          </Card>
+        )}
+      </div>
+
+      {/* Browse all models card */}
+      <div className="w-full max-w-4xl mx-auto">
+        <Card className="p-6 md:p-8 border border-gray-200 dark:border-gray-800 rounded-lg">
+          <h2 className="text-xl font-semibold mb-6 text-gray-900 dark:text-gray-100">
+            Browse all models
+          </h2>
 
           <div className="flex items-center justify-between mb-4">
             <div className="relative">
@@ -188,44 +413,79 @@ export default function ComparisonContent() {
               <Input
                 type="text"
                 placeholder="Search models..."
-                className="pl-8 w-[200px]"
+                className="pl-8 w-[250px]"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
+            <span className="text-sm text-gray-500">
+              {filteredModels.length} models
+            </span>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {filteredModels.map((model) => (
-              <div
-                key={model.id}
-                className="border rounded-lg p-3 cursor-pointer hover:bg-gray-50 transition-colors"
-                onClick={() => handleModelCardClick(model.id)}
-              >
-                <div
-                  className={`flex items-center gap-2 ${
-                    firstModel === model.id || secondModel === model.id
-                      ? "text-brand font-medium"
-                      : ""
-                  }`}
-                >
-                  <img
-                    src={model.logo}
-                    alt={`${model.provider} logo`}
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                  <div>
-                    <div className="text-sm font-medium truncate">
-                      {model.name}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {model.provider}
+          {loading ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="border rounded-lg p-3 animate-pulse">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full" />
+                    <div className="flex-1">
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-1" />
+                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-h-96 overflow-y-auto">
+              {filteredModels.map((model) => {
+                const isSelected = firstModel === model.id || secondModel === model.id;
+                const isFirst = firstModel === model.id;
+                const isSecond = secondModel === model.id;
+
+                return (
+                  <div
+                    key={model.id}
+                    className={`border rounded-lg p-3 cursor-pointer transition-colors ${
+                      isSelected
+                        ? "border-brand bg-brand/5"
+                        : "border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+                    }`}
+                    onClick={() => handleModelCardClick(model.id)}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                        <img
+                          src={getProviderLogo(model.author)}
+                          alt={`${model.author} logo`}
+                          className="w-4 h-4 object-contain"
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div
+                          className={`text-sm font-medium truncate ${
+                            isSelected ? "text-brand" : "text-gray-900 dark:text-gray-100"
+                          }`}
+                        >
+                          {model.name}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                          {model.author}
+                          {isFirst && (
+                            <span className="text-[10px] bg-brand/20 text-brand px-1 rounded">1</span>
+                          )}
+                          {isSecond && (
+                            <span className="text-[10px] bg-brand/20 text-brand px-1 rounded">2</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </Card>
       </div>
     </div>

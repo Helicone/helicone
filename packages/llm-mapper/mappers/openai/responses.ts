@@ -6,6 +6,7 @@ const typeMap: Record<string, Message["_type"]> = {
   input_text: "message",
   input_image: "image",
   input_file: "file",
+  output_text: "message", // Assistant messages that come back as input have output_text type
 };
 
 interface OpenAIResponseRequest {
@@ -293,10 +294,10 @@ const convertRequestInputToMessages = (
   }
 
   const messages: Message[] = [];
-  let lastAssistantMessage: Message | null = null;
 
   input.forEach((msg: any, msgIdx) => {
-    // Handle function calls - group them into tool_calls array
+    // Handle function calls - each function_call becomes its own assistant message
+    // to preserve chronological order in conversation history
     if (msg.type === "function_call") {
       const toolCall = {
         id: msg.id || msg.call_id || `req-tool-${msgIdx}`,
@@ -305,19 +306,14 @@ const convertRequestInputToMessages = (
         type: "function",
       };
 
-      // Find or create an assistant message to attach tool calls to
-      if (!lastAssistantMessage || lastAssistantMessage.role !== "assistant") {
-        lastAssistantMessage = {
-          _type: "message",
-          role: "assistant",
-          content: "", // Assistant messages with tool calls can have empty content
-          id: `req-msg-assistant-${msgIdx}`,
-          tool_calls: [],
-        };
-        messages.push(lastAssistantMessage);
-      }
-
-      lastAssistantMessage.tool_calls?.push(toolCall);
+      // Create a new assistant message for each function call
+      messages.push({
+        _type: "message",
+        role: "assistant",
+        content: "",
+        id: `req-msg-assistant-${msgIdx}`,
+        tool_calls: [toolCall],
+      });
       return;
     }
 
@@ -389,19 +385,13 @@ const convertRequestInputToMessages = (
           }
         }
 
-        const message = {
+        messages.push({
           _type: "message",
           role: msg.role,
           type: "input_text",
           content: content,
           id: `req-msg-${msgIdx}`,
-        } as Message;
-        messages.push(message);
-
-        // Update lastAssistantMessage if this is an assistant message
-        if (msg.role === "assistant") {
-          lastAssistantMessage = message;
-        }
+        } as Message);
 
         return;
       } else if (Array.isArray(msg.content)) {
@@ -415,6 +405,9 @@ const convertRequestInputToMessages = (
             };
 
             if (content.type === "input_text" && content.text) {
+              baseResponse.content = content.text;
+            } else if (content.type === "output_text" && content.text) {
+              // Handle output_text from assistant messages that are sent back as input
               baseResponse.content = content.text;
             } else if (content.type === "input_image") {
               baseResponse.detail = content.detail;
@@ -852,6 +845,26 @@ export const mapOpenAIResponse = ({
     ...request,
     model: model || request.model,
   });
+
+  // Convert instructions field to a system message at the beginning of messages array
+  if (request.instructions && mappedRequest.messages) {
+    const systemMessage: Message = {
+      _type: "message",
+      role: "system",
+      content: request.instructions,
+      id: "instructions-system-msg",
+    };
+    mappedRequest.messages = [systemMessage, ...mappedRequest.messages];
+  } else if (request.instructions && !mappedRequest.messages) {
+    // If there are no messages but there are instructions, create messages array with just the system message
+    const systemMessage: Message = {
+      _type: "message",
+      role: "system",
+      content: request.instructions,
+      id: "instructions-system-msg",
+    };
+    mappedRequest.messages = [systemMessage];
+  }
 
   // Create the LlmSchema structure
   const schema: LlmSchema = {

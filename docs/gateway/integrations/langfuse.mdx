@@ -1,0 +1,227 @@
+---
+title: "Langfuse Integration"
+sidebarTitle: "Langfuse"
+description: "Integrate Helicone AI Gateway with Langfuse to access 100+ LLM providers with observability and LLM tracing."
+"twitter:title": "Langfuse Integration - Helicone OSS LLM Observability"
+iconType: "solid"
+---
+
+import { strings } from "/snippets/strings.mdx";
+import Star from "/snippets/star.mdx";
+
+## Introduction
+
+[Langfuse](https://langfuse.com/) is an open-source LLM observability and analytics platform that provides tracing, monitoring, and analytics for LLM applications.
+
+<Note>
+  This integration requires only **two changes** to your existing Langfuse code - updating the base URL and API key.
+</Note>
+
+## Integration Steps
+
+<Steps>
+  <Step title={strings.generateKey}>
+    <div dangerouslySetInnerHTML={{ __html: strings.generateKeyInstructions }} />
+
+    Create a `.env` file in your project:
+
+    ```env
+    HELICONE_API_KEY=sk-helicone-...
+    ```
+  </Step>
+
+  <Step title="Install Langfuse packages">
+    ```bash
+    pip install langfuse python-dotenv
+    ```
+  </Step>
+
+  <Step title="Create a Langfuse OpenAI client using Helicone">
+    Use Langfuse's OpenAI client wrapper with Helicone's base URL:
+
+    ```python
+    import os
+    from dotenv import load_dotenv
+    from langfuse.openai import openai
+
+    # Load environment variables
+    load_dotenv()
+
+    # Create an OpenAI client with Helicone's base URL
+    client = openai.OpenAI(
+        api_key=os.getenv("HELICONE_API_KEY"),
+        base_url="https://ai-gateway.helicone.ai/"
+    )
+    ```
+  </Step>
+
+  <Step title="Make requests with Langfuse tracing">
+    Your existing Langfuse code continues to work without any changes:
+
+    ```python
+    # Make a chat completion request
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": "Tell me a fun fact about space."}
+        ],
+        name="fun-fact-request"  # Optional: Name of the generation in Langfuse
+    )
+
+    # Print the assistant's reply
+    print(response.choices[0].message.content)
+    ```
+
+    <div dangerouslySetInnerHTML={{ __html: strings.modelRegistryDescription }} />
+  </Step>
+
+  <Step title={strings.viewRequestsInDashboard}>
+    <div dangerouslySetInnerHTML={{ __html: strings.viewRequestsInDashboardDescription("Langfuse") }} />
+
+    - Request/response bodies
+    - Latency metrics
+    - Token usage and costs
+    - Model performance analytics
+    - Error tracking
+    - LLM traces and spans in Langfuse
+    - Session tracking
+
+    <Star />
+  </Step>
+</Steps>
+
+## Complete Working Example
+
+```python
+#!/usr/bin/env python3
+
+import os
+from dotenv import load_dotenv
+from langfuse.openai import openai
+
+# Load environment variables
+load_dotenv()
+
+# Create an OpenAI client with Helicone's base URL
+client = openai.OpenAI(
+    api_key=os.getenv("HELICONE_API_KEY"),
+    base_url="https://ai-gateway.helicone.ai/"
+)
+
+# Make a chat completion request
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Tell me a fun fact about space."}
+    ],
+    name="fun-fact-request"  # Optional: Name of the generation in Langfuse
+)
+
+# Print the assistant's reply
+print(response.choices[0].message.content)
+```
+
+### Streaming Responses
+
+Langfuse supports streaming responses with full observability:
+
+```python
+# Streaming example
+stream = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {"role": "user", "content": "Write a short story about a robot learning to code."}
+    ],
+    stream=True,
+    name="streaming-story"
+)
+
+print("🤖 Assistant (streaming):")
+for chunk in stream:
+    if chunk.choices[0].delta.content is not None:
+        print(chunk.choices[0].delta.content, end="", flush=True)
+print("\n")
+```
+
+### Nested Example
+
+```python
+import os
+from dotenv import load_dotenv
+from langfuse import observe
+from langfuse.openai import openai
+
+load_dotenv()
+
+client = openai.OpenAI(
+    base_url="https://ai-gateway.helicone.ai/",
+    api_key=os.getenv("HELICONE_API_KEY"),
+)
+
+@observe()  # This decorator enables tracing of the function
+def analyze_text(text: str):
+    # First LLM call: Summarize the text
+    summary_response = summarize_text(text)
+    summary = summary_response.choices[0].message.content
+
+    # Second LLM call: Analyze the sentiment of the summary
+    sentiment_response = analyze_sentiment(summary)
+    sentiment = sentiment_response.choices[0].message.content
+
+    return {
+        "summary": summary,
+        "sentiment": sentiment
+    }
+
+@observe()  # Nested function to be traced
+def summarize_text(text: str):
+    return client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "You summarize texts in a concise manner."},
+            {"role": "user", "content": f"Summarize the following text:\n{text}"}
+        ],
+        name="summarize-text"
+    )
+
+@observe()  # Nested function to be traced
+def analyze_sentiment(summary: str):
+    return client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "You analyze the sentiment of texts."},
+            {"role": "user", "content": f"Analyze the sentiment of the following summary:\n{summary}"}
+        ],
+        name="analyze-sentiment"
+    )
+
+# Example usage
+text_to_analyze = "OpenAI's GPT-4 model has significantly advanced the field of AI, setting new standards for language generation."
+analyze_text(text_to_analyze)
+```
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="AI Gateway Overview" icon="arrow-progress" href="/gateway/overview">
+    Learn about Helicone's AI Gateway features and capabilities
+  </Card>
+  <Card title="Provider Routing" icon="route" href="/gateway/provider-routing">
+    Configure intelligent routing and automatic failover
+  </Card>
+  <Card title="Model Registry" icon="database" href="https://helicone.ai/models">
+    Browse all available models and providers
+  </Card>
+  <Card title="Custom Properties" icon="tags" href="/features/advanced-usage/custom-properties">
+    Add metadata to track and filter your requests
+  </Card>
+  <Card title="Sessions" icon="link" href="/features/sessions">
+    Track multi-turn conversations and user sessions
+  </Card>
+  <Card title="Rate Limiting" icon="gauge" href="/features/advanced-usage/custom-rate-limits">
+    Configure rate limits for your applications
+  </Card>
+</CardGroup>
+

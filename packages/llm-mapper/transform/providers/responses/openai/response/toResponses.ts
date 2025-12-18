@@ -1,20 +1,67 @@
-import { OpenAIResponseBody } from "../../../../types/openai";
+import { OpenAIResponseBody, ChatCompletionContentPartImage } from "../../../../types/openai";
 import {
   ResponsesResponseBody,
   ResponsesMessageOutputItem,
   ResponsesUsage,
+  ResponsesReasoningItem,
+  ResponsesOutputContentPart,
 } from "../../../../types/responses";
 
 export function toResponses(body: OpenAIResponseBody): ResponsesResponseBody {
   const first = body.choices?.[0];
   const message = first?.message;
-  const output: any[] = [];
+  const output: ResponsesResponseBody["output"] = [];
+
+  if (message?.reasoning_details && message.reasoning_details.length > 0) {
+    for (const detail of message.reasoning_details) {
+      const reasoningItem: ResponsesReasoningItem = {
+        id: `rs_${Math.random().toString(36).slice(2, 10)}`,
+        type: "reasoning",
+        summary: [{ type: "summary_text", text: detail.thinking }],
+        encrypted_content: detail.signature || null,
+      };
+      output.push(reasoningItem);
+    }
+  } else if (message?.reasoning) {
+    const reasoningItem: ResponsesReasoningItem = {
+      id: `rs_${Math.random().toString(36).slice(2, 10)}`,
+      type: "reasoning",
+      summary: [{ type: "summary_text", text: message.reasoning }],
+      encrypted_content: null,
+    };
+    output.push(reasoningItem);
+  }
+
+  // Build message content from text and images
+  const messageContent: ResponsesOutputContentPart[] = [];
 
   if (message?.content) {
+    messageContent.push({
+      type: "output_text",
+      text: message.content,
+      annotations: message.annotations ?? [],
+    });
+  }
+
+  // Map images to output_image parts
+  if (message?.images && message.images.length > 0) {
+    for (const img of message.images) {
+      messageContent.push({
+        type: "output_image",
+        image_url: img.image_url?.url || "",
+        detail: img.image_url?.detail,
+      });
+    }
+  }
+
+  // Only create a message output item if we have content
+  if (messageContent.length > 0) {
     const msg: ResponsesMessageOutputItem = {
+      id: `msg_${Math.random().toString(36).slice(2, 10)}`,
       type: "message",
+      status: "completed",
       role: "assistant",
-      content: [{ type: "output_text", text: message.content }],
+      content: messageContent,
     };
     output.push(msg);
   }
@@ -22,7 +69,7 @@ export function toResponses(body: OpenAIResponseBody): ResponsesResponseBody {
   const pushFunctionCall = (id: string | undefined, name: string, args: string | undefined) => {
     const call_id = id || `call_${Math.random().toString(36).slice(2, 10)}`;
     output.push({
-      id: `fc_${call_id}`,
+      id: call_id,
       type: "function_call",
       status: "completed",
       name,
@@ -58,6 +105,7 @@ export function toResponses(body: OpenAIResponseBody): ResponsesResponseBody {
                 body.usage.completion_tokens_details.reasoning_tokens,
             }
           : undefined,
+        modality_tokens: body.usage.modality_tokens,
         cost: body.usage.cost,
       }
     : undefined;

@@ -7,7 +7,6 @@ import type {
   AuthResult,
   RequestBodyContext,
   RequestParams,
-  ResponseFormat,
   ModelSpec,
 } from "./types";
 import { providers, ModelProviderName } from "./providers";
@@ -43,8 +42,6 @@ export function heliconeProviderToModelProviderName(
       return "perplexity";
     case "DEEPSEEK":
       return "deepseek";
-    case "COHERE":
-      return "cohere";
     case "OPENROUTER":
       return "openrouter";
     case "DEEPINFRA":
@@ -63,6 +60,8 @@ export function heliconeProviderToModelProviderName(
       return "baseten";
     case "FIREWORKS":
       return "fireworks";
+    case "CANOPYWAVE":
+      return "canopywave";
     // new registry does not have
     case "LOCAL":
     case "HELICONE":
@@ -136,6 +135,9 @@ export const dbProviderToProvider = (
   if (provider === "openrouter" || provider === "OpenRouter") {
     return "openrouter";
   }
+  if (provider === "canopywave" || provider === "Canopy Wave") {
+    return "canopywave";
+  }
   if (provider === "novita" || provider === "Novita") {
     return "novita";
   }
@@ -162,7 +164,7 @@ export const dbProviderToProvider = (
 
 export function buildEndpointUrl(
   endpoint: Endpoint,
-  requestParams: RequestParams
+  requestParams: RequestParams,
 ): Result<string> {
   const providerResult = getProvider(endpoint.provider);
   if (providerResult.error) {
@@ -314,7 +316,7 @@ export async function buildRequestBody(
 export async function buildErrorMessage(
   endpoint: Endpoint,
   response: Response
-): Promise<Result<string>> {
+): Promise<Result<{ message: string; details?: any }>> {
   const providerResult = getProvider(endpoint.provider);
   if (providerResult.error) {
     return err(providerResult.error);
@@ -338,13 +340,16 @@ export function validateProvider(
  * Model name mapping for backward compatibility
  * Maps deprecated/incorrect model names to their correct counterparts
  */
-const MODEL_NAME_MAPPINGS: Record<string, string> = {
+export const MODEL_NAME_MAPPINGS: Record<string, string> = {
   "gemini-1.5-flash": "gemini-2.5-flash-lite",
   "claude-3.5-sonnet": "claude-3.5-sonnet-v2",
   "claude-3.5-sonnet-20240620": "claude-3.5-sonnet-v2",
   "deepseek-r1": "deepseek-reasoner",
   "kimi-k2": "kimi-k2-0905",
   "kimi-k2-instruct": "kimi-k2-0905",
+  // Grok 4.1 backwards compatibility (period to dash)
+  "grok-4.1-fast-non-reasoning": "grok-4-1-fast-non-reasoning",
+  "grok-4.1-fast-reasoning": "grok-4-1-fast-reasoning",
 };
 
 export function parseModelString(

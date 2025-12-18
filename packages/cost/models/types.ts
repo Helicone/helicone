@@ -19,7 +19,6 @@ export const AUTHORS = [
   "amazon",
   "microsoft",
   "nvidia",
-  "cohere",
   "deepseek",
   "qwen",
   "xai",
@@ -40,7 +39,7 @@ export interface Modality {
   outputs: OutputModality[];
 }
 
-export type ResponseFormat = "ANTHROPIC" | "OPENAI";
+export type ResponseFormat = "ANTHROPIC" | "OPENAI" | "GOOGLE";
 
 export type Tokenizer =
   | "Claude"
@@ -120,11 +119,20 @@ export const PARAMETER_LABELS: Record<StandardParameter, string> = {
   n: "Number of Completions",
 };
 
+/**
+ * Per-modality pricing configuration.
+ * Supports input, cached input (as multiplier), and output rates.
+ */
+export interface ModalityPricing {
+  input?: number; // cost per input token
+  cachedInputMultiplier?: number; // multiplier on input rate (0.1 = 10% of input)
+  output?: number; // cost per output token
+}
+
 export interface ModelPricing {
   threshold: number;
   input: number;
   output: number;
-  image?: number;
   cacheMultipliers?: {
     cachedInput: number;
     write5m?: number;
@@ -133,8 +141,13 @@ export interface ModelPricing {
   cacheStoragePerHour?: number;
   thinking?: number;
   request?: number;
-  audio?: number;
-  video?: number;
+
+  // Per-modality pricing
+  image?: ModalityPricing;
+  audio?: ModalityPricing;
+  video?: ModalityPricing;
+  file?: ModalityPricing;
+
   web_search?: number;
 }
 
@@ -219,6 +232,7 @@ export interface EndpointConfig extends UserEndpointConfig {
 export interface RequestParams {
   isStreaming?: boolean;
   bodyMapping?: BodyMappingType;
+  apiKey?: string;
 }
 
 export interface Endpoint extends BaseConfig {

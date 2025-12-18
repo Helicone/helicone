@@ -9,7 +9,7 @@ export const models = {
     contextLength: 400000,
     maxOutputTokens: 128000,
     created: "2025-01-01T00:00:00.000Z",
-    modality: { inputs: ["text", "image"], outputs: ["text", "image"] },
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
   },
   "gpt-5.1-codex": {
@@ -19,7 +19,7 @@ export const models = {
     contextLength: 400000,
     maxOutputTokens: 128000,
     created: "2025-01-01T00:00:00.000Z",
-    modality: { inputs: ["text", "image"], outputs: ["text", "image"] },
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
   },
   "gpt-5.1-codex-mini": {
@@ -29,7 +29,7 @@ export const models = {
     contextLength: 400000,
     maxOutputTokens: 128000,
     created: "2025-01-01T00:00:00.000Z",
-    modality: { inputs: ["text", "image"], outputs: ["text", "image"] },
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
   },
   "gpt-5.1-chat-latest": {
@@ -40,7 +40,7 @@ export const models = {
     contextLength: 128000,
     maxOutputTokens: 16384,
     created: "2025-01-01T00:00:00.000Z",
-    modality: { inputs: ["text", "image"], outputs: ["text", "image"] },
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
   },
   "codex-mini-latest": {

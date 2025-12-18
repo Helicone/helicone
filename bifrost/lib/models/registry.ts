@@ -1,17 +1,36 @@
 import { providers } from "@helicone-package/cost/providers/mappings";
 
-function getProviderLogo(provider: string): string {
+export function getProviderLogo(provider: string): string {
   const logoMap: Record<string, string> = {
-    OPENAI: "/static/home/chatgpt.webp",
-    ANTHROPIC: "/static/home/anthropic.webp",
-    GOOGLE: "/static/home/gemini.webp",
-    META: "/static/home/logo2.webp",
-    MISTRAL: "/static/home/mistral.webp",
-    COHERE: "/static/home/logo3.webp",
-    GROQ: "/static/home/groq.svg",
+    openai: "/static/home/chatgpt.webp",
+    anthropic: "/static/home/anthropic.webp",
+    google: "/static/home/gemini.webp",
+    meta: "/static/home/meta.webp",
+    "meta-llama": "/static/home/meta.webp",
+    mistral: "/static/home/mistral.webp",
+    cohere: "/static/home/logo3.webp",
+    groq: "/static/home/groq.svg",
+    together: "/static/home/togetherai.webp",
+    openrouter: "/static/home/openrouter.webp",
+    deepseek: "/static/home/deepseek.webp",
+    alibaba: "/static/home/alibaba.webp",
+    qwen: "/static/home/qwen.webp",
+    perplexity: "/static/home/perplexity.webp",
+    xai: "/static/home/xai.webp",
+    "x-ai": "/static/home/xai.webp",
+    ai21: "/static/home/ai21.webp",
+    amazon: "/static/home/amazon.webp",
+    nvidia: "/static/home/nvidia.webp",
+    microsoft: "/static/home/microsoft.webp",
+    moonshotai: "/static/home/moonshotai.webp",
+    baidu: "/static/home/baidu.webp",
+    zhipu: "/static/home/zhipu.webp",
+    zhipuai: "/static/home/zhipu.webp",
+    "z.ai": "/static/home/zai.webp",
+    zai: "/static/home/zai.webp",
   };
 
-  return logoMap[provider] || "/static/home/logo4.webp"; // Default logo
+  return logoMap[provider.toLowerCase()] || "/static/home/logo2.webp"; // Default logo
 }
 
 export interface ModelFamily {

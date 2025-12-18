@@ -643,6 +643,24 @@ export interface paths {
     /** @description Update a saved query for admin (stored under admin org ID) */
     patch: operations["UpdateAdminSavedQuery"];
   };
+  "/v1/credits/balance": {
+    get: operations["GetCreditsBalance"];
+  };
+  "/v1/credits/payments": {
+    get: operations["ListTokenUsagePayments"];
+  };
+  "/v1/credits/totalSpend": {
+    get: operations["GetTotalSpend"];
+  };
+  "/v1/credits/spend/breakdown": {
+    get: operations["GetSpendBreakdown"];
+  };
+  "/v1/credits/invoices": {
+    get: operations["ListInvoices"];
+  };
+  "/v1/credits/discounts": {
+    get: operations["GetDiscounts"];
+  };
   "/v1/admin/wallet/gateway/dashboard_data": {
     post: operations["GetGatewayDashboardData"];
   };
@@ -663,6 +681,44 @@ export interface paths {
   };
   "/v1/admin/wallet/analytics/time-series": {
     post: operations["GetTimeSeriesData"];
+  };
+  "/v1/admin/wallet/{orgId}/spend-breakdown": {
+    /**
+     * @description Get spend breakdown for an org by date range.
+     * Includes discounts applied per organization's discount rules.
+     */
+    post: operations["GetSpendBreakdownForOrg"];
+  };
+  "/v1/admin/wallet/{orgId}/invoices/{invoiceId}": {
+    /** @description Delete a recorded invoice. */
+    delete: operations["DeleteInvoice"];
+  };
+  "/v1/admin/wallet/{orgId}/invoices/{invoiceId}/update": {
+    /** @description Update an invoice's hosted URL (for after sending from Stripe). */
+    post: operations["UpdateInvoice"];
+  };
+  "/v1/admin/wallet/{orgId}/invoices/list": {
+    /** @description List all recorded invoices for an org. */
+    post: operations["AdminListInvoices"];
+  };
+  "/v1/admin/wallet/{orgId}/invoice-summary": {
+    /** @description Get invoice summary: total spend, total invoiced, uninvoiced balance. */
+    post: operations["GetInvoiceSummary"];
+  };
+  "/v1/admin/wallet/{orgId}/create-invoice": {
+    /**
+     * @description Create a Stripe invoice from spend breakdown and record it.
+     * This creates line items in Stripe for each model/provider combo.
+     */
+    post: operations["CreateInvoice"];
+  };
+  "/v1/admin/wallet/{orgId}/discounts/list": {
+    /** @description Get discount rules for an organization. */
+    post: operations["ListDiscounts"];
+  };
+  "/v1/admin/wallet/{orgId}/discounts/update": {
+    /** @description Update discount rules for an organization. */
+    post: operations["UpdateDiscounts"];
   };
   "/v1/audio/convert-to-wav": {
     post: operations["ConvertToWav"];
@@ -1741,6 +1797,7 @@ Json: JsonObject;
         [key: string]: components["schemas"]["SortDirection"];
       };
       cost?: components["schemas"]["SortDirection"];
+      time_to_first_token?: components["schemas"]["SortDirection"];
     };
     RequestQueryParams: {
       filter: components["schemas"]["RequestFilterNode"];
@@ -1755,9 +1812,9 @@ Json: JsonObject;
       isScored?: boolean;
     };
     /** @enum {string} */
-    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "BEDROCK" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "CHUTES" | "LLAMA" | "NVIDIA" | "VERCEL" | "CEREBRAS" | "BASETEN";
+    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "BEDROCK" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "CHUTES" | "LLAMA" | "NVIDIA" | "VERCEL" | "CEREBRAS" | "BASETEN" | "CANOPYWAVE";
     /** @enum {string} */
-    ModelProviderName: "baseten" | "anthropic" | "azure" | "bedrock" | "cerebras" | "chutes" | "cohere" | "deepinfra" | "deepseek" | "fireworks" | "google-ai-studio" | "groq" | "helicone" | "mistral" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
+    ModelProviderName: "baseten" | "anthropic" | "azure" | "bedrock" | "canopywave" | "cerebras" | "chutes" | "deepinfra" | "deepseek" | "fireworks" | "google-ai-studio" | "groq" | "helicone" | "mistral" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
     Provider: components["schemas"]["ProviderName"] | components["schemas"]["ModelProviderName"] | "CUSTOM";
     /** @enum {string} */
     LlmType: "chat" | "completion";
@@ -16266,6 +16323,125 @@ Json: JsonObject;
       error: null;
     };
     "Result__rows-Record_string.any_-Array--elapsedMilliseconds-number--size-number--rowCount-number_.string_": components["schemas"]["ResultSuccess__rows-Record_string.any_-Array--elapsedMilliseconds-number--size-number--rowCount-number__"] | components["schemas"]["ResultError_string_"];
+    CreditBalanceResponse: {
+      /** Format: double */
+      totalCreditsPurchased: number;
+      /** Format: double */
+      balance: number;
+    };
+    ResultSuccess_CreditBalanceResponse_: {
+      data: components["schemas"]["CreditBalanceResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_CreditBalanceResponse.string_": components["schemas"]["ResultSuccess_CreditBalanceResponse_"] | components["schemas"]["ResultError_string_"];
+    PurchasedCredits: {
+      id: string;
+      /** Format: double */
+      createdAt: number;
+      /** Format: double */
+      credits: number;
+      referenceId: string;
+    };
+    PaginatedPurchasedCredits: {
+      purchases: components["schemas"]["PurchasedCredits"][];
+      /** Format: double */
+      total: number;
+      /** Format: double */
+      page: number;
+      /** Format: double */
+      pageSize: number;
+    };
+    ResultSuccess_PaginatedPurchasedCredits_: {
+      data: components["schemas"]["PaginatedPurchasedCredits"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PaginatedPurchasedCredits.string_": components["schemas"]["ResultSuccess_PaginatedPurchasedCredits_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__totalSpend-number__": {
+      data: {
+        /** Format: double */
+        totalSpend: number;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__totalSpend-number_.string_": components["schemas"]["ResultSuccess__totalSpend-number__"] | components["schemas"]["ResultError_string_"];
+    ModelSpend: {
+      model: string;
+      provider: string;
+      /** Format: double */
+      promptTokens: number;
+      /** Format: double */
+      completionTokens: number;
+      /** Format: double */
+      cacheReadTokens: number;
+      /** Format: double */
+      cacheWriteTokens: number;
+      pricing: {
+        /** Format: double */
+        cacheWritePer1M?: number;
+        /** Format: double */
+        cacheReadPer1M?: number;
+        /** Format: double */
+        outputPer1M: number;
+        /** Format: double */
+        inputPer1M: number;
+      } | null;
+      /** Format: double */
+      subtotal: number;
+      /** Format: double */
+      discountPercent: number;
+      /** Format: double */
+      total: number;
+      /** Format: double */
+      cacheAdjustment?: number;
+    };
+    SpendBreakdownResponse: {
+      models: components["schemas"]["ModelSpend"][];
+      /** Format: double */
+      totalCost: number;
+      timeRange: {
+        end: string;
+        start: string;
+      };
+    };
+    ResultSuccess_SpendBreakdownResponse_: {
+      data: components["schemas"]["SpendBreakdownResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_SpendBreakdownResponse.string_": components["schemas"]["ResultSuccess_SpendBreakdownResponse_"] | components["schemas"]["ResultError_string_"];
+    PTBInvoice: {
+      id: string;
+      organizationId: string;
+      stripeInvoiceId: string | null;
+      hostedInvoiceUrl: string | null;
+      startDate: string;
+      endDate: string;
+      /** Format: double */
+      amountCents: number;
+      notes: string | null;
+      createdAt: string;
+    };
+    "ResultSuccess_PTBInvoice-Array_": {
+      data: components["schemas"]["PTBInvoice"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PTBInvoice-Array.string_": components["schemas"]["ResultSuccess_PTBInvoice-Array_"] | components["schemas"]["ResultError_string_"];
+    OrgDiscount: {
+      provider: string | null;
+      model: string | null;
+      /** Format: double */
+      percent: number;
+    };
+    "ResultSuccess_OrgDiscount-Array_": {
+      data: components["schemas"]["OrgDiscount"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_OrgDiscount-Array.string_": components["schemas"]["ResultSuccess_OrgDiscount-Array_"] | components["schemas"]["ResultError_string_"];
     DashboardData: {
       organizations: ({
           /** Format: double */
@@ -16379,6 +16555,57 @@ Json: JsonObject;
       error: null;
     };
     "Result_TimeSeriesResponse.string_": components["schemas"]["ResultSuccess_TimeSeriesResponse_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_ModelSpend-Array_": {
+      data: components["schemas"]["ModelSpend"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ModelSpend-Array.string_": components["schemas"]["ResultSuccess_ModelSpend-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__deleted-boolean__": {
+      data: {
+        deleted: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__deleted-boolean_.string_": components["schemas"]["ResultSuccess__deleted-boolean__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__updated-boolean__": {
+      data: {
+        updated: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__updated-boolean_.string_": components["schemas"]["ResultSuccess__updated-boolean__"] | components["schemas"]["ResultError_string_"];
+    InvoiceSummary: {
+      /** Format: double */
+      totalSpendCents: number;
+      /** Format: double */
+      totalInvoicedCents: number;
+      /** Format: double */
+      uninvoicedBalanceCents: number;
+      lastInvoiceEndDate: string | null;
+    };
+    ResultSuccess_InvoiceSummary_: {
+      data: components["schemas"]["InvoiceSummary"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_InvoiceSummary.string_": components["schemas"]["ResultSuccess_InvoiceSummary_"] | components["schemas"]["ResultError_string_"];
+    CreateInvoiceResponse: {
+      invoiceId: string;
+      hostedInvoiceUrl: string | null;
+      dashboardUrl: string;
+      /** Format: double */
+      amountCents: number;
+      ptbInvoiceId: string;
+    };
+    ResultSuccess_CreateInvoiceResponse_: {
+      data: components["schemas"]["CreateInvoiceResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_CreateInvoiceResponse.string_": components["schemas"]["ResultSuccess_CreateInvoiceResponse_"] | components["schemas"]["ResultError_string_"];
     ConvertToWavResponse: {
       data: string | null;
       error: string | null;
@@ -16589,7 +16816,7 @@ export interface operations {
         content: {
           "application/json": ({
             /** @enum {string} */
-            providerName: "baseten" | "anthropic" | "azure" | "bedrock" | "cerebras" | "chutes" | "cohere" | "deepinfra" | "deepseek" | "fireworks" | "google-ai-studio" | "groq" | "helicone" | "mistral" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
+            providerName: "baseten" | "anthropic" | "azure" | "bedrock" | "canopywave" | "cerebras" | "chutes" | "deepinfra" | "deepseek" | "fireworks" | "google-ai-studio" | "groq" | "helicone" | "mistral" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
           }) | {
             error: string;
           };
@@ -20266,6 +20493,79 @@ export interface operations {
       };
     };
   };
+  GetCreditsBalance: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_CreditBalanceResponse.string_"];
+        };
+      };
+    };
+  };
+  ListTokenUsagePayments: {
+    parameters: {
+      query?: {
+        page?: number;
+        pageSize?: number;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PaginatedPurchasedCredits.string_"];
+        };
+      };
+    };
+  };
+  GetTotalSpend: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__totalSpend-number_.string_"];
+        };
+      };
+    };
+  };
+  GetSpendBreakdown: {
+    parameters: {
+      query?: {
+        timeRange?: "7d" | "30d" | "90d" | "all";
+        startDate?: string;
+        endDate?: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_SpendBreakdownResponse.string_"];
+        };
+      };
+    };
+  };
+  ListInvoices: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PTBInvoice-Array.string_"];
+        };
+      };
+    };
+  };
+  GetDiscounts: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_OrgDiscount-Array.string_"];
+        };
+      };
+    };
+  };
   GetGatewayDashboardData: {
     parameters: {
       query?: {
@@ -20391,6 +20691,170 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_TimeSeriesResponse.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * @description Get spend breakdown for an org by date range.
+   * Includes discounts applied per organization's discount rules.
+   */
+  GetSpendBreakdownForOrg: {
+    parameters: {
+      query: {
+        startDate: string;
+        endDate: string;
+      };
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ModelSpend-Array.string_"];
+        };
+      };
+    };
+  };
+  /** @description Delete a recorded invoice. */
+  DeleteInvoice: {
+    parameters: {
+      path: {
+        orgId: string;
+        invoiceId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__deleted-boolean_.string_"];
+        };
+      };
+    };
+  };
+  /** @description Update an invoice's hosted URL (for after sending from Stripe). */
+  UpdateInvoice: {
+    parameters: {
+      path: {
+        orgId: string;
+        invoiceId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          hostedInvoiceUrl: string | null;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__updated-boolean_.string_"];
+        };
+      };
+    };
+  };
+  /** @description List all recorded invoices for an org. */
+  AdminListInvoices: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PTBInvoice-Array.string_"];
+        };
+      };
+    };
+  };
+  /** @description Get invoice summary: total spend, total invoiced, uninvoiced balance. */
+  GetInvoiceSummary: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_InvoiceSummary.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * @description Create a Stripe invoice from spend breakdown and record it.
+   * This creates line items in Stripe for each model/provider combo.
+   */
+  CreateInvoice: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          daysUntilDue?: number;
+          endDate: string;
+          startDate: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_CreateInvoiceResponse.string_"];
+        };
+      };
+    };
+  };
+  /** @description Get discount rules for an organization. */
+  ListDiscounts: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_OrgDiscount-Array.string_"];
+        };
+      };
+    };
+  };
+  /** @description Update discount rules for an organization. */
+  UpdateDiscounts: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          discounts: components["schemas"]["OrgDiscount"][];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_OrgDiscount-Array.string_"];
         };
       };
     };

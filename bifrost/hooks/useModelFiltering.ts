@@ -80,7 +80,7 @@ export function useModelFiltering({
       search ||
       selectedProviders.size > 0 ||
       priceRange[0] > 0 ||
-      priceRange[1] < 50 ||
+      priceRange[1] < 200 ||
       minContextSize > 0 ||
       selectedCapabilities.size > 0 ||
       showPtbOnly ||

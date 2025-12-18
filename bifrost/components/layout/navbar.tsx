@@ -18,13 +18,13 @@ import {
   ChevronRight,
   Scale,
   Newspaper,
-  Earth,
   ExternalLink,
   Gem,
   Github,
   GitMerge,
   HandCoins,
   TrendingUp,
+  BarChart3,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -233,15 +233,6 @@ const resourcesComponents: LinkItem[] = [
 
 const toolsComponents: LinkItem[] = [
   {
-    title: "Open Stats",
-    link: {
-      href: "/open-stats",
-      isExternal: false,
-    },
-    description: "Real-time LLM usage analytics",
-    icon: <Earth className="size-5 navbar-icon-style" />,
-  },
-  {
     title: "Model Comparison",
     link: {
       href: "/comparison",
@@ -298,6 +289,15 @@ const mainComponents: LinkItem[] = [
     description: "Browse and compare AI models",
     icon: <Scale className="size-5 navbar-icon-style" />,
   },
+  // {
+  //   title: "Stats",
+  //   link: {
+  //     href: "/stats",
+  //     isExternal: false,
+  //   },
+  //   description: "View AI Gateway usage statistics",
+  //   icon: <BarChart3 className="size-5 navbar-icon-style" />,
+  // },
 ];
 
 const additionalComponents: LinkItem[] = [
@@ -408,6 +408,15 @@ const NavBar = (props: NavBarProps) => {
                 <Link href="/models" legacyBehavior passHref>
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                     Models
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+
+              {/* Stats */}
+              <NavigationMenuItem>
+                <Link href="/stats" legacyBehavior passHref>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    Stats
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>

@@ -26,12 +26,20 @@ export interface OpenAIChoice {
   logprobs: null | OpenAILogProbs;
 }
 
+export interface OpenAIReasoningDetail {
+  thinking: string;
+  signature: string;
+}
+
 export interface OpenAIResponseMessage {
   role: "assistant" | "system" | "user" | "function" | "tool";
   content: string | null;
+  reasoning?: string;
+  reasoning_details?: OpenAIReasoningDetail[];
   function_call?: OpenAIFunctionCall;
   tool_calls?: OpenAIToolCall[];
   annotations?: OpenAIAnnotation[];
+  images?: ChatCompletionContentPartImage[];
 }
 
 export interface OpenAIAnnotation {
@@ -42,6 +50,16 @@ export interface OpenAIAnnotation {
     content?: string;
     start_index: number;
     end_index: number;
+  };
+}
+
+
+// Mimics the input structure for images in Chat Completion choices.
+export interface ChatCompletionContentPartImage {
+  type: "image_url";
+  image_url: {
+    url: string;
+    detail?: "auto" | "low" | "high";
   };
 }
 
@@ -65,12 +83,15 @@ export interface OpenAIStreamChoice {
 export interface OpenAIDelta {
   role?: Role;
   content?: string;
+  reasoning?: string;
+  reasoning_details?: OpenAIReasoningDetail[];
   function_call?: {
     name?: string;
     arguments?: string;
   };
   tool_calls?: OpenAIStreamingToolCall[];
   annotations?: OpenAIAnnotation[];
+  images?: ChatCompletionContentPartImage[];
 }
 
 // === LOGPROBS TYPES ===

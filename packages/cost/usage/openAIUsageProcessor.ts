@@ -135,6 +135,11 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
 
     const usage = parsedResponse.usage || {};
 
+    // This usage processor is applied to all AI Gateway requests when logging tokens from Jawn
+    // this means the processor must properly handle additional AI Gateway only info
+    // OpenAIUsage from "@helicone-package/llm-mapper/transform/types/common";
+    // ResponsesUsage from "@helicone-package/llm-mapper/transform/types/responses";
+
     const promptTokens = usage.prompt_tokens ?? usage.input_tokens ?? 0;
     const completionTokens =
       usage.completion_tokens ?? usage.output_tokens ?? 0;
@@ -148,6 +153,15 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     const promptAudioTokens = promptDetails.audio_tokens ?? 0;
     const completionAudioTokens = completionDetails.audio_tokens ?? 0;
     const reasoningTokens = completionDetails.reasoning_tokens ?? 0;
+
+    // AI Gateway fields - cache write tokens
+    // First try to get the detailed breakdown (5m vs 1h), then fall back to total cache_write_tokens
+    const cacheWriteDetails = promptDetails.cache_write_details;
+    const cacheWriteTokensTotal = promptDetails.cache_write_tokens ?? 0;
+
+    // If we have detailed breakdown, use it; otherwise treat all cache writes as 5m (the common case)
+    const cacheWrite5mTokens = cacheWriteDetails?.write_5m_tokens ?? cacheWriteTokensTotal;
+    const cacheWrite1hTokens = cacheWriteDetails?.write_1h_tokens ?? 0;
 
     const effectivePromptTokens = Math.max(
       0,
@@ -163,9 +177,11 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
       output: effectiveCompletionTokens,
     };
 
-    if (cachedTokens > 0) {
+    if (cachedTokens > 0 || cacheWrite5mTokens > 0 || cacheWrite1hTokens > 0) {
       modelUsage.cacheDetails = {
         cachedInput: cachedTokens,
+        write5m: cacheWrite5mTokens ?? 0,
+        write1h: cacheWrite1hTokens ?? 0,
       };
     }
 
@@ -173,10 +189,48 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
       modelUsage.thinking = reasoningTokens;
     }
 
-    if (promptAudioTokens > 0 || completionAudioTokens > 0) {
-      // TODO: add audio output support since some models support it in the
-      // chat completions endpoint
-      modelUsage.audio = promptAudioTokens + completionAudioTokens;
+    // Handle audio tokens - use modality_tokens if available, otherwise fall back to legacy fields
+    const modalityTokens = usage.modality_tokens;
+    if (modalityTokens?.audio) {
+      // New structure with detailed breakdown
+      modelUsage.audio = {
+        input: modalityTokens.audio.input_tokens ?? 0,
+        cachedInput: modalityTokens.audio.cached_tokens ?? 0,
+        output: modalityTokens.audio.output_tokens ?? 0,
+      };
+    } else if (promptAudioTokens > 0 || completionAudioTokens > 0) {
+      // Backwards compatibility for old fields that only define audio input/output in prompt/completion details.
+      modelUsage.audio = {
+        input: promptAudioTokens,
+        output: completionAudioTokens,
+      };
+    }
+
+    // Handle image tokens from modality_tokens
+    if (modalityTokens?.image) {
+      modelUsage.image = {
+        input: modalityTokens.image.input_tokens ?? 0,
+        cachedInput: modalityTokens.image.cached_tokens ?? 0,
+        output: modalityTokens.image.output_tokens ?? 0,
+      };
+    }
+
+    // Handle video tokens from modality_tokens
+    if (modalityTokens?.video) {
+      modelUsage.video = {
+        input: modalityTokens.video.input_tokens ?? 0,
+        cachedInput: modalityTokens.video.cached_tokens ?? 0,
+        output: modalityTokens.video.output_tokens ?? 0,
+      };
+    }
+
+    // Handle file tokens from modality_tokens
+    if (modalityTokens?.file) {
+      modelUsage.file = {
+        input: modalityTokens.file.input_tokens ?? 0,
+        cachedInput: modalityTokens.file.cached_tokens ?? 0,
+        output: modalityTokens.file.output_tokens ?? 0,
+      };
     }
 
     const rejectedTokens = completionDetails.rejected_prediction_tokens ?? 0;

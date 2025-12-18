@@ -52,10 +52,10 @@ interface ChatInterfaceProps {
 }
 
 const models = [
-  { id: "claude-3.7-sonnet, gpt-4o, gpt-4o-mini", label: "Auto" },
-  { id: "gpt-4o/openai", label: "GPT-4o" },
-  { id: "gpt-4o-mini/openai", label: "GPT-4o-mini" },
-  { id: "claude-3.7-sonnet/anthropic", label: "Claude 3.7 Sonnet" },
+  { id: "claude-sonnet-4-5-20250514, gpt-5-mini, gpt-5", label: "Auto" },
+  { id: "gpt-5/openai", label: "GPT-5" },
+  { id: "gpt-5-mini/openai", label: "GPT-5 Mini" },
+  { id: "claude-sonnet-4-5-20250514/anthropic", label: "Claude Sonnet 4.5" },
 ];
 
 const ChatInterface = forwardRef<{ focus: () => void }, ChatInterfaceProps>(
