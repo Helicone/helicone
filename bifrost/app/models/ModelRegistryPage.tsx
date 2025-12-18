@@ -612,7 +612,7 @@ export function ModelRegistryPage() {
                           />
                           {model.pinnedVersionOfModel && (
                             <span className="text-xs font-normal text-amber-800 dark:text-amber-200 bg-amber-100 dark:bg-amber-900/40 px-2 py-0.5">
-                              Pinned
+                              Pinned Version
                             </span>
                           )}
                           {isFree && (

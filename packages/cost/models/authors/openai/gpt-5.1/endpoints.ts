@@ -587,6 +587,42 @@ export const endpoints = {
       "*": {},
     },
   },
+  "gpt-5.1-2025-11-13:novita": {
+    provider: "novita",
+    author: "openai",
+    providerModelId: "pa/gpt-5.1-2025-11-13",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000125,
+        output: 0.00001,
+        web_search: 0.01,
+        cacheMultipliers: {
+          cachedInput: 0.1,
+        },
+      },
+    ],
+    contextLength: 128000,
+    maxCompletionTokens: 32768,
+    supportedParameters: [
+      "max_completion_tokens",
+      "stop",
+    ],
+    unsupportedParameters: [
+      "temperature",
+      "top_p",
+      "presence_penalty",
+      "frequency_penalty",
+      "logprobs",
+      "top_logprobs",
+      "logit_bias",
+      "max_tokens",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${GPT51ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

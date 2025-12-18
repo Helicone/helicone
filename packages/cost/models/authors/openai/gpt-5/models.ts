@@ -113,6 +113,17 @@ export const models = {
     tokenizer: "GPT",
     pinnedVersionOfModel: "gpt-5-chat-latest",
   },
+  "gpt-5-pro-2025-10-01": {
+    name: "OpenAI: GPT-5 Pro",
+    author: "openai",
+    description: "Most capable GPT-5 model with extended thinking capabilities",
+    contextLength: 128000,
+    maxOutputTokens: 32768,
+    created: "2025-10-01T00:00:00.000Z",
+    modality: { inputs: ["text"], outputs: ["text"] },
+    tokenizer: "GPT",
+    pinnedVersionOfModel: "gpt-5-pro",
+  },
 } satisfies Record<string, ModelConfig>;
 
 export type GPT5ModelName = keyof typeof models;
