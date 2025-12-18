@@ -11,7 +11,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
-import { CHART_COLOR_PALETTE } from "@/lib/chartColors";
+import { CHART_COLOR_PALETTE, CHART_COLORS } from "@/lib/chartColors";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   formatTokens,
@@ -146,8 +146,6 @@ function CustomTooltip({ active, payload, chartConfig, showProjection }: CustomT
   );
 }
 
-// Projection bar color - semi-transparent gray
-const PROJECTION_COLOR = "rgba(156, 163, 175, 0.4)";
 
 export function ModelUsageChart({
   data,
@@ -204,7 +202,7 @@ export function ModelUsageChart({
       // Add projection config
       chartConfig[`${sanitizeModelName(model)}_projection`] = {
         label: `${model} (projected)`,
-        color: PROJECTION_COLOR,
+        color: CHART_COLORS.projection,
       };
     });
 
@@ -267,7 +265,7 @@ export function ModelUsageChart({
                 key={`${model}_projection`}
                 dataKey={`${sanitizeModelName(model)}_projection`}
                 stackId="a"
-                fill={PROJECTION_COLOR}
+                fill={CHART_COLORS.projection}
                 radius={0}
               />
             ))}

@@ -15,6 +15,10 @@ export const CHART_COLORS = {
   yellow: "hsl(48, 100%, 50%)", // Bright yellow
   indigo: "hsl(243, 100%, 62%)", // Vivid indigo
   teal: "hsl(173, 100%, 35%)", // Deep teal
+
+  // Projection/forecast color - semi-transparent muted gray
+  // Uses muted-foreground hue with transparency for overlay effect
+  projection: "hsla(240, 4%, 46%, 0.4)", // Matches --muted-foreground in light mode
 } as const;
 
 // Color arrays for multi-line charts

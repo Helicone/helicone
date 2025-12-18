@@ -11,7 +11,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
-import { CHART_COLOR_PALETTE } from "@/lib/chartColors";
+import { CHART_COLOR_PALETTE, CHART_COLORS } from "@/lib/chartColors";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   formatTokens,
@@ -44,8 +44,6 @@ function sanitizeProviderName(provider: string): string {
   return provider.replace(/[^a-zA-Z0-9]/g, "_");
 }
 
-// Projection bar color - semi-transparent gray
-const PROJECTION_COLOR = "rgba(156, 163, 175, 0.4)";
 
 interface CustomTooltipProps {
   active?: boolean;
@@ -204,7 +202,7 @@ export function ProviderUsageChart({
       // Add projection config
       chartConfig[`${sanitizeProviderName(provider)}_projection`] = {
         label: `${provider} (projected)`,
-        color: PROJECTION_COLOR,
+        color: CHART_COLORS.projection,
       };
     });
 
@@ -267,7 +265,7 @@ export function ProviderUsageChart({
                 key={`${provider}_projection`}
                 dataKey={`${sanitizeProviderName(provider)}_projection`}
                 stackId="a"
-                fill={PROJECTION_COLOR}
+                fill={CHART_COLORS.projection}
                 radius={0}
               />
             ))}

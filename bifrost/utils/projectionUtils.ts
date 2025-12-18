@@ -4,6 +4,38 @@
  */
 
 /**
+ * Calculate linear regression slope and intercept for the given values.
+ * Returns the predicted value at the next index position.
+ */
+function linearRegression(values: number[]): { slope: number; intercept: number } {
+  const n = values.length;
+  if (n < 2) return { slope: 0, intercept: values[0] || 0 };
+
+  // x values are indices: 0, 1, 2, ..., n-1
+  let sumX = 0;
+  let sumY = 0;
+  let sumXY = 0;
+  let sumX2 = 0;
+
+  for (let i = 0; i < n; i++) {
+    sumX += i;
+    sumY += values[i];
+    sumXY += i * values[i];
+    sumX2 += i * i;
+  }
+
+  const denominator = n * sumX2 - sumX * sumX;
+  if (denominator === 0) {
+    return { slope: 0, intercept: sumY / n };
+  }
+
+  const slope = (n * sumXY - sumX * sumY) / denominator;
+  const intercept = (sumY - slope * sumX) / n;
+
+  return { slope, intercept };
+}
+
+/**
  * Calculate the projected value for the last bar based on trend analysis.
  * Uses linear regression on previous data points to project the final value.
  *
@@ -26,22 +58,34 @@ export function calculateProjection(
     return 0;
   }
 
-  // Method 1: Simple projection based on current progress
+  // Method 1: Simple extrapolation based on current progress
   // If we're 50% through the bucket and have 100 tokens, project 200 total
   const simpleProjection = lastValue / lastBarTimeProgress;
 
-  // Method 2: Use average of previous buckets as a baseline
-  // This helps smooth out projections when current bucket is anomalous
-  const previousValues = values.slice(0, -1);
-  const previousAverage =
-    previousValues.reduce((sum, v) => sum + v, 0) / previousValues.length;
+  // Method 2: Linear regression on ALL values (including partial last bucket)
+  // This captures the trend and projects where we should be
+  const { slope, intercept } = linearRegression(values);
+  const lastIndex = values.length - 1;
+  // Project what the full bucket value should be based on trend
+  const trendProjection = intercept + slope * lastIndex;
 
-  // Blend the two methods:
-  // - Weight the simple projection more when we have more progress data
-  // - Weight the historical average more when we're early in the bucket
-  const progressWeight = Math.min(lastBarTimeProgress * 1.5, 0.8);
-  const blendedProjection =
-    simpleProjection * progressWeight + previousAverage * (1 - progressWeight);
+  // Method 3: For the last bar specifically, use the trend to predict what
+  // the full value should be, but also consider current pace
+  // If the current pace (simple projection) is higher than trend, use a blend
+  // that favors the higher value (optimistic but grounded)
+
+  // Weight: favor simple projection more as we have more data in the current bucket
+  // At 50% progress, give equal weight. At 90% progress, heavily favor simple.
+  const simpleWeight = Math.min(lastBarTimeProgress * 1.2, 0.95);
+
+  // Take the maximum of trend and simple, then blend slightly toward the other
+  // This ensures we don't underproject when there's clear growth
+  const maxProjection = Math.max(simpleProjection, trendProjection);
+  const minProjection = Math.min(simpleProjection, trendProjection);
+
+  // Blend: mostly use the higher projection, but pull slightly toward the lower
+  // to avoid being overly optimistic
+  const blendedProjection = maxProjection * 0.85 + minProjection * 0.15;
 
   // The projection bar should only show the additional projected amount
   const projectedAddition = Math.max(0, blendedProjection - lastValue);
