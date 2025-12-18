@@ -88,6 +88,16 @@ function getAllModelsWithIds(): Result<Record<ModelName, ModelConfig>> {
   return ok(allModels);
 }
 
+const modelToAuthorMap: Map<string, string> = new Map();
+for (const [modelName, config] of Object.entries(allModels)) {
+  modelToAuthorMap.set(modelName.toLowerCase(), config.author);
+}
+
+function getAuthorByModel(model: string): string | null {
+  const normalizedModel = model.toLowerCase();
+  return modelToAuthorMap.get(normalizedModel) ?? null;
+}
+
 function getEndpointsByModel(model: string): Result<Endpoint[]> {
   const endpoints = indexes.modelToEndpoints.get(model as ModelName) || [];
   return ok(endpoints);
@@ -283,4 +293,5 @@ export const registry = {
   getModelProviderEntriesByModel,
   getModelProviderEntry,
   getModelProviderConfigByVersion,
+  getAuthorByModel,
 };
