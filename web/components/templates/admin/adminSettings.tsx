@@ -397,7 +397,7 @@ const AdminSettings = () => {
                   // Escape HTML to prevent XSS, then escape regex special chars
                   let displayName = escapeHtml(setting.name);
                   if (searchQuery) {
-                    const escapedQuery = escapeRegExp(escapeHtml(searchQuery));
+                    const escapedQuery = escapeRegExp(searchQuery);
                     const regex = new RegExp(`(${escapedQuery})`, "gi");
                     displayName = displayName.replace(
                       regex,
