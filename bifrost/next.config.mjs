@@ -82,6 +82,20 @@ const nextConfig = {
   async headers() {
     return [
       {
+        // Security headers for all routes
+        source: "/:path*",
+        headers: [
+          {
+            key: "X-Frame-Options",
+            value: "SAMEORIGIN",
+          },
+          {
+            key: "Content-Security-Policy",
+            value: "frame-ancestors 'self'",
+          },
+        ],
+      },
+      {
         source: "/rss/changelog.xml",
         headers: [
           {
