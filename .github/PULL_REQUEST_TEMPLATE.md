@@ -20,6 +20,17 @@ What part of Helicone does this affect?
 - [ ] Performance improvement
 - [ ] Refactoring
 
+## Deployment Notes
+- [ ] No special deployment steps required
+- [ ] Database migrations need to run
+- [ ] Environment variable changes required
+- [ ] Coordination with other teams needed
+
+## Screenshots / Demos
+| **Before**   |  **After**  |
+|-------------|-----------|
+|                      |                   |
+
 ## Extra Notes
 Any additional context, considerations, or notes for reviewers.
 
