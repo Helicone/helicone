@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
 import { BarChart3, ChevronLeft } from "lucide-react";
 import { ModelUsageChart } from "../../ModelUsageChart";
 import { ModelLeaderboard } from "../../ModelLeaderboard";
+import { getJawnClient } from "@/lib/clients/jawn";
 
 type LeaderboardTimeFrame = "24h" | "7d" | "30d";
 
@@ -43,22 +43,7 @@ interface AuthorStatsResponse {
   leaderboard: LeaderboardEntry[];
 }
 
-const JAWN_BASE_URL =
-  process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE || "http://localhost:8585";
 
-async function fetchAuthorStats(
-  author: string,
-  timeframe: string
-): Promise<AuthorStatsResponse> {
-  const response = await fetch(
-    `${JAWN_BASE_URL}/v1/public/stats/authors/${encodeURIComponent(author)}?timeframe=${timeframe}`
-  );
-  const result = await response.json();
-  if (result.error) {
-    throw new Error(result.error);
-  }
-  return result.data as AuthorStatsResponse;
-}
 
 function TimeframeSelector({
   value,
@@ -91,18 +76,67 @@ interface AuthorStatsPageProps {
 }
 
 export function AuthorStatsPage({ author }: AuthorStatsPageProps) {
+  const jawnClient = useMemo(() => getJawnClient(), []);
   const [leaderboardTimeframe, setLeaderboardTimeframe] =
     useState<LeaderboardTimeFrame>("7d");
 
-  const { data: chartData, isLoading: chartLoading } = useQuery({
-    queryKey: ["author-stats-chart", author],
-    queryFn: () => fetchAuthorStats(author, "1y"),
-  });
+  // Chart data
+  const [chartData, setChartData] = useState<AuthorStatsResponse | null>(null);
+  const [chartLoading, setChartLoading] = useState(true);
 
-  const { data: leaderboardData, isLoading: leaderboardLoading } = useQuery({
-    queryKey: ["author-stats-leaderboard", author, leaderboardTimeframe],
-    queryFn: () => fetchAuthorStats(author, leaderboardTimeframe),
-  });
+  // Leaderboard data
+  const [leaderboardData, setLeaderboardData] = useState<AuthorStatsResponse | null>(null);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false);
+
+  // Fetch chart data (1 year) on mount
+  useEffect(() => {
+    const fetchChartData = async () => {
+      try {
+        setChartLoading(true);
+        const response = await jawnClient.GET(
+          "/v1/public/stats/authors/{author}",
+          {
+            params: { path: { author }, query: { timeframe: "1y" } },
+          }
+        );
+
+        if (response.data?.data) {
+          setChartData(response.data.data as AuthorStatsResponse);
+        }
+      } catch (error) {
+        console.error("Failed to load author stats chart:", error);
+      } finally {
+        setChartLoading(false);
+      }
+    };
+
+    fetchChartData();
+  }, [author, jawnClient]);
+
+  // Fetch leaderboard data
+  useEffect(() => {
+    const fetchLeaderboardData = async () => {
+      try {
+        setLeaderboardLoading(true);
+        const response = await jawnClient.GET(
+          "/v1/public/stats/authors/{author}",
+          {
+            params: { path: { author }, query: { timeframe: leaderboardTimeframe } },
+          }
+        );
+
+        if (response.data?.data) {
+          setLeaderboardData(response.data.data as AuthorStatsResponse);
+        }
+      } catch (error) {
+        console.error("Failed to load author stats leaderboard:", error);
+      } finally {
+        setLeaderboardLoading(false);
+      }
+    };
+
+    fetchLeaderboardData();
+  }, [author, leaderboardTimeframe, jawnClient]);
 
   return (
     <div className="bg-white dark:bg-black min-h-screen py-16 lg:py-16 w-[60%] mx-auto">

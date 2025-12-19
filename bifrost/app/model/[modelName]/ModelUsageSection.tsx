@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect, useMemo } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { SingleUsageChart, SingleUsageDataPoint } from "@/app/stats/components/SingleUsageChart";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getJawnClient } from "@/lib/clients/jawn";
 
 interface ModelStatsResponse {
   model: string;
@@ -12,29 +13,38 @@ interface ModelStatsResponse {
   timeSeries: SingleUsageDataPoint[];
 }
 
-const JAWN_BASE_URL =
-  process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE || "http://localhost:8585";
-
-async function fetchModelStats(model: string): Promise<ModelStatsResponse> {
-  const response = await fetch(
-    `${JAWN_BASE_URL}/v1/public/stats/models/${encodeURIComponent(model)}?timeframe=1y`
-  );
-  const result = await response.json();
-  if (result.error) {
-    throw new Error(result.error);
-  }
-  return result.data as ModelStatsResponse;
-}
-
 interface ModelUsageSectionProps {
   modelId: string;
 }
 
 export function ModelUsageSection({ modelId }: ModelUsageSectionProps) {
-  const { data, isLoading } = useQuery({
-    queryKey: ["model-stats", modelId],
-    queryFn: () => fetchModelStats(modelId),
-  });
+  const jawnClient = useMemo(() => getJawnClient(), []);
+  const [data, setData] = useState<ModelStatsResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchModelStats = async () => {
+      try {
+        setIsLoading(true);
+        const response = await jawnClient.GET(
+          "/v1/public/stats/models/{model}",
+          {
+            params: { path: { model: modelId }, query: { timeframe: "1y" } },
+          }
+        );
+
+        if (response.data?.data) {
+          setData(response.data.data as ModelStatsResponse);
+        }
+      } catch (error) {
+        console.error("Failed to load model stats:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchModelStats();
+  }, [modelId, jawnClient]);
 
   if (isLoading) {
     return (

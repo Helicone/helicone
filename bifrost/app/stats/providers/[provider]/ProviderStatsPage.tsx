@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, Server } from "lucide-react";
 import { ModelUsageChart } from "../../ModelUsageChart";
 import { ModelLeaderboard } from "../../ModelLeaderboard";
+import { getJawnClient } from "@/lib/clients/jawn";
 
 type LeaderboardTimeFrame = "24h" | "7d" | "30d";
 
@@ -43,22 +43,7 @@ interface ProviderStatsResponse {
   leaderboard: LeaderboardEntry[];
 }
 
-const JAWN_BASE_URL =
-  process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE || "http://localhost:8585";
 
-async function fetchProviderStats(
-  provider: string,
-  timeframe: string
-): Promise<ProviderStatsResponse> {
-  const response = await fetch(
-    `${JAWN_BASE_URL}/v1/public/stats/providers/${encodeURIComponent(provider)}?timeframe=${timeframe}`
-  );
-  const result = await response.json();
-  if (result.error) {
-    throw new Error(result.error);
-  }
-  return result.data as ProviderStatsResponse;
-}
 
 function TimeframeSelector({
   value,
@@ -91,18 +76,67 @@ interface ProviderStatsPageProps {
 }
 
 export function ProviderStatsPage({ provider }: ProviderStatsPageProps) {
+  const jawnClient = useMemo(() => getJawnClient(), []);
   const [leaderboardTimeframe, setLeaderboardTimeframe] =
     useState<LeaderboardTimeFrame>("7d");
 
-  const { data: chartData, isLoading: chartLoading } = useQuery({
-    queryKey: ["provider-stats-chart", provider],
-    queryFn: () => fetchProviderStats(provider, "1y"),
-  });
+  // Chart data
+  const [chartData, setChartData] = useState<ProviderStatsResponse | null>(null);
+  const [chartLoading, setChartLoading] = useState(true);
 
-  const { data: leaderboardData, isLoading: leaderboardLoading } = useQuery({
-    queryKey: ["provider-stats-leaderboard", provider, leaderboardTimeframe],
-    queryFn: () => fetchProviderStats(provider, leaderboardTimeframe),
-  });
+  // Leaderboard data
+  const [leaderboardData, setLeaderboardData] = useState<ProviderStatsResponse | null>(null);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false);
+
+  // Fetch chart data (1 year) on mount
+  useEffect(() => {
+    const fetchChartData = async () => {
+      try {
+        setChartLoading(true);
+        const response = await jawnClient.GET(
+          "/v1/public/stats/providers/{provider}",
+          {
+            params: { path: { provider }, query: { timeframe: "1y" } },
+          }
+        );
+
+        if (response.data?.data) {
+          setChartData(response.data.data as ProviderStatsResponse);
+        }
+      } catch (error) {
+        console.error("Failed to load provider stats chart:", error);
+      } finally {
+        setChartLoading(false);
+      }
+    };
+
+    fetchChartData();
+  }, [provider, jawnClient]);
+
+  // Fetch leaderboard data
+  useEffect(() => {
+    const fetchLeaderboardData = async () => {
+      try {
+        setLeaderboardLoading(true);
+        const response = await jawnClient.GET(
+          "/v1/public/stats/providers/{provider}",
+          {
+            params: { path: { provider }, query: { timeframe: leaderboardTimeframe } },
+          }
+        );
+
+        if (response.data?.data) {
+          setLeaderboardData(response.data.data as ProviderStatsResponse);
+        }
+      } catch (error) {
+        console.error("Failed to load provider stats leaderboard:", error);
+      } finally {
+        setLeaderboardLoading(false);
+      }
+    };
+
+    fetchLeaderboardData();
+  }, [provider, leaderboardTimeframe, jawnClient]);
 
   return (
     <div className="bg-white dark:bg-black min-h-screen py-16 lg:py-16 w-[60%] mx-auto">
