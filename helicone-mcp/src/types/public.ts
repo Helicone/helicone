@@ -460,6 +460,20 @@ export interface paths {
      */
     get: operations["GetModelStats"];
   };
+  "/v1/public/stats/providers/{provider}/uptime": {
+    /**
+     * @description Get uptime/success rate statistics for a specific provider.
+     * Returns time series data showing success rate per time bucket.
+     */
+    get: operations["GetProviderUptime"];
+  };
+  "/v1/public/stats/model-provider-uptime": {
+    /**
+     * @description Get uptime/success rate statistics for all model-provider pairs.
+     * Used on model detail pages to show uptime per provider.
+     */
+    get: operations["GetModelProviderUptime"];
+  };
   "/v1/session/query": {
     post: operations["GetSessions"];
   };
@@ -2699,6 +2713,43 @@ Json: JsonObject;
       error: null;
     };
     "Result_ModelStatsResponse.string_": components["schemas"]["ResultSuccess_ModelStatsResponse_"] | components["schemas"]["ResultError_string_"];
+    UptimeDataPoint: {
+      time: string;
+      /** Format: double */
+      totalRequests: number;
+      /** Format: double */
+      successfulRequests: number;
+      /** Format: double */
+      successRate: number;
+    };
+    ProviderUptimeResponse: {
+      provider: string;
+      uptime: components["schemas"]["UptimeDataPoint"][];
+      /** Format: double */
+      overallSuccessRate: number;
+    };
+    ResultSuccess_ProviderUptimeResponse_: {
+      data: components["schemas"]["ProviderUptimeResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ProviderUptimeResponse.string_": components["schemas"]["ResultSuccess_ProviderUptimeResponse_"] | components["schemas"]["ResultError_string_"];
+    ModelProviderUptimeEntry: {
+      model: string;
+      provider: string;
+      uptime: components["schemas"]["UptimeDataPoint"][];
+      /** Format: double */
+      overallSuccessRate: number;
+    };
+    ModelProviderUptimeResponse: {
+      uptime: components["schemas"]["ModelProviderUptimeEntry"][];
+    };
+    ResultSuccess_ModelProviderUptimeResponse_: {
+      data: components["schemas"]["ModelProviderUptimeResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ModelProviderUptimeResponse.string_": components["schemas"]["ResultSuccess_ModelProviderUptimeResponse_"] | components["schemas"]["ResultError_string_"];
     SessionResult: {
       created_at: string;
       latest_request_created_at: string;
@@ -7054,6 +7105,50 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_ModelStatsResponse.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * @description Get uptime/success rate statistics for a specific provider.
+   * Returns time series data showing success rate per time bucket.
+   */
+  GetProviderUptime: {
+    parameters: {
+      query?: {
+        /** @description Time range: "24h", "7d", "30d", "3m", or "1y" */
+        timeframe?: components["schemas"]["StatsTimeFrame"];
+      };
+      path: {
+        /** @description The provider identifier (e.g., "openai", "anthropic") */
+        provider: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ProviderUptimeResponse.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * @description Get uptime/success rate statistics for all model-provider pairs.
+   * Used on model detail pages to show uptime per provider.
+   */
+  GetModelProviderUptime: {
+    parameters: {
+      query?: {
+        /** @description Time range: "24h", "7d", "30d", "3m", or "1y" */
+        timeframe?: components["schemas"]["StatsTimeFrame"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ModelProviderUptimeResponse.string_"];
         };
       };
     };

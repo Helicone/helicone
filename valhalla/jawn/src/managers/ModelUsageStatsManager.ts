@@ -98,6 +98,30 @@ export interface ModelStatsResponse {
   timeSeries: ModelStatsTimeSeriesDataPoint[];
 }
 
+interface UptimeDataPoint {
+  time: string;
+  totalRequests: number;
+  successfulRequests: number;
+  successRate: number;
+}
+
+export interface ProviderUptimeResponse {
+  provider: string;
+  uptime: UptimeDataPoint[];
+  overallSuccessRate: number;
+}
+
+interface ModelProviderUptimeEntry {
+  model: string;
+  provider: string;
+  uptime: UptimeDataPoint[];
+  overallSuccessRate: number;
+}
+
+export interface ModelProviderUptimeResponse {
+  uptime: ModelProviderUptimeEntry[];
+}
+
 const TOTAL_TOKENS_EXPR = `total_prompt_tokens + total_completion_tokens + total_completion_audio_tokens + total_prompt_audio_tokens + total_prompt_cache_write_tokens + total_prompt_cache_read_tokens`;
 const BASE_WHERE_CLAUSE = `model != '' AND provider != 'CUSTOM'`;
 
@@ -107,6 +131,15 @@ const TIME_CONFIG = {
   "30d": { interval: "INTERVAL 30 DAY", bucket: "INTERVAL 1 DAY" },
   "3m": { interval: "INTERVAL 3 MONTH", bucket: "INTERVAL 1 DAY" },
   "1y": { interval: "INTERVAL 1 YEAR", bucket: "INTERVAL 1 WEEK" },
+} as const;
+
+// More granular buckets for uptime data (every 3 days for 1 year = ~122 bars)
+const UPTIME_TIME_CONFIG = {
+  "24h": { interval: "INTERVAL 1 DAY", bucket: "INTERVAL 1 HOUR" },
+  "7d": { interval: "INTERVAL 7 DAY", bucket: "INTERVAL 6 HOUR" },
+  "30d": { interval: "INTERVAL 30 DAY", bucket: "INTERVAL 1 DAY" },
+  "3m": { interval: "INTERVAL 3 MONTH", bucket: "INTERVAL 1 DAY" },
+  "1y": { interval: "INTERVAL 1 YEAR", bucket: "INTERVAL 3 DAY" },
 } as const;
 
 export class ModelUsageStatsManager {
@@ -879,5 +912,134 @@ export class ModelUsageStatsManager {
       totals.set(author, (totals.get(author) ?? 0) + Number(total_tokens));
     }
     return totals;
+  }
+
+  /**
+   * Get uptime/success rate data for a specific provider over the given timeframe.
+   */
+  async getProviderUptime(
+    provider: string,
+    timeframe: StatsTimeFrame
+  ): Promise<Result<ProviderUptimeResponse, string>> {
+    const { interval, bucket } = UPTIME_TIME_CONFIG[timeframe];
+    const escapedProvider = provider.replace(/'/g, "''");
+
+    const uptimeQuery = `
+      SELECT
+        toStartOfInterval(hour, ${bucket}, 'UTC') as time_bucket,
+        sum(total_requests) as total_requests,
+        sum(successful_requests) as successful_requests
+      FROM request_stats
+      WHERE hour >= now() - ${interval} AND ${BASE_WHERE_CLAUSE}
+        AND provider = '${escapedProvider}'
+      GROUP BY time_bucket
+      ORDER BY time_bucket
+    `;
+
+    const uptimeResult = await clickhouseDb.dbQuery<{
+      time_bucket: string;
+      total_requests: number;
+      successful_requests: number;
+    }>(uptimeQuery, []);
+
+    if (uptimeResult.error) return err(uptimeResult.error);
+
+    const uptime: UptimeDataPoint[] = (uptimeResult.data ?? []).map((row) => {
+      const total = Number(row.total_requests);
+      const successful = Number(row.successful_requests);
+      return {
+        time: row.time_bucket,
+        totalRequests: total,
+        successfulRequests: successful,
+        successRate: total > 0 ? (successful / total) * 100 : 0,
+      };
+    });
+
+    // Calculate overall success rate
+    const totalRequests = uptime.reduce((sum, d) => sum + d.totalRequests, 0);
+    const totalSuccessful = uptime.reduce((sum, d) => sum + d.successfulRequests, 0);
+    const overallSuccessRate = totalRequests > 0 ? (totalSuccessful / totalRequests) * 100 : 0;
+
+    return ok({ provider, uptime, overallSuccessRate });
+  }
+
+  /**
+   * Get uptime/success rate data for model-provider pairs.
+   * Used on model detail pages to show uptime per provider.
+   */
+  async getModelProviderUptime(
+    timeframe: StatsTimeFrame
+  ): Promise<Result<ModelProviderUptimeResponse, string>> {
+    const { interval, bucket } = UPTIME_TIME_CONFIG[timeframe];
+
+    const uptimeQuery = `
+      SELECT
+        toStartOfInterval(hour, ${bucket}, 'UTC') as time_bucket,
+        model,
+        provider,
+        sum(total_requests) as total_requests,
+        sum(successful_requests) as successful_requests
+      FROM request_stats
+      WHERE hour >= now() - ${interval} AND ${BASE_WHERE_CLAUSE}
+      GROUP BY time_bucket, model, provider
+      ORDER BY time_bucket
+    `;
+
+    const uptimeResult = await clickhouseDb.dbQuery<{
+      time_bucket: string;
+      model: string;
+      provider: string;
+      total_requests: number;
+      successful_requests: number;
+    }>(uptimeQuery, []);
+
+    if (uptimeResult.error) return err(uptimeResult.error);
+
+    // Group by model-provider pair
+    const modelProviderMap = new Map<string, {
+      model: string;
+      provider: string;
+      dataPoints: { time: string; total: number; successful: number }[];
+    }>();
+
+    for (const row of uptimeResult.data ?? []) {
+      const key = `${row.model}::${row.provider}`;
+      if (!modelProviderMap.has(key)) {
+        modelProviderMap.set(key, {
+          model: row.model,
+          provider: row.provider,
+          dataPoints: [],
+        });
+      }
+      modelProviderMap.get(key)!.dataPoints.push({
+        time: row.time_bucket,
+        total: Number(row.total_requests),
+        successful: Number(row.successful_requests),
+      });
+    }
+
+    // Convert to response format
+    const uptime: ModelProviderUptimeEntry[] = [];
+    for (const entry of modelProviderMap.values()) {
+      const uptimeData: UptimeDataPoint[] = entry.dataPoints.map((d) => ({
+        time: d.time,
+        totalRequests: d.total,
+        successfulRequests: d.successful,
+        successRate: d.total > 0 ? (d.successful / d.total) * 100 : 0,
+      }));
+
+      const totalRequests = entry.dataPoints.reduce((sum, d) => sum + d.total, 0);
+      const totalSuccessful = entry.dataPoints.reduce((sum, d) => sum + d.successful, 0);
+      const overallSuccessRate = totalRequests > 0 ? (totalSuccessful / totalRequests) * 100 : 0;
+
+      uptime.push({
+        model: entry.model,
+        provider: entry.provider,
+        uptime: uptimeData,
+        overallSuccessRate,
+      });
+    }
+
+    return ok({ uptime });
   }
 }

@@ -27,6 +27,7 @@ import { StandardParameter } from "@helicone-package/cost/models/types";
 import { capitalizeModality } from "@/lib/constants/modalities";
 import { ModelSearchDropdown } from "@/components/models/ModelSearchDropdown";
 import { ModelUsageSection } from "./ModelUsageSection";
+import { UptimeStatusBarInline, UptimeDataPoint } from "@/components/stats/UptimeStatusBar";
 
 type ModelRegistryItem = components["schemas"]["ModelRegistryItem"];
 
@@ -66,6 +67,10 @@ export function ModelDetailPage({ initialModel, modelName }: ModelDetailPageProp
   const [currentLanguage, setCurrentLanguage] = useState<"typescript" | "python" | "curl">("typescript");
   const [highlightedCode, setHighlightedCode] = useState<string>("");
   const [copiedCode, setCopiedCode] = useState(false);
+
+  // Provider uptime data (model-provider pairs)
+  const [providerUptimeMap, setProviderUptimeMap] = useState<Map<string, UptimeDataPoint[]>>(new Map());
+  const [uptimeLoading, setUptimeLoading] = useState(true);
 
   // Build back URL that preserves filter query params
   const backToModelsUrl = useMemo(() => {
@@ -132,6 +137,40 @@ export function ModelDetailPage({ initialModel, modelName }: ModelDetailPageProp
 
     fetchModels();
   }, [modelName, initialModel]);
+
+  // Fetch model-provider uptime data (30 days)
+  useEffect(() => {
+    const fetchUptimeData = async () => {
+      if (!model) return;
+      
+      try {
+        setUptimeLoading(true);
+        const baseUrl = process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE || "http://localhost:8585";
+        const response = await fetch(
+          `${baseUrl}/v1/public/stats/model-provider-uptime?timeframe=30d`
+        );
+        const result = await response.json();
+
+        if (result.data?.uptime) {
+          // Build a map of model::provider -> uptime data
+          const uptimeMap = new Map<string, UptimeDataPoint[]>();
+          for (const entry of result.data.uptime) {
+            // Only include data for this model
+            if (entry.model === model.id) {
+              uptimeMap.set(entry.provider, entry.uptime);
+            }
+          }
+          setProviderUptimeMap(uptimeMap);
+        }
+      } catch (error) {
+        console.error("Failed to load model-provider uptime:", error);
+      } finally {
+        setUptimeLoading(false);
+      }
+    };
+
+    fetchUptimeData();
+  }, [model]);
 
   // Code snippets
   const codeSnippets = useMemo(() => {
@@ -532,6 +571,13 @@ completion = client.chat.completions.create(
                               <span className="font-mono text-gray-900 dark:text-gray-100">
                                 {pricing.cacheWrite ? `${formatCost(pricing.cacheWrite)}/1M` : "—"}
                               </span>
+                            </div>
+                            <div>
+                              <span className="text-xs text-gray-500 dark:text-gray-400 block">Uptime</span>
+                              <UptimeStatusBarInline
+                                data={providerUptimeMap.get(endpoint.provider) ?? []}
+                                isLoading={uptimeLoading}
+                              />
                             </div>
                           </div>
                         </div>

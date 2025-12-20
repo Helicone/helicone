@@ -8,6 +8,8 @@ import {
   ModelUsageStatsManager,
   ProviderStatsResponse,
   ProviderUsageResponse,
+  ProviderUptimeResponse,
+  ModelProviderUptimeResponse,
 } from "../../managers/ModelUsageStatsManager";
 
 export type StatsTimeFrame = "24h" | "7d" | "30d" | "3m" | "1y";
@@ -143,6 +145,52 @@ export class StatsController extends Controller {
   ): Promise<Result<ModelStatsResponse, string>> {
     const manager = new ModelUsageStatsManager();
     const result = await manager.getModelStats(model, timeframe);
+
+    if (result.error) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+
+    return result;
+  }
+
+  /**
+   * Get uptime/success rate statistics for a specific provider.
+   * Returns time series data showing success rate per time bucket.
+   *
+   * @param provider The provider identifier (e.g., "openai", "anthropic")
+   * @param timeframe Time range: "24h", "7d", "30d", "3m", or "1y"
+   */
+  @Get("/providers/{provider}/uptime")
+  public async getProviderUptime(
+    @Path() provider: string,
+    @Query() timeframe: StatsTimeFrame = "1y"
+  ): Promise<Result<ProviderUptimeResponse, string>> {
+    const manager = new ModelUsageStatsManager();
+    const result = await manager.getProviderUptime(provider, timeframe);
+
+    if (result.error) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+
+    return result;
+  }
+
+  /**
+   * Get uptime/success rate statistics for all model-provider pairs.
+   * Used on model detail pages to show uptime per provider.
+   *
+   * @param timeframe Time range: "24h", "7d", "30d", "3m", or "1y"
+   */
+  @Get("/model-provider-uptime")
+  public async getModelProviderUptime(
+    @Query() timeframe: StatsTimeFrame = "30d"
+  ): Promise<Result<ModelProviderUptimeResponse, string>> {
+    const manager = new ModelUsageStatsManager();
+    const result = await manager.getModelProviderUptime(timeframe);
 
     if (result.error) {
       this.setStatus(500);
