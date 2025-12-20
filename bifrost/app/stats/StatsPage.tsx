@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect, useMemo } from "react";
 import { BarChart3, PieChart, Server } from "lucide-react";
 import { ModelUsageChart } from "./ModelUsageChart";
 import { ModelLeaderboard } from "./ModelLeaderboard";
@@ -9,6 +8,7 @@ import { MarketShareChart } from "./MarketShareChart";
 import { MarketShareLeaderboard } from "./MarketShareLeaderboard";
 import { ProviderUsageChart } from "./ProviderUsageChart";
 import { ProviderLeaderboard } from "./ProviderLeaderboard";
+import { getJawnClient } from "@/lib/clients/jawn";
 
 type LeaderboardTimeFrame = "24h" | "7d" | "30d";
 
@@ -91,19 +91,7 @@ interface ProviderUsageResponse {
   leaderboard: ProviderLeaderboardEntry[];
 }
 
-const JAWN_BASE_URL =
-  process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE || "http://localhost:8585";
 
-async function fetchStats<T>(endpoint: string, timeframe: string): Promise<T> {
-  const response = await fetch(
-    `${JAWN_BASE_URL}/v1/public/stats/${endpoint}?timeframe=${timeframe}`
-  );
-  const result = await response.json();
-  if (result.error) {
-    throw new Error(result.error);
-  }
-  return result.data as T;
-}
 
 function TimeframeSelector({
   value,
@@ -132,6 +120,8 @@ function TimeframeSelector({
 }
 
 export function StatsPage() {
+  const jawnClient = useMemo(() => getJawnClient(), []);
+  
   const [leaderboardTimeframe, setLeaderboardTimeframe] =
     useState<LeaderboardTimeFrame>("7d");
   const [marketShareTimeframe, setMarketShareTimeframe] =
@@ -139,45 +129,161 @@ export function StatsPage() {
   const [providerTimeframe, setProviderTimeframe] =
     useState<LeaderboardTimeFrame>("7d");
 
-  const { data: chartData, isLoading: chartLoading } = useQuery({
-    queryKey: ["model-usage-stats-chart"],
-    queryFn: () => fetchStats<ModelUsageResponse>("model-usage", "1y"),
-  });
+  // Model usage chart data
+  const [chartData, setChartData] = useState<ModelUsageResponse | null>(null);
+  const [chartLoading, setChartLoading] = useState(true);
 
-  const { data: leaderboardData, isLoading: leaderboardLoading } = useQuery({
-    queryKey: ["model-usage-stats-leaderboard", leaderboardTimeframe],
-    queryFn: () =>
-      fetchStats<ModelUsageResponse>("model-usage", leaderboardTimeframe),
-  });
+  // Model usage leaderboard data
+  const [leaderboardData, setLeaderboardData] = useState<ModelUsageResponse | null>(null);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false);
 
-  const { data: marketShareChartData, isLoading: marketShareChartLoading } =
-    useQuery({
-      queryKey: ["market-share-stats-chart"],
-      queryFn: () => fetchStats<MarketShareResponse>("market-share", "1y"),
-    });
+  // Market share chart data
+  const [marketShareChartData, setMarketShareChartData] = useState<MarketShareResponse | null>(null);
+  const [marketShareChartLoading, setMarketShareChartLoading] = useState(true);
 
-  const {
-    data: marketShareLeaderboardData,
-    isLoading: marketShareLeaderboardLoading,
-  } = useQuery({
-    queryKey: ["market-share-stats-leaderboard", marketShareTimeframe],
-    queryFn: () =>
-      fetchStats<MarketShareResponse>("market-share", marketShareTimeframe),
-  });
+  // Market share leaderboard data
+  const [marketShareLeaderboardData, setMarketShareLeaderboardData] = useState<MarketShareResponse | null>(null);
+  const [marketShareLeaderboardLoading, setMarketShareLeaderboardLoading] = useState(false);
 
-  const { data: providerChartData, isLoading: providerChartLoading } = useQuery(
-    {
-      queryKey: ["provider-usage-stats-chart"],
-      queryFn: () => fetchStats<ProviderUsageResponse>("provider-usage", "1y"),
-    }
-  );
+  // Provider chart data
+  const [providerChartData, setProviderChartData] = useState<ProviderUsageResponse | null>(null);
+  const [providerChartLoading, setProviderChartLoading] = useState(true);
 
-  const { data: providerLeaderboardData, isLoading: providerLeaderboardLoading } =
-    useQuery({
-      queryKey: ["provider-usage-stats-leaderboard", providerTimeframe],
-      queryFn: () =>
-        fetchStats<ProviderUsageResponse>("provider-usage", providerTimeframe),
-    });
+  // Provider leaderboard data
+  const [providerLeaderboardData, setProviderLeaderboardData] = useState<ProviderUsageResponse | null>(null);
+  const [providerLeaderboardLoading, setProviderLeaderboardLoading] = useState(false);
+
+  // Fetch model usage chart (1 year) on mount
+  useEffect(() => {
+    const fetchModelUsageChart = async () => {
+      try {
+        setChartLoading(true);
+        const response = await jawnClient.GET(
+          "/v1/public/stats/model-usage",
+          { params: { query: { timeframe: "1y" } } }
+        );
+        if (response.data?.data) {
+          setChartData(response.data.data as ModelUsageResponse);
+        }
+      } catch (error) {
+        console.error("Failed to load model usage chart:", error);
+      } finally {
+        setChartLoading(false);
+      }
+    };
+
+    fetchModelUsageChart();
+  }, [jawnClient]);
+
+  // Fetch model usage leaderboard
+  useEffect(() => {
+    const fetchModelUsageLeaderboard = async () => {
+      try {
+        setLeaderboardLoading(true);
+        const response = await jawnClient.GET(
+          "/v1/public/stats/model-usage",
+          { params: { query: { timeframe: leaderboardTimeframe } } }
+        );
+        if (response.data?.data) {
+          setLeaderboardData(response.data.data as ModelUsageResponse);
+        }
+      } catch (error) {
+        console.error("Failed to load model usage leaderboard:", error);
+      } finally {
+        setLeaderboardLoading(false);
+      }
+    };
+
+    fetchModelUsageLeaderboard();
+  }, [leaderboardTimeframe, jawnClient]);
+
+  // Fetch market share chart (1 year) on mount
+  useEffect(() => {
+    const fetchMarketShareChart = async () => {
+      try {
+        setMarketShareChartLoading(true);
+        const response = await jawnClient.GET(
+          "/v1/public/stats/market-share",
+          { params: { query: { timeframe: "1y" } } }
+        );
+        if (response.data?.data) {
+          setMarketShareChartData(response.data.data as MarketShareResponse);
+        }
+      } catch (error) {
+        console.error("Failed to load market share chart:", error);
+      } finally {
+        setMarketShareChartLoading(false);
+      }
+    };
+
+    fetchMarketShareChart();
+  }, [jawnClient]);
+
+  // Fetch market share leaderboard
+  useEffect(() => {
+    const fetchMarketShareLeaderboard = async () => {
+      try {
+        setMarketShareLeaderboardLoading(true);
+        const response = await jawnClient.GET(
+          "/v1/public/stats/market-share",
+          { params: { query: { timeframe: marketShareTimeframe } } }
+        );
+        if (response.data?.data) {
+          setMarketShareLeaderboardData(response.data.data as MarketShareResponse);
+        }
+      } catch (error) {
+        console.error("Failed to load market share leaderboard:", error);
+      } finally {
+        setMarketShareLeaderboardLoading(false);
+      }
+    };
+
+    fetchMarketShareLeaderboard();
+  }, [marketShareTimeframe, jawnClient]);
+
+  // Fetch provider usage chart (1 year) on mount
+  useEffect(() => {
+    const fetchProviderUsageChart = async () => {
+      try {
+        setProviderChartLoading(true);
+        const response = await jawnClient.GET(
+          "/v1/public/stats/provider-usage",
+          { params: { query: { timeframe: "1y" } } }
+        );
+        if (response.data?.data) {
+          setProviderChartData(response.data.data as ProviderUsageResponse);
+        }
+      } catch (error) {
+        console.error("Failed to load provider usage chart:", error);
+      } finally {
+        setProviderChartLoading(false);
+      }
+    };
+
+    fetchProviderUsageChart();
+  }, [jawnClient]);
+
+  // Fetch provider usage leaderboard
+  useEffect(() => {
+    const fetchProviderUsageLeaderboard = async () => {
+      try {
+        setProviderLeaderboardLoading(true);
+        const response = await jawnClient.GET(
+          "/v1/public/stats/provider-usage",
+          { params: { query: { timeframe: providerTimeframe } } }
+        );
+        if (response.data?.data) {
+          setProviderLeaderboardData(response.data.data as ProviderUsageResponse);
+        }
+      } catch (error) {
+        console.error("Failed to load provider usage leaderboard:", error);
+      } finally {
+        setProviderLeaderboardLoading(false);
+      }
+    };
+
+    fetchProviderUsageLeaderboard();
+  }, [providerTimeframe, jawnClient]);
 
   return (
     <div className="bg-white dark:bg-black min-h-screen py-16 lg:py-16 w-[60%] mx-auto">

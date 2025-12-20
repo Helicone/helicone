@@ -439,6 +439,27 @@ export interface paths {
      */
     get: operations["GetProviderUsage"];
   };
+  "/v1/public/stats/authors/{author}": {
+    /**
+     * @description Get statistics for a specific model author.
+     * Returns time series data and a leaderboard of top models by that author.
+     */
+    get: operations["GetAuthorStats"];
+  };
+  "/v1/public/stats/providers/{provider}": {
+    /**
+     * @description Get statistics for a specific inference provider.
+     * Returns time series data and a leaderboard of top models on that provider.
+     */
+    get: operations["GetProviderStats"];
+  };
+  "/v1/public/stats/models/{model}": {
+    /**
+     * @description Get usage statistics for a specific model.
+     * Returns time series data showing token usage over time.
+     */
+    get: operations["GetModelStats"];
+  };
   "/v1/session/query": {
     post: operations["GetSessions"];
   };
@@ -2635,6 +2656,49 @@ Json: JsonObject;
       error: null;
     };
     "Result_ProviderUsageResponse.string_": components["schemas"]["ResultSuccess_ProviderUsageResponse_"] | components["schemas"]["ResultError_string_"];
+    AuthorStatsResponse: {
+      author: string;
+      /** Format: double */
+      totalTokens: number;
+      timeSeries: components["schemas"]["ModelUsageTimeSeriesDataPoint"][];
+      leaderboard: components["schemas"]["ModelUsageLeaderboardEntry"][];
+    };
+    ResultSuccess_AuthorStatsResponse_: {
+      data: components["schemas"]["AuthorStatsResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_AuthorStatsResponse.string_": components["schemas"]["ResultSuccess_AuthorStatsResponse_"] | components["schemas"]["ResultError_string_"];
+    ProviderStatsResponse: {
+      provider: string;
+      /** Format: double */
+      totalTokens: number;
+      timeSeries: components["schemas"]["ModelUsageTimeSeriesDataPoint"][];
+      leaderboard: components["schemas"]["ModelUsageLeaderboardEntry"][];
+    };
+    ResultSuccess_ProviderStatsResponse_: {
+      data: components["schemas"]["ProviderStatsResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ProviderStatsResponse.string_": components["schemas"]["ResultSuccess_ProviderStatsResponse_"] | components["schemas"]["ResultError_string_"];
+    ModelStatsTimeSeriesDataPoint: {
+      time: string;
+      /** Format: double */
+      totalTokens: number;
+    };
+    ModelStatsResponse: {
+      model: string;
+      /** Format: double */
+      totalTokens: number;
+      timeSeries: components["schemas"]["ModelStatsTimeSeriesDataPoint"][];
+    };
+    ResultSuccess_ModelStatsResponse_: {
+      data: components["schemas"]["ModelStatsResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ModelStatsResponse.string_": components["schemas"]["ResultSuccess_ModelStatsResponse_"] | components["schemas"]["ResultError_string_"];
     SessionResult: {
       created_at: string;
       latest_request_created_at: string;
@@ -6918,6 +6982,78 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_ProviderUsageResponse.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * @description Get statistics for a specific model author.
+   * Returns time series data and a leaderboard of top models by that author.
+   */
+  GetAuthorStats: {
+    parameters: {
+      query?: {
+        /** @description Time range: "24h", "7d", "30d", "3m", or "1y" */
+        timeframe?: components["schemas"]["StatsTimeFrame"];
+      };
+      path: {
+        /** @description The author identifier (e.g., "openai", "anthropic") */
+        author: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_AuthorStatsResponse.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * @description Get statistics for a specific inference provider.
+   * Returns time series data and a leaderboard of top models on that provider.
+   */
+  GetProviderStats: {
+    parameters: {
+      query?: {
+        /** @description Time range: "24h", "7d", "30d", "3m", or "1y" */
+        timeframe?: components["schemas"]["StatsTimeFrame"];
+      };
+      path: {
+        /** @description The provider identifier (e.g., "openai", "anthropic") */
+        provider: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ProviderStatsResponse.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * @description Get usage statistics for a specific model.
+   * Returns time series data showing token usage over time.
+   */
+  GetModelStats: {
+    parameters: {
+      query?: {
+        /** @description Time range: "24h", "7d", "30d", "3m", or "1y" */
+        timeframe?: components["schemas"]["StatsTimeFrame"];
+      };
+      path: {
+        /** @description The model identifier (e.g., "gpt-4", "claude-3-opus") */
+        model: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ModelStatsResponse.string_"];
         };
       };
     };
