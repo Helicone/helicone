@@ -7,7 +7,7 @@ import {
   NoSymbolIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
-import { KeyIcon, LinkIcon, Plug, Webhook, Lock } from "lucide-react";
+import { KeyIcon, LinkIcon, Plug, Webhook, Lock, Shield } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ReactNode } from "react";
@@ -31,6 +31,12 @@ const ORGANIZATION_TABS = [
     title: "Billing",
     icon: CreditCardIcon,
     href: "/settings/billing",
+  },
+  {
+    id: "sso",
+    title: "SSO",
+    icon: Shield,
+    href: "/settings/sso",
   },
   {
     id: "reports",

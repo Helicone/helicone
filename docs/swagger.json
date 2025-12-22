@@ -7344,6 +7344,185 @@
 					}
 				]
 			},
+			"ResultSuccess__hasSSO-boolean--organizationId_63_-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"organizationId": {
+								"type": "string"
+							},
+							"hasSSO": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"hasSSO"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__hasSSO-boolean--organizationId_63_-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__hasSSO-boolean--organizationId_63_-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"SSOConfig": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"organizationId": {
+						"type": "string"
+					},
+					"domain": {
+						"type": "string"
+					},
+					"providerId": {
+						"type": "string",
+						"nullable": true
+					},
+					"metadataUrl": {
+						"type": "string",
+						"nullable": true
+					},
+					"enabled": {
+						"type": "boolean"
+					},
+					"createdAt": {
+						"type": "string"
+					},
+					"updatedAt": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"organizationId",
+					"domain",
+					"providerId",
+					"metadataUrl",
+					"enabled",
+					"createdAt",
+					"updatedAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_SSOConfig-or-null_": {
+				"properties": {
+					"data": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/SSOConfig"
+							}
+						],
+						"nullable": true
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_SSOConfig-or-null.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_SSOConfig-or-null_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess_SSOConfig_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/SSOConfig"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_SSOConfig.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_SSOConfig_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"CreateSSOConfigRequest": {
+				"properties": {
+					"domain": {
+						"type": "string"
+					},
+					"metadataUrl": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"domain",
+					"metadataUrl"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UpdateSSOConfigRequest": {
+				"properties": {
+					"domain": {
+						"type": "string"
+					},
+					"metadataUrl": {
+						"type": "string"
+					},
+					"enabled": {
+						"type": "boolean"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
 			"SessionResult": {
 				"properties": {
 					"created_at": {
@@ -19916,6 +20095,196 @@
 						"required": false,
 						"schema": {
 							"$ref": "#/components/schemas/StatsTimeFrame"
+						}
+					}
+				]
+			}
+		},
+		"/v1/public/sso/check/{domain}": {
+			"get": {
+				"operationId": "CheckDomainSSO",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__hasSSO-boolean--organizationId_63_-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Check if a domain has SSO configured (public endpoint for sign-in flow)\nNo authentication required.",
+				"tags": [
+					"SSO"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "domain",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/organization/sso": {
+			"get": {
+				"operationId": "GetSSOConfig",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_SSOConfig-or-null.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get SSO configuration for the current organization",
+				"tags": [
+					"SSO"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "CreateSSOConfig",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_SSOConfig.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Create SSO configuration for the current organization",
+				"tags": [
+					"SSO"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateSSOConfigRequest"
+							}
+						}
+					}
+				}
+			},
+			"put": {
+				"operationId": "UpdateSSOConfig",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_SSOConfig.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Update SSO configuration for the current organization",
+				"tags": [
+					"SSO"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateSSOConfigRequest"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteSSOConfig",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Delete SSO configuration for the current organization",
+				"tags": [
+					"SSO"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/organization/sso/check/{domain}": {
+			"get": {
+				"operationId": "CheckDomainSSO",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__hasSSO-boolean--organizationId_63_-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Check if a domain has SSO configured (public endpoint for sign-in flow)",
+				"tags": [
+					"SSO"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "domain",
+						"required": true,
+						"schema": {
+							"type": "string"
 						}
 					}
 				]

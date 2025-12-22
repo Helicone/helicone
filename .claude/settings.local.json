@@ -98,7 +98,9 @@
       "mcp__chrome-devtools__press_key",
       "Bash(yarn install)",
       "Bash(npx vitest:*)",
-      "WebFetch(domain:streamdown.ai)"
+      "WebFetch(domain:streamdown.ai)",
+      "WebFetch(domain:supabase.com)",
+      "Bash(docker logs:*)"
     ],
     "deny": []
   },

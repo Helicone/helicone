@@ -3,7 +3,7 @@ import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientF
 import { GetServerSidePropsContext } from "next";
 import { env } from "next-runtime-env";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import PublicMetaData from "../components/layout/public/publicMetaData";
 import useNotification from "../components/shared/notification/useNotification";
 import AuthForm from "../components/templates/auth/authForm";
@@ -29,6 +29,53 @@ const SignIn = ({
   const { unauthorized } = router.query;
   const [refreshed, setRefreshed] = useState(false);
   const [redirectCount, setRedirectCount] = useState(0);
+
+  // Check if a domain has SSO configured
+  // This calls the Jawn public endpoint directly (no auth required)
+  const checkSSODomain = useCallback(
+    async (domain: string): Promise<boolean> => {
+      try {
+        const jawnUrl = env("NEXT_PUBLIC_HELICONE_JAWN_SERVICE") || "http://localhost:8585";
+        const response = await fetch(
+          `${jawnUrl}/v1/public/sso/check/${encodeURIComponent(domain)}`
+        );
+        if (!response.ok) {
+          return false;
+        }
+        const data = await response.json();
+        if (data?.data?.hasSSO) {
+          return true;
+        }
+        return false;
+      } catch (error) {
+        logger.error({ error, domain }, "Failed to check SSO domain");
+        return false;
+      }
+    },
+    []
+  );
+
+  // Handle SSO sign-in
+  const handleSSOSubmit = useCallback(
+    async (domain: string) => {
+      try {
+        const { error } = await heliconeAuthClient.signInWithSSO({
+          domain,
+          options: {
+            redirectTo: `${window.location.origin}/dashboard`,
+          },
+        });
+        if (error) {
+          setNotification("SSO sign-in failed. Please try again.", "error");
+          logger.error({ error, domain }, "SSO sign-in failed");
+        }
+      } catch (error) {
+        setNotification("SSO sign-in failed. Please try again.", "error");
+        logger.error({ error, domain }, "SSO sign-in exception");
+      }
+    },
+    [heliconeAuthClient, setNotification]
+  );
 
   useEffect(() => {
     // Prevent infinite loops by limiting redirects
@@ -154,6 +201,8 @@ const SignIn = ({
               }
               setNotification("Successfully signed in.", "success");
             }}
+            checkSSODomain={checkSSODomain}
+            handleSSOSubmit={handleSSOSubmit}
             authFormType={"signin"}
             customerPortalContent={customerPortalContent}
           />

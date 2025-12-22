@@ -439,6 +439,27 @@ export interface paths {
      */
     get: operations["GetProviderUsage"];
   };
+  "/v1/public/sso/check/{domain}": {
+    /**
+     * @description Check if a domain has SSO configured (public endpoint for sign-in flow)
+     * No authentication required.
+     */
+    get: operations["CheckDomainSSO"];
+  };
+  "/v1/organization/sso": {
+    /** @description Get SSO configuration for the current organization */
+    get: operations["GetSSOConfig"];
+    /** @description Update SSO configuration for the current organization */
+    put: operations["UpdateSSOConfig"];
+    /** @description Create SSO configuration for the current organization */
+    post: operations["CreateSSOConfig"];
+    /** @description Delete SSO configuration for the current organization */
+    delete: operations["DeleteSSOConfig"];
+  };
+  "/v1/organization/sso/check/{domain}": {
+    /** @description Check if a domain has SSO configured (public endpoint for sign-in flow) */
+    get: operations["CheckDomainSSO"];
+  };
   "/v1/session/query": {
     post: operations["GetSessions"];
   };
@@ -2635,6 +2656,46 @@ Json: JsonObject;
       error: null;
     };
     "Result_ProviderUsageResponse.string_": components["schemas"]["ResultSuccess_ProviderUsageResponse_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__hasSSO-boolean--organizationId_63_-string__": {
+      data: {
+        organizationId?: string;
+        hasSSO: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__hasSSO-boolean--organizationId_63_-string_.string_": components["schemas"]["ResultSuccess__hasSSO-boolean--organizationId_63_-string__"] | components["schemas"]["ResultError_string_"];
+    SSOConfig: {
+      id: string;
+      organizationId: string;
+      domain: string;
+      providerId: string | null;
+      metadataUrl: string | null;
+      enabled: boolean;
+      createdAt: string;
+      updatedAt: string;
+    };
+    "ResultSuccess_SSOConfig-or-null_": {
+      data: components["schemas"]["SSOConfig"] | null;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_SSOConfig-or-null.string_": components["schemas"]["ResultSuccess_SSOConfig-or-null_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_SSOConfig_: {
+      data: components["schemas"]["SSOConfig"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_SSOConfig.string_": components["schemas"]["ResultSuccess_SSOConfig_"] | components["schemas"]["ResultError_string_"];
+    CreateSSOConfigRequest: {
+      domain: string;
+      metadataUrl: string;
+    };
+    UpdateSSOConfigRequest: {
+      domain?: string;
+      metadataUrl?: string;
+      enabled?: boolean;
+    };
     SessionResult: {
       created_at: string;
       latest_request_created_at: string;
@@ -6918,6 +6979,76 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_ProviderUsageResponse.string_"];
+        };
+      };
+    };
+  };
+  /** @description Check if a domain has SSO configured (public endpoint for sign-in flow) */
+  CheckDomainSSO: {
+    parameters: {
+      path: {
+        domain: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__hasSSO-boolean--organizationId_63_-string_.string_"];
+        };
+      };
+    };
+  };
+  /** @description Get SSO configuration for the current organization */
+  GetSSOConfig: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_SSOConfig-or-null.string_"];
+        };
+      };
+    };
+  };
+  /** @description Update SSO configuration for the current organization */
+  UpdateSSOConfig: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateSSOConfigRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_SSOConfig.string_"];
+        };
+      };
+    };
+  };
+  /** @description Create SSO configuration for the current organization */
+  CreateSSOConfig: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSSOConfigRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_SSOConfig.string_"];
+        };
+      };
+    };
+  };
+  /** @description Delete SSO configuration for the current organization */
+  DeleteSSOConfig: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };

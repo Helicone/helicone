@@ -70,13 +70,16 @@ export class OrganizationController extends Controller {
       return err(authParams.error ?? "User not found");
     }
 
+    // SSO Auto-Enrollment: Check if user should be added to an SSO-configured org
+    await this.autoEnrollSSOUser(authParams.data.id, authParams.data.email);
+
     const result = await dbExecute<
       Database["public"]["Tables"]["organization"]["Row"] & {
         role: string;
       }
     >(
       `SELECT DISTINCT ON (organization.id) organization.*, organization_member.org_role
-      FROM organization 
+      FROM organization
       left join organization_member on organization.id = organization_member.organization
       WHERE soft_delete = false
       and (organization_member.member = $1 or organization.owner = $1)
@@ -89,6 +92,77 @@ export class OrganizationController extends Controller {
     }
 
     return ok(result.data!);
+  }
+
+  /**
+   * Auto-enroll a user into their SSO organization based on email domain.
+   * This is called when fetching organizations to ensure SSO users are
+   * automatically added to the organization that has SSO configured for their domain.
+   */
+  private async autoEnrollSSOUser(
+    userId: string,
+    email: string | undefined
+  ): Promise<void> {
+    if (!email) return;
+
+    // Extract domain from email
+    const domain = email.split("@")[1]?.toLowerCase();
+    if (!domain) return;
+
+    try {
+      // Check if there's an SSO config for this domain
+      const ssoConfig = await dbExecute<{
+        organization_id: string;
+        enabled: boolean;
+      }>(
+        `SELECT organization_id, enabled
+         FROM organization_sso_config
+         WHERE domain = $1 AND enabled = true`,
+        [domain]
+      );
+
+      if (!ssoConfig.data || ssoConfig.data.length === 0) {
+        return; // No SSO config for this domain
+      }
+
+      const orgId = ssoConfig.data[0].organization_id;
+
+      // Check if user is already a member of this organization
+      const existingMember = await dbExecute<{ member: string }>(
+        `SELECT member FROM organization_member
+         WHERE organization = $1 AND member = $2`,
+        [orgId, userId]
+      );
+
+      if (existingMember.data && existingMember.data.length > 0) {
+        return; // User is already a member
+      }
+
+      // Check if user is the owner
+      const isOwner = await dbExecute<{ owner: string }>(
+        `SELECT owner FROM organization WHERE id = $1 AND owner = $2`,
+        [orgId, userId]
+      );
+
+      if (isOwner.data && isOwner.data.length > 0) {
+        return; // User is already the owner
+      }
+
+      // Add user as a member with 'member' role
+      await dbExecute(
+        `INSERT INTO organization_member (member, organization, org_role)
+         VALUES ($1, $2, 'member')
+         ON CONFLICT (member, organization) DO NOTHING`,
+        [userId, orgId]
+      );
+
+      console.log(
+        `[SSO Auto-Enrollment] Added user ${userId} (${email}) to organization ${orgId}`
+      );
+    } catch (error) {
+      // Log but don't fail - auto-enrollment is a convenience feature
+      console.error(`[SSO Auto-Enrollment] Error:`, error);
+    }
   }
 
   @Get("/{organizationId}")

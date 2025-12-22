@@ -1,0 +1,36 @@
+# Local SAML Identity Provider for Testing
+#
+# This runs SimpleSAMLphp as a Docker container to test SSO integration.
+#
+# Usage:
+#   cd .local-dev/idp
+#   docker-compose up -d
+#
+# IdP Metadata URL: http://localhost:8080/simplesaml/saml2/idp/metadata.php
+# IdP Login Page: http://localhost:8080/simplesaml
+
+version: '3.8'
+
+services:
+  idp:
+    image: kristophjunge/test-saml-idp:1.15
+    container_name: local-saml-idp
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    environment:
+      # The IdP's entity ID
+      SIMPLESAMLPHP_IDP_ENTITYID: "http://localhost:8080/simplesaml/saml2/idp/metadata.php"
+
+      # The SP (Supabase) entity ID - pointing to REMOTE Supabase
+      SIMPLESAMLPHP_SP_ENTITY_ID: "https://zpxpwznewawbyvdumfbj.supabase.co/auth/v1/sso/saml/metadata"
+
+      # The ACS URL where assertions are sent - pointing to REMOTE Supabase
+      SIMPLESAMLPHP_SP_ASSERTION_CONSUMER_SERVICE: "https://zpxpwznewawbyvdumfbj.supabase.co/auth/v1/sso/saml/acs"
+
+      # Single Logout URL
+      SIMPLESAMLPHP_SP_SINGLE_LOGOUT_SERVICE: "https://zpxpwznewawbyvdumfbj.supabase.co/auth/v1/sso/saml/slo"
+    volumes:
+      - ./authsources.php:/var/www/simplesamlphp/config/authsources.php:ro
+      - ./saml20-sp-remote.php:/var/www/simplesamlphp/metadata/saml20-sp-remote.php:ro
+    restart: unless-stopped

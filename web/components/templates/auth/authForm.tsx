@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { BsGoogle, BsGithub } from "react-icons/bs";
+import { Building2, Loader2 } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -12,6 +13,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -24,6 +32,8 @@ interface AuthFormProps {
   handleEmailSubmit: (email: string, password: string) => void;
   handleGoogleSubmit?: () => void;
   handleGithubSubmit?: () => void;
+  handleSSOSubmit?: (domain: string) => Promise<void>;
+  checkSSODomain?: (domain: string) => Promise<boolean>;
   authFormType: "signin" | "signup" | "reset" | "reset-password";
   customerPortalContent?: CustomerPortalContent;
 }
@@ -33,6 +43,8 @@ const AuthForm = (props: AuthFormProps) => {
     handleEmailSubmit,
     handleGoogleSubmit,
     handleGithubSubmit,
+    handleSSOSubmit,
+    checkSSODomain,
     authFormType,
     customerPortalContent,
   } = props;
@@ -180,15 +192,50 @@ const AuthForm = (props: AuthFormProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  // SSO dialog state
+  const [showSSODialog, setShowSSODialog] = useState(false);
+  const [ssoEmail, setSSOEmail] = useState("");
+  const [ssoLoading, setSSOLoading] = useState(false);
+  const [ssoError, setSSOError] = useState<string | null>(null);
+
   const handleEmailSubmitHandler = async (
     event: FormEvent<HTMLFormElement>,
   ) => {
     event.preventDefault();
-
     setIsLoading(true);
-
     await handleEmailSubmit(email, password);
     setIsLoading(false);
+  };
+
+  // Handle SSO flow - check domain and redirect if SSO is configured
+  const handleSSOFlow = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!ssoEmail || !checkSSODomain || !handleSSOSubmit) return;
+
+    const domain = ssoEmail.split("@")[1];
+    if (!domain) {
+      setSSOError("Please enter a valid email address");
+      return;
+    }
+
+    setSSOLoading(true);
+    setSSOError(null);
+
+    try {
+      const hasSSO = await checkSSODomain(domain);
+      if (hasSSO) {
+        await handleSSOSubmit(domain);
+        // Don't reset loading - we're redirecting
+      } else {
+        setSSOError(`SSO is not configured for ${domain}. Please contact your administrator or sign in with email/password.`);
+        setSSOLoading(false);
+      }
+    } catch (error) {
+      console.error("SSO check failed:", error);
+      setSSOError("Failed to check SSO configuration. Please try again.");
+      setSSOLoading(false);
+    }
   };
 
   const handleRouting = (regionEvent: "us" | "eu") => {
@@ -482,21 +529,24 @@ const AuthForm = (props: AuthFormProps) => {
             <Button
               type="submit"
               disabled={
-                isLoading || (authFormType === "signup" && !acceptedTerms)
+                isLoading ||
+                (authFormType === "signup" && !acceptedTerms)
               }
               className="w-full bg-sky-500 py-2 text-white"
             >
-              {authFormType === "signin"
-                ? "Sign in with email"
-                : authFormType === "signup"
-                  ? "Create account"
-                  : authFormType === "reset"
-                    ? "Reset password"
-                    : "Update password"}
+              {isLoading
+                ? "Please wait..."
+                : authFormType === "signin"
+                  ? "Sign in with email"
+                  : authFormType === "signup"
+                    ? "Create account"
+                    : authFormType === "reset"
+                      ? "Reset password"
+                      : "Update password"}
             </Button>
           </form>
 
-          {(handleGoogleSubmit || handleGithubSubmit) && (
+          {(handleGoogleSubmit || handleGithubSubmit || handleSSOSubmit) && (
             <div className="mt-8">
               <div className="relative">
                 <div
@@ -512,7 +562,7 @@ const AuthForm = (props: AuthFormProps) => {
                 </div>
               </div>
 
-              <div className="mt-6 grid grid-cols-2 gap-3">
+              <div className="mt-6 grid grid-cols-3 gap-3">
                 {handleGoogleSubmit && (
                   <button
                     onClick={() => handleGoogleSubmit()}
@@ -531,9 +581,66 @@ const AuthForm = (props: AuthFormProps) => {
                     <span>GitHub</span>
                   </button>
                 )}
+                {handleSSOSubmit && authFormType === "signin" && (
+                  <button
+                    onClick={() => {
+                      setSSOEmail("");
+                      setSSOError(null);
+                      setShowSSODialog(true);
+                    }}
+                    className="flex items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+                  >
+                    <Building2 size={16} />
+                    <span>SSO</span>
+                  </button>
+                )}
               </div>
             </div>
           )}
+
+          {/* SSO Dialog */}
+          <Dialog open={showSSODialog} onOpenChange={setShowSSODialog}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Sign in with SSO</DialogTitle>
+                <DialogDescription>
+                  Enter your work email to sign in with your company&apos;s identity provider.
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleSSOFlow} className="space-y-4">
+                <div className="space-y-2">
+                  <Input
+                    type="email"
+                    placeholder="you@company.com"
+                    value={ssoEmail}
+                    onChange={(e) => {
+                      setSSOEmail(e.target.value);
+                      setSSOError(null);
+                    }}
+                    autoFocus
+                    required
+                  />
+                  {ssoError && (
+                    <p className="text-sm text-red-600">{ssoError}</p>
+                  )}
+                </div>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={ssoLoading || !ssoEmail}
+                >
+                  {ssoLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Checking...
+                    </>
+                  ) : (
+                    "Continue with SSO"
+                  )}
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
 
           {customerPortalContent && (
             <div className="mt-8 text-center text-xs italic text-gray-500">

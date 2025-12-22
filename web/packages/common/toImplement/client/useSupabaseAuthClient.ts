@@ -171,6 +171,40 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
     return ok(undefined);
   }
 
+  async signInWithSSO({
+    domain,
+    options,
+  }: {
+    domain: string;
+    options?: { redirectTo?: string };
+  }): Promise<Result<void, string>> {
+    if (this.queryClient) {
+      this.queryClient.clear();
+    }
+
+    if (!this.supabaseClient) {
+      return err("Supabase client not found");
+    }
+
+    const { data, error } = await this.supabaseClient.auth.signInWithSSO({
+      domain,
+      options: {
+        redirectTo: options?.redirectTo,
+      },
+    });
+
+    if (error) {
+      return err(error.message);
+    }
+
+    // Redirect to the IdP
+    if (data?.url) {
+      window.location.href = data.url;
+    }
+
+    return ok(undefined);
+  }
+
   async updateUser({
     password,
   }: {
