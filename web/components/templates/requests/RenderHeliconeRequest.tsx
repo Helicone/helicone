@@ -24,6 +24,7 @@ import Json from "./components/Json";
 import { Realtime } from "./components/Realtime";
 import { Tool } from "./components/tool/Tool";
 import { VectorDB } from "./components/vector-db/VectorDB";
+import { TranslationProvider } from "@/components/shared/TranslationContext";
 
 export default function RenderHeliconeRequest({
   heliconeRequest,
@@ -89,23 +90,24 @@ export function RenderMappedRequest({
 
   // Use switch statement for rendering different types
   return (
-    <ScrollArea
-      orientation="vertical"
-      className={`relative h-full w-full ${className} rounded-lg border border-border bg-sidebar-background [&>div>div[style]]:!block`}
-    >
-      <Button
-        variant={"outline"}
-        size={"sm"}
-        className="felx-row absolute right-2 top-2 z-20 flex gap-1"
-        onClick={() => toggleMode(isShiftPressed)}
+    <TranslationProvider>
+      <ScrollArea
+        orientation="vertical"
+        className={`relative h-full w-full ${className} rounded-lg border border-border bg-sidebar-background [&>div>div[style]]:!block`}
       >
-        <XSmall className="font-medium text-secondary">
-          {MODE_LABELS[mode]}
-        </XSmall>
-        <LuChevronsLeftRight className="h-4 w-4 text-secondary" />
-      </Button>
+        <Button
+          variant={"outline"}
+          size={"sm"}
+          className="felx-row absolute right-2 top-2 z-20 flex gap-1"
+          onClick={() => toggleMode(isShiftPressed)}
+        >
+          <XSmall className="font-medium text-secondary">
+            {MODE_LABELS[mode]}
+          </XSmall>
+          <LuChevronsLeftRight className="h-4 w-4 text-secondary" />
+        </Button>
 
-      {mode === "debug" ? (
+        {mode === "debug" ? (
         <div className="p-4">
           <pre className="whitespace-pre-wrap text-sm">
             <JsonRenderer
@@ -196,7 +198,8 @@ export function RenderMappedRequest({
           }
         })()
       )}
-    </ScrollArea>
+      </ScrollArea>
+    </TranslationProvider>
   );
 }
 

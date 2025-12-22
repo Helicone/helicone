@@ -17,6 +17,7 @@ import { JsonRenderer } from "./single/JsonRenderer";
 import TextMessage from "./single/TextMessage";
 import ToolMessage from "./ToolMessage";
 import { ImageModal } from "./single/images/ImageModal";
+import { useOptionalTranslationContext } from "@/components/shared/TranslationContext";
 
 type MessageType = "image" | "tool" | "text" | "pdf" | "contentArray";
 function base64UrlToBase64(base64url: string) {
@@ -275,6 +276,8 @@ const renderTextContent = (
     showDeleteButton?: boolean;
     onDelete?: () => void;
     showAnnotations?: boolean;
+    translatedContent?: string | null;
+    isShowingTranslation?: boolean;
   } = {},
 ) => {
   const textElement = (
@@ -290,6 +293,8 @@ const renderTextContent = (
       mode={mode}
       annotations={message.annotations}
       showAnnotations={options.showAnnotations}
+      translatedContent={options.translatedContent}
+      isShowingTranslation={options.isShowingTranslation}
     />
   );
 
@@ -354,6 +359,8 @@ const renderContentByType = (
     showDeleteButton?: boolean;
     onDelete?: () => void;
     showAnnotations?: boolean;
+    translatedContent?: string | null;
+    isShowingTranslation?: boolean;
   } = {},
 ) => {
   switch (messageType) {
@@ -411,6 +418,11 @@ export default function ChatMessage({
   const [pendingFileAction, setPendingFileAction] = useState<
     "add" | "change" | null
   >(null);
+
+  // Translation support
+  const translationContext = useOptionalTranslationContext();
+  const messageId = message.id || `msg-${messageIndex}`;
+  const translationState = translationContext?.getTranslationState(messageId);
 
   const toggleMessage = (index: number) => {
     setExpandedMessages((prev) => ({
@@ -807,6 +819,12 @@ export default function ChatMessage({
             onAddText={addTextToMessage}
             onAddImage={addImageToMessage}
             onCopyContent={() => navigator.clipboard.writeText(content)}
+            onTranslate={() =>
+              translationContext?.translateMessage(messageId, content)
+            }
+            translationState={translationState}
+            isTranslationConfigured={translationContext?.isConfigured}
+            targetLanguage={translationContext?.targetLanguage}
           />
         )}
       <div
@@ -865,6 +883,8 @@ export default function ChatMessage({
               showDeleteButton: false,
               onDelete: () => deleteMessage(messageIndex),
               showAnnotations: !(isLongMessage && !isExpanded),
+              translatedContent: translationState?.translatedText,
+              isShowingTranslation: translationState?.isShowingTranslation,
             },
           )
         )}
