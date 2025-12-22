@@ -297,11 +297,33 @@ export const LegacyProPlanCard = () => {
             </div>
           )}
 
-          <div className="space-y-2 text-sm text-muted-foreground">
-            <p>$20/seat/month + usage-based request billing</p>
-            {hasPromptsAddon && (
-              <p className="text-sky-600">Prompts add-on active ($50/mo)</p>
-            )}
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              $20/seat/month + usage-based request billing
+            </p>
+
+            {/* Add-ons Section */}
+            <div className="rounded-lg border p-4">
+              <h3 className="mb-3 text-sm font-medium">Active Add-ons</h3>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`h-2 w-2 rounded-full ${hasPromptsAddon ? "bg-green-500" : "bg-gray-300"}`}
+                    />
+                    <span className="text-sm">Prompts</span>
+                  </div>
+                  <span className="text-sm text-muted-foreground">
+                    {hasPromptsAddon ? "$50/mo" : "Not active"}
+                  </span>
+                </div>
+              </div>
+              {hasPromptsAddon && (
+                <p className="mt-3 text-xs text-muted-foreground">
+                  Manage your add-ons via the &quot;Manage Subscription&quot; button below
+                </p>
+              )}
+            </div>
           </div>
 
           <Col className="gap-2">
