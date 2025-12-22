@@ -189,7 +189,10 @@ export function UptimeStatusBarInline({
                 Last 30 days:{" "}
                 <span
                   className={
-                    data[data.length - 1]?.successRate >= 99
+                    const totalReqs = data.reduce((sum, d) => sum + d.totalRequests, 0);
+                    const successReqs = data.reduce((sum, d) => sum + d.successfulRequests, 0);
+                    const overallSuccessRate = totalReqs > 0 ? ((successReqs / totalReqs) * 100) : 0;
+                    return overallSuccessRate >= 99
                       ? "text-green-600 dark:text-green-400"
                       : data[data.length - 1]?.successRate >= 95
                       ? "text-amber-600 dark:text-amber-400"
