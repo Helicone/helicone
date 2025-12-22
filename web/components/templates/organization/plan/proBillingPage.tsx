@@ -16,7 +16,10 @@ import { InvoiceSheet } from "./InvoiceSheet";
 import { Badge } from "@/components/ui/badge";
 import { CalendarIcon } from "lucide-react";
 
-export const ProPlanCard = () => {
+/**
+ * Shared hook for Pro subscription management
+ */
+const useProSubscription = () => {
   const org = useOrg();
 
   const subscription = useQuery({
@@ -73,6 +76,33 @@ export const ProPlanCard = () => {
     }
     return "N/A";
   };
+
+  return {
+    subscription,
+    manageSubscriptionPaymentLink,
+    reactivateSubscription,
+    isTrialActive,
+    isSubscriptionEnding,
+    getBillingCycleDates,
+  };
+};
+
+/**
+ * New Pro Plan Card for tier pro-20251210
+ * - $79/mo flat
+ * - Unlimited seats
+ * - $6/GB storage billing
+ * - Prompts included
+ */
+export const ProPlanCard = () => {
+  const {
+    subscription,
+    manageSubscriptionPaymentLink,
+    reactivateSubscription,
+    isTrialActive,
+    isSubscriptionEnding,
+    getBillingCycleDates,
+  } = useProSubscription();
 
   return (
     <div className="flex max-w-5xl flex-row gap-6 pb-8">
@@ -172,6 +202,166 @@ export const ProPlanCard = () => {
             <p className="text-sm text-muted-foreground">
               Built for companies looking to scale. Includes everything in Pro,
               plus unlimited requests, prompts, experiments and more.
+            </p>
+          </CardHeader>
+          <CardFooter className="mt-auto">
+            <Link href="/contact" className="w-full">
+              <Button
+                variant="outline"
+                size="lg"
+                className="w-full border border-input"
+              >
+                Contact sales
+              </Button>
+            </Link>
+          </CardFooter>
+        </Card>
+
+        <Card className="flex flex-col">
+          <CardHeader className="space-y-1.5">
+            <CardTitle className="text-2xl font-semibold">
+              Looking for something else?
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Need support, have a unique use case or want to say hi?
+            </p>
+          </CardHeader>
+          <CardFooter className="mt-auto">
+            <Link href="/contact" className="w-full">
+              <Button
+                variant="outline"
+                size="lg"
+                className="w-full border border-input"
+              >
+                Contact us
+              </Button>
+            </Link>
+          </CardFooter>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+/**
+ * Legacy Pro Plan Card for tiers pro-20240913, pro-20250202
+ * - $20/seat/mo
+ * - Per-request billing
+ * - Prompts as $50/mo add-on
+ */
+export const LegacyProPlanCard = () => {
+  const org = useOrg();
+  const {
+    subscription,
+    manageSubscriptionPaymentLink,
+    reactivateSubscription,
+    isTrialActive,
+    isSubscriptionEnding,
+    getBillingCycleDates,
+  } = useProSubscription();
+
+  const hasPromptsAddon =
+    (org?.currentOrg?.stripe_metadata as { addons?: { prompts?: boolean } })
+      ?.addons?.prompts ?? false;
+
+  return (
+    <div className="flex max-w-5xl flex-row gap-6 pb-8">
+      <Card className="w-full">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <CardTitle className="text-xl font-medium">Pro</CardTitle>
+            <Badge
+              variant="secondary"
+              className="bg-sky-50 text-sky-700 hover:bg-sky-50"
+            >
+              Current plan
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {subscription.data?.data?.current_period_start &&
+            subscription.data?.data?.current_period_end && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground text-slate-500">
+                <CalendarIcon className="h-4 w-4" />
+                <span>Current billing period: {getBillingCycleDates()}</span>
+              </div>
+            )}
+          {isTrialActive && (
+            <div className="rounded-lg border border-sky-100 bg-sky-50 p-4">
+              <p className="text-sm text-sky-700">
+                Your trial ends on:{" "}
+                {new Date(
+                  subscription.data!.data!.trial_end! * 1000,
+                ).toLocaleDateString()}
+              </p>
+            </div>
+          )}
+
+          <div className="space-y-2 text-sm text-muted-foreground">
+            <p>$20/seat/month + usage-based request billing</p>
+            {hasPromptsAddon && (
+              <p className="text-sky-600">Prompts add-on active ($50/mo)</p>
+            )}
+          </div>
+
+          <Col className="gap-2">
+            {isSubscriptionEnding ? (
+              <Button
+                onClick={async () => {
+                  const result = await reactivateSubscription.mutateAsync();
+                  if (result.data) {
+                    subscription.refetch();
+                  } else {
+                    logger.error("Failed to reactivate subscription");
+                  }
+                }}
+                disabled={reactivateSubscription.isPending}
+              >
+                {reactivateSubscription.isPending
+                  ? "Reactivating..."
+                  : "Reactivate Subscription"}
+              </Button>
+            ) : (
+              <Button
+                className="w-full bg-sky-600 text-white hover:bg-sky-700"
+                onClick={async () => {
+                  const result =
+                    await manageSubscriptionPaymentLink.mutateAsync();
+                  if (result.data) {
+                    window.open(result.data, "_blank");
+                  } else {
+                    logger.error(
+                      "No URL returned from manage subscription mutation",
+                    );
+                  }
+                }}
+                disabled={manageSubscriptionPaymentLink.isPending}
+              >
+                {manageSubscriptionPaymentLink.isPending
+                  ? "Loading..."
+                  : "Manage Subscription"}
+              </Button>
+            )}
+            <InvoiceSheet />
+            <Link
+              href="https://helicone.ai/pricing"
+              className="text-semibold mt-6 text-center text-sm text-gray-500 text-sky-600 hover:text-sky-700"
+            >
+              View pricing page
+            </Link>
+          </Col>
+        </CardContent>
+      </Card>
+
+      <div className="flex flex-col gap-6">
+        <Card className="flex flex-col">
+          <CardHeader className="space-y-1.5">
+            <CardTitle className="text-2xl font-semibold">
+              Upgrade to Team Bundle
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Unlimited seats, prompts, and experiments included. Plus SOC-2 &
+              HIPAA compliance.
             </p>
           </CardHeader>
           <CardFooter className="mt-auto">
