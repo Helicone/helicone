@@ -24,10 +24,7 @@ import {
   RequestParams,
   BodyMappingType,
 } from "@helicone-package/cost/models/types";
-import {
-  getAndStoreInCache,
-  SecureCacheProvider,
-} from "../util/cache/secureCache";
+import { SecureCacheProvider } from "../util/cache/secureCache";
 import { GatewayMetrics } from "./GatewayMetrics";
 import {
   toOpenAIResponse,
