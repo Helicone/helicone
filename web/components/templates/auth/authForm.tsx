@@ -515,7 +515,7 @@ const AuthForm = (props: AuthFormProps) => {
                 </div>
               </div>
 
-              <div className="mt-6 grid grid-cols-3 gap-3">
+              <div className="mt-6 flex flex-wrap justify-center gap-3">
                 {handleGoogleSubmit && (
                   <button
                     onClick={() => handleGoogleSubmit()}
