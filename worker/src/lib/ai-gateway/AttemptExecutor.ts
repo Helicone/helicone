@@ -26,7 +26,7 @@ import { toChatCompletions } from "@helicone-package/llm-mapper/transform/provid
 import { WalletKVSync } from "./WalletKVSync";
 
 // Minimum balance (in cents) to allow optimistic execution without waiting for escrow
-const ALLOWABLE_BALANCE_TO_SKIP_CHECK = 10 * 100; // $10 in cents
+const ALLOWABLE_BALANCE_TO_SKIP_CHECK = 450; // $4.50 in cents
 
 interface ExecutorProps {
   attempt: Attempt;
@@ -41,6 +41,7 @@ interface ExecutorProps {
   metrics: GatewayMetrics;
   orgMeta: {
     allowNegativeBalance: boolean;
+    /** Credit line limit in cents (e.g., 5000 = $50.00). Sourced from organization.credit_limit in Supabase. */
     creditLimit: number;
   };
   traceContext: TraceContext | null;
@@ -63,18 +64,6 @@ export class AttemptExecutor {
   ) {}
 
   async reserveEscrowAndGetId(props: PTBProps): PendingEscrow {
-    const walletSpanId = props.traceContext?.sampled
-      ? this.tracer.startSpan(
-          "ai_gateway.ptb.credit_validation.reserve_escrow",
-          "reserveEscrow",
-          "helicone-wallet",
-          {
-            operation: "reserve_escrow",
-          },
-          props.traceContext
-        )
-      : null;
-
     const escrowResult = await this.reserveEscrow(
       props.attempt,
       props.requestWrapper.heliconeHeaders.requestId,
@@ -83,11 +72,6 @@ export class AttemptExecutor {
     );
 
     if (isErr(escrowResult)) {
-      if (walletSpanId) {
-        this.tracer.setError(walletSpanId, escrowResult.error.message);
-        this.tracer.finishSpan(walletSpanId);
-      }
-
       return err({
         type:
           (escrowResult.error.statusCode || 500) === 429
@@ -96,12 +80,6 @@ export class AttemptExecutor {
         message: escrowResult.error.message,
         statusCode: escrowResult.error.statusCode || 500,
       });
-    }
-
-    // Finish wallet span with success tags
-    if (walletSpanId) {
-      this.tracer.setTag(walletSpanId, "escrow_id", escrowResult.data.escrowId);
-      this.tracer.finishSpan(walletSpanId);
     }
 
     return ok({ reservedEscrowId: escrowResult.data.escrowId });
@@ -115,12 +93,33 @@ export class AttemptExecutor {
       AttemptError
     >
   > {
+    const walletSpanId = props.traceContext?.sampled
+      ? this.tracer.startSpan(
+          "ai_gateway.ptb.credit_validation.reserve_escrow",
+          "reserveEscrow",
+          "helicone-wallet",
+          {
+            operation: "reserve_escrow",
+          },
+          props.traceContext
+        )
+      : null;
     const walletKVSync = new WalletKVSync(this.env.WALLET_KV, props.orgId);
 
     const pendingEscrow = this.reserveEscrowAndGetId(props);
 
-    // Check and allow if KV has balance > ALLOWABLE_BALANCE_TO_SKIP_CHECK
+    // Check KV cache for wallet balance
     const walletState = await walletKVSync.getWalletState();
+
+    // Tag KV cache status
+    if (walletSpanId) {
+      this.tracer.setTag(
+        walletSpanId,
+        "kv_cache_hit",
+        walletState ? "true" : "false"
+      );
+    }
+
     if (walletState) {
       const creditLineAmount = props.orgMeta.allowNegativeBalance
         ? (props.orgMeta.creditLimit ?? 0)
@@ -129,16 +128,43 @@ export class AttemptExecutor {
         creditLineAmount + walletState.remainingBalanceCents;
 
       if (effectiveBalance > ALLOWABLE_BALANCE_TO_SKIP_CHECK) {
+        // OPTIMISTIC PATH - proceed without waiting for escrow
+        if (walletSpanId) {
+          this.tracer.setTag(walletSpanId, "execution_mode", "optimistic");
+          this.tracer.setTag(
+            walletSpanId,
+            "effective_balance_cents",
+            effectiveBalance
+          );
+          this.tracer.finishSpan(walletSpanId);
+        }
         return ok({
           pendingEscrow,
         });
       }
     }
 
-    // Balance too low - must wait for escrow result before proceeding
+    // BLOCKING PATH - balance too low, must wait for escrow result
+    if (walletSpanId) {
+      this.tracer.setTag(walletSpanId, "execution_mode", "blocking");
+    }
+
     const awaitedEscrow = await pendingEscrow;
     if (awaitedEscrow.error) {
+      if (walletSpanId) {
+        this.tracer.setError(walletSpanId, awaitedEscrow.error.message);
+        this.tracer.finishSpan(walletSpanId);
+      }
       return err(awaitedEscrow.error);
+    }
+    // Finish wallet span with success tags
+    if (walletSpanId) {
+      this.tracer.setTag(
+        walletSpanId,
+        "escrow_id",
+        awaitedEscrow.data.reservedEscrowId
+      );
+      this.tracer.finishSpan(walletSpanId);
     }
 
     // Wrap the already-resolved result back in a promise for consistent return type

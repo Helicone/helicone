@@ -39,6 +39,9 @@ export class WalletManager {
     try {
       // Await the pending escrow to get the escrowId
       const escrowResult = await proxyRequest.escrowInfo.escrow;
+      // FOR TEST PLEASE REMOVE THIS
+      getDataDogClient(this.env).trackOptimisticEscrowFailure();
+
       if (escrowResult.error) {
         console.error("Escrow reservation failed", escrowResult.error);
         getDataDogClient(this.env).trackOptimisticEscrowFailure();
