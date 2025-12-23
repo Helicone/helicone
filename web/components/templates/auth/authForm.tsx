@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { BsGoogle, BsGithub } from "react-icons/bs";
-import { SiOkta } from "react-icons/si";
+import { Lock } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -25,7 +25,7 @@ interface AuthFormProps {
   handleEmailSubmit: (email: string, password: string) => void;
   handleGoogleSubmit?: () => void;
   handleGithubSubmit?: () => void;
-  handleOktaSubmit?: (email: string) => void;
+  showSSOButton?: boolean;
   authFormType: "signin" | "signup" | "reset" | "reset-password";
   customerPortalContent?: CustomerPortalContent;
 }
@@ -35,7 +35,7 @@ const AuthForm = (props: AuthFormProps) => {
     handleEmailSubmit,
     handleGoogleSubmit,
     handleGithubSubmit,
-    handleOktaSubmit,
+    showSSOButton,
     authFormType,
     customerPortalContent,
   } = props;
@@ -499,7 +499,7 @@ const AuthForm = (props: AuthFormProps) => {
             </Button>
           </form>
 
-          {(handleGoogleSubmit || handleGithubSubmit || handleOktaSubmit) && (
+          {(handleGoogleSubmit || handleGithubSubmit || showSSOButton) && (
             <div className="mt-8">
               <div className="relative">
                 <div
@@ -534,14 +534,14 @@ const AuthForm = (props: AuthFormProps) => {
                     <span>GitHub</span>
                   </button>
                 )}
-                {handleOktaSubmit && (
-                  <button
-                    onClick={() => handleOktaSubmit(email)}
+                {showSSOButton && (
+                  <Link
+                    href="/sso"
                     className="flex items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
                   >
-                    <SiOkta />
-                    <span>Okta</span>
-                  </button>
+                    <Lock size={14} />
+                    <span>SSO</span>
+                  </Link>
                 )}
               </div>
             </div>
