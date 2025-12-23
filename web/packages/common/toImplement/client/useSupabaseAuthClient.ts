@@ -192,8 +192,24 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
     if (error) {
       return err(error.message);
     }
-    if (data?.url) {
+    if (!data?.url) {
+      return err("SSO redirect URL not provided");
+    }
+    try {
+      // Validate URL format before attempting redirect
+      // This will throw if the URL is invalid
+      // eslint-disable-next-line no-new
+      new URL(data.url);
+    } catch {
+      return err("Invalid SSO redirect URL");
+    }
+    if (typeof window === "undefined" || !window.location) {
+      return err("Window object is not available for SSO redirect");
+    }
+    try {
       window.location.href = data.url;
+    } catch {
+      return err("Failed to redirect to SSO URL");
     }
     return ok(undefined);
   }
