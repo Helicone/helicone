@@ -42,7 +42,6 @@ export class ProviderKeysManager {
     );
   }
 
-
   chooseProviderKey(
     keys: ProviderKey[],
     provider: ModelProviderName,
@@ -50,17 +49,17 @@ export class ProviderKeysManager {
     keyCuid?: string
   ): ProviderKey | null {
     if (keyCuid) {
-      const cuidKey = keys.filter(key => key.cuid === keyCuid);
+      const cuidKey = keys.filter((key) => key.cuid === keyCuid);
       if (cuidKey.length === 0) {
         return null;
       }
       return cuidKey[0];
     }
-    let filteredKeys = keys.filter(key => key.provider === provider);
-    
+    let filteredKeys = keys.filter((key) => key.provider === provider);
+
     // For Azure OpenAI, filter by heliconeModelId
-    filteredKeys = filteredKeys.filter(key => {
-      if (key.config && typeof key.config === 'object' && key.config !== null) {
+    filteredKeys = filteredKeys.filter((key) => {
+      if (key.config && typeof key.config === "object" && key.config !== null) {
         const config = key.config as { heliconeModelId?: string };
         if (config.heliconeModelId) {
           return config.heliconeModelId === providerModelId;
@@ -68,17 +67,15 @@ export class ProviderKeysManager {
       }
       return true;
     });
-    
+
     if (filteredKeys.length === 0) {
       return null;
     }
-    
+
     return filteredKeys[0];
   }
-  
-  async getProviderKeys(
-    orgId: string,
-  ): Promise<ProviderKey[] | null> {
+
+  async getProviderKeys(orgId: string): Promise<ProviderKey[] | null> {
     const keys = await getFromKVCacheOnly(
       `provider_keys_${orgId}`,
       this.env,
@@ -88,8 +85,7 @@ export class ProviderKeysManager {
       return null;
     }
 
-    return (JSON.parse(keys) as ProviderKey[]);
-    
+    return JSON.parse(keys) as ProviderKey[];
   }
 
   async getProviderKeyWithFetch(
@@ -99,7 +95,12 @@ export class ProviderKeysManager {
     keyCuid?: string
   ): Promise<ProviderKey | null> {
     const keys = await this.getProviderKeys(orgId);
-    const validKey = this.chooseProviderKey(keys ?? [], provider, providerModelId, keyCuid);
+    const validKey = this.chooseProviderKey(
+      keys ?? [],
+      provider,
+      providerModelId,
+      keyCuid
+    );
 
     if (!validKey) {
       const keys = await this.store.getProviderKeysWithFetch(

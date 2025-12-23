@@ -9,6 +9,7 @@ import { err, ok, Result } from "../util/results";
 import { isError } from "../../../../packages/common/result";
 import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
 import { WalletKVSync } from "../ai-gateway/WalletKVSync";
+import { DisallowListKVSync } from "../ai-gateway/DisallowListKVSync";
 import { createDataDogTracer } from "../monitoring/DataDogTracer";
 
 export class WalletManager {
@@ -96,6 +97,13 @@ export class WalletManager {
           proxyRequest.requestWrapper.getGatewayAttempt()?.endpoint
             .providerModelId ?? "*"
         );
+
+        // Invalidate KV cache so next request fetches fresh data
+        const disallowKVSync = new DisallowListKVSync(
+          this.env.WALLET_KV,
+          organizationId
+        );
+        await disallowKVSync.invalidate();
       }
 
       const timeSinceLastCheck = Date.now() - clickhouseLastCheckedAt;

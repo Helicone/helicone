@@ -12,6 +12,7 @@ import { AttemptBuilder } from "./AttemptBuilder";
 import { AttemptExecutor } from "./AttemptExecutor";
 import { Plugin } from "@helicone-package/cost/models/types";
 import { Attempt, AttemptError, DisallowListEntry, EscrowInfo } from "./types";
+import { DisallowListKVSync } from "./DisallowListKVSync";
 import { ant2oaiResponse } from "../clients/llmmapper/router/oai2ant/nonStream";
 import { ant2oaiStreamResponse } from "../clients/llmmapper/router/oai2ant/stream";
 import { goog2oaiResponse } from "../clients/llmmapper/router/oai2google/nonStream";
@@ -508,9 +509,23 @@ export class SimpleAIGateway {
 
   private async getDisallowList(orgId: string): Promise<DisallowListEntry[]> {
     try {
+      // Check KV cache first
+      const kvSync = new DisallowListKVSync(this.env.WALLET_KV, orgId);
+      const cachedList = await kvSync.getDisallowList();
+
+      if (cachedList !== null) {
+        return cachedList;
+      }
+
+      // Cache miss - fetch from Durable Object
       const walletId = this.env.WALLET.idFromName(orgId);
       const walletStub = this.env.WALLET.get(walletId);
-      return await walletStub.getDisallowList();
+      const disallowList = await walletStub.getDisallowList();
+
+      // Store in KV for future requests (fire-and-forget)
+      kvSync.storeDisallowList(disallowList);
+
+      return disallowList;
     } catch (error) {
       console.error("Failed to get disallow list:", error);
       return [];
