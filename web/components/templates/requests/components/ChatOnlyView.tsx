@@ -21,6 +21,7 @@ import {
 import { JsonRenderer } from "./chatComponent/single/JsonRenderer";
 import { Streamdown } from "streamdown";
 import type { BundledTheme } from "shiki";
+import { preserveLineBreaksForMarkdown } from "@/lib/textHelpers";
 
 const shikiTheme: [BundledTheme, BundledTheme] = ["vitesse-light", "vitesse-dark"];
 
@@ -269,7 +270,9 @@ function ChatBubble({
               : "text-purple-900 dark:text-purple-100"
           )}
         >
-          <Streamdown shikiTheme={shikiTheme}>{displayContent}</Streamdown>
+          <Streamdown shikiTheme={shikiTheme}>
+            {preserveLineBreaksForMarkdown(displayContent)}
+          </Streamdown>
         </div>
 
         {/* Expand/collapse button for long messages */}

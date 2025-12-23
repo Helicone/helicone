@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import CitationAnnotations from "./CitationAnnotations";
 import { Streamdown } from "streamdown";
 import type { BundledTheme } from "shiki";
+import { preserveLineBreaksForMarkdown } from "@/lib/textHelpers";
 
 const shikiTheme: [BundledTheme, BundledTheme] = ["vitesse-light", "vitesse-dark"];
 
@@ -122,7 +123,9 @@ export default function TextMessage({
       {displayContent ? (
         <>
           <div className="w-full whitespace-pre-wrap break-words text-sm">
-            <Streamdown shikiTheme={shikiTheme}>{displayContent}</Streamdown>
+            <Streamdown shikiTheme={shikiTheme}>
+              {preserveLineBreaksForMarkdown(displayContent)}
+            </Streamdown>
           </div>
           {annotations && annotations.length > 0 && (
             <CitationAnnotations
