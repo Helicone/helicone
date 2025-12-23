@@ -154,6 +154,33 @@ const SignIn = ({
               }
               setNotification("Successfully signed in.", "success");
             }}
+            handleOktaSubmit={async (email: string) => {
+              const domain = email.split("@")[1];
+              if (!domain) {
+                setNotification(
+                  "Please enter your email address first.",
+                  "error",
+                );
+                return;
+              }
+              const { error } = await heliconeAuthClient.signInWithSSO({
+                domain,
+              });
+              if (error) {
+                setNotification(
+                  "Error logging in with SSO. Please try again or contact your administrator or Helicone.",
+                  "error",
+                );
+                logger.error(
+                  {
+                    error,
+                  },
+                  "Okta SSO sign in failed",
+                );
+                return;
+              }
+              setNotification("Redirecting to Okta...", "success");
+            }}
             authFormType={"signin"}
             customerPortalContent={customerPortalContent}
           />

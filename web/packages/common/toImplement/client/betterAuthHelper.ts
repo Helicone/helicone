@@ -192,6 +192,10 @@ export const heliconeAuthClientFromSession = (
       throw new Error("Not implemented");
     },
 
+    async signInWithSSO(params): Promise<Result<void, string>> {
+      throw new Error("Not implemented");
+    },
+
     async resetPassword(params): Promise<Result<void, string>> {
       throw new Error("Not implemented");
     },
