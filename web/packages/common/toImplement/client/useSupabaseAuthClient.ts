@@ -178,10 +178,6 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
     domain: string;
     options?: { redirectTo?: string };
   }): Promise<Result<void, string>> {
-    if (this.queryClient) {
-      this.queryClient.clear();
-    }
-
     if (!this.supabaseClient) {
       return err("Supabase client not found");
     }
@@ -195,23 +191,31 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
     if (!data?.url) {
       return err("SSO redirect URL not provided");
     }
+
+    // Validate URL format
     try {
-      // Validate URL format before attempting redirect
-      // This will throw if the URL is invalid
-      // eslint-disable-next-line no-new
       new URL(data.url);
     } catch {
       return err("Invalid SSO redirect URL");
     }
+
     if (typeof window === "undefined" || !window.location) {
       return err("Window object is not available for SSO redirect");
     }
+
+    // Clear cache right before redirect to SSO provider
+    if (this.queryClient) {
+      this.queryClient.clear();
+    }
+
     try {
       window.location.href = data.url;
-    } catch {
-      return err("Failed to redirect to SSO URL");
+      return ok(undefined);
+    } catch (redirectError) {
+      return err(
+        "Failed to redirect to SSO provider due to an unknown error"
+      );
     }
-    return ok(undefined);
   }
 
   async updateUser({
