@@ -175,7 +175,7 @@ const SignIn = ({
                   {
                     error,
                   },
-                  "Okta SSO sign in failed",
+                  "SSO sign in failed",
                 );
                 return;
               }
