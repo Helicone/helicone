@@ -208,8 +208,14 @@ export class SupabaseAuthClient implements HeliconeAuthClient {
       this.queryClient.clear();
     }
 
-    window.location.href = data.url;
-    return ok(undefined);
+    try {
+      window.location.href = data.url;
+      return ok(undefined);
+    } catch (redirectError) {
+      return err(
+        "Failed to redirect to SSO provider due to an unknown error"
+      );
+    }
   }
 
   async updateUser({

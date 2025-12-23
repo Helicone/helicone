@@ -98,6 +98,7 @@ const SSO = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full"
+                disabled={isLoading}
               />
             </div>
 
