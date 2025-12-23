@@ -8,11 +8,13 @@ import { SlackAlertManager } from "./SlackAlertManager";
 import { err, ok, Result } from "../util/results";
 import { isError } from "../../../../packages/common/result";
 import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
+import { WalletKVSync } from "../ai-gateway/WalletKVSync";
 
 export class WalletManager {
   private env: Env;
   walletStub: DurableObjectStub<Wallet>;
   private ctx: ExecutionContext;
+  private walletKVSync: WalletKVSync;
 
   constructor(
     env: Env,
@@ -22,6 +24,7 @@ export class WalletManager {
     this.env = env;
     this.ctx = ctx;
     this.walletStub = walletStub;
+    this.walletKVSync = new WalletKVSync(env.WALLET_KV);
   }
 
   async finalizeEscrowAndSyncSpend(
@@ -29,17 +32,26 @@ export class WalletManager {
     proxyRequest: HeliconeProxyRequest,
     cost: number | undefined,
     statusCode: number
-  ): Promise<Result<void, string>> {
+  ): Promise<Result<{ remainingBalance: number }, string>> {
     if (!proxyRequest.escrowInfo) {
       return err("No escrow info");
     }
 
     try {
-      const { clickhouseLastCheckedAt } = await this.walletStub.finalizeEscrow(
-        organizationId,
-        proxyRequest.escrowInfo.escrowId,
-        cost ?? 0
-      );
+      const escrowResult = await proxyRequest.escrowInfo.escrow;
+      if (escrowResult.error) {
+        console.error("ERROR GETTING ESCROW", escrowResult.error);
+        // TODO add datadog logging and alerting here
+      }
+
+      const { clickhouseLastCheckedAt, remainingBalance } =
+        await this.walletStub.finalizeEscrow(
+          organizationId,
+          proxyRequest.escrowInfo.escrowId,
+          cost ?? 0
+        );
+
+      await this.walletKVSync.storeWalletState(remainingBalance);
 
       if (
         cost === undefined &&
@@ -67,7 +79,7 @@ export class WalletManager {
           proxyRequest.requestWrapper.getRawProviderAuthHeader() ?? ""
         );
       }
-      return ok(undefined);
+      return ok({ remainingBalance });
     } catch (error) {
       console.error(
         `Error finalizing escrow ${proxyRequest.escrowInfo.escrowId}:`,

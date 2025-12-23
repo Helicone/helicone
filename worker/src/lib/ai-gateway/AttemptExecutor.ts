@@ -21,8 +21,11 @@ import {
 import { RequestWrapper } from "../RequestWrapper";
 import { err, isErr, ok, Result } from "../util/results";
 import { GatewayMetrics } from "./GatewayMetrics";
-import { Attempt, AttemptError, EscrowInfo } from "./types";
+import { Attempt, AttemptError, EscrowInfo, PendingEscrow } from "./types";
 import { toChatCompletions } from "@helicone-package/llm-mapper/transform/providers/responses/request/toChatCompletions";
+import { WalletKVSync } from "./WalletKVSync";
+
+const ALLOWABLE_BALANCE_TO_SKIP_CHECK = 10 * 100; // $!0 in cents
 
 interface ExecutorProps {
   attempt: Attempt;
@@ -42,39 +45,33 @@ interface ExecutorProps {
   traceContext: TraceContext | null;
 }
 
+interface PTBProps {
+  attempt: Attempt;
+  requestWrapper: RequestWrapper;
+  orgId: string;
+  orgMeta: ExecutorProps["orgMeta"];
+  traceContext?: TraceContext | null;
+}
+
 export class AttemptExecutor {
   constructor(
     private readonly env: Env,
     private readonly ctx: ExecutionContext,
     private readonly cacheProvider: CacheProvider,
     private readonly tracer: DataDogTracer
-  ) { }
+  ) {}
 
-  async PTBPreCheck(props: {
-    attempt: Attempt;
-    requestWrapper: RequestWrapper;
-    orgId: string;
-    orgMeta: ExecutorProps["orgMeta"];
-    traceContext?: TraceContext | null;
-  }): Promise<
-    Result<
-      {
-        reservedEscrowId: string;
-      },
-      AttemptError
-    >
-  > {
-    // Start wallet operation span
+  async reserveEscrowAndGetId(props: PTBProps): PendingEscrow {
     const walletSpanId = props.traceContext?.sampled
       ? this.tracer.startSpan(
-        "ai_gateway.ptb.credit_validation.reserve_escrow",
-        "reserveEscrow",
-        "helicone-wallet",
-        {
-          operation: "reserve_escrow",
-        },
-        props.traceContext
-      )
+          "ai_gateway.ptb.credit_validation.reserve_escrow",
+          "reserveEscrow",
+          "helicone-wallet",
+          {
+            operation: "reserve_escrow",
+          },
+          props.traceContext
+        )
       : null;
 
     const escrowResult = await this.reserveEscrow(
@@ -109,6 +106,44 @@ export class AttemptExecutor {
     return ok({ reservedEscrowId: escrowResult.data.escrowId });
   }
 
+  async PTBPreCheck(props: PTBProps): Promise<
+    Result<
+      {
+        pendingEscrow: PendingEscrow;
+      },
+      AttemptError
+    >
+  > {
+    const walletKVSync = new WalletKVSync(this.env.WALLET_KV, props.orgId);
+
+    const pendingEscrow = this.reserveEscrowAndGetId(props);
+
+    // Check and allow if KV has balance > ALLOWABLE_BALANCE_TO_SKIP_CHECK
+    const walletState = await walletKVSync.getWalletState();
+    if (walletState) {
+      const creditLineAmount = props.orgMeta.allowNegativeBalance
+        ? (props.orgMeta.creditLimit ?? 0)
+        : 0;
+      const effectiveBalance =
+        creditLineAmount + walletState.remainingBalanceCents;
+
+      if (effectiveBalance > ALLOWABLE_BALANCE_TO_SKIP_CHECK) {
+        return ok({
+          pendingEscrow,
+        });
+      }
+    }
+
+    const awaitedEscrow = await pendingEscrow;
+    if (awaitedEscrow.error) {
+      return awaitedEscrow;
+    }
+
+    return ok({
+      pendingEscrow: awaitedEscrow.data,
+    });
+  }
+
   async execute(props: ExecutorProps): Promise<Result<Response, AttemptError>> {
     const { endpoint, providerKey } = props.attempt;
 
@@ -119,16 +154,16 @@ export class AttemptExecutor {
     if (props.attempt.authType === "ptb" && endpoint.ptbEnabled) {
       ptbSpanId = props.traceContext?.sampled
         ? this.tracer.startSpan(
-          "ai_gateway.ptb",
-          `${props.requestWrapper.getMethod()} ${props.requestWrapper.getUrl()}`,
-          "ai-gateway-ptb",
-          {
-            provider: endpoint.provider,
-            model: endpoint.providerModelId,
-            http_method: props.requestWrapper.getMethod(),
-          },
-          props.traceContext
-        )
+            "ai_gateway.ptb",
+            `${props.requestWrapper.getMethod()} ${props.requestWrapper.getUrl()}`,
+            "ai-gateway-ptb",
+            {
+              provider: endpoint.provider,
+              model: endpoint.providerModelId,
+              http_method: props.requestWrapper.getMethod(),
+            },
+            props.traceContext
+          )
         : null;
     }
 
@@ -212,7 +247,9 @@ export class AttemptExecutor {
     plugins?: Plugin[],
     traceContext?: TraceContext | null
   ): Promise<Result<Response, AttemptError>> {
-    const bodyMapping = endpoint.userConfig.gatewayMapping || requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping;
+    const bodyMapping =
+      endpoint.userConfig.gatewayMapping ||
+      requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping;
     try {
       const bodyResult = await buildRequestBody(endpoint, {
         parsedBody,
@@ -292,9 +329,10 @@ export class AttemptExecutor {
       // If provider doesn't return Authorization header, remove the original one
       // This handles providers that use URL-based auth (like Google's native API)
       // Check both cases since headers can be lowercase or capitalized
-      const hasAuthHeader = 'Authorization' in authHeaders || 'authorization' in authHeaders;
+      const hasAuthHeader =
+        "Authorization" in authHeaders || "authorization" in authHeaders;
       if (!hasAuthHeader && endpoint.provider === "google-ai-studio") {
-        requestWrapper.getHeaders().delete('Authorization');
+        requestWrapper.getHeaders().delete("Authorization");
       }
 
       metrics.markPreRequestEnd();
@@ -303,16 +341,17 @@ export class AttemptExecutor {
       // Start provider request span
       const providerSpanId = traceContext?.sampled
         ? this.tracer.startSpan(
-          `ai_gateway.${endpoint.ptbEnabled ? "ptb" : "byok"
-          }.provider.llm_request`,
-          `${endpoint.provider} ${endpoint.providerModelId}`,
-          "llm-provider",
-          {
-            provider: endpoint.provider,
-            model: endpoint.providerModelId,
-          },
-          traceContext
-        )
+            `ai_gateway.${
+              endpoint.ptbEnabled ? "ptb" : "byok"
+            }.provider.llm_request`,
+            `${endpoint.provider} ${endpoint.providerModelId}`,
+            "llm-provider",
+            {
+              provider: endpoint.provider,
+              model: endpoint.providerModelId,
+            },
+            traceContext
+          )
         : null;
 
       const providerStartTime = Date.now();

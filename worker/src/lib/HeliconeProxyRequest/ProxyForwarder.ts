@@ -611,7 +611,6 @@ async function log(
       const walletStub = env.WALLET.get(walletId);
       const walletManager = new WalletManager(env, ctx, walletStub);
 
-      
       if (!cachedResponse) {
         const checkTopOffPromise =
           walletManager.walletStub.checkAndScheduleAutoTopoffAlarm(
