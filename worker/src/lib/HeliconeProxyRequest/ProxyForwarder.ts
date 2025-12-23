@@ -611,7 +611,6 @@ async function log(
       const walletStub = env.WALLET.get(walletId);
       const walletManager = new WalletManager(env, ctx, walletStub);
 
-      
       if (!cachedResponse) {
         const checkTopOffPromise =
           walletManager.walletStub.checkAndScheduleAutoTopoffAlarm(
@@ -641,7 +640,10 @@ async function log(
         await checkTopOffPromise;
       } else {
         if (proxyRequest.escrowInfo) {
-          await walletStub.cancelEscrow(proxyRequest.escrowInfo.escrowId);
+          const escrowResult = await proxyRequest.escrowInfo.escrow;
+          if (escrowResult.data) {
+            await walletStub.cancelEscrow(escrowResult.data.reservedEscrowId);
+          }
         }
       }
 

@@ -8,6 +8,8 @@ import { SlackAlertManager } from "./SlackAlertManager";
 import { err, ok, Result } from "../util/results";
 import { isError } from "../../../../packages/common/result";
 import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
+import { WalletKVSync } from "../ai-gateway/WalletKVSync";
+import { createDataDogTracer } from "../monitoring/DataDogTracer";
 
 export class WalletManager {
   private env: Env;
@@ -29,17 +31,53 @@ export class WalletManager {
     proxyRequest: HeliconeProxyRequest,
     cost: number | undefined,
     statusCode: number
-  ): Promise<Result<void, string>> {
+  ): Promise<Result<{ remainingBalance: number }, string>> {
     if (!proxyRequest.escrowInfo) {
       return err("No escrow info");
     }
 
     try {
-      const { clickhouseLastCheckedAt } = await this.walletStub.finalizeEscrow(
-        organizationId,
-        proxyRequest.escrowInfo.escrowId,
-        cost ?? 0
-      );
+      // Await the pending escrow to get the escrowId
+      const escrowResult = await proxyRequest.escrowInfo.escrow;
+
+      if (escrowResult.error) {
+        console.error("Escrow reservation failed", escrowResult.error);
+
+        // Send a dedicated trace for optimistic escrow failure with full metadata
+        // This happens when we proceeded with LLM request based on cached balance
+        // but the actual escrow reservation failed (e.g., insufficient funds)
+        // TODO: Refactor to pass tracer/traceContext through so this can be a span on the main trace
+        const tracer = createDataDogTracer(this.env);
+        tracer.startTrace(
+          "ptb.optimistic_escrow_failure",
+          "escrow_failure",
+          {
+            org_id: organizationId,
+            provider: proxyRequest.escrowInfo.endpoint.provider,
+            model: proxyRequest.escrowInfo.endpoint.providerModelId,
+            error_type: escrowResult.error.type,
+            error_message: escrowResult.error.message,
+            status_code: String(escrowResult.error.statusCode),
+          },
+          true // forceSample - always trace escrow failures
+        );
+        tracer.finishTrace();
+        this.ctx.waitUntil(tracer.sendTrace());
+
+        return err(escrowResult.error.message);
+      }
+      const escrowId = escrowResult.data.reservedEscrowId;
+
+      const { clickhouseLastCheckedAt, remainingBalance } =
+        await this.walletStub.finalizeEscrow(
+          organizationId,
+          escrowId,
+          cost ?? 0
+        );
+
+      // Store remaining balance to KV for future optimistic checks
+      const walletKVSync = new WalletKVSync(this.env.WALLET_KV, organizationId);
+      await walletKVSync.storeWalletState(remainingBalance);
 
       if (
         cost === undefined &&
@@ -67,15 +105,10 @@ export class WalletManager {
           proxyRequest.requestWrapper.getRawProviderAuthHeader() ?? ""
         );
       }
-      return ok(undefined);
+      return ok({ remainingBalance });
     } catch (error) {
-      console.error(
-        `Error finalizing escrow ${proxyRequest.escrowInfo.escrowId}:`,
-        error
-      );
-      return err(
-        `Error finalizing escrow ${proxyRequest.escrowInfo.escrowId}: ${error}`
-      );
+      console.error("Error finalizing escrow:", error);
+      return err(`Error finalizing escrow: ${error}`);
     }
   }
 
