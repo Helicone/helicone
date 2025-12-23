@@ -102,6 +102,27 @@ const SignUp = () => {
             return;
           }
         }}
+        handleOktaSubmit={async (email: string) => {
+          const domain = email.split("@")[1];
+          if (!domain) {
+            setNotification("Please enter your email address first.", "error");
+            return;
+          }
+          const { error } = await heliconeAuthClient.signInWithSSO({
+            domain,
+            options: {
+              redirectTo: `${origin}/onboarding`,
+            },
+          });
+          if (error) {
+            setNotification(
+              "Error signing up with SSO. Please try again or contact your administrator or Helicone.",
+              "error",
+            );
+            logger.error({ error }, "SSO sign up failed");
+            return;
+          }
+        }}
         authFormType={"signup"}
       />
       <ThemedModal

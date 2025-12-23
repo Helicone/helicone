@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { BsGoogle, BsGithub } from "react-icons/bs";
+import { SiOkta } from "react-icons/si";
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -24,6 +25,7 @@ interface AuthFormProps {
   handleEmailSubmit: (email: string, password: string) => void;
   handleGoogleSubmit?: () => void;
   handleGithubSubmit?: () => void;
+  handleOktaSubmit?: (email: string) => void;
   authFormType: "signin" | "signup" | "reset" | "reset-password";
   customerPortalContent?: CustomerPortalContent;
 }
@@ -33,6 +35,7 @@ const AuthForm = (props: AuthFormProps) => {
     handleEmailSubmit,
     handleGoogleSubmit,
     handleGithubSubmit,
+    handleOktaSubmit,
     authFormType,
     customerPortalContent,
   } = props;
@@ -496,7 +499,7 @@ const AuthForm = (props: AuthFormProps) => {
             </Button>
           </form>
 
-          {(handleGoogleSubmit || handleGithubSubmit) && (
+          {(handleGoogleSubmit || handleGithubSubmit || handleOktaSubmit) && (
             <div className="mt-8">
               <div className="relative">
                 <div
@@ -512,7 +515,7 @@ const AuthForm = (props: AuthFormProps) => {
                 </div>
               </div>
 
-              <div className="mt-6 grid grid-cols-2 gap-3">
+              <div className="mt-6 flex flex-wrap justify-center gap-3">
                 {handleGoogleSubmit && (
                   <button
                     onClick={() => handleGoogleSubmit()}
@@ -529,6 +532,15 @@ const AuthForm = (props: AuthFormProps) => {
                   >
                     <BsGithub />
                     <span>GitHub</span>
+                  </button>
+                )}
+                {handleOktaSubmit && (
+                  <button
+                    onClick={() => handleOktaSubmit(email)}
+                    className="flex items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+                  >
+                    <SiOkta />
+                    <span>Okta</span>
                   </button>
                 )}
               </div>
