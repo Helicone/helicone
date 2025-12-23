@@ -8,6 +8,7 @@ import {
 } from "@helicone-package/llm-mapper/types";
 import { Streamdown } from "streamdown";
 import type { BundledTheme } from "shiki";
+import { preserveLineBreaksForMarkdown } from "@/lib/textHelpers";
 
 const shikiTheme: [BundledTheme, BundledTheme] = ["vitesse-light", "vitesse-dark"];
 
@@ -65,7 +66,9 @@ export default function AssistantToolCalls({
       ) : (
         content && (
           <div className="w-full whitespace-pre-wrap break-words p-2 text-xs">
-            <Streamdown shikiTheme={shikiTheme}>{content}</Streamdown>
+            <Streamdown shikiTheme={shikiTheme}>
+              {preserveLineBreaksForMarkdown(content)}
+            </Streamdown>
           </div>
         )
       )}
