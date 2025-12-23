@@ -20,6 +20,8 @@ const ALLOWED_METRICS = new Set([
   "worker.ai-gateway.latency.prompt_request_ms",
   // Gateway error metrics
   "worker.ai-gateway.provider.rate_limit_429",
+  // PTB optimistic execution metrics
+  "worker.ptb.escrow_failure_optimistic",
 ]);
 
 export interface DataDogConfig {
@@ -116,6 +118,15 @@ export class DataDogClient {
    */
   trackProviderRateLimit(): void {
     this.sendMetric("worker.ai-gateway.provider.rate_limit_429", 1);
+  }
+
+  /**
+   * Track escrow reservation failure after optimistic execution
+   * This happens when we proceeded with the LLM request based on cached balance
+   * but the actual escrow reservation failed (e.g., insufficient funds)
+   */
+  trackOptimisticEscrowFailure(): void {
+    this.sendMetric("worker.ptb.escrow_failure_optimistic", 1);
   }
 
   /**

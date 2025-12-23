@@ -9,6 +9,7 @@ import { err, ok, Result } from "../util/results";
 import { isError } from "../../../../packages/common/result";
 import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
 import { WalletKVSync } from "../ai-gateway/WalletKVSync";
+import { getDataDogClient } from "../monitoring/DataDogClient";
 
 export class WalletManager {
   private env: Env;
@@ -40,6 +41,7 @@ export class WalletManager {
       const escrowResult = await proxyRequest.escrowInfo.escrow;
       if (escrowResult.error) {
         console.error("Escrow reservation failed", escrowResult.error);
+        getDataDogClient(this.env).trackOptimisticEscrowFailure();
         return err(escrowResult.error.message);
       }
       const escrowId = escrowResult.data.reservedEscrowId;
