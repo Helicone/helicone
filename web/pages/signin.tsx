@@ -179,7 +179,6 @@ const SignIn = ({
                 );
                 return;
               }
-              setNotification("Redirecting to Okta...", "success");
             }}
             authFormType={"signin"}
             customerPortalContent={customerPortalContent}
