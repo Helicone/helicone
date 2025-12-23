@@ -99,7 +99,8 @@
       "Bash(yarn install)",
       "Bash(npx vitest:*)",
       "WebFetch(domain:streamdown.ai)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "Bash(yarn cf-typegen:*)"
     ],
     "deny": []
   },
