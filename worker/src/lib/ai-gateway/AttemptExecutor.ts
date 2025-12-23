@@ -25,7 +25,8 @@ import { Attempt, AttemptError, EscrowInfo, PendingEscrow } from "./types";
 import { toChatCompletions } from "@helicone-package/llm-mapper/transform/providers/responses/request/toChatCompletions";
 import { WalletKVSync } from "./WalletKVSync";
 
-const ALLOWABLE_BALANCE_TO_SKIP_CHECK = 10 * 100; // $!0 in cents
+// Minimum balance (in cents) to allow optimistic execution without waiting for escrow
+const ALLOWABLE_BALANCE_TO_SKIP_CHECK = 10 * 100; // $10 in cents
 
 interface ExecutorProps {
   attempt: Attempt;
@@ -134,13 +135,15 @@ export class AttemptExecutor {
       }
     }
 
+    // Balance too low - must wait for escrow result before proceeding
     const awaitedEscrow = await pendingEscrow;
     if (awaitedEscrow.error) {
-      return awaitedEscrow;
+      return err(awaitedEscrow.error);
     }
 
+    // Wrap the already-resolved result back in a promise for consistent return type
     return ok({
-      pendingEscrow: awaitedEscrow.data,
+      pendingEscrow: Promise.resolve(awaitedEscrow),
     });
   }
 
@@ -185,7 +188,7 @@ export class AttemptExecutor {
       }
 
       escrowInfo = {
-        escrowId: ptbCheck.data.reservedEscrowId,
+        escrow: ptbCheck.data.pendingEscrow,
         endpoint: endpoint,
       };
     }
@@ -207,7 +210,17 @@ export class AttemptExecutor {
     // If error, cancel escrow and return the error
     if (isErr(result)) {
       if (escrowInfo) {
-        this.ctx.waitUntil(this.cancelEscrow(escrowInfo.escrowId, props.orgId));
+        // Need to await the pending escrow to get escrowId for cancellation
+        this.ctx.waitUntil(
+          escrowInfo.escrow.then((escrowResult) => {
+            if (escrowResult.data) {
+              return this.cancelEscrow(
+                escrowResult.data.reservedEscrowId,
+                props.orgId
+              );
+            }
+          })
+        );
       }
 
       // Finish PTB span with error

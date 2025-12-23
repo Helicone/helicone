@@ -14,7 +14,6 @@ export class WalletManager {
   private env: Env;
   walletStub: DurableObjectStub<Wallet>;
   private ctx: ExecutionContext;
-  private walletKVSync: WalletKVSync;
 
   constructor(
     env: Env,
@@ -24,7 +23,6 @@ export class WalletManager {
     this.env = env;
     this.ctx = ctx;
     this.walletStub = walletStub;
-    this.walletKVSync = new WalletKVSync(env.WALLET_KV);
   }
 
   async finalizeEscrowAndSyncSpend(
@@ -38,20 +36,24 @@ export class WalletManager {
     }
 
     try {
+      // Await the pending escrow to get the escrowId
       const escrowResult = await proxyRequest.escrowInfo.escrow;
       if (escrowResult.error) {
-        console.error("ERROR GETTING ESCROW", escrowResult.error);
-        // TODO add datadog logging and alerting here
+        console.error("Escrow reservation failed", escrowResult.error);
+        return err(escrowResult.error.message);
       }
+      const escrowId = escrowResult.data.reservedEscrowId;
 
       const { clickhouseLastCheckedAt, remainingBalance } =
         await this.walletStub.finalizeEscrow(
           organizationId,
-          proxyRequest.escrowInfo.escrowId,
+          escrowId,
           cost ?? 0
         );
 
-      await this.walletKVSync.storeWalletState(remainingBalance);
+      // Store remaining balance to KV for future optimistic checks
+      const walletKVSync = new WalletKVSync(this.env.WALLET_KV, organizationId);
+      await walletKVSync.storeWalletState(remainingBalance);
 
       if (
         cost === undefined &&
@@ -81,13 +83,8 @@ export class WalletManager {
       }
       return ok({ remainingBalance });
     } catch (error) {
-      console.error(
-        `Error finalizing escrow ${proxyRequest.escrowInfo.escrowId}:`,
-        error
-      );
-      return err(
-        `Error finalizing escrow ${proxyRequest.escrowInfo.escrowId}: ${error}`
-      );
+      console.error("Error finalizing escrow:", error);
+      return err(`Error finalizing escrow: ${error}`);
     }
   }
 
