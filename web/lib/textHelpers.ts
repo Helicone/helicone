@@ -25,7 +25,7 @@ export function preserveLineBreaksForMarkdown(text: string): string {
       }
       // For non-code parts, convert single newlines to double newlines
       // but don't affect existing double newlines
-      return part.replace(/(?<!\n)\n(?!\n)/g, "\n\n");
+      return part.replace(/\n(?!\n)/g, "\n\n");
     })
     .join("");
 }
