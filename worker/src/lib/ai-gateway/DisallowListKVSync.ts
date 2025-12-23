@@ -25,7 +25,7 @@ export class DisallowListKVSync {
   async storeDisallowList(list: DisallowListEntry[]): Promise<void> {
     try {
       await this.kv.put(this.key, JSON.stringify(list), {
-        expirationTtl: 60 * 60 * 12, // 12 hours
+        expirationTtl: 60 * 60, // 1 hour
       });
     } catch (error) {
       console.error(`Failed to store disallow list for ${this.orgId}:`, error);
