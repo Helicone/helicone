@@ -165,9 +165,8 @@ export class RequestController extends Controller {
     const reqManager = new RequestManager(request.authParams);
     let returnRequest: Result<HeliconeRequest, string>;
     if (includeBody) {
-      returnRequest = await reqManager.uncachedGetRequestByIdWithBody(
-        requestId
-      );
+      returnRequest =
+        await reqManager.uncachedGetRequestByIdWithBody(requestId);
     } else {
       returnRequest = await reqManager.getRequestById(requestId);
     }
