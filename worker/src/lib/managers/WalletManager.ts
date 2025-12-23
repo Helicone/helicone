@@ -9,7 +9,7 @@ import { err, ok, Result } from "../util/results";
 import { isError } from "../../../../packages/common/result";
 import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
 import { WalletKVSync } from "../ai-gateway/WalletKVSync";
-import { getDataDogClient } from "../monitoring/DataDogClient";
+import { createDataDogTracer } from "../monitoring/DataDogTracer";
 
 export class WalletManager {
   private env: Env;
@@ -39,12 +39,31 @@ export class WalletManager {
     try {
       // Await the pending escrow to get the escrowId
       const escrowResult = await proxyRequest.escrowInfo.escrow;
-      // FOR TEST PLEASE REMOVE THIS
-      getDataDogClient(this.env).trackOptimisticEscrowFailure();
 
       if (escrowResult.error) {
         console.error("Escrow reservation failed", escrowResult.error);
-        getDataDogClient(this.env).trackOptimisticEscrowFailure();
+
+        // Send a dedicated trace for optimistic escrow failure with full metadata
+        // This happens when we proceeded with LLM request based on cached balance
+        // but the actual escrow reservation failed (e.g., insufficient funds)
+        // TODO: Refactor to pass tracer/traceContext through so this can be a span on the main trace
+        const tracer = createDataDogTracer(this.env);
+        tracer.startTrace(
+          "ptb.optimistic_escrow_failure",
+          "escrow_failure",
+          {
+            org_id: organizationId,
+            provider: proxyRequest.escrowInfo.endpoint.provider,
+            model: proxyRequest.escrowInfo.endpoint.providerModelId,
+            error_type: escrowResult.error.type,
+            error_message: escrowResult.error.message,
+            status_code: String(escrowResult.error.statusCode),
+          },
+          true // forceSample - always trace escrow failures
+        );
+        tracer.finishTrace();
+        this.ctx.waitUntil(tracer.sendTrace());
+
         return err(escrowResult.error.message);
       }
       const escrowId = escrowResult.data.reservedEscrowId;
