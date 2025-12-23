@@ -119,7 +119,7 @@ const SignUp = () => {
               "Error signing up with SSO. Please try again or contact your administrator or Helicone.",
               "error",
             );
-            logger.error({ error }, "Okta SSO sign up failed");
+            logger.error({ error }, "SSO sign up failed");
             return;
           }
         }}
