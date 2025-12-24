@@ -522,8 +522,8 @@ export class SimpleAIGateway {
       const walletStub = this.env.WALLET.get(walletId);
       const disallowList = await walletStub.getDisallowList();
 
-      // Store in KV for future requests (fire-and-forget)
-      kvSync.storeDisallowList(disallowList);
+      // Store in KV for future requests
+      await kvSync.storeDisallowList(disallowList);
 
       return disallowList;
     } catch (error) {
