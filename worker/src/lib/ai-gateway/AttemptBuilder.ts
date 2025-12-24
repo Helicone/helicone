@@ -99,6 +99,7 @@ export class AttemptBuilder {
     const providerDataResult = registry.getModelProviderEntriesByModel(
       modelSpec.modelName
     );
+
     // Filter out providers that require explicit routing (e.g., helicone)
     // and globally ignored providers
     const providerData = (providerDataResult.data || []).filter(
@@ -182,6 +183,7 @@ export class AttemptBuilder {
       ),
       this.buildPtbAttempts(modelSpec, providerData, bodyMapping, plugins),
     ]);
+
     return [...byokAttempts, ...ptbAttempts];
   }
 
