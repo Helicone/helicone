@@ -2,6 +2,7 @@ import { ModelProviderName } from "@helicone-package/cost/models/providers";
 import { ProviderKey, ProviderKeysStore } from "../db/ProviderKeysStore";
 import {
   getFromKVCacheOnly,
+  InMemoryCache,
   removeFromCache,
   storeInCache,
 } from "../util/cache/secureCache";
@@ -76,16 +77,30 @@ export class ProviderKeysManager {
   }
 
   async getProviderKeys(orgId: string): Promise<ProviderKey[] | null> {
-    const keys = await getFromKVCacheOnly(
+    const keys = InMemoryCache.getInstance<ProviderKey[]>().get(
+      `provider_keys_${orgId}`
+    );
+    if (keys) {
+      return keys;
+    }
+
+    const kvKeys = await getFromKVCacheOnly(
       `provider_keys_${orgId}`,
       this.env,
       43200 // 12 hours
     );
-    if (!keys) {
+    if (kvKeys) {
+      InMemoryCache.getInstance<ProviderKey[]>().set(
+        `provider_keys_${orgId}`,
+        JSON.parse(kvKeys)
+      );
+    }
+
+    if (!kvKeys) {
       return null;
     }
 
-    return JSON.parse(keys) as ProviderKey[];
+    return JSON.parse(kvKeys) as ProviderKey[];
   }
 
   /**
@@ -112,6 +127,7 @@ export class ProviderKeysManager {
       providerModelId,
       keyCuid
     );
+    // console.log("keys", validKey);
 
     if (validKey) {
       // Cache hit - trigger background refresh and return immediately
@@ -129,6 +145,8 @@ export class ProviderKeysManager {
       }
       return validKey;
     }
+
+    // console.log("no valid key", provider, providerModelId, orgId, keyCuid);
 
     // Cache miss - must wait for fetch
     return this.fetchAndCacheProviderKey(
@@ -187,7 +205,12 @@ export class ProviderKeysManager {
         false // Don't use memory cache to avoid test contamination
       );
 
-      return this.chooseProviderKey(fetchedKeys, provider, providerModelId, keyCuid);
+      return this.chooseProviderKey(
+        fetchedKeys,
+        provider,
+        providerModelId,
+        keyCuid
+      );
     } catch (e) {
       console.error(`Failed to fetch/cache provider key for ${orgId}:`, e);
       return null;
