@@ -1,6 +1,34 @@
-import { ModelProviderName } from "@helicone-package/cost/models/providers";
+import {
+  ModelProviderName,
+  providers,
+} from "@helicone-package/cost/models/providers";
 import { ProviderKey, ProviderKeysStore } from "../db/ProviderKeysStore";
 import { getFromKVCacheOnly, storeInCache } from "../util/cache/secureCache";
+
+/**
+ * Pads the provider keys with nulls for all providers that are not in the providerKeys array
+ * This is to ensure that the provider keys are always available for all providers
+ * This is necessary because the provider keys are not always available for all providers
+ * and we need to ensure that the provider keys are always available for all providers
+ * @param providerKeys
+ * @param orgId
+ * @returns
+ */
+function nullProviderKey(
+  orgId: string,
+  providerName: ModelProviderName
+): ProviderKey {
+  return {
+    provider: providerName,
+    org_id: orgId,
+    decrypted_provider_key: "",
+    auth_type: "key",
+    byok_enabled: false,
+    config: null,
+    decrypted_provider_secret_key: null,
+    cuid: null,
+  };
+}
 
 export class ProviderKeysManager {
   providerKeysFromCache: Map<string, Promise<ProviderKey[] | null>> = new Map();
@@ -137,7 +165,25 @@ export class ProviderKeysManager {
         keyCuid
       );
 
-      if (!keys) return null;
+      if (!keys) {
+        const existingKeys = await getFromKVCacheOnly(
+          `provider_keys_${orgId}`,
+          this.env,
+          43200 // 12 hours
+        );
+        if (existingKeys) {
+          const existingKeysData = JSON.parse(existingKeys) as ProviderKey[];
+          existingKeysData.push(nullProviderKey(orgId, provider));
+
+          await storeInCache(
+            `provider_keys_${orgId}`,
+            JSON.stringify(existingKeysData),
+            this.env,
+            43200 // 12 hours
+          );
+        }
+        return null;
+      }
 
       const existingKeys = await getFromKVCacheOnly(
         `provider_keys_${orgId}`,
@@ -147,6 +193,7 @@ export class ProviderKeysManager {
       if (existingKeys) {
         const existingKeysData = JSON.parse(existingKeys) as ProviderKey[];
         existingKeysData.push(...keys);
+
         await storeInCache(
           `provider_keys_${orgId}`,
           JSON.stringify(existingKeysData),
