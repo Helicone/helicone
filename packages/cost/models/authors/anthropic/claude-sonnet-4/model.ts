@@ -11,6 +11,7 @@ export const models = {
     created: "2025-05-14T00:00:00.000Z",
     modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "Claude",
+    stripeModelId: "claude-sonnet-4",
   },
 } satisfies Record<string, ModelConfig>;
 
