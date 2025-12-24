@@ -3,10 +3,13 @@ import { env, runInDurableObject } from "cloudflare:test";
 import "../setup";
 import { runGatewayTest } from "./test-framework";
 import { setSupabaseTestCase } from "../setup";
+import { clearProviderKeysInMemoryCache } from "../../src/lib/util/cache/inMemoryCache";
 
 describe("PTB request validation", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Clear in-memory cache to prevent stale data from previous tests
+    clearProviderKeysInMemoryCache();
   });
 
   afterEach(() => {

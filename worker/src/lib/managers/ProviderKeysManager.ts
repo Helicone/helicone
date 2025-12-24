@@ -1,16 +1,26 @@
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
 import { ProviderKey, ProviderKeysStore } from "../db/ProviderKeysStore";
-import {
-  getFromKVCacheOnly,
-  removeFromCache,
-  storeInCache,
-} from "../util/cache/secureCache";
+import { getFromKVCacheOnly, storeInCache } from "../util/cache/secureCache";
 
 export class ProviderKeysManager {
+  providerKeysFromCache: Map<string, Promise<ProviderKey[] | null>> = new Map();
   constructor(
     private store: ProviderKeysStore,
-    private env: Env
-  ) {}
+    private env: Env,
+    orgId?: string
+  ) {
+    if (orgId) {
+      this.providerKeysFromCache.set(
+        orgId,
+        this.getProviderKeysFromCache(`provider_keys_${orgId}`)
+      );
+    }
+
+    this.providerKeysFromCache.set(
+      env.HELICONE_ORG_ID,
+      this.getProviderKeysFromCache(`provider_keys_${env.HELICONE_ORG_ID}`)
+    );
+  }
 
   async setProviderKeys() {
     const providerKeys = await this.store.getProviderKeys();
@@ -75,37 +85,44 @@ export class ProviderKeysManager {
     return filteredKeys[0];
   }
 
-  async getProviderKeys(orgId: string): Promise<ProviderKey[] | null> {
-    const keys = await getFromKVCacheOnly(
-      `provider_keys_${orgId}`,
-      this.env,
-      43200 // 12 hours
-    );
-    if (!keys) {
+  private async getProviderKeysFromCache(
+    kvCacheKey: string
+  ): Promise<ProviderKey[] | null> {
+    const kvKeys = await getFromKVCacheOnly(kvCacheKey, this.env, 43200);
+    if (!kvKeys) {
       return null;
     }
-
-    return JSON.parse(keys) as ProviderKey[];
+    return JSON.parse(kvKeys) as ProviderKey[];
   }
 
-  /**
-   * Get provider key with read-through cache pattern.
-   * Returns cached data immediately, always refreshes in background.
-   */
+  async getProviderKeys(orgId: string): Promise<ProviderKey[] | null> {
+    if (this.providerKeysFromCache.has(orgId)) {
+      const promiseVal = this.providerKeysFromCache.get(orgId);
+
+      if (promiseVal !== undefined) {
+        return await promiseVal;
+      }
+    }
+
+    const result = await this.getProviderKeysFromCache(
+      `provider_keys_${orgId}`
+    );
+    if (result) {
+      this.providerKeysFromCache.set(orgId, Promise.resolve(result));
+      return result;
+    }
+
+    return null;
+  }
+
   async getProviderKeyWithFetch(
     provider: ModelProviderName,
     providerModelId: string,
     orgId: string,
-    keyCuid?: string,
-    ctx?: ExecutionContext
+    keyCuid?: string
   ): Promise<ProviderKey | null> {
-    const cacheKey = `provider_keys_${orgId}`;
-    const ttl = 43200; // 12 hours
-
-    // Get cached keys
     const keys = await this.getProviderKeys(orgId);
 
-    // Try to find key from cache
     const validKey = this.chooseProviderKey(
       keys ?? [],
       provider,
@@ -113,84 +130,39 @@ export class ProviderKeysManager {
       keyCuid
     );
 
-    if (validKey) {
-      // Cache hit - trigger background refresh and return immediately
-      if (ctx) {
-        ctx.waitUntil(
-          this.fetchAndCacheProviderKey(
-            provider,
-            providerModelId,
-            orgId,
-            keyCuid,
-            cacheKey,
-            ttl
-          )
-        );
-      }
-      return validKey;
-    }
-
-    // Cache miss - must wait for fetch
-    return this.fetchAndCacheProviderKey(
-      provider,
-      providerModelId,
-      orgId,
-      keyCuid,
-      cacheKey,
-      ttl
-    );
-  }
-
-  /**
-   * Fetch provider key from Supabase and update cache.
-   * Used both for cache miss (awaited) and background refresh (fire-and-forget).
-   */
-  private async fetchAndCacheProviderKey(
-    provider: ModelProviderName,
-    providerModelId: string,
-    orgId: string,
-    keyCuid: string | undefined,
-    cacheKey: string,
-    ttl: number
-  ): Promise<ProviderKey | null> {
-    try {
-      const fetchedKeys = await this.store.getProviderKeysWithFetch(
+    if (!validKey) {
+      const keys = await this.store.getProviderKeysWithFetch(
         provider,
         orgId,
         keyCuid
       );
 
-      if (!fetchedKeys || fetchedKeys.length === 0) return null;
+      if (!keys) return null;
 
-      // Merge with existing cache
-      const existingCached = await this.getProviderKeys(orgId);
-      const existingKeys = existingCached ?? [];
-
-      // Dedupe by cuid (or provider if no cuid)
-      const keyMap = new Map<string, ProviderKey>();
-      for (const key of existingKeys) {
-        const id = key.cuid ?? `${key.provider}`;
-        keyMap.set(id, key);
-      }
-      for (const key of fetchedKeys) {
-        const id = key.cuid ?? `${key.provider}`;
-        keyMap.set(id, key);
-      }
-
-      const mergedKeys = Array.from(keyMap.values());
-
-      await storeInCache(
-        cacheKey,
-        JSON.stringify(mergedKeys),
+      const existingKeys = await getFromKVCacheOnly(
+        `provider_keys_${orgId}`,
         this.env,
-        ttl,
-        false // Don't use memory cache to avoid test contamination
+        43200 // 12 hours
       );
-
-      return this.chooseProviderKey(fetchedKeys, provider, providerModelId, keyCuid);
-    } catch (e) {
-      console.error(`Failed to fetch/cache provider key for ${orgId}:`, e);
-      return null;
+      if (existingKeys) {
+        const existingKeysData = JSON.parse(existingKeys) as ProviderKey[];
+        existingKeysData.push(...keys);
+        await storeInCache(
+          `provider_keys_${orgId}`,
+          JSON.stringify(existingKeysData),
+          this.env,
+          43200 // 12 hours
+        );
+      } else {
+        await storeInCache(
+          `provider_keys_${orgId}`,
+          JSON.stringify(keys),
+          this.env,
+          43200 // 12 hours
+        );
+      }
+      return this.chooseProviderKey(keys, provider, providerModelId, keyCuid);
     }
+    return validKey;
   }
 }

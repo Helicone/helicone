@@ -24,19 +24,16 @@ export class AttemptBuilder {
   private readonly pluginHandler: PluginHandler;
   private readonly tracer: DataDogTracer;
   private readonly traceContext: TraceContext | null;
-  private readonly ctx: ExecutionContext;
 
   constructor(
     private readonly providerKeysManager: ProviderKeysManager,
     private readonly env: Env,
     tracer: DataDogTracer,
-    traceContext: TraceContext | null,
-    ctx: ExecutionContext
+    traceContext: TraceContext | null
   ) {
     this.pluginHandler = new PluginHandler();
     this.tracer = tracer;
     this.traceContext = traceContext;
-    this.ctx = ctx;
   }
 
   async buildAttempts(
@@ -126,7 +123,7 @@ export class AttemptBuilder {
 
     const attemptArrays = await Promise.all(
       providerData.map(async (data) => {
-        const byokAttempts = await this.buildByokAttempts(
+        const byokAttempts = this.buildByokAttempts(
           modelSpec,
           data,
           orgId,
@@ -135,13 +132,13 @@ export class AttemptBuilder {
         );
 
         // Always build PTB attempts (feature flag removed)
-        const ptbAttempts = await this.buildPtbAttempts(
+        const ptbAttempts = this.buildPtbAttempts(
           modelSpec,
           data,
           bodyMapping,
           plugins
         );
-        return [...byokAttempts, ...ptbAttempts];
+        return [...(await byokAttempts), ...(await ptbAttempts)];
       })
     );
 
@@ -213,8 +210,7 @@ export class AttemptBuilder {
       providerData.provider,
       modelSpec.modelName,
       orgId,
-      modelSpec.customUid,
-      this.ctx
+      modelSpec.customUid
     );
 
     this.tracer.finishSpan(keySpan);
@@ -270,8 +266,7 @@ export class AttemptBuilder {
       modelSpec.provider as ModelProviderName,
       modelSpec.modelName,
       orgId,
-      modelSpec.customUid,
-      this.ctx
+      modelSpec.customUid
     );
 
     if (!userKey || !this.isByokEnabled(userKey)) {
@@ -342,9 +337,7 @@ export class AttemptBuilder {
     const heliconeKey = await this.providerKeysManager.getProviderKeyWithFetch(
       providerData.provider,
       providerData.config.providerModelId,
-      this.env.HELICONE_ORG_ID,
-      undefined,
-      this.ctx
+      this.env.HELICONE_ORG_ID
     );
 
     this.tracer.finishSpan(ptbKeySpan);
