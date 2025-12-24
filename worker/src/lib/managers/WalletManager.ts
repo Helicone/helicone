@@ -1,16 +1,10 @@
-import {
-  ALERT_ID,
-  ALERT_THRESHOLD,
-  SYNC_STALENESS_THRESHOLD,
-  Wallet,
-} from "../durable-objects/Wallet";
-import { SlackAlertManager } from "./SlackAlertManager";
-import { err, ok, Result } from "../util/results";
-import { isError } from "../../../../packages/common/result";
-import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
-import { WalletKVSync } from "../ai-gateway/WalletKVSync";
+import retry from "async-retry";
 import { DisallowListKVSync } from "../ai-gateway/DisallowListKVSync";
+import { WalletKVSync } from "../ai-gateway/WalletKVSync";
+import { SYNC_STALENESS_THRESHOLD, Wallet } from "../durable-objects/Wallet";
+import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
 import { createDataDogTracer } from "../monitoring/DataDogTracer";
+import { err, ok, Result } from "../util/results";
 
 export class WalletManager {
   private env: Env;
@@ -69,16 +63,58 @@ export class WalletManager {
       }
       const escrowId = escrowResult.data.reservedEscrowId;
 
-      const { clickhouseLastCheckedAt, remainingBalance } =
-        await this.walletStub.finalizeEscrow(
-          organizationId,
-          escrowId,
-          cost ?? 0
+      const { clickhouseLastCheckedAt, remainingBalance, staleEscrowsCleared } =
+        await retry(
+          async (bail) => {
+            try {
+              return await this.walletStub.finalizeEscrow(
+                organizationId,
+                escrowId,
+                cost ?? 0
+              );
+            } catch (e) {
+              // Don't retry validation errors
+              if (
+                e instanceof Error &&
+                e.message.includes("cannot be negative")
+              ) {
+                bail(e);
+                return undefined as never;
+              }
+              throw e;
+            }
+          },
+          {
+            retries: 3,
+            minTimeout: 100,
+            maxTimeout: 1000,
+            onRetry: (error, attempt) => {
+              console.warn(
+                `Retry attempt ${attempt} for finalizeEscrow. Error: ${error}`
+              );
+            },
+          }
         );
 
       // Store remaining balance to KV for future optimistic checks
       const walletKVSync = new WalletKVSync(this.env.WALLET_KV, organizationId);
       await walletKVSync.storeWalletState(remainingBalance);
+
+      // Log stale escrow cleanup to DataDog
+      if (staleEscrowsCleared !== undefined && staleEscrowsCleared > 0) {
+        const tracer = createDataDogTracer(this.env);
+        tracer.startTrace(
+          "ptb.stale_escrows_cleared",
+          "escrow_cleanup",
+          {
+            org_id: organizationId,
+            escrows_cleared: String(staleEscrowsCleared),
+          },
+          true // forceSample - always log cleanup events
+        );
+        tracer.finishTrace();
+        this.ctx.waitUntil(tracer.sendTrace());
+      }
 
       if (
         cost === undefined &&

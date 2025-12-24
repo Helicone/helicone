@@ -170,7 +170,7 @@ export class AttemptBuilder {
     }
 
     const providerData = providerDataResult.data;
-      
+
     // Build BYOK and PTB attempts in parallel since they're independent
     const [byokAttempts, ptbAttempts] = await Promise.all([
       this.buildByokAttempts(

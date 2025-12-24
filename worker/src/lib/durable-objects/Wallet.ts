@@ -535,7 +535,11 @@ export class Wallet extends DurableObject<Env> {
     orgId: string,
     escrowId: string,
     actualCost: number
-  ): { clickhouseLastCheckedAt: number; remainingBalance: number } {
+  ): {
+    clickhouseLastCheckedAt: number;
+    remainingBalance: number;
+    staleEscrowsCleared?: number;
+  } {
     const actualCostScaled = actualCost * SCALE_FACTOR;
     if (actualCostScaled < 0) {
       throw new Error("actualCost cannot be negative");
@@ -595,15 +599,31 @@ export class Wallet extends DurableObject<Env> {
         (totalCreditsPurchased - totalDebits - totalEscrow) / SCALE_FACTOR;
 
       // Probabilistic cleanup: 1% chance to clean stale escrows
+      let staleEscrowsCleared: number | undefined;
       if (Math.random() < 0.01) {
         const oneHourAgo = Date.now() - 60 * 60 * 1000;
-        this.ctx.storage.sql.exec(
-          "DELETE FROM escrows WHERE created_at < ?",
-          oneHourAgo
-        );
+        // Count before delete
+        const countBefore = this.ctx.storage.sql
+          .exec<{ count: number }>(
+            "SELECT COUNT(*) as count FROM escrows WHERE created_at < ?",
+            oneHourAgo
+          )
+          .one().count;
+
+        if (countBefore > 0) {
+          this.ctx.storage.sql.exec(
+            "DELETE FROM escrows WHERE created_at < ?",
+            oneHourAgo
+          );
+          staleEscrowsCleared = countBefore;
+        }
       }
 
-      return { clickhouseLastCheckedAt: result.checked_at, remainingBalance };
+      return {
+        clickhouseLastCheckedAt: result.checked_at,
+        remainingBalance,
+        staleEscrowsCleared,
+      };
     });
   }
 
