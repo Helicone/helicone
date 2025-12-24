@@ -284,7 +284,7 @@ export async function getFromKVCacheOnly(
     key,
     env,
     useMemoryCache: false,
-    expirationTtl: 60, // 1 minute
+    expirationTtl: expirationTtl ?? 60, // Use passed TTL or default to 1 minute
   });
 }
 
