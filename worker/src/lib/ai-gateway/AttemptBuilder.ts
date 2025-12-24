@@ -121,9 +121,11 @@ export class AttemptBuilder {
         )
       : null;
 
+    const startTime = performance.now();
+
     const attemptArrays = await Promise.all(
       providerData.map(async (data) => {
-        const byokAttempts = await this.buildByokAttempts(
+        const byokAttempts = this.buildByokAttempts(
           modelSpec,
           data,
           orgId,
@@ -132,15 +134,18 @@ export class AttemptBuilder {
         );
 
         // Always build PTB attempts (feature flag removed)
-        const ptbAttempts = await this.buildPtbAttempts(
+        const ptbAttempts = this.buildPtbAttempts(
           modelSpec,
           data,
           bodyMapping,
           plugins
         );
-        return [...byokAttempts, ...ptbAttempts];
+        return [...(await byokAttempts), ...(await ptbAttempts)];
       })
     );
+
+    const latency = performance.now() - startTime;
+    console.log("buildAttemptsForAllProviders latency", latency);
 
     this.tracer.finishSpan(parallelSpan);
 
@@ -206,12 +211,17 @@ export class AttemptBuilder {
         )
       : null;
 
+    const startTime = performance.now();
+
     const userKey = await this.providerKeysManager.getProviderKeyWithFetch(
       providerData.provider,
       modelSpec.modelName,
       orgId,
       modelSpec.customUid
     );
+
+    const latency = performance.now() - startTime;
+    console.log("getProviderKeyWithFetch latency", latency);
 
     this.tracer.finishSpan(keySpan);
 
