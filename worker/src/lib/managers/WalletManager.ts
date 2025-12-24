@@ -1,16 +1,10 @@
-import {
-  ALERT_ID,
-  ALERT_THRESHOLD,
-  SYNC_STALENESS_THRESHOLD,
-  Wallet,
-} from "../durable-objects/Wallet";
-import { SlackAlertManager } from "./SlackAlertManager";
-import { err, ok, Result } from "../util/results";
-import { isError } from "../../../../packages/common/result";
-import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
-import { WalletKVSync } from "../ai-gateway/WalletKVSync";
+import retry from "async-retry";
 import { DisallowListKVSync } from "../ai-gateway/DisallowListKVSync";
+import { WalletKVSync } from "../ai-gateway/WalletKVSync";
+import { SYNC_STALENESS_THRESHOLD, Wallet } from "../durable-objects/Wallet";
+import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
 import { createDataDogTracer } from "../monitoring/DataDogTracer";
+import { err, ok, Result } from "../util/results";
 
 export class WalletManager {
   private env: Env;
@@ -70,10 +64,36 @@ export class WalletManager {
       const escrowId = escrowResult.data.reservedEscrowId;
 
       const { clickhouseLastCheckedAt, remainingBalance, staleEscrowsCleared } =
-        await this.walletStub.finalizeEscrow(
-          organizationId,
-          escrowId,
-          cost ?? 0
+        await retry(
+          async (bail) => {
+            try {
+              return await this.walletStub.finalizeEscrow(
+                organizationId,
+                escrowId,
+                cost ?? 0
+              );
+            } catch (e) {
+              // Don't retry validation errors
+              if (
+                e instanceof Error &&
+                e.message.includes("cannot be negative")
+              ) {
+                bail(e);
+                return undefined as never;
+              }
+              throw e;
+            }
+          },
+          {
+            retries: 3,
+            minTimeout: 100,
+            maxTimeout: 1000,
+            onRetry: (error, attempt) => {
+              console.warn(
+                `Retry attempt ${attempt} for finalizeEscrow. Error: ${error}`
+              );
+            },
+          }
         );
 
       // Store remaining balance to KV for future optimistic checks
