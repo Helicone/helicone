@@ -224,14 +224,20 @@ export class WalletManager {
     cost: number | undefined,
     escrowError: { type: string; message: string; statusCode: number }
   ): void {
+    const escrowInfo = proxyRequest.escrowInfo;
+    if (!escrowInfo) {
+      console.error("Cannot trace escrow failure: escrowInfo is missing");
+      return;
+    }
+
     const tracer = createDataDogTracer(this.env);
     tracer.startTrace(
       "ptb.optimistic_escrow_failure",
       "escrow_failure",
       {
         org_id: organizationId,
-        provider: proxyRequest.escrowInfo!.endpoint.provider,
-        model: proxyRequest.escrowInfo!.endpoint.providerModelId,
+        provider: escrowInfo.endpoint.provider,
+        model: escrowInfo.endpoint.providerModelId,
         error_type: escrowError.type,
         error_message: escrowError.message,
         status_code: String(escrowError.statusCode),
