@@ -11,6 +11,7 @@ import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
 import { WalletKVSync } from "../ai-gateway/WalletKVSync";
 import { DisallowListKVSync } from "../ai-gateway/DisallowListKVSync";
 import { createDataDogTracer } from "../monitoring/DataDogTracer";
+import retry from "async-retry";
 
 export class WalletManager {
   private env: Env;
@@ -70,10 +71,36 @@ export class WalletManager {
       const escrowId = escrowResult.data.reservedEscrowId;
 
       const { clickhouseLastCheckedAt, remainingBalance, staleEscrowsCleared } =
-        await this.walletStub.finalizeEscrow(
-          organizationId,
-          escrowId,
-          cost ?? 0
+        await retry(
+          async (bail) => {
+            try {
+              return await this.walletStub.finalizeEscrow(
+                organizationId,
+                escrowId,
+                cost ?? 0
+              );
+            } catch (e) {
+              // Don't retry validation errors
+              if (
+                e instanceof Error &&
+                e.message.includes("cannot be negative")
+              ) {
+                bail(e);
+                return undefined as never;
+              }
+              throw e;
+            }
+          },
+          {
+            retries: 3,
+            minTimeout: 100,
+            maxTimeout: 1000,
+            onRetry: (error, attempt) => {
+              console.warn(
+                `Retry attempt ${attempt} for finalizeEscrow. Error: ${error}`
+              );
+            },
+          }
         );
 
       // Store remaining balance to KV for future optimistic checks
