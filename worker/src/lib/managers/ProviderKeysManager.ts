@@ -2,6 +2,7 @@ import { ModelProviderName } from "@helicone-package/cost/models/providers";
 import { ProviderKey, ProviderKeysStore } from "../db/ProviderKeysStore";
 import {
   getFromKVCacheOnly,
+  InMemoryCache,
   removeFromCache,
   storeInCache,
 } from "../util/cache/secureCache";
@@ -76,16 +77,27 @@ export class ProviderKeysManager {
   }
 
   async getProviderKeys(orgId: string): Promise<ProviderKey[] | null> {
-    const keys = await getFromKVCacheOnly(
-      `provider_keys_${orgId}`,
-      this.env,
-      43200 // 12 hours
-    );
-    if (!keys) {
+    const kvCacheKey = `provider_keys_${orgId}`;
+    const memoryCacheKey = `provider_keys_in_memory_${orgId}`;
+
+    // Check in-memory cache first (fastest)
+    const cachedKeys =
+      InMemoryCache.getInstance<ProviderKey[]>().get(memoryCacheKey);
+    if (cachedKeys) {
+      return cachedKeys;
+    }
+
+    // Fall back to KV cache
+    const kvKeys = await getFromKVCacheOnly(kvCacheKey, this.env, 43200);
+    if (!kvKeys) {
       return null;
     }
 
-    return JSON.parse(keys) as ProviderKey[];
+    // Parse once and store in memory cache for subsequent requests
+    const parsedKeys = JSON.parse(kvKeys) as ProviderKey[];
+    InMemoryCache.getInstance<ProviderKey[]>().set(memoryCacheKey, parsedKeys);
+
+    return parsedKeys;
   }
 
   /**
@@ -99,7 +111,6 @@ export class ProviderKeysManager {
     keyCuid?: string,
     ctx?: ExecutionContext
   ): Promise<ProviderKey | null> {
-    const cacheKey = `provider_keys_${orgId}`;
     const ttl = 43200; // 12 hours
 
     // Get cached keys
@@ -122,7 +133,6 @@ export class ProviderKeysManager {
             providerModelId,
             orgId,
             keyCuid,
-            cacheKey,
             ttl
           )
         );
@@ -136,7 +146,6 @@ export class ProviderKeysManager {
       providerModelId,
       orgId,
       keyCuid,
-      cacheKey,
       ttl
     );
   }
@@ -150,7 +159,6 @@ export class ProviderKeysManager {
     providerModelId: string,
     orgId: string,
     keyCuid: string | undefined,
-    cacheKey: string,
     ttl: number
   ): Promise<ProviderKey | null> {
     try {
@@ -179,15 +187,26 @@ export class ProviderKeysManager {
 
       const mergedKeys = Array.from(keyMap.values());
 
+      const kvCacheKey = `provider_keys_${orgId}`;
+      const memoryCacheKey = `provider_keys_in_memory_${orgId}`;
+
       await storeInCache(
-        cacheKey,
+        kvCacheKey,
         JSON.stringify(mergedKeys),
         this.env,
         ttl,
-        false // Don't use memory cache to avoid test contamination
+        false // Don't use secureCache's memory cache (uses hashed keys)
       );
 
-      return this.chooseProviderKey(fetchedKeys, provider, providerModelId, keyCuid);
+      // Update our in-memory cache with the merged keys
+      InMemoryCache.getInstance<ProviderKey[]>().set(memoryCacheKey, mergedKeys);
+
+      return this.chooseProviderKey(
+        fetchedKeys,
+        provider,
+        providerModelId,
+        keyCuid
+      );
     } catch (e) {
       console.error(`Failed to fetch/cache provider key for ${orgId}:`, e);
       return null;

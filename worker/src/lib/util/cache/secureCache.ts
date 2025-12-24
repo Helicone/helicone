@@ -17,7 +17,7 @@ export interface SecureCacheEnv {
   REQUEST_CACHE_KEY_2: Env["REQUEST_CACHE_KEY_2"];
 }
 
-class InMemoryCache<T> {
+export class InMemoryCache<T> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private static instance: InMemoryCache<any>;
   private cache: Map<string, T>;
