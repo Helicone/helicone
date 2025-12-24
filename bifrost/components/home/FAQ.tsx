@@ -21,22 +21,14 @@ const FAQ = () => {
               Will Helicone add latency to my LLM calls?
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground text-base sm:text-lg font-normal">
-              Minimal impact. Our{" "}
-              <a
-                href="https://github.com/Helicone/ai-gateway/tree/main/benchmarks"
-                target="_blank"
-                rel="noopener"
-                className="text-brand"
-              >
-                self-hosted AI Gateway
-              </a>{" "}
-              benchmarks at <span className="font-bold">less than 1ms</span> per
-              request with no network overhead.
+              Minimal impact. You get a similar experience to making direct
+              calls to OpenAI, Anthropic, and Google, but with massive gains
+              from caching, load balancing, and failover - far outweighing the{" "}
+              <strong>minimal latency overhead</strong> (up to 20ms).
               <br />
               <br />
-              For our cloud gateway, computational overhead is still under 1ms,
-              plus one network hop. We&apos;re deployed globally on the edge to
-              minimize latency - see our{" "}
+              We&apos;re deployed globally on the edge to minimize latency - see
+              our{" "}
               <a
                 href="https://docs.helicone.ai/references/latency-affect"
                 target="_blank"
@@ -46,33 +38,27 @@ const FAQ = () => {
                 cloud benchmarks
               </a>{" "}
               for real-world performance.
-              <br />
-              <br />
-              This overhead is negligible compared to actual LLM response times
-              (500ms to several seconds). You get massive gains from caching,
-              load balancing, and failover that far outweigh the minimal latency
-              cost.
             </AccordionContent>
           </AccordionItem>
           <hr className="my-2 border-t border-slate-200" />
           <AccordionItem value="item-3" className="border-b-0">
             <AccordionTrigger className="text-foreground text-base sm:text-lg font-medium text-left">
-              How is Helicone different from other monitoring solutions?
+              How is Helicone different from other AI gateways?
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground text-base sm:text-lg font-normal">
-              Unlike general observability tools that treat LLMs as black boxes,
-              Helicone is purpose-built for AI applications with specialized
-              features like prompt version tracking, token-level cost analysis,
-              and LLM-specific debugging tools, plus a full routing layer
-              enabling caching, rate limiting, load balancing, and more.
+              We&apos;re the only AI gateway{" "}
+              <strong>purposefully built for agentic workflows.</strong>
               <br />
               <br />
-              We provide end-to-end visibility from user sessions to individual
-              token decisions. Most importantly, Helicone scales with you from
-              prototype to production without requiring changes to your
-              monitoring approach as you grow or new models are released —
-              something traditional APM tools can&apos;t offer for LLM
-              workflows.
+              Agents still behave in unpredicable ways, so our AI gateway was
+              designed with observability built-in by default.
+              <br />
+              <br />
+              Our routing layer enables caching, rate limiting, load balancing,
+              and more, while our observability platform provides end-to-end
+              visibility with specialized features like prompt management,
+              version tracking, token-level cost analysis, and LLM-specific
+              debugging tools, and more.
             </AccordionContent>
           </AccordionItem>
           <hr className="my-2 border-t border-slate-200" />
@@ -82,22 +68,21 @@ const FAQ = () => {
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground text-base sm:text-lg font-normal">
               There&apos;s no SDK required, so most developers integrate
-              Helicone in under 2 minutes with merely two line changes -
-              starting the AI Gateway with a single command and updating the
-              base URL in your LLM request.
+              Helicone in under 2 minutes.
               <br />
               <br />
-              Our{" "}
+              As long as you&apos;re using the OpenAI SDK, you will only need to
+              update the <code>baseUrl</code> and the <code>model</code> name in
+              your code. You can find more detailed examples in our{" "}
               <a
                 href="https://docs.helicone.ai/getting-started/quick-start"
                 target="_blank"
                 rel="noopener"
                 className="text-brand"
               >
-                documentation
+                documentation,
               </a>{" "}
-              includes examples for all major providers and frameworks including
-              OpenAI, Anthropic, LangChain, LlamaIndex, and more.
+              including integrations with all major frameworks and providers.
               <br />
               <br />
               Developers typically see their first dashboard data within 5
