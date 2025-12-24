@@ -111,7 +111,6 @@ export class ProviderKeysManager {
     keyCuid?: string,
     ctx?: ExecutionContext
   ): Promise<ProviderKey | null> {
-    const cacheKey = `provider_keys_${orgId}`;
     const ttl = 43200; // 12 hours
 
     // Get cached keys
@@ -134,7 +133,6 @@ export class ProviderKeysManager {
             providerModelId,
             orgId,
             keyCuid,
-            cacheKey,
             ttl
           )
         );
@@ -148,7 +146,6 @@ export class ProviderKeysManager {
       providerModelId,
       orgId,
       keyCuid,
-      cacheKey,
       ttl
     );
   }
@@ -162,7 +159,6 @@ export class ProviderKeysManager {
     providerModelId: string,
     orgId: string,
     keyCuid: string | undefined,
-    cacheKey: string,
     ttl: number
   ): Promise<ProviderKey | null> {
     try {
@@ -191,8 +187,11 @@ export class ProviderKeysManager {
 
       const mergedKeys = Array.from(keyMap.values());
 
+      const kvCacheKey = `provider_keys_${orgId}`;
+      const memoryCacheKey = `provider_keys_in_memory_${orgId}`;
+
       await storeInCache(
-        cacheKey,
+        kvCacheKey,
         JSON.stringify(mergedKeys),
         this.env,
         ttl,
@@ -200,7 +199,7 @@ export class ProviderKeysManager {
       );
 
       // Update our in-memory cache with the merged keys
-      InMemoryCache.getInstance<ProviderKey[]>().set(cacheKey, mergedKeys);
+      InMemoryCache.getInstance<ProviderKey[]>().set(memoryCacheKey, mergedKeys);
 
       return this.chooseProviderKey(
         fetchedKeys,
