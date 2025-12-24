@@ -119,10 +119,23 @@ async function storeInCacheWithHmac({
   expirationTtl?: number;
   useMemoryCache?: boolean;
 }): Promise<void> {
+  const start = performance.now();
+
+  const encryptStart = performance.now();
   const encrypted = await encrypt(value, env, hmac_key);
+  console.log(
+    `[PERF] storeInCacheWithHmac - encrypt took ${(performance.now() - encryptStart).toFixed(2)}ms`
+  );
+
+  const hashStart = performance.now();
   const hashedKey = await hashWithHmac(key, hmac_key);
+  console.log(
+    `[PERF] storeInCacheWithHmac - hashWithHmac took ${(performance.now() - hashStart).toFixed(2)}ms`
+  );
+
   const ttlToUse = expirationTtl ?? 600;
   try {
+    const putStart = performance.now();
     await safePut({
       key: env.SECURE_CACHE,
       keyName: hashedKey,
@@ -131,6 +144,9 @@ async function storeInCacheWithHmac({
         expirationTtl: ttlToUse,
       },
     });
+    console.log(
+      `[PERF] storeInCacheWithHmac - safePut took ${(performance.now() - putStart).toFixed(2)}ms`
+    );
   } catch (e) {
     console.error("Error storing in cache", e);
   }
@@ -140,6 +156,9 @@ async function storeInCacheWithHmac({
       JSON.stringify(encrypted)
     );
   }
+  console.log(
+    `[PERF] storeInCacheWithHmac TOTAL for hmac_key=${hmac_key} took ${(performance.now() - start).toFixed(2)}ms`
+  );
 }
 
 export async function storeInCache(
@@ -182,23 +201,48 @@ async function getFromCacheWithHmac({
   useMemoryCache?: boolean;
   expirationTtl?: number;
 }): Promise<string | null> {
+  const start = performance.now();
   try {
+    const hashStart = performance.now();
     const hashedKey = await hashWithHmac(key, hmac_key);
+    console.log(
+      `[PERF] getFromCacheWithHmac - hashWithHmac took ${(performance.now() - hashStart).toFixed(2)}ms`
+    );
+
     if (useMemoryCache) {
       const encryptedMemory =
         InMemoryCache.getInstance<string>().get(hashedKey);
       if (encryptedMemory !== undefined) {
-        return decrypt(JSON.parse(encryptedMemory), env, hmac_key);
+        const decryptStart = performance.now();
+        const result = await decrypt(JSON.parse(encryptedMemory), env, hmac_key);
+        console.log(
+          `[PERF] getFromCacheWithHmac - HIT in-memory, decrypt took ${(performance.now() - decryptStart).toFixed(2)}ms, TOTAL ${(performance.now() - start).toFixed(2)}ms`
+        );
+        return result;
       }
     }
+
+    const kvGetStart = performance.now();
     const encryptedRemote = await env.SECURE_CACHE.get(hashedKey, {
       cacheTtl: expirationTtl ?? 60 * 60, // 1 hour
     });
+    console.log(
+      `[PERF] getFromCacheWithHmac - SECURE_CACHE.get took ${(performance.now() - kvGetStart).toFixed(2)}ms - found: ${!!encryptedRemote}`
+    );
+
     if (!encryptedRemote) {
+      console.log(
+        `[PERF] getFromCacheWithHmac - MISS, TOTAL ${(performance.now() - start).toFixed(2)}ms`
+      );
       return null;
     }
 
-    return decrypt(JSON.parse(encryptedRemote), env, hmac_key);
+    const decryptStart = performance.now();
+    const result = await decrypt(JSON.parse(encryptedRemote), env, hmac_key);
+    console.log(
+      `[PERF] getFromCacheWithHmac - decrypt took ${(performance.now() - decryptStart).toFixed(2)}ms, TOTAL ${(performance.now() - start).toFixed(2)}ms`
+    );
+    return result;
   } catch (e) {
     console.error("Error getting from cache", e);
     return null;

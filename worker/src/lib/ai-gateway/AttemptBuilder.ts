@@ -43,10 +43,19 @@ export class AttemptBuilder {
     plugins?: Plugin[],
     globalIgnoreProviders?: Set<ModelProviderName>
   ): Promise<Attempt[]> {
+    const buildAttemptsStart = performance.now();
+    console.log(
+      `[PERF] buildAttempts START - modelStrings: ${JSON.stringify(modelStrings)}, orgId: ${orgId}`
+    );
+
     const allAttempts: Attempt[] = [];
 
     for (const modelString of modelStrings) {
+      const parseStart = performance.now();
       const modelSpec = parseModelString(modelString);
+      console.log(
+        `[PERF] parseModelString took ${(performance.now() - parseStart).toFixed(2)}ms for "${modelString}"`
+      );
 
       // Skip invalid model specs
       // TODO: Return error
@@ -57,16 +66,21 @@ export class AttemptBuilder {
 
       if (modelSpec.data.provider) {
         // Explicit provider specified - sort within this model's attempts to prioritize BYOK over PTB
+        const providerAttemptsStart = performance.now();
         const providerAttempts = await this.getProviderAttempts(
           modelSpec.data,
           orgId,
           bodyMapping,
           plugins
         );
+        console.log(
+          `[PERF] getProviderAttempts took ${(performance.now() - providerAttemptsStart).toFixed(2)}ms for provider "${modelSpec.data.provider}"`
+        );
         // Sort this model's attempts (BYOK first), but preserve order relative to other models
         allAttempts.push(...sortAttemptsByPriority(providerAttempts));
       } else {
         // No provider specified - get all providers and sort by priority
+        const allProvidersStart = performance.now();
         const attempts = await this.buildAttemptsForAllProviders(
           modelSpec.data,
           orgId,
@@ -74,17 +88,27 @@ export class AttemptBuilder {
           plugins,
           globalIgnoreProviders
         );
+        console.log(
+          `[PERF] buildAttemptsForAllProviders took ${(performance.now() - allProvidersStart).toFixed(2)}ms`
+        );
         allAttempts.push(...sortAttemptsByPriority(attempts));
       }
     }
 
     // Filter explicit provider routing attempts (not filtered in buildAttemptsForAllProviders)
     if (globalIgnoreProviders && globalIgnoreProviders.size > 0) {
-      return allAttempts.filter(
+      const filtered = allAttempts.filter(
         (attempt) => !globalIgnoreProviders.has(attempt.endpoint.provider)
       );
+      console.log(
+        `[PERF] buildAttempts TOTAL took ${(performance.now() - buildAttemptsStart).toFixed(2)}ms - returned ${filtered.length} attempts`
+      );
+      return filtered;
     }
 
+    console.log(
+      `[PERF] buildAttempts TOTAL took ${(performance.now() - buildAttemptsStart).toFixed(2)}ms - returned ${allAttempts.length} attempts`
+    );
     return allAttempts;
   }
 
@@ -95,16 +119,26 @@ export class AttemptBuilder {
     plugins?: Plugin[],
     globalIgnoreProviders?: Set<ModelProviderName>
   ): Promise<Attempt[]> {
+    const allProvidersStart = performance.now();
+
     // Get all provider data in one query
+    const registryStart = performance.now();
     const providerDataResult = registry.getModelProviderEntriesByModel(
       modelSpec.modelName
     );
+    console.log(
+      `[PERF] registry.getModelProviderEntriesByModel took ${(performance.now() - registryStart).toFixed(2)}ms for "${modelSpec.modelName}"`
+    );
+
     // Filter out providers that require explicit routing (e.g., helicone)
     // and globally ignored providers
     const providerData = (providerDataResult.data || []).filter(
       (data) =>
         !data.config.requireExplicitRouting &&
         (!globalIgnoreProviders || !globalIgnoreProviders.has(data.provider))
+    );
+    console.log(
+      `[PERF] Found ${providerData.length} providers for "${modelSpec.modelName}": ${providerData.map((p) => p.provider).join(", ")}`
     );
 
     // Process all providers in parallel (we know model exists because parseModelString validated it)
@@ -121,8 +155,12 @@ export class AttemptBuilder {
         )
       : null;
 
+    const promiseAllStart = performance.now();
     const attemptArrays = await Promise.all(
       providerData.map(async (data) => {
+        const providerStart = performance.now();
+
+        const byokStart = performance.now();
         const byokAttempts = this.buildByokAttempts(
           modelSpec,
           data,
@@ -130,20 +168,39 @@ export class AttemptBuilder {
           bodyMapping,
           plugins
         );
+        const byokResult = await byokAttempts;
+        console.log(
+          `[PERF] buildByokAttempts for ${data.provider} took ${(performance.now() - byokStart).toFixed(2)}ms - returned ${byokResult.length} attempts`
+        );
 
         // Always build PTB attempts (feature flag removed)
+        const ptbStart = performance.now();
         const ptbAttempts = this.buildPtbAttempts(
           modelSpec,
           data,
           bodyMapping,
           plugins
         );
-        return [...(await byokAttempts), ...(await ptbAttempts)];
+        const ptbResult = await ptbAttempts;
+        console.log(
+          `[PERF] buildPtbAttempts for ${data.provider} took ${(performance.now() - ptbStart).toFixed(2)}ms - returned ${ptbResult.length} attempts`
+        );
+
+        console.log(
+          `[PERF] Provider ${data.provider} total took ${(performance.now() - providerStart).toFixed(2)}ms`
+        );
+        return [...byokResult, ...ptbResult];
       })
+    );
+    console.log(
+      `[PERF] Promise.all for all providers took ${(performance.now() - promiseAllStart).toFixed(2)}ms`
     );
 
     this.tracer.finishSpan(parallelSpan);
 
+    console.log(
+      `[PERF] buildAttemptsForAllProviders TOTAL took ${(performance.now() - allProvidersStart).toFixed(2)}ms`
+    );
     return attemptArrays.flat();
   }
 
@@ -153,35 +210,78 @@ export class AttemptBuilder {
     bodyMapping: BodyMappingType = "OPENAI",
     plugins?: Plugin[]
   ): Promise<Attempt[]> {
+    const getProviderStart = performance.now();
+
     // Get provider data once
+    const registryStart = performance.now();
     const providerDataResult = registry.getModelProviderEntry(
       modelSpec.modelName,
       modelSpec.provider as ModelProviderName
     );
+    console.log(
+      `[PERF] registry.getModelProviderEntry took ${(performance.now() - registryStart).toFixed(2)}ms for "${modelSpec.modelName}/${modelSpec.provider}"`
+    );
 
     if (!providerDataResult.data) {
       // No registry data - try passthrough for unknown models
-      return this.buildPassthroughAttempt(
+      console.log(
+        `[PERF] No registry data, trying passthrough for "${modelSpec.modelName}/${modelSpec.provider}"`
+      );
+      const passthroughStart = performance.now();
+      const result = await this.buildPassthroughAttempt(
         modelSpec,
         orgId,
         bodyMapping,
         plugins
       );
+      console.log(
+        `[PERF] buildPassthroughAttempt took ${(performance.now() - passthroughStart).toFixed(2)}ms`
+      );
+      return result;
     }
 
     const providerData = providerDataResult.data;
 
     // Build BYOK and PTB attempts in parallel since they're independent
+    const parallelStart = performance.now();
+    console.log(
+      `[PERF] Starting parallel BYOK/PTB build for ${modelSpec.provider}`
+    );
+
+    const byokStart = performance.now();
+    const byokPromise = this.buildByokAttempts(
+      modelSpec,
+      providerData,
+      orgId,
+      bodyMapping,
+      plugins
+    );
+
+    const ptbStart = performance.now();
+    const ptbPromise = this.buildPtbAttempts(
+      modelSpec,
+      providerData,
+      bodyMapping,
+      plugins
+    );
+
     const [byokAttempts, ptbAttempts] = await Promise.all([
-      this.buildByokAttempts(
-        modelSpec,
-        providerData,
-        orgId,
-        bodyMapping,
-        plugins
-      ),
-      this.buildPtbAttempts(modelSpec, providerData, bodyMapping, plugins),
+      byokPromise,
+      ptbPromise,
     ]);
+    console.log(
+      `[PERF] BYOK for ${modelSpec.provider} took ${(performance.now() - byokStart).toFixed(2)}ms - returned ${byokAttempts.length} attempts`
+    );
+    console.log(
+      `[PERF] PTB for ${modelSpec.provider} took ${(performance.now() - ptbStart).toFixed(2)}ms - returned ${ptbAttempts.length} attempts`
+    );
+    console.log(
+      `[PERF] Parallel BYOK/PTB total took ${(performance.now() - parallelStart).toFixed(2)}ms`
+    );
+
+    console.log(
+      `[PERF] getProviderAttempts TOTAL took ${(performance.now() - getProviderStart).toFixed(2)}ms`
+    );
     return [...byokAttempts, ...ptbAttempts];
   }
 
@@ -192,6 +292,8 @@ export class AttemptBuilder {
     bodyMapping: BodyMappingType = "OPENAI",
     plugins?: Plugin[]
   ): Promise<Attempt[]> {
+    const buildByokStart = performance.now();
+
     // Get user's provider key
     const keySpan = this.traceContext?.sampled
       ? this.tracer.startSpan(
@@ -206,16 +308,23 @@ export class AttemptBuilder {
         )
       : null;
 
+    const keyFetchStart = performance.now();
     const userKey = await this.providerKeysManager.getProviderKeyWithFetch(
       providerData.provider,
       modelSpec.modelName,
       orgId,
       modelSpec.customUid
     );
+    console.log(
+      `[PERF] BYOK getProviderKeyWithFetch for ${providerData.provider}/${orgId} took ${(performance.now() - keyFetchStart).toFixed(2)}ms - found: ${!!userKey}`
+    );
 
     this.tracer.finishSpan(keySpan);
 
     if (!userKey || !this.isByokEnabled(userKey)) {
+      console.log(
+        `[PERF] BYOK buildByokAttempts for ${providerData.provider} returning early (no key) - total ${(performance.now() - buildByokStart).toFixed(2)}ms`
+      );
       return []; // No BYOK available
     }
 
@@ -226,12 +335,19 @@ export class AttemptBuilder {
     };
 
     // Build endpoint from provider data's config
+    const buildEndpointStart = performance.now();
     const endpointResult = registry.buildEndpoint(
       providerData.config,
       userConfig
     );
+    console.log(
+      `[PERF] BYOK registry.buildEndpoint for ${providerData.provider} took ${(performance.now() - buildEndpointStart).toFixed(2)}ms`
+    );
 
     if (isErr(endpointResult) || !endpointResult.data) {
+      console.log(
+        `[PERF] BYOK buildByokAttempts for ${providerData.provider} returning early (endpoint error) - total ${(performance.now() - buildByokStart).toFixed(2)}ms`
+      );
       return [];
     }
 
@@ -243,6 +359,9 @@ export class AttemptBuilder {
 
     const providerDefaultPriority = getProviderPriority(providerData.provider);
 
+    console.log(
+      `[PERF] BYOK buildByokAttempts for ${providerData.provider} completed - total ${(performance.now() - buildByokStart).toFixed(2)}ms`
+    );
     return [
       {
         endpoint: endpointResult.data,
@@ -315,8 +434,13 @@ export class AttemptBuilder {
     bodyMapping: BodyMappingType = "OPENAI",
     plugins?: Plugin[]
   ): Promise<Attempt[]> {
+    const buildPtbStart = performance.now();
+
     // Check if we have PTB endpoints
     if (providerData.ptbEndpoints.length === 0) {
+      console.log(
+        `[PERF] PTB buildPtbAttempts for ${providerData.provider} returning early (no PTB endpoints) - total ${(performance.now() - buildPtbStart).toFixed(2)}ms`
+      );
       return []; // No PTB endpoints available
     }
 
@@ -334,16 +458,23 @@ export class AttemptBuilder {
         )
       : null;
 
+    const keyFetchStart = performance.now();
     const heliconeKey = await this.providerKeysManager.getProviderKeyWithFetch(
       providerData.provider,
       providerData.config.providerModelId,
       this.env.HELICONE_ORG_ID
+    );
+    console.log(
+      `[PERF] PTB getProviderKeyWithFetch for ${providerData.provider}/HELICONE_ORG took ${(performance.now() - keyFetchStart).toFixed(2)}ms - found: ${!!heliconeKey}`
     );
 
     this.tracer.finishSpan(ptbKeySpan);
 
     if (!heliconeKey) {
       console.error("Can't do PTB without Helicone's key");
+      console.log(
+        `[PERF] PTB buildPtbAttempts for ${providerData.provider} returning early (no Helicone key) - total ${(performance.now() - buildPtbStart).toFixed(2)}ms`
+      );
       return []; // Can't do PTB without Helicone's key
     }
 
@@ -355,7 +486,7 @@ export class AttemptBuilder {
     );
 
     // Use the helper method to build PTB attempts
-    return this.buildPtbAttemptsFromEndpoints(
+    const result = this.buildPtbAttemptsFromEndpoints(
       modelSpec.modelName,
       providerData.provider,
       providerData.ptbEndpoints,
@@ -363,6 +494,10 @@ export class AttemptBuilder {
       bodyMapping,
       processedPlugins
     );
+    console.log(
+      `[PERF] PTB buildPtbAttempts for ${providerData.provider} completed - total ${(performance.now() - buildPtbStart).toFixed(2)}ms`
+    );
+    return result;
   }
 
   private buildPtbAttemptsFromEndpoints(
