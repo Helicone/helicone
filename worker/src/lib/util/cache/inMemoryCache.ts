@@ -45,3 +45,12 @@ export class InMemoryCache<T> {
     this.cache.clear();
   }
 }
+
+/**
+ * Helper function to clear all provider keys from the in-memory cache.
+ * Used primarily in tests to ensure cache doesn't leak between test cases.
+ */
+export function clearProviderKeysInMemoryCache(): void {
+  const cache = InMemoryCache.getInstance<unknown>();
+  cache.clear();
+}
