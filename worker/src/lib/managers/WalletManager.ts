@@ -71,7 +71,9 @@ export class WalletManager {
     console.error("Escrow reservation failed", escrowError);
 
     // Try direct debit as fallback if we have a valid cost
-    if (cost !== undefined && cost > 0) {
+    // Skip if escrow failed due to wallet suspension (disputes) - don't bypass the block
+    const isWalletSuspended = escrowError.statusCode === 403;
+    if (cost !== undefined && cost > 0 && !isWalletSuspended) {
       const directDebitResult = await this.tryDirectDebit(organizationId, cost);
       if (directDebitResult) {
         return ok({ remainingBalance: directDebitResult.remainingBalance });
