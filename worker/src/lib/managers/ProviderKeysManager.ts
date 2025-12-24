@@ -77,30 +77,25 @@ export class ProviderKeysManager {
   }
 
   async getProviderKeys(orgId: string): Promise<ProviderKey[] | null> {
-    const keys = InMemoryCache.getInstance<ProviderKey[]>().get(
-      `provider_keys_${orgId}`
-    );
-    if (keys) {
-      return keys;
+    const cacheKey = `provider_keys_${orgId}`;
+
+    // Check in-memory cache first (fastest)
+    const cachedKeys = InMemoryCache.getInstance<ProviderKey[]>().get(cacheKey);
+    if (cachedKeys) {
+      return cachedKeys;
     }
 
-    const kvKeys = await getFromKVCacheOnly(
-      `provider_keys_${orgId}`,
-      this.env,
-      43200 // 12 hours
-    );
-    if (kvKeys) {
-      InMemoryCache.getInstance<ProviderKey[]>().set(
-        `provider_keys_${orgId}`,
-        JSON.parse(kvKeys)
-      );
-    }
-
+    // Fall back to KV cache
+    const kvKeys = await getFromKVCacheOnly(cacheKey, this.env, 43200);
     if (!kvKeys) {
       return null;
     }
 
-    return JSON.parse(kvKeys) as ProviderKey[];
+    // Parse once and store in memory cache for subsequent requests
+    const parsedKeys = JSON.parse(kvKeys) as ProviderKey[];
+    InMemoryCache.getInstance<ProviderKey[]>().set(cacheKey, parsedKeys);
+
+    return parsedKeys;
   }
 
   /**
@@ -127,7 +122,6 @@ export class ProviderKeysManager {
       providerModelId,
       keyCuid
     );
-    // console.log("keys", validKey);
 
     if (validKey) {
       // Cache hit - trigger background refresh and return immediately
@@ -145,8 +139,6 @@ export class ProviderKeysManager {
       }
       return validKey;
     }
-
-    // console.log("no valid key", provider, providerModelId, orgId, keyCuid);
 
     // Cache miss - must wait for fetch
     return this.fetchAndCacheProviderKey(
@@ -202,8 +194,11 @@ export class ProviderKeysManager {
         JSON.stringify(mergedKeys),
         this.env,
         ttl,
-        false // Don't use memory cache to avoid test contamination
+        false // Don't use secureCache's memory cache (uses hashed keys)
       );
+
+      // Update our in-memory cache with the merged keys
+      InMemoryCache.getInstance<ProviderKey[]>().set(cacheKey, mergedKeys);
 
       return this.chooseProviderKey(
         fetchedKeys,
