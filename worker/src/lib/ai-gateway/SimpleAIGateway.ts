@@ -81,7 +81,8 @@ export class SimpleAIGateway {
 
     const providerKeysManager = new ProviderKeysManager(
       new ProviderKeysStore(this.supabaseClient),
-      env
+      env,
+      this.orgId
     );
 
     // Create SecureCacheProvider for distributed caching

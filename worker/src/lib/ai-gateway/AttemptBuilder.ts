@@ -123,7 +123,7 @@ export class AttemptBuilder {
 
     const attemptArrays = await Promise.all(
       providerData.map(async (data) => {
-        const byokAttempts = await this.buildByokAttempts(
+        const byokAttempts = this.buildByokAttempts(
           modelSpec,
           data,
           orgId,
@@ -132,13 +132,13 @@ export class AttemptBuilder {
         );
 
         // Always build PTB attempts (feature flag removed)
-        const ptbAttempts = await this.buildPtbAttempts(
+        const ptbAttempts = this.buildPtbAttempts(
           modelSpec,
           data,
           bodyMapping,
           plugins
         );
-        return [...byokAttempts, ...ptbAttempts];
+        return [...(await byokAttempts), ...(await ptbAttempts)];
       })
     );
 

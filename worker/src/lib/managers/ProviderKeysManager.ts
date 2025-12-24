@@ -1,17 +1,26 @@
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
 import { ProviderKey, ProviderKeysStore } from "../db/ProviderKeysStore";
-import {
-  getFromKVCacheOnly,
-  InMemoryCache,
-  removeFromCache,
-  storeInCache,
-} from "../util/cache/secureCache";
+import { getFromKVCacheOnly, storeInCache } from "../util/cache/secureCache";
 
 export class ProviderKeysManager {
+  providerKeysFromCache: Map<string, Promise<ProviderKey[] | null>> = new Map();
   constructor(
     private store: ProviderKeysStore,
-    private env: Env
-  ) {}
+    private env: Env,
+    orgId?: string
+  ) {
+    if (orgId) {
+      this.providerKeysFromCache.set(
+        orgId,
+        this.getProviderKeysFromCache(`provider_keys_${orgId}`)
+      );
+    }
+
+    this.providerKeysFromCache.set(
+      env.HELICONE_ORG_ID,
+      this.getProviderKeysFromCache(`provider_keys_${env.HELICONE_ORG_ID}`)
+    );
+  }
 
   async setProviderKeys() {
     const providerKeys = await this.store.getProviderKeys();
@@ -76,28 +85,34 @@ export class ProviderKeysManager {
     return filteredKeys[0];
   }
 
-  async getProviderKeys(orgId: string): Promise<ProviderKey[] | null> {
-    const kvCacheKey = `provider_keys_${orgId}`;
-    const memoryCacheKey = `provider_keys_in_memory_${orgId}`;
-
-    // Check in-memory cache first (fastest)
-    const cachedKeys =
-      InMemoryCache.getInstance<ProviderKey[]>().get(memoryCacheKey);
-    if (cachedKeys) {
-      return cachedKeys;
-    }
-
-    // Fall back to KV cache
+  private async getProviderKeysFromCache(
+    kvCacheKey: string
+  ): Promise<ProviderKey[] | null> {
     const kvKeys = await getFromKVCacheOnly(kvCacheKey, this.env, 43200);
     if (!kvKeys) {
       return null;
     }
+    return JSON.parse(kvKeys) as ProviderKey[];
+  }
 
-    // Parse once and store in memory cache for subsequent requests
-    const parsedKeys = JSON.parse(kvKeys) as ProviderKey[];
-    InMemoryCache.getInstance<ProviderKey[]>().set(memoryCacheKey, parsedKeys);
+  async getProviderKeys(orgId: string): Promise<ProviderKey[] | null> {
+    if (this.providerKeysFromCache.has(orgId)) {
+      const promiseVal = this.providerKeysFromCache.get(orgId);
 
-    return parsedKeys;
+      if (promiseVal !== undefined) {
+        return await promiseVal;
+      }
+    }
+
+    const result = await this.getProviderKeysFromCache(
+      `provider_keys_${orgId}`
+    );
+    if (result) {
+      this.providerKeysFromCache.set(orgId, Promise.resolve(result));
+      return result;
+    }
+
+    return null;
   }
 
   async getProviderKeyWithFetch(
@@ -107,6 +122,7 @@ export class ProviderKeysManager {
     keyCuid?: string
   ): Promise<ProviderKey | null> {
     const keys = await this.getProviderKeys(orgId);
+
     const validKey = this.chooseProviderKey(
       keys ?? [],
       provider,
