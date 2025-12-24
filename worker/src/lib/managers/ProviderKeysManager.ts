@@ -2,6 +2,26 @@ import { ModelProviderName } from "@helicone-package/cost/models/providers";
 import { ProviderKey, ProviderKeysStore } from "../db/ProviderKeysStore";
 import { getFromKVCacheOnly, storeInCache } from "../util/cache/secureCache";
 
+/**
+ * Creates a sentinel key to cache when no keys exist for a provider.
+ * Prevents repeated DB lookups for providers without keys.
+ */
+function nullProviderKey(
+  orgId: string,
+  providerName: ModelProviderName
+): ProviderKey {
+  return {
+    provider: providerName,
+    org_id: orgId,
+    decrypted_provider_key: "",
+    auth_type: "key",
+    byok_enabled: false,
+    config: null,
+    decrypted_provider_secret_key: null,
+    cuid: null,
+  };
+}
+
 export class ProviderKeysManager {
   providerKeysFromCache: Map<string, Promise<ProviderKey[] | null>> = new Map();
   constructor(
@@ -58,14 +78,17 @@ export class ProviderKeysManager {
     providerModelId: string,
     keyCuid?: string
   ): ProviderKey | null {
+    // Filter out null sentinel keys (empty decrypted_provider_key)
+    const validKeys = keys.filter((key) => key.decrypted_provider_key !== "");
+
     if (keyCuid) {
-      const cuidKey = keys.filter((key) => key.cuid === keyCuid);
+      const cuidKey = validKeys.filter((key) => key.cuid === keyCuid);
       if (cuidKey.length === 0) {
         return null;
       }
       return cuidKey[0];
     }
-    let filteredKeys = keys.filter((key) => key.provider === provider);
+    let filteredKeys = validKeys.filter((key) => key.provider === provider);
 
     // For Azure OpenAI, filter by heliconeModelId
     filteredKeys = filteredKeys.filter((key) => {
@@ -137,7 +160,32 @@ export class ProviderKeysManager {
         keyCuid
       );
 
-      if (!keys) return null;
+      if (!keys) {
+        const existingKeys = await getFromKVCacheOnly(
+          `provider_keys_${orgId}`,
+          this.env,
+          43200 // 12 hours
+        );
+        if (existingKeys) {
+          const existingKeysData = JSON.parse(existingKeys) as ProviderKey[];
+          existingKeysData.push(nullProviderKey(orgId, provider));
+
+          await storeInCache(
+            `provider_keys_${orgId}`,
+            JSON.stringify(existingKeysData),
+            this.env,
+            43200 // 12 hours
+          );
+        } else {
+          await storeInCache(
+            `provider_keys_${orgId}`,
+            JSON.stringify([nullProviderKey(orgId, provider)]),
+            this.env,
+            43200 // 12 hours
+          );
+        }
+        return null;
+      }
 
       const existingKeys = await getFromKVCacheOnly(
         `provider_keys_${orgId}`,
@@ -147,6 +195,7 @@ export class ProviderKeysManager {
       if (existingKeys) {
         const existingKeysData = JSON.parse(existingKeys) as ProviderKey[];
         existingKeysData.push(...keys);
+
         await storeInCache(
           `provider_keys_${orgId}`,
           JSON.stringify(existingKeysData),
