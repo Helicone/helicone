@@ -1,18 +1,10 @@
-import {
-  ModelProviderName,
-  providers,
-} from "@helicone-package/cost/models/providers";
+import { ModelProviderName } from "@helicone-package/cost/models/providers";
 import { ProviderKey, ProviderKeysStore } from "../db/ProviderKeysStore";
 import { getFromKVCacheOnly, storeInCache } from "../util/cache/secureCache";
 
 /**
- * Pads the provider keys with nulls for all providers that are not in the providerKeys array
- * This is to ensure that the provider keys are always available for all providers
- * This is necessary because the provider keys are not always available for all providers
- * and we need to ensure that the provider keys are always available for all providers
- * @param providerKeys
- * @param orgId
- * @returns
+ * Creates a sentinel key to cache when no keys exist for a provider.
+ * Prevents repeated DB lookups for providers without keys.
  */
 function nullProviderKey(
   orgId: string,
@@ -86,14 +78,17 @@ export class ProviderKeysManager {
     providerModelId: string,
     keyCuid?: string
   ): ProviderKey | null {
+    // Filter out null sentinel keys (empty decrypted_provider_key)
+    const validKeys = keys.filter((key) => key.decrypted_provider_key !== "");
+
     if (keyCuid) {
-      const cuidKey = keys.filter((key) => key.cuid === keyCuid);
+      const cuidKey = validKeys.filter((key) => key.cuid === keyCuid);
       if (cuidKey.length === 0) {
         return null;
       }
       return cuidKey[0];
     }
-    let filteredKeys = keys.filter((key) => key.provider === provider);
+    let filteredKeys = validKeys.filter((key) => key.provider === provider);
 
     // For Azure OpenAI, filter by heliconeModelId
     filteredKeys = filteredKeys.filter((key) => {
