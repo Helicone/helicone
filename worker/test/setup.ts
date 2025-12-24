@@ -1,5 +1,6 @@
 import { vi } from "vitest";
 import { TestCase } from "./providers/base.test-config";
+import { InMemoryCache } from "../src/lib/util/cache/secureCache";
 
 type MutableTestCase = Partial<TestCase> | undefined;
 
@@ -7,6 +8,8 @@ let currentTestCase: MutableTestCase;
 
 export function setSupabaseTestCase(tc: MutableTestCase) {
   currentTestCase = tc;
+  // Clear in-memory cache when test case changes to avoid stale data
+  InMemoryCache.getInstance().clear();
 }
 
 // Register the mock once at module load and read hoisted state inside the factory

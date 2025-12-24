@@ -77,23 +77,25 @@ export class ProviderKeysManager {
   }
 
   async getProviderKeys(orgId: string): Promise<ProviderKey[] | null> {
-    const cacheKey = `provider_keys_${orgId}`;
+    const kvCacheKey = `provider_keys_${orgId}`;
+    const memoryCacheKey = `provider_keys_in_memory_${orgId}`;
 
     // Check in-memory cache first (fastest)
-    const cachedKeys = InMemoryCache.getInstance<ProviderKey[]>().get(cacheKey);
+    const cachedKeys =
+      InMemoryCache.getInstance<ProviderKey[]>().get(memoryCacheKey);
     if (cachedKeys) {
       return cachedKeys;
     }
 
     // Fall back to KV cache
-    const kvKeys = await getFromKVCacheOnly(cacheKey, this.env, 43200);
+    const kvKeys = await getFromKVCacheOnly(kvCacheKey, this.env, 43200);
     if (!kvKeys) {
       return null;
     }
 
     // Parse once and store in memory cache for subsequent requests
     const parsedKeys = JSON.parse(kvKeys) as ProviderKey[];
-    InMemoryCache.getInstance<ProviderKey[]>().set(cacheKey, parsedKeys);
+    InMemoryCache.getInstance<ProviderKey[]>().set(memoryCacheKey, parsedKeys);
 
     return parsedKeys;
   }
