@@ -7537,6 +7537,160 @@
 					}
 				]
 			},
+			"UptimeDataPoint": {
+				"properties": {
+					"time": {
+						"type": "string"
+					},
+					"totalRequests": {
+						"type": "number",
+						"format": "double"
+					},
+					"successfulRequests": {
+						"type": "number",
+						"format": "double"
+					},
+					"successRate": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"time",
+					"totalRequests",
+					"successfulRequests",
+					"successRate"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ProviderUptimeResponse": {
+				"properties": {
+					"provider": {
+						"type": "string"
+					},
+					"uptime": {
+						"items": {
+							"$ref": "#/components/schemas/UptimeDataPoint"
+						},
+						"type": "array"
+					},
+					"overallSuccessRate": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"provider",
+					"uptime",
+					"overallSuccessRate"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_ProviderUptimeResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/ProviderUptimeResponse"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ProviderUptimeResponse.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ProviderUptimeResponse_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ModelProviderUptimeEntry": {
+				"properties": {
+					"model": {
+						"type": "string"
+					},
+					"provider": {
+						"type": "string"
+					},
+					"uptime": {
+						"items": {
+							"$ref": "#/components/schemas/UptimeDataPoint"
+						},
+						"type": "array"
+					},
+					"overallSuccessRate": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"model",
+					"provider",
+					"uptime",
+					"overallSuccessRate"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ModelProviderUptimeResponse": {
+				"properties": {
+					"uptime": {
+						"items": {
+							"$ref": "#/components/schemas/ModelProviderUptimeEntry"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"uptime"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_ModelProviderUptimeResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/ModelProviderUptimeResponse"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ModelProviderUptimeResponse.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ModelProviderUptimeResponse_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"SessionResult": {
 				"properties": {
 					"created_at": {
@@ -20228,6 +20382,81 @@
 							"type": "string"
 						}
 					},
+					{
+						"description": "Time range: \"24h\", \"7d\", \"30d\", \"3m\", or \"1y\"",
+						"in": "query",
+						"name": "timeframe",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/StatsTimeFrame"
+						}
+					}
+				]
+			}
+		},
+		"/v1/public/stats/providers/{provider}/uptime": {
+			"get": {
+				"operationId": "GetProviderUptime",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ProviderUptimeResponse.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get uptime/success rate statistics for a specific provider.\nReturns time series data showing success rate per time bucket.",
+				"tags": [
+					"Stats"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "The provider identifier (e.g., \"openai\", \"anthropic\")",
+						"in": "path",
+						"name": "provider",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "Time range: \"24h\", \"7d\", \"30d\", \"3m\", or \"1y\"",
+						"in": "query",
+						"name": "timeframe",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/StatsTimeFrame"
+						}
+					}
+				]
+			}
+		},
+		"/v1/public/stats/model-provider-uptime": {
+			"get": {
+				"operationId": "GetModelProviderUptime",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ModelProviderUptimeResponse.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get uptime/success rate statistics for all model-provider pairs.\nUsed on model detail pages to show uptime per provider.",
+				"tags": [
+					"Stats"
+				],
+				"security": [],
+				"parameters": [
 					{
 						"description": "Time range: \"24h\", \"7d\", \"30d\", \"3m\", or \"1y\"",
 						"in": "query",
