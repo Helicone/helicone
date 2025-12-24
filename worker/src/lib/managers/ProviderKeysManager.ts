@@ -24,11 +24,16 @@ function nullProviderKey(
 
 export class ProviderKeysManager {
   providerKeysFromCache: Map<string, Promise<ProviderKey[] | null>> = new Map();
+  private ctx?: ExecutionContext;
+
   constructor(
     private store: ProviderKeysStore,
     private env: Env,
-    orgId?: string
+    orgId?: string,
+    ctx?: ExecutionContext
   ) {
+    this.ctx = ctx;
+
     if (orgId) {
       this.providerKeysFromCache.set(
         orgId,
@@ -132,40 +137,41 @@ export class ProviderKeysManager {
   }
 
   async getProviderKeys(orgId: string): Promise<ProviderKey[] | null> {
-    const start = performance.now();
-
     if (this.providerKeysFromCache.has(orgId)) {
       const promiseVal = this.providerKeysFromCache.get(orgId);
 
       if (promiseVal !== undefined) {
-        const result = await promiseVal;
-        console.log(
-          `[PERF] getProviderKeys for ${orgId} - HIT in-memory Promise cache - took ${(performance.now() - start).toFixed(2)}ms`
-        );
-        return result;
+        return await promiseVal;
       }
     }
 
-    const kvStart = performance.now();
     const result = await this.getProviderKeysFromCache(
       `provider_keys_${orgId}`
-    );
-    console.log(
-      `[PERF] getProviderKeys for ${orgId} - KV cache lookup took ${(performance.now() - kvStart).toFixed(2)}ms - found: ${!!result}`
     );
 
     if (result) {
       this.providerKeysFromCache.set(orgId, Promise.resolve(result));
-      console.log(
-        `[PERF] getProviderKeys for ${orgId} - TOTAL took ${(performance.now() - start).toFixed(2)}ms`
-      );
       return result;
     }
 
-    console.log(
-      `[PERF] getProviderKeys for ${orgId} - MISS - TOTAL took ${(performance.now() - start).toFixed(2)}ms`
-    );
     return null;
+  }
+
+  /**
+   * Store keys in cache, using ctx.waitUntil if available to avoid blocking.
+   */
+  private storeInCacheAsync(orgId: string, keysToStore: ProviderKey[]): void {
+    const cachePromise = storeInCache(
+      `provider_keys_${orgId}`,
+      JSON.stringify(keysToStore),
+      this.env,
+      43200 // 12 hours
+    );
+
+    if (this.ctx) {
+      this.ctx.waitUntil(cachePromise);
+    }
+    // If no ctx, fire and forget - the cache write will complete eventually
   }
 
   async getProviderKeyWithFetch(
@@ -174,52 +180,29 @@ export class ProviderKeysManager {
     orgId: string,
     keyCuid?: string
   ): Promise<ProviderKey | null> {
-    const totalStart = performance.now();
-
-    const cacheStart = performance.now();
     const keys = await this.getProviderKeys(orgId);
-    console.log(
-      `[PERF] getProviderKeyWithFetch - getProviderKeys(${orgId}) took ${(performance.now() - cacheStart).toFixed(2)}ms - found ${keys?.length ?? 0} keys`
-    );
 
-    const chooseStart = performance.now();
     const validKey = this.chooseProviderKey(
       keys ?? [],
       provider,
       providerModelId,
       keyCuid
     );
-    console.log(
-      `[PERF] getProviderKeyWithFetch - chooseProviderKey(${provider}) took ${(performance.now() - chooseStart).toFixed(2)}ms - found: ${!!validKey}`
-    );
 
     if (!validKey) {
       // Check if we have a sentinel for this provider (means we already checked DB and found nothing)
       if (keys && this.hasSentinelForProvider(keys, provider)) {
-        console.log(
-          `[PERF] getProviderKeyWithFetch - Found sentinel for ${provider}/${orgId}, skipping DB fetch`
-        );
-        console.log(
-          `[PERF] getProviderKeyWithFetch TOTAL for ${provider}/${orgId} took ${(performance.now() - totalStart).toFixed(2)}ms - returning null (sentinel)`
-        );
         return null;
       }
 
-      console.log(
-        `[PERF] getProviderKeyWithFetch - No cached key for ${provider}/${orgId}, fetching from DB...`
-      );
-      const dbStart = performance.now();
       const fetchedKeys = await this.store.getProviderKeysWithFetch(
         provider,
         orgId,
         keyCuid
       );
-      console.log(
-        `[PERF] getProviderKeyWithFetch - DB fetch for ${provider}/${orgId} took ${(performance.now() - dbStart).toFixed(2)}ms - found: ${!!fetchedKeys}`
-      );
 
       if (!fetchedKeys) {
-        const storeNullStart = performance.now();
+        // Store null sentinel asynchronously
         const existingKeys = await getFromKVCacheOnly(
           `provider_keys_${orgId}`,
           this.env,
@@ -228,31 +211,14 @@ export class ProviderKeysManager {
         if (existingKeys) {
           const existingKeysData = JSON.parse(existingKeys) as ProviderKey[];
           existingKeysData.push(nullProviderKey(orgId, provider));
-
-          await storeInCache(
-            `provider_keys_${orgId}`,
-            JSON.stringify(existingKeysData),
-            this.env,
-            43200 // 12 hours
-          );
+          this.storeInCacheAsync(orgId, existingKeysData);
         } else {
-          await storeInCache(
-            `provider_keys_${orgId}`,
-            JSON.stringify([nullProviderKey(orgId, provider)]),
-            this.env,
-            43200 // 12 hours
-          );
+          this.storeInCacheAsync(orgId, [nullProviderKey(orgId, provider)]);
         }
-        console.log(
-          `[PERF] getProviderKeyWithFetch - Stored null sentinel for ${provider}/${orgId} took ${(performance.now() - storeNullStart).toFixed(2)}ms`
-        );
-        console.log(
-          `[PERF] getProviderKeyWithFetch TOTAL for ${provider}/${orgId} took ${(performance.now() - totalStart).toFixed(2)}ms - returning null`
-        );
         return null;
       }
 
-      const storeKeysStart = performance.now();
+      // Store fetched keys asynchronously
       const existingKeys = await getFromKVCacheOnly(
         `provider_keys_${orgId}`,
         this.env,
@@ -261,38 +227,18 @@ export class ProviderKeysManager {
       if (existingKeys) {
         const existingKeysData = JSON.parse(existingKeys) as ProviderKey[];
         existingKeysData.push(...fetchedKeys);
-
-        await storeInCache(
-          `provider_keys_${orgId}`,
-          JSON.stringify(existingKeysData),
-          this.env,
-          43200 // 12 hours
-        );
+        this.storeInCacheAsync(orgId, existingKeysData);
       } else {
-        await storeInCache(
-          `provider_keys_${orgId}`,
-          JSON.stringify(fetchedKeys),
-          this.env,
-          43200 // 12 hours
-        );
+        this.storeInCacheAsync(orgId, fetchedKeys);
       }
-      console.log(
-        `[PERF] getProviderKeyWithFetch - Stored fetched keys for ${provider}/${orgId} took ${(performance.now() - storeKeysStart).toFixed(2)}ms`
-      );
-      const result = this.chooseProviderKey(
+
+      return this.chooseProviderKey(
         fetchedKeys,
         provider,
         providerModelId,
         keyCuid
       );
-      console.log(
-        `[PERF] getProviderKeyWithFetch TOTAL for ${provider}/${orgId} took ${(performance.now() - totalStart).toFixed(2)}ms - returning key`
-      );
-      return result;
     }
-    console.log(
-      `[PERF] getProviderKeyWithFetch TOTAL for ${provider}/${orgId} took ${(performance.now() - totalStart).toFixed(2)}ms - returning cached key`
-    );
     return validKey;
   }
 }
