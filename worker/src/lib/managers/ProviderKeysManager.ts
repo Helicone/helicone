@@ -20,7 +20,6 @@ export class ProviderKeysManager {
       env.HELICONE_ORG_ID,
       this.getProviderKeysFromCache(`provider_keys_${env.HELICONE_ORG_ID}`)
     );
-    console.log("providerKeysFromCache", orgId, env.HELICONE_ORG_ID);
   }
 
   async setProviderKeys() {
