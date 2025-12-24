@@ -108,42 +108,4 @@ export class ProviderKeysStore {
       cuid: key.cuid,
     }));
   }
-
-  /**
-   * Fetch all provider keys for an organization.
-   * Used for read-through cache background refresh.
-   */
-  async getProviderKeysByOrg(orgId: string): Promise<ProviderKey[] | null> {
-    const { data, error } = await this.supabaseClient
-      .from("decrypted_provider_keys_v2")
-      .select(
-        "org_id, decrypted_provider_key, decrypted_provider_secret_key, auth_type, provider_name, config, cuid, byok_enabled"
-      )
-      .eq("org_id", orgId)
-      .eq("soft_delete", false)
-      .not("decrypted_provider_key", "is", null);
-
-    if (error || !data || data.length === 0) {
-      return null;
-    }
-
-    return data
-      .map((key): ProviderKey | null => {
-        const provider = dbProviderToProvider(key.provider_name ?? "");
-        if (!provider) return null;
-
-        return {
-          provider,
-          org_id: orgId,
-          decrypted_provider_key: key.decrypted_provider_key ?? "",
-          decrypted_provider_secret_key:
-            key.decrypted_provider_secret_key ?? null,
-          auth_type: key.auth_type as "key" | "session_token",
-          byok_enabled: key.byok_enabled ?? null,
-          config: key.config,
-          cuid: key.cuid ?? null,
-        };
-      })
-      .filter((key): key is ProviderKey => key !== null);
-  }
 }

@@ -105,11 +105,6 @@ export class ProviderKeysManager {
     // Get cached keys
     const keys = await this.getProviderKeys(orgId);
 
-    // Always trigger background refresh if ctx is available (read-through cache)
-    if (ctx) {
-      ctx.waitUntil(this.refreshProviderKeysInBackground(orgId, cacheKey, ttl));
-    }
-
     // Try to find key from cache
     const validKey = this.chooseProviderKey(
       keys ?? [],
@@ -119,55 +114,83 @@ export class ProviderKeysManager {
     );
 
     if (validKey) {
+      // Cache hit - trigger background refresh and return immediately
+      if (ctx) {
+        ctx.waitUntil(
+          this.fetchAndCacheProviderKey(
+            provider,
+            providerModelId,
+            orgId,
+            keyCuid,
+            cacheKey,
+            ttl
+          )
+        );
+      }
       return validKey;
     }
 
-    // Cache miss for this specific key - must wait for fetch
-    const fetchedKeys = await this.store.getProviderKeysWithFetch(
+    // Cache miss - must wait for fetch
+    return this.fetchAndCacheProviderKey(
       provider,
+      providerModelId,
       orgId,
-      keyCuid
-    );
-
-    if (!fetchedKeys) return null;
-
-    // Merge with existing cache and store
-    const existingKeys = keys ?? [];
-    const mergedKeys = [...existingKeys, ...fetchedKeys];
-
-    await storeInCache(
+      keyCuid,
       cacheKey,
-      JSON.stringify(mergedKeys),
-      this.env,
-      ttl,
-      false // Don't use memory cache to avoid test contamination
+      ttl
     );
-
-    return this.chooseProviderKey(fetchedKeys, provider, providerModelId, keyCuid);
   }
 
   /**
-   * Background refresh of provider keys cache.
-   * Called via ctx.waitUntil() to not block the request.
+   * Fetch provider key from Supabase and update cache.
+   * Used both for cache miss (awaited) and background refresh (fire-and-forget).
    */
-  private async refreshProviderKeysInBackground(
+  private async fetchAndCacheProviderKey(
+    provider: ModelProviderName,
+    providerModelId: string,
     orgId: string,
+    keyCuid: string | undefined,
     cacheKey: string,
     ttl: number
-  ): Promise<void> {
+  ): Promise<ProviderKey | null> {
     try {
-      const keys = await this.store.getProviderKeysByOrg(orgId);
-      if (keys && keys.length > 0) {
-        await storeInCache(
-          cacheKey,
-          JSON.stringify(keys),
-          this.env,
-          ttl,
-          false // Don't use memory cache
-        );
+      const fetchedKeys = await this.store.getProviderKeysWithFetch(
+        provider,
+        orgId,
+        keyCuid
+      );
+
+      if (!fetchedKeys || fetchedKeys.length === 0) return null;
+
+      // Merge with existing cache
+      const existingCached = await this.getProviderKeys(orgId);
+      const existingKeys = existingCached ?? [];
+
+      // Dedupe by cuid (or provider if no cuid)
+      const keyMap = new Map<string, ProviderKey>();
+      for (const key of existingKeys) {
+        const id = key.cuid ?? `${key.provider}`;
+        keyMap.set(id, key);
       }
+      for (const key of fetchedKeys) {
+        const id = key.cuid ?? `${key.provider}`;
+        keyMap.set(id, key);
+      }
+
+      const mergedKeys = Array.from(keyMap.values());
+
+      await storeInCache(
+        cacheKey,
+        JSON.stringify(mergedKeys),
+        this.env,
+        ttl,
+        false // Don't use memory cache to avoid test contamination
+      );
+
+      return this.chooseProviderKey(fetchedKeys, provider, providerModelId, keyCuid);
     } catch (e) {
-      console.error(`Background refresh failed for provider keys ${orgId}:`, e);
+      console.error(`Failed to fetch/cache provider key for ${orgId}:`, e);
+      return null;
     }
   }
 }
