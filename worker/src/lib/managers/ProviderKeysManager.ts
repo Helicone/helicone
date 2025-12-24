@@ -181,6 +181,13 @@ export class ProviderKeysManager {
             this.env,
             43200 // 12 hours
           );
+        } else {
+          await storeInCache(
+            `provider_keys_${orgId}`,
+            JSON.stringify([nullProviderKey(orgId, provider)]),
+            this.env,
+            43200 // 12 hours
+          );
         }
         return null;
       }
