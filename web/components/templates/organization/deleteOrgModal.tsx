@@ -82,11 +82,13 @@ export const DeleteOrgModal = (props: DeleteOrgModalProps) => {
               if (
                 orgContext?.currentOrg?.tier === "pro-20240913" ||
                 orgContext?.currentOrg?.tier === "pro-20250202" ||
+                orgContext?.currentOrg?.tier === "pro-20251210" ||
                 orgContext?.currentOrg?.tier === "team-20250130" ||
+                orgContext?.currentOrg?.tier === "team-20251210" ||
                 orgContext?.currentOrg?.tier === "growth"
               ) {
                 setNotification(
-                  "You cannot delete your organization while on the Pro plan",
+                  "You cannot delete your organization while on a paid plan",
                   "error",
                 );
                 return;

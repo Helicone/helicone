@@ -27,37 +27,17 @@ import { sendMeteredBatch } from "./sendBatchEvent";
 
 type StripeMeterEvent = Stripe.V2.Billing.MeterEventStreamCreateParams.Event;
 
+// Legacy prices for grandfathered users (per-seat, per-request)
+// New pricing (2025-12-10) uses SettingsManager instead of env vars
 const DEFAULT_PRODUCT_PRICES = {
-  "request-volume": process.env.PRICE_PROD_REQUEST_VOLUME_ID!, //(This is just growth)
-  "pro-users": process.env.PRICE_PROD_PRO_USERS_ID!,
-  prompts: process.env.PRICE_PROD_PROMPTS_ID!,
+  "request-volume": process.env.PRICE_PROD_REQUEST_VOLUME_ID!, // Legacy: per-request billing
+  "pro-users": process.env.PRICE_PROD_PRO_USERS_ID!, // Legacy: $20/seat
+  prompts: process.env.PRICE_PROD_PROMPTS_ID!, // Legacy: $50/mo add-on
   alerts: process.env.PRICE_PROD_ALERTS_ID!,
   experiments: process.env.PRICE_PROD_EXPERIMENTS_FLAT_ID!,
   evals: process.env.PRICE_PROD_EVALS_ID!,
-  team_bundle: process.env.PRICE_PROD_TEAM_BUNDLE_ID!,
+  team_bundle: process.env.PRICE_PROD_TEAM_BUNDLE_ID!, // Legacy: $200/mo
 } as const;
-
-const getMeterId = async (
-  meterName: "stripe:trace-meter-id"
-): Promise<Result<string, string>> => {
-  const result = await dbExecute<{ name: string; settings: any }>(
-    `SELECT * FROM helicone_settings where name = $1`,
-    [meterName]
-  );
-
-  if (result.error) {
-    return err(`Error fetching meter id: ${result.error}`);
-  }
-
-  if (
-    !result.data?.[0]?.settings?.meterId ||
-    typeof result.data?.[0]?.settings?.meterId !== "string"
-  ) {
-    return err("Meter id not found");
-  }
-
-  return ok(result.data[0].settings.meterId);
-};
 
 const getProProductPrices = async (): Promise<
   typeof DEFAULT_PRODUCT_PRICES
@@ -370,19 +350,16 @@ WHERE (${builtFilter.filter})`,
         return err("Error getting or creating stripe customer");
       }
 
-      const orgMemberCount = await this.getOrgMemberCount();
-      if (orgMemberCount.error || !orgMemberCount.data) {
-        return err("Error getting organization member count");
-      }
-
-      const seats = Math.max(orgMemberCount.data, body.seats ?? 1);
-
+      // New pricing (2025-12-10): unlimited seats, no seat count needed
       const session = await this.portalLinkUpgradeToPro(
         origin,
         customerId.data,
-        seats,
         body
       );
+
+      if (session.error) {
+        return err(session.error);
+      }
 
       return ok(session.data?.url!);
     } catch (error: any) {
@@ -442,31 +419,28 @@ WHERE (${builtFilter.filter})`,
   private async portalLinkUpgradeToPro(
     origin: string,
     customerId: string,
-    orgMemberCount: number,
     body: UpgradeToProRequest
   ): Promise<Result<Stripe.Checkout.Session, string>> {
     const proProductPrices = await getProProductPrices();
+
+    // New pricing (2025-12-10): $79/mo flat, prompts included, unlimited seats
+    // Storage usage ($6/GB) is tracked via bytes_sum meter events in StripeLogHandler
+    const settingsManager = new SettingsManager();
+    const stripeProductSettings =
+      await settingsManager.getSetting("stripe:products");
+    if (!stripeProductSettings?.pro20251210_79Price) {
+      return err("stripe:products pro20251210_79Price is not configured");
+    }
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       customer: customerId,
       payment_method_types: ["card"],
       line_items: [
         {
-          price: proProductPrices["request-volume"],
-          // No quantity for usage based pricing
+          price: stripeProductSettings.pro20251210_79Price, // $79/mo flat
+          quantity: 1,
         },
-        {
-          price: proProductPrices["pro-users"],
-          quantity: orgMemberCount,
-        },
-        ...(body?.addons?.prompts
-          ? [
-              {
-                price: proProductPrices["prompts"],
-                quantity: 1,
-              },
-            ]
-          : []),
+        // Legacy add-ons (alerts, experiments, evals) - prompts now included in base
         ...(body?.addons?.alerts
           ? [
               {
@@ -495,13 +469,13 @@ WHERE (${builtFilter.filter})`,
       mode: "subscription",
       metadata: {
         orgId: this.authParams.organizationId,
-        tier: "pro-20250202",
+        tier: "pro-20251210",
       },
       subscription_data: {
         trial_period_days: 7,
         metadata: {
           orgId: this.authParams.organizationId,
-          tier: "pro-20250202",
+          tier: "pro-20251210",
         },
       },
       ui_mode: body.ui_mode ?? "hosted",
@@ -547,18 +521,16 @@ WHERE (${builtFilter.filter})`,
         return err("Error getting or creating stripe customer");
       }
 
-      const orgMemberCount = await this.getOrgMemberCount();
-      if (orgMemberCount.error || !orgMemberCount.data) {
-        return err("Error getting organization member count");
-      }
-
-      const seats = Math.max(orgMemberCount.data, body.seats ?? 1);
+      // New pricing (2025-12-10): unlimited seats, no seat count needed
       const sessionUrl = await this.portalLinkUpgradeToPro(
         origin,
         customerId.data,
-        seats,
         body
       );
+
+      if (sessionUrl.error) {
+        return err(sessionUrl.error);
+      }
 
       // For embedded mode, return the client secret instead of the URL
       if (body.ui_mode === "embedded") {
@@ -577,30 +549,34 @@ WHERE (${builtFilter.filter})`,
     isNewCustomer: boolean,
     uiMode: "embedded" | "hosted"
   ): Promise<Result<Stripe.Checkout.Session, string>> {
-    const proProductPrices = await getProProductPrices();
+    // New pricing (2025-12-10): $799/mo flat, prompts/experiments/evals included
+    // Storage usage ($6/GB) is tracked via bytes_sum meter events in StripeLogHandler
+    const settingsManager = new SettingsManager();
+    const stripeProductSettings =
+      await settingsManager.getSetting("stripe:products");
+    if (!stripeProductSettings?.team20251210_799Price) {
+      return err("stripe:products team20251210_799Price is not configured");
+    }
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       customer: customerId,
       payment_method_types: ["card"],
       line_items: [
         {
-          price: proProductPrices["request-volume"],
-        },
-        {
-          price: proProductPrices["team_bundle"],
+          price: stripeProductSettings.team20251210_799Price, // $799/mo flat
           quantity: 1,
         },
       ],
       mode: "subscription",
       metadata: {
         orgId: this.authParams.organizationId,
-        tier: "team-20250130",
+        tier: "team-20251210",
       },
       subscription_data: {
         trial_period_days: isNewCustomer ? 7 : undefined,
         metadata: {
           orgId: this.authParams.organizationId,
-          tier: "team-20250130",
+          tier: "team-20251210",
         },
       },
       ui_mode: uiMode,
@@ -652,6 +628,10 @@ WHERE (${builtFilter.filter})`,
         body.ui_mode ?? "hosted"
       );
 
+      if (session.error) {
+        return err(session.error);
+      }
+
       if (body.ui_mode === "embedded") {
         return ok(session.data?.client_secret!);
       }
@@ -690,6 +670,10 @@ WHERE (${builtFilter.filter})`,
           body.ui_mode ?? "hosted"
         );
 
+        if (session.error) {
+          return err(session.error);
+        }
+
         if (body.ui_mode === "embedded") {
           return ok(session.data?.client_secret!);
         }
@@ -711,6 +695,10 @@ WHERE (${builtFilter.filter})`,
         false,
         body.ui_mode ?? "hosted"
       );
+
+      if (session.error) {
+        return err(session.error);
+      }
 
       if (body.ui_mode === "embedded") {
         return ok(session.data?.client_secret!);

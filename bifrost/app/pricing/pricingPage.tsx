@@ -108,13 +108,13 @@ export default function PricingPage() {
                     How is Helicone&apos;s usage-based pricing calculated?
                   </AccordionTrigger>
                   <AccordionContent className="accordion-content-style">
-                    Helicone&apos;s usage-based pricing is calculated based on
-                    the number of requests you make to our API. You can find the
-                    rate per log under &quot;Additional logs&quot; in the table
-                    above.
+                    Helicone&apos;s usage-based pricing is based on the amount
+                    of data you store. The first 1 GB is free, and additional
+                    storage is billed at $6 per GB. This is approximately 10,000
+                    requests per GB.
                     <br />
                     <br />
-                    You can also find your monthly usage in the{" "}
+                    You can find your monthly usage in the{" "}
                     <Link
                       href="https://us.helicone.ai/settings/billing"
                       className="underline hover:text-brand"
@@ -127,17 +127,17 @@ export default function PricingPage() {
 
                 <AccordionItem value="item-3">
                   <AccordionTrigger className="font-medium text-left">
-                    What happens if I exceed my request limit?
+                    What happens if I exceed my storage limit?
                   </AccordionTrigger>
                   <AccordionContent className="accordion-content-style">
-                    On the Free plan, you can view up to 10,000 requests per
-                    month in Helicone. Don&apos;t worry, we are still logging
-                    all your incoming requests in the background. To access
-                    them, you can upgrade to the Pro plan at any time.
+                    On the Free plan, you get 1 GB of storage (approximately
+                    10,000 requests). We continue logging all your requests in
+                    the background. To access them, you can upgrade to the Pro
+                    plan at any time.
                     <br />
                     <br />
-                    If you are on the Pro or Team plan, any usage beyond 10,000
-                    requests per month will be automatically billed.
+                    If you are on the Pro or Team plan, any storage beyond 1 GB
+                    is automatically billed at $6 per GB.
                   </AccordionContent>
                 </AccordionItem>
 
