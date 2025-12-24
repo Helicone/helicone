@@ -266,6 +266,7 @@ const generateMockRequest = (
       totalTokens: totalTokens,
       promptTokens: promptTokens,
       completionTokens: completionTokens,
+      reasoningTokens: 0,
       promptCacheReadTokens: 0,
       promptCacheWriteTokens: 0,
       latency: Math.floor(Math.random() * 2000) + 500,

@@ -1,3 +1,6 @@
+// This class handles the logging of requests and responses to various storage backends
+// including Postgres, S3, and Clickhouse. It maps incoming log data to the appropriate
+// database schemas and manages batch processing for efficiency.
 import { heliconeRequestToMappedContent } from "@helicone-package/llm-mapper/utils/getMappedContent";
 import {
   CacheMetricSMT,
@@ -27,6 +30,7 @@ import {
   getPromptCacheReadTokens,
   getPromptAudioTokens,
   getCompletionAudioTokens,
+  getReasoningTokens,
 } from "./HandlerContext";
 import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
 import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
@@ -179,7 +183,7 @@ export class LoggingHandler extends AbstractLogHandler {
       // MAP LEGACY PROMPT RECORDS
       const promptMapped =
         context.message.log.request.promptId &&
-        context.processedLog.request.heliconeTemplate
+          context.processedLog.request.heliconeTemplate
           ? this.mapPrompt(context)
           : null;
       const experimentCellValueMapped = this.mapExperimentCellValues(context);
@@ -369,8 +373,7 @@ export class LoggingHandler extends AbstractLogHandler {
       return ok("All logs inserted successfully.");
     } catch (error: any) {
       return err(
-        `Unexpected error during logging to Clickhouse: ${
-          error.message ?? "No error message provided"
+        `Unexpected error during logging to Clickhouse: ${error.message ?? "No error message provided"
         }`
       );
     }
@@ -484,6 +487,7 @@ export class LoggingHandler extends AbstractLogHandler {
     const completionAudioTokens = atLeastZero(
       getCompletionAudioTokens(modelUsage, legacyUsage) ?? 0
     );
+    const reasoningTokens = atLeastZero(getReasoningTokens(modelUsage) ?? 0);
     const orgParams = context.orgParams;
     const { requestText, responseText } =
       this.requestResponseTextFromContext(context);
@@ -528,6 +532,7 @@ export class LoggingHandler extends AbstractLogHandler {
       completion_audio_tokens: atLeastZero(
         isCacheHit ? 0 : completionAudioTokens
       ),
+      reasoning_tokens: atLeastZero(isCacheHit ? 0 : reasoningTokens),
       cost: cost,
       request_created_at: formatTimeString(
         request.requestCreatedAt.toISOString()

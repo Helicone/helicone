@@ -5025,6 +5025,11 @@
 						"format": "double",
 						"nullable": true
 					},
+					"reasoning_tokens": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
 					"prompt_audio_tokens": {
 						"type": "number",
 						"format": "double",
@@ -5163,6 +5168,7 @@
 					"prompt_cache_write_tokens",
 					"prompt_cache_read_tokens",
 					"completion_tokens",
+					"reasoning_tokens",
 					"prompt_audio_tokens",
 					"completion_audio_tokens",
 					"cost",

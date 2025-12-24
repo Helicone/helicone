@@ -261,6 +261,7 @@ export class EvaluatorManager extends BaseManager {
           prompt_cache_write_tokens: null,
           prompt_cache_read_tokens: null,
           completion_tokens: null,
+          reasoning_tokens: null,
           prompt_id: null,
           prompt_version: null, // SEE NOTE IN jawn/.../HandlerContext.ts
           llmSchema: null,

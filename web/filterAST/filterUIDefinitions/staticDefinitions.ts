@@ -307,6 +307,13 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
     table: "request_response_rmt",
   },
   {
+    id: "reasoning_tokens",
+    label: "Reasoning Tokens",
+    type: "number",
+    operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "request_response_rmt",
+  },
+  {
     id: "time_to_first_token",
     label: "Time to First Token (ms)",
     type: "number",
