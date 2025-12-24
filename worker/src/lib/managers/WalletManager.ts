@@ -69,7 +69,7 @@ export class WalletManager {
       }
       const escrowId = escrowResult.data.reservedEscrowId;
 
-      const { clickhouseLastCheckedAt, remainingBalance } =
+      const { clickhouseLastCheckedAt, remainingBalance, staleEscrowsCleared } =
         await this.walletStub.finalizeEscrow(
           organizationId,
           escrowId,
@@ -79,6 +79,22 @@ export class WalletManager {
       // Store remaining balance to KV for future optimistic checks
       const walletKVSync = new WalletKVSync(this.env.WALLET_KV, organizationId);
       await walletKVSync.storeWalletState(remainingBalance);
+
+      // Log stale escrow cleanup to DataDog
+      if (staleEscrowsCleared !== undefined && staleEscrowsCleared > 0) {
+        const tracer = createDataDogTracer(this.env);
+        tracer.startTrace(
+          "ptb.stale_escrows_cleared",
+          "escrow_cleanup",
+          {
+            org_id: organizationId,
+            escrows_cleared: String(staleEscrowsCleared),
+          },
+          true // forceSample - always log cleanup events
+        );
+        tracer.finishTrace();
+        this.ctx.waitUntil(tracer.sendTrace());
+      }
 
       if (
         cost === undefined &&
