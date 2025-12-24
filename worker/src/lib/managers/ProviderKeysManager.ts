@@ -2,6 +2,7 @@ import { ModelProviderName } from "@helicone-package/cost/models/providers";
 import { ProviderKey, ProviderKeysStore } from "../db/ProviderKeysStore";
 import {
   getFromKVCacheOnly,
+  InMemoryCache,
   removeFromCache,
   storeInCache,
 } from "../util/cache/secureCache";
@@ -76,16 +77,27 @@ export class ProviderKeysManager {
   }
 
   async getProviderKeys(orgId: string): Promise<ProviderKey[] | null> {
-    const keys = await getFromKVCacheOnly(
-      `provider_keys_${orgId}`,
-      this.env,
-      43200 // 12 hours
-    );
-    if (!keys) {
+    const kvCacheKey = `provider_keys_${orgId}`;
+    const memoryCacheKey = `provider_keys_in_memory_${orgId}`;
+
+    // Check in-memory cache first (fastest)
+    const cachedKeys =
+      InMemoryCache.getInstance<ProviderKey[]>().get(memoryCacheKey);
+    if (cachedKeys) {
+      return cachedKeys;
+    }
+
+    // Fall back to KV cache
+    const kvKeys = await getFromKVCacheOnly(kvCacheKey, this.env, 43200);
+    if (!kvKeys) {
       return null;
     }
 
-    return JSON.parse(keys) as ProviderKey[];
+    // Parse once and store in memory cache for subsequent requests
+    const parsedKeys = JSON.parse(kvKeys) as ProviderKey[];
+    InMemoryCache.getInstance<ProviderKey[]>().set(memoryCacheKey, parsedKeys);
+
+    return parsedKeys;
   }
 
   async getProviderKeyWithFetch(
