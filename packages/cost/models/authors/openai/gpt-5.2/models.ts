@@ -12,17 +12,6 @@ export const models = {
     modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
   },
-  "gpt-5.2-2025-12-11": {
-    name: "OpenAI GPT-5.2 (2025-12-11)",
-    author: "openai",
-    description:
-      "GPT-5.2 is our best general-purpose model, part of the GPT-5 flagship model family. Our most intelligent model yet for both general and agentic tasks, GPT-5.2 shows improvements over the previous GPT-5.1 in:\n- General intelligence\n- Instruction following\n- Accuracy and token efficiency\n- Multimodality—especially vision\n- Code generation—especially front-end UI creation\n- Tool calling and context management in the API\n- Spreadsheet understanding and creation\n- Unlike the previous GPT-5.1 model, GPT-5.2 has new features for managing what the model knows and remembers to improve accuracy.",
-    contextLength: 400000,
-    maxOutputTokens: 128000,
-    created: "2025-12-11T00:00:00.000Z",
-    modality: { inputs: ["text", "image"], outputs: ["text"] },
-    tokenizer: "GPT",
-  },
   "gpt-5.2-pro": {
     name: "OpenAI: GPT-5.2 Pro",
     author: "openai",

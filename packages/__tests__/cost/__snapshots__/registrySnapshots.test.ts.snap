@@ -4987,29 +4987,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "openai/gpt-5.2": {
-    "gpt-5.2-2025-12-11:openai": {
-      "context": 400000,
-      "crossRegion": false,
-      "maxTokens": 128000,
-      "modelId": "gpt-5.2-2025-12-11",
-      "parameters": [
-        "logprobs",
-        "max_completion_tokens",
-        "response_format",
-        "seed",
-        "stop",
-        "temperature",
-        "tool_choice",
-        "tools",
-        "top_p",
-        "verbosity",
-      ],
-      "provider": "openai",
-      "ptbEnabled": true,
-      "regions": [
-        "*",
-      ],
-    },
     "gpt-5.2-chat-latest:openai": {
       "context": 128000,
       "crossRegion": false,
@@ -6616,7 +6593,6 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
   ],
   "openai/gpt-5.2": [
-    "openai",
     "openai",
     "openai",
     "openai",
@@ -8929,12 +8905,6 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
-      "model": "gpt-5.2-2025-12-11",
-      "providers": [
-        "openai",
-      ],
-    },
-    {
       "model": "gpt-5.2-chat-latest",
       "providers": [
         "openai",
@@ -9343,7 +9313,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "novita",
     },
     {
-      "modelCount": 30,
+      "modelCount": 29,
       "provider": "openai",
     },
     {
@@ -9416,7 +9386,6 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "gpt-5.1-codex",
     "gpt-5.1-codex-mini",
     "gpt-5.2",
-    "gpt-5.2-2025-12-11",
     "gpt-5.2-chat-latest",
     "gpt-5.2-pro",
     "gpt-oss-120b",
@@ -9475,9 +9444,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 286,
-  "totalModelProviderConfigs": 286,
-  "totalModelsWithPtb": 101,
+  "totalEndpoints": 285,
+  "totalModelProviderConfigs": 285,
+  "totalModelsWithPtb": 100,
   "totalProviders": 21,
 }
 `;
