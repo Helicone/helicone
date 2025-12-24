@@ -210,8 +210,11 @@ export class ProviderKeysManager {
         );
         if (existingKeys) {
           const existingKeysData = JSON.parse(existingKeys) as ProviderKey[];
-          existingKeysData.push(nullProviderKey(orgId, provider));
-          this.storeInCacheAsync(orgId, existingKeysData);
+          // Check if sentinel already exists to avoid duplicates from concurrent requests
+          if (!this.hasSentinelForProvider(existingKeysData, provider)) {
+            existingKeysData.push(nullProviderKey(orgId, provider));
+            this.storeInCacheAsync(orgId, existingKeysData);
+          }
         } else {
           this.storeInCacheAsync(orgId, [nullProviderKey(orgId, provider)]);
         }
