@@ -95,7 +95,8 @@ export class SimpleAIGateway {
       providerKeysManager,
       env,
       tracer,
-      traceContext
+      traceContext,
+      ctx
     );
     this.attemptExecutor = new AttemptExecutor(env, ctx, cacheProvider, tracer);
   }

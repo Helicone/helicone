@@ -88,13 +88,29 @@ export class ProviderKeysManager {
     return JSON.parse(keys) as ProviderKey[];
   }
 
+  /**
+   * Get provider key with read-through cache pattern.
+   * Returns cached data immediately, always refreshes in background.
+   */
   async getProviderKeyWithFetch(
     provider: ModelProviderName,
     providerModelId: string,
     orgId: string,
-    keyCuid?: string
+    keyCuid?: string,
+    ctx?: ExecutionContext
   ): Promise<ProviderKey | null> {
+    const cacheKey = `provider_keys_${orgId}`;
+    const ttl = 43200; // 12 hours
+
+    // Get cached keys
     const keys = await this.getProviderKeys(orgId);
+
+    // Always trigger background refresh if ctx is available (read-through cache)
+    if (ctx) {
+      ctx.waitUntil(this.refreshProviderKeysInBackground(orgId, cacheKey, ttl));
+    }
+
+    // Try to find key from cache
     const validKey = this.chooseProviderKey(
       keys ?? [],
       provider,
@@ -102,39 +118,56 @@ export class ProviderKeysManager {
       keyCuid
     );
 
-    if (!validKey) {
-      const keys = await this.store.getProviderKeysWithFetch(
-        provider,
-        orgId,
-        keyCuid
-      );
+    if (validKey) {
+      return validKey;
+    }
 
-      if (!keys) return null;
+    // Cache miss for this specific key - must wait for fetch
+    const fetchedKeys = await this.store.getProviderKeysWithFetch(
+      provider,
+      orgId,
+      keyCuid
+    );
 
-      const existingKeys = await getFromKVCacheOnly(
-        `provider_keys_${orgId}`,
-        this.env,
-        43200 // 12 hours
-      );
-      if (existingKeys) {
-        const existingKeysData = JSON.parse(existingKeys) as ProviderKey[];
-        existingKeysData.push(...keys);
+    if (!fetchedKeys) return null;
+
+    // Merge with existing cache and store
+    const existingKeys = keys ?? [];
+    const mergedKeys = [...existingKeys, ...fetchedKeys];
+
+    await storeInCache(
+      cacheKey,
+      JSON.stringify(mergedKeys),
+      this.env,
+      ttl,
+      false // Don't use memory cache to avoid test contamination
+    );
+
+    return this.chooseProviderKey(fetchedKeys, provider, providerModelId, keyCuid);
+  }
+
+  /**
+   * Background refresh of provider keys cache.
+   * Called via ctx.waitUntil() to not block the request.
+   */
+  private async refreshProviderKeysInBackground(
+    orgId: string,
+    cacheKey: string,
+    ttl: number
+  ): Promise<void> {
+    try {
+      const keys = await this.store.getProviderKeysByOrg(orgId);
+      if (keys && keys.length > 0) {
         await storeInCache(
-          `provider_keys_${orgId}`,
-          JSON.stringify(existingKeysData),
-          this.env,
-          43200 // 12 hours
-        );
-      } else {
-        await storeInCache(
-          `provider_keys_${orgId}`,
+          cacheKey,
           JSON.stringify(keys),
           this.env,
-          43200 // 12 hours
+          ttl,
+          false // Don't use memory cache
         );
       }
-      return this.chooseProviderKey(keys, provider, providerModelId, keyCuid);
+    } catch (e) {
+      console.error(`Background refresh failed for provider keys ${orgId}:`, e);
     }
-    return validKey;
   }
 }
