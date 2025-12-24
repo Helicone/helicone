@@ -1,10 +1,6 @@
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
 import { ProviderKey, ProviderKeysStore } from "../db/ProviderKeysStore";
-import {
-  getFromKVCacheOnly,
-  removeFromCache,
-  storeInCache,
-} from "../util/cache/secureCache";
+import { getFromCache, storeInCache } from "../util/cache/secureCache";
 
 export class ProviderKeysManager {
   constructor(
@@ -76,11 +72,14 @@ export class ProviderKeysManager {
   }
 
   async getProviderKeys(orgId: string): Promise<ProviderKey[] | null> {
-    const keys = await getFromKVCacheOnly(
-      `provider_keys_${orgId}`,
-      this.env,
-      43200 // 12 hours
-    );
+    // Use memory cache to avoid repeated KV reads within the same request
+    // when building attempts for multiple providers
+    const keys = await getFromCache({
+      key: `provider_keys_${orgId}`,
+      env: this.env,
+      useMemoryCache: true,
+      expirationTtl: 43200, // 12 hours edge cache TTL
+    });
     if (!keys) {
       return null;
     }
@@ -111,11 +110,12 @@ export class ProviderKeysManager {
 
       if (!keys) return null;
 
-      const existingKeys = await getFromKVCacheOnly(
-        `provider_keys_${orgId}`,
-        this.env,
-        43200 // 12 hours
-      );
+      const existingKeys = await getFromCache({
+        key: `provider_keys_${orgId}`,
+        env: this.env,
+        useMemoryCache: true,
+        expirationTtl: 43200, // 12 hours edge cache TTL
+      });
       if (existingKeys) {
         const existingKeysData = JSON.parse(existingKeys) as ProviderKey[];
         existingKeysData.push(...keys);
