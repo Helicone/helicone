@@ -78,7 +78,6 @@ export class SimpleAIGateway {
     this.metrics = metrics;
     this.tracer = tracer;
     this.traceContext = traceContext;
-    console.log("orgId", this.orgId);
 
     const providerKeysManager = new ProviderKeysManager(
       new ProviderKeysStore(this.supabaseClient),
