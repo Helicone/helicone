@@ -631,6 +631,82 @@ export class Wallet extends DurableObject<Env> {
     this.ctx.storage.sql.exec("DELETE FROM escrows WHERE id = ?", escrowId);
   }
 
+  /**
+   * Directly debit the wallet without going through escrow.
+   * Used as a fallback when escrow reservation fails but we've already
+   * made the LLM request optimistically (based on cached balance).
+   */
+  directDebit(
+    orgId: string,
+    actualCost: number
+  ): {
+    clickhouseLastCheckedAt: number;
+    remainingBalance: number;
+  } {
+    const actualCostScaled = actualCost * SCALE_FACTOR;
+    if (actualCostScaled < 0) {
+      throw new Error("actualCost cannot be negative");
+    }
+
+    return this.ctx.storage.transactionSync(() => {
+      const now = Date.now();
+
+      // Upsert to add the debit directly (same pattern as finalizeEscrow but without escrow deletion)
+      this.ctx.storage.sql.exec(
+        `INSERT INTO aggregated_debits (org_id, debits, updated_at, ch_last_checked_at, ch_last_value)
+          VALUES (?, ?, ?, ?, ?)
+          ON CONFLICT(org_id) DO UPDATE
+          SET debits = aggregated_debits.debits + excluded.debits, updated_at = ?`,
+        orgId,
+        actualCostScaled,
+        now,
+        now,
+        0,
+        now
+      );
+
+      // Get clickhouse last checked timestamp
+      const result = this.ctx.storage.sql
+        .exec<{
+          checked_at: number;
+        }>(
+          "SELECT ch_last_checked_at as checked_at FROM aggregated_debits WHERE org_id = ?",
+          orgId
+        )
+        .one();
+
+      // Calculate remaining balance (totalCredits - totalDebits - totalEscrow)
+      const totalCreditsPurchased = this.ctx.storage.sql
+        .exec<{
+          total: number;
+        }>("SELECT COALESCE(SUM(credits), 0) as total FROM credit_purchases")
+        .one().total;
+
+      const totalDebits = this.ctx.storage.sql
+        .exec<{
+          total: number;
+        }>(
+          "SELECT COALESCE(SUM(debits), 0) as total FROM aggregated_debits WHERE org_id = ?",
+          orgId
+        )
+        .one().total;
+
+      const totalEscrow = this.ctx.storage.sql
+        .exec<{
+          total: number;
+        }>("SELECT COALESCE(SUM(amount), 0) as total FROM escrows")
+        .one().total;
+
+      const remainingBalance =
+        (totalCreditsPurchased - totalDebits - totalEscrow) / SCALE_FACTOR;
+
+      return {
+        clickhouseLastCheckedAt: result.checked_at,
+        remainingBalance,
+      };
+    });
+  }
+
   updateClickhouseValues(orgId: string, clickhouseValue: number): void {
     const scaledValue = clickhouseValue * SCALE_FACTOR;
     const now = Date.now();
