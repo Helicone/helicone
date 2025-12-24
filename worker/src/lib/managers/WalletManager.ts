@@ -1,17 +1,10 @@
-import {
-  ALERT_ID,
-  ALERT_THRESHOLD,
-  SYNC_STALENESS_THRESHOLD,
-  Wallet,
-} from "../durable-objects/Wallet";
-import { SlackAlertManager } from "./SlackAlertManager";
-import { err, ok, Result } from "../util/results";
-import { isError } from "../../../../packages/common/result";
-import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
-import { WalletKVSync } from "../ai-gateway/WalletKVSync";
-import { DisallowListKVSync } from "../ai-gateway/DisallowListKVSync";
-import { createDataDogTracer } from "../monitoring/DataDogTracer";
 import retry from "async-retry";
+import { DisallowListKVSync } from "../ai-gateway/DisallowListKVSync";
+import { WalletKVSync } from "../ai-gateway/WalletKVSync";
+import { SYNC_STALENESS_THRESHOLD, Wallet } from "../durable-objects/Wallet";
+import { HeliconeProxyRequest } from "../models/HeliconeProxyRequest";
+import { createDataDogTracer } from "../monitoring/DataDogTracer";
+import { err, ok, Result } from "../util/results";
 
 export class WalletManager {
   private env: Env;
