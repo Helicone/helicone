@@ -82,6 +82,7 @@ export const DEFAULT_EMPTY_CHAT: MappedLLMRequest = {
     totalTokens: null,
     promptTokens: null,
     completionTokens: null,
+    reasoningTokens: null,
     latency: null,
     user: null,
     status: {
@@ -186,6 +187,7 @@ const convertOpenAIChatRequestToMappedLLMRequest = (
       totalTokens: null,
       promptTokens: null,
       completionTokens: null,
+      reasoningTokens: null,
       latency: null,
       user: null,
       status: {

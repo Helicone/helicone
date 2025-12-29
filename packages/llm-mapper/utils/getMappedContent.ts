@@ -80,6 +80,7 @@ const metaDataFromHeliconeRequest = (
     createdAt: heliconeRequest.request_created_at,
     path: heliconeRequest.request_path,
     completionTokens: heliconeRequest.completion_tokens,
+    reasoningTokens: heliconeRequest.reasoning_tokens,
     promptCacheWriteTokens: heliconeRequest.prompt_cache_write_tokens,
     promptCacheReadTokens: heliconeRequest.prompt_cache_read_tokens,
     promptTokens: heliconeRequest.prompt_tokens,
