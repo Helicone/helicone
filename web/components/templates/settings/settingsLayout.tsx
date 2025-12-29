@@ -7,7 +7,7 @@ import {
   NoSymbolIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
-import { KeyIcon, LinkIcon, Plug, Webhook, Lock } from "lucide-react";
+import { KeyIcon, LinkIcon, Plug, Webhook, Lock, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ReactNode } from "react";
@@ -31,6 +31,13 @@ const ORGANIZATION_TABS = [
     title: "Billing",
     icon: CreditCardIcon,
     href: "/settings/billing",
+  },
+  {
+    id: "sso",
+    title: "SSO",
+    icon: ShieldCheck,
+    href: "/settings/sso",
+    requiresPaidPlan: true,
   },
   {
     id: "reports",
@@ -82,6 +89,14 @@ const ACCOUNTS_TABS = [
   },
 ];
 
+interface SettingsTab {
+  id: string;
+  title: string;
+  icon: React.ComponentType<{ className?: string }>;
+  href: string;
+  requiresPaidPlan?: boolean;
+}
+
 interface SettingsLayoutProps {
   children: ReactNode;
 }
@@ -91,10 +106,13 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
   const currentPath = router.pathname;
   const org = useOrg();
   const isBetterAuthEnabled = process.env.NEXT_PUBLIC_BETTER_AUTH === "true";
+  const isPaidPlan = org?.currentOrg?.tier !== "free";
 
-  const organizationTabs = ORGANIZATION_TABS;
+  const organizationTabs = ORGANIZATION_TABS.filter(
+    (tab) => !tab.requiresPaidPlan || isPaidPlan
+  );
 
-  const renderNavSection = (title: string, tabs: typeof ORGANIZATION_TABS) => (
+  const renderNavSection = (title: string, tabs: SettingsTab[]) => (
     <div className="space-y-2">
       <h3 className="px-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
         {title}

@@ -177,6 +177,15 @@ export interface paths {
   "/v1/organization/update_onboarding": {
     post: operations["UpdateOnboardingStatus"];
   };
+  "/v1/organization/sso/metadata": {
+    post: operations["SubmitSSOMetadata"];
+  };
+  "/v1/organization/sso": {
+    get: operations["GetSSOConfig"];
+  };
+  "/v1/organization/sso/verify-domain": {
+    post: operations["VerifySSODomain"];
+  };
   "/v1/organization/models": {
     get: operations["GetModels"];
   };
@@ -1250,6 +1259,34 @@ Json: JsonObject;
       };
     };
     OnboardingStatus: components["schemas"]["Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--hasCompletedQuickstart-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___"];
+    "ResultSuccess__verificationToken-string__": {
+      data: {
+        verificationToken: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__verificationToken-string_.string_": components["schemas"]["ResultSuccess__verificationToken-string__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__domain-string--verificationToken-string--domainVerified-boolean--status-string_-or-null_": {
+      data: {
+        status: string;
+        domainVerified: boolean;
+        verificationToken: string;
+        domain: string;
+      } | null;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__domain-string--verificationToken-string--domainVerified-boolean--status-string_-or-null.string_": components["schemas"]["ResultSuccess__domain-string--verificationToken-string--domainVerified-boolean--status-string_-or-null_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__verified-boolean--ssoConfigured_63_-boolean__": {
+      data: {
+        ssoConfigured?: boolean;
+        verified: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__verified-boolean--ssoConfigured_63_-boolean_.string_": components["schemas"]["ResultSuccess__verified-boolean--ssoConfigured_63_-boolean__"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__model-string_-Array_": {
       data: {
           model: string;
@@ -17646,6 +17683,44 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  SubmitSSOMetadata: {
+    requestBody: {
+      content: {
+        "application/json": {
+          domain: string;
+          metadataUrl: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__verificationToken-string_.string_"];
+        };
+      };
+    };
+  };
+  GetSSOConfig: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__domain-string--verificationToken-string--domainVerified-boolean--status-string_-or-null.string_"];
+        };
+      };
+    };
+  };
+  VerifySSODomain: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__verified-boolean--ssoConfigured_63_-boolean_.string_"];
         };
       };
     };

@@ -2053,6 +2053,136 @@
 			"OnboardingStatus": {
 				"$ref": "#/components/schemas/Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--hasCompletedQuickstart-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___"
 			},
+			"ResultSuccess__verificationToken-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"verificationToken": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"verificationToken"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__verificationToken-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__verificationToken-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__domain-string--verificationToken-string--domainVerified-boolean--status-string_-or-null_": {
+				"properties": {
+					"data": {
+						"properties": {
+							"status": {
+								"type": "string"
+							},
+							"domainVerified": {
+								"type": "boolean"
+							},
+							"verificationToken": {
+								"type": "string"
+							},
+							"domain": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"status",
+							"domainVerified",
+							"verificationToken",
+							"domain"
+						],
+						"type": "object",
+						"nullable": true
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__domain-string--verificationToken-string--domainVerified-boolean--status-string_-or-null.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__domain-string--verificationToken-string--domainVerified-boolean--status-string_-or-null_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__verified-boolean--ssoConfigured_63_-boolean__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"ssoConfigured": {
+								"type": "boolean"
+							},
+							"verified": {
+								"type": "boolean"
+							}
+						},
+						"required": [
+							"verified"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__verified-boolean--ssoConfigured_63_-boolean_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__verified-boolean--ssoConfigured_63_-boolean__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"ResultSuccess__model-string_-Array_": {
 				"properties": {
 					"data": {
@@ -52329,6 +52459,106 @@
 						}
 					}
 				}
+			}
+		},
+		"/v1/organization/sso/metadata": {
+			"post": {
+				"operationId": "SubmitSSOMetadata",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__verificationToken-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"domain": {
+										"type": "string"
+									},
+									"metadataUrl": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"domain",
+									"metadataUrl"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/organization/sso": {
+			"get": {
+				"operationId": "GetSSOConfig",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__domain-string--verificationToken-string--domainVerified-boolean--status-string_-or-null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/organization/sso/verify-domain": {
+			"post": {
+				"operationId": "VerifySSODomain",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__verified-boolean--ssoConfigured_63_-boolean_.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
 			}
 		},
 		"/v1/organization/models": {

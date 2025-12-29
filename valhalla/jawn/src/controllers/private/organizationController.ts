@@ -591,6 +591,268 @@ export class OrganizationController extends Controller {
     }
   }
 
+  @Post("/sso/metadata")
+  public async submitSSOMetadata(
+    @Body()
+    requestBody: {
+      metadataUrl: string;
+      domain: string;
+    },
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<{ verificationToken: string }, string>> {
+    const organizationManager = new OrganizationManager(request.authParams);
+
+    // Check if organization is on a paid plan
+    const org = await organizationManager.getOrg();
+    if (org.error || !org.data) {
+      this.setStatus(500);
+      return err(org.error ?? "Error getting organization");
+    }
+
+    if (org.data.tier === "free") {
+      this.setStatus(403);
+      return err("SSO is only available on paid plans");
+    }
+
+    // Validate the metadata URL
+    if (
+      !requestBody.metadataUrl ||
+      !requestBody.metadataUrl.startsWith("https://")
+    ) {
+      this.setStatus(400);
+      return err("Invalid IdP metadata URL. Must be a valid HTTPS URL.");
+    }
+
+    // Validate the domain
+    if (!requestBody.domain || requestBody.domain.trim().length === 0) {
+      this.setStatus(400);
+      return err("Email domain is required.");
+    }
+
+    // Basic domain format validation
+    const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]*\.[a-zA-Z]{2,}$/;
+    if (!domainRegex.test(requestBody.domain.trim())) {
+      this.setStatus(400);
+      return err("Invalid email domain format.");
+    }
+
+    // Generate a verification token
+    const verificationToken = `helicone-verify-${crypto.randomUUID().slice(0, 12)}`;
+
+    // Store the SSO request in the organization's onboarding_status
+    const ssoMetadata = {
+      idp_metadata_url: requestBody.metadataUrl,
+      domain: requestBody.domain.trim().toLowerCase(),
+      verification_token: verificationToken,
+      domain_verified: false,
+      requested_at: new Date().toISOString(),
+      requested_by: request.authParams.userId,
+      status: "pending_verification",
+    };
+
+    const result = await dbExecute(
+      `UPDATE organization
+       SET onboarding_status = jsonb_set(
+         COALESCE(onboarding_status, '{}'::jsonb),
+         '{sso}',
+         $1::jsonb
+       )
+       WHERE id = $2`,
+      [JSON.stringify(ssoMetadata), request.authParams.organizationId]
+    );
+
+    if (result.error) {
+      this.setStatus(500);
+      return err(result.error ?? "Error saving SSO metadata");
+    }
+
+    this.setStatus(200);
+    return ok({ verificationToken });
+  }
+
+  @Get("/sso")
+  public async getSSOConfig(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<
+    Result<
+      {
+        domain: string;
+        verificationToken: string;
+        domainVerified: boolean;
+        status: string;
+      } | null,
+      string
+    >
+  > {
+    const result = await dbExecute<{
+      onboarding_status: {
+        sso?: {
+          domain: string;
+          verification_token: string;
+          domain_verified: boolean;
+          status: string;
+        };
+      };
+    }>(
+      `SELECT onboarding_status FROM organization WHERE id = $1`,
+      [request.authParams.organizationId]
+    );
+
+    if (result.error) {
+      this.setStatus(500);
+      return err(result.error ?? "Error getting SSO config");
+    }
+
+    const sso = result.data?.[0]?.onboarding_status?.sso;
+    if (!sso) {
+      return ok(null);
+    }
+
+    return ok({
+      domain: sso.domain,
+      verificationToken: sso.verification_token,
+      domainVerified: sso.domain_verified,
+      status: sso.status,
+    });
+  }
+
+  @Post("/sso/verify-domain")
+  public async verifySSODomain(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<{ verified: boolean; ssoConfigured?: boolean }, string>> {
+    const organizationManager = new OrganizationManager(request.authParams);
+
+    // Check if organization is on a paid plan
+    const org = await organizationManager.getOrg();
+    if (org.error || !org.data) {
+      this.setStatus(500);
+      return err(org.error ?? "Error getting organization");
+    }
+
+    if (org.data.tier === "free") {
+      this.setStatus(403);
+      return err("SSO is only available on paid plans");
+    }
+
+    // Get current SSO config
+    const configResult = await dbExecute<{
+      onboarding_status: {
+        sso?: {
+          domain: string;
+          verification_token: string;
+          domain_verified: boolean;
+          idp_metadata_url: string;
+          status: string;
+        };
+      };
+    }>(
+      `SELECT onboarding_status FROM organization WHERE id = $1`,
+      [request.authParams.organizationId]
+    );
+
+    if (configResult.error || !configResult.data?.[0]) {
+      this.setStatus(500);
+      return err("Error getting SSO config");
+    }
+
+    const sso = configResult.data[0].onboarding_status?.sso;
+    if (!sso) {
+      this.setStatus(400);
+      return err("No SSO configuration found. Please submit SSO metadata first.");
+    }
+
+    // If already configured, return success
+    if (sso.status === "configured") {
+      return ok({ verified: true, ssoConfigured: true });
+    }
+
+    if (sso.domain_verified) {
+      return ok({ verified: true, ssoConfigured: false });
+    }
+
+    // Verify DNS TXT record
+    const { Resolver } = await import("dns").then((m) => m.promises);
+    const resolver = new Resolver();
+
+    try {
+      const records = await resolver.resolveTxt(sso.domain);
+      const flatRecords = records.flat();
+      const verified = flatRecords.some(
+        (record) => record === sso.verification_token
+      );
+
+      if (verified) {
+        // Update the SSO config to mark as verified
+        await dbExecute(
+          `UPDATE organization
+           SET onboarding_status = jsonb_set(
+             onboarding_status,
+             '{sso,domain_verified}',
+             'true'::jsonb
+           )
+           WHERE id = $1`,
+          [request.authParams.organizationId]
+        );
+
+        // Create SSO provider in Supabase
+        const { SSOManager } = await import(
+          "../../managers/organization/SSOManager"
+        );
+        const ssoManager = new SSOManager();
+        const createResult = await ssoManager.createSSOProvider(
+          sso.domain,
+          sso.idp_metadata_url
+        );
+
+        if (createResult.error || !createResult.data) {
+          // Mark as verified but not configured
+          await dbExecute(
+            `UPDATE organization
+             SET onboarding_status = jsonb_set(
+               onboarding_status,
+               '{sso,status}',
+               '"verified"'::jsonb
+             )
+             WHERE id = $1`,
+            [request.authParams.organizationId]
+          );
+
+          // Return verified but with error info
+          this.setStatus(200);
+          return err(
+            `Domain verified but failed to configure SSO: ${createResult.error ?? "Unknown error"}`
+          );
+        }
+
+        // Mark as fully configured
+        await dbExecute(
+          `UPDATE organization
+           SET onboarding_status = jsonb_set(
+             jsonb_set(
+               onboarding_status,
+               '{sso,status}',
+               '"configured"'::jsonb
+             ),
+             '{sso,provider_id}',
+             $1::jsonb
+           )
+           WHERE id = $2`,
+          [
+            JSON.stringify(createResult.data.providerId),
+            request.authParams.organizationId,
+          ]
+        );
+
+        return ok({ verified: true, ssoConfigured: true });
+      }
+
+      return ok({ verified: false });
+    } catch (error) {
+      // DNS lookup failed - domain might not exist or no TXT records
+      return ok({ verified: false });
+    }
+  }
+
   @Get("/models")
   public async getModels(@Request() request: JawnAuthenticatedRequest): Promise<
     Result<
