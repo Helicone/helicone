@@ -96,7 +96,11 @@
       "WebFetch(domain:docs.perplexity.ai)",
       "mcp__chrome-devtools__fill_form",
       "mcp__chrome-devtools__press_key",
-      "Bash(yarn install)"
+      "Bash(yarn install)",
+      "Bash(npx vitest:*)",
+      "WebFetch(domain:streamdown.ai)",
+      "mcp__ide__getDiagnostics",
+      "Bash(yarn cf-typegen:*)"
     ],
     "deny": []
   },

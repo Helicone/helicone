@@ -3,9 +3,7 @@ title: "Responses API"
 description: "Use the OpenAI Responses API format through Helicone AI Gateway with your Helicone API key"
 ---
 
-<Info>
-Currently, the Responses API is not supported for Anthropic models.
-</Info>
+The Responses API is OpenAI's newer interface for conversational AI that supports advanced features like reasoning, tool use, and streaming. Helicone's AI Gateway supports the Responses API format for both OpenAI and Anthropic models.
 
 ## Quick Start
 
@@ -46,7 +44,7 @@ response = client.responses.create(
 print(response.output_text)
 ```
 
-```bash curl
+```bash
 curl https://ai-gateway.helicone.ai/v1/responses \
   -H "Authorization: Bearer $HELICONE_API_KEY" \
   -H "Content-Type: application/json" \

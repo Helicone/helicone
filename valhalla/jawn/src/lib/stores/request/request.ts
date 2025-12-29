@@ -170,6 +170,17 @@ export async function getRequestsClickhouseNoSort(
 
   const sortSQL = createdAtSort === "asc" ? "ASC" : "DESC";
   const query = `
+    WITH top_requests AS (
+      SELECT
+          request_id,
+          request_created_at
+      FROM request_response_rmt
+      WHERE (${builtFilter.filter})
+        AND request_created_at <= now() + INTERVAL 1 MINUTE
+      ORDER BY request_created_at ${sortSQL}
+      LIMIT ${limit}
+      OFFSET ${offset}
+    )
     SELECT response_id,
       if(notEmpty(response_body), response_body, '{"helicone_message": "fetching body from signed_url... contact engineering@helicone.ai for more information"}') as response_body,
       response_created_at,
@@ -204,13 +215,13 @@ export async function getRequestsClickhouseNoSort(
       storage_location
     FROM request_response_rmt
     WHERE (
-      (${builtFilter.filter})
+      organization_id = {val_0 : String} AND
+      request_created_at >= (SELECT min(request_created_at) - interval '1 minute' FROM top_requests)
+      AND request_created_at <= (SELECT max(request_created_at) + interval '1 minute' FROM top_requests)
+      AND request_id IN (SELECT request_id FROM top_requests)
     )
-    ORDER BY (organization_id, toStartOfHour(request_created_at), request_created_at) ${sortSQL}
-    LIMIT ${limit}
-    OFFSET ${offset}
+    ORDER BY organization_id ${sortSQL}, toStartOfHour(request_created_at) ${sortSQL}, request_created_at ${sortSQL}
   `;
-
   const requests = await dbQueryClickhouse<HeliconeRequest>(
     query,
     builtFilter.argsAcc
@@ -288,6 +299,7 @@ export async function getRequestsClickhouse(
     FROM request_response_rmt
     WHERE (
       (${builtFilter.filter})
+      AND request_created_at <= now() + INTERVAL 1 MINUTE
     )
     ${sortSQL !== undefined ? `ORDER BY ${sortSQL}` : ""}
     LIMIT ${limit}

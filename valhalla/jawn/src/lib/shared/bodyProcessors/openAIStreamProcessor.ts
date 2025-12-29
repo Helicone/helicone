@@ -1,4 +1,7 @@
-import { consolidateTextFields } from "../../../utils/streamParser";
+import {
+  consolidateTextFields,
+  consolidateResponsesAPIFields,
+} from "../../../utils/streamParser";
 import { PromiseGenericResult, err, ok } from "../../../packages/common/result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 import { isParseInputJson } from "./helpers";
@@ -35,6 +38,12 @@ export const NON_DATA_LINES = [
   "event: response.content_part.done",
   "event: response.output_item.done",
   "event: response.completed",
+  "event: response.reasoning_summary_part.added",
+  "event: response.reasoning_summary_text.delta",
+  "event: response.reasoning_summary_text.done",
+  "event: response.reasoning_summary_part.done",
+  "event: response.function_call_arguments.delta",
+  "event: response.function_call_arguments.done",
 ];
 
 function tryModel(requestData: string) {
@@ -78,10 +87,67 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
     });
 
     try {
+      // Detect if this is OpenAI Responses API format
+      const isResponsesAPI = data.some(
+        (item) =>
+          item?.type === "response.created" ||
+          item?.type === "response.completed"
+      );
+
+      if (isResponsesAPI) {
+        // Handle Responses API format
+        const consolidatedData = consolidateResponsesAPIFields(data);
+        const usageData = consolidatedData?.usage;
+
+        let usage;
+        if (usageData) {
+          // Responses API uses input_tokens/output_tokens
+          const effectivePromptTokens = Math.max(
+            0,
+            (usageData.input_tokens ?? 0) -
+              (usageData.input_tokens_details?.cached_tokens ?? 0)
+          );
+
+          const effectiveCompletionTokens = Math.max(
+            0,
+            (usageData.output_tokens ?? 0) -
+              (usageData.output_tokens_details?.reasoning_tokens ?? 0)
+          );
+
+          usage = {
+            totalTokens: usageData.total_tokens,
+            completionTokens: effectiveCompletionTokens,
+            promptTokens: effectivePromptTokens,
+            promptCacheReadTokens:
+              usageData.input_tokens_details?.cached_tokens ?? 0,
+            heliconeCalculated: false,
+          };
+        } else {
+          usage = {
+            totalTokens: -1,
+            completionTokens: -1,
+            promptTokens: -1,
+            heliconeCalculated: true,
+            helicone_error:
+              "counting tokens not supported, please see https://docs.helicone.ai/use-cases/enable-stream-usage",
+          };
+        }
+
+        return ok({
+          processedBody: {
+            ...consolidatedData,
+            streamed_data: data,
+          },
+          usage: usage,
+        });
+      }
+
+      // Handle Chat Completions API format (existing logic)
       const consolidatedData = consolidateTextFields(data);
       // since we have pricing rates that are separate for audio, input, output, and cached tokens,
       // we need to separate those components out here so that we can correctly calculate the cost.
-      const usageData = consolidatedData.usage || consolidatedData.response?.usage;
+      const usageData =
+        consolidatedData.usage || consolidatedData.response?.usage;
 
       let usage;
       if (usageData) {
@@ -121,10 +187,12 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
             usageData?.prompt_tokens_details?.cached_tokens ??
             usageData?.input_tokens_details?.cached_tokens ??
             0,
+          promptCacheWriteTokens:
+            usageData?.prompt_tokens_details?.cache_write_tokens ?? 0,
           heliconeCalculated: usageData?.helicone_calculated ?? false,
 
           // OpenRouter may contain these fields based on wallet/BYOK setup
-          cost: usageData.cost
+          cost: usageData.cost,
         };
       } else if (consolidatedData.response?.usage) {
         usage = {

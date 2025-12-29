@@ -1,5 +1,23 @@
-import { ModelUsage } from "./types";
-import { OpenAIUsage } from "@helicone-package/llm-mapper/transform/types/common";
+import { ModelUsage, ModalityUsage } from "./types";
+import { OpenAIUsage, ModalityTokenDetails } from "@helicone-package/llm-mapper/transform/types/common";
+
+function mapModalityUsageToTokenDetails(usage: ModalityUsage): ModalityTokenDetails {
+  return {
+    input_tokens: usage.input ?? 0,
+    cached_tokens: usage.cachedInput ?? 0,
+    output_tokens: usage.output ?? 0,
+  };
+}
+
+function hasModalityTokens(usage: ModalityUsage | undefined): boolean {
+  if (!usage) return false;
+  return (usage.input ?? 0) > 0 || (usage.cachedInput ?? 0) > 0 || (usage.output ?? 0) > 0;
+}
+
+function sumModalityTokens(usage: ModalityUsage | undefined): number {
+  if (!usage) return 0;
+  return (usage.input ?? 0) + (usage.cachedInput ?? 0) + (usage.output ?? 0);
+}
 
 /**
  * Converts normalized ModelUsage to OpenAI usage format
@@ -16,13 +34,16 @@ export function mapModelUsageToOpenAI(modelUsage: ModelUsage): OpenAIUsage {
     total_tokens: promptTokens + completionTokens,
   };
 
+  const audioInputTokens = modelUsage.audio?.input ?? 0;
+  const audioOutputTokens = modelUsage.audio?.output ?? 0;
   // Map cache details if present
   if (modelUsage.cacheDetails) {
     const { cachedInput, write5m, write1h } = modelUsage.cacheDetails;
+    usage.total_tokens += cachedInput;
 
     usage.prompt_tokens_details = {
       cached_tokens: cachedInput ?? 0,
-      audio_tokens: modelUsage.audio ?? 0,
+      audio_tokens: audioInputTokens,
     };
 
     // Add cache write details if present
@@ -33,25 +54,49 @@ export function mapModelUsageToOpenAI(modelUsage: ModelUsage): OpenAIUsage {
         write_5m_tokens: write5m ?? 0,
         write_1h_tokens: write1h ?? 0,
       };
+
+      usage.total_tokens += (write5m ?? 0) + (write1h ?? 0);
     }
-  } else if (modelUsage.audio) {
-    // Audio tokens without cache details
+  } else if (audioInputTokens > 0) {
+    // Modality tokens without cache details
     usage.prompt_tokens_details = {
       cached_tokens: 0,
-      audio_tokens: modelUsage.audio,
+      audio_tokens: audioInputTokens,
     };
   }
 
   // Map completion token details
-  const hasCompletionDetails = modelUsage.thinking || modelUsage.audio;
+  const hasCompletionDetails = modelUsage.thinking || audioOutputTokens > 0;
   if (hasCompletionDetails) {
     usage.completion_tokens_details = {
       reasoning_tokens: modelUsage.thinking ?? 0,
-      audio_tokens: modelUsage.audio ?? 0,
+
+      audio_tokens: audioOutputTokens,
       accepted_prediction_tokens: 0,
       rejected_prediction_tokens: 0,
     };
   }
+
+  usage.modality_tokens = {};
+
+  if (hasModalityTokens(modelUsage.image)) {
+    usage.modality_tokens.image = mapModalityUsageToTokenDetails(modelUsage.image!);
+  }
+  if (hasModalityTokens(modelUsage.audio)) {
+    usage.modality_tokens.audio = mapModalityUsageToTokenDetails(modelUsage.audio!);
+  }
+  if (hasModalityTokens(modelUsage.video)) {
+    usage.modality_tokens.video = mapModalityUsageToTokenDetails(modelUsage.video!);
+  }
+  if (hasModalityTokens(modelUsage.file)) {
+    usage.modality_tokens.file = mapModalityUsageToTokenDetails(modelUsage.file!);
+  }
+
+  usage.total_tokens +=
+    sumModalityTokens(modelUsage.image) +
+    sumModalityTokens(modelUsage.audio) +
+    sumModalityTokens(modelUsage.video) +
+    sumModalityTokens(modelUsage.file);
 
   // Map web search to server_tool_use (Anthropic-style extension to OpenAI format)
   if (modelUsage.web_search && modelUsage.web_search > 0) {

@@ -87,6 +87,9 @@ export class BedrockProvider extends BaseProvider {
     const forwardToHost = `bedrock-runtime.${awsRegion}.amazonaws.com`;
     headers.set("host", forwardToHost);
     headers.set("content-type", "application/json");
+    if (endpoint.providerModelId.includes("sonnet-4")) {
+      headers.set("anthropic-beta", "context-1m-2025-08-07");
+    }
 
     const url = new URL(authContext.requestUrl);
     const request = new HttpRequest({
@@ -110,17 +113,35 @@ export class BedrockProvider extends BaseProvider {
   }
 
   buildRequestBody(endpoint: Endpoint, context: RequestBodyContext): string {
-    if (endpoint.providerModelId.includes("claude-")) {
-      const anthropicBody =
-        context.bodyMapping === "OPENAI"
-          ? context.toAnthropic(
-              context.parsedBody,
-              endpoint.providerModelId,
-              { includeCacheBreakpoints: false }
-            )
-          : context.parsedBody;
+    if (context.bodyMapping === "NO_MAPPING") {
+      // For Claude models, add anthropic_version and remove model/stream
+      if (endpoint.providerModelId.includes("claude-")) {
+        return JSON.stringify({
+          ...context.parsedBody,
+          anthropic_version: "bedrock-2023-05-31",
+          model: undefined,
+          stream: undefined,
+        });
+      }
+      return JSON.stringify({
+        ...context.parsedBody,
+        model: endpoint.providerModelId,
+      });
+    }
 
-      const updatedBody = {
+    let updatedBody = context.parsedBody;
+    if (context.bodyMapping === "RESPONSES") {
+      updatedBody = context.toChatCompletions(updatedBody);
+    }
+
+    if (endpoint.providerModelId.includes("claude-")) {
+      const anthropicBody = context.toAnthropic(
+        updatedBody,
+        endpoint.providerModelId,
+        { includeCacheBreakpoints: false }
+      );
+
+      updatedBody = {
         ...anthropicBody,
         anthropic_version: "bedrock-2023-05-31",
         model: undefined, // model is not needed in Bedrock inputs (as its defined via URL)
@@ -136,11 +157,18 @@ export class BedrockProvider extends BaseProvider {
     });
   }
 
-  async buildErrorMessage(response: Response): Promise<string> {
-    const respJson = (await response.json()) as any;
-    if (respJson.message) {
-      return respJson.message;
+  async buildErrorMessage(response: Response): Promise<{
+    message: string;
+    details?: any;
+  }> {
+    try {
+      const respJson = (await response.json()) as any;
+      if (respJson.message) {
+        return { message: respJson.message, details: respJson };
+      }
+      return { message: `Failed request with status ${response.status}` };
+    } catch (error) {
+      return { message: `Request failed with status ${response.status}` };
     }
-    return `Failed request with status ${response.status}`;
   }
 }

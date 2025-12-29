@@ -12,10 +12,6 @@ export const endpoints = {
         threshold: 0,
         input: 0.000001,
         output: 0.000003,
-        request: 0.0,
-        image: 0.0,
-        audio: 0.0,
-        web_search: 0.0,
         cacheMultipliers: {
           cachedInput: 0.5,
         },
@@ -289,6 +285,37 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000006, // $0.6/1M
         output: 0.0000025, // $2.5/1M
+      },
+    ],
+    quantization: "bf16",
+    contextLength: 262_144,
+    maxCompletionTokens: 262_144,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "tool_choice",
+      "tools",
+      "structured_outputs",
+      "response_format",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "kimi-k2-thinking:canopywave": {
+    provider: "canopywave",
+    author: "moonshotai",
+    providerModelId: "moonshotai/kimi-k2-thinking",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000048, // $0.48/1M
+        output: 0.0000020, // $2.00/1M
       },
     ],
     quantization: "bf16",

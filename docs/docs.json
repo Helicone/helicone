@@ -34,6 +34,9 @@
                 "group": "Provider Concepts",
                 "pages": [
                   "gateway/concepts/prompt-caching",
+                  "gateway/concepts/reasoning",
+                  "gateway/concepts/image-generation",
+                  "gateway/concepts/context-editing",
                   "gateway/web-search",
                   "gateway/concepts/error-handling",
                   "gateway/concepts/responses-api"
@@ -42,9 +45,16 @@
               {
                 "group": "Integrations",
                 "pages": [
+                  "gateway/integrations/overview",
+                  "gateway/integrations/claude-agent-sdk",
                   "gateway/integrations/codex",
+                  "gateway/integrations/dpsy",
+                  "gateway/integrations/llamaindex",
                   "gateway/integrations/langchain",
+                  "gateway/integrations/langfuse",
                   "gateway/integrations/langgraph",
+                  "gateway/integrations/litellm",
+                  "gateway/integrations/llamaindex",
                   "gateway/integrations/n8n",
                   "gateway/integrations/semantic-kernel",
                   "gateway/integrations/vercel-ai-sdk",
@@ -75,6 +85,7 @@
                 "pages": [
                   "integrations/tools/curl",
                   "integrations/tools/logger-sdk",
+                  "integrations/tools/mcp",
                   "integrations/tools/xcode"
                 ]
               },
@@ -498,6 +509,10 @@
   },
   "navbar": {
     "links": [
+      {
+        "label": "Models",
+        "href": "https://helicone.ai/models"
+      },
       {
         "label": "Discord",
         "href": "https://discord.com/invite/zsSTcH2qhG"

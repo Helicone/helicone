@@ -9,7 +9,14 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
-import { MessageCircle, Rocket, Settings, Coins } from "lucide-react";
+import {
+  MessageCircle,
+  Rocket,
+  Settings,
+  Coins,
+  FileText,
+  ArrowUpRight,
+} from "lucide-react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -22,6 +29,8 @@ import { ChangelogItem } from "./types";
 import SidebarQuickstepCard from "../SidebarQuickstartCard";
 import { useHeliconeAgent } from "@/components/templates/agent/HeliconeAgentContext";
 import { useCredits } from "@/services/hooks/useCredits";
+import { useHasWrappedData } from "@/components/templates/wrapped/useWrapped";
+import { Gift } from "lucide-react";
 
 // Sidebar width constants
 const SIDEBAR_WIDTH_COLLAPSED = "w-12"; // 48px
@@ -56,6 +65,9 @@ const DesktopSidebar = ({
 
   // Fetch credit balance - defaults to 0 if it fails
   const { data: creditData } = useCredits();
+
+  // Check if org has wrapped data
+  const { hasData: hasWrappedData } = useHasWrappedData();
 
   const [isCollapsed, setIsCollapsed] = useLocalStorage(
     "isSideBarCollapsed",
@@ -268,12 +280,29 @@ const DesktopSidebar = ({
           {/* Main content area */}
           <div className="flex min-h-0 flex-1 flex-col">
             <ScrollArea
-              className="flex h-full flex-1 flex-col justify-between"
+              className="flex h-full flex-1 flex-col"
               width="thin"
               type="scroll"
             >
               {/* Navigation items */}
               <div className="flex flex-col">
+                {/* Wrapped 2025 Button - Only show if org has data */}
+                {hasWrappedData && (
+                  <div className="px-2 pt-2">
+                    <Button
+                      variant="ghost"
+                      onClick={() => router.push("/wrapped")}
+                      className={cn(
+                        "w-full gap-2 bg-blue-100 font-medium text-blue-700 hover:bg-blue-200 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900/70",
+                        isCollapsed ? "h-8 w-8 p-0" : "h-9",
+                      )}
+                    >
+                      <Gift size={16} />
+                      {!isCollapsed && <span>Merry Christmas!</span>}
+                    </Button>
+                  </div>
+                )}
+
                 {/* Quickstart Card - Only show if organization hasn't integrated */}
                 {onboardingStatus?.hasCompletedQuickstart === false &&
                   !isCollapsed && <SidebarQuickstepCard />}
@@ -331,43 +360,43 @@ const DesktopSidebar = ({
                     )}
                   </nav>
                 </div>
-              </div>
 
-              {/* InfoBox */}
-              {canShowInfoBox &&
-                orgContext?.currentOrg?.tier === "free" &&
-                (isCollapsed ? (
-                  <div className="px-2 py-2">
-                    <ProFeatureWrapper featureName="pro" enabled={false}>
-                      <Button
-                        variant="action"
-                        size="icon"
-                        className="h-8 w-full bg-sky-500 text-white hover:bg-sky-600"
-                      >
-                        <Rocket className="h-4 w-4" />
-                      </Button>
-                    </ProFeatureWrapper>
-                  </div>
-                ) : (
-                  <div className="mx-2 mb-4 mt-2 flex flex-col items-start justify-between gap-4 rounded border border-slate-200 bg-slate-50 px-3 py-2 font-medium text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 md:flex-row md:items-center md:justify-center md:gap-2">
-                    <div className="flex flex-col gap-2">
-                      <h1 className="text-start text-xs leading-[1.35rem] tracking-tight">
-                        Unlock more features with{" "}
-                        <span className="font-bold text-sky-500">Pro</span>. No
-                        usage limits, sessions, user analytics, custom
-                        properties and much more.
-                      </h1>
+                {/* InfoBox */}
+                {canShowInfoBox &&
+                  orgContext?.currentOrg?.tier === "free" &&
+                  (isCollapsed ? (
+                    <div className="px-2 py-2">
                       <ProFeatureWrapper featureName="pro" enabled={false}>
                         <Button
                           variant="action"
-                          className="h-8 w-full bg-sky-500 text-xs text-white hover:bg-sky-600"
+                          size="icon"
+                          className="h-8 w-full bg-sky-500 text-white hover:bg-sky-600"
                         >
-                          Start Pro Free Trial
+                          <Rocket className="h-4 w-4" />
                         </Button>
                       </ProFeatureWrapper>
                     </div>
-                  </div>
-                ))}
+                  ) : (
+                    <div className="mx-2 mb-4 mt-2 flex flex-col items-start justify-between gap-4 rounded border border-slate-200 bg-slate-50 px-3 py-2 font-medium text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 md:flex-row md:items-center md:justify-center md:gap-2">
+                      <div className="flex flex-col gap-2">
+                        <h1 className="text-start text-xs leading-[1.35rem] tracking-tight">
+                          Unlock more features with{" "}
+                          <span className="font-bold text-sky-500">Pro</span>.
+                          No usage limits, sessions, user analytics, custom
+                          properties and much more.
+                        </h1>
+                        <ProFeatureWrapper featureName="pro" enabled={false}>
+                          <Button
+                            variant="action"
+                            className="h-8 w-full bg-sky-500 text-xs text-white hover:bg-sky-600"
+                          >
+                            Start Pro Free Trial
+                          </Button>
+                        </ProFeatureWrapper>
+                      </div>
+                    </div>
+                  ))}
+              </div>
             </ScrollArea>
 
             <div
@@ -376,28 +405,60 @@ const DesktopSidebar = ({
                 isCollapsed && "items-center",
               )}
             >
-              <Button
-                variant="ghost"
-                size="none"
-                onClick={() => setAgentChatOpen(!agentChatOpen)}
+              {/* Resources Section */}
+              <a
+                href="https://docs.helicone.ai"
+                target="_blank"
+                rel="noopener noreferrer"
                 className={cn(
                   "flex items-center text-xs text-muted-foreground hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
                   isCollapsed
-                    ? "h-8 w-8 justify-center"
-                    : "h-8 w-full justify-start gap-2 px-3",
+                    ? "h-8 w-8 justify-center rounded-md"
+                    : "h-8 w-full justify-start gap-2 rounded-md px-3",
                 )}
               >
-                <div className="relative">
-                  <MessageCircle size={16} className="text-muted-foreground" />
-                  {agentChatOpen && (
-                    <span className="absolute -right-1 -top-1 h-1.5 w-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
-                  )}
-                </div>
-                {!isCollapsed && <span>Support</span>}
-              </Button>
+                <FileText size={16} className="text-muted-foreground" />
+                {!isCollapsed && (
+                  <>
+                    <span>Docs</span>
+                    <ArrowUpRight
+                      size={12}
+                      className="ml-auto text-muted-foreground"
+                    />
+                  </>
+                )}
+              </a>
+
+              {/* Partial-width divider */}
+              <div
+                className={cn(
+                  "my-2 h-px bg-slate-200 dark:bg-slate-700",
+                  isCollapsed ? "w-6" : "mx-3",
+                )}
+              />
 
               {orgContext?.currentOrg?.tier !== "demo" && (
                 <>
+                  <Button
+                    variant="ghost"
+                    size="none"
+                    onClick={() => setAgentChatOpen(!agentChatOpen)}
+                    className={cn(
+                      "flex items-center text-xs text-muted-foreground hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800",
+                      isCollapsed
+                        ? "h-8 w-8 justify-center"
+                        : "h-8 w-full justify-start gap-2 px-3",
+                    )}
+                  >
+                    <div className="relative">
+                      <MessageCircle size={16} className="text-muted-foreground" />
+                      {agentChatOpen && (
+                        <span className="absolute -right-1 -top-1 h-1.5 w-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
+                      )}
+                    </div>
+                    {!isCollapsed && <span>Support</span>}
+                  </Button>
+
                   <Button
                     variant="ghost"
                     size="none"

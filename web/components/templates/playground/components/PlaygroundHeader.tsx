@@ -1,3 +1,4 @@
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -14,7 +15,13 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { MappedLLMRequest, Tool } from "@helicone-package/llm-mapper/types";
-import { CheckIcon, ChevronsUpDownIcon, Loader2 } from "lucide-react";
+import {
+  AlertTriangleIcon,
+  CheckIcon,
+  ChevronsUpDownIcon,
+  Loader2,
+  XIcon,
+} from "lucide-react";
 import { useState } from "react";
 import { ModelParameters } from "@/lib/api/llm/generate";
 import ModelParametersForm from "./ModelParametersForm";
@@ -47,6 +54,11 @@ interface PlaygroundHeaderProps {
   error: string | null;
   isLoading?: boolean;
   createPrompt?: boolean;
+  unsupportedModelWarning?: {
+    originalModel: string;
+    fallbackModel: string;
+  } | null;
+  onDismissUnsupportedModelWarning?: () => void;
 }
 
 const PlaygroundHeader = ({
@@ -69,6 +81,8 @@ const PlaygroundHeader = ({
   error,
   isLoading,
   createPrompt,
+  unsupportedModelWarning,
+  onDismissUnsupportedModelWarning,
 }: PlaygroundHeaderProps) => {
   const [modelListOpen, setModelListOpen] = useState<boolean>(false);
   const { data: playgroundModels, isLoading: modelsLoading } =
@@ -83,12 +97,36 @@ const PlaygroundHeader = ({
   return (
     <div
       className={cn(
-        "flex w-full items-center justify-between px-4 py-2",
+        "flex w-full flex-col gap-2 px-4 py-2",
         isScrolled
           ? "rounded-lg bg-background"
           : "border-t border-border bg-sidebar-background",
       )}
     >
+      {unsupportedModelWarning && (
+        <Alert variant="warning" className="py-2">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <AlertTriangleIcon size={16} className="flex-shrink-0" />
+              <AlertDescription>
+                Model &quot;{unsupportedModelWarning.originalModel}&quot; is not
+                supported in Playground. Using &quot;
+                {unsupportedModelWarning.fallbackModel}&quot; instead.
+              </AlertDescription>
+            </div>
+            {onDismissUnsupportedModelWarning && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 flex-shrink-0 p-0"
+                onClick={onDismissUnsupportedModelWarning}
+              >
+                <XIcon size={14} />
+              </Button>
+            )}
+          </div>
+        </Alert>
+      )}
       <div className="flex w-full items-center justify-between gap-2">
         <div className="flex w-full cursor-pointer items-center gap-2">
           <Popover open={modelListOpen} onOpenChange={setModelListOpen}>

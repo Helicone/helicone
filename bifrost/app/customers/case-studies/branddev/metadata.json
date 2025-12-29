@@ -1,0 +1,11 @@
+{
+  "company": "Brand.dev",
+  "title": "How Brand.dev Cut Debugging Time by 90%+",
+  "description": "Brand.dev uses Helicone to debug, optimize, and scale their AI infrastructure.",
+  "logo": "/static/customers/case-studies/branddev.webp",
+  "url": "brand.dev",
+  "customerSince": "2024-05-23",
+  "isOpenSourced": false,
+  "date": "2025-12-10",
+  "relatedStudies": ["deepai", "cogna"]
+}

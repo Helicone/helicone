@@ -157,6 +157,24 @@ export default function RequestDrawer(props: RequestDivProps) {
     request?.id || "",
   );
 
+  // Sanitizes Target URL if API key is used as a query parameter
+  const sanitizeTargetUrl = useCallback((url: string) => {
+    try {
+      const parsed = new URL(url);
+      const keyParam = parsed.searchParams.get("key");
+      if (keyParam) {
+        const masked = keyParam.startsWith("AI")
+          ? `${keyParam.slice(0, 3)}...`
+          : `${keyParam.slice(0, 1)}...`;
+        parsed.searchParams.set("key", masked);
+        return parsed.toString();
+      }
+    } catch {
+      // Fall through to return the original URL if parsing fails
+    }
+    return url;
+  }, []);
+
   // BACKWARDS COMPATABILITY FOR OLD PROMPTS
   const legacyPromptId = useMemo(
     () =>
@@ -239,9 +257,11 @@ export default function RequestDrawer(props: RequestDivProps) {
     ];
 
     if (request.heliconeMetadata.targetUrl) {
+      const safeUrl = sanitizeTargetUrl(request.heliconeMetadata.targetUrl);
       requestInfo.push({
         label: "Target URL",
-        value: request.heliconeMetadata.targetUrl,
+        value: safeUrl,
+        fullValue: safeUrl,
       });
     }
 
@@ -261,29 +281,29 @@ export default function RequestDrawer(props: RequestDivProps) {
       },
       ...(request.heliconeMetadata.path
         ? [
-            {
-              label: "Path",
-              value: request.heliconeMetadata.path,
-            },
-          ]
+          {
+            label: "Path",
+            value: request.heliconeMetadata.path,
+          },
+        ]
         : []),
       ...(request.heliconeMetadata.promptCacheReadTokens &&
-      request.heliconeMetadata.promptCacheReadTokens > 0
+        request.heliconeMetadata.promptCacheReadTokens > 0
         ? [
-            {
-              label: "Prompt Cache Read Tokens",
-              value: request.heliconeMetadata.promptCacheReadTokens || 0,
-            },
-          ]
+          {
+            label: "Prompt Cache Read Tokens",
+            value: request.heliconeMetadata.promptCacheReadTokens || 0,
+          },
+        ]
         : []),
       ...(request.heliconeMetadata.promptCacheWriteTokens &&
-      request.heliconeMetadata.promptCacheWriteTokens > 0
+        request.heliconeMetadata.promptCacheWriteTokens > 0
         ? [
-            {
-              label: "Prompt Cache Write Tokens",
-              value: request.heliconeMetadata.promptCacheWriteTokens || 0,
-            },
-          ]
+          {
+            label: "Prompt Cache Write Tokens",
+            value: request.heliconeMetadata.promptCacheWriteTokens || 0,
+          },
+        ]
         : []),
     ];
 
@@ -742,8 +762,8 @@ export default function RequestDrawer(props: RequestDivProps) {
                   icon={<ScrollTextIcon className="h-4 w-4" />}
                   copyText={specialProperties.promptId}
                   href={
-                    newPromptId
-                      ? `/prompts`
+                    newPromptVersionId
+                      ? `/prompts?promptId=${newPromptId}`
                       : `/prompts/${promptDataQuery.data?.id}`
                   }
                   truncateLength={dynamicTruncateLength}
@@ -911,9 +931,9 @@ export default function RequestDrawer(props: RequestDivProps) {
                         <span className="text-sm font-medium text-muted-foreground">
                           {currentPromptData.data.prompt.name.length > 15
                             ? currentPromptData.data.prompt.name.substring(
-                                0,
-                                12,
-                              ) + "..."
+                              0,
+                              12,
+                            ) + "..."
                             : currentPromptData.data.prompt.name}
                         </span>
                       </>
@@ -1093,12 +1113,12 @@ export default function RequestDrawer(props: RequestDivProps) {
               type="request"
               defaultValue={
                 request.heliconeMetadata.scores &&
-                request.heliconeMetadata.scores["helicone-score-feedback"]
+                  request.heliconeMetadata.scores["helicone-score-feedback"]
                   ? Number(
-                      request.heliconeMetadata.scores[
-                        "helicone-score-feedback"
-                      ],
-                    ) === 1
+                    request.heliconeMetadata.scores[
+                    "helicone-score-feedback"
+                    ],
+                  ) === 1
                     ? true
                     : false
                   : null

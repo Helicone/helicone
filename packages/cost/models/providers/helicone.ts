@@ -32,37 +32,49 @@ export class HeliconeProvider extends BaseProvider {
     return `${this.baseUrl}/openai/v1${path}`;
   }
 
-  authenticate(authContext: AuthContext): AuthResult {
+  authenticate(authContext: AuthContext, endpoint: Endpoint): AuthResult {
     const headers: Record<string, string> = {};
 
     // Default to Bearer token auth for OpenAI models
     headers["Authorization"] = `Bearer ${authContext.apiKey || ""}`;
 
+    if (endpoint.providerModelId.includes("sonnet-4")) {
+      headers["anthropic-beta"] = "context-1m-2025-08-07";
+    }
+
     return { headers };
   }
 
   buildRequestBody(endpoint: Endpoint, context: RequestBodyContext): string {
-    // Check if this is an Anthropic model
+    let updatedBody = context.parsedBody;
     const isAnthropicModel = endpoint.author === "anthropic";
-
-    if (isAnthropicModel) {
-      // Use Anthropic message format (converted from OpenAI format if needed)
-      if (context.bodyMapping === "NO_MAPPING") {
-        const body = { ...context.parsedBody };
-
+    if (context.bodyMapping === "NO_MAPPING") {
+      if (isAnthropicModel) {
         // Ensure system message is in object format if it's a string
-        if (typeof body.system === "string") {
-          body.system = [{ type: "text", text: body.system }];
+        if (typeof updatedBody.system === "string") {
+          updatedBody.system = [{ type: "text", text: updatedBody.system }];
         }
-
         return JSON.stringify({
-          ...body,
+          ...updatedBody,
           model: endpoint.providerModelId,
         });
       }
 
+      return JSON.stringify({
+        ...updatedBody,
+        model: endpoint.providerModelId,
+      });
+    }
+
+    // Convert responses API format to chat completions format first
+    // This supports both OpenAI and Anthropic models with the responses API
+    if (context.bodyMapping === "RESPONSES" && !endpoint.providerModelId.includes("gpt")) {
+      updatedBody = context.toChatCompletions(updatedBody);
+    }
+
+    if (isAnthropicModel) {
       const anthropicBody = context.toAnthropic(
-        context.parsedBody,
+        updatedBody,
         endpoint.providerModelId
       );
 
@@ -75,7 +87,7 @@ export class HeliconeProvider extends BaseProvider {
 
     // Standard format - just pass through with correct model
     return JSON.stringify({
-      ...context.parsedBody,
+      ...updatedBody,
       model: endpoint.providerModelId,
     });
   }

@@ -12,8 +12,10 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000003,
         output: 0.0000025,
-        image: 0.001238,
-        audio: 0.000001,
+        audio: {
+          input: 0.000001, // $1/1M audio input tokens
+          cachedInputMultiplier: 0.1, // $0.1/1M cached audio (10% of input)
+        },
         cacheMultipliers: {
           cachedInput: 0.25,
           write5m: 1.0,
@@ -41,6 +43,7 @@ export const endpoints = {
       tpm: 8_000_000,
     },
     ptbEnabled: true,
+    responseFormat: "GOOGLE",
     endpointConfigs: {
       "*": {},
     },
@@ -55,8 +58,10 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000003,
         output: 0.0000025,
-        image: 0.001238,
-        audio: 0.000001,
+        audio: {
+          input: 0.000001, // $1/1M audio input tokens
+          cachedInputMultiplier: 0.1, // $0.1/1M cached audio (10% of input)
+        },
         cacheMultipliers: {
           cachedInput: 0.25,
           write5m: 1.0,
@@ -79,6 +84,7 @@ export const endpoints = {
       "tools",
       "top_p",
     ],
+    responseFormat: "GOOGLE",
     ptbEnabled: true,
     endpointConfigs: {
       global: {

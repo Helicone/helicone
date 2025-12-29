@@ -45,7 +45,7 @@ export class Prompt2025Manager extends BaseManager {
       process.env.S3_ACCESS_KEY || undefined,
       process.env.S3_SECRET_KEY || undefined,
       process.env.S3_ENDPOINT_PUBLIC ?? process.env.S3_ENDPOINT ?? "",
-      process.env.S3_BUCKET_NAME ?? "",
+      process.env.S3_PROMPT_BUCKET_NAME ?? "",
       (process.env.S3_REGION as "us-west-2" | "eu-west-1") ?? "us-west-2"
     );
   }
@@ -65,7 +65,7 @@ export class Prompt2025Manager extends BaseManager {
     }
   }
 
-  private generateRandomPromptId() : string {
+  private generateRandomPromptId(): string {
     const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let result = '';
     for (let i = 0; i < PROMPT_ID_LENGTH; i++) {
@@ -191,7 +191,7 @@ export class Prompt2025Manager extends BaseManager {
   }): Promise<Result<Prompt2025[], string>> {
     const tagsFilterClause = params.tagsFilter.length > 0 ? `AND tags && $3::text[]` : "";
     const result = await dbExecute<Prompt2025>(
-    `
+      `
       SELECT
         id,
         name,
@@ -224,7 +224,7 @@ export class Prompt2025Manager extends BaseManager {
     versionId: string;
     requestId: string;
   }): Promise<Result<Prompt2025Input | null, string>> {
-    const existsResult = await dbExecute<{exists: boolean}>(
+    const existsResult = await dbExecute<{ exists: boolean }>(
       `SELECT EXISTS (
         SELECT 1 FROM prompts_2025_versions 
         WHERE prompt_id = $1 AND id = $2 AND organization = $3 AND soft_delete is false
@@ -455,11 +455,11 @@ export class Prompt2025Manager extends BaseManager {
         VALUES ($1, $2, $3, NOW(), $4)
         RETURNING id
           `, [
-            promptId,
-            params.name,
-            params.tags,
-            this.authParams.organizationId,
-          ]
+          promptId,
+          params.name,
+          params.tags,
+          this.authParams.organizationId,
+        ]
         );
         break;
       } catch (error: any) {
@@ -470,14 +470,14 @@ export class Prompt2025Manager extends BaseManager {
         return err(error);
       }
     }
-    
+
     if (insertPromptResult?.error) {
       return err(insertPromptResult.error);
     }
-    
+
     const promptId = insertPromptResult?.data?.[0]?.id ?? '';
-    
-    
+
+
     const insertPromptVersionResult = await dbExecute<{ id: string }>(
       `
       INSERT INTO prompts_2025_versions (
@@ -493,13 +493,13 @@ export class Prompt2025Manager extends BaseManager {
       VALUES (NOW(), $1, 0, 0, 'First version.', $2, $3, $4)
       RETURNING id
       `, [
-        promptId,
-        this.authParams.userId,
-        this.authParams.organizationId,
-        params.promptBody.model,
-      ]
+      promptId,
+      this.authParams.userId,
+      this.authParams.organizationId,
+      params.promptBody.model,
+    ]
     )
-    
+
     if (insertPromptVersionResult?.error) {
       return err(insertPromptVersionResult.error);
     }
@@ -595,14 +595,14 @@ export class Prompt2025Manager extends BaseManager {
       VALUES (NOW(), $1, $2, $3, $4, $5, $6, $7)
       RETURNING id
       `, [
-        params.promptId,
-        nextMajor,
-        nextMinor,
-        params.commitMessage,
-        this.authParams.userId,
-        this.authParams.organizationId,
-        params.promptBody.model,
-      ]
+      params.promptId,
+      nextMajor,
+      nextMinor,
+      params.commitMessage,
+      this.authParams.userId,
+      this.authParams.organizationId,
+      params.promptBody.model,
+    ]
     )
 
     if (insertPromptVersionResult?.error) {
@@ -773,10 +773,10 @@ export class Prompt2025Manager extends BaseManager {
   ): Promise<Result<null, string>> {
     if (!promptId) return err("Prompt ID is required");
     const key = this.s3Client.getPromptKey(promptId, promptVersionId, this.authParams.organizationId);
-    
-    const s3result = await this.s3Client.store(key, JSON.stringify(promptBody)); 
+
+    const s3result = await this.s3Client.store(key, JSON.stringify(promptBody));
     if (s3result.error) return err(s3result.error);
-    
+
     return ok(null);
   }
 
@@ -785,7 +785,7 @@ export class Prompt2025Manager extends BaseManager {
     promptVersionId: string
   ): Promise<Result<null, string>> {
     const key = this.s3Client.getPromptKey(promptId, promptVersionId, this.authParams.organizationId);
-    
+
     const s3Result = await this.s3Client.remove(key);
     if (s3Result.error) return err(s3Result.error);
     return ok(null);
@@ -1240,14 +1240,13 @@ export class PromptManager extends BaseManager {
     AND prompt_v2.soft_delete = false
     AND prompts_versions.soft_delete = false
     AND (${filterWithAuth.filter})
-    ${
-      includeExperimentVersions
+    ${includeExperimentVersions
         ? ""
         : `AND (
               prompts_versions.metadata->>'experimentAssigned' IS NULL
               OR prompts_versions.metadata->>'experimentAssigned' != 'true'
             )`
-    }
+      }
     `,
       filterWithAuth.argsAcc
     );
@@ -1660,13 +1659,13 @@ export class PromptManager extends BaseManager {
         const matches = str.match(regex);
         return matches
           ? matches.map((match) =>
-              match
-                .replace(
-                  /<helicone-prompt-input key=\\?"(.*?)\\?"\s*\/>/g,
-                  "$1"
-                )
-                .replace(/\\/g, "")
-            )
+            match
+              .replace(
+                /<helicone-prompt-input key=\\?"(.*?)\\?"\s*\/>/g,
+                "$1"
+              )
+              .replace(/\\/g, "")
+          )
           : [];
       };
 

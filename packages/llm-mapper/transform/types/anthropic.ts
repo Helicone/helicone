@@ -26,6 +26,47 @@ export interface AnthropicRequestBody {
   stream?: boolean;
   tools?: (AnthropicTool | AnthropicWebSearchTool)[];
   tool_choice?: AnthropicToolChoice;
+  thinking?: AnthropicThinkingConfig;
+  /**
+   * Context management configuration for automatic context editing.
+   * @see https://docs.anthropic.com/en/docs/build-with-claude/context-editing
+   */
+  context_management?: AnthropicContextManagement;
+}
+
+export type AnthropicThinkingConfig = {
+  type: "enabled";
+  budget_tokens: number;
+} | {
+  type: "disabled";
+};
+
+/**
+ * Context management configuration for Anthropic's context editing feature.
+ * Uses an edits array with versioned strategy types.
+ *
+ * @see https://docs.anthropic.com/en/docs/build-with-claude/context-editing
+ */
+export interface AnthropicContextManagement {
+  edits: AnthropicContextEdit[];
+}
+
+export type AnthropicContextEdit =
+  | AnthropicClearToolUsesEdit
+  | AnthropicClearThinkingEdit;
+
+export interface AnthropicClearToolUsesEdit {
+  type: "clear_tool_uses_20250919";
+  trigger?: { type: "input_tokens" | "tool_uses"; value: number };
+  keep?: { type: "tool_uses"; value: number };
+  clear_at_least?: { type: "input_tokens"; value: number };
+  exclude_tools?: string[];
+  clear_tool_inputs?: boolean;
+}
+
+export interface AnthropicClearThinkingEdit {
+  type: "clear_thinking_20251015";
+  keep?: { type: "thinking_turns"; value: number } | "all";
 }
 
 export interface AnthropicMessage {

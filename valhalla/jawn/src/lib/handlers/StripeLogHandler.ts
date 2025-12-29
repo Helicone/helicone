@@ -53,7 +53,11 @@ export class StripeLogHandler extends AbstractLogHandler {
       return await super.handle(context);
     }
 
-    if (context.message.log.request.cacheReferenceId && (context.message.log.request.cacheReferenceId !== DEFAULT_CACHE_REFERENCE_ID)) {
+    if (
+      context.message.log.request.cacheReferenceId &&
+      context.message.log.request.cacheReferenceId !==
+        DEFAULT_CACHE_REFERENCE_ID
+    ) {
       return await super.handle(context);
     }
 
@@ -67,7 +71,7 @@ export class StripeLogHandler extends AbstractLogHandler {
       return await super.handle(context);
     }
 
-    const event: StripeMeterEvent = {
+    const request_event: StripeMeterEvent = {
       identifier: `org_${organizationId}_request_${context.message.log.request.id}`,
       event_name: "requests_sum",
       timestamp: context.message.log.request.requestCreatedAt.toISOString(),
@@ -76,8 +80,19 @@ export class StripeLogHandler extends AbstractLogHandler {
         value: "1",
       },
     };
+    this.stripeTraceUsages.push(request_event);
 
-    this.stripeTraceUsages.push(event);
+    const byte_event: StripeMeterEvent = {
+      identifier: `org_${organizationId}_byte_${context.message.log.request.id}`,
+      event_name: "bytes_sum",
+      timestamp: context.message.log.request.requestCreatedAt.toISOString(),
+      payload: {
+        stripe_customer_id: stripe_customer_id.data,
+        value: context.sizeBytes?.toString() ?? "0",
+      },
+    };
+
+    this.stripeTraceUsages.push(byte_event);
 
     return await super.handle(context);
   }

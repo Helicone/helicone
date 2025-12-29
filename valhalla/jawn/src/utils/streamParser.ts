@@ -47,6 +47,13 @@ export function consolidateTextFields(responseBody: any[]): any {
                   content: c.delta.content
                     ? c.delta.content + (cur.choices[i].delta.content ?? "")
                     : cur.choices[i].delta.content,
+                  reasoning: c.delta.reasoning
+                    ? c.delta.reasoning + (cur.choices[i].delta.reasoning ?? "")
+                    : cur.choices[i].delta.reasoning,
+                  reasoning_details:
+                    c.delta.reasoning_details && cur.choices[i].delta.reasoning_details
+                      ? [...c.delta.reasoning_details, ...cur.choices[i].delta.reasoning_details]
+                      : c.delta.reasoning_details || cur.choices[i].delta.reasoning_details,
                   function_call: c.delta.function_call
                     ? recursivelyConsolidate(
                         c.delta.function_call,
@@ -179,6 +186,52 @@ export function recursivelyConsolidateToolCalls(
 
   // Convert back to array and sort by index
   return Object.values(finalToolCalls).sort((a, b) => a.index - b.index);
+}
+
+/**
+ * Consolidates OpenAI Responses API streaming events into a complete response object.
+ * The response.completed event contains the full response, so we extract that directly.
+ * Falls back to manual consolidation if response.completed is not found.
+ */
+export function consolidateResponsesAPIFields(responseBody: any[]): any {
+  // Find the response.completed event - it contains the complete response
+  const completedEvent = responseBody.find(
+    (item) => item?.type === "response.completed"
+  );
+
+  if (completedEvent?.response) {
+    return completedEvent.response;
+  }
+
+  // Fallback: manual consolidation from individual events
+  // Get the base response from response.created or response.in_progress
+  const createdEvent = responseBody.find(
+    (item) => item?.type === "response.created"
+  );
+  const inProgressEvent = responseBody.find(
+    (item) => item?.type === "response.in_progress"
+  );
+
+  const baseResponse = createdEvent?.response || inProgressEvent?.response;
+
+  if (!baseResponse) {
+    // If we can't find any response events, return the first non-error item
+    return responseBody.find(
+      (item) => item && !item.error && typeof item === "object"
+    );
+  }
+
+  // Build the output array from response.output_item.done events
+  const outputItems = responseBody
+    .filter((item) => item?.type === "response.output_item.done")
+    .sort((a, b) => (a.output_index ?? 0) - (b.output_index ?? 0))
+    .map((item) => item.item);
+
+  return {
+    ...baseResponse,
+    status: "completed",
+    output: outputItems.length > 0 ? outputItems : baseResponse.output,
+  };
 }
 
 export function consolidateGoogleTextFields(responseBody: any[]): any {

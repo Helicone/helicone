@@ -1,5 +1,5 @@
-// src/users/usersController.ts
 import {
+  Body,
   Controller,
   Delete,
   Path,
@@ -21,6 +21,13 @@ import { AdminWalletManager } from "../../managers/admin/AdminWalletManager";
 import { AdminWalletAnalyticsManager } from "../../managers/admin/AdminWalletAnalyticsManager";
 import { WalletState } from "../../types/wallet";
 import { WalletManager } from "../../managers/wallet/WalletManager";
+import { OrgDiscount } from "../../utils/discountCalculator";
+import { CreditsManager, ModelSpend, PTBInvoice } from "../../managers/creditsManager";
+import {
+  InvoicingManager,
+  InvoiceSummary,
+  CreateInvoiceResponse,
+} from "../../managers/admin/InvoicingManager";
 
 interface DashboardData {
   organizations: Array<{
@@ -544,5 +551,164 @@ export class AdminWalletController extends Controller {
       tokenUsageProductId,
       timeGranularity
     );
+  }
+
+  /**
+   * Get spend breakdown for an org by date range.
+   * Includes discounts applied per organization's discount rules.
+   */
+  @Post("/{orgId}/spend-breakdown")
+  public async getSpendBreakdownForOrg(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string,
+    @Query() startDate: string,
+    @Query() endDate: string
+  ): Promise<Result<ModelSpend[], string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return err("Invalid date format");
+    }
+
+    // Use CreditsManager with the target org's auth params
+    const creditsManager = new CreditsManager({
+      organizationId: orgId,
+      userId: request.authParams.userId,
+    });
+
+    const result = await creditsManager.getSpendBreakdownByDateRange(start, end);
+
+    if (result.error || !result.data) {
+      return err(result.error ?? "Failed to get spend breakdown");
+    }
+
+    return ok(result.data.models);
+  }
+
+  /**
+   * Delete a recorded invoice.
+   */
+  @Delete("/{orgId}/invoices/{invoiceId}")
+  public async deleteInvoice(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string,
+    @Path() invoiceId: string
+  ): Promise<Result<{ deleted: boolean }, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    const manager = new InvoicingManager(orgId);
+    return manager.deleteInvoice(invoiceId);
+  }
+
+  /**
+   * Update an invoice's hosted URL (for after sending from Stripe).
+   */
+  @Post("/{orgId}/invoices/{invoiceId}/update")
+  public async updateInvoice(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string,
+    @Path() invoiceId: string,
+    @Body() body: { hostedInvoiceUrl: string | null }
+  ): Promise<Result<{ updated: boolean }, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    const manager = new InvoicingManager(orgId);
+    return manager.updateInvoice(invoiceId, body.hostedInvoiceUrl);
+  }
+
+  /**
+   * List all recorded invoices for an org.
+   */
+  @Post("/{orgId}/invoices/list")
+  public async adminListInvoices(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string
+  ): Promise<Result<PTBInvoice[], string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    const creditsManager = new CreditsManager({
+      organizationId: orgId,
+      userId: request.authParams.userId,
+    });
+
+    return creditsManager.listInvoices();
+  }
+
+  /**
+   * Get invoice summary: total spend, total invoiced, uninvoiced balance.
+   */
+  @Post("/{orgId}/invoice-summary")
+  public async getInvoiceSummary(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string
+  ): Promise<Result<InvoiceSummary, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    const manager = new InvoicingManager(orgId);
+    return manager.getInvoiceSummary();
+  }
+
+  /**
+   * Create a Stripe invoice from spend breakdown and record it.
+   * This creates line items in Stripe for each model/provider combo.
+   */
+  @Post("/{orgId}/create-invoice")
+  public async createInvoice(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string,
+    @Body()
+    body: {
+      startDate: string;
+      endDate: string;
+      daysUntilDue?: number;
+    }
+  ): Promise<Result<CreateInvoiceResponse, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    const start = new Date(body.startDate);
+    const end = new Date(body.endDate);
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return err("Invalid date format");
+    }
+
+    const manager = new InvoicingManager(orgId);
+    return manager.createInvoice(start, end, body.daysUntilDue);
+  }
+
+  /**
+   * Get discount rules for an organization.
+   */
+  @Post("/{orgId}/discounts/list")
+  public async listDiscounts(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string
+  ): Promise<Result<OrgDiscount[], string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    const creditsManager = new CreditsManager({
+      organizationId: orgId,
+      userId: request.authParams.userId,
+    });
+
+    return creditsManager.getDiscounts();
+  }
+
+  /**
+   * Update discount rules for an organization.
+   */
+  @Post("/{orgId}/discounts/update")
+  public async updateDiscounts(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string,
+    @Body() body: { discounts: OrgDiscount[] }
+  ): Promise<Result<OrgDiscount[], string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    const manager = new InvoicingManager(orgId);
+    return manager.updateDiscounts(body.discounts);
   }
 }

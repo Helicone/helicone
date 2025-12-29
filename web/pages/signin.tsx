@@ -154,6 +154,7 @@ const SignIn = ({
               }
               setNotification("Successfully signed in.", "success");
             }}
+            showSSOButton={true}
             authFormType={"signin"}
             customerPortalContent={customerPortalContent}
           />

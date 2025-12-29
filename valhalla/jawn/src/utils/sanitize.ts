@@ -1,3 +1,19 @@
+/**
+ * Replaces only lone (unpaired) surrogates with the Unicode replacement character.
+ * Valid surrogate pairs (used for emojis like 😀) are preserved.
+ *
+ * A valid surrogate pair is: high surrogate (\uD800-\uDBFF) followed by low surrogate (\uDC00-\uDFFF)
+ * Lone surrogates are invalid and cause issues with JSON parsing in databases.
+ */
+export function replaceLoneSurrogates(text: string): string {
+  // Match high surrogate NOT followed by low surrogate, OR
+  // low surrogate NOT preceded by high surrogate
+  return text.replace(
+    /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g,
+    "\uFFFD"
+  );
+}
+
 export function sanitizeObject(obj: any): any {
   if (typeof obj === "string") {
     // Remove null characters

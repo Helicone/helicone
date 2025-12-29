@@ -37,6 +37,16 @@ export interface AnthropicUsage {
   service_tier?: string;
 }
 
+/**
+ * Per-modality token breakdown for input, cached, and output tokens.
+ * Used in AI Gateway extended modality details.
+ */
+export interface ModalityTokenDetails {
+  input_tokens?: number;
+  cached_tokens?: number;
+  output_tokens?: number;
+}
+
 // OpenAI usage types
 export interface OpenAIUsage {
   // Including cached and audio tokens
@@ -47,6 +57,7 @@ export interface OpenAIUsage {
   total_tokens: number;
   prompt_tokens_details?: {
     cached_tokens?: number;
+    // matches OpenAI usage spec, but is legacy. Refer to modality_tokens.audio.input.
     audio_tokens?: number;
 
     // AI Gateway only
@@ -58,9 +69,18 @@ export interface OpenAIUsage {
   };
   completion_tokens_details?: {
     reasoning_tokens?: number;
+    // matches OpenAI usage spec, but is legacy. Refer to modality_tokens.audio.output.
     audio_tokens?: number;
     accepted_prediction_tokens?: number;
     rejected_prediction_tokens?: number;
+  };
+
+  // AI Gateway extended modality details
+  modality_tokens?: {
+    image?: ModalityTokenDetails;
+    audio?: ModalityTokenDetails;
+    video?: ModalityTokenDetails;
+    file?: ModalityTokenDetails;
   };
 
   // AI Gateway only - when cost calculation upfront is possible
@@ -70,31 +90,31 @@ export interface OpenAIUsage {
 // Content block types (shared between Anthropic request and response)
 export interface AnthropicContentBlock {
   type:
-    | "text"
-    | "image"
-    | "document"
-    | "tool_use"
-    | "tool_result"
-    | "thinking"
-    | "server_tool_use"
-    | "web_search_tool_result";
+  | "text"
+  | "image"
+  | "document"
+  | "tool_use"
+  | "tool_result"
+  | "thinking"
+  | "server_tool_use"
+  | "web_search_tool_result";
   text?: string;
   // Image and Document fields
   source?:
-    | {
-        type: "base64";
-        media_type: string;
-        data: string;
-      }
-    | {
-        type: "url";
-        url: string;
-      }
-    | {
-        type: "text";
-        media_type: string;
-        data: string;
-      };
+  | {
+    type: "base64";
+    media_type: string;
+    data: string;
+  }
+  | {
+    type: "url";
+    url: string;
+  }
+  | {
+    type: "text";
+    media_type: string;
+    data: string;
+  };
   // Document fields
   title?: string;
   // Tool use fields

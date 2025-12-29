@@ -110,7 +110,7 @@ export const endpoints = {
   "claude-4.5-haiku:openrouter": {
     provider: "openrouter",
     author: "anthropic",
-    providerModelId: "anthropic/claude-4.5-haiku",
+    providerModelId: "anthropic/claude-haiku-4.5",
     pricing: [
       {
         threshold: 0,

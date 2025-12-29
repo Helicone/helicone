@@ -32,9 +32,11 @@ export function getJawnClient(apiKey?: string) {
 
   return createClient<publicPaths>({
     baseUrl: getJawnServiceUrl(),
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-    },
+    headers: apiKey
+      ? {
+          Authorization: `Bearer ${apiKey}`,
+        }
+      : {},
   });
 }
 

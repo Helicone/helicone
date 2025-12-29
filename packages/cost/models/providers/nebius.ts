@@ -14,4 +14,18 @@ export class NebiusProvider extends BaseProvider {
   buildUrl(endpoint: Endpoint, requestParams: RequestParams): string {
     return `${this.baseUrl}chat/completions`;
   }
+
+  async buildErrorMessage(response: Response): Promise<{
+    message: string;
+    details?: any;
+  }> {
+    try {
+      const respJson = (await response.json()) as any;
+      return {
+        message: respJson.detail || `Request failed with status ${response.status}`
+      };
+    } catch (error) {
+      return { message: `Request failed with status ${response.status}` };
+    }
+  }
 }

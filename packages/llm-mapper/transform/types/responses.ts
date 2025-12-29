@@ -1,9 +1,15 @@
 import { BaseStreamEvent } from "./common";
+import { ModalityTokenDetails } from "./common";
 
 // === REQUEST TYPES ===
 // OpenAI Responses API request types (subset used by Helicone mappings)
 
 export type ResponsesRole = "user" | "assistant" | "system" | "developer";
+
+export interface ResponsesSummaryTextPart {
+  type: "summary_text";
+  text: string;
+}
 
 export interface ResponsesInputTextPart {
   type: "input_text";
@@ -56,7 +62,8 @@ export interface ResponsesFunctionCallOutputInputItem {
 export type ResponsesInputItem =
   | ResponsesMessageInputItem
   | ResponsesFunctionCallInputItem
-  | ResponsesFunctionCallOutputInputItem;
+  | ResponsesFunctionCallOutputInputItem
+  | ResponsesReasoningItem;
 
 export interface ResponsesToolFunction {
   name: string;
@@ -66,7 +73,9 @@ export interface ResponsesToolFunction {
 
 export interface ResponsesToolDefinition {
   type: "function";
-  function: ResponsesToolFunction;
+  name: string;
+  description?: string;
+  parameters?: Record<string, any> // JSON Object
 }
 
 export type ResponsesToolChoice =
@@ -74,6 +83,42 @@ export type ResponsesToolChoice =
   | "auto"
   | "required"
   | { type: "function"; function: { name: string } };
+
+/**
+ * Context editing configuration for managing conversation context.
+ * Only supported for Anthropic models - will be stripped for other providers.
+ *
+ * @see https://docs.anthropic.com/en/docs/build-with-claude/context-editing
+ */
+export interface ResponsesContextEditingConfig {
+  /**
+   * Whether context editing is enabled.
+   */
+  enabled: boolean;
+
+  /**
+   * Optional strategy for clearing old tool uses when context exceeds thresholds.
+   */
+  clear_tool_uses?: {
+    trigger?: number;
+    keep?: number;
+    clear_at_least?: number;
+    exclude_tools?: string[];
+    clear_tool_inputs?: boolean;
+  };
+
+  /**
+   * Optional strategy for clearing thinking blocks when extended thinking is enabled.
+   */
+  clear_thinking?: {
+    keep?: number | "all";
+  };
+}
+
+export interface ResponsesImageGenerationConfig {
+  aspect_ratio: string; // e.g "16:9"
+  image_size: string; // e.g "2K"
+}
 
 export interface ResponsesRequestBody {
   model: string;
@@ -85,6 +130,11 @@ export interface ResponsesRequestBody {
   previous_response_id?: string;
   reasoning?: {
     effort?: "low" | "medium" | "high" | "minimal";
+    summary?: "auto" | "concise" | "detailed";
+    generate_summary?: "auto" | "concise" | "detailed";
+  };
+  reasoning_options?: {
+    budget_tokens?: number;
   };
   text?: {
     verbosity?: "low" | "medium" | "high";
@@ -93,6 +143,7 @@ export interface ResponsesRequestBody {
   stream?: boolean;
   temperature?: number;
   top_p?: number;
+  top_k?: number;
   truncation?: "auto" | "disabled";
   user?: string;
   tools?: ResponsesToolDefinition[];
@@ -107,6 +158,12 @@ export interface ResponsesRequestBody {
   seed?: number;
   service_tier?: string;
   stream_options?: any;
+  /**
+   * Context editing configuration for managing conversation context.
+   * Only supported for Anthropic models - will be stripped for other providers.
+   */
+  context_editing?: ResponsesContextEditingConfig;
+  image_generation?: ResponsesImageGenerationConfig;
   // Deprecated parameters (pass-through if present)
   function_call?: string | { name: string };
   functions?: Array<any>;
@@ -129,9 +186,16 @@ export interface ResponsesOutputToolCallPart {
   arguments: string; // JSON string
 }
 
+export interface ResponsesOutputImagePart {
+  type: "output_image";
+  image_url: string; // data URI format
+  detail?: "high" | "low" | "auto";
+}
+
 export type ResponsesOutputContentPart =
   | ResponsesOutputTextPart
-  | ResponsesOutputToolCallPart;
+  | ResponsesOutputToolCallPart
+  | ResponsesOutputImagePart;
 
 export interface ResponsesMessageOutputItem {
   type: "message";
@@ -139,6 +203,13 @@ export interface ResponsesMessageOutputItem {
   id?: string;
   role: ResponsesRole; // Typically "assistant" on output
   content: ResponsesOutputContentPart[];
+}
+
+export interface ResponsesReasoningOutputItem {
+  id: string;
+  type: "reasoning";
+  summary: ResponsesSummaryTextPart[];
+  encrypted_content?: string | null;  // Signature for multi-turn thinking
 }
 
 export interface ResponsesFunctionCallOutputItem {
@@ -151,10 +222,11 @@ export interface ResponsesFunctionCallOutputItem {
   parsed_arguments?: any | null;
 }
 
-export interface ResponsesReasoningOutputItem {
+export interface ResponsesReasoningItem {
   id: string;
   type: "reasoning";
   summary: any[];
+  encrypted_content?: string | null;  // Signature for multi-turn thinking
 }
 
 export interface ResponsesUsage {
@@ -167,6 +239,13 @@ export interface ResponsesUsage {
   };
   output_tokens_details?: {
     reasoning_tokens?: number;
+  };
+  // Per-modality token breakdown (matches OpenAIUsage.modality_tokens)
+  modality_tokens?: {
+    image?: ModalityTokenDetails;
+    audio?: ModalityTokenDetails;
+    video?: ModalityTokenDetails;
+    file?: ModalityTokenDetails;
   };
   // AI Gateway only - when cost calculation directly provided in usage
   cost?: number;
@@ -189,7 +268,7 @@ export interface ResponsesResponseBody {
   output: (
     | ResponsesMessageOutputItem
     | ResponsesFunctionCallOutputItem
-    | ResponsesReasoningOutputItem
+    | ResponsesReasoningItem
   )[];
   parallel_tool_calls?: boolean;
   previous_response_id?: string | null;
@@ -201,7 +280,7 @@ export interface ResponsesResponseBody {
   temperature?: number;
   text?: { format?: { type: string }; verbosity?: "low" | "medium" | "high" };
   tool_choice?: "auto" | "none" | { type: "function"; function: { name: string } };
-  tools?: (ResponsesToolDefinition & Record<string, any>)[];
+  tools?: ResponsesToolDefinition[];
   top_logprobs?: number;
   top_p?: number;
   truncation?: string;
@@ -232,7 +311,7 @@ export interface ResponseOutputItemAddedEvent extends BaseStreamEvent {
   item:
     | (ResponsesMessageOutputItem & { status: "in_progress" | "completed" })
     | ResponsesFunctionCallOutputItem
-    | ResponsesReasoningOutputItem;
+    | ResponsesReasoningItem;
 }
 
 export interface ResponseContentPartAddedEvent extends BaseStreamEvent {
@@ -242,6 +321,14 @@ export interface ResponseContentPartAddedEvent extends BaseStreamEvent {
   output_index: number;
   content_index: number;
   part: { type: "output_text"; text: string; annotations?: any[]; logprobs?: any[] } | any;
+}
+
+export interface ResponseContentPartDoneEvent extends BaseStreamEvent {
+  type: "response.content_part.done";
+  item_id: string;
+  output_index: number;
+  content_index: number;
+  part: ResponsesOutputTextPart | ResponsesOutputImagePart;
 }
 
 export interface ResponseOutputTextDeltaEvent extends BaseStreamEvent {
@@ -271,7 +358,8 @@ export interface ResponseOutputItemDoneEvent extends BaseStreamEvent {
   output_index: number;
   item:
     | (ResponsesMessageOutputItem & { status: "completed" | "in_progress" })
-    | ResponsesFunctionCallOutputItem;
+    | ResponsesFunctionCallOutputItem
+    | ResponsesReasoningOutputItem;
 }
 
 export interface ResponseFunctionCallArgumentsDeltaEvent extends BaseStreamEvent {
@@ -306,15 +394,58 @@ export interface ResponseErrorEvent extends BaseStreamEvent {
   };
 }
 
+// Reasoning streaming events
+export interface ResponseReasoningSummaryPartAddedEvent extends BaseStreamEvent {
+  type: "response.reasoning_summary_part.added";
+  sequence_number?: number;
+  item_id: string;
+  output_index: number;
+  summary_index: number;
+  part: ResponsesSummaryTextPart;
+}
+
+export interface ResponseReasoningSummaryTextDeltaEvent extends BaseStreamEvent {
+  type: "response.reasoning_summary_text.delta";
+  sequence_number?: number;
+  item_id: string;
+  output_index: number;
+  summary_index: number;
+  delta: string;
+  obfuscation?: string;
+}
+
+export interface ResponseReasoningSummaryTextDoneEvent extends BaseStreamEvent {
+  type: "response.reasoning_summary_text.done";
+  sequence_number?: number;
+  item_id: string;
+  output_index: number;
+  summary_index: number;
+  text: string;
+}
+
+export interface ResponseReasoningSummaryPartDoneEvent extends BaseStreamEvent {
+  type: "response.reasoning_summary_part.done";
+  sequence_number?: number;
+  item_id: string;
+  output_index: number;
+  summary_index: number;
+  part: ResponsesSummaryTextPart;
+}
+
 export type ResponsesStreamEvent =
   | ResponseCreatedEvent
   | ResponseInProgressEvent
   | ResponseOutputItemAddedEvent
   | ResponseContentPartAddedEvent
+  | ResponseContentPartDoneEvent
   | ResponseOutputTextDeltaEvent
   | ResponseOutputTextDoneEvent
   | ResponseOutputItemDoneEvent
   | ResponseCompletedEvent
   | ResponseErrorEvent
   | ResponseFunctionCallArgumentsDeltaEvent
-  | ResponseFunctionCallArgumentsDoneEvent;
+  | ResponseFunctionCallArgumentsDoneEvent
+  | ResponseReasoningSummaryPartAddedEvent
+  | ResponseReasoningSummaryTextDeltaEvent
+  | ResponseReasoningSummaryTextDoneEvent
+  | ResponseReasoningSummaryPartDoneEvent;

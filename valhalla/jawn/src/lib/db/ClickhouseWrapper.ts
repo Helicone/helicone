@@ -163,9 +163,11 @@ export class ClickhouseClientWrapper {
         parameters
       );
       console.error(err);
+      // Extract error message properly - Error objects don't stringify well
+      const errorMessage = err instanceof Error ? err.message : String(err);
       return {
         data: null,
-        error: JSON.stringify(err),
+        error: errorMessage,
       };
     }
   }

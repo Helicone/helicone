@@ -324,7 +324,7 @@ describe("OpenAI Responses API Mapper", () => {
       });
     });
 
-    it("should handle multiple function calls in sequence", () => {
+    it("should handle multiple function calls in sequence - each as separate message", () => {
       const request = {
         model: "gpt-4",
         input: [
@@ -349,7 +349,8 @@ describe("OpenAI Responses API Mapper", () => {
         model: "gpt-4",
       });
 
-      expect(result.schema.request?.messages).toHaveLength(1);
+      // Each function_call should be a separate assistant message to preserve chronological order
+      expect(result.schema.request?.messages).toHaveLength(2);
       expect(result.schema.request?.messages?.[0]).toMatchObject({
         _type: "message",
         role: "assistant" as const,
@@ -361,6 +362,13 @@ describe("OpenAI Responses API Mapper", () => {
             arguments: { param1: "[REDACTED_VALUE_1]" },
             type: "function",
           },
+        ],
+      });
+      expect(result.schema.request?.messages?.[1]).toMatchObject({
+        _type: "message",
+        role: "assistant" as const,
+        content: "",
+        tool_calls: [
           {
             id: "call_[REDACTED_2]",
             name: "[REDACTED_FUNCTION_2]",
@@ -479,6 +487,69 @@ describe("OpenAI Responses API Mapper", () => {
             filename: "[REDACTED].pdf",
           },
         ],
+      });
+    });
+
+    it("should handle output_text content from assistant messages in input (ENG-3689)", () => {
+      // This test verifies that assistant messages with output_text content
+      // (which occur when previous responses are sent back as input) are properly extracted
+      const request = {
+        model: "gpt-5-mini",
+        input: [
+          {
+            role: "user" as const,
+            content: [
+              {
+                type: "input_text" as const,
+                text: "What is the weather in San Francisco?",
+              },
+            ],
+          },
+          {
+            id: "msg_123",
+            type: "message",
+            status: "completed",
+            content: [
+              {
+                type: "output_text" as const,
+                annotations: [],
+                logprobs: [],
+                text: "Plan: 1) Call the weather tool to fetch current weather.",
+              },
+            ],
+            role: "assistant" as const,
+          },
+        ],
+      };
+
+      const result = mapOpenAIResponse({
+        request: request as any,
+        response: {},
+        model: "gpt-5-mini",
+      });
+
+      expect(result.schema.request?.messages).toHaveLength(2);
+
+      // Check user message
+      expect(result.schema.request?.messages?.[0]).toMatchObject({
+        _type: "contentArray",
+        role: "user" as const,
+      });
+
+      // Check assistant message with output_text content is properly extracted
+      const assistantMessage = result.schema.request?.messages?.[1];
+      expect(assistantMessage).toMatchObject({
+        _type: "contentArray",
+        role: "assistant" as const,
+      });
+
+      // Verify the contentArray contains the output_text content properly mapped
+      expect(assistantMessage?.contentArray).toHaveLength(1);
+      expect(assistantMessage?.contentArray?.[0]).toMatchObject({
+        _type: "message",
+        role: "assistant" as const,
+        type: "output_text",
+        content: "Plan: 1) Call the weather tool to fetch current weather.",
       });
     });
   });
@@ -805,6 +876,196 @@ describe("OpenAI Responses API Mapper", () => {
       expect(getRequestText(undefined as any)).toBe("");
       expect(getResponseText(null as any)).toBe("");
       expect(getResponseText(undefined as any)).toBe("");
+    });
+  });
+
+  describe("Instructions Field Handling (ENG-3699)", () => {
+    it("should convert instructions field to system message at beginning of messages array", () => {
+      const request = {
+        model: "gpt-4",
+        instructions: "You are a helpful assistant that always responds in JSON format.",
+        input: [
+          {
+            type: "message",
+            role: "user" as const,
+            content: "What is 2 + 2?",
+          },
+        ],
+      };
+
+      const result = mapOpenAIResponse({
+        request: request as any,
+        response: {},
+        model: "gpt-4",
+      });
+
+      expect(result.schema.request?.messages).toHaveLength(2);
+
+      // Check that the first message is the system message from instructions
+      expect(result.schema.request?.messages?.[0]).toMatchObject({
+        _type: "message",
+        role: "system",
+        content: "You are a helpful assistant that always responds in JSON format.",
+        id: "instructions-system-msg",
+      });
+
+      // Check that the user message is second
+      expect(result.schema.request?.messages?.[1]).toMatchObject({
+        _type: "message",
+        role: "user" as const,
+        content: "What is 2 + 2?",
+      });
+    });
+
+    it("should include instructions system message in concatenatedMessages for Rendered view", () => {
+      const request = {
+        model: "gpt-4",
+        instructions: "You are a coding assistant.",
+        input: "Write a hello world function.",
+      };
+
+      const response = {
+        item: {
+          id: "resp-123",
+          role: "assistant" as const,
+          content: [
+            {
+              type: "output_text",
+              text: "Here is a hello world function: function hello() { console.log('Hello, World!'); }",
+            },
+          ],
+        },
+      };
+
+      const result = mapOpenAIResponse({
+        request: request as any,
+        response,
+        model: "gpt-4",
+      });
+
+      // concatenatedMessages should include: system message (from instructions), user message, assistant response
+      expect(result.preview.concatenatedMessages).toHaveLength(3);
+
+      // First message should be the system message from instructions
+      expect(result.preview.concatenatedMessages[0]).toMatchObject({
+        _type: "message",
+        role: "system",
+        content: "You are a coding assistant.",
+        id: "instructions-system-msg",
+      });
+
+      // Second message should be the user message
+      expect(result.preview.concatenatedMessages[1]).toMatchObject({
+        _type: "message",
+        role: "user",
+        content: "Write a hello world function.",
+      });
+
+      // Third message should be the assistant response
+      expect(result.preview.concatenatedMessages[2]).toMatchObject({
+        _type: "message",
+        role: "assistant",
+        content: "Here is a hello world function: function hello() { console.log('Hello, World!'); }",
+      });
+    });
+
+    it("should handle instructions with no input messages", () => {
+      const request = {
+        model: "gpt-4",
+        instructions: "You are a helpful assistant.",
+        input: [],
+      };
+
+      const result = mapOpenAIResponse({
+        request: request as any,
+        response: {},
+        model: "gpt-4",
+      });
+
+      // Should have only the system message from instructions
+      expect(result.schema.request?.messages).toHaveLength(1);
+      expect(result.schema.request?.messages?.[0]).toMatchObject({
+        _type: "message",
+        role: "system",
+        content: "You are a helpful assistant.",
+        id: "instructions-system-msg",
+      });
+    });
+
+    it("should handle request with no instructions (existing behavior unchanged)", () => {
+      const request = {
+        model: "gpt-4",
+        input: [
+          {
+            type: "message",
+            role: "user" as const,
+            content: "What is the capital of France?",
+          },
+        ],
+      };
+
+      const result = mapOpenAIResponse({
+        request: request as any,
+        response: {},
+        model: "gpt-4",
+      });
+
+      // Should only have the user message, no system message prepended
+      expect(result.schema.request?.messages).toHaveLength(1);
+      expect(result.schema.request?.messages?.[0]).toMatchObject({
+        _type: "message",
+        role: "user" as const,
+        content: "What is the capital of France?",
+      });
+    });
+
+    it("should work with string input and instructions", () => {
+      const request = {
+        model: "gpt-4",
+        instructions: "Be concise.",
+        input: "Explain quantum computing.",
+      };
+
+      const result = mapOpenAIResponse({
+        request: request as any,
+        response: {},
+        model: "gpt-4",
+      });
+
+      expect(result.schema.request?.messages).toHaveLength(2);
+
+      // First message should be system message from instructions
+      expect(result.schema.request?.messages?.[0]).toMatchObject({
+        _type: "message",
+        role: "system",
+        content: "Be concise.",
+        id: "instructions-system-msg",
+      });
+
+      // Second message should be user message from string input
+      expect(result.schema.request?.messages?.[1]).toMatchObject({
+        _type: "message",
+        role: "user",
+        type: "input_text",
+        content: "Explain quantum computing.",
+      });
+    });
+
+    it("should preserve instructions in request.instructions field as well", () => {
+      const request = {
+        model: "gpt-4",
+        instructions: "You are a helpful assistant.",
+        input: "Hello",
+      };
+
+      const result = mapOpenAIResponse({
+        request: request as any,
+        response: {},
+        model: "gpt-4",
+      });
+
+      // Instructions should also be preserved in the request.instructions field
+      expect(result.schema.request?.instructions).toBe("You are a helpful assistant.");
     });
   });
 });

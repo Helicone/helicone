@@ -169,12 +169,28 @@ export class RequestManager extends BaseManager {
     if (request.error || !request.data) {
       return err(request.error);
     }
+
+    // Check if the body is already populated from ClickHouse (not the placeholder message)
+    const hasRealBody =
+      request.data.request_body &&
+      typeof request.data.request_body === "object" &&
+      !("helicone_message" in request.data.request_body);
+
+    if (hasRealBody) {
+      // Body already populated from ClickHouse, no need to fetch from S3
+      return ok(request.data);
+    }
+
+    // Need to fetch from S3
     if (!request.data.signed_body_url) {
       return err("Request body not found");
     }
     try {
       const bodyResponse = await fetch(request.data.signed_body_url);
       if (!bodyResponse.ok) {
+        console.error(
+          `[RequestManager] Failed to fetch body: ${bodyResponse.status} ${bodyResponse.statusText}`
+        );
         return err("Error fetching request body");
       }
       const bodyData = await bodyResponse.json();
@@ -184,6 +200,7 @@ export class RequestManager extends BaseManager {
         response_body: bodyData?.["response"],
       });
     } catch (e) {
+      console.error("[RequestManager] Exception fetching body:", e);
       return err("Error fetching request body");
     }
   }
@@ -563,11 +580,15 @@ export class RequestManager extends BaseManager {
 
       let deduped = Array.from(seen.values());
 
-      deduped.sort((a, b) => {
-        const aTime = new Date(a.request_created_at).getTime();
-        const bTime = new Date(b.request_created_at).getTime();
-        return sort.created_at === "asc" ? aTime - bTime : bTime - aTime;
-      });
+      // Only re-sort by created_at if that was the requested sort
+      // Otherwise, preserve the order returned from the database (e.g., latency sort)
+      if (sort.created_at) {
+        deduped.sort((a, b) => {
+          const aTime = new Date(a.request_created_at).getTime();
+          const bTime = new Date(b.request_created_at).getTime();
+          return sort.created_at === "asc" ? aTime - bTime : bTime - aTime;
+        });
+      }
 
       return deduped;
     });

@@ -6,8 +6,10 @@ import {
   BodyMappingType,
 } from "@helicone-package/cost/models/types";
 import { OpenAIResponseBody, ChatCompletionChunk } from "../types/openai";
-import { toOpenAI } from "./anthropic/response/toOpenai";
+import { toOpenAI as anthropicToOpenAI } from "./anthropic/response/toOpenai";
 import { AnthropicToOpenAIStreamConverter } from "./anthropic/streamedResponse/toOpenai";
+import { toOpenAI as googleToOpenAI } from "./google/response/toOpenai";
+import { GoogleToOpenAIStreamConverter } from "./google/streamedResponse/toOpenai";
 import { toResponses } from "./responses/openai/response/toResponses";
 import { ChatToResponsesStreamConverter } from "./responses/streamedResponse/toResponses";
 
@@ -502,6 +504,13 @@ export async function normalizeAIGatewayResponse(params: {
 
           normalizedOpenAIText = serializeOpenAIChunks(openAIChunks);
         }
+      } else if (responseFormat === "GOOGLE") {
+        const converter = new GoogleToOpenAIStreamConverter();
+        const openAIChunks: ChatCompletionChunk[] = [];
+        converter.processLines(responseText, (chunk) => {
+          openAIChunks.push(chunk);
+        });
+        normalizedOpenAIText = serializeOpenAIChunks(openAIChunks);
       } else if (responseFormat === "OPENAI") {
         // Already in OpenAI format, just normalize usage
         normalizedOpenAIText = await normalizeOpenAIStreamText(
@@ -511,7 +520,10 @@ export async function normalizeAIGatewayResponse(params: {
         );
       }
 
-      if (bodyMapping === "RESPONSES" && provider !== "openai") {
+      // by this line, normalizedOpenAIText is now in Chat Completions format
+
+      const nativelySupportsResponsesAPI = provider === "openai" || (provider === "helicone" && providerModelId.includes("gpt"));
+      if (bodyMapping === "RESPONSES" && !nativelySupportsResponsesAPI) {
         return convertOpenAIStreamToResponses(normalizedOpenAIText);
       }
 
@@ -523,10 +535,15 @@ export async function normalizeAIGatewayResponse(params: {
       let openAIBody = providerBody;
       if (responseFormat === "ANTHROPIC") {
         // Convert Anthropic to OpenAI format
-        openAIBody = toOpenAI(providerBody);
+        openAIBody = anthropicToOpenAI(providerBody);
+      } else if (responseFormat === "GOOGLE") {
+        openAIBody = googleToOpenAI(providerBody);
       }
 
       // Normalize usage for all providers
+      // We do this "extra" work because while some providers return OpenAI-format usage,
+      // the usage numbers may not be accurate or consistent.
+      // Ex: input tokens = prompt tokens + cached prompt tokens instead of just prompt tokens
       const usageProcessor = getUsageProcessor(provider);
       if (usageProcessor) {
         const modelUsageResult = await usageProcessor.parse({
@@ -540,7 +557,8 @@ export async function normalizeAIGatewayResponse(params: {
         }
       }
 
-      if (bodyMapping === "RESPONSES" && provider !== "openai") {
+      const nativelySupportsResponsesAPI = provider === "openai" || (provider === "helicone" && providerModelId.includes("gpt"));
+      if (bodyMapping === "RESPONSES" && !nativelySupportsResponsesAPI) {
         const responsesBody = toResponses(openAIBody);
         return JSON.stringify(responsesBody);
       }

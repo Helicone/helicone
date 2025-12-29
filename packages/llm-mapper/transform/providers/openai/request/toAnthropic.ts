@@ -4,6 +4,10 @@ import {
   AnthropicTool,
   AnthropicWebSearchTool,
   AnthropicToolChoice,
+  AnthropicContextManagement,
+  AnthropicContextEdit,
+  AnthropicClearToolUsesEdit,
+  AnthropicClearThinkingEdit,
 } from "../../../types/anthropic";
 import {
   HeliconeChatCompletionContentPart,
@@ -20,16 +24,37 @@ export function toAnthropic(
   }
 ): AnthropicRequestBody {
   const includeCache = options?.includeCacheBreakpoints !== false;
+  
+  // Determine max_tokens with default fallback
+  const maxTokens = openAIBody.max_completion_tokens ?? openAIBody.max_tokens ?? 4096;
+  
   const antBody: AnthropicRequestBody = {
     model: providerModelId || openAIBody.model,
     messages: [],
-    max_tokens:
-      openAIBody.max_completion_tokens ?? openAIBody.max_tokens ?? 1024,
+    max_tokens: maxTokens,
     temperature: openAIBody.temperature ?? undefined,
     top_p: openAIBody.top_p ?? undefined,
 
     stream: openAIBody.stream ?? undefined,
   };
+
+  if (openAIBody.reasoning_effort) {
+    let budgetTokens: number;
+    
+    if (openAIBody.reasoning_options?.budget_tokens) {
+      budgetTokens = openAIBody.reasoning_options.budget_tokens;
+    } else {
+      budgetTokens = Math.floor(maxTokens / 2);
+    }
+
+    antBody.thinking = {
+      type: "enabled",
+      budget_tokens: budgetTokens,
+    };
+
+    // temperature 1 is required for Anthropic models to enable reasoning
+    antBody.temperature = 1;
+  }
 
   if (openAIBody.stop) {
     antBody.stop_sequences = Array.isArray(openAIBody.stop)
@@ -98,6 +123,11 @@ export function toAnthropic(
 
   if (openAIBody.logit_bias) {
     throw new Error("Logit bias is not supported");
+  }
+
+  // Map context_editing to Anthropic's context_management
+  if (openAIBody.context_editing?.enabled) {
+    antBody.context_management = mapContextEditing(openAIBody.context_editing);
   }
 
   // if and only if the user did not provide any cache control breakpoints,
@@ -299,8 +329,8 @@ function extractSystemMessage(
       systemMessageBlocks.push({
         type: "text",
         text: convertedBlock,
-        ...(includeCache && (msg as any).cache_control
-          ? { cache_control: (msg as any).cache_control }
+        ...(includeCache && msg.cache_control
+          ? { cache_control: msg.cache_control }
           : {}),
       });
     } else {
@@ -335,8 +365,8 @@ function mapMessages(
             type: "tool_result",
             tool_use_id: message.tool_call_id,
             content: typeof message.content === "string" ? message.content : "",
-            ...(includeCache && (message as any).cache_control
-              ? { cache_control: (message as any).cache_control }
+            ...(includeCache && message.cache_control
+              ? { cache_control: message.cache_control }
               : {}),
           },
         ],
@@ -349,6 +379,11 @@ function mapMessages(
     };
 
     if (message.role === "assistant" || message.role === "user") {
+      // Check if assistant message has images - not supported by Anthropic
+      if (message.role === "assistant" && message.images && message.images.length > 0) {
+        throw new Error("Image outputs in assistant messages are not supported by Anthropic");
+      }
+
       const processedToolCallContent: AnthropicContentBlock[] = [];
 
       if (message.role === "assistant" && message.tool_calls) {
@@ -364,8 +399,29 @@ function mapMessages(
           }
         });
       }
-      
+
+      const hasReasoningDetails = message.role === "assistant" && message.reasoning_details && message.reasoning_details?.length > 0;
+      const hasReasoning = message.role === "assistant" && !!message.reasoning;
       let processedContent: string | AnthropicContentBlock[] = [];
+
+      // Thinking blocks MUST be first in Anthropic format to be valid
+      if (message.reasoning_details && hasReasoningDetails) {
+        // Use reasoning_details when available (includes signatures for multi-turn)
+        for (const detail of message.reasoning_details) {
+          processedContent.push({
+            type: "thinking",
+            thinking: detail.thinking,
+            signature: detail.signature,
+          });
+        }
+      } else if (hasReasoning) {
+        // Fallback to simple reasoning string (no signature - may fail on multi-turn)
+        processedContent.push({
+          type: "thinking",
+          thinking: message.reasoning,
+        });
+      }
+
       if (message.content) {
         const convertedContent = openAIContentToAnthropicContent(
           message.content,
@@ -374,7 +430,7 @@ function mapMessages(
         if (typeof convertedContent === "string") {
           // if the message requires forming a content array
           const hasMsgCache = includeCache && !!(message as any).cache_control;
-          if (hasMsgCache || processedToolCallContent.length > 0) {
+          if (hasMsgCache || processedToolCallContent.length > 0 || hasReasoning) {
             processedContent.push({
               type: "text",
               text: convertedContent,
@@ -384,7 +440,7 @@ function mapMessages(
             });
           } else {
             // there was no cache control breakpoint, the content was just string,
-            // and no tool calls, so we create a non-content array message.
+            // no tool calls, and no reasoning, so we create a non-content array message.
             antMessage.content = convertedContent;
             return antMessage;
           }
@@ -518,4 +574,73 @@ function mapWebSearch(
   }
 
   return webSearchTool;
+}
+
+/**
+ * Maps the Helicone context_editing configuration to Anthropic's context_management format.
+ *
+ * Helicone uses a unified `context_editing` object with `enabled` flag and optional strategies,
+ * while Anthropic uses `context_management` with an `edits` array containing versioned strategy objects.
+ *
+ * @see https://docs.anthropic.com/en/docs/build-with-claude/context-editing
+ */
+function mapContextEditing(
+  contextEditing: NonNullable<HeliconeChatCreateParams["context_editing"]>
+): AnthropicContextManagement {
+  const edits: AnthropicContextEdit[] = [];
+
+  // clear_thinking must come first in the array per Anthropic docs
+  if (contextEditing.clear_thinking) {
+    const thinkingConfig = contextEditing.clear_thinking;
+    const thinkingEdit: AnthropicClearThinkingEdit = {
+      type: "clear_thinking_20251015",
+    };
+    if (thinkingConfig.keep !== undefined) {
+      thinkingEdit.keep =
+        thinkingConfig.keep === "all"
+          ? "all"
+          : { type: "thinking_turns", value: thinkingConfig.keep };
+    }
+    edits.push(thinkingEdit);
+  }
+
+  // Map clear_tool_uses to Anthropic's clear_tool_uses_20250919 strategy
+  if (contextEditing.clear_tool_uses) {
+    const toolUsesConfig = contextEditing.clear_tool_uses;
+    const toolUsesEdit: AnthropicClearToolUsesEdit = {
+      type: "clear_tool_uses_20250919",
+    };
+
+    if (toolUsesConfig.trigger !== undefined) {
+      toolUsesEdit.trigger = {
+        type: "input_tokens",
+        value: toolUsesConfig.trigger,
+      };
+    }
+    if (toolUsesConfig.keep !== undefined) {
+      toolUsesEdit.keep = { type: "tool_uses", value: toolUsesConfig.keep };
+    }
+    if (toolUsesConfig.clear_at_least !== undefined) {
+      toolUsesEdit.clear_at_least = {
+        type: "input_tokens",
+        value: toolUsesConfig.clear_at_least,
+      };
+    }
+    if (toolUsesConfig.exclude_tools !== undefined) {
+      toolUsesEdit.exclude_tools = toolUsesConfig.exclude_tools;
+    }
+    if (toolUsesConfig.clear_tool_inputs !== undefined) {
+      toolUsesEdit.clear_tool_inputs = toolUsesConfig.clear_tool_inputs;
+    }
+    edits.push(toolUsesEdit);
+  }
+
+  // If enabled but no specific strategies provided, use defaults
+  // Add clear_tool_uses with defaults when context_editing is enabled
+  // but no specific strategies are provided
+  if (edits.length === 0) {
+    edits.push({ type: "clear_tool_uses_20250919" });
+  }
+
+  return { edits };
 }

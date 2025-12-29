@@ -3,10 +3,13 @@ import { env, runInDurableObject } from "cloudflare:test";
 import "../setup";
 import { runGatewayTest } from "./test-framework";
 import { setSupabaseTestCase } from "../setup";
+import { clearProviderKeysInMemoryCache } from "../../src/lib/util/cache/inMemoryCache";
 
 describe("PTB request validation", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Clear in-memory cache to prevent stale data from previous tests
+    clearProviderKeysInMemoryCache();
   });
 
   afterEach(() => {
@@ -29,6 +32,9 @@ describe("PTB request validation", () => {
 
     const body = (await response.json()) as any;
     expect(body.error).toContain("messages");
+    expect(body.error).toContain(
+      "https://docs.helicone.ai/rest/ai-gateway/post-v1-chat-completions"
+    );
   });
 
   it("allows BYOK requests with the same payload", async () => {

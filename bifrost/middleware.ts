@@ -29,8 +29,8 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(`${appUrl}/prompts`, 301);
     case "/requests":
       return NextResponse.redirect(`${appUrl}/requests`, 301);
-    case "/roadmap":
-      return NextResponse.redirect(`${appUrl}/roadmap`, 301);
+    case "/alerts":
+      return NextResponse.redirect(`${appUrl}/alerts`, 301);
   }
 
   // Continue to next middleware or page
@@ -45,7 +45,7 @@ export const config = {
     "/job",
     "/prompts",
     "/requests",
-    "/roadmap",
     "/dashboard",
+    "/alerts",
   ],
 };

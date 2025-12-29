@@ -21,8 +21,12 @@ import {
 import { RequestWrapper } from "../RequestWrapper";
 import { err, isErr, ok, Result } from "../util/results";
 import { GatewayMetrics } from "./GatewayMetrics";
-import { Attempt, AttemptError, EscrowInfo } from "./types";
+import { Attempt, AttemptError, EscrowInfo, PendingEscrow } from "./types";
 import { toChatCompletions } from "@helicone-package/llm-mapper/transform/providers/responses/request/toChatCompletions";
+import { WalletKVSync } from "./WalletKVSync";
+
+// Minimum balance (in cents) to allow optimistic execution without waiting for escrow
+const ALLOWABLE_BALANCE_TO_SKIP_CHECK = 450; // $4.50 in cents
 
 interface ExecutorProps {
   attempt: Attempt;
@@ -37,9 +41,18 @@ interface ExecutorProps {
   metrics: GatewayMetrics;
   orgMeta: {
     allowNegativeBalance: boolean;
+    /** Credit line limit in cents (e.g., 5000 = $50.00). Sourced from organization.credit_limit in Supabase. */
     creditLimit: number;
   };
   traceContext: TraceContext | null;
+}
+
+interface PTBProps {
+  attempt: Attempt;
+  requestWrapper: RequestWrapper;
+  orgId: string;
+  orgMeta: ExecutorProps["orgMeta"];
+  traceContext?: TraceContext | null;
 }
 
 export class AttemptExecutor {
@@ -50,21 +63,36 @@ export class AttemptExecutor {
     private readonly tracer: DataDogTracer
   ) {}
 
-  async PTBPreCheck(props: {
-    attempt: Attempt;
-    requestWrapper: RequestWrapper;
-    orgId: string;
-    orgMeta: ExecutorProps["orgMeta"];
-    traceContext?: TraceContext | null;
-  }): Promise<
+  async reserveEscrowAndGetId(props: PTBProps): PendingEscrow {
+    const escrowResult = await this.reserveEscrow(
+      props.attempt,
+      props.requestWrapper.heliconeHeaders.requestId,
+      props.orgId,
+      props.orgMeta
+    );
+
+    if (isErr(escrowResult)) {
+      return err({
+        type:
+          (escrowResult.error.statusCode || 500) === 429
+            ? "insufficient_credit_limit"
+            : "request_failed",
+        message: escrowResult.error.message,
+        statusCode: escrowResult.error.statusCode || 500,
+      });
+    }
+
+    return ok({ reservedEscrowId: escrowResult.data.escrowId });
+  }
+
+  async PTBPreCheck(props: PTBProps): Promise<
     Result<
       {
-        reservedEscrowId: string;
+        pendingEscrow: PendingEscrow;
       },
       AttemptError
     >
   > {
-    // Start wallet operation span
     const walletSpanId = props.traceContext?.sampled
       ? this.tracer.startSpan(
           "ai_gateway.ptb.credit_validation.reserve_escrow",
@@ -76,37 +104,73 @@ export class AttemptExecutor {
           props.traceContext
         )
       : null;
+    const walletKVSync = new WalletKVSync(this.env.WALLET_KV, props.orgId);
 
-    const escrowResult = await this.reserveEscrow(
-      props.attempt,
-      props.requestWrapper.heliconeHeaders.requestId,
-      props.orgId,
-      props.orgMeta
-    );
+    const pendingEscrow = this.reserveEscrowAndGetId(props);
 
-    if (isErr(escrowResult)) {
-      if (walletSpanId) {
-        this.tracer.setError(walletSpanId, escrowResult.error.message);
-        this.tracer.finishSpan(walletSpanId);
-      }
+    // Check KV cache for wallet balance
+    const walletState = await walletKVSync.getWalletState();
 
-      return err({
-        type:
-          (escrowResult.error.statusCode || 500) === 429
-            ? "insufficient_credit_limit"
-            : "request_failed",
-        message: escrowResult.error.message,
-        statusCode: escrowResult.error.statusCode || 500,
-      });
+    // Tag KV cache status
+    if (walletSpanId) {
+      this.tracer.setTag(
+        walletSpanId,
+        "kv_cache_hit",
+        walletState ? "true" : "false"
+      );
     }
 
+    if (walletState) {
+      const creditLineAmount = props.orgMeta.allowNegativeBalance
+        ? (props.orgMeta.creditLimit ?? 0)
+        : 0;
+      const effectiveBalance =
+        creditLineAmount + walletState.remainingBalanceCents;
+
+      if (effectiveBalance > ALLOWABLE_BALANCE_TO_SKIP_CHECK) {
+        // OPTIMISTIC PATH - proceed without waiting for escrow
+        if (walletSpanId) {
+          this.tracer.setTag(walletSpanId, "execution_mode", "optimistic");
+          this.tracer.setTag(
+            walletSpanId,
+            "effective_balance_cents",
+            effectiveBalance
+          );
+          this.tracer.finishSpan(walletSpanId);
+        }
+        return ok({
+          pendingEscrow,
+        });
+      }
+    }
+
+    // BLOCKING PATH - balance too low, must wait for escrow result
+    if (walletSpanId) {
+      this.tracer.setTag(walletSpanId, "execution_mode", "blocking");
+    }
+
+    const awaitedEscrow = await pendingEscrow;
+    if (awaitedEscrow.error) {
+      if (walletSpanId) {
+        this.tracer.setError(walletSpanId, awaitedEscrow.error.message);
+        this.tracer.finishSpan(walletSpanId);
+      }
+      return err(awaitedEscrow.error);
+    }
     // Finish wallet span with success tags
     if (walletSpanId) {
-      this.tracer.setTag(walletSpanId, "escrow_id", escrowResult.data.escrowId);
+      this.tracer.setTag(
+        walletSpanId,
+        "escrow_id",
+        awaitedEscrow.data.reservedEscrowId
+      );
       this.tracer.finishSpan(walletSpanId);
     }
 
-    return ok({ reservedEscrowId: escrowResult.data.escrowId });
+    // Wrap the already-resolved result back in a promise for consistent return type
+    return ok({
+      pendingEscrow: Promise.resolve(awaitedEscrow),
+    });
   }
 
   async execute(props: ExecutorProps): Promise<Result<Response, AttemptError>> {
@@ -150,7 +214,7 @@ export class AttemptExecutor {
       }
 
       escrowInfo = {
-        escrowId: ptbCheck.data.reservedEscrowId,
+        escrow: ptbCheck.data.pendingEscrow,
         endpoint: endpoint,
       };
     }
@@ -172,7 +236,17 @@ export class AttemptExecutor {
     // If error, cancel escrow and return the error
     if (isErr(result)) {
       if (escrowInfo) {
-        this.ctx.waitUntil(this.cancelEscrow(escrowInfo.escrowId, props.orgId));
+        // Need to await the pending escrow to get escrowId for cancellation
+        this.ctx.waitUntil(
+          escrowInfo.escrow.then((escrowResult) => {
+            if (escrowResult.data) {
+              return this.cancelEscrow(
+                escrowResult.data.reservedEscrowId,
+                props.orgId
+              );
+            }
+          })
+        );
       }
 
       // Finish PTB span with error
@@ -212,7 +286,9 @@ export class AttemptExecutor {
     plugins?: Plugin[],
     traceContext?: TraceContext | null
   ): Promise<Result<Response, AttemptError>> {
-    const bodyMapping = endpoint.userConfig.gatewayMapping || requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping;
+    const bodyMapping =
+      endpoint.userConfig.gatewayMapping ||
+      requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping;
     try {
       const bodyResult = await buildRequestBody(endpoint, {
         parsedBody,
@@ -230,6 +306,7 @@ export class AttemptExecutor {
         });
       }
 
+      requestParams.apiKey = providerKey.decrypted_provider_key;
       const urlResult = buildEndpointUrl(endpoint, requestParams);
 
       if (isErr(urlResult)) {
@@ -282,10 +359,19 @@ export class AttemptExecutor {
 
       await requestWrapper.setBody(bodyResult.data);
 
-      for (const [key, value] of Object.entries(
-        authResult.data?.headers || {}
-      )) {
+      // Apply auth headers from provider
+      const authHeaders = authResult.data?.headers || {};
+      for (const [key, value] of Object.entries(authHeaders)) {
         requestWrapper.setHeader(key, value);
+      }
+
+      // If provider doesn't return Authorization header, remove the original one
+      // This handles providers that use URL-based auth (like Google's native API)
+      // Check both cases since headers can be lowercase or capitalized
+      const hasAuthHeader =
+        "Authorization" in authHeaders || "authorization" in authHeaders;
+      if (!hasAuthHeader && endpoint.provider === "google-ai-studio") {
+        requestWrapper.getHeaders().delete("Authorization");
       }
 
       metrics.markPreRequestEnd();
@@ -351,8 +437,9 @@ export class AttemptExecutor {
             response.status === 429 && heliconeError === "rate_limited"
               ? "rate_limited"
               : "request_failed",
-          message: errorMessageResult.data,
+          message: errorMessageResult.data.message,
           statusCode: response.status,
+          details: errorMessageResult.data.details,
         });
       }
 

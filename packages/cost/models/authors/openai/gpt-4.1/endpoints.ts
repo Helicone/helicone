@@ -11,7 +11,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.000002,
         output: 0.000008,
-        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
+        web_search: 0.01, // $10 per 1000 searches
         cacheMultipliers: {
           cachedInput: 0.25,
         },
@@ -50,46 +50,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000004,
         output: 0.0000016,
-        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
-        cacheMultipliers: {
-          cachedInput: 0.25,
-        },
-      },
-    ],
-    contextLength: 1047576,
-    maxCompletionTokens: 32768,
-    rateLimits: {
-      rpm: 30000,
-      tpm: 150000000,
-      tpd: 15000000000,
-    },
-    supportedParameters: [
-      "tools",
-      "tool_choice",
-      "seed",
-      "max_tokens",
-      "response_format",
-      "temperature",
-      "top_p",
-      "stop",
-      "frequency_penalty",
-      "presence_penalty",
-    ],
-    ptbEnabled: true,
-    endpointConfigs: {
-      "*": {},
-    },
-  },
-  "gpt-4.1-mini-2025-04-14:openai": {
-    providerModelId: "gpt-4.1-mini-2025-04-14",
-    provider: "openai",
-    author: "openai",
-    pricing: [
-      {
-        threshold: 0,
-        input: 0.0000004,
-        output: 0.0000016,
-        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
+        web_search: 0.01, // $10 per 1000 searches
         cacheMultipliers: {
           cachedInput: 0.25,
         },
@@ -128,7 +89,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000001,
         output: 0.0000004,
-        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
+        web_search: 0.01, // $10 per 1000 searches
         cacheMultipliers: {
           cachedInput: 0.25,
         },
@@ -167,7 +128,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.000002,
         output: 0.000008,
-        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
+        web_search: 0.01, // $10 per 1000 searches
         cacheMultipliers: {
           cachedInput: 0.25,
         },
@@ -205,45 +166,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000004,
         output: 0.0000016,
-        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
-        cacheMultipliers: {
-          cachedInput: 0.25,
-        },
-      },
-    ],
-    contextLength: 1047576,
-    maxCompletionTokens: 32768,
-    rateLimits: {
-      rpm: 200,
-      tpm: 200000,
-    },
-    supportedParameters: [
-      "tools",
-      "tool_choice",
-      "seed",
-      "max_tokens",
-      "response_format",
-      "temperature",
-      "top_p",
-      "stop",
-      "frequency_penalty",
-      "presence_penalty",
-    ],
-    ptbEnabled: true,
-    endpointConfigs: {
-      "*": {},
-    },
-  },
-  "gpt-4.1-mini-2025-04-14:azure": {
-    providerModelId: "gpt-4.1-mini-2025-04-14",
-    provider: "azure",
-    author: "openai",
-    pricing: [
-      {
-        threshold: 0,
-        input: 0.0000004,
-        output: 0.0000016,
-        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
+        web_search: 0.01, // $10 per 1000 searches
         cacheMultipliers: {
           cachedInput: 0.25,
         },
@@ -281,9 +204,9 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000001,
         output: 0.0000004,
-        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
+        web_search: 0.01, // $10 per 1000 searches
         cacheMultipliers: {
-          cachedInput: 0.3,
+          cachedInput: 0.25,
         },
       },
     ],
@@ -319,7 +242,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000211, // $2.11/1M - worst-case: $2.00/1M (OpenAI) * 1.055
         output: 0.00000844, // $8.44/1M - worst-case: $8.00/1M (OpenAI) * 1.055
-        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
+        web_search: 0.01, // $10 per 1000 searches
       },
     ],
     contextLength: 1_047_576,
@@ -350,38 +273,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000042, // $0.42/1M - worst-case: $0.40/1M (OpenAI) * 1.055
         output: 0.00000169, // $1.69/1M - worst-case: $1.60/1M (OpenAI) * 1.055
-        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
-      },
-    ],
-    contextLength: 1_047_576,
-    maxCompletionTokens: 32_768,
-    supportedParameters: [
-      "tools",
-      "tool_choice",
-      "seed",
-      "max_tokens",
-      "response_format",
-      "temperature",
-      "top_p",
-      "stop",
-      "frequency_penalty",
-      "presence_penalty",
-    ],
-    ptbEnabled: true,
-    endpointConfigs: {
-      "*": {},
-    },
-  },
-  "gpt-4.1-mini-2025-04-14:openrouter": {
-    provider: "openrouter",
-    author: "openai",
-    providerModelId: "openai/gpt-4.1-mini-2025-04-14",
-    pricing: [
-      {
-        threshold: 0,
-        input: 0.00000042, // $0.42/1M - worst-case: $0.40/1M (OpenAI) * 1.055
-        output: 0.00000169, // $1.69/1M - worst-case: $1.60/1M (OpenAI) * 1.055
-        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
+        web_search: 0.01, // $10 per 1000 searches
       },
     ],
     contextLength: 1_047_576,
@@ -412,7 +304,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000011, // $0.11/1M - worst-case: $0.10/1M (OpenAI) * 1.055
         output: 0.00000042, // $0.42/1M - worst-case: $0.40/1M (OpenAI) * 1.055
-        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
+        web_search: 0.01, // $10 per 1000 searches
       },
     ],
     contextLength: 1_047_576,
@@ -443,7 +335,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.000002, // $2.00 per 1M tokens
         output: 0.000008, // $8.00 per 1M tokens
-        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
+        web_search: 0.01, // $10 per 1000 searches
         cacheMultipliers: {
           cachedInput: 0.25, // $0.50 per 1M tokens
         },
@@ -473,7 +365,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000001, // $0.10 per 1M tokens
         output: 0.0000004, // $0.40 per 1M tokens
-        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
+        web_search: 0.01, // $10 per 1000 searches
         cacheMultipliers: {
           cachedInput: 0.25, // $0.025 per 1M tokens
         },
@@ -496,7 +388,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.0000004, // $0.40 per 1M tokens
         output: 0.0000016, // $1.60 per 1M tokens
-        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
+        web_search: 0.01, // $10 per 1000 searches
         cacheMultipliers: {
           cachedInput: 0.25, // $0.10 per 1M tokens
         },

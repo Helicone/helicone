@@ -18,6 +18,7 @@ const config: Config = {
   coverageDirectory: "coverage",
   verbose: true,
   testTimeout: 30000,
+  maxWorkers: 1,
   setupFilesAfterEnv: ["<rootDir>/tests/setup.ts"],
   transform: {
     "^.+\\.ts$": [

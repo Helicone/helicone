@@ -54,10 +54,15 @@ export class DataDogTracer {
     this.orgId = orgId;
   }
 
+  /**
+   * Start a new trace
+   * @param forceSample - If true, bypass sampling and always trace. Use for critical/rare events.
+   */
   startTrace(
     name: string,
     resource: string,
-    tags?: Record<string, string>
+    tags?: Record<string, string>,
+    forceSample = false
   ): TraceContext | null {
     if (this.spans.size >= MAX_SPANS) {
       return null;
@@ -67,8 +72,8 @@ export class DataDogTracer {
       return null;
     }
 
-    // Apply sampling decision
-    const sampled = Math.random() < this.config.sampleRate;
+    // Apply sampling decision (unless forced)
+    const sampled = forceSample || Math.random() < this.config.sampleRate;
     if (!sampled) {
       return { trace_id: "", sampled: false, tags: {} };
     }

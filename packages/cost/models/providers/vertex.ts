@@ -9,6 +9,7 @@ import type {
 } from "../types";
 import { getGoogleAccessToken } from "../../auth/gcpServiceAccountAuth";
 import { CacheProvider } from "../../../common/cache/provider";
+import { toGoogle } from "@helicone-package/llm-mapper/transform/providers/openai/request/toGoogle";
 
 export class VertexProvider extends BaseProvider {
   readonly displayName = "Vertex AI";
@@ -57,7 +58,12 @@ export class VertexProvider extends BaseProvider {
           ? "https://aiplatform.googleapis.com"
           : this.baseUrl.replace("{region}", region);
 
-      return `${baseUrlWithRegion}/v1beta1/projects/${projectId}/locations/${region}/endpoints/openapi/chat/completions`;
+      const baseEndpointUrl = `${baseUrlWithRegion}/v1beta1/projects/${projectId}/locations/${region}/publishers/google/models/${modelId}`;
+      const suffix = requestParams.isStreaming
+        ? ":streamGenerateContent?alt=sse"
+        : ":generateContent";
+
+      return `${baseEndpointUrl}${suffix}`;
     }
 
     if (!projectId || !region) {
@@ -77,37 +83,50 @@ export class VertexProvider extends BaseProvider {
     // Gemini models use Google's predict format; all others use rawPredict for native format
     const isStreaming = requestParams.isStreaming === true;
     const endpointMethod = isStreaming
-        ? "streamRawPredict"
-        : "rawPredict";
+      ? "streamRawPredict"
+      : "rawPredict";
 
     return `${baseEndpointUrl}:${endpointMethod}`;
   }
 
   buildRequestBody(endpoint: Endpoint, context: RequestBodyContext): string {
     const modelId = endpoint.providerModelId || "";
+    if (context.bodyMapping === "NO_MAPPING") {
+      // For Claude models on Vertex, still need to add anthropic_version
+      // even when the body is already in Anthropic format (NO_MAPPING)
+      if (modelId.includes("claude-")) {
+        return JSON.stringify({
+          ...context.parsedBody,
+          anthropic_version: "vertex-2023-10-16",
+          model: undefined,
+        });
+      }
+      return JSON.stringify({
+        ...context.parsedBody,
+        model: modelId,
+      });
+    }
+
+    let updatedBody = context.parsedBody;
+
+    // Convert to Chat Completions
+    if (context.bodyMapping === "RESPONSES") {
+      updatedBody = context.toChatCompletions(context.parsedBody);
+    }
 
     if (modelId.toLowerCase().includes("gemini")) {
-      let updatedBody = context.parsedBody;
-      if (context.bodyMapping === "RESPONSES") {
-        updatedBody = context.toChatCompletions(context.parsedBody);
-      }
-      updatedBody = {
-        ...updatedBody,
-        model: `google/${modelId}`,
-      };
-      return JSON.stringify(updatedBody);
+      const geminiBody = toGoogle(updatedBody);
+      return JSON.stringify(geminiBody);
     }
 
     if (endpoint.providerModelId.includes("claude-")) {
-      const anthropicBody =
-        context.bodyMapping === "OPENAI"
-          ? context.toAnthropic(
-              context.parsedBody,
-              endpoint.providerModelId,
-              { includeCacheBreakpoints: false }
-            )
-          : context.parsedBody;
-      const updatedBody = {
+      const anthropicBody = context.toAnthropic(
+        updatedBody,
+        endpoint.providerModelId,
+        { includeCacheBreakpoints: true }
+      );
+
+      updatedBody = {
         ...anthropicBody,
         anthropic_version: "vertex-2023-10-16",
         model: undefined, // model is not needed in Vertex inputs (as its defined via URL)
@@ -143,23 +162,29 @@ export class VertexProvider extends BaseProvider {
     return {
       headers: {
         Authorization: `Bearer ${accessToken}`,
+        ...(endpoint.providerModelId.includes("sonnet-4") ? {
+          "anthropic-beta": "context-1m-2025-08-07"
+        } : {})
       },
     };
   }
 
-  async buildErrorMessage(response: Response): Promise<string> {
+  async buildErrorMessage(response: Response): Promise<{
+    message: string;
+    details?: any;
+  }> {
     try {
       const respJson = (await response.json()) as any;
       if (respJson.error?.message) {
         // Anthropic error format
-        return respJson.error.message;
+        return { message: respJson.error.message, details: respJson.error };
       } else if (respJson[0]?.error?.message) {
         // Gemini error format
-        return respJson[0].error.message;
+        return { message: respJson[0].error.message, details: respJson[0].error };
       }
-      return `Request failed with status ${response.status}`;
+      return { message: `Request failed with status ${response.status}`, details: undefined };
     } catch (error) {
-      return `Request failed with status ${response.status}`;
+      return { message: `Request failed with status ${response.status}`, details: undefined };
     }
   }
 

@@ -26,11 +26,13 @@ import {
   getPromptCacheWriteTokens,
   getPromptCacheReadTokens,
   getPromptAudioTokens,
+  getCompletionAudioTokens,
 } from "./HandlerContext";
 import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
 import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 import { atLeastZero } from "../utils/helicone_math";
 import { tryToGetSize } from "../../utils/tryGetSize";
+import { replaceLoneSurrogates } from "../../utils/sanitize";
 
 type RequestRecord = {
   requestId: string;
@@ -200,14 +202,14 @@ export class LoggingHandler extends AbstractLogHandler {
         this.sanitizeJsonEscapeSequences(requestResponseVersionedCHMapped);
 
       // Special handling for request_body to ensure it's properly sanitized
+      // Only replace lone surrogates, preserving valid emoji surrogate pairs
       if (
         typeof sanitizedRequestResponseVersionedCHMapped.request_body ===
         "string"
       ) {
         sanitizedRequestResponseVersionedCHMapped.request_body =
-          sanitizedRequestResponseVersionedCHMapped.request_body.replace(
-            /[\uD800-\uDFFF]/g,
-            "\uFFFD"
+          replaceLoneSurrogates(
+            sanitizedRequestResponseVersionedCHMapped.request_body
           );
       }
 
@@ -480,7 +482,7 @@ export class LoggingHandler extends AbstractLogHandler {
       getPromptAudioTokens(modelUsage, legacyUsage) ?? 0
     );
     const completionAudioTokens = atLeastZero(
-      legacyUsage.completionAudioTokens ?? 0
+      getCompletionAudioTokens(modelUsage, legacyUsage) ?? 0
     );
     const orgParams = context.orgParams;
     const { requestText, responseText } =
@@ -694,17 +696,19 @@ export class LoggingHandler extends AbstractLogHandler {
   /**
    * Sanitizes JSON data by removing invalid escape sequences
    * This is needed to fix the "missing second part of surrogate pair" error
+   * Only replaces lone surrogates, preserving valid emoji surrogate pairs
    * @param obj - The object to sanitize
    * @returns A sanitized copy of the object
    */
   private sanitizeJsonEscapeSequences<T>(obj: T): T {
     // Create a deep copy of the object through serialization
-    // and replace any invalid surrogate pairs
+    // and replace only lone (unpaired) surrogates, preserving valid emoji pairs
     try {
       const sanitizedJson = JSON.stringify(obj, (_, value) => {
         if (typeof value === "string") {
-          // Replace any lone surrogate halves with the Unicode replacement character (U+FFFD)
-          return value.replace(/[\uD800-\uDFFF]/g, "\uFFFD");
+          // Replace only lone surrogate halves with the Unicode replacement character (U+FFFD)
+          // Valid surrogate pairs (emojis) are preserved
+          return replaceLoneSurrogates(value);
         }
         return value;
       });
