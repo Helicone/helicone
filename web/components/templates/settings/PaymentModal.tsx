@@ -20,13 +20,13 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   onClose,
   returnUrl,
 }) => {
-  const [amount, setAmount] = useState(5);
+  const [amount, setAmount] = useState(10);
   const [customAmount, setCustomAmount] = useState("");
   const createCheckoutSession = useCreateCheckoutSession();
   const { setNotification } = useNotification();
 
-  const presetAmounts = [5, 20, 100, 500];
-  const MIN_AMOUNT = 5;
+  const presetAmounts = [10, 20, 100, 500];
+  const MIN_AMOUNT = 10;
 
   const creditsAmountCents = Math.round(amount * 100);
   const percentageFeeCents = Math.ceil(
@@ -47,7 +47,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     setCustomAmount(value);
 
     if (value === "") {
-      setAmount(5);
+      setAmount(10);
       return;
     }
 
