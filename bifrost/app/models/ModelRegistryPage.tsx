@@ -19,8 +19,10 @@ import {
   X,
   Filter,
   Info,
+  Plus,
   GitCompare,
 } from "lucide-react";
+import { RequestModelModal } from "./RequestModelModal";
 import { Button } from "@/components/ui/button";
 import { useModelFiltering } from "@/hooks/useModelFiltering";
 import { Model, SortOption } from "@/lib/filters/modelFilters";
@@ -122,6 +124,7 @@ export function ModelRegistryPage() {
     ])
   );
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [requestModalOpen, setRequestModalOpen] = useState(false);
 
   const toggleSection = (section: string) => {
     const newSet = new Set(expandedSections);
@@ -241,9 +244,8 @@ export function ModelRegistryPage() {
 
         {/* Sidebar */}
         <div
-          className={`${
-            sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } lg:translate-x-0 fixed lg:sticky lg:top-16 w-[75vw] lg:w-80 lg:flex-shrink-0 transition-transform duration-300 z-50 lg:z-10 left-0 top-0 h-screen lg:h-[calc(100vh-4rem)] bg-white dark:bg-gray-900 lg:border-r border-gray-200 dark:border-gray-800 overflow-y-auto shadow-xl lg:shadow-none lg:self-start`}
+          className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+            } lg:translate-x-0 fixed lg:sticky lg:top-16 w-[75vw] lg:w-80 lg:flex-shrink-0 transition-transform duration-300 z-50 lg:z-10 left-0 top-0 h-screen lg:h-[calc(100vh-4rem)] bg-white dark:bg-gray-900 lg:border-r border-gray-200 dark:border-gray-800 overflow-y-auto shadow-xl lg:shadow-none lg:self-start`}
         >
           <div className="p-6">
             {/* Mobile close button */}
@@ -459,37 +461,37 @@ export function ModelRegistryPage() {
               <div className="flex flex-col lg:flex-row gap-3">
                 {/* Search bar */}
                 <div className="relative lg:flex-1">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     placeholder="Search models..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 h-10 bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-700"
+                    className="pl-9 h-9 bg-transparent border-input"
                   />
                 </div>
 
                 {/* Mobile filter button */}
                 <button
                   onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="lg:hidden flex items-center justify-center gap-2 px-4 h-10 border border-gray-200 dark:border-gray-800 rounded-md text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  className="lg:hidden flex items-center justify-center gap-2 px-3 h-9 border border-input rounded-md text-sm text-foreground bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground"
                 >
-                  <Filter className="h-4 w-4" />
+                  <Filter className="h-4 w-4 opacity-50" />
                   <span>Filters</span>
                 </button>
 
                 {/* PTB Toggle */}
                 <TooltipProvider>
-                  <div className="flex items-center gap-2 px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-900">
+                  <div className="flex items-center gap-2 px-3 h-9 border border-input rounded-md bg-transparent shadow-sm">
                     <div className="flex items-center gap-1.5">
                       <label
                         htmlFor="ptb-toggle"
-                        className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap"
+                        className="text-sm text-foreground whitespace-nowrap"
                       >
                         Credits
                       </label>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Info className="h-3.5 w-3.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help" />
+                          <Info className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
                         </TooltipTrigger>
                         <TooltipContent className="max-w-xs">
                           <p>
@@ -514,8 +516,8 @@ export function ModelRegistryPage() {
                   value={sortBy}
                   onValueChange={(v) => setSortBy(v as SortOption)}
                 >
-                  <SelectTrigger className="w-full lg:w-[160px] h-10">
-                    <ArrowUpDown className="h-4 w-4 mr-2" />
+                  <SelectTrigger className="w-full lg:w-[160px]">
+                    <ArrowUpDown className="h-4 w-4 mr-2 opacity-50" />
                     <SelectValue placeholder="Sort" />
                   </SelectTrigger>
                   <SelectContent>
@@ -531,6 +533,14 @@ export function ModelRegistryPage() {
                   </SelectContent>
                 </Select>
 
+                {/* Request Model Button */}
+                <button
+                  onClick={() => setRequestModalOpen(true)}
+                  className="flex items-center justify-center gap-2 px-3 h-9 border border-input rounded-md text-sm text-foreground bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors whitespace-nowrap"
+                >
+                  <Plus className="h-4 w-4 opacity-50" />
+                  <span className="hidden sm:inline">Request Model</span>
+                </button>
                 {/* Compare button */}
                 <Link href="/comparison">
                   <Button variant="outline" size="sm" className="gap-2 h-10">
@@ -540,7 +550,7 @@ export function ModelRegistryPage() {
                 </Link>
               </div>
               <div className="flex items-center">
-                <span className="text-sm text-gray-500 dark:text-gray-400">
+                <span className="text-sm text-muted-foreground">
                   Showing {filteredModels.length} of {totalModels} models
                 </span>
                 <div className="flex justify-between items-center">
@@ -556,11 +566,10 @@ export function ModelRegistryPage() {
                       setShowPtbOnly(false);
                       setSearchQuery("");
                     }}
-                    className={`px-3 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-all flex items-center gap-2 ${
-                      isFiltered
+                    className={`px-3 text-sm text-muted-foreground hover:text-foreground transition-all flex items-center gap-2 ${isFiltered
                         ? "opacity-100 pointer-events-auto"
                         : "opacity-0 pointer-events-none"
-                    }`}
+                      }`}
                   >
                     <X className="h-3.5 w-3.5" />
                     Reset filters
@@ -705,6 +714,12 @@ export function ModelRegistryPage() {
           </div>
         )}
       </div>
+
+      {/* Request Model Modal */}
+      <RequestModelModal
+        open={requestModalOpen}
+        onOpenChange={setRequestModalOpen}
+      />
     </div>
   );
 }
