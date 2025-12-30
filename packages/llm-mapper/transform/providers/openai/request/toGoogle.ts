@@ -175,7 +175,73 @@ function buildGenerationConfig(
     config.imageConfig = imageConfig;
   }
 
+  // Handle response_format for structured output
+  const responseFormatConfig = buildResponseFormatConfig(body);
+  if (responseFormatConfig) {
+    if (responseFormatConfig.responseMimeType) {
+      config.responseMimeType = responseFormatConfig.responseMimeType;
+    }
+    if (responseFormatConfig.responseSchema) {
+      config.responseSchema = responseFormatConfig.responseSchema;
+    }
+  }
+
   return Object.keys(config).length > 0 ? config : undefined;
+}
+
+/**
+ * Converts OpenAI's response_format to Google's responseMimeType and responseSchema.
+ *
+ * OpenAI format:
+ * - { type: "text" } -> No special handling (default)
+ * - { type: "json_object" } -> responseMimeType: "application/json"
+ * - { type: "json_schema", json_schema: { schema: {...} } } -> responseMimeType + responseSchema
+ *
+ * Google format:
+ * - generationConfig.responseMimeType: "application/json"
+ * - generationConfig.responseSchema: { type: "object", properties: {...} }
+ */
+function buildResponseFormatConfig(
+  body: HeliconeChatCreateParams
+): { responseMimeType?: string; responseSchema?: Record<string, any> } | undefined {
+  const responseFormat = body.response_format;
+
+  if (!responseFormat) {
+    return undefined;
+  }
+
+  // Handle different response_format types
+  if (responseFormat.type === "text") {
+    // Default behavior, no special config needed
+    return undefined;
+  }
+
+  if (responseFormat.type === "json_object") {
+    // Simple JSON mode without schema
+    return {
+      responseMimeType: "application/json",
+    };
+  }
+
+  if (responseFormat.type === "json_schema") {
+    const jsonSchema = (responseFormat as any).json_schema;
+    if (!jsonSchema?.schema) {
+      // Fallback to simple JSON mode if no schema provided
+      return {
+        responseMimeType: "application/json",
+      };
+    }
+
+    // Strip OpenAI-specific fields from the schema (like additionalProperties)
+    const cleanedSchema = stripOpenAISchemaFields(jsonSchema.schema);
+
+    return {
+      responseMimeType: "application/json",
+      responseSchema: cleanedSchema,
+    };
+  }
+
+  return undefined;
 }
 
 /**
@@ -287,6 +353,63 @@ function buildImageConfig(body: HeliconeChatCreateParams): GeminiImageConfig | u
   return imageConfig;
 }
 
+/**
+ * Recursively strips OpenAI-specific JSON Schema fields that Gemini doesn't recognize.
+ *
+ * OpenAI's strict mode requires additionalProperties: false on all object schemas,
+ * but Gemini's API rejects this field with:
+ * "Unknown name 'additionalProperties' at 'tools[0].function_declarations[0].parameters'"
+ */
+function stripOpenAISchemaFields(schema: Record<string, any> | undefined): Record<string, any> | undefined {
+  if (!schema || typeof schema !== 'object') {
+    return schema;
+  }
+
+  // Create a shallow copy to avoid mutating the original
+  const cleaned = { ...schema };
+
+  // Remove OpenAI-specific fields
+  delete cleaned.additionalProperties;
+
+  // Recurse into properties
+  if (cleaned.properties && typeof cleaned.properties === 'object') {
+    cleaned.properties = Object.fromEntries(
+      Object.entries(cleaned.properties).map(([key, value]) => [
+        key,
+        stripOpenAISchemaFields(value as Record<string, any>),
+      ])
+    );
+  }
+
+  // Handle array items
+  if (cleaned.items) {
+    cleaned.items = stripOpenAISchemaFields(cleaned.items);
+  }
+
+  // Handle allOf, anyOf, oneOf
+  for (const combiner of ['allOf', 'anyOf', 'oneOf'] as const) {
+    if (Array.isArray(cleaned[combiner])) {
+      cleaned[combiner] = cleaned[combiner].map((subSchema: Record<string, any>) =>
+        stripOpenAISchemaFields(subSchema)
+      );
+    }
+  }
+
+  // Handle $defs / definitions (JSON Schema references)
+  for (const defsKey of ['$defs', 'definitions'] as const) {
+    if (cleaned[defsKey] && typeof cleaned[defsKey] === 'object') {
+      cleaned[defsKey] = Object.fromEntries(
+        Object.entries(cleaned[defsKey]).map(([key, value]) => [
+          key,
+          stripOpenAISchemaFields(value as Record<string, any>),
+        ])
+      );
+    }
+  }
+
+  return cleaned;
+}
+
 function buildTools(body: HeliconeChatCreateParams): GeminiTool[] | undefined {
   if (!body.tools || body.tools.length === 0) {
     return undefined;
@@ -309,7 +432,7 @@ function buildTools(body: HeliconeChatCreateParams): GeminiTool[] | undefined {
     .map((tool) => ({
       name: tool.function!.name,
       description: tool.function!.description,
-      parameters: tool.function!.parameters,
+      parameters: stripOpenAISchemaFields(tool.function!.parameters),
     }));
 
   if (functions.length === 0) {
