@@ -12,6 +12,7 @@ import { AttemptBuilder } from "./AttemptBuilder";
 import { AttemptExecutor } from "./AttemptExecutor";
 import { Plugin } from "@helicone-package/cost/models/types";
 import { Attempt, AttemptError, DisallowListEntry, EscrowInfo } from "./types";
+import { DisallowListKVSync } from "./DisallowListKVSync";
 import { ant2oaiResponse } from "../clients/llmmapper/router/oai2ant/nonStream";
 import { ant2oaiStreamResponse } from "../clients/llmmapper/router/oai2ant/stream";
 import { goog2oaiResponse } from "../clients/llmmapper/router/oai2google/nonStream";
@@ -80,7 +81,9 @@ export class SimpleAIGateway {
 
     const providerKeysManager = new ProviderKeysManager(
       new ProviderKeysStore(this.supabaseClient),
-      env
+      env,
+      this.orgId,
+      ctx
     );
 
     // Create SecureCacheProvider for distributed caching
@@ -195,15 +198,17 @@ export class SimpleAIGateway {
 
     // Step 4: Get disallow list (only if there are PTB attempts)
     const hasPtbAttempts = attempts.some((a) => a.authType === "ptb");
-    const disallowSpan = this.traceContext?.sampled && hasPtbAttempts
-      ? this.tracer.startSpan(
-          "ai_gateway.gateway.get_disallow_list",
-          "getDisallowList",
-          "ai-gateway",
-          {},
-          this.traceContext
-        )
-      : null;
+    const disallowSpan =
+      this.traceContext?.sampled && hasPtbAttempts
+        ? this.tracer.startSpan(
+            "ai_gateway.gateway.get_disallow_list",
+            "getDisallowList",
+            "ai-gateway",
+            {},
+            this.traceContext
+          )
+        : null;
+
     const disallowList = hasPtbAttempts
       ? await this.getDisallowList(this.orgId)
       : [];
@@ -264,7 +269,10 @@ export class SimpleAIGateway {
       }
 
       // Check disallow list (only for PTB attempts)
-      if (attempt.authType === "ptb" && this.isDisallowed(attempt, disallowList)) {
+      if (
+        attempt.authType === "ptb" &&
+        this.isDisallowed(attempt, disallowList)
+      ) {
         errors.push({
           source: attempt.source,
           message:
@@ -425,7 +433,10 @@ export class SimpleAIGateway {
       modelStrings,
       body: parsedBody,
       plugins,
-      globalIgnoreProviders: globalIgnoreProvidersSet.size > 0 ? globalIgnoreProvidersSet : undefined,
+      globalIgnoreProviders:
+        globalIgnoreProvidersSet.size > 0
+          ? globalIgnoreProvidersSet
+          : undefined,
     });
   }
 
@@ -441,8 +452,7 @@ export class SimpleAIGateway {
   // reasoning_options reserved for providers with custom reasoning logic
   private requiresReasoningOptions(providerModelId: string): boolean {
     return (
-      providerModelId.includes("claude") ||
-      providerModelId.includes("gemini")
+      providerModelId.includes("claude") || providerModelId.includes("gemini")
     );
   }
 
@@ -501,9 +511,23 @@ export class SimpleAIGateway {
 
   private async getDisallowList(orgId: string): Promise<DisallowListEntry[]> {
     try {
+      // Check KV cache first
+      const kvSync = new DisallowListKVSync(this.env.WALLET_KV, orgId);
+      const cachedList = await kvSync.getDisallowList();
+
+      if (cachedList !== null) {
+        return cachedList;
+      }
+
+      // Cache miss - fetch from Durable Object
       const walletId = this.env.WALLET.idFromName(orgId);
       const walletStub = this.env.WALLET.get(walletId);
-      return await walletStub.getDisallowList();
+      const disallowList = await walletStub.getDisallowList();
+
+      // Store in KV for future requests
+      await kvSync.storeDisallowList(disallowList);
+
+      return disallowList;
     } catch (error) {
       console.error("Failed to get disallow list:", error);
       return [];
@@ -542,7 +566,7 @@ export class SimpleAIGateway {
     const isStream =
       contentType?.includes("text/event-stream") ||
       contentType?.includes("application/vnd.amazon.eventstream");
-    
+
     let finalMappedResponse = response;
     try {
       if (mappingType === "OPENAI") {
@@ -576,11 +600,16 @@ export class SimpleAIGateway {
       }
 
       // Output now is in Chat Completions format
-      if (bodyMapping === "RESPONSES" && provider !== "openai") {
+      const nativelySupportsResponsesAPI =
+        provider === "openai" ||
+        (provider === "helicone" && providerModelId.includes("gpt"));
+      if (bodyMapping === "RESPONSES" && !nativelySupportsResponsesAPI) {
         if (isStream) {
-          finalMappedResponse = oaiChat2responsesStreamResponse(finalMappedResponse);
+          finalMappedResponse =
+            oaiChat2responsesStreamResponse(finalMappedResponse);
         } else {
-          finalMappedResponse = await oaiChat2responsesResponse(finalMappedResponse);
+          finalMappedResponse =
+            await oaiChat2responsesResponse(finalMappedResponse);
         }
       }
 

@@ -171,11 +171,12 @@ export async function getRequestsClickhouseNoSort(
   const sortSQL = createdAtSort === "asc" ? "ASC" : "DESC";
   const query = `
     WITH top_requests AS (
-      SELECT 
+      SELECT
           request_id,
           request_created_at
       FROM request_response_rmt
       WHERE (${builtFilter.filter})
+        AND request_created_at <= now() + INTERVAL 1 MINUTE
       ORDER BY request_created_at ${sortSQL}
       LIMIT ${limit}
       OFFSET ${offset}
@@ -194,8 +195,9 @@ export async function getRequestsClickhouseNoSort(
       model AS request_model,
       ai_gateway_body_mapping,
       time_to_first_token,
-      (prompt_tokens + completion_tokens) AS total_tokens,
+      (prompt_tokens + completion_tokens + reasoning_tokens) AS total_tokens,
       completion_tokens,
+      reasoning_tokens,
       prompt_cache_read_tokens,
       prompt_cache_write_tokens,
       prompt_tokens,
@@ -276,8 +278,9 @@ export async function getRequestsClickhouse(
       model AS request_model,
       ai_gateway_body_mapping,
       time_to_first_token,
-      (prompt_tokens + completion_tokens) AS total_tokens,
+      (prompt_tokens + completion_tokens + reasoning_tokens) AS total_tokens,
       completion_tokens,
+      reasoning_tokens,
       prompt_tokens,
       prompt_cache_read_tokens,
       prompt_cache_write_tokens,
@@ -298,6 +301,7 @@ export async function getRequestsClickhouse(
     FROM request_response_rmt
     WHERE (
       (${builtFilter.filter})
+      AND request_created_at <= now() + INTERVAL 1 MINUTE
     )
     ${sortSQL !== undefined ? `ORDER BY ${sortSQL}` : ""}
     LIMIT ${limit}

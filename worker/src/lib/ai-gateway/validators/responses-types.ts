@@ -8,6 +8,7 @@ const ServiceTier = z.union([
 const ModelResponseProperties = z
   .object({
     top_logprobs: z.union([z.number(), z.null()]),
+    top_k: z.union([z.number(), z.null()]),
     temperature: z.union([z.number(), z.null()]),
     top_p: z.union([z.number(), z.null()]),
     user: z.string(),
@@ -391,7 +392,13 @@ const RefusalContent = z
     type: z.literal("refusal").default("refusal"),
     refusal: z.string(),
   });
-const OutputMessageContent = z.union([OutputTextContent, RefusalContent]);
+const OutputImageContent = z
+  .object({
+    type: z.literal("output_image").default("output_image"),
+    image_url: z.string(),
+    detail: z.enum(["low", "high", "auto"]).optional(),
+  });
+const OutputMessageContent = z.union([OutputTextContent, RefusalContent, OutputImageContent]);
 const OutputMessage = z
   .object({
     id: z.string(),
@@ -658,6 +665,11 @@ const ClearThinkingConfig = z
   })
   .passthrough();
 
+const ImageGenerationConfig = z.object({
+  aspect_ratio: z.string(),
+  image_size: z.string(),
+});
+
 const ContextEditingConfig = z
   .object({
     enabled: z.boolean(),
@@ -680,6 +692,7 @@ const CreateResponse = CreateModelResponseProperties.merge(ResponseProperties)
       // Context editing configuration for managing conversation context
       // Only supported for Anthropic models - will be stripped for other providers
       context_editing: ContextEditingConfig.optional(),
+      image_generation: ImageGenerationConfig.optional(),
       // conversation was removed
     })
   )

@@ -1,6 +1,7 @@
 import { Endpoint, Plugin } from "@helicone-package/cost/models/types";
 import { ProviderKey } from "../db/ProviderKeysStore";
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
+import { Result } from "../util/results";
 
 export interface Attempt {
   endpoint: Endpoint;
@@ -16,9 +17,18 @@ export interface DisallowListEntry {
   model: string;
 }
 
+export type PendingEscrow = Promise<
+  Result<
+    {
+      reservedEscrowId: string;
+    },
+    AttemptError
+  >
+>;
+
 // For backwards compatibility
 export interface EscrowInfo {
-  escrowId: string;
+  escrow: PendingEscrow;
   endpoint: Endpoint;
 }
 

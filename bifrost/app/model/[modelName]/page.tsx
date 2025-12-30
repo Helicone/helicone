@@ -4,6 +4,7 @@ import { ModelDetailPage } from "./ModelDetailPage";
 import { Layout } from "@/app/components/Layout";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { components } from "@/lib/clients/jawnTypes/public";
+import QueryProvider from "@/app/stats/QueryProvider";
 
 type ModelRegistryItem = components["schemas"]["ModelRegistryItem"];
 
@@ -89,24 +90,26 @@ export default async function ModelPage({
   
   return (
     <Layout noNavbarMargin={true}>
-      <Suspense
-        fallback={
-          <div className="flex flex-col gap-4 w-full max-w-6xl mx-auto px-4 py-8">
-            <div className="h-8 w-64 bg-muted rounded animate-pulse" />
-            <div className="h-4 w-96 bg-muted rounded animate-pulse" />
-            <div className="grid gap-4 mt-8">
-              {[...Array(5)].map((_, i) => (
-                <div
-                  key={i}
-                  className="h-20 bg-muted rounded animate-pulse"
-                />
-              ))}
+      <QueryProvider>
+        <Suspense
+          fallback={
+            <div className="flex flex-col gap-4 w-full max-w-6xl mx-auto px-4 py-8">
+              <div className="h-8 w-64 bg-muted rounded animate-pulse" />
+              <div className="h-4 w-96 bg-muted rounded animate-pulse" />
+              <div className="grid gap-4 mt-8">
+                {[...Array(5)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-20 bg-muted rounded animate-pulse"
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        }
-      >
-        <ModelDetailPage initialModel={model} modelName={decodedModelName} />
-      </Suspense>
+          }
+        >
+          <ModelDetailPage initialModel={model} modelName={decodedModelName} />
+        </Suspense>
+      </QueryProvider>
     </Layout>
   );
 }

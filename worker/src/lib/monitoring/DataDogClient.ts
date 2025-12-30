@@ -20,6 +20,8 @@ const ALLOWED_METRICS = new Set([
   "worker.ai-gateway.latency.prompt_request_ms",
   // Gateway error metrics
   "worker.ai-gateway.provider.rate_limit_429",
+  // PTB optimistic execution metrics
+  "worker.ptb.escrow_failure_optimistic",
 ]);
 
 export interface DataDogConfig {
@@ -119,9 +121,25 @@ export class DataDogClient {
   }
 
   /**
-   * Send a metric to DataDog with sampling
+   * Track escrow reservation failure after optimistic execution
+   * This happens when we proceeded with the LLM request based on cached balance
+   * but the actual escrow reservation failed (e.g., insufficient funds)
+   *
+   * NOTE: This bypasses sampling - we want 100% of these failures tracked
    */
-  private async sendMetric(metricName: string, value: number): Promise<void> {
+  trackOptimisticEscrowFailure(): void {
+    this.sendMetric("worker.ptb.escrow_failure_optimistic", 1, true);
+  }
+
+  /**
+   * Send a metric to DataDog with sampling
+   * @param skipSampling - If true, always send (bypass sampling). Use for critical metrics.
+   */
+  private async sendMetric(
+    metricName: string,
+    value: number,
+    skipSampling = false
+  ): Promise<void> {
     try {
       // Check kill switch
       if (this.DISABLED) return;
@@ -132,9 +150,10 @@ export class DataDogClient {
         return;
       }
 
-      // Apply sampling
+      // Apply sampling (unless bypassed for critical metrics)
       if (!this.config.enabled) return;
-      if (Math.random() > (this.config.sampleRate ?? 0.05)) return;
+      if (!skipSampling && Math.random() > (this.config.sampleRate ?? 0.05))
+        return;
 
       const timestamp = Math.floor(Date.now() / 1000);
 

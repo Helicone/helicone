@@ -599,8 +599,16 @@ describe("VertexUsageProcessor", () => {
       input: 90,
       output: 45,
       thinking: 20,
-      audio: 5,
-      image: 10,
+      audio: {
+        input: 0,
+        cachedInput: 0,
+        output: 5,
+      },
+      image: {
+        input: 10,
+        cachedInput: 0,
+        output: 0,
+      },
     });
   });
 
@@ -640,9 +648,21 @@ describe("VertexUsageProcessor", () => {
       cacheDetails: {
         cachedInput: 20,
       },
-      audio: 18, // prompt audio (10) + completion audio (8)
-      image: 7, // prompt image (5) + completion image (2)
-      video: 19, // prompt video (15) + completion video (4)
+      audio: {
+        input: 10,
+        cachedInput: 0,
+        output: 8,
+      },
+      image: {
+        input: 5,
+        cachedInput: 0,
+        output: 2,
+      },
+      video: {
+        input: 15,
+        cachedInput: 0,
+        output: 4,
+      },
     });
   });
 
@@ -678,7 +698,11 @@ describe("VertexUsageProcessor", () => {
       input: 6,
       output: 19,
       thinking: 35,
-      image: 8,
+      image: {
+        input: 8,
+        cachedInput: 0,
+        output: 0,
+      },
     });
   });
 });

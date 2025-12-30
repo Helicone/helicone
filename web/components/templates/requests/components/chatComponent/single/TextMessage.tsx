@@ -4,16 +4,13 @@ import { JsonRenderer } from "./JsonRenderer";
 import { ChatMode } from "../../Chat";
 import MarkdownEditor from "@/components/shared/markdownEditor";
 import { Mode } from "@/store/requestRenderModeStore";
-import dynamic from "next/dynamic";
-import { markdownComponents } from "@/components/shared/prompts/ResponsePanel";
 import { Skeleton } from "@/components/ui/skeleton";
 import CitationAnnotations from "./CitationAnnotations";
+import { Streamdown } from "streamdown";
+import type { BundledTheme } from "shiki";
+import { preserveLineBreaksForMarkdown } from "@/lib/textHelpers";
 
-// Dynamically import ReactMarkdown with no SSR
-const ReactMarkdown = dynamic(() => import("react-markdown"), {
-  ssr: false,
-  loading: () => <div className="h-4 w-full animate-pulse rounded bg-muted" />,
-});
+const shikiTheme: [BundledTheme, BundledTheme] = ["vitesse-light", "vitesse-dark"];
 
 interface TextMessageProps {
   isPartOfContentArray?: boolean;
@@ -125,12 +122,11 @@ export default function TextMessage({
     <>
       {displayContent ? (
         <>
-          <ReactMarkdown
-            components={markdownComponents}
-            className="w-full whitespace-pre-wrap break-words text-sm"
-          >
-            {displayContent}
-          </ReactMarkdown>
+          <div className="w-full whitespace-pre-wrap break-words text-sm">
+            <Streamdown shikiTheme={shikiTheme}>
+              {preserveLineBreaksForMarkdown(displayContent)}
+            </Streamdown>
+          </div>
           {annotations && annotations.length > 0 && (
             <CitationAnnotations
               annotations={annotations}

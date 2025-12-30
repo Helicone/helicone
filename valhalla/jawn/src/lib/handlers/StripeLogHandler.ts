@@ -83,7 +83,7 @@ export class StripeLogHandler extends AbstractLogHandler {
     this.stripeTraceUsages.push(request_event);
 
     const byte_event: StripeMeterEvent = {
-      identifier: `org_${organizationId}_request_${context.message.log.request.id}`,
+      identifier: `org_${organizationId}_byte_${context.message.log.request.id}`,
       event_name: "bytes_sum",
       timestamp: context.message.log.request.requestCreatedAt.toISOString(),
       payload: {

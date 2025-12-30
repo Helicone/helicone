@@ -308,6 +308,11 @@ const ClearThinkingConfig = z
   })
   .strict();
 
+const ImageGenerationConfig = z.object({
+  aspect_ratio: z.string(),
+  image_size: z.string(),
+});
+
 const ContextEditingConfig = z
   .object({
     enabled: z.boolean(),
@@ -323,6 +328,7 @@ const CreateChatCompletionRequest = z
     top_logprobs: z.number().int().gte(0).lte(20).nullish(),
     temperature: z.union([z.number(), z.null()]).optional(),
     top_p: z.union([z.number(), z.null()]).optional(),
+    top_k: z.union([z.number(), z.null()]).optional(),
     user: z.string().optional(),
     safety_identifier: z.string().optional(),
     prompt_cache_key: z.string().optional(),
@@ -399,6 +405,7 @@ const CreateChatCompletionRequest = z
     // Context editing configuration for managing conversation context
     // Only supported for Anthropic models - will be stripped for other providers
     context_editing: ContextEditingConfig.optional(),
+    image_generation: ImageGenerationConfig.optional(),
   })
   .strict();
 

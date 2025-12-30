@@ -153,6 +153,7 @@ export class ScoreStore extends BaseStore {
             prompt_cache_read_tokens: row.prompt_cache_read_tokens,
             prompt_audio_tokens: row.prompt_audio_tokens,
             completion_audio_tokens: row.completion_audio_tokens,
+            reasoning_tokens: row.reasoning_tokens,
             model:
               row.model && row.model !== ""
                 ? row.model

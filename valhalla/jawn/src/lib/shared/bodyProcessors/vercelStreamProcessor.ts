@@ -1,6 +1,5 @@
 import { PromiseGenericResult, ok } from "../../../packages/common/result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
-import { getTokenCountGPT3 } from "../../tokens/tokenCounter";
 import { calculateModel } from "../../../utils/modelMapper";
 
 export class VercelStreamProcessor implements IBodyProcessor {
@@ -104,66 +103,6 @@ export class VercelStreamProcessor implements IBodyProcessor {
       calculateModel(requestModel, detectedModel, modelOverride) ||
       requestModel ||
       "unknown";
-
-    // If usage is all zeros or undefined, calculate tokens as fallback
-    if (
-      !usage ||
-      usage.totalTokens === 0 ||
-      (usage.promptTokens === 0 && usage.completionTokens === 0)
-    ) {
-      try {
-        // Calculate completion tokens
-        const completionTokens = completionText
-          ? await getTokenCountGPT3(completionText, model)
-          : 0;
-        let promptTokens = 0;
-
-        // Try to parse the request body to get prompt tokens
-        if (requestBody) {
-          try {
-            const parsedRequest = JSON.parse(requestBody);
-            // Vercel uses 'messages'
-            if (
-              parsedRequest.messages &&
-              Array.isArray(parsedRequest.messages)
-            ) {
-              const promptText = parsedRequest.messages
-                .map((msg: any) => {
-                  if (msg.content) {
-                    // Handle string content
-                    if (typeof msg.content === "string") {
-                      return msg.content;
-                    }
-                    // Handle content array (structured content)
-                    if (Array.isArray(msg.content)) {
-                      return msg.content
-                        .filter((c: any) => c.type === "text")
-                        .map((c: any) => c.text || "")
-                        .join("");
-                    }
-                  }
-                  return "";
-                })
-                .join(" ");
-              promptTokens = promptText
-                ? await getTokenCountGPT3(promptText, model)
-                : 0;
-            }
-          } catch (e) {
-            console.error("Error parsing request for token calculation", e);
-          }
-        }
-
-        usage = {
-          promptTokens,
-          completionTokens,
-          totalTokens: promptTokens + completionTokens,
-          heliconeCalculated: true,
-        };
-      } catch (e) {
-        console.error("Error calculating tokens for Vercel", e);
-      }
-    }
 
     try {
       // Create OpenAI-compatible response format

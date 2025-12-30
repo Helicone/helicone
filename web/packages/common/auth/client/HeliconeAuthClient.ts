@@ -56,6 +56,14 @@ export interface HeliconeAuthClient {
     options?: { redirectTo?: string };
   }) => Promise<Result<void, string>>;
 
+  signInWithSSO: ({
+    domain,
+    options,
+  }: {
+    domain: string;
+    options?: { redirectTo?: string };
+  }) => Promise<Result<void, string>>;
+
   updateUser: ({
     password,
   }: {
