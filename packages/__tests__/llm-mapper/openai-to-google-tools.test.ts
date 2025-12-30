@@ -77,7 +77,7 @@ describe("toGoogle tool transformation", () => {
                   type: "object",
                   properties: {
                     units: { type: "string" },
-                    includeForcast: { type: "boolean" },
+                    includeForecast: { type: "boolean" },
                   },
                   additionalProperties: false,
                 },

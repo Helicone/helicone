@@ -361,7 +361,7 @@ function buildImageConfig(body: HeliconeChatCreateParams): GeminiImageConfig | u
  * "Unknown name 'additionalProperties' at 'tools[0].function_declarations[0].parameters'"
  */
 function stripOpenAISchemaFields(schema: Record<string, any> | undefined): Record<string, any> | undefined {
-  if (!schema || typeof schema !== 'object') {
+  if (!schema || typeof schema !== 'object' || Array.isArray(schema)) {
     return schema;
   }
 
@@ -381,9 +381,15 @@ function stripOpenAISchemaFields(schema: Record<string, any> | undefined): Recor
     );
   }
 
-  // Handle array items
+  // Handle array items (can be a single schema or array of schemas for tuple validation)
   if (cleaned.items) {
-    cleaned.items = stripOpenAISchemaFields(cleaned.items);
+    if (Array.isArray(cleaned.items)) {
+      cleaned.items = cleaned.items.map((item: Record<string, any>) =>
+        stripOpenAISchemaFields(item)
+      );
+    } else {
+      cleaned.items = stripOpenAISchemaFields(cleaned.items);
+    }
   }
 
   // Handle allOf, anyOf, oneOf
