@@ -10,7 +10,7 @@ const Companies = ({ className }: CompaniesProps) => {
     <div className={cn("py-16", className)}>
       <div className="max-w-6xl mx-auto px-4">
         <p className="text-center text-md mb-8">
-          1000+ AI teams use Helicone to build reliable products
+          Thousands of AI teams use Helicone to build reliable AI workflows
         </p>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-8 items-center justify-items-center">
           {(
@@ -18,7 +18,7 @@ const Companies = ({ className }: CompaniesProps) => {
               ["/static/togetherai.webp", "togetherai", 169, 53],
               ["/static/qawolf.webp", "qawolf", 157, 53],
               ["/static/home/clay.webp", "clay", 150, 53],
-              ["/static/home/logos/sia.webp", "Singapore Airlines", 132, 53],
+              // ["/static/home/logos/sia.webp", "Singapore Airlines", 132, 53], TO-DO: Replace with Mintlify
               ["/static/home/duolingo2.png", "duolingo", 240, 53],
               ["/static/sunrun.webp", "sunrun", 132, 53],
               ["/static/filevine.webp", "filevine", 130, 53],

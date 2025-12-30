@@ -16,11 +16,10 @@ const Log = () => {
           </div>
           <div className="flex flex-col gap-6">
             <h2 className="font-semibold text-4xl sm:text-5xl leading-[120%] max-w-[600px] text-wrap text-black">
-              Trace and debug your agent with ease
+              Inspect every run <span className="text-brand">in seconds</span>
             </h2>
             <p className="text-lg max-w-[520px] text-landing-description font-light leading-relaxed">
-              Visualize your multi-step LLM interactions, log requests in
-              real-time, and pinpoint the root cause of errors.
+              Agents fail in unpredictable ways. Trace sessions to see exactly which step broke, which tool was called, and it returned.
             </p>
             <div className="inline-flex">
               <Link

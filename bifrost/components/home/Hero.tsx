@@ -36,14 +36,14 @@ const Hero = () => {
         />
       </div>
       <h1 className="text-xl sm:text-7xl md:text-[84px] font-semibold mb-3 w-full max-w-4xl text-wrap text-black z-[10]">
-        Build Reliable
+        AI Gateway
         <br />
-        <span className="text-brand">AI Apps</span>
+        <span className="text-brand">Built for Agents</span>
       </h1>
       <p className="text-lg sm:text-xl 2xl:text-2xl text-landing-secondary font-light mb-6 lg:mb-12 z-[10]">
         The world&apos;s fastest-growing AI companies rely on Helicone
         <br />
-        to route, debug, and analyze their applications.
+        to route, trace, and debug their agentic workflows.
       </p>
       <div className="flex flex-col md:flex-row gap-4">
         <div className="flex flex-col gap-2">
@@ -54,7 +54,7 @@ const Hero = () => {
             </Button>
           </Link>
           <p className="text-sm text-landing-secondary">
-            No credit card required, 7-day free trial
+            No credit card required
           </p>
         </div>
       </div>
