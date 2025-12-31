@@ -2,6 +2,10 @@ import { Row } from "@/components/layout/common";
 import Header from "@/components/shared/Header";
 import LivePill from "@/components/shared/LivePill";
 import { logger } from "@/lib/telemetry/logger";
+import { useQuery } from "@tanstack/react-query";
+import { getJawnClient } from "@/lib/clients/jawn";
+import { AlertTriangle } from "lucide-react";
+import Link from "next/link";
 import ViewColumns from "@/components/shared/themed/table/columns/viewColumns";
 import ThemedTimeFilter from "@/components/shared/themed/themedTimeFilter";
 import { Button } from "@/components/ui/button";
@@ -142,6 +146,19 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   /*                                    HOOKS                                   */
   /* -------------------------------------------------------------------------- */
   const orgContext = useOrg();
+  const isFree = orgContext?.currentOrg?.tier === "free";
+
+  const freeUsage = useQuery({
+    queryKey: ["free-usage", orgContext?.currentOrg?.id],
+    queryFn: async () => {
+      const jawn = getJawnClient(orgContext?.currentOrg?.id);
+      return jawn.GET("/v1/stripe/subscription/free/usage");
+    },
+    enabled: isFree,
+  });
+
+  const isOverLimit = isFree && (freeUsage.data?.data ?? 0) > 10000;
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const { store: filterStore, helpers: filterHelpers } = useFilterAST();
@@ -670,6 +687,25 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   return shouldShowMockData === undefined ? null : shouldShowMockData ===
     false ? (
     <main className="flex h-screen w-full animate-fade-in flex-col">
+      {/* Free Tier Warning Banner */}
+      {isOverLimit && (
+        <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
+          <AlertTriangle size={20} className="flex-shrink-0" />
+          <div className="flex-1">
+            <p className="font-medium">You've exceeded your free tier limit</p>
+            <p className="text-sm">
+              Logging may be paused soon. Upgrade to Pro to continue logging
+              requests.
+            </p>
+          </div>
+          <Link
+            href="/settings/billing"
+            className="rounded-md bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700"
+          >
+            Upgrade to Pro
+          </Link>
+        </div>
+      )}
       {/* Requests Header */}
       {/* Warning */}
       {!userId && (
