@@ -122,7 +122,7 @@ export const ProPlanCard = () => {
         <CardContent className="space-y-6">
           {subscription.data?.data?.current_period_start &&
             subscription.data?.data?.current_period_end && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground text-slate-500">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <CalendarIcon className="h-4 w-4" />
                 <span>Current billing period: {getBillingCycleDates()}</span>
               </div>
@@ -178,7 +178,7 @@ export const ProPlanCard = () => {
             <InvoiceSheet />
             <Link
               href="https://helicone.ai/pricing"
-              className="text-semibold mt-6 text-center text-sm text-gray-500 text-sky-600 hover:text-sky-700"
+              className="font-semibold mt-6 text-center text-sm text-sky-600 hover:text-sky-700"
             >
               View pricing page
             </Link>
@@ -274,7 +274,7 @@ export const LegacyProPlanCard = () => {
         <CardContent className="space-y-6">
           {subscription.data?.data?.current_period_start &&
             subscription.data?.data?.current_period_end && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground text-slate-500">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <CalendarIcon className="h-4 w-4" />
                 <span>Current billing period: {getBillingCycleDates()}</span>
               </div>
@@ -360,7 +360,7 @@ export const LegacyProPlanCard = () => {
             <InvoiceSheet />
             <Link
               href="https://helicone.ai/pricing"
-              className="text-semibold mt-6 text-center text-sm text-gray-500 text-sky-600 hover:text-sky-700"
+              className="font-semibold mt-6 text-center text-sm text-sky-600 hover:text-sky-700"
             >
               View pricing page
             </Link>

@@ -13,15 +13,6 @@ import { logger } from "@/lib/telemetry/logger";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { InvoiceSheet } from "./InvoiceSheet";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { useState } from "react";
 import { CheckIcon } from "lucide-react";
 import { PlanFeatureCard } from "./PlanFeatureCard";
 import { InfoBox } from "@/components/ui/helicone/infoBox";
@@ -89,7 +80,6 @@ const useTeamSubscription = () => {
  * - Everything included (prompts, experiments, evals)
  */
 export const TeamPlanCard = () => {
-  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const {
     subscription,
     manageSubscriptionPaymentLink,
@@ -153,7 +143,10 @@ export const TeamPlanCard = () => {
               <CheckIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-green-500" />
               <span>
                 Unlimited seats, 5 organizations (
-                <a href="mailto:support@helicone.ai" className="text-sky-600 hover:underline">
+                <a
+                  href="mailto:support@helicone.ai"
+                  className="text-sky-600 hover:underline"
+                >
                   email us
                 </a>{" "}
                 for more)
@@ -250,26 +243,6 @@ export const TeamPlanCard = () => {
           }}
         />
       </div>
-
-      <Dialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
-        <DialogContent className="max-md">
-          <DialogHeader>
-            <DialogTitle>Confirm Subscription Change</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to modify your Team subscription?
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsConfirmDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button onClick={() => {}}>Confirm</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
@@ -281,7 +254,6 @@ export const TeamPlanCard = () => {
  * - Per-request billing
  */
 export const LegacyTeamPlanCard = () => {
-  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const {
     subscription,
     manageSubscriptionPaymentLink,
@@ -300,7 +272,9 @@ export const LegacyTeamPlanCard = () => {
               Current plan
             </span>
           </CardTitle>
-          <CardDescription>$200/month + usage-based request billing</CardDescription>
+          <CardDescription>
+            $200/month + usage-based request billing
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {isTrialActive && (
@@ -421,26 +395,6 @@ export const LegacyTeamPlanCard = () => {
           }}
         />
       </div>
-
-      <Dialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
-        <DialogContent className="max-md">
-          <DialogHeader>
-            <DialogTitle>Confirm Subscription Change</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to modify your Team subscription?
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsConfirmDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button onClick={() => {}}>Confirm</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

@@ -77,7 +77,7 @@ export const REQUEST_PRICING_TIERS = [
 
 // Legacy byte-based pricing (kept for backward compatibility)
 export const BYTE_PRICING = {
-  ratePerGB: 3.25, // First tier rate
+  ratePerGB: GB_PRICING_TIERS[0].ratePerGB, // First tier rate
   freeGB: 0, // No free GB in new model (free requests instead)
 };
 
