@@ -23,8 +23,8 @@ const FreeCard: React.FC = () => {
           <Col>
             {[
               "10,000 free requests",
-              "Requests and Dashboard",
-              "Free, truly.",
+              "1 GB storage",
+              "1 seat, 1 organization",
             ].map((feature, index) => (
               <div key={index} className="py-1.5 flex items-center gap-2">
                 <div className="w-4 h-4 relative overflow-hidden">

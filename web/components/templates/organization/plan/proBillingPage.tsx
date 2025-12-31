@@ -13,25 +13,14 @@ import { logger } from "@/lib/telemetry/logger";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { InvoiceSheet } from "./InvoiceSheet";
-import { Switch } from "@/components/ui/switch";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { useState } from "react";
-import { useCallback } from "react";
-import { useCostForPrompts } from "../../pricing/hooks";
 import { Badge } from "@/components/ui/badge";
 import { CalendarIcon } from "lucide-react";
 
-export const ProPlanCard = () => {
+/**
+ * Shared hook for Pro subscription management
+ */
+const useProSubscription = () => {
   const org = useOrg();
-  const [isPromptsDialogOpen, setIsPromptsDialogOpen] = useState(false);
-  const costForPrompts = useCostForPrompts();
 
   const subscription = useQuery({
     queryKey: ["subscription", org?.currentOrg?.id],
@@ -63,40 +52,6 @@ export const ProPlanCard = () => {
     },
   });
 
-  const addProductToSubscription = useMutation({
-    mutationFn: async (productType: "alerts" | "prompts") => {
-      const jawn = getJawnClient(org?.currentOrg?.id);
-      const result = await jawn.POST(
-        "/v1/stripe/subscription/add-ons/{productType}",
-        {
-          params: {
-            path: {
-              productType,
-            },
-          },
-        },
-      );
-      return result;
-    },
-  });
-
-  const deleteProductFromSubscription = useMutation({
-    mutationFn: async (productType: "alerts" | "prompts") => {
-      const jawn = getJawnClient(org?.currentOrg?.id);
-      const result = await jawn.DELETE(
-        "/v1/stripe/subscription/add-ons/{productType}",
-        {
-          params: {
-            path: {
-              productType,
-            },
-          },
-        },
-      );
-      return result;
-    },
-  });
-
   const isTrialActive =
     subscription.data?.data?.trial_end &&
     new Date(subscription.data.data.trial_end * 1000) > new Date() &&
@@ -105,25 +60,6 @@ export const ProPlanCard = () => {
         new Date(subscription.data.data.current_period_start * 1000));
 
   const isSubscriptionEnding = subscription.data?.data?.cancel_at_period_end;
-
-  const hasPrompts = subscription.data?.data?.items?.some(
-    (item: any) => item.price.product?.name === "Prompts" && item.quantity > 0,
-  );
-
-  const handlePromptsToggle = () => {
-    setIsPromptsDialogOpen(true);
-  };
-
-  const confirmPromptsChange = async () => {
-    if (!hasPrompts) {
-      await addProductToSubscription.mutateAsync("prompts");
-    } else {
-      await deleteProductFromSubscription.mutateAsync("prompts");
-    }
-    setIsPromptsDialogOpen(false);
-
-    subscription.refetch();
-  };
 
   const getBillingCycleDates = () => {
     if (
@@ -141,21 +77,33 @@ export const ProPlanCard = () => {
     return "N/A";
   };
 
-  const getDialogDescription = useCallback(
-    (isEnabling: boolean, feature: string, price: string) => {
-      let description = isEnabling
-        ? `You are about to enable ${feature}. This will add ${price}/mo to your subscription.`
-        : `You are about to disable ${feature}. This will remove ${price}/mo from your subscription.`;
+  return {
+    subscription,
+    manageSubscriptionPaymentLink,
+    reactivateSubscription,
+    isTrialActive,
+    isSubscriptionEnding,
+    getBillingCycleDates,
+  };
+};
 
-      if (isTrialActive && isEnabling) {
-        description +=
-          " You will not be charged for this feature while on your trial.";
-      }
-
-      return description;
-    },
-    [isTrialActive],
-  );
+/**
+ * New Pro Plan Card for tier pro-20251210
+ * - $79/mo flat
+ * - Unlimited seats
+ * - Tiered GB storage billing (starts at $3.25/GB)
+ * - Tiered request billing (10K free, then tiered)
+ * - Prompts included
+ */
+export const ProPlanCard = () => {
+  const {
+    subscription,
+    manageSubscriptionPaymentLink,
+    reactivateSubscription,
+    isTrialActive,
+    isSubscriptionEnding,
+    getBillingCycleDates,
+  } = useProSubscription();
 
   return (
     <div className="flex max-w-5xl flex-row gap-6 pb-8">
@@ -174,7 +122,7 @@ export const ProPlanCard = () => {
         <CardContent className="space-y-6">
           {subscription.data?.data?.current_period_start &&
             subscription.data?.data?.current_period_end && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground text-slate-500">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <CalendarIcon className="h-4 w-4" />
                 <span>Current billing period: {getBillingCycleDates()}</span>
               </div>
@@ -189,39 +137,185 @@ export const ProPlanCard = () => {
               </p>
             </div>
           )}
+          <Col className="gap-2">
+            {isSubscriptionEnding ? (
+              <Button
+                onClick={async () => {
+                  const result = await reactivateSubscription.mutateAsync();
+                  if (result.data) {
+                    subscription.refetch();
+                  } else {
+                    logger.error("Failed to reactivate subscription");
+                  }
+                }}
+                disabled={reactivateSubscription.isPending}
+              >
+                {reactivateSubscription.isPending
+                  ? "Reactivating..."
+                  : "Reactivate Subscription"}
+              </Button>
+            ) : (
+              <Button
+                className="w-full bg-sky-600 text-white hover:bg-sky-700"
+                onClick={async () => {
+                  const result =
+                    await manageSubscriptionPaymentLink.mutateAsync();
+                  if (result.data) {
+                    window.open(result.data, "_blank");
+                  } else {
+                    logger.error(
+                      "No URL returned from manage subscription mutation",
+                    );
+                  }
+                }}
+                disabled={manageSubscriptionPaymentLink.isPending}
+              >
+                {manageSubscriptionPaymentLink.isPending
+                  ? "Loading..."
+                  : "Manage Subscription"}
+              </Button>
+            )}
+            <InvoiceSheet />
+            <Link
+              href="https://helicone.ai/pricing"
+              className="font-semibold mt-6 text-center text-sm text-sky-600 hover:text-sky-700"
+            >
+              View pricing page
+            </Link>
+          </Col>
+        </CardContent>
+      </Card>
+
+      <div className="flex flex-col gap-6">
+        <Card className="flex flex-col">
+          <CardHeader className="space-y-1.5">
+            <CardTitle className="text-2xl font-semibold">
+              Learn about our Enterprise plan
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Built for companies looking to scale. Includes everything in Pro,
+              plus unlimited requests, prompts, experiments and more.
+            </p>
+          </CardHeader>
+          <CardFooter className="mt-auto">
+            <Link href="/contact" className="w-full">
+              <Button
+                variant="outline"
+                size="lg"
+                className="w-full border border-input"
+              >
+                Contact sales
+              </Button>
+            </Link>
+          </CardFooter>
+        </Card>
+
+        <Card className="flex flex-col">
+          <CardHeader className="space-y-1.5">
+            <CardTitle className="text-2xl font-semibold">
+              Looking for something else?
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Need support, have a unique use case or want to say hi?
+            </p>
+          </CardHeader>
+          <CardFooter className="mt-auto">
+            <Link href="/contact" className="w-full">
+              <Button
+                variant="outline"
+                size="lg"
+                className="w-full border border-input"
+              >
+                Contact us
+              </Button>
+            </Link>
+          </CardFooter>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+/**
+ * Legacy Pro Plan Card for tiers pro-20240913, pro-20250202
+ * - $20/seat/mo
+ * - Per-request billing
+ * - Prompts as $50/mo add-on
+ */
+export const LegacyProPlanCard = () => {
+  const org = useOrg();
+  const {
+    subscription,
+    manageSubscriptionPaymentLink,
+    reactivateSubscription,
+    isTrialActive,
+    isSubscriptionEnding,
+    getBillingCycleDates,
+  } = useProSubscription();
+
+  const hasPromptsAddon =
+    (org?.currentOrg?.stripe_metadata as { addons?: { prompts?: boolean } })
+      ?.addons?.prompts ?? false;
+
+  return (
+    <div className="flex max-w-5xl flex-row gap-6 pb-8">
+      <Card className="w-full">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <CardTitle className="text-xl font-medium">Pro</CardTitle>
+            <Badge
+              variant="secondary"
+              className="bg-sky-50 text-sky-700 hover:bg-sky-50"
+            >
+              Current plan
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {subscription.data?.data?.current_period_start &&
+            subscription.data?.data?.current_period_end && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <CalendarIcon className="h-4 w-4" />
+                <span>Current billing period: {getBillingCycleDates()}</span>
+              </div>
+            )}
           {isTrialActive && (
-            <div className="text-sm text-slate-500">
-              All add-ons are free during your trial
+            <div className="rounded-lg border border-sky-100 bg-sky-50 p-4">
+              <p className="text-sm text-sky-700">
+                Your trial ends on:{" "}
+                {new Date(
+                  subscription.data!.data!.trial_end! * 1000,
+                ).toLocaleDateString()}
+              </p>
             </div>
           )}
+
           <div className="space-y-4">
-            <div className="flex items-center justify-between py-3">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-slate-900">
-                    Prompts{" "}
-                    {isTrialActive ? (
-                      <span className="text-slate-400 line-through">
-                        ${costForPrompts.data?.data ?? "loading..."}/mo
-                      </span>
-                    ) : (
-                      <span>
-                        (${costForPrompts.data?.data ?? "loading..."}/mo)
-                      </span>
-                    )}
-                  </h3>
+            <p className="text-sm text-muted-foreground">
+              $20/seat/month + usage-based request billing
+            </p>
+
+            {/* Add-ons Section */}
+            <div className="rounded-lg border p-4">
+              <h3 className="mb-3 text-sm font-medium">Active Add-ons</h3>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`h-2 w-2 rounded-full ${hasPromptsAddon ? "bg-green-500" : "bg-gray-300"}`}
+                    />
+                    <span className="text-sm">Prompts</span>
+                  </div>
+                  <span className="text-sm text-muted-foreground">
+                    {hasPromptsAddon ? "$50/mo" : "Not active"}
+                  </span>
                 </div>
-                {isTrialActive && (
-                  <p className="text-sm text-slate-500">
-                    Create, version and test prompts
-                  </p>
-                )}
               </div>
-              <Switch
-                checked={hasPrompts}
-                onCheckedChange={handlePromptsToggle}
-                className="data-[state=checked]:bg-sky-600"
-              />
+              {hasPromptsAddon && (
+                <p className="mt-3 text-xs text-muted-foreground">
+                  Manage your add-ons via the &quot;Manage Subscription&quot; button below
+                </p>
+              )}
             </div>
           </div>
 
@@ -266,7 +360,7 @@ export const ProPlanCard = () => {
             <InvoiceSheet />
             <Link
               href="https://helicone.ai/pricing"
-              className="text-semibold mt-6 text-center text-sm text-gray-500 text-sky-600 hover:text-sky-700"
+              className="font-semibold mt-6 text-center text-sm text-sky-600 hover:text-sky-700"
             >
               View pricing page
             </Link>
@@ -274,43 +368,15 @@ export const ProPlanCard = () => {
         </CardContent>
       </Card>
 
-      <Dialog open={isPromptsDialogOpen} onOpenChange={setIsPromptsDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>
-              {!hasPrompts ? "Enable Prompts" : "Disable Prompts"}
-            </DialogTitle>
-            <DialogDescription>
-              {getDialogDescription(
-                !hasPrompts,
-                "Prompts",
-                `$${costForPrompts.data?.data ?? "loading..."}`,
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsPromptsDialogOpen(false);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button onClick={confirmPromptsChange}>Confirm</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
       <div className="flex flex-col gap-6">
         <Card className="flex flex-col">
           <CardHeader className="space-y-1.5">
             <CardTitle className="text-2xl font-semibold">
-              Learn about our Enterprise plan
+              Upgrade to Team Bundle
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              Built for companies looking to scale. Includes everything in Pro,
-              plus unlimited requests, prompts, experiments and more.
+              Unlimited seats, prompts, and experiments included. Plus SOC-2 &
+              HIPAA compliance.
             </p>
           </CardHeader>
           <CardFooter className="mt-auto">

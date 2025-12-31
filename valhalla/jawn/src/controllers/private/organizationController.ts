@@ -252,8 +252,13 @@ export class OrganizationController extends Controller {
       return ok(null); // Silently succeed if member already exists
     }
 
-    if (org.data.tier === "enterprise" || org.data.tier === "team-20250130") {
-      // Enterprise tier: Proceed to add member without additional checks
+    if (
+      org.data.tier === "enterprise" ||
+      org.data.tier === "team-20250130" ||
+      org.data.tier === "team-20251210" ||
+      org.data.tier === "pro-20251210"
+    ) {
+      // Enterprise, Team, and new Pro tiers: Proceed to add member without additional checks (unlimited seats)
     } else if (
       org.data.tier === "pro-20240913" ||
       org.data.tier === "pro-20250202"
@@ -502,8 +507,11 @@ export class OrganizationController extends Controller {
       memberCount.data > 0 &&
       org.data.tier != "free" &&
       org.data.tier != "team-20250130" &&
+      org.data.tier != "team-20251210" &&
+      org.data.tier != "pro-20251210" &&
       org.data.tier != "enterprise"
     ) {
+      // Only update seat count for legacy per-seat tiers
       const userCount = await stripeManager.updateProUserCount(
         memberCount.data - 1
       );

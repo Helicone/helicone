@@ -694,7 +694,7 @@ const TeamVersion20250130 = {
     const { data: orgDataArray, error: orgDataError } =
       await dbExecute<OrgSubscriptionData>(
         `SELECT stripe_subscription_id, name, owner FROM organization WHERE id = $1 LIMIT 1`,
-        [orgId || ""],
+        [orgId],
       );
 
     if (orgDataError) {
@@ -829,6 +829,11 @@ const ProVersion20251210 = {
     const subscriptionItemId = subscription?.items.data[0].id;
     const orgId = subscription.metadata?.orgId;
 
+    if (!orgId || typeof orgId !== "string" || orgId.trim() === "") {
+      logger.error({ subscriptionId }, "Missing or invalid orgId in subscription metadata");
+      return;
+    }
+
     // New pricing: all features included in base plan
     const addons: Addons = {
       alerts: true,
@@ -845,7 +850,7 @@ const ProVersion20251210 = {
            tier = 'pro-20251210',
            stripe_metadata = $3
        WHERE id = $4`,
-      [subscriptionId, subscriptionItemId, { addons: addons }, orgId || ""],
+      [subscriptionId, subscriptionItemId, { addons: addons }, orgId],
     );
 
     if (updateError) {
@@ -880,6 +885,11 @@ const TeamVersion20251210 = {
     const subscriptionItemId = subscription?.items.data[0].id;
     const orgId = subscription.metadata?.orgId;
 
+    if (!orgId || typeof orgId !== "string" || orgId.trim() === "") {
+      logger.error({ subscriptionId }, "Missing or invalid orgId in subscription metadata");
+      return;
+    }
+
     // Get the existing subscription from the organization
     type OrgSubscriptionData = {
       stripe_subscription_id: string | null;
@@ -890,7 +900,7 @@ const TeamVersion20251210 = {
     const { data: orgDataArray, error: orgDataError } =
       await dbExecute<OrgSubscriptionData>(
         `SELECT stripe_subscription_id, name, owner FROM organization WHERE id = $1 LIMIT 1`,
-        [orgId || ""],
+        [orgId],
       );
 
     if (orgDataError) {
@@ -938,7 +948,7 @@ const TeamVersion20251210 = {
            tier = 'team-20251210',
            stripe_metadata = $3
        WHERE id = $4`,
-      [subscriptionId, subscriptionItemId, { addons }, orgId || ""],
+      [subscriptionId, subscriptionItemId, { addons }, orgId],
     );
 
     if (updateError) {

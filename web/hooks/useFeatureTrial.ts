@@ -29,7 +29,8 @@ export const useFeatureTrial = (
         const endpoint =
           subscription.data?.data?.status === "canceled" ||
           org?.currentOrg?.tier === "pro-20240913" ||
-          org?.currentOrg?.tier === "pro-20250202"
+          org?.currentOrg?.tier === "pro-20250202" ||
+          org?.currentOrg?.tier === "pro-20251210"
             ? "/v1/stripe/subscription/existing-customer/upgrade-to-team-bundle"
             : "/v1/stripe/subscription/new-customer/upgrade-to-team-bundle";
 
