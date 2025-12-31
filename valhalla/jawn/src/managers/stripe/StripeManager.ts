@@ -424,12 +424,20 @@ WHERE (${builtFilter.filter})`,
     const proProductPrices = await getProProductPrices();
 
     // New pricing (2025-12-10): $79/mo flat, prompts included, unlimited seats
-    // Usage is tracked via bytes_sum and requests_sum meter events in StripeLogHandler
+    // Plus metered billing for requests and GB usage
     const settingsManager = new SettingsManager();
     const stripeProductSettings =
       await settingsManager.getSetting("stripe:products");
     if (!stripeProductSettings?.pro20251210_79Price) {
       return err("stripe:products pro20251210_79Price is not configured");
+    }
+    if (!stripeProductSettings?.requestVolumePrice_20251210) {
+      return err(
+        "stripe:products requestVolumePrice_20251210 is not configured"
+      );
+    }
+    if (!stripeProductSettings?.gigVolumePrice_20251210) {
+      return err("stripe:products gigVolumePrice_20251210 is not configured");
     }
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
@@ -440,31 +448,12 @@ WHERE (${builtFilter.filter})`,
           price: stripeProductSettings.pro20251210_79Price, // $79/mo flat
           quantity: 1,
         },
-        // Legacy add-ons (alerts, experiments, evals) - prompts now included in base
-        ...(body?.addons?.alerts
-          ? [
-              {
-                price: proProductPrices["alerts"],
-                quantity: 1,
-              },
-            ]
-          : []),
-        ...(body?.addons?.experiments
-          ? [
-              {
-                price: proProductPrices["experiments"],
-                quantity: 1,
-              },
-            ]
-          : []),
-        ...(body?.addons?.evals
-          ? [
-              {
-                price: proProductPrices["evals"],
-                quantity: 1,
-              },
-            ]
-          : []),
+        {
+          price: stripeProductSettings.requestVolumePrice_20251210, // Metered request billing
+        },
+        {
+          price: stripeProductSettings.gigVolumePrice_20251210, // Metered GB billing
+        },
       ],
       mode: "subscription",
       metadata: {
@@ -550,12 +539,20 @@ WHERE (${builtFilter.filter})`,
     uiMode: "embedded" | "hosted"
   ): Promise<Result<Stripe.Checkout.Session, string>> {
     // New pricing (2025-12-10): $799/mo flat, prompts/experiments/evals included
-    // Usage is tracked via bytes_sum and requests_sum meter events in StripeLogHandler
+    // Plus metered billing for requests and GB usage
     const settingsManager = new SettingsManager();
     const stripeProductSettings =
       await settingsManager.getSetting("stripe:products");
     if (!stripeProductSettings?.team20251210_799Price) {
       return err("stripe:products team20251210_799Price is not configured");
+    }
+    if (!stripeProductSettings?.requestVolumePrice_20251210) {
+      return err(
+        "stripe:products requestVolumePrice_20251210 is not configured"
+      );
+    }
+    if (!stripeProductSettings?.gigVolumePrice_20251210) {
+      return err("stripe:products gigVolumePrice_20251210 is not configured");
     }
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
@@ -565,6 +562,12 @@ WHERE (${builtFilter.filter})`,
         {
           price: stripeProductSettings.team20251210_799Price, // $799/mo flat
           quantity: 1,
+        },
+        {
+          price: stripeProductSettings.requestVolumePrice_20251210, // Metered request billing
+        },
+        {
+          price: stripeProductSettings.gigVolumePrice_20251210, // Metered GB billing
         },
       ],
       mode: "subscription",

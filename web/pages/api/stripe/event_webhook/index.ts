@@ -906,11 +906,12 @@ const TeamVersion20251210 = {
     const orgData =
       orgDataArray && orgDataArray.length > 0 ? orgDataArray[0] : null;
 
-    // Cancel old subscription if it exists
+    // Cancel old subscription if it exists AND it's different from the new one
     if (
       orgData &&
       orgData.stripe_subscription_id &&
-      typeof orgData.stripe_subscription_id === "string"
+      typeof orgData.stripe_subscription_id === "string" &&
+      orgData.stripe_subscription_id !== subscriptionId // Don't cancel the subscription we just created!
     ) {
       try {
         logger.info("Cancelling old subscription");

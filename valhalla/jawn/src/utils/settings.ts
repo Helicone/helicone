@@ -26,9 +26,10 @@ export interface SqsSettings {
 
 export interface StripeProductSettings {
   cloudGatewayTokenUsageProduct: string;
-  cloudGatewayStorageUsageProduct: string; // For $6/GB byte-based billing
-  pro20251210_79Price?: string; // $79/mo flat Pro (price_1ScuD5FeVmeixR9wXpK9BCki)
-  team20251210_799Price?: string; // $799/mo flat Team (price_1ScuAvFeVmeixR9wmmzNz0kV)
+  requestVolumePrice_20251210?: string; // Metered request-based billing
+  gigVolumePrice_20251210?: string; // Metered GB-based billing
+  pro20251210_79Price?: string; // $79/mo flat Pro
+  team20251210_799Price?: string; // $799/mo flat Team
 }
 
 export interface SettingsType {
@@ -67,8 +68,6 @@ const DEFAULTS: Partial<Record<SettingName, any>> = {
   "stripe:products": {
     cloudGatewayTokenUsageProduct:
       process.env.STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT,
-    cloudGatewayStorageUsageProduct:
-      process.env.STRIPE_CLOUD_GATEWAY_STORAGE_USAGE_PRODUCT,
   },
 };
 class SettingsCache extends InMemoryCache {
