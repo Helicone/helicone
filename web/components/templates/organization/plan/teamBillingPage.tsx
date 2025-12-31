@@ -148,11 +148,19 @@ export const TeamPlanCard = () => {
               </div>
             )}
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="flex flex-col gap-2">
+            <div className="flex items-start gap-2 text-sm">
+              <CheckIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-green-500" />
+              <span>
+                Unlimited seats, 5 organizations (
+                <a href="mailto:support@helicone.ai" className="text-sky-600 hover:underline">
+                  email us
+                </a>{" "}
+                for more)
+              </span>
+            </div>
             {[
-              "Unlimited seats, 5 organizations",
               "Everything in Pro",
-              "SOC-2 & HIPAA compliance",
               "Dedicated Slack channel",
               "Support engineer & SLAs",
               "Data export",
@@ -162,6 +170,17 @@ export const TeamPlanCard = () => {
                 <span>{feature}</span>
               </div>
             ))}
+            <div className="flex items-start gap-2 text-sm">
+              <CheckIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-green-500" />
+              <a
+                href="https://trust.helicone.ai"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sky-600 hover:underline"
+              >
+                SOC-2 & HIPAA compliance
+              </a>
+            </div>
           </div>
 
           <Col className="gap-2">

@@ -137,14 +137,6 @@ export const ProPlanCard = () => {
               </p>
             </div>
           )}
-          <div className="space-y-4">
-            <div className="rounded-lg border border-sky-100 bg-sky-50 p-4">
-              <p className="text-sm text-sky-700">
-                <span className="font-semibold">Prompts included</span> - Create, version and test prompts at no extra cost
-              </p>
-            </div>
-          </div>
-
           <Col className="gap-2">
             {isSubscriptionEnding ? (
               <Button
