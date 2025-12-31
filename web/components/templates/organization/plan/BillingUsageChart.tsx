@@ -232,10 +232,18 @@ export const BillingUsageChart = () => {
 
   return (
     <div className="space-y-6">
+      {/* Section Header */}
+      <div>
+        <h3 className="text-lg font-medium">Usage-Based Charges</h3>
+        <p className="text-sm text-muted-foreground">
+          Additional charges based on your request volume and storage (excludes base plan price)
+        </p>
+      </div>
+
       {/* Summary Stats */}
       <div className="grid grid-cols-3 gap-4">
         <div className="rounded-lg border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Current Spend</p>
+          <p className="text-sm text-muted-foreground">Current Usage Spend</p>
           <p className="text-2xl font-semibold">
             {formatCurrency(usageStats.estimatedCost.totalCost)}
           </p>
@@ -245,11 +253,11 @@ export const BillingUsageChart = () => {
           </p>
         </div>
         <div className="rounded-lg border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Projected Monthly</p>
+          <p className="text-sm text-muted-foreground">Projected Usage Spend</p>
           <p className="text-2xl font-semibold">
             {formatCurrency(usageStats.estimatedCost.projectedMonthlyTotalCost)}
           </p>
-          <p className="text-xs text-muted-foreground">Based on current usage</p>
+          <p className="text-xs text-muted-foreground">End of billing period estimate</p>
         </div>
         <div className="rounded-lg border bg-card p-4">
           <p className="text-sm text-muted-foreground">Total Usage</p>
