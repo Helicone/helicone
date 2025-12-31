@@ -829,16 +829,13 @@ const ProVersion20251210 = {
     const subscriptionItemId = subscription?.items.data[0].id;
     const orgId = subscription.metadata?.orgId;
 
-    // New pricing: prompts included, only alerts/experiments/evals as add-ons
-    const addons: Addons = {};
-    subscription.items.data.forEach((item) => {
-      const addonKey = ADDON_PRICES[item.price.id];
-      // Skip prompts - now included in base plan
-      if (addonKey && addonKey !== "prompts") {
-        addons[addonKey] =
-          item.quantity !== undefined ? item.quantity > 0 : false;
-      }
-    });
+    // New pricing: all features included in base plan
+    const addons: Addons = {
+      alerts: true,
+      prompts: true,
+      experiments: true,
+      evals: true,
+    };
 
     const { error: updateError } = await dbExecute(
       `UPDATE organization
@@ -924,6 +921,14 @@ const TeamVersion20251210 = {
       }
     }
 
+    // New pricing: all features included in base plan
+    const addons: Addons = {
+      alerts: true,
+      prompts: true,
+      experiments: true,
+      evals: true,
+    };
+
     // Update to new subscription
     const { error: updateError } = await dbExecute(
       `UPDATE organization
@@ -933,7 +938,7 @@ const TeamVersion20251210 = {
            tier = 'team-20251210',
            stripe_metadata = $3
        WHERE id = $4`,
-      [subscriptionId, subscriptionItemId, { addons: {} }, orgId || ""],
+      [subscriptionId, subscriptionItemId, { addons }, orgId || ""],
     );
 
     if (updateError) {
