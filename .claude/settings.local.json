@@ -101,7 +101,8 @@
       "WebFetch(domain:streamdown.ai)",
       "mcp__ide__getDiagnostics",
       "Bash(yarn cf-typegen:*)",
-      "WebFetch(domain:docs.stripe.com)"
+      "WebFetch(domain:docs.stripe.com)",
+      "Bash(xargs -I {} sh -c 'echo \"\"\"\"=== {} ===\"\"\"\" && grep -E \"\"\"\"recharts|chart|graph\"\"\"\" {} 2>/dev/null || true')"
     ],
     "deny": []
   },

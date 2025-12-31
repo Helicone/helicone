@@ -11,6 +11,10 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useState, Fragment } from "react";
+import {
+  GB_PRICING_TIERS,
+  REQUEST_PRICING_TIERS,
+} from "@helicone-package/pricing";
 
 interface PricingTier {
   name: string;
@@ -33,23 +37,19 @@ interface FeatureGroup {
   features: Feature[];
 }
 
-const USAGE_PRICING_GB = [
-  { label: "First 30 GB", rate: "$3.25/GB" },
-  { label: "31-80 GB", rate: "$2.00/GB" },
-  { label: "81-200 GB", rate: "$1.25/GB" },
-  { label: "201-450 GB", rate: "$0.75/GB" },
-  { label: "450+ GB", rate: "$0.50/GB" },
-];
+// Derive display data from shared pricing tiers
+const USAGE_PRICING_GB = GB_PRICING_TIERS.map((tier) => ({
+  label: tier.label,
+  rate: `$${tier.ratePerGB.toFixed(2)}/GB`,
+}));
 
-const USAGE_PRICING_REQUESTS = [
-  { label: "First 10,000", rate: "Free" },
-  { label: "10,001-30,000", rate: "$0.00070" },
-  { label: "30,001-90,000", rate: "$0.00035" },
-  { label: "90,001-250,000", rate: "$0.000175" },
-  { label: "250,001-800,000", rate: "$0.0000875" },
-  { label: "800,001-2,500,000", rate: "$0.00004375" },
-  { label: "2,500,000+", rate: "$0.00002" },
-];
+const USAGE_PRICING_REQUESTS = REQUEST_PRICING_TIERS.map((tier) => ({
+  label: tier.label,
+  rate:
+    tier.ratePerLog === 0
+      ? "Free"
+      : `$${tier.ratePerLog.toFixed(8).replace(/0+$/, "")}`,
+}));
 
 const tiers: PricingTier[] = [
   {

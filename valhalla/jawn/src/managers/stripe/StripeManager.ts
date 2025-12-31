@@ -9,7 +9,13 @@ import {
   AutoTopoffSettings,
   UpdateAutoTopoffSettingsRequest,
   PaymentMethod,
+  UsageStatsResponse,
+  DailyUsageDataPoint,
 } from "../../controllers/public/stripeController";
+import {
+  calculateGBCost,
+  calculateRequestCost,
+} from "@helicone-package/pricing";
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { Database } from "../../lib/db/database.types";
 import { dbExecute, dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
@@ -1735,6 +1741,131 @@ WHERE (${builtFilter.filter})`,
       return ok(undefined);
     } catch (error) {
       return err(`Error removing payment method: ${error}`);
+    }
+  }
+
+  public async getUsageStats(): Promise<Result<UsageStatsResponse, string>> {
+    try {
+      // Get subscription to find billing period
+      const subscriptionResult = await this.getSubscription();
+      if (!subscriptionResult.data) {
+        return err("No subscription found");
+      }
+
+      const subscription = subscriptionResult.data;
+      const periodStart = new Date(subscription.current_period_start * 1000);
+      const periodEnd = new Date(subscription.current_period_end * 1000);
+      const now = new Date();
+
+      // Calculate days elapsed and total
+      const msPerDay = 24 * 60 * 60 * 1000;
+      const daysElapsed = Math.floor(
+        (now.getTime() - periodStart.getTime()) / msPerDay
+      );
+      const daysTotal = Math.floor(
+        (periodEnd.getTime() - periodStart.getTime()) / msPerDay
+      );
+
+      // Query ClickHouse for daily usage data within billing period
+      const dailyUsageQuery = `
+        SELECT
+          toDate(request_created_at) as date,
+          count(*) as requests,
+          sum(size_bytes) as bytes
+        FROM request_response_rmt
+        WHERE organization_id = {val_0: String}
+          AND request_created_at >= {val_1: DateTime}
+          AND request_created_at < {val_2: DateTime}
+        GROUP BY date
+        ORDER BY date ASC
+      `;
+
+      const dailyResult = await dbQueryClickhouse<{
+        date: string;
+        requests: number;
+        bytes: number;
+      }>(dailyUsageQuery, [
+        this.authParams.organizationId,
+        periodStart,
+        periodEnd,
+      ]);
+
+      if (dailyResult.error) {
+        return err(`Error querying daily usage: ${dailyResult.error}`);
+      }
+
+      // Create a map for quick lookup
+      const dailyMap = new Map<string, { requests: number; bytes: number }>();
+      for (const row of dailyResult.data ?? []) {
+        dailyMap.set(row.date, {
+          requests: Number(row.requests),
+          bytes: Number(row.bytes),
+        });
+      }
+
+      // Build daily data array with all dates in the period (up to today)
+      const dailyData: DailyUsageDataPoint[] = [];
+      let totalRequests = 0;
+      let totalBytes = 0;
+
+      const currentDate = new Date(periodStart);
+      while (currentDate <= now && currentDate < periodEnd) {
+        const dateStr = currentDate.toISOString().split("T")[0];
+        const dayData = dailyMap.get(dateStr) ?? { requests: 0, bytes: 0 };
+
+        dailyData.push({
+          date: dateStr,
+          requests: dayData.requests,
+          bytes: dayData.bytes,
+        });
+
+        totalRequests += dayData.requests;
+        totalBytes += dayData.bytes;
+
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+
+      const totalGB = totalBytes / (1024 * 1024 * 1024);
+
+      // Calculate costs using the pricing package
+      const requestsCostResult = calculateRequestCost(totalRequests);
+      const gbCostResult = calculateGBCost(totalGB);
+
+      // Calculate projected monthly cost based on current usage rate
+      const projectionFactor =
+        daysElapsed > 0 ? daysTotal / daysElapsed : daysTotal;
+      const projectedRequests = totalRequests * projectionFactor;
+      const projectedGB = totalGB * projectionFactor;
+
+      const projectedRequestsCostResult =
+        calculateRequestCost(projectedRequests);
+      const projectedGBCostResult = calculateGBCost(projectedGB);
+
+      return ok({
+        billingPeriod: {
+          start: periodStart.toISOString(),
+          end: periodEnd.toISOString(),
+          daysElapsed,
+          daysTotal,
+        },
+        usage: {
+          totalRequests,
+          totalBytes,
+          totalGB,
+        },
+        dailyData,
+        estimatedCost: {
+          requestsCost: requestsCostResult.cost,
+          gbCost: gbCostResult.cost,
+          totalCost: requestsCostResult.cost + gbCostResult.cost,
+          projectedMonthlyRequestsCost: projectedRequestsCostResult.cost,
+          projectedMonthlyGBCost: projectedGBCostResult.cost,
+          projectedMonthlyTotalCost:
+            projectedRequestsCostResult.cost + projectedGBCostResult.cost,
+        },
+      });
+    } catch (error) {
+      return err(`Error getting usage stats: ${error}`);
     }
   }
 }

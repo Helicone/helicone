@@ -15,6 +15,7 @@ import Link from "next/link";
 import { InvoiceSheet } from "./InvoiceSheet";
 import { Badge } from "@/components/ui/badge";
 import { CalendarIcon } from "lucide-react";
+import { BillingUsageChart } from "./BillingUsageChart";
 
 /**
  * Shared hook for Pro subscription management
@@ -137,6 +138,10 @@ export const ProPlanCard = () => {
               </p>
             </div>
           )}
+
+          {/* Usage Chart */}
+          <BillingUsageChart />
+
           <Col className="gap-2">
             {isSubscriptionEnding ? (
               <Button
