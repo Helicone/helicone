@@ -84,7 +84,8 @@ const useTeamSubscription = () => {
  * New Team Plan Card for tier team-20251210
  * - $799/mo flat
  * - Unlimited seats, 5 organizations
- * - $6/GB storage billing
+ * - Tiered GB storage billing (starts at $3.25/GB)
+ * - Tiered request billing (10K free, then tiered)
  * - Everything included (prompts, experiments, evals)
  */
 export const TeamPlanCard = () => {

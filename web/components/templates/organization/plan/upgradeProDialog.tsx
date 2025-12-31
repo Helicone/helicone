@@ -156,7 +156,7 @@ export const UpgradeProDialog = ({
                   <div>
                     <P className="font-semibold">Pro Plan</P>
                     <Muted className="text-sm">
-                      Unlimited seats, $6/GB usage
+                      Unlimited seats, tiered usage
                     </Muted>
                   </div>
                   <P className="text-lg font-bold">${PRO_PRICE}/mo</P>

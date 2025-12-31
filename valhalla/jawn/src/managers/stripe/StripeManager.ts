@@ -424,7 +424,7 @@ WHERE (${builtFilter.filter})`,
     const proProductPrices = await getProProductPrices();
 
     // New pricing (2025-12-10): $79/mo flat, prompts included, unlimited seats
-    // Storage usage ($6/GB) is tracked via bytes_sum meter events in StripeLogHandler
+    // Usage is tracked via bytes_sum and requests_sum meter events in StripeLogHandler
     const settingsManager = new SettingsManager();
     const stripeProductSettings =
       await settingsManager.getSetting("stripe:products");
@@ -550,7 +550,7 @@ WHERE (${builtFilter.filter})`,
     uiMode: "embedded" | "hosted"
   ): Promise<Result<Stripe.Checkout.Session, string>> {
     // New pricing (2025-12-10): $799/mo flat, prompts/experiments/evals included
-    // Storage usage ($6/GB) is tracked via bytes_sum meter events in StripeLogHandler
+    // Usage is tracked via bytes_sum and requests_sum meter events in StripeLogHandler
     const settingsManager = new SettingsManager();
     const stripeProductSettings =
       await settingsManager.getSetting("stripe:products");

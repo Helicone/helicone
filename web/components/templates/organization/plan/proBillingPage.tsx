@@ -91,7 +91,8 @@ const useProSubscription = () => {
  * New Pro Plan Card for tier pro-20251210
  * - $79/mo flat
  * - Unlimited seats
- * - $6/GB storage billing
+ * - Tiered GB storage billing (starts at $3.25/GB)
+ * - Tiered request billing (10K free, then tiered)
  * - Prompts included
  */
 export const ProPlanCard = () => {

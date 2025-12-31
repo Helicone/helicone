@@ -33,9 +33,22 @@ interface FeatureGroup {
   features: Feature[];
 }
 
-const USAGE_PRICING_BYTES = [
-  { label: "First 1 GB", rate: "Free" },
-  { label: "Additional", rate: "$6/GB" },
+const USAGE_PRICING_GB = [
+  { label: "First 30 GB", rate: "$3.25/GB" },
+  { label: "31-80 GB", rate: "$2.00/GB" },
+  { label: "81-200 GB", rate: "$1.25/GB" },
+  { label: "201-450 GB", rate: "$0.75/GB" },
+  { label: "450+ GB", rate: "$0.50/GB" },
+];
+
+const USAGE_PRICING_REQUESTS = [
+  { label: "First 10,000", rate: "Free" },
+  { label: "10,001-30,000", rate: "$0.00070" },
+  { label: "30,001-90,000", rate: "$0.00035" },
+  { label: "90,001-250,000", rate: "$0.000175" },
+  { label: "250,001-800,000", rate: "$0.0000875" },
+  { label: "800,001-2,500,000", rate: "$0.00004375" },
+  { label: "2,500,000+", rate: "$0.00002" },
 ];
 
 const tiers: PricingTier[] = [
@@ -93,10 +106,10 @@ const featureGroups: FeatureGroup[] = [
         enterprise: "Unlimited",
       },
       {
-        name: "Storage",
-        hobby: "1 GB",
-        pro: "$6/GB",
-        team: "$6/GB",
+        name: "Usage-based pricing",
+        hobby: "10K requests",
+        pro: "Tiered pricing",
+        team: "Tiered pricing",
         enterprise: "Volume discount",
         tooltip: "usage",
       },
@@ -425,34 +438,73 @@ export default function PricingComparisonTable() {
                           )}
                         </div>
                         {feature.tooltip === "usage" && showUsageTiers && (
-                          <div className="pl-8 pt-4">
-                            <Table className="w-full">
-                              <TableHeader>
-                                <TableRow className="hover:bg-transparent">
-                                  <TableHead className="text-slate-500 font-medium px-0 py-1">
-                                    Storage
-                                  </TableHead>
-                                  <TableHead className="text-slate-500 font-medium px-0 py-1 text-right">
-                                    Rate
-                                  </TableHead>
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                {USAGE_PRICING_BYTES.map((tier, i) => (
-                                  <TableRow
-                                    key={i}
-                                    className="hover:bg-transparent"
-                                  >
-                                    <TableCell className="px-0 py-1 text-sm text-slate-500">
-                                      {tier.label}
-                                    </TableCell>
-                                    <TableCell className="px-0 py-1 text-right text-sm text-slate-500">
-                                      {tier.rate}
-                                    </TableCell>
+                          <div className="pl-8 pt-4 space-y-4">
+                            {/* Storage Pricing */}
+                            <div>
+                              <div className="text-slate-600 text-xs font-semibold mb-2">
+                                Storage Pricing
+                              </div>
+                              <Table className="w-full">
+                                <TableHeader>
+                                  <TableRow className="hover:bg-transparent">
+                                    <TableHead className="text-slate-500 font-medium px-0 py-1">
+                                      Usage
+                                    </TableHead>
+                                    <TableHead className="text-slate-500 font-medium px-0 py-1 text-right">
+                                      Rate
+                                    </TableHead>
                                   </TableRow>
-                                ))}
-                              </TableBody>
-                            </Table>
+                                </TableHeader>
+                                <TableBody>
+                                  {USAGE_PRICING_GB.map((tier, i) => (
+                                    <TableRow
+                                      key={i}
+                                      className="hover:bg-transparent"
+                                    >
+                                      <TableCell className="px-0 py-1 text-sm text-slate-500">
+                                        {tier.label}
+                                      </TableCell>
+                                      <TableCell className="px-0 py-1 text-right text-sm text-slate-500">
+                                        {tier.rate}
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </div>
+                            {/* Request Pricing */}
+                            <div>
+                              <div className="text-slate-600 text-xs font-semibold mb-2">
+                                Request Pricing
+                              </div>
+                              <Table className="w-full">
+                                <TableHeader>
+                                  <TableRow className="hover:bg-transparent">
+                                    <TableHead className="text-slate-500 font-medium px-0 py-1">
+                                      Requests
+                                    </TableHead>
+                                    <TableHead className="text-slate-500 font-medium px-0 py-1 text-right">
+                                      Rate
+                                    </TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {USAGE_PRICING_REQUESTS.map((tier, i) => (
+                                    <TableRow
+                                      key={i}
+                                      className="hover:bg-transparent"
+                                    >
+                                      <TableCell className="px-0 py-1 text-sm text-slate-500">
+                                        {tier.label}
+                                      </TableCell>
+                                      <TableCell className="px-0 py-1 text-right text-sm text-slate-500">
+                                        {tier.rate}
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </div>
                           </div>
                         )}
                       </div>

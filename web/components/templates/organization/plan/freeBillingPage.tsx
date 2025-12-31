@@ -106,7 +106,7 @@ export const FreePlanCard = () => {
               </CardHeader>
               <CardContent className="flex-1 space-y-4">
                 <p className="text-sm text-slate-500">
-                  Unlimited seats, $6/GB usage-based billing
+                  Unlimited seats, tiered usage-based billing
                 </p>
                 <ul className="space-y-2.5">
                   {proFeatures.slice(0, 4).map((feature) => (
@@ -295,7 +295,7 @@ const proFeatures = [
   },
   {
     title: "Usage-based billing",
-    description: "$6/GB - only pay for what you use",
+    description: "Tiered GB + request pricing - costs decrease as you scale",
   },
   {
     title: "Sessions",

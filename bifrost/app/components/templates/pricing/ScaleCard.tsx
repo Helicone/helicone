@@ -34,7 +34,7 @@ const ScaleCard: React.FC = () => {
               "Everything in Hobby",
               "Unlimited seats",
               "Unlimited requests",
-              "$6/GB usage-based billing",
+              "Tiered usage-based billing",
             ].map((feature, index) => (
               <div key={index} className="py-1.5 flex items-center gap-2">
                 <div className="w-4 h-4 relative overflow-hidden">

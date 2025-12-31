@@ -31,11 +31,11 @@ const BillingPlanPage = (props: OrgPlanPageProps) => {
         {/* Legacy Pro tiers (per-seat, per-request billing) */}
         {org?.currentOrg?.tier === "pro-20240913" && <LegacyProPlanCard />}
         {org?.currentOrg?.tier === "pro-20250202" && <LegacyProPlanCard />}
-        {/* New Pro tier (flat $79/mo + $6/GB) */}
+        {/* New Pro tier (flat $79/mo + tiered usage) */}
         {org?.currentOrg?.tier === "pro-20251210" && <ProPlanCard />}
         {/* Legacy Team tier ($200/mo) */}
         {org?.currentOrg?.tier === "team-20250130" && <LegacyTeamPlanCard />}
-        {/* New Team tier ($799/mo + $6/GB) */}
+        {/* New Team tier ($799/mo + tiered usage) */}
         {org?.currentOrg?.tier === "team-20251210" && <TeamPlanCard />}
         {org?.currentOrg?.tier &&
           !knownTiers.includes(org?.currentOrg?.tier) && (
