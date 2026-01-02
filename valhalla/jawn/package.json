@@ -23,6 +23,7 @@
     "@helicone-package/cost": "*",
     "@helicone-package/filters": "*",
     "@helicone-package/llm-mapper": "*",
+    "@helicone-package/pricing": "*",
     "@helicone-package/secrets": "*",
     "@helicone/helpers": "^1.1.0",
     "@helicone/prompts": "^1.0.11",

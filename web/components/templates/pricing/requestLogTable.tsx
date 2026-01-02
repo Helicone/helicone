@@ -7,6 +7,18 @@ import {
   TableRow,
 } from "@tremor/react";
 
+// Re-export from shared package for backward compatibility
+export {
+  GB_PRICING_TIERS,
+  REQUEST_PRICING_TIERS,
+  BYTE_PRICING,
+} from "@helicone-package/pricing";
+
+import {
+  GB_PRICING_TIERS,
+  REQUEST_PRICING_TIERS,
+} from "@helicone-package/pricing";
+
 interface RequestLogTableProps {}
 
 // Legacy per-request pricing for grandfathered users
@@ -55,52 +67,26 @@ export const HELICONE_LOG_PRICING = BASE_LOG_PRICING.map((pricing) => ({
   rate: pricing.rate * MULTIPLIER,
 }));
 
-// New tiered GB storage pricing (2025-12-10)
-export const GB_PRICING_TIERS = [
-  { maxGB: 30, ratePerGB: 3.25, label: "First 30 GB" },
-  { maxGB: 80, ratePerGB: 2.0, label: "31-80 GB" },
-  { maxGB: 200, ratePerGB: 1.25, label: "81-200 GB" },
-  { maxGB: 450, ratePerGB: 0.75, label: "201-450 GB" },
-  { maxGB: Infinity, ratePerGB: 0.5, label: "450+ GB" },
-];
-
-// New tiered request pricing (2025-12-10)
-export const REQUEST_PRICING_TIERS = [
-  { maxLogs: 10_000, ratePerLog: 0, label: "First 10,000" },
-  { maxLogs: 30_000, ratePerLog: 0.0007, label: "10,001-30,000" },
-  { maxLogs: 90_000, ratePerLog: 0.00035, label: "30,001-90,000" },
-  { maxLogs: 250_000, ratePerLog: 0.000175, label: "90,001-250,000" },
-  { maxLogs: 800_000, ratePerLog: 0.0000875, label: "250,001-800,000" },
-  { maxLogs: 2_500_000, ratePerLog: 0.00004375, label: "800,001-2,500,000" },
-  { maxLogs: Infinity, ratePerLog: 0.00002, label: "2,500,000+" },
-];
-
-// Legacy byte-based pricing (kept for backward compatibility)
-export const BYTE_PRICING = {
-  ratePerGB: GB_PRICING_TIERS[0].ratePerGB, // First tier rate
-  freeGB: 0, // No free GB in new model (free requests instead)
-};
-
 const RequestLogTable = (props: RequestLogTableProps) => {
   const {} = props;
 
   return (
-    <div className="mb-8 mt-2 space-y-6">
+    <div className="mb-8 mt-2 flex flex-col gap-6">
       {/* Storage Pricing Table */}
-      <div className="rounded-lg border border-gray-300 p-2">
-        <h3 className="mb-2 text-sm font-medium text-black">Storage Pricing</h3>
+      <div className="rounded-lg border border-border p-2">
+        <h3 className="mb-2 text-sm font-medium text-foreground">Storage Pricing</h3>
         <Table>
           <TableHead>
-            <TableRow className="border-b border-gray-300">
-              <TableHeaderCell className="text-black">Usage</TableHeaderCell>
-              <TableHeaderCell className="text-black">Rate</TableHeaderCell>
+            <TableRow className="border-b border-border">
+              <TableHeaderCell className="text-foreground">Usage</TableHeaderCell>
+              <TableHeaderCell className="text-foreground">Rate</TableHeaderCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {GB_PRICING_TIERS.map((tier, i) => (
               <TableRow key={i}>
-                <TableCell className="text-gray-600">{tier.label}</TableCell>
-                <TableCell className="text-black">
+                <TableCell className="text-muted-foreground">{tier.label}</TableCell>
+                <TableCell className="text-foreground">
                   ${tier.ratePerGB.toFixed(2)}/GB
                 </TableCell>
               </TableRow>
@@ -110,20 +96,20 @@ const RequestLogTable = (props: RequestLogTableProps) => {
       </div>
 
       {/* Request Pricing Table */}
-      <div className="rounded-lg border border-gray-300 p-2">
-        <h3 className="mb-2 text-sm font-medium text-black">Request Pricing</h3>
+      <div className="rounded-lg border border-border p-2">
+        <h3 className="mb-2 text-sm font-medium text-foreground">Request Pricing</h3>
         <Table>
           <TableHead>
-            <TableRow className="border-b border-gray-300">
-              <TableHeaderCell className="text-black">Requests</TableHeaderCell>
-              <TableHeaderCell className="text-black">Rate</TableHeaderCell>
+            <TableRow className="border-b border-border">
+              <TableHeaderCell className="text-foreground">Requests</TableHeaderCell>
+              <TableHeaderCell className="text-foreground">Rate</TableHeaderCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {REQUEST_PRICING_TIERS.map((tier, i) => (
               <TableRow key={i}>
-                <TableCell className="text-gray-600">{tier.label}</TableCell>
-                <TableCell className="text-black">
+                <TableCell className="text-muted-foreground">{tier.label}</TableCell>
+                <TableCell className="text-foreground">
                   {tier.ratePerLog === 0
                     ? "Free"
                     : `$${tier.ratePerLog.toFixed(8).replace(/0+$/, "")}`}

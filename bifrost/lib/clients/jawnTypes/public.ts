@@ -304,6 +304,9 @@ export interface paths {
   "/v1/stripe/payment-methods/{paymentMethodId}": {
     delete: operations["RemovePaymentMethod"];
   };
+  "/v1/stripe/subscription/usage-stats": {
+    get: operations["GetUsageStats"];
+  };
   "/v1/integration": {
     get: operations["GetIntegrations"];
     post: operations["CreateIntegration"];
@@ -1664,6 +1667,46 @@ Json: JsonObject;
     };
     CreateSetupSessionRequest: {
       returnUrl?: string;
+    };
+    DailyUsageDataPoint: {
+      date: string;
+      /** Format: double */
+      requests: number;
+      /** Format: double */
+      bytes: number;
+    };
+    UsageStatsResponse: {
+      billingPeriod: {
+        /** Format: double */
+        daysTotal: number;
+        /** Format: double */
+        daysElapsed: number;
+        end: string;
+        start: string;
+      };
+      usage: {
+        /** Format: double */
+        totalGB: number;
+        /** Format: double */
+        totalBytes: number;
+        /** Format: double */
+        totalRequests: number;
+      };
+      dailyData: components["schemas"]["DailyUsageDataPoint"][];
+      estimatedCost: {
+        /** Format: double */
+        projectedMonthlyTotalCost: number;
+        /** Format: double */
+        projectedMonthlyGBCost: number;
+        /** Format: double */
+        projectedMonthlyRequestsCost: number;
+        /** Format: double */
+        totalCost: number;
+        /** Format: double */
+        gbCost: number;
+        /** Format: double */
+        requestsCost: number;
+      };
     };
     IntegrationCreateParams: {
       integration_name: string;
@@ -6309,6 +6352,16 @@ export interface operations {
           "application/json": {
             success: boolean;
           };
+        };
+      };
+    };
+  };
+  GetUsageStats: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["UsageStatsResponse"] | null;
         };
       };
     };

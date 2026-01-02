@@ -16,6 +16,7 @@ import { InvoiceSheet } from "./InvoiceSheet";
 import { CheckIcon } from "lucide-react";
 import { PlanFeatureCard } from "./PlanFeatureCard";
 import { InfoBox } from "@/components/ui/helicone/infoBox";
+import { BillingUsageChart } from "./BillingUsageChart";
 
 /**
  * Shared hook for Team subscription management
@@ -175,6 +176,9 @@ export const TeamPlanCard = () => {
               </a>
             </div>
           </div>
+
+          {/* Usage Chart */}
+          <BillingUsageChart />
 
           <Col className="gap-2">
             {isSubscriptionEnding ? (
