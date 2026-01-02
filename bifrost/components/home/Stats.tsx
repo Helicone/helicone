@@ -1,34 +1,68 @@
 "use client";
 
 import { ISLAND_WIDTH } from "@/lib/utils";
-// import { humanReadableNumber } from "@/app/utils/formattingUtils";
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 
-function humanReadableNumber(num: number): string {
-  if (num >= 1_000_000_000_000) {
-    return `${Math.ceil(num / 1_000_000_000_00) / 10} trillion`;
-  } else if (num >= 1_000_000_000) {
-    return `${Math.ceil(num / 1_000_000_00) / 10} billion`;
-  } else if (num >= 1_000_000) {
-    return `${Math.ceil(num / 1_000_00) / 10}M+`;
-  } else if (num >= 1_000) {
-    return `${Math.ceil(num / 100) / 10}k+`;
+// Baseline date: January 2, 2025
+const BASELINE_DATE = new Date("2025-01-02");
+
+// Baseline values (update these periodically with real numbers)
+const BASELINE_REQUESTS = 3_000_000_000; // 3 billion
+const BASELINE_TOKENS_TRILLION = 31.5; // 31.5 trillion
+const BASELINE_USERS = 20_600_000; // 20.6 million
+
+// Growth rates
+const REQUESTS_PER_DAY = 50_000_000; // 50 million per day
+const TOKENS_TRILLION_PER_MONTH = 1; // 1 trillion per month
+const USERS_PER_MONTH = 1_000_000; // 1 million per month
+
+function getGrowthMetrics() {
+  const now = new Date();
+  const daysSinceBaseline = Math.floor(
+    (now.getTime() - BASELINE_DATE.getTime()) / (1000 * 60 * 60 * 24)
+  );
+  const monthsSinceBaseline = daysSinceBaseline / 30;
+
+  const totalRequests = BASELINE_REQUESTS + daysSinceBaseline * REQUESTS_PER_DAY;
+  const totalTokensTrillion =
+    BASELINE_TOKENS_TRILLION + monthsSinceBaseline * TOKENS_TRILLION_PER_MONTH;
+  const totalUsers = BASELINE_USERS + monthsSinceBaseline * USERS_PER_MONTH;
+
+  return {
+    requests: totalRequests,
+    tokensTrillion: totalTokensTrillion,
+    users: totalUsers,
+  };
+}
+
+function formatRequests(num: number): string {
+  if (num >= 1_000_000_000) {
+    return `${(num / 1_000_000_000).toFixed(1)} billion`;
   }
   return num.toLocaleString();
 }
 
-const Stats = ({
-  totalValuesData,
-}: {
-  totalValuesData?: {
-    total_requests?: number;
-    total_tokens?: number;
-    total_cost?: number;
-  };
-}) => {
+function formatTokens(trillions: number): string {
+  return `${trillions.toFixed(1)} Trillion`;
+}
+
+function formatUsers(num: number): string {
+  if (num >= 1_000_000) {
+    return `${(num / 1_000_000).toFixed(1)} million`;
+  }
+  return num.toLocaleString();
+}
+
+const Stats = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const [metrics, setMetrics] = useState(getGrowthMetrics());
   const elementRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Update metrics on mount (for SSR hydration)
+    setMetrics(getGrowthMetrics());
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -65,11 +99,11 @@ const Stats = ({
               isVisible ? "rotate-[-3deg]" : "rotate-[0  deg]"
             )}
           >
-            {humanReadableNumber(totalValuesData?.total_requests ?? 0)}
+            {formatRequests(metrics.requests)}
           </span>{" "}
           requests processed,{" "}
-          <span className="text-brand">1 Trillion</span> tokens a month, <span className="text-brand">18.3 million</span>{" "}
-          users tracked
+          <span className="text-brand">{formatTokens(metrics.tokensTrillion)}</span> tokens a month,{" "}
+          <span className="text-brand">{formatUsers(metrics.users)}</span> users tracked
         </h1>
       </div>
     </div>
