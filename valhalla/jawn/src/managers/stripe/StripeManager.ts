@@ -1252,6 +1252,7 @@ WHERE (${builtFilter.filter})`,
           success_url: successUrl,
           cancel_url: cancelUrl,
           mode: "payment",
+          allow_promotion_codes: false,
           line_items: [
             {
               price_data: {
