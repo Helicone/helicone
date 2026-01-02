@@ -43,7 +43,7 @@ export const useCostForExperiments = () => {
 export const useBillingUsage = () => {
   const org = useOrg();
 
-  const result = $JAWN_API.useQuery(
+  return $JAWN_API.useQuery(
     "get",
     "/v1/stripe/subscription/usage-stats",
     {},
@@ -52,9 +52,4 @@ export const useBillingUsage = () => {
       staleTime: 5 * 60 * 1000, // 5 minutes
     }
   );
-
-  return {
-    ...result,
-    data: result.data?.data,
-  };
 };

@@ -1832,8 +1832,9 @@ WHERE (${builtFilter.filter})`,
       const gbCostResult = calculateGBCost(totalGB);
 
       // Calculate projected monthly cost based on current usage rate
+      // If no days have elapsed yet, use factor of 1 (current = projected)
       const projectionFactor =
-        daysElapsed > 0 ? daysTotal / daysElapsed : daysTotal;
+        daysElapsed > 0 ? daysTotal / daysElapsed : 1;
       const projectedRequests = totalRequests * projectionFactor;
       const projectedGB = totalGB * projectionFactor;
 

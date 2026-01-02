@@ -700,8 +700,8 @@ export class StripeController extends Controller {
     const result = await stripeManager.getUsageStats();
 
     if (result.error) {
-      console.error("Error getting usage stats:", result.error);
-      return null;
+      this.setStatus(400);
+      throw new Error(result.error);
     }
 
     return result.data;

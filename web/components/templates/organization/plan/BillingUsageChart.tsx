@@ -168,9 +168,9 @@ export const BillingUsageChart = () => {
       gb: cumulativeGB,
       requestsCost,
       gbCost,
-      // For stacked area chart - actual values
-      actualRequestsCost: requestsCost,
-      actualGBCost: gbCost,
+      // For stacked area chart - actual values (null for projected data points)
+      actualRequestsCost: requestsCost as number | null,
+      actualGBCost: gbCost as number | null,
       // Projected values (null for actual data points)
       projectedRequestsCost: null as number | null,
       projectedGBCost: null as number | null,
@@ -207,8 +207,8 @@ export const BillingUsageChart = () => {
       gb: projectedCumulativeGB,
       requestsCost,
       gbCost,
-      actualRequestsCost: null as unknown as number,
-      actualGBCost: null as unknown as number,
+      actualRequestsCost: null,
+      actualGBCost: null,
       projectedRequestsCost: requestsCost,
       projectedGBCost: gbCost,
     });
