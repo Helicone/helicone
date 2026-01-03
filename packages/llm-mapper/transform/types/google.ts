@@ -57,6 +57,10 @@ export type GeminiGenerationConfig = {
   frequencyPenalty?: number;
   thinkingConfig?: GeminiThinkingConfig;
   imageConfig?: GeminiImageConfig;
+  /** MIME type for the response (e.g., "application/json" for structured output) */
+  responseMimeType?: string;
+  /** JSON Schema for structured output responses */
+  responseSchema?: Record<string, any>;
 };
 
 export type GeminiToolConfig = {
