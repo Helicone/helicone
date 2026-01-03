@@ -11,6 +11,7 @@ import {
   Database,
   ChevronLeft,
   User,
+  DollarSign,
 } from "lucide-react";
 import { useRouter } from "next/router";
 import {
@@ -51,6 +52,7 @@ const navigation = [
   {
     group: "Business",
     items: [
+      { name: "Pricing Analytics", href: "/admin/pricing-analytics", icon: DollarSign },
       { name: "Wallet", href: "/admin/wallet", icon: Wallet },
       {
         name: "Stripe Projections",

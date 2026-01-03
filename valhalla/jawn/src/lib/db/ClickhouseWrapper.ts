@@ -34,6 +34,7 @@ export class ClickhouseClientWrapper {
       host: clickhouseHost,
       username: env.CLICKHOUSE_USER,
       password: env.CLICKHOUSE_PASSWORD,
+      request_timeout: 60000,
     });
 
     this.clickHouseHqlClient = createClient({
@@ -89,6 +90,7 @@ export class ClickhouseClientWrapper {
         // See https://clickhouse.com/docs/en/interfaces/http/#response-buffering
         clickhouse_settings: {
           wait_end_of_query: 1,
+          max_execution_time: 60,
         },
       });
       const raw = (await queryResult.json()) as unknown;
