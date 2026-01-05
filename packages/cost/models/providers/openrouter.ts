@@ -1,5 +1,5 @@
 import { BaseProvider } from "./base";
-import type { Endpoint, RequestParams } from "../types";
+import type { Endpoint, RequestBodyContext, RequestParams } from "../types";
 
 export class OpenRouterProvider extends BaseProvider {
   readonly displayName = "OpenRouter";
@@ -10,5 +10,18 @@ export class OpenRouterProvider extends BaseProvider {
 
   buildUrl(endpoint: Endpoint, requestParams: RequestParams): string {
     return "https://openrouter.ai/api/v1/chat/completions";
+  }
+
+  buildRequestBody(endpoint: Endpoint, context: RequestBodyContext): string | Promise<string> {
+    let updatedBody = context.parsedBody;
+    if (context.bodyMapping === "RESPONSES") {
+      updatedBody = context.toChatCompletions(updatedBody);
+    }
+
+    return JSON.stringify({
+      ...updatedBody,
+      model: endpoint.providerModelId,
+      usage: { include: true }
+    });
   }
 }

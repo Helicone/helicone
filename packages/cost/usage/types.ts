@@ -1,9 +1,13 @@
+export interface ModalityUsage {
+  input?: number;
+  cachedInput?: number;
+  output?: number;
+}
+
 export interface ModelUsage {
-  // Excluding cached or audio tokens
+  // Text modality
   input: number;
-  // Excluding reasoning or audio tokens
   output: number;
-  image?: number;
   cacheDetails?: {
     cachedInput: number;
     write5m?: number;
@@ -11,7 +15,15 @@ export interface ModelUsage {
   };
   cacheDurationHours?: number;
   thinking?: number;
-  audio?: number;
-  video?: number;
+
+  // Other modality breakdowns
+  image?: ModalityUsage;
+  audio?: ModalityUsage;
+  video?: ModalityUsage;
+  file?: ModalityUsage;
+
   web_search?: number;
+
+  // Direct USD cost from provider if available
+  cost?: number;
 }

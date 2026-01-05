@@ -22,6 +22,7 @@ export default defineWorkersConfig({
             "INSERT_KV",
             "UTILITY_KV",
             "REQUEST_AND_RESPONSE_QUEUE_KV",
+            "WALLET_KV",
           ],
           durableObjects: {
             WALLET: {

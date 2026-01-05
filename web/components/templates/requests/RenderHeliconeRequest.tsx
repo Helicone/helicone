@@ -16,6 +16,7 @@ import { useMemo } from "react";
 import { LuChevronsLeftRight } from "react-icons/lu";
 import { Assistant } from "./components/assistant/Assistant";
 import Chat from "./components/Chat";
+import ChatOnlyView from "./components/ChatOnlyView";
 import { JsonRenderer } from "./components/chatComponent/single/JsonRenderer";
 import { Completion } from "./components/completion";
 import { ErrorMessage } from "./components/error/ErrorMessage";
@@ -115,6 +116,8 @@ export function RenderMappedRequest({
         </div>
       ) : mode === "json" ? (
         <Json mapperContent={mappedRequest} />
+      ) : mode === "chat" ? (
+        <ChatOnlyView mappedRequest={mappedRequest} />
       ) : hasError ? (
         <>
           <ErrorMessage mapperContent={mappedRequest} className="p-4" />
@@ -122,7 +125,8 @@ export function RenderMappedRequest({
       ) : (
         (() => {
           switch (mappedRequest._type) {
-            case "ai-gateway":
+            case "ai-gateway-chat":
+            case "ai-gateway-responses":
             case "openai-chat":
             case "gemini-chat":
             case "vercel-chat":

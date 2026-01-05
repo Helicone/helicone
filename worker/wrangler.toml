@@ -9,7 +9,7 @@ durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
 	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
 	{ name = "WALLET", class_name = "Wallet" },
-	{ name = "REQUEST_BODY_BUFFER", class_name = "RequestBodyBufferContainer" }
+	{ name = "REQUEST_BODY_BUFFER", class_name = "RequestBodyBufferContainer" },
 ]
 
 
@@ -18,6 +18,7 @@ kv_namespaces = [
 	{ binding = "CACHE_KV", id = "81f49b61645345a499b37e3944c3502d", preview_id = "9d7e936c78be456c8c7e296a15215837" },
 	{ binding = "INSERT_KV", id = "364ccea321534b4397fd8934f5757bd6", preview_id = "03504e09b1c949e6a3b77b11bb45d602" },
 	{ binding = "UTILITY_KV", id = "8b5d1650741d4f999e858f788387e3fa", preview_id = "a0ecbc9180784f7096e7ca1932b5676a" },
+	{ binding = "WALLET_KV", id = "7635e7dd625a482ba6afc086f55a7e89" },
 	{ binding = "REQUEST_AND_RESPONSE_QUEUE_KV", id = "cf75f1c978d14eaeabc4483662688ab4", preview_id = "cf75f1c978d14eaeabc4483662688ab4" },
 	{ binding = "SECURE_CACHE", id = "23d7b3cb44254e0eb0b824a310abe155", preview_id = "9d7e936c78be456c8c7e296a15215837" },
 	{ binding = "EU_SECURE_CACHE", id = "a0243398352c4ea996e5bf4008938285", preview_id = "9d7e936c78be456c8c7e296a15215837" },
@@ -28,7 +29,7 @@ queues.producers = [
 ]
 
 containers = [
-	{ image = "./RequestBodyBufferContainer/Dockerfile", class_name = "RequestBodyBufferContainer", max_instances = 10, instance_type = "standard" }
+	{ image = "./RequestBodyBufferContainer/Dockerfile", class_name = "RequestBodyBufferContainer", max_instances = 10, instance_type = "standard" },
 ]
 
 [vars]
@@ -51,7 +52,7 @@ S3_ENDPOINT = "http://localhost:9000"
 S3_ACCESS_KEY = "minioadmin"
 S3_SECRET_KEY = "minioadmin"
 S3_BUCKET_NAME = "request-response-storage"
-HELICONE_MANUAL_ACCESS_KEY="sk-helicone-rrrrrrr-xxxxxxx-vvvvvvv-wwwwwww"
+HELICONE_MANUAL_ACCESS_KEY = "sk-helicone-rrrrrrr-xxxxxxx-vvvvvvv-wwwwwww"
 APP_URL = "https://us.helicone.ai"
 ENVIRONMENT = "development"
 TOKENIZER_COUNT_API = "https://tokens.helicone.ai/anthropic/count_tokens"
@@ -67,6 +68,9 @@ PROMPTARMOR_API_KEY = ""
 DATADOG_ENABLED = "false"
 DATADOG_API_KEY = ""
 DATADOG_ENDPOINT = ""
+DATADOG_APM_ENABLED = "false"
+DATADOG_APM_ENDPOINT = "https://http-intake.logs.us5.datadoghq.com"
+DATADOG_APM_SAMPLING_RATE = "0.01"
 GATEWAY_TARGET = ""
 S3_ENABLED = "true"
 S3_REGION = "us-west-2"
@@ -94,11 +98,11 @@ STRIPE_WEBHOOK_SECRET = ""
 HELICONE_ORG_ID = ""
 
 EU_HELICONE_ORG_ID = ""
-STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT="prod_StWk1FmJ88b9Ju"
+STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT = "prod_StWk1FmJ88b9Ju"
 
-UPSTASH_KAFKA_URL=""
-UPSTASH_KAFKA_USERNAME=""
-UPSTASH_KAFKA_PASSWORD=""
+UPSTASH_KAFKA_URL = ""
+UPSTASH_KAFKA_USERNAME = ""
+UPSTASH_KAFKA_PASSWORD = ""
 
 [triggers]
 crons = ["* * * * *", "0 * * * *", "0 10 * * mon", "*/5 * * * *"]
@@ -177,7 +181,7 @@ durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
 	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
 	{ name = "WALLET", class_name = "Wallet" },
-	{ name = "REQUEST_BODY_BUFFER", class_name = "RequestBodyBufferContainer" }
+	{ name = "REQUEST_BODY_BUFFER", class_name = "RequestBodyBufferContainer" },
 ]
 
 kv_namespaces = [
@@ -186,12 +190,13 @@ kv_namespaces = [
 	{ binding = "INSERT_KV", id = "364ccea321534b4397fd8934f5757bd6", preview_id = "03504e09b1c949e6a3b77b11bb45d602" },
 	{ binding = "UTILITY_KV", id = "8b5d1650741d4f999e858f788387e3fa", preview_id = "a0ecbc9180784f7096e7ca1932b5676a" },
 	{ binding = "REQUEST_AND_RESPONSE_QUEUE_KV", id = "cf75f1c978d14eaeabc4483662688ab4", preview_id = "cf75f1c978d14eaeabc4483662688ab4" },
+	{ binding = "WALLET_KV", id = "7635e7dd625a482ba6afc086f55a7e89" },
 	{ binding = "SECURE_CACHE", id = "43d1ce4eaa9c4be9ae88a97ea8ed88ef", preview_id = "23d7b3cb44254e0eb0b824a310abe155" },
 	{ binding = "EU_SECURE_CACHE", id = "39c1d7b64db749e39adeba19c698e6a1" },
 ]
 
 containers = [
-	{ image = "./RequestBodyBufferContainer/Dockerfile", class_name = "RequestBodyBufferContainer", max_instances = 10, instance_type = "standard" }
+	{ image = "./RequestBodyBufferContainer/Dockerfile", class_name = "RequestBodyBufferContainer", max_instances = 10, instance_type = "standard" },
 ]
 
 [env.production.triggers]
@@ -206,6 +211,9 @@ SUPABASE_URL = "https://bolqqmqbrciybnypvklh.supabase.co"
 CLICKHOUSE_HOST = "https://p76qbrlulo.us-east-1.aws.clickhouse.cloud:8443"
 VAULT_ENABLED = "true"
 DATADOG_ENABLED = "true"
+DATADOG_APM_ENABLED = "true"
+DATADOG_APM_ENDPOINT = "https://http-intake.logs.us5.datadoghq.com"
+DATADOG_APM_SAMPLING_RATE = "0.10"
 QUEUE_PROVIDER = "sqs"
 ENVIRONMENT = "production"
 APP_URL = "https://us.helicone.ai"
@@ -248,6 +256,7 @@ kv_namespaces = [
 	{ binding = "CACHE_KV", id = "81f49b61645345a499b37e3944c3502d", preview_id = "9d7e936c78be456c8c7e296a15215837" },
 	{ binding = "INSERT_KV", id = "364ccea321534b4397fd8934f5757bd6", preview_id = "03504e09b1c949e6a3b77b11bb45d602" },
 	{ binding = "UTILITY_KV", id = "8b5d1650741d4f999e858f788387e3fa", preview_id = "a0ecbc9180784f7096e7ca1932b5676a" },
+	{ binding = "WALLET_KV", id = "7635e7dd625a482ba6afc086f55a7e89" },
 	{ binding = "REQUEST_AND_RESPONSE_QUEUE_KV", id = "cf75f1c978d14eaeabc4483662688ab4", preview_id = "cf75f1c978d14eaeabc4483662688ab4" },
 	{ binding = "SECURE_CACHE", id = "23d7b3cb44254e0eb0b824a310abe155" },
 	{ binding = "EU_SECURE_CACHE", id = "a0243398352c4ea996e5bf4008938285" },
@@ -258,7 +267,7 @@ durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
 	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
 	{ name = "WALLET", class_name = "Wallet" },
-	{ name = "REQUEST_BODY_BUFFER", class_name = "RequestBodyBufferContainer" }
+	{ name = "REQUEST_BODY_BUFFER", class_name = "RequestBodyBufferContainer" },
 ]
 
 queues.producers = [
@@ -266,7 +275,7 @@ queues.producers = [
 ]
 
 containers = [
-	{ image = "./RequestBodyBufferContainer/Dockerfile", class_name = "RequestBodyBufferContainer", max_instances = 10, instance_type = "standard" }
+	{ image = "./RequestBodyBufferContainer/Dockerfile", class_name = "RequestBodyBufferContainer", max_instances = 10, instance_type = "standard" },
 ]
 
 # Environment-specific variables only (inherit most from top-level [vars])
@@ -280,8 +289,6 @@ APP_URL = "https://us.helicone.ai"
 
 [env.production_staging.triggers]
 crons = []
-
-
 
 
 [[migrations]]

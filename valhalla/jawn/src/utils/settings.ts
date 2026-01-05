@@ -26,6 +26,10 @@ export interface SqsSettings {
 
 export interface StripeProductSettings {
   cloudGatewayTokenUsageProduct: string;
+  requestVolumePrice_20251210?: string; // Metered request-based billing
+  gigVolumePrice_20251210?: string; // Metered GB-based billing
+  pro20251210_79Price?: string; // $79/mo flat Pro
+  team20251210_799Price?: string; // $799/mo flat Team
 }
 
 export interface SettingsType {
@@ -46,12 +50,26 @@ export interface SettingsType {
   "sqs:request-response-logs-dlq": SqsSettings;
   "sqs:helicone-scores-dlq": SqsSettings;
   "stripe:products": StripeProductSettings;
+  // Stores provider/admin secrets; expected to include { helicone: string, ... }
+  "secrets:provider-keys": Record<string, string>;
 }
 
 export type SettingName = keyof SettingsType;
 
 export type Setting = KafkaSettings | AzureExperiment | ApiKey;
 
+// TODO: Add default values for all SettingName types to prevent undefined returns
+// when settings fail to load from database and don't exist in cache.
+// Missing defaults for: kafka:dlq, kafka:log, kafka:score, kafka:dlq:score,
+// kafka:dlq:eu, kafka:log:eu, kafka:orgs-to-dlq, azure:experiment, openai:apiKey,
+// anthropic:apiKey, openrouter:apiKey, togetherai:apiKey, sqs:request-response-logs,
+// sqs:helicone-scores, sqs:request-response-logs-dlq, sqs:helicone-scores-dlq
+const DEFAULTS: Partial<Record<SettingName, any>> = {
+  "stripe:products": {
+    cloudGatewayTokenUsageProduct:
+      process.env.STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT,
+  },
+};
 class SettingsCache extends InMemoryCache {
   private static instance: SettingsCache;
   private API_KEY_CACHE_TTL = 60 * 1000; // 1 minute
@@ -108,7 +126,12 @@ export class SettingsManager {
 
       if (!setting) {
         await this.loadSettings();
-        return this.settingsCache.get(name) as SettingsType[T] | undefined;
+        const res = this.settingsCache.get(name) as SettingsType[T] | undefined;
+        if (res) {
+          return res;
+        } else {
+          return DEFAULTS[name];
+        }
       }
 
       return setting;

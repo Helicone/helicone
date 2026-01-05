@@ -1,5 +1,6 @@
 import { vi } from "vitest";
 import { TestCase } from "./providers/base.test-config";
+import { InMemoryCache } from "../src/lib/util/cache/inMemoryCache";
 
 type MutableTestCase = Partial<TestCase> | undefined;
 
@@ -7,6 +8,8 @@ let currentTestCase: MutableTestCase;
 
 export function setSupabaseTestCase(tc: MutableTestCase) {
   currentTestCase = tc;
+  // Clear in-memory cache when test case changes to avoid stale data
+  InMemoryCache.getInstance().clear();
 }
 
 // Register the mock once at module load and read hoisted state inside the factory
@@ -132,8 +135,10 @@ vi.mock("@supabase/supabase-js", () => ({
               type: "service_account",
               project_id: "test-project",
               private_key_id: "test-key-id",
-              private_key: "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQCsJKIUJeD/qHPf\nb53+BG6p7I8qclGNQrFL2IXqQZFR4843PF7vDleIq55ZxxFCZ8s30/evOsbmbPpY\n/0rDy0cKYoWOYg/i72XtPiReXQjFKa2+cHdjIwIFAi6YIoO0JJKF3k98Q2U4iETV\nOY5usQ7M8XXKQ9/B3OvLdE35lCMUVSFGjSQWN49XJ8dynH3JZ2n/UflP35ZGFKg7\nmGJdnt3+u9W0WRShlJ6GMD029zHnHIvxc0g3ESZ5NogSlO7xAg5nExramhmbpjRQ\nL39+wjw3in2XQSuPPZHtFCGBjFLqUJq5cJsaJ7TmZPMDbL2Zus1JKgxMVya/eKmA\nvOZxzo9HAgMBAAECggEAU+KGGMtcmTi9PmRl2SLPyn48RbLviqa1PwCEQWMyLXWV\nR9VjbZrPjQoUYCthfbqWjN3+FKXPxvnUBQpipIaqV6Uq7/dZRnzibnmZv2IWo/1r\nbSHhC65Dja1Ch2BKTb6EqDdtBGDTMnk1EbK6dbZSQAxqGeZ5Yz8EqGBEnxpQ/dav\ntwiCn/MolNldfi3r0e56+pih7jM9UlzZz7nygESygdGCoew667iLzNVAgcIjBnEJ\nH7UF1sTt91UqY6DfeOnFX1HWmPHHlJqnU7wW4Oqc9FWTkPerG8UBSCQGTE1AZNbN\ncfh9g5W0JoTvh2fcg8IGZsi0PR2m3Y2KZqlXxdDgAQKBgQDv01zI+JdRSC62McRH\nac1peINSWKbXZZD8xWvyFMo61e5bocv5of8HaeMSI44MIfvX2CCI8/nJg6zL6X61\npaVJQezPawGVeQKds3KT4vZPpufycGdk/yU5BUz0vp1VgjH0JAMyKC5lDfi3kvNh\nQQufvPQWhkauf6FuQOAfHvnJwQKBgQC3wLfYe5dz3K5Ga1WRLiPnDx1t9w1NdA5Y\ngdCWzs0MRwn6bgHYHO1ivSBtlbK6epQCdSt0x12cF19lhFCvFWupXmwlpF7L6GSE\nzCpdx+elAZvPlpmtyCRtUjA6vSIw0iFTZzUcBdPtX+rF24JOqHi3OX4UgjOUgRaG\nwkTveX7LBwKBgQC9Ic72nzWWYHqWLMFCIGpiVywZcNiC3hJthbQPgd3KcJQ9p2eZ\nQuxBCHyO/YM0hkh6fHOMDfxbs4A+f7HxxuSG1XrQSO9C1d/+RlqBzme5gUNCquqf\nd6f/Q/LgwMKLgNWsWAo9L/sGrvIKs9VESWvFWdqVOOfdDcJdlMQrRt5vAQKBgQCN\nSVJS0xztylX58Ve2rIqQhA+12MrSrhTFuvL+sf35nbmvY9xpJjzkudTwTbVCKzQY\n+6yxOwXgGhyQuv8q0Eaa0O5ItyzojkST00QUHbwgJK+AGyUI+SYBJLvOvlRGw5s6\nPNYaOOTt1N14ysJT5rgC8eLetAoi+mqurTtCAuIaCwKBgQCO5Gm81959RrnIPfvE\nop73k1gpGsG8ogckrGux6VRnu0WHUon/7JPru8eH+4qBMsiGgCq6FMtGL0qerFTm\nleUB+B7JBTw0nDpT/ri7AhBClh6okFEOXizdZObm6OuiY2pyCkD2ixfdpQdSw50k\nVoOOvy3ufoYcLzM601qivR+k7g==\n-----END PRIVATE KEY-----",
-              client_email: "test-service-account@test-project.iam.gserviceaccount.com",
+              private_key:
+                "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQCsJKIUJeD/qHPf\nb53+BG6p7I8qclGNQrFL2IXqQZFR4843PF7vDleIq55ZxxFCZ8s30/evOsbmbPpY\n/0rDy0cKYoWOYg/i72XtPiReXQjFKa2+cHdjIwIFAi6YIoO0JJKF3k98Q2U4iETV\nOY5usQ7M8XXKQ9/B3OvLdE35lCMUVSFGjSQWN49XJ8dynH3JZ2n/UflP35ZGFKg7\nmGJdnt3+u9W0WRShlJ6GMD029zHnHIvxc0g3ESZ5NogSlO7xAg5nExramhmbpjRQ\nL39+wjw3in2XQSuPPZHtFCGBjFLqUJq5cJsaJ7TmZPMDbL2Zus1JKgxMVya/eKmA\nvOZxzo9HAgMBAAECggEAU+KGGMtcmTi9PmRl2SLPyn48RbLviqa1PwCEQWMyLXWV\nR9VjbZrPjQoUYCthfbqWjN3+FKXPxvnUBQpipIaqV6Uq7/dZRnzibnmZv2IWo/1r\nbSHhC65Dja1Ch2BKTb6EqDdtBGDTMnk1EbK6dbZSQAxqGeZ5Yz8EqGBEnxpQ/dav\ntwiCn/MolNldfi3r0e56+pih7jM9UlzZz7nygESygdGCoew667iLzNVAgcIjBnEJ\nH7UF1sTt91UqY6DfeOnFX1HWmPHHlJqnU7wW4Oqc9FWTkPerG8UBSCQGTE1AZNbN\ncfh9g5W0JoTvh2fcg8IGZsi0PR2m3Y2KZqlXxdDgAQKBgQDv01zI+JdRSC62McRH\nac1peINSWKbXZZD8xWvyFMo61e5bocv5of8HaeMSI44MIfvX2CCI8/nJg6zL6X61\npaVJQezPawGVeQKds3KT4vZPpufycGdk/yU5BUz0vp1VgjH0JAMyKC5lDfi3kvNh\nQQufvPQWhkauf6FuQOAfHvnJwQKBgQC3wLfYe5dz3K5Ga1WRLiPnDx1t9w1NdA5Y\ngdCWzs0MRwn6bgHYHO1ivSBtlbK6epQCdSt0x12cF19lhFCvFWupXmwlpF7L6GSE\nzCpdx+elAZvPlpmtyCRtUjA6vSIw0iFTZzUcBdPtX+rF24JOqHi3OX4UgjOUgRaG\nwkTveX7LBwKBgQC9Ic72nzWWYHqWLMFCIGpiVywZcNiC3hJthbQPgd3KcJQ9p2eZ\nQuxBCHyO/YM0hkh6fHOMDfxbs4A+f7HxxuSG1XrQSO9C1d/+RlqBzme5gUNCquqf\nd6f/Q/LgwMKLgNWsWAo9L/sGrvIKs9VESWvFWdqVOOfdDcJdlMQrRt5vAQKBgQCN\nSVJS0xztylX58Ve2rIqQhA+12MrSrhTFuvL+sf35nbmvY9xpJjzkudTwTbVCKzQY\n+6yxOwXgGhyQuv8q0Eaa0O5ItyzojkST00QUHbwgJK+AGyUI+SYBJLvOvlRGw5s6\nPNYaOOTt1N14ysJT5rgC8eLetAoi+mqurTtCAuIaCwKBgQCO5Gm81959RrnIPfvE\nop73k1gpGsG8ogckrGux6VRnu0WHUon/7JPru8eH+4qBMsiGgCq6FMtGL0qerFTm\nleUB+B7JBTw0nDpT/ri7AhBClh6okFEOXizdZObm6OuiY2pyCkD2ixfdpQdSw50k\nVoOOvy3ufoYcLzM601qivR+k7g==\n-----END PRIVATE KEY-----",
+              client_email:
+                "test-service-account@test-project.iam.gserviceaccount.com",
               client_id: "123456789",
               auth_uri: "https://accounts.google.com/o/oauth2/auth",
               token_uri: "https://oauth2.googleapis.com/token",
@@ -202,6 +207,15 @@ vi.mock("@supabase/supabase-js", () => ({
             config: null,
             byok_enabled: isByokEnabled,
           },
+          mistral: {
+            org_id: "test-org-id",
+            provider_name: "mistral",
+            decrypted_provider_key: "test-mistral-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: null,
+            byok_enabled: isByokEnabled,
+          },
           novita: {
             org_id: "test-org-id",
             provider_name: "novita",
@@ -211,10 +225,55 @@ vi.mock("@supabase/supabase-js", () => ({
             config: null,
             byok_enabled: isByokEnabled,
           },
+          canopywave: {
+            org_id: "test-org-id",
+            provider_name: "canopywave",
+            decrypted_provider_key: "test-canopywave-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: null,
+            byok_enabled: isByokEnabled,
+          },
           nebius: {
             org_id: "test-org-id",
             provider_name: "nebius",
             decrypted_provider_key: "test-nebius-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: null,
+            byok_enabled: isByokEnabled,
+          },
+          chutes: {
+            org_id: "test-org-id",
+            provider_name: "chutes",
+            decrypted_provider_key: "test-chutes-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: null,
+            byok_enabled: isByokEnabled,
+          },
+          cerebras: {
+            org_id: "test-org-id",
+            provider_name: "cerebras",
+            decrypted_provider_key: "test-cerebras-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: null,
+            byok_enabled: isByokEnabled,
+          },
+          baseten: {
+            org_id: "test-org-id",
+            provider_name: "baseten",
+            decrypted_provider_key: "test-baseten-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: null,
+            byok_enabled: isByokEnabled,
+          },
+          fireworks: {
+            org_id: "test-org-id",
+            provider_name: "fireworks",
+            decrypted_provider_key: "test-fireworks-api-key",
             decrypted_provider_secret_key: null,
             auth_type: "api_key",
             config: null,
@@ -245,6 +304,15 @@ vi.mock("@supabase/supabase-js", () => ({
 
         // Helicone provider keys (for PTB when BYOK is disabled)
         const mockHeliconeProviderKeys: Record<string, any> = {
+          helicone: {
+            org_id: "0afe3a6e-d095-4ec0-bc1e-2af6f57bd2a5",
+            provider_name: "helicone",
+            decrypted_provider_key: "helicone-ptb-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: null,
+            byok_enabled: true,
+          },
           anthropic: {
             org_id: "0afe3a6e-d095-4ec0-bc1e-2af6f57bd2a5",
             provider_name: "anthropic",
@@ -270,8 +338,10 @@ vi.mock("@supabase/supabase-js", () => ({
               type: "service_account",
               project_id: "helicone-project",
               private_key_id: "helicone-key-id",
-              private_key: "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQCsJKIUJeD/qHPf\nb53+BG6p7I8qclGNQrFL2IXqQZFR4843PF7vDleIq55ZxxFCZ8s30/evOsbmbPpY\n/0rDy0cKYoWOYg/i72XtPiReXQjFKa2+cHdjIwIFAi6YIoO0JJKF3k98Q2U4iETV\nOY5usQ7M8XXKQ9/B3OvLdE35lCMUVSFGjSQWN49XJ8dynH3JZ2n/UflP35ZGFKg7\nmGJdnt3+u9W0WRShlJ6GMD029zHnHIvxc0g3ESZ5NogSlO7xAg5nExramhmbpjRQ\nL39+wjw3in2XQSuPPZHtFCGBjFLqUJq5cJsaJ7TmZPMDbL2Zus1JKgxMVya/eKmA\nvOZxzo9HAgMBAAECggEAU+KGGMtcmTi9PmRl2SLPyn48RbLviqa1PwCEQWMyLXWV\nR9VjbZrPjQoUYCthfbqWjN3+FKXPxvnUBQpipIaqV6Uq7/dZRnzibnmZv2IWo/1r\nbSHhC65Dja1Ch2BKTb6EqDdtBGDTMnk1EbK6dbZSQAxqGeZ5Yz8EqGBEnxpQ/dav\ntwiCn/MolNldfi3r0e56+pih7jM9UlzZz7nygESygdGCoew667iLzNVAgcIjBnEJ\nH7UF1sTt91UqY6DfeOnFX1HWmPHHlJqnU7wW4Oqc9FWTkPerG8UBSCQGTE1AZNbN\ncfh9g5W0JoTvh2fcg8IGZsi0PR2m3Y2KZqlXxdDgAQKBgQDv01zI+JdRSC62McRH\nac1peINSWKbXZZD8xWvyFMo61e5bocv5of8HaeMSI44MIfvX2CCI8/nJg6zL6X61\npaVJQezPawGVeQKds3KT4vZPpufycGdk/yU5BUz0vp1VgjH0JAMyKC5lDfi3kvNh\nQQufvPQWhkauf6FuQOAfHvnJwQKBgQC3wLfYe5dz3K5Ga1WRLiPnDx1t9w1NdA5Y\ngdCWzs0MRwn6bgHYHO1ivSBtlbK6epQCdSt0x12cF19lhFCvFWupXmwlpF7L6GSE\nzCpdx+elAZvPlpmtyCRtUjA6vSIw0iFTZzUcBdPtX+rF24JOqHi3OX4UgjOUgRaG\nwkTveX7LBwKBgQC9Ic72nzWWYHqWLMFCIGpiVywZcNiC3hJthbQPgd3KcJQ9p2eZ\nQuxBCHyO/YM0hkh6fHOMDfxbs4A+f7HxxuSG1XrQSO9C1d/+RlqBzme5gUNCquqf\nd6f/Q/LgwMKLgNWsWAo9L/sGrvIKs9VESWvFWdqVOOfdDcJdlMQrRt5vAQKBgQCN\nSVJS0xztylX58Ve2rIqQhA+12MrSrhTFuvL+sf35nbmvY9xpJjzkudTwTbVCKzQY\n+6yxOwXgGhyQuv8q0Eaa0O5ItyzojkST00QUHbwgJK+AGyUI+SYBJLvOvlRGw5s6\nPNYaOOTt1N14ysJT5rgC8eLetAoi+mqurTtCAuIaCwKBgQCO5Gm81959RrnIPfvE\nop73k1gpGsG8ogckrGux6VRnu0WHUon/7JPru8eH+4qBMsiGgCq6FMtGL0qerFTm\nleUB+B7JBTw0nDpT/ri7AhBClh6okFEOXizdZObm6OuiY2pyCkD2ixfdpQdSw50k\nVoOOvy3ufoYcLzM601qivR+k7g==\n-----END PRIVATE KEY-----",
-              client_email: "helicone-service-account@helicone-project.iam.gserviceaccount.com",
+              private_key:
+                "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQCsJKIUJeD/qHPf\nb53+BG6p7I8qclGNQrFL2IXqQZFR4843PF7vDleIq55ZxxFCZ8s30/evOsbmbPpY\n/0rDy0cKYoWOYg/i72XtPiReXQjFKa2+cHdjIwIFAi6YIoO0JJKF3k98Q2U4iETV\nOY5usQ7M8XXKQ9/B3OvLdE35lCMUVSFGjSQWN49XJ8dynH3JZ2n/UflP35ZGFKg7\nmGJdnt3+u9W0WRShlJ6GMD029zHnHIvxc0g3ESZ5NogSlO7xAg5nExramhmbpjRQ\nL39+wjw3in2XQSuPPZHtFCGBjFLqUJq5cJsaJ7TmZPMDbL2Zus1JKgxMVya/eKmA\nvOZxzo9HAgMBAAECggEAU+KGGMtcmTi9PmRl2SLPyn48RbLviqa1PwCEQWMyLXWV\nR9VjbZrPjQoUYCthfbqWjN3+FKXPxvnUBQpipIaqV6Uq7/dZRnzibnmZv2IWo/1r\nbSHhC65Dja1Ch2BKTb6EqDdtBGDTMnk1EbK6dbZSQAxqGeZ5Yz8EqGBEnxpQ/dav\ntwiCn/MolNldfi3r0e56+pih7jM9UlzZz7nygESygdGCoew667iLzNVAgcIjBnEJ\nH7UF1sTt91UqY6DfeOnFX1HWmPHHlJqnU7wW4Oqc9FWTkPerG8UBSCQGTE1AZNbN\ncfh9g5W0JoTvh2fcg8IGZsi0PR2m3Y2KZqlXxdDgAQKBgQDv01zI+JdRSC62McRH\nac1peINSWKbXZZD8xWvyFMo61e5bocv5of8HaeMSI44MIfvX2CCI8/nJg6zL6X61\npaVJQezPawGVeQKds3KT4vZPpufycGdk/yU5BUz0vp1VgjH0JAMyKC5lDfi3kvNh\nQQufvPQWhkauf6FuQOAfHvnJwQKBgQC3wLfYe5dz3K5Ga1WRLiPnDx1t9w1NdA5Y\ngdCWzs0MRwn6bgHYHO1ivSBtlbK6epQCdSt0x12cF19lhFCvFWupXmwlpF7L6GSE\nzCpdx+elAZvPlpmtyCRtUjA6vSIw0iFTZzUcBdPtX+rF24JOqHi3OX4UgjOUgRaG\nwkTveX7LBwKBgQC9Ic72nzWWYHqWLMFCIGpiVywZcNiC3hJthbQPgd3KcJQ9p2eZ\nQuxBCHyO/YM0hkh6fHOMDfxbs4A+f7HxxuSG1XrQSO9C1d/+RlqBzme5gUNCquqf\nd6f/Q/LgwMKLgNWsWAo9L/sGrvIKs9VESWvFWdqVOOfdDcJdlMQrRt5vAQKBgQCN\nSVJS0xztylX58Ve2rIqQhA+12MrSrhTFuvL+sf35nbmvY9xpJjzkudTwTbVCKzQY\n+6yxOwXgGhyQuv8q0Eaa0O5ItyzojkST00QUHbwgJK+AGyUI+SYBJLvOvlRGw5s6\nPNYaOOTt1N14ysJT5rgC8eLetAoi+mqurTtCAuIaCwKBgQCO5Gm81959RrnIPfvE\nop73k1gpGsG8ogckrGux6VRnu0WHUon/7JPru8eH+4qBMsiGgCq6FMtGL0qerFTm\nleUB+B7JBTw0nDpT/ri7AhBClh6okFEOXizdZObm6OuiY2pyCkD2ixfdpQdSw50k\nVoOOvy3ufoYcLzM601qivR+k7g==\n-----END PRIVATE KEY-----",
+              client_email:
+                "helicone-service-account@helicone-project.iam.gserviceaccount.com",
               client_id: "987654321",
               auth_uri: "https://accounts.google.com/o/oauth2/auth",
               token_uri: "https://oauth2.googleapis.com/token",
@@ -344,6 +414,15 @@ vi.mock("@supabase/supabase-js", () => ({
             org_id: "0afe3a6e-d095-4ec0-bc1e-2af6f57bd2a5",
             provider_name: "novita",
             decrypted_provider_key: "helicone-novita-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: null,
+            byok_enabled: true,
+          },
+          canopywave: {
+            org_id: "0afe3a6e-d095-4ec0-bc1e-2af6f57bd2a5",
+            provider_name: "canopywave",
+            decrypted_provider_key: "helicone-canopywave-api-key",
             decrypted_provider_secret_key: null,
             auth_type: "api_key",
             config: null,

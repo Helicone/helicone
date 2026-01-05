@@ -72,6 +72,10 @@ export const authMiddleware = async (
     next();
     return;
   }
+  if (req.path === "/v1/models" && req.method === "GET") {
+    next();
+    return;
+  }
   if (req.path === "/v1/organization" && req.method === "GET") {
     next();
     return;
@@ -99,19 +103,19 @@ export const authMiddleware = async (
 
     (req as any).authParams = authParams.data;
 
-    const onFinish = logHttpRequestInClickhouse(
-      {
-        method: `${req.method}`,
-        url: `${req.originalUrl}`,
-        userAgent: `${req.headers["user-agent"] ?? ""}`,
-      },
-      {
-        status: res.statusCode,
-      },
-      authParams.data
-    );
+    // const onFinish = logHttpRequestInClickhouse(
+    //   {
+    //     method: `${req.method}`,
+    //     url: `${req.originalUrl}`,
+    //     userAgent: `${req.headers["user-agent"] ?? ""}`,
+    //   },
+    //   {
+    //     status: res.statusCode,
+    //   },
+    //   authParams.data
+    // );
 
-    res.on("finish", onFinish);
+    // res.on("finish", onFinish);
 
     if (
       req.path.startsWith("/v1/admin") &&

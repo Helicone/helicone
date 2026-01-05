@@ -106,6 +106,23 @@ export interface paths {
   "/v1/stripe/subscription": {
     get: operations["GetSubscription"];
   };
+  "/v1/stripe/auto-topoff/settings": {
+    get: operations["GetAutoTopoffSettings"];
+    post: operations["UpdateAutoTopoffSettings"];
+    delete: operations["DisableAutoTopoff"];
+  };
+  "/v1/stripe/payment-methods": {
+    get: operations["GetPaymentMethods"];
+  };
+  "/v1/stripe/payment-methods/setup-session": {
+    post: operations["CreateSetupSession"];
+  };
+  "/v1/stripe/payment-methods/{paymentMethodId}": {
+    delete: operations["RemovePaymentMethod"];
+  };
+  "/v1/stripe/subscription/usage-stats": {
+    get: operations["GetUsageStats"];
+  };
   "/v1/organization": {
     get: operations["GetOrganizations"];
   };
@@ -162,6 +179,9 @@ export interface paths {
   };
   "/v1/organization/update_onboarding": {
     post: operations["UpdateOnboardingStatus"];
+  };
+  "/v1/organization/models": {
+    get: operations["GetModels"];
   };
   "/v1/evaluator": {
     post: operations["CreateEvaluator"];
@@ -457,6 +477,65 @@ export interface paths {
   "/v1/alert-banner": {
     get: operations["GetAlertBanners"];
   };
+  "/v1/helicone-sql/schema": {
+    /**
+     * Get database schema
+     * @description Get ClickHouse schema (tables and columns)
+     */
+    get: operations["GetClickHouseSchema"];
+  };
+  "/v1/helicone-sql/execute": {
+    /**
+     * Execute SQL query
+     * @description Execute a SQL query against ClickHouse
+     */
+    post: operations["ExecuteSql"];
+  };
+  "/v1/helicone-sql/download": {
+    /**
+     * Download query results as CSV
+     * @description Execute a SQL query and download results as CSV
+     */
+    post: operations["DownloadCsv"];
+  };
+  "/v1/helicone-sql/saved-queries": {
+    /**
+     * List saved queries
+     * @description Get all saved queries for the organization
+     */
+    get: operations["GetSavedQueries"];
+  };
+  "/v1/helicone-sql/saved-query/{queryId}": {
+    /**
+     * Get saved query
+     * @description Get a specific saved query by ID
+     */
+    get: operations["GetSavedQuery"];
+    /**
+     * Update saved query
+     * @description Update an existing saved query
+     */
+    put: operations["UpdateSavedQuery"];
+    /**
+     * Delete saved query
+     * @description Delete a saved query by ID
+     */
+    delete: operations["DeleteSavedQuery"];
+  };
+  "/v1/helicone-sql/saved-queries/bulk-delete": {
+    /**
+     * Bulk delete saved queries
+     * @description Delete multiple saved queries at once
+     */
+    post: operations["BulkDeleteSavedQueries"];
+  };
+  "/v1/helicone-sql/saved-query": {
+    /**
+     * Create saved query
+     * @description Create a new saved query
+     */
+    post: operations["CreateSavedQuery"];
+  };
   "/v1/admin/has-feature-flag": {
     post: operations["HasFeatureFlag"];
   };
@@ -478,6 +557,31 @@ export interface paths {
   };
   "/v1/admin/whodis": {
     post: operations["Whodis"];
+  };
+  "/v1/admin/org-search": {
+    post: operations["OrgSearch"];
+  };
+  "/v1/admin/org-search-fast": {
+    post: operations["OrgSearchFast"];
+  };
+  "/v1/admin/user-search": {
+    post: operations["UserSearch"];
+  };
+  "/v1/admin/org/{orgId}/member/{memberId}": {
+    delete: operations["RemoveOrgMember"];
+    patch: operations["UpdateOrgMemberRole"];
+  };
+  "/v1/admin/org/{orgId}/gateway-discount": {
+    patch: operations["UpdateGatewayDiscount"];
+  };
+  "/v1/admin/org/{orgId}/delete": {
+    post: operations["DeleteOrg"];
+  };
+  "/v1/admin/org-usage-light/{orgId}": {
+    get: operations["GetOrgUsageLight"];
+  };
+  "/v1/admin/org-usage/{orgId}": {
+    get: operations["GetOrgUsage"];
   };
   "/v1/admin/settings/{name}": {
     get: operations["GetSetting"];
@@ -525,6 +629,41 @@ export interface paths {
   "/v1/admin/helix-thread/{sessionId}": {
     get: operations["GetHelixThread"];
   };
+  "/v1/admin/hql-enriched": {
+    post: operations["ExecuteEnrichedHql"];
+  };
+  "/v1/admin/saved-queries": {
+    /** @description Get all saved queries for admin (stored under admin org ID) */
+    get: operations["GetAdminSavedQueries"];
+  };
+  "/v1/admin/saved-query": {
+    /** @description Create a new saved query for admin (stored under admin org ID) */
+    post: operations["CreateAdminSavedQuery"];
+  };
+  "/v1/admin/saved-query/{queryId}": {
+    /** @description Delete a saved query for admin (stored under admin org ID) */
+    delete: operations["DeleteAdminSavedQuery"];
+    /** @description Update a saved query for admin (stored under admin org ID) */
+    patch: operations["UpdateAdminSavedQuery"];
+  };
+  "/v1/credits/balance": {
+    get: operations["GetCreditsBalance"];
+  };
+  "/v1/credits/payments": {
+    get: operations["ListTokenUsagePayments"];
+  };
+  "/v1/credits/totalSpend": {
+    get: operations["GetTotalSpend"];
+  };
+  "/v1/credits/spend/breakdown": {
+    get: operations["GetSpendBreakdown"];
+  };
+  "/v1/credits/invoices": {
+    get: operations["ListInvoices"];
+  };
+  "/v1/credits/discounts": {
+    get: operations["GetDiscounts"];
+  };
   "/v1/admin/wallet/gateway/dashboard_data": {
     post: operations["GetGatewayDashboardData"];
   };
@@ -542,6 +681,47 @@ export interface paths {
   };
   "/v1/admin/wallet/{orgId}/disallow-list": {
     delete: operations["RemoveFromDisallowList"];
+  };
+  "/v1/admin/wallet/analytics/time-series": {
+    post: operations["GetTimeSeriesData"];
+  };
+  "/v1/admin/wallet/{orgId}/spend-breakdown": {
+    /**
+     * @description Get spend breakdown for an org by date range.
+     * Includes discounts applied per organization's discount rules.
+     */
+    post: operations["GetSpendBreakdownForOrg"];
+  };
+  "/v1/admin/wallet/{orgId}/invoices/{invoiceId}": {
+    /** @description Delete a recorded invoice. */
+    delete: operations["DeleteInvoice"];
+  };
+  "/v1/admin/wallet/{orgId}/invoices/{invoiceId}/update": {
+    /** @description Update an invoice's hosted URL (for after sending from Stripe). */
+    post: operations["UpdateInvoice"];
+  };
+  "/v1/admin/wallet/{orgId}/invoices/list": {
+    /** @description List all recorded invoices for an org. */
+    post: operations["AdminListInvoices"];
+  };
+  "/v1/admin/wallet/{orgId}/invoice-summary": {
+    /** @description Get invoice summary: total spend, total invoiced, uninvoiced balance. */
+    post: operations["GetInvoiceSummary"];
+  };
+  "/v1/admin/wallet/{orgId}/create-invoice": {
+    /**
+     * @description Create a Stripe invoice from spend breakdown and record it.
+     * This creates line items in Stripe for each model/provider combo.
+     */
+    post: operations["CreateInvoice"];
+  };
+  "/v1/admin/wallet/{orgId}/discounts/list": {
+    /** @description Get discount rules for an organization. */
+    post: operations["ListDiscounts"];
+  };
+  "/v1/admin/wallet/{orgId}/discounts/update": {
+    /** @description Update discount rules for an organization. */
+    post: operations["UpdateDiscounts"];
   };
   "/v1/audio/convert-to-wav": {
     post: operations["ConvertToWav"];
@@ -717,6 +897,7 @@ export interface components {
     CreateCloudGatewayCheckoutSessionRequest: {
       /** Format: double */
       amount: number;
+      returnUrl?: string;
     };
     UpgradeToProRequest: {
       addons?: {
@@ -772,6 +953,77 @@ export interface components {
       /** Format: double */
       count: number;
     };
+    AutoTopoffSettings: {
+      enabled: boolean;
+      /** Format: double */
+      thresholdCents: number;
+      /** Format: double */
+      topoffAmountCents: number;
+      stripePaymentMethodId: string | null;
+      lastTopoffAt: string | null;
+      /** Format: double */
+      consecutiveFailures: number;
+    };
+    UpdateAutoTopoffSettingsRequest: {
+      enabled: boolean;
+      /** Format: double */
+      thresholdCents: number;
+      /** Format: double */
+      topoffAmountCents: number;
+      stripePaymentMethodId: string;
+    };
+    PaymentMethod: {
+      id: string;
+      brand: string;
+      last4: string;
+      /** Format: double */
+      exp_month: number;
+      /** Format: double */
+      exp_year: number;
+    };
+    CreateSetupSessionRequest: {
+      returnUrl?: string;
+    };
+    DailyUsageDataPoint: {
+      date: string;
+      /** Format: double */
+      requests: number;
+      /** Format: double */
+      bytes: number;
+    };
+    UsageStatsResponse: {
+      billingPeriod: {
+        /** Format: double */
+        daysTotal: number;
+        /** Format: double */
+        daysElapsed: number;
+        end: string;
+        start: string;
+      };
+      usage: {
+        /** Format: double */
+        totalGB: number;
+        /** Format: double */
+        totalBytes: number;
+        /** Format: double */
+        totalRequests: number;
+      };
+      dailyData: components["schemas"]["DailyUsageDataPoint"][];
+      estimatedCost: {
+        /** Format: double */
+        projectedMonthlyTotalCost: number;
+        /** Format: double */
+        projectedMonthlyGBCost: number;
+        /** Format: double */
+        projectedMonthlyRequestsCost: number;
+        /** Format: double */
+        totalCost: number;
+        /** Format: double */
+        gbCost: number;
+        /** Format: double */
+        requestsCost: number;
+      };
+    };
 Json: JsonObject;
     "ResultSuccess__40_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-and-_role-string__41_-Array_": {
       data: (({
@@ -802,6 +1054,7 @@ Json: JsonObject;
           has_onboarded: boolean;
           has_integrated: boolean;
           governance_settings: components["schemas"]["Json"] | null;
+          gateway_discount_enabled: boolean;
           domain: string | null;
           /** Format: double */
           credit_limit: number;
@@ -844,6 +1097,7 @@ Json: JsonObject;
         has_onboarded: boolean;
         has_integrated: boolean;
         governance_settings: components["schemas"]["Json"] | null;
+        gateway_discount_enabled: boolean;
         domain: string | null;
         /** Format: double */
         credit_limit: number;
@@ -855,7 +1109,7 @@ Json: JsonObject;
       error: null;
     };
     "Result_Database-at-public_91_Tables_93_-at-organization_91_Row_93_.string_": components["schemas"]["ResultSuccess_Database-at-public_91_Tables_93_-at-organization_91_Row_93__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
+    "ResultSuccess__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
       data: {
           tier: string;
           subscription_status: string;
@@ -884,6 +1138,7 @@ Json: JsonObject;
           has_onboarded: boolean;
           has_integrated: boolean;
           governance_settings: components["schemas"]["Json"];
+          gateway_discount_enabled: boolean;
           domain: string;
           /** Format: double */
           credit_limit: number;
@@ -894,9 +1149,9 @@ Json: JsonObject;
       /** @enum {number|null} */
       error: null;
     };
-    "Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_": components["schemas"]["ResultSuccess__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__": {
-      data: components["schemas"]["Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_"];
+    "Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_": components["schemas"]["ResultSuccess__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__": {
+      data: components["schemas"]["Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_"];
       /** @enum {number|null} */
       error: null;
     };
@@ -905,7 +1160,7 @@ Json: JsonObject;
       data: null;
       error: unknown;
     };
-    "Result_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_": components["schemas"]["ResultSuccess_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__"] | components["schemas"]["ResultError_unknown_"];
+    "Result_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_": components["schemas"]["ResultSuccess_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__"] | components["schemas"]["ResultError_unknown_"];
     ResultSuccess_string_: {
       data: string;
       /** @enum {number|null} */
@@ -940,6 +1195,7 @@ Json: JsonObject;
       has_onboarded?: boolean;
       has_integrated?: boolean;
       governance_settings?: components["schemas"]["Json"] | null;
+      gateway_discount_enabled?: boolean;
       domain?: string | null;
       /** Format: double */
       credit_limit?: number;
@@ -1037,6 +1293,14 @@ Json: JsonObject;
       };
     };
     OnboardingStatus: components["schemas"]["Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--hasCompletedQuickstart-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___"];
+    "ResultSuccess__model-string_-Array_": {
+      data: {
+          model: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__model-string_-Array.string_": components["schemas"]["ResultSuccess__model-string_-Array_"] | components["schemas"]["ResultError_string_"];
     EvaluatorResult: {
       id: string;
       created_at: string;
@@ -1492,6 +1756,9 @@ Json: JsonObject;
       prompt_cache_write_tokens?: components["schemas"]["Partial_NumberOperators_"];
       total_tokens?: components["schemas"]["Partial_NumberOperators_"];
       target_url?: components["schemas"]["Partial_TextOperators_"];
+      property_key?: {
+        equals: string;
+      };
       properties?: {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
@@ -1573,6 +1840,7 @@ Json: JsonObject;
         [key: string]: components["schemas"]["SortDirection"];
       };
       cost?: components["schemas"]["SortDirection"];
+      time_to_first_token?: components["schemas"]["SortDirection"];
     };
     RequestQueryParams: {
       filter: components["schemas"]["RequestFilterNode"];
@@ -1587,9 +1855,9 @@ Json: JsonObject;
       isScored?: boolean;
     };
     /** @enum {string} */
-    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "BEDROCK" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "CHUTES" | "LLAMA" | "NVIDIA" | "VERCEL";
+    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "BEDROCK" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "CHUTES" | "LLAMA" | "NVIDIA" | "VERCEL" | "CEREBRAS" | "BASETEN" | "CANOPYWAVE";
     /** @enum {string} */
-    ModelProviderName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter" | "novita" | "nebius";
+    ModelProviderName: "baseten" | "anthropic" | "azure" | "bedrock" | "canopywave" | "cerebras" | "chutes" | "deepinfra" | "deepseek" | "fireworks" | "google-ai-studio" | "groq" | "helicone" | "mistral" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
     Provider: components["schemas"]["ProviderName"] | components["schemas"]["ModelProviderName"] | "CUSTOM";
     /** @enum {string} */
     LlmType: "chat" | "completion";
@@ -1659,6 +1927,13 @@ Json: JsonObject;
       databaseName?: string;
       [key: string]: unknown;
     };
+    HeliconeEventData: {
+      /** @enum {string} */
+      _type: "data";
+      name: string;
+      meta?: components["schemas"]["Record_string.any_"];
+      [key: string]: unknown;
+    };
     LLMRequestBody: {
       llm_type?: components["schemas"]["LlmType"];
       provider?: string;
@@ -1697,6 +1972,7 @@ Json: JsonObject;
       };
       toolDetails?: components["schemas"]["HeliconeEventTool"];
       vectorDBDetails?: components["schemas"]["HeliconeEventVectorDB"];
+      dataDetails?: components["schemas"]["HeliconeEventData"];
       input?: string | string[];
       /** Format: double */
       n?: number | null;
@@ -1727,6 +2003,18 @@ Json: JsonObject;
       _type: "functionCall" | "function" | "image" | "text" | "file" | "contentArray";
     };
     LLMResponseBody: {
+      dataDetailsResponse?: {
+        name: string;
+        /** @enum {string} */
+        _type: "data";
+        metadata: {
+          timestamp: string;
+          [key: string]: unknown;
+        };
+        message: string;
+        status: string;
+        [key: string]: unknown;
+      };
       vectorDBDetailsResponse?: {
         /** @enum {string} */
         _type: "vector_db";
@@ -1797,6 +2085,8 @@ Json: JsonObject;
       /** Format: double */
       completion_tokens: number | null;
       /** Format: double */
+      reasoning_tokens: number | null;
+      /** Format: double */
       prompt_audio_tokens: number | null;
       /** Format: double */
       completion_audio_tokens: number | null;
@@ -1823,7 +2113,8 @@ Json: JsonObject;
       cache_enabled: boolean;
       updated_at?: string;
       request_referrer?: string | null;
-      gateway_endpoint_version: string | null;
+      ai_gateway_body_mapping: string | null;
+      storage_location?: string;
     };
     "ResultSuccess_HeliconeRequest-Array_": {
       data: components["schemas"]["HeliconeRequest"][];
@@ -2226,10 +2517,9 @@ Json: JsonObject;
       customer_id: string;
     };
     /** @enum {string} */
-    ResponseFormat: "ANTHROPIC" | "OPENAI";
+    BodyMappingType: "OPENAI" | "NO_MAPPING" | "RESPONSES";
     HeliconeMeta: {
-      gatewayEndpointVersion?: string;
-      gatewayResponseFormat?: components["schemas"]["ResponseFormat"];
+      aiGatewayBodyMapping?: components["schemas"]["BodyMappingType"];
       providerModelId?: string;
       gatewayModel?: string;
       gatewayProvider?: components["schemas"]["ModelProviderName"];
@@ -3131,6 +3421,7 @@ Json: JsonObject;
           minimum_request_count: number | null;
           metric: string;
           id: string;
+          filter: components["schemas"]["Json"] | null;
           emails: string[];
           created_at: string | null;
         })[];
@@ -3148,6 +3439,8 @@ Json: JsonObject;
           alert_id: string;
           alert_end_time: string | null;
         })[];
+      /** Format: double */
+      historyTotalCount: number;
     };
     ResultSuccess_AlertResponse_: {
       data: components["schemas"]["AlertResponse"];
@@ -3155,16 +3448,98 @@ Json: JsonObject;
       error: null;
     };
     "Result_AlertResponse.string_": components["schemas"]["ResultSuccess_AlertResponse_"] | components["schemas"]["ResultError_string_"];
+    /** @enum {string} */
+    AlertMetric: "latency" | "cost" | "prompt_tokens" | "completion_tokens" | "prompt_cache_read_tokens" | "prompt_cache_write_tokens" | "total_tokens" | "response.status" | "count";
+    /** @enum {string} */
+    AlertAggregation: "sum" | "avg" | "min" | "max" | "percentile";
+    /** @enum {string} */
+    AlertStandardGrouping: "model" | "provider" | "user";
+    AlertGrouping: components["schemas"]["AlertStandardGrouping"] | string;
+    /** @description Matches all records (no filtering) */
+    AllExpression: {
+      /** @enum {string} */
+      type: "all";
+    };
+    /** @enum {string} */
+    FilterSubType: "property" | "score" | "sessions" | "user";
+    /**
+     * @description Type for the field specification in a condition
+     * Describes what field is being filtered and how
+     */
+    BaseFieldSpec: {
+      subtype?: components["schemas"]["FilterSubType"];
+      /** @enum {string} */
+      valueMode?: "value" | "key";
+      key?: string;
+    };
+    FieldSpec: (components["schemas"]["BaseFieldSpec"] & ({
+      /** @enum {string} */
+      column: "properties" | "user_id" | "model" | "country_code" | "response_id" | "status" | "latency" | "provider" | "time_to_first_token" | "request_created_at" | "response_created_at" | "organization_id" | "threat" | "request_id" | "prompt_tokens" | "completion_tokens" | "prompt_cache_read_tokens" | "prompt_cache_write_tokens" | "target_url" | "scores" | "request_body" | "response_body" | "assets" | "proxy_key_id" | "updated_at";
+      /** @enum {string} */
+      table: "request_response_rmt";
+    })) | (components["schemas"]["BaseFieldSpec"] & ({
+      /** @enum {string} */
+      column: "created_at" | "cost" | "prompt_tokens" | "completion_tokens" | "total_tokens" | "total_requests" | "latest_request_created_at";
+      /** @enum {string} */
+      table: "sessions_request_response_rmt";
+    })) | (components["schemas"]["BaseFieldSpec"] & ({
+      /** @enum {string} */
+      column: "user_id" | "cost" | "total_requests" | "active_for" | "first_active" | "last_active" | "average_requests_per_day_active" | "average_tokens_per_request" | "total_completion_tokens" | "total_prompt_tokens";
+      /** @enum {string} */
+      table: "users_view";
+    }));
+    /**
+     * @description All supported filter operator types
+     * @enum {string}
+     */
+    FilterOperator: "eq" | "neq" | "is" | "gt" | "gte" | "lt" | "lte" | "like" | "ilike" | "contains" | "not-contains" | "in";
+    /** @description Single condition expression that compares a field against a value */
+    ConditionExpression: {
+      /** @enum {string} */
+      type: "condition";
+      field: components["schemas"]["FieldSpec"];
+      operator: components["schemas"]["FilterOperator"];
+      value: string | number | boolean;
+    };
+    /**
+     * @description Filter expression type union
+     * Represents all possible filter expression types in the AST
+     */
+    FilterExpression: components["schemas"]["AllExpression"] | components["schemas"]["ConditionExpression"] | components["schemas"]["AndExpression"] | components["schemas"]["OrExpression"];
+    /**
+     * @description Logical AND of multiple expressions
+     * All contained expressions must match for this to match
+     */
+    AndExpression: {
+      /** @enum {string} */
+      type: "and";
+      expressions: components["schemas"]["FilterExpression"][];
+    };
+    /**
+     * @description Logical OR of multiple expressions
+     * At least one contained expression must match for this to match
+     */
+    OrExpression: {
+      /** @enum {string} */
+      type: "or";
+      expressions: components["schemas"]["FilterExpression"][];
+    };
     AlertRequest: {
       name: string;
-      metric: string;
+      metric: components["schemas"]["AlertMetric"];
       /** Format: double */
       threshold: number;
+      aggregation: components["schemas"]["AlertAggregation"] | null;
+      /** Format: double */
+      percentile: number | null;
+      grouping: components["schemas"]["AlertGrouping"] | null;
+      grouping_is_property: boolean | null;
       time_window: string;
       emails: string[];
       slack_channels: string[];
       /** Format: double */
       minimum_request_count?: number;
+      filter: components["schemas"]["FilterExpression"] | null;
     };
     "ResultSuccess__active-boolean--created_at-string--id-number--message-string--title-string--updated_at-string_-Array_": {
       data: {
@@ -3180,6 +3555,88 @@ Json: JsonObject;
       error: null;
     };
     "Result__active-boolean--created_at-string--id-number--message-string--title-string--updated_at-string_-Array.string_": components["schemas"]["ResultSuccess__active-boolean--created_at-string--id-number--message-string--title-string--updated_at-string_-Array_"] | components["schemas"]["ResultError_string_"];
+    ClickHouseTableColumn: {
+      name: string;
+      type: string;
+      default_type?: string;
+      default_expression?: string;
+      comment?: string;
+      codec_expression?: string;
+      ttl_expression?: string;
+    };
+    ClickHouseTableSchema: {
+      table_name: string;
+      columns: components["schemas"]["ClickHouseTableColumn"][];
+    };
+    "ResultSuccess_ClickHouseTableSchema-Array_": {
+      data: components["schemas"]["ClickHouseTableSchema"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ClickHouseTableSchema-Array.string_": components["schemas"]["ResultSuccess_ClickHouseTableSchema-Array_"] | components["schemas"]["ResultError_string_"];
+    ExecuteSqlResponse: {
+      /** Format: double */
+      rowCount: number;
+      /** Format: double */
+      size: number;
+      /** Format: double */
+      elapsedMilliseconds: number;
+      rows: components["schemas"]["Record_string.any_"][];
+    };
+    ResultSuccess_ExecuteSqlResponse_: {
+      data: components["schemas"]["ExecuteSqlResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ExecuteSqlResponse.string_": components["schemas"]["ResultSuccess_ExecuteSqlResponse_"] | components["schemas"]["ResultError_string_"];
+    ExecuteSqlRequest: {
+      sql: string;
+    };
+    HqlSavedQuery: {
+      id: string;
+      organization_id: string;
+      name: string;
+      sql: string;
+      created_at: string;
+      updated_at: string;
+    };
+    ResultSuccess_Array_HqlSavedQuery__: {
+      data: components["schemas"]["HqlSavedQuery"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Array_HqlSavedQuery_.string_": components["schemas"]["ResultSuccess_Array_HqlSavedQuery__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_HqlSavedQuery-or-null_": {
+      data: components["schemas"]["HqlSavedQuery"] | null;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HqlSavedQuery-or-null.string_": components["schemas"]["ResultSuccess_HqlSavedQuery-or-null_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_void_: {
+      data: unknown;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_void.string_": components["schemas"]["ResultSuccess_void_"] | components["schemas"]["ResultError_string_"];
+    BulkDeleteSavedQueriesRequest: {
+      ids: string[];
+    };
+    "ResultSuccess_HqlSavedQuery-Array_": {
+      data: components["schemas"]["HqlSavedQuery"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HqlSavedQuery-Array.string_": components["schemas"]["ResultSuccess_HqlSavedQuery-Array_"] | components["schemas"]["ResultError_string_"];
+    CreateSavedQueryRequest: {
+      name: string;
+      sql: string;
+    };
+    ResultSuccess_HqlSavedQuery_: {
+      data: components["schemas"]["HqlSavedQuery"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HqlSavedQuery.string_": components["schemas"]["ResultSuccess_HqlSavedQuery_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__organization_id-string--name-string--flags-string-Array_-Array_": {
       data: {
           flags: string[];
@@ -3205,7 +3662,7 @@ Json: JsonObject;
     };
     Setting: components["schemas"]["KafkaSettings"] | components["schemas"]["AzureExperiment"] | components["schemas"]["ApiKey"];
     /** @enum {string} */
-    SettingName: "kafka:dlq" | "kafka:log" | "kafka:score" | "kafka:dlq:score" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment" | "openai:apiKey" | "anthropic:apiKey" | "openrouter:apiKey" | "togetherai:apiKey" | "sqs:request-response-logs" | "sqs:helicone-scores" | "sqs:request-response-logs-dlq" | "sqs:helicone-scores-dlq" | "stripe:products";
+    SettingName: "kafka:dlq" | "kafka:log" | "kafka:score" | "kafka:dlq:score" | "kafka:dlq:eu" | "kafka:log:eu" | "kafka:orgs-to-dlq" | "azure:experiment" | "openai:apiKey" | "anthropic:apiKey" | "openrouter:apiKey" | "togetherai:apiKey" | "sqs:request-response-logs" | "sqs:helicone-scores" | "sqs:request-response-logs-dlq" | "sqs:helicone-scores-dlq" | "stripe:products" | "secrets:provider-keys";
     /**
      * @description The **`URL`** interface is used to parse, construct, normalize, and encode URL.
      *
@@ -15897,6 +16354,139 @@ Json: JsonObject;
       error: null;
     };
     "Result_InAppThread.string_": components["schemas"]["ResultSuccess_InAppThread_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__rows-Record_string.any_-Array--elapsedMilliseconds-number--size-number--rowCount-number__": {
+      data: {
+        /** Format: double */
+        rowCount: number;
+        /** Format: double */
+        size: number;
+        /** Format: double */
+        elapsedMilliseconds: number;
+        rows: components["schemas"]["Record_string.any_"][];
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__rows-Record_string.any_-Array--elapsedMilliseconds-number--size-number--rowCount-number_.string_": components["schemas"]["ResultSuccess__rows-Record_string.any_-Array--elapsedMilliseconds-number--size-number--rowCount-number__"] | components["schemas"]["ResultError_string_"];
+    CreditBalanceResponse: {
+      /** Format: double */
+      totalCreditsPurchased: number;
+      /** Format: double */
+      balance: number;
+    };
+    ResultSuccess_CreditBalanceResponse_: {
+      data: components["schemas"]["CreditBalanceResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_CreditBalanceResponse.string_": components["schemas"]["ResultSuccess_CreditBalanceResponse_"] | components["schemas"]["ResultError_string_"];
+    PurchasedCredits: {
+      id: string;
+      /** Format: double */
+      createdAt: number;
+      /** Format: double */
+      credits: number;
+      referenceId: string;
+    };
+    PaginatedPurchasedCredits: {
+      purchases: components["schemas"]["PurchasedCredits"][];
+      /** Format: double */
+      total: number;
+      /** Format: double */
+      page: number;
+      /** Format: double */
+      pageSize: number;
+    };
+    ResultSuccess_PaginatedPurchasedCredits_: {
+      data: components["schemas"]["PaginatedPurchasedCredits"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PaginatedPurchasedCredits.string_": components["schemas"]["ResultSuccess_PaginatedPurchasedCredits_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__totalSpend-number__": {
+      data: {
+        /** Format: double */
+        totalSpend: number;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__totalSpend-number_.string_": components["schemas"]["ResultSuccess__totalSpend-number__"] | components["schemas"]["ResultError_string_"];
+    ModelSpend: {
+      model: string;
+      provider: string;
+      /** Format: double */
+      promptTokens: number;
+      /** Format: double */
+      completionTokens: number;
+      /** Format: double */
+      cacheReadTokens: number;
+      /** Format: double */
+      cacheWriteTokens: number;
+      pricing: {
+        /** Format: double */
+        cacheWritePer1M?: number;
+        /** Format: double */
+        cacheReadPer1M?: number;
+        /** Format: double */
+        outputPer1M: number;
+        /** Format: double */
+        inputPer1M: number;
+      } | null;
+      /** Format: double */
+      subtotal: number;
+      /** Format: double */
+      discountPercent: number;
+      /** Format: double */
+      total: number;
+      /** Format: double */
+      cacheAdjustment?: number;
+    };
+    SpendBreakdownResponse: {
+      models: components["schemas"]["ModelSpend"][];
+      /** Format: double */
+      totalCost: number;
+      timeRange: {
+        end: string;
+        start: string;
+      };
+    };
+    ResultSuccess_SpendBreakdownResponse_: {
+      data: components["schemas"]["SpendBreakdownResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_SpendBreakdownResponse.string_": components["schemas"]["ResultSuccess_SpendBreakdownResponse_"] | components["schemas"]["ResultError_string_"];
+    PTBInvoice: {
+      id: string;
+      organizationId: string;
+      stripeInvoiceId: string | null;
+      hostedInvoiceUrl: string | null;
+      startDate: string;
+      endDate: string;
+      /** Format: double */
+      amountCents: number;
+      notes: string | null;
+      createdAt: string;
+    };
+    "ResultSuccess_PTBInvoice-Array_": {
+      data: components["schemas"]["PTBInvoice"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PTBInvoice-Array.string_": components["schemas"]["ResultSuccess_PTBInvoice-Array_"] | components["schemas"]["ResultError_string_"];
+    OrgDiscount: {
+      provider: string | null;
+      model: string | null;
+      /** Format: double */
+      percent: number;
+    };
+    "ResultSuccess_OrgDiscount-Array_": {
+      data: components["schemas"]["OrgDiscount"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_OrgDiscount-Array.string_": components["schemas"]["ResultSuccess_OrgDiscount-Array_"] | components["schemas"]["ResultError_string_"];
     DashboardData: {
       organizations: ({
           /** Format: double */
@@ -15995,6 +16585,72 @@ Json: JsonObject;
       error: null;
     };
     "Result__allowNegativeBalance-boolean--creditLimit-number_.string_": components["schemas"]["ResultSuccess__allowNegativeBalance-boolean--creditLimit-number__"] | components["schemas"]["ResultError_string_"];
+    TimeSeriesDataPoint: {
+      timestamp: string;
+      /** Format: double */
+      amount: number;
+    };
+    TimeSeriesResponse: {
+      deposits: components["schemas"]["TimeSeriesDataPoint"][];
+      spend: components["schemas"]["TimeSeriesDataPoint"][];
+    };
+    ResultSuccess_TimeSeriesResponse_: {
+      data: components["schemas"]["TimeSeriesResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_TimeSeriesResponse.string_": components["schemas"]["ResultSuccess_TimeSeriesResponse_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_ModelSpend-Array_": {
+      data: components["schemas"]["ModelSpend"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ModelSpend-Array.string_": components["schemas"]["ResultSuccess_ModelSpend-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__deleted-boolean__": {
+      data: {
+        deleted: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__deleted-boolean_.string_": components["schemas"]["ResultSuccess__deleted-boolean__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__updated-boolean__": {
+      data: {
+        updated: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__updated-boolean_.string_": components["schemas"]["ResultSuccess__updated-boolean__"] | components["schemas"]["ResultError_string_"];
+    InvoiceSummary: {
+      /** Format: double */
+      totalSpendCents: number;
+      /** Format: double */
+      totalInvoicedCents: number;
+      /** Format: double */
+      uninvoicedBalanceCents: number;
+      lastInvoiceEndDate: string | null;
+    };
+    ResultSuccess_InvoiceSummary_: {
+      data: components["schemas"]["InvoiceSummary"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_InvoiceSummary.string_": components["schemas"]["ResultSuccess_InvoiceSummary_"] | components["schemas"]["ResultError_string_"];
+    CreateInvoiceResponse: {
+      invoiceId: string;
+      hostedInvoiceUrl: string | null;
+      dashboardUrl: string;
+      /** Format: double */
+      amountCents: number;
+      ptbInvoiceId: string;
+    };
+    ResultSuccess_CreateInvoiceResponse_: {
+      data: components["schemas"]["CreateInvoiceResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_CreateInvoiceResponse.string_": components["schemas"]["ResultSuccess_CreateInvoiceResponse_"] | components["schemas"]["ResultError_string_"];
     ConvertToWavResponse: {
       data: string | null;
       error: string | null;
@@ -16205,7 +16861,7 @@ export interface operations {
         content: {
           "application/json": ({
             /** @enum {string} */
-            providerName: "anthropic" | "openai" | "bedrock" | "vertex" | "azure" | "perplexity" | "groq" | "deepseek" | "cohere" | "xai" | "deepinfra" | "google-ai-studio" | "openrouter" | "novita" | "nebius";
+            providerName: "baseten" | "anthropic" | "azure" | "bedrock" | "canopywave" | "cerebras" | "chutes" | "deepinfra" | "deepseek" | "fireworks" | "google-ai-studio" | "groq" | "helicone" | "mistral" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
           }) | {
             error: string;
           };
@@ -16585,9 +17241,11 @@ export interface operations {
   };
   MigrateToPro: {
     responses: {
-      /** @description No content */
-      204: {
-        content: never;
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": unknown;
+        };
       };
     };
   };
@@ -16637,6 +17295,97 @@ export interface operations {
       };
     };
   };
+  GetAutoTopoffSettings: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AutoTopoffSettings"] | null;
+        };
+      };
+    };
+  };
+  UpdateAutoTopoffSettings: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateAutoTopoffSettingsRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["AutoTopoffSettings"];
+        };
+      };
+    };
+  };
+  DisableAutoTopoff: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            success: boolean;
+          };
+        };
+      };
+    };
+  };
+  GetPaymentMethods: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["PaymentMethod"][];
+        };
+      };
+    };
+  };
+  CreateSetupSession: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSetupSessionRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            setupUrl: string;
+          };
+        };
+      };
+    };
+  };
+  RemovePaymentMethod: {
+    parameters: {
+      path: {
+        paymentMethodId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            success: boolean;
+          };
+        };
+      };
+    };
+  };
+  GetUsageStats: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["UsageStatsResponse"] | null;
+        };
+      };
+    };
+  };
   GetOrganizations: {
     responses: {
       /** @description Ok */
@@ -16672,7 +17421,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_"];
+          "application/json": components["schemas"]["Result_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_"];
         };
       };
     };
@@ -16952,6 +17701,16 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetModels: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__model-string_-Array.string_"];
         };
       };
     };
@@ -18691,6 +19450,12 @@ export interface operations {
     };
   };
   GetAlerts: {
+    parameters: {
+      query?: {
+        historyPage?: number;
+        historyPageSize?: number;
+      };
+    };
     responses: {
       /** @description Ok */
       200: {
@@ -18736,6 +19501,180 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__active-boolean--created_at-string--id-number--message-string--title-string--updated_at-string_-Array.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * Get database schema
+   * @description Get ClickHouse schema (tables and columns)
+   */
+  GetClickHouseSchema: {
+    responses: {
+      /** @description Array of table schemas with columns */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ClickHouseTableSchema-Array.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * Execute SQL query
+   * @description Execute a SQL query against ClickHouse
+   */
+  ExecuteSql: {
+    /** @description The SQL query to execute */
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ExecuteSqlRequest"];
+      };
+    };
+    responses: {
+      /** @description Query results with rows and metadata */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ExecuteSqlResponse.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * Download query results as CSV
+   * @description Execute a SQL query and download results as CSV
+   */
+  DownloadCsv: {
+    /** @description The SQL query to execute */
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ExecuteSqlRequest"];
+      };
+    };
+    responses: {
+      /** @description URL to download the CSV file */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * List saved queries
+   * @description Get all saved queries for the organization
+   */
+  GetSavedQueries: {
+    responses: {
+      /** @description Array of saved queries */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Array_HqlSavedQuery_.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * Get saved query
+   * @description Get a specific saved query by ID
+   */
+  GetSavedQuery: {
+    parameters: {
+      path: {
+        /** @description The ID of the saved query */
+        queryId: string;
+      };
+    };
+    responses: {
+      /** @description The saved query details */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HqlSavedQuery-or-null.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * Update saved query
+   * @description Update an existing saved query
+   */
+  UpdateSavedQuery: {
+    parameters: {
+      path: {
+        /** @description The ID of the saved query to update */
+        queryId: string;
+      };
+    };
+    /** @description The updated query details */
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSavedQueryRequest"];
+      };
+    };
+    responses: {
+      /** @description The updated saved query */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HqlSavedQuery.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * Delete saved query
+   * @description Delete a saved query by ID
+   */
+  DeleteSavedQuery: {
+    parameters: {
+      path: {
+        /** @description The ID of the saved query to delete */
+        queryId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_void.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * Bulk delete saved queries
+   * @description Delete multiple saved queries at once
+   */
+  BulkDeleteSavedQueries: {
+    /** @description Array of query IDs to delete */
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BulkDeleteSavedQueriesRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_void.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * Create saved query
+   * @description Create a new saved query
+   */
+  CreateSavedQuery: {
+    /** @description The saved query details */
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSavedQueryRequest"];
+      };
+    };
+    responses: {
+      /** @description Array containing the created saved query */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HqlSavedQuery-Array.string_"];
         };
       };
     };
@@ -18960,6 +19899,261 @@ export interface operations {
                   id: string;
                 };
               })[];
+          };
+        };
+      };
+    };
+  };
+  OrgSearch: {
+    requestBody: {
+      content: {
+        "application/json": {
+          query: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            organizations: ({
+                usage: {
+                  /** Format: double */
+                  all_time_count: number;
+                  monthly_usage: {
+                      /** Format: double */
+                      requestCount: number;
+                      month: string;
+                    }[];
+                  /** Format: double */
+                  requests_last_30_days: number;
+                  /** Format: double */
+                  total_requests: number;
+                };
+                organization: {
+                  members: ({
+                      last_sign_in_at: string | null;
+                      role: string;
+                      name: string;
+                      email: string;
+                      id: string;
+                    })[];
+                  subscription_status: string | null;
+                  stripe_subscription_id: string | null;
+                  stripe_customer_id: string | null;
+                  tier: string;
+                  owner: string;
+                  created_at: string;
+                  name: string;
+                  id: string;
+                };
+              })[];
+          };
+        };
+      };
+    };
+  };
+  OrgSearchFast: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          offset?: number;
+          /** Format: double */
+          limit?: number;
+          query: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            hasMore: boolean;
+            /** Format: double */
+            total: number;
+            organizations: ({
+                members: ({
+                    last_sign_in_at: string | null;
+                    role: string;
+                    name: string;
+                    email: string;
+                    id: string;
+                  })[];
+                gateway_discount_enabled: boolean;
+                subscription_status: string | null;
+                stripe_subscription_id: string | null;
+                stripe_customer_id: string | null;
+                tier: string;
+                owner: string;
+                created_at: string;
+                name: string;
+                id: string;
+              })[];
+          };
+        };
+      };
+    };
+  };
+  UserSearch: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          offset?: number;
+          /** Format: double */
+          limit?: number;
+          query: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            hasMore: boolean;
+            /** Format: double */
+            total: number;
+            users: ({
+                organizations: ({
+                    role: string | null;
+                    name: string | null;
+                    id: string;
+                  })[];
+                is_admin: boolean;
+                last_sign_in_at: string | null;
+                created_at: string;
+                name: string | null;
+                email: string;
+                id: string;
+              })[];
+          };
+        };
+      };
+    };
+  };
+  RemoveOrgMember: {
+    parameters: {
+      path: {
+        orgId: string;
+        memberId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  UpdateOrgMemberRole: {
+    parameters: {
+      path: {
+        orgId: string;
+        memberId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          role: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  UpdateGatewayDiscount: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          enabled: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  DeleteOrg: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetOrgUsageLight: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            /** Format: double */
+            requests_last_30_days: number;
+            last_request_at: string | null;
+          };
+        };
+      };
+    };
+  };
+  GetOrgUsage: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            /** Format: double */
+            all_time_count: number;
+            monthly_usage: {
+                /** Format: double */
+                cost: number;
+                /** Format: double */
+                requestCount: number;
+                month: string;
+              }[];
+            /** Format: double */
+            requests_last_30_days: number;
+            /** Format: double */
+            total_requests: number;
           };
         };
       };
@@ -19265,12 +20459,176 @@ export interface operations {
       };
     };
   };
+  ExecuteEnrichedHql: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          limit?: number;
+          sql: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__rows-Record_string.any_-Array--elapsedMilliseconds-number--size-number--rowCount-number_.string_"];
+        };
+      };
+    };
+  };
+  /** @description Get all saved queries for admin (stored under admin org ID) */
+  GetAdminSavedQueries: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HqlSavedQuery-Array.string_"];
+        };
+      };
+    };
+  };
+  /** @description Create a new saved query for admin (stored under admin org ID) */
+  CreateAdminSavedQuery: {
+    requestBody: {
+      content: {
+        "application/json": {
+          sql: string;
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HqlSavedQuery-Array.string_"];
+        };
+      };
+    };
+  };
+  /** @description Delete a saved query for admin (stored under admin org ID) */
+  DeleteAdminSavedQuery: {
+    parameters: {
+      path: {
+        queryId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  /** @description Update a saved query for admin (stored under admin org ID) */
+  UpdateAdminSavedQuery: {
+    parameters: {
+      path: {
+        queryId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          sql: string;
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HqlSavedQuery.string_"];
+        };
+      };
+    };
+  };
+  GetCreditsBalance: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_CreditBalanceResponse.string_"];
+        };
+      };
+    };
+  };
+  ListTokenUsagePayments: {
+    parameters: {
+      query?: {
+        page?: number;
+        pageSize?: number;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PaginatedPurchasedCredits.string_"];
+        };
+      };
+    };
+  };
+  GetTotalSpend: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__totalSpend-number_.string_"];
+        };
+      };
+    };
+  };
+  GetSpendBreakdown: {
+    parameters: {
+      query?: {
+        timeRange?: "7d" | "30d" | "90d" | "all";
+        startDate?: string;
+        endDate?: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_SpendBreakdownResponse.string_"];
+        };
+      };
+    };
+  };
+  ListInvoices: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PTBInvoice-Array.string_"];
+        };
+      };
+    };
+  };
+  GetDiscounts: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_OrgDiscount-Array.string_"];
+        };
+      };
+    };
+  };
   GetGatewayDashboardData: {
     parameters: {
       query?: {
         search?: string;
         sortBy?: string;
         sortOrder?: "asc" | "desc";
+        page?: number;
+        pageSize?: number;
       };
     };
     responses: {
@@ -19371,6 +20729,187 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_WalletState.string_"];
+        };
+      };
+    };
+  };
+  GetTimeSeriesData: {
+    parameters: {
+      query: {
+        startDate: string;
+        endDate: string;
+        groupBy?: "minute" | "hour" | "day" | "week" | "month";
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_TimeSeriesResponse.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * @description Get spend breakdown for an org by date range.
+   * Includes discounts applied per organization's discount rules.
+   */
+  GetSpendBreakdownForOrg: {
+    parameters: {
+      query: {
+        startDate: string;
+        endDate: string;
+      };
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ModelSpend-Array.string_"];
+        };
+      };
+    };
+  };
+  /** @description Delete a recorded invoice. */
+  DeleteInvoice: {
+    parameters: {
+      path: {
+        orgId: string;
+        invoiceId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__deleted-boolean_.string_"];
+        };
+      };
+    };
+  };
+  /** @description Update an invoice's hosted URL (for after sending from Stripe). */
+  UpdateInvoice: {
+    parameters: {
+      path: {
+        orgId: string;
+        invoiceId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          hostedInvoiceUrl: string | null;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__updated-boolean_.string_"];
+        };
+      };
+    };
+  };
+  /** @description List all recorded invoices for an org. */
+  AdminListInvoices: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PTBInvoice-Array.string_"];
+        };
+      };
+    };
+  };
+  /** @description Get invoice summary: total spend, total invoiced, uninvoiced balance. */
+  GetInvoiceSummary: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_InvoiceSummary.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * @description Create a Stripe invoice from spend breakdown and record it.
+   * This creates line items in Stripe for each model/provider combo.
+   */
+  CreateInvoice: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          daysUntilDue?: number;
+          endDate: string;
+          startDate: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_CreateInvoiceResponse.string_"];
+        };
+      };
+    };
+  };
+  /** @description Get discount rules for an organization. */
+  ListDiscounts: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_OrgDiscount-Array.string_"];
+        };
+      };
+    };
+  };
+  /** @description Update discount rules for an organization. */
+  UpdateDiscounts: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          discounts: components["schemas"]["OrgDiscount"][];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_OrgDiscount-Array.string_"];
         };
       };
     };

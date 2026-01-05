@@ -2,8 +2,7 @@ import { useRouter } from "next/router";
 import { useOrg } from "../org/organizationContext";
 import MetaData from "../public/authMetaData";
 import { logger } from "@/lib/telemetry/logger";
-import { H4 } from "@/components/ui/typography";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AdminSidebar } from "./adminSidebar";
 import { useState, useEffect } from "react";
 
@@ -88,15 +87,7 @@ export default function AdminLayout(props: { children: React.ReactNode }) {
           <AdminSidebar />
 
           <div className="flex min-w-0 flex-1 flex-col">
-            {/* Top navigation bar - visible on all screens */}
-            <div className="sticky top-0 z-40 flex h-14 items-center gap-4 border-b border-sidebar-border bg-sidebar-background px-4">
-              {/* Sidebar trigger - visible on all screens */}
-              <SidebarTrigger className="flex h-9 w-9 items-center justify-center rounded-md transition-colors hover:bg-sidebar-accent" />
-
-              <H4>{getPageName()}</H4>
-            </div>
-
-            <main className="w-full flex-1 overflow-auto bg-background p-6">
+            <main className="w-full flex-1 overflow-auto bg-background">
               {children}
             </main>
           </div>

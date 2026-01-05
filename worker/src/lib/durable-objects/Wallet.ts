@@ -1,6 +1,9 @@
 import { DurableObject } from "cloudflare:workers";
 import { err, ok, Result } from "../util/results";
 import Stripe from "stripe";
+import { AutoTopoffManager } from "../managers/AutoTopoffManager";
+
+export const MS_BETWEEN_ALARMS = 5 * 1000 * 60; // 5 minutes
 
 // 10^10 is the scale factor for the balance
 // (which is sent to us by stripe in cents)
@@ -532,16 +535,24 @@ export class Wallet extends DurableObject<Env> {
     orgId: string,
     escrowId: string,
     actualCost: number
-  ): { clickhouseLastCheckedAt: number } {
+  ): {
+    clickhouseLastCheckedAt: number;
+    remainingBalance: number;
+    staleEscrowsCleared?: number;
+  } {
     const actualCostScaled = actualCost * SCALE_FACTOR;
+    if (actualCostScaled < 0) {
+      throw new Error("actualCost cannot be negative");
+    }
+
     return this.ctx.storage.transactionSync(() => {
       const now = Date.now();
 
-      // This does an upsert update and += the deebits... it's confusing but I am writing a comment here so now you know, you're welcome and i love you.
+      // This does an upsert update and += the debits... it's confusing but I am writing a comment here so now you know, you're welcome and i love you.
       this.ctx.storage.sql.exec(
-        `INSERT INTO aggregated_debits (org_id, debits, updated_at, ch_last_checked_at, ch_last_value) 
-          VALUES (?, ?, ?, ?, ?) 
-          ON CONFLICT(org_id) DO UPDATE 
+        `INSERT INTO aggregated_debits (org_id, debits, updated_at, ch_last_checked_at, ch_last_value)
+          VALUES (?, ?, ?, ?, ?)
+          ON CONFLICT(org_id) DO UPDATE
           SET debits = aggregated_debits.debits + excluded.debits, updated_at = ?`,
         orgId,
         actualCostScaled,
@@ -551,6 +562,8 @@ export class Wallet extends DurableObject<Env> {
         now
       );
       this.ctx.storage.sql.exec("DELETE FROM escrows WHERE id = ?", escrowId);
+
+      // Get clickhouse last checked timestamp
       const result = this.ctx.storage.sql
         .exec<{
           checked_at: number;
@@ -559,12 +572,139 @@ export class Wallet extends DurableObject<Env> {
           orgId
         )
         .one();
-      return { clickhouseLastCheckedAt: result.checked_at };
+
+      // Calculate remaining balance (totalCredits - totalDebits - totalEscrow)
+      const totalCreditsPurchased = this.ctx.storage.sql
+        .exec<{
+          total: number;
+        }>("SELECT COALESCE(SUM(credits), 0) as total FROM credit_purchases")
+        .one().total;
+
+      const totalDebits = this.ctx.storage.sql
+        .exec<{
+          total: number;
+        }>(
+          "SELECT COALESCE(SUM(debits), 0) as total FROM aggregated_debits WHERE org_id = ?",
+          orgId
+        )
+        .one().total;
+
+      const totalEscrow = this.ctx.storage.sql
+        .exec<{
+          total: number;
+        }>("SELECT COALESCE(SUM(amount), 0) as total FROM escrows")
+        .one().total;
+
+      const remainingBalance =
+        (totalCreditsPurchased - totalDebits - totalEscrow) / SCALE_FACTOR;
+
+      // Probabilistic cleanup: 1% chance to clean stale escrows
+      let staleEscrowsCleared: number | undefined;
+      if (Math.random() < 0.01) {
+        const oneHourAgo = Date.now() - 60 * 60 * 1000;
+        // Count before delete
+        const countBefore = this.ctx.storage.sql
+          .exec<{ count: number }>(
+            "SELECT COUNT(*) as count FROM escrows WHERE created_at < ?",
+            oneHourAgo
+          )
+          .one().count;
+
+        if (countBefore > 0) {
+          this.ctx.storage.sql.exec(
+            "DELETE FROM escrows WHERE created_at < ?",
+            oneHourAgo
+          );
+          staleEscrowsCleared = countBefore;
+        }
+      }
+
+      return {
+        clickhouseLastCheckedAt: result.checked_at,
+        remainingBalance,
+        staleEscrowsCleared,
+      };
     });
   }
 
   cancelEscrow(escrowId: string): void {
     this.ctx.storage.sql.exec("DELETE FROM escrows WHERE id = ?", escrowId);
+  }
+
+  /**
+   * Directly debit the wallet without going through escrow.
+   * Used as a fallback when escrow reservation fails but we've already
+   * made the LLM request optimistically (based on cached balance).
+   */
+  directDebit(
+    orgId: string,
+    actualCost: number
+  ): {
+    clickhouseLastCheckedAt: number;
+    remainingBalance: number;
+  } {
+    const actualCostScaled = actualCost * SCALE_FACTOR;
+    if (actualCostScaled < 0) {
+      throw new Error("actualCost cannot be negative");
+    }
+
+    return this.ctx.storage.transactionSync(() => {
+      const now = Date.now();
+
+      // Upsert to add the debit directly (same pattern as finalizeEscrow but without escrow deletion)
+      this.ctx.storage.sql.exec(
+        `INSERT INTO aggregated_debits (org_id, debits, updated_at, ch_last_checked_at, ch_last_value)
+          VALUES (?, ?, ?, ?, ?)
+          ON CONFLICT(org_id) DO UPDATE
+          SET debits = aggregated_debits.debits + excluded.debits, updated_at = ?`,
+        orgId,
+        actualCostScaled,
+        now,
+        now,
+        0,
+        now
+      );
+
+      // Get clickhouse last checked timestamp
+      const result = this.ctx.storage.sql
+        .exec<{
+          checked_at: number;
+        }>(
+          "SELECT ch_last_checked_at as checked_at FROM aggregated_debits WHERE org_id = ?",
+          orgId
+        )
+        .one();
+
+      // Calculate remaining balance (totalCredits - totalDebits - totalEscrow)
+      const totalCreditsPurchased = this.ctx.storage.sql
+        .exec<{
+          total: number;
+        }>("SELECT COALESCE(SUM(credits), 0) as total FROM credit_purchases")
+        .one().total;
+
+      const totalDebits = this.ctx.storage.sql
+        .exec<{
+          total: number;
+        }>(
+          "SELECT COALESCE(SUM(debits), 0) as total FROM aggregated_debits WHERE org_id = ?",
+          orgId
+        )
+        .one().total;
+
+      const totalEscrow = this.ctx.storage.sql
+        .exec<{
+          total: number;
+        }>("SELECT COALESCE(SUM(amount), 0) as total FROM escrows")
+        .one().total;
+
+      const remainingBalance =
+        (totalCreditsPurchased - totalDebits - totalEscrow) / SCALE_FACTOR;
+
+      return {
+        clickhouseLastCheckedAt: result.checked_at,
+        remainingBalance,
+      };
+    });
   }
 
   updateClickhouseValues(orgId: string, clickhouseValue: number): void {
@@ -770,5 +910,58 @@ export class Wallet extends DurableObject<Env> {
         return err(`Failed to update dispute: ${error}`);
       }
     });
+  }
+
+  async checkAndScheduleAutoTopoffAlarm(orgId: string): Promise<void> {
+    await this.ctx.storage.put("org_id", orgId);
+
+    const alarm = await this.ctx.storage.getAlarm();
+    if (alarm !== null) {
+      // Alarm already scheduled
+      return;
+    }
+
+    try {
+      const autoTopoffManager = new AutoTopoffManager(this.env);
+
+      const walletState = this.getWalletState(orgId);
+      const effectiveBalanceCents = walletState.effectiveBalance;
+
+      if (
+        await autoTopoffManager.shouldTriggerTopoff(
+          orgId,
+          effectiveBalanceCents
+        )
+      ) {
+        await this.ctx.storage.setAlarm(Date.now() + MS_BETWEEN_ALARMS); // 5 minutes from now
+      }
+    } catch (error) {
+      console.error(
+        `Error checking/scheduling auto topoff alarm for org ${orgId}:`,
+        error
+      );
+    }
+  }
+
+  async alarm(): Promise<void> {
+    const orgId = await this.ctx.storage.get<string>("org_id");
+    try {
+      const autoTopoffManager = new AutoTopoffManager(this.env);
+
+      const walletState = this.getWalletState(orgId!);
+      const effectiveBalanceCents = walletState.effectiveBalance;
+
+      // double check before initiating topoff
+      if (
+        await autoTopoffManager.shouldTriggerTopoff(
+          orgId!,
+          effectiveBalanceCents
+        )
+      ) {
+        await autoTopoffManager.initiateTopoff(orgId!);
+      }
+    } catch (error) {
+      console.error(`Unexpected error in auto topoff alarm handler:`, error);
+    }
   }
 }

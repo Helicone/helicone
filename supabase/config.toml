@@ -2,6 +2,11 @@
 # directory name when running `supabase init`.
 project_id = "helicone"
 
+[db.seed]
+enabled = true
+sql_paths = ['./seeds/*.sql']
+
+
 [api]
 # Port to use for the API URL.
 port = 54321

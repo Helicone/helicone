@@ -7,7 +7,7 @@ import { DEFAULT_UUID } from "@helicone-package/llm-mapper/types";
 import { ModelUsage } from "@helicone-package/cost";
 import { CostBreakdown } from "@helicone-package/cost/models/calculate-cost";
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
-import { ResponseFormat } from "@helicone-package/cost/models/types";
+import { BodyMappingType } from "@helicone-package/cost/models/types";
 
 export class HandlerContext extends SetOnce {
   public message: KafkaMessageContents;
@@ -16,6 +16,8 @@ export class HandlerContext extends SetOnce {
   public legacyUsage: Usage;
   public usage?: ModelUsage;
   public costBreakdown?: CostBreakdown;
+  public storageLocation?: "s3" | "clickhouse";
+  public sizeBytes?: number;
   public rawLog: RawLog;
   public processedLog: ProcessedLog;
   public timingMetrics: { constructor: string; start: number }[] = [];
@@ -100,7 +102,6 @@ export type ProcessedLog = {
     model?: string;
     body?: any;
     heliconeTemplate?: TemplateWithInputs;
-    assets?: Map<string, string>;
     properties?: Record<string, string>;
     scores?: Record<string, number | boolean | undefined>;
     scores_evaluatorIds?: Record<string, string>;
@@ -108,7 +109,6 @@ export type ProcessedLog = {
   response: {
     model?: string;
     body?: any;
-    assets?: Map<string, string>;
   };
 };
 
@@ -127,7 +127,7 @@ export type HeliconeMeta = {
   promptInputs?: Record<string, any>;
   heliconeManualAccessKey?: string;
   stripeCustomerId?: string;
-  
+
   // Deprecated gateway metadata
   gatewayRouterId?: string;
   gatewayDeploymentTarget?: string;
@@ -135,11 +135,10 @@ export type HeliconeMeta = {
   // AI Gateway metadata
   isPassthroughBilling?: boolean;
   gatewayProvider?: ModelProviderName;
-  
+
   gatewayModel?: string; // registry format
   providerModelId?: string; // provider format
-  gatewayResponseFormat?: ResponseFormat;
-  gatewayEndpointVersion?: string; // endpoint config version
+  aiGatewayBodyMapping?: BodyMappingType; // body mapping type
 };
 
 export type KafkaMessageContents = {
@@ -184,10 +183,7 @@ export const toHeliconeRequest = (context: HandlerContext): HeliconeRequest => {
 
   const promptTokens = getPromptTokens(modelUsage, legacyUsage);
   const completionTokens = getCompletionTokens(modelUsage, legacyUsage);
-  const totalTokens = getTotalTokens(
-    modelUsage,
-    legacyUsage,
-  );
+  const totalTokens = getTotalTokens(modelUsage, legacyUsage);
   const promptCacheWriteTokens = getPromptCacheWriteTokens(
     modelUsage,
     legacyUsage
@@ -198,6 +194,7 @@ export const toHeliconeRequest = (context: HandlerContext): HeliconeRequest => {
   );
   const promptAudioTokens = getPromptAudioTokens(modelUsage, legacyUsage);
   const completionAudioTokens = legacyUsage.completionAudioTokens ?? null;
+  const reasoningTokens = getReasoningTokens(modelUsage);
 
   return {
     cost: context.costBreakdown?.totalCost ?? legacyUsage.cost ?? null,
@@ -210,14 +207,19 @@ export const toHeliconeRequest = (context: HandlerContext): HeliconeRequest => {
     response_created_at:
       context.message.log.response.responseCreatedAt.toISOString(),
     response_status: context.message.log.response.status,
-    request_model: context.message.heliconeMeta.gatewayModel ?? context.processedLog.request.model ?? null,
+    request_model:
+      context.message.heliconeMeta.gatewayModel ??
+      context.processedLog.request.model ??
+      null,
     response_model: null,
     request_path: context.message.log.request.path,
     request_user_id: context.message.log.request.userId ?? null,
     request_properties: context.message.log.request.properties ?? null,
     model_override: null,
     helicone_user: null,
-    provider: context.message.heliconeMeta.gatewayProvider ?? context.message.log.request.provider,
+    provider:
+      context.message.heliconeMeta.gatewayProvider ??
+      context.message.log.request.provider,
     delay_ms: context.message.log.response.delayMs ?? null,
     time_to_first_token: context.message.log.response.timeToFirstToken ?? null,
 
@@ -229,6 +231,7 @@ export const toHeliconeRequest = (context: HandlerContext): HeliconeRequest => {
     prompt_cache_read_tokens: isCacheHit ? 0 : promptCacheReadTokens,
     prompt_audio_tokens: isCacheHit ? 0 : promptAudioTokens,
     completion_audio_tokens: isCacheHit ? 0 : completionAudioTokens,
+    reasoning_tokens: isCacheHit ? 0 : reasoningTokens,
 
     /// NOTE: Unfortunately our codebase is running two prompts systems in parallel.
     // This used to track the legacy feature, but its now the new one.
@@ -246,11 +249,15 @@ export const toHeliconeRequest = (context: HandlerContext): HeliconeRequest => {
     properties: context.message.log.request.properties ?? {},
     assets: [],
     target_url: context.message.log.request.targetUrl,
-    model: context.message.heliconeMeta.gatewayModel ?? context.processedLog.model ?? "",
+    model:
+      context.message.heliconeMeta.gatewayModel ??
+      context.processedLog.model ??
+      "",
     cache_reference_id: context.message.log.request.cacheReferenceId ?? null,
     cache_enabled: context.message.log.request.cacheEnabled ?? false,
     request_referrer: context.message.log.request.requestReferrer ?? null,
-    gateway_endpoint_version: context.message.heliconeMeta.gatewayEndpointVersion ?? null,
+    ai_gateway_body_mapping:
+      context.message.heliconeMeta.aiGatewayBodyMapping ?? null,
   };
 };
 
@@ -258,8 +265,15 @@ export function getPromptTokens(
   modelUsage: ModelUsage | undefined,
   legacyUsage: Usage
 ): number | null {
-  if (modelUsage?.input) {
-    return modelUsage.input;
+  if (modelUsage) {
+    const modalityInput =
+      (modelUsage.audio?.input ?? 0) +
+      (modelUsage.image?.input ?? 0) +
+      (modelUsage.video?.input ?? 0) +
+      (modelUsage.file?.input ?? 0);
+    if (modelUsage.input > 0 || modalityInput > 0) {
+      return modelUsage.input + modalityInput;
+    }
   }
   return legacyUsage.promptTokens ?? null;
 }
@@ -268,18 +282,36 @@ export function getCompletionTokens(
   modelUsage: ModelUsage | undefined,
   legacyUsage: Usage
 ): number | null {
-  if (modelUsage?.output) {
-    return modelUsage.output;
+  if (modelUsage) {
+    const modalityOutput =
+      (modelUsage.audio?.output ?? 0) +
+      (modelUsage.image?.output ?? 0) +
+      (modelUsage.video?.output ?? 0) +
+      (modelUsage.file?.output ?? 0);
+    // Note: reasoning/thinking tokens are now tracked separately and NOT included in completion tokens
+    if (modelUsage.output > 0 || modalityOutput > 0) {
+      return modelUsage.output + modalityOutput;
+    }
   }
   return legacyUsage.completionTokens ?? null;
 }
 
 function getTotalTokens(
   modelUsage: ModelUsage | undefined,
-  legacyUsage: Usage,
+  legacyUsage: Usage
 ): number | null {
-  if (modelUsage?.input || modelUsage?.output) {
-    return (modelUsage.input ?? 0) + (modelUsage.output ?? 0);
+  const promptTokens = getPromptTokens(modelUsage, legacyUsage);
+  const completionTokens = getCompletionTokens(modelUsage, legacyUsage);
+  const reasoningTokens = getReasoningTokens(modelUsage);
+
+  if (
+    promptTokens !== null ||
+    completionTokens !== null ||
+    reasoningTokens !== null
+  ) {
+    return (
+      (promptTokens ?? 0) + (completionTokens ?? 0) + (reasoningTokens ?? 0)
+    );
   }
   return legacyUsage.totalTokens ?? null;
 }
@@ -301,9 +333,16 @@ export function getPromptCacheReadTokens(
   modelUsage: ModelUsage | undefined,
   legacyUsage: Usage
 ): number | null {
-  const cacheDetails = modelUsage?.cacheDetails;
-  if (cacheDetails?.cachedInput) {
-    return cacheDetails.cachedInput;
+  if (modelUsage) {
+    const textCached = modelUsage.cacheDetails?.cachedInput ?? 0;
+    const modalityCached =
+      (modelUsage.audio?.cachedInput ?? 0) +
+      (modelUsage.image?.cachedInput ?? 0) +
+      (modelUsage.video?.cachedInput ?? 0) +
+      (modelUsage.file?.cachedInput ?? 0);
+    if (textCached > 0 || modalityCached > 0) {
+      return textCached + modalityCached;
+    }
   }
   return legacyUsage.promptCacheReadTokens ?? null;
 }
@@ -312,8 +351,27 @@ export function getPromptAudioTokens(
   modelUsage: ModelUsage | undefined,
   legacyUsage: Usage
 ): number | null {
-  if (modelUsage?.audio) {
-    return modelUsage.audio;
+  if (modelUsage?.audio?.input) {
+    return modelUsage.audio.input;
   }
   return legacyUsage.promptAudioTokens ?? null;
+}
+
+export function getCompletionAudioTokens(
+  modelUsage: ModelUsage | undefined,
+  legacyUsage: Usage
+): number | null {
+  if (modelUsage?.audio?.output) {
+    return modelUsage.audio.output;
+  }
+  return legacyUsage.completionAudioTokens ?? null;
+}
+
+export function getReasoningTokens(
+  modelUsage: ModelUsage | undefined
+): number | null {
+  if (modelUsage?.thinking !== undefined && modelUsage.thinking > 0) {
+    return modelUsage.thinking;
+  }
+  return null;
 }

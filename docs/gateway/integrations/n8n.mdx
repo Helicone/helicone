@@ -1,0 +1,217 @@
+---
+title: "n8n Integration"
+sidebarTitle: "n8n"
+description: "Use the Helicone Chat Model node in n8n workflows to route LLM requests through the AI Gateway with full observability."
+"twitter:title": "n8n Integration - Helicone OSS LLM Observability"
+---
+
+import Star from "/snippets/star.mdx";
+import RequestIntegration from "/snippets/request-integration.mdx";
+
+## Introduction
+
+The Helicone Chat Model is a community node for [n8n](https://n8n.io/) that provides a LangChain-compatible interface for AI workflows. Route requests to any LLM provider through the Helicone AI Gateway.
+
+<Note>
+  This is an n8n community node that integrates seamlessly with n8n's AI chain functionality.
+</Note>
+
+## Prerequisites
+
+- An n8n account (see [n8n installation docs](https://docs.n8n.io/hosting/) for setup options)
+- A Helicone API key ([get one here](https://us.helicone.ai/settings/api-keys))
+
+## Integration Steps
+
+<Steps>
+  <Step title="Install the Helicone community node">
+    From your n8n interface:
+
+    1. Click the **user menu** (bottom left corner)
+    2. Select **Settings**
+    3. Go to **Community Nodes**
+    4. Click **Install a community node**
+    5. Enter the package name: `n8n-nodes-helicone`
+    6. Click **Install**
+
+    Wait ~30 seconds for installation. The node will appear in your nodes panel.
+
+    <Info>
+      Learn more about installing community nodes in the [n8n documentation](https://docs.n8n.io/integrations/community-nodes/installation/).
+    </Info>
+
+    ![n8n install community node](/images/integrations/n8n/install-node.webp)
+  </Step>
+
+  <Step title="Configure Helicone credentials">
+    Add your Helicone API key to n8n:
+
+    1. Go to **Settings** → **Credentials**
+    2. Click **Add Credential**
+    3. Search for "Helicone" and select **Helicone LLM Observability**
+    4. Enter your Helicone API key
+    5. Click **Save**
+
+    ![n8n credentials tab](/images/integrations/n8n/credentials-tab.webp)
+
+  </Step>
+
+  <Step title="Add the Helicone Chat Model node to your workflow">
+    1. Create a new workflow or open an existing one
+    2. Click "+" to add a node
+    3. Search for "Helicone Chat Model"
+    4. Configure the node:
+       - **Credentials**: Select your saved Helicone credentials
+       - **Model**: Choose any model from the [model registry](https://helicone.ai/models) (e.g., `gpt-4.1-mini`, `claude-3-opus-20240229`)
+       - **Options**: Configure temperature, max tokens, and other model parameters
+
+    ![n8n search for Helicone node](/images/integrations/n8n/search-node.webp)
+
+    <Note>
+      The Helicone Chat Model node outputs a LangChain-compatible model that can be used with other AI nodes in n8n.
+    </Note>
+  </Step>
+
+  <Step title="Use in AI chains">
+    The Helicone Chat Model node is designed to work with n8n's AI chain functionality:
+
+    1. Connect the node to other AI nodes that accept `ai_languageModel` inputs
+    2. Build complex AI workflows with Chat nodes, Chain nodes, and other AI processing nodes
+    3. All requests are automatically logged to Helicone
+
+    Example workflow:
+    Chat Input → Helicone Chat Model → Chat Output
+
+    ![n8n workflow example](/images/integrations/n8n/demo.webp)
+  </Step>
+
+  <Step title="View requests in Helicone dashboard">
+    Open your [Helicone dashboard](https://us.helicone.ai/dashboard) to see:
+
+    - All workflow requests logged automatically
+    - Token usage and costs per request
+    - Response time metrics
+    - Full request/response bodies
+    - Session tracking for multi-turn conversations
+    - Custom properties for filtering and analysis
+
+    ![Helicone dashboard verification](/images/integrations/n8n/helicone-verify.webp)
+    <Star />
+  </Step>
+</Steps>
+
+## Node Configuration
+
+### Required Parameters
+
+- **Model**: Any model supported by Helicone AI Gateway.
+  Examples: `gpt-4.1-mini`, `claude-opus-4-1`, `gemini-2.5-flash-lite`.
+  See all models in the [Helicone's model registry](https://helicone.ai/models)
+
+### Model Options
+
+- **Temperature** (0-2): Controls randomness in responses
+- **Max Tokens**: Maximum tokens to generate
+- **Top P** (0-1): Nucleus sampling parameter
+- **Frequency Penalty** (-2 to 2): Reduces repetition
+- **Presence Penalty** (-2 to 2): Encourages new topics
+- **Response Format**: Text or JSON
+- **Timeout**: Request timeout in milliseconds
+- **Max Retries**: Number of retry attempts on failure
+
+## Example Workflows
+
+### Basic Chat Workflow
+
+```
+[Chat Input] → [Helicone Chat Model] → [Chat Output]
+```
+
+1. Add a **Chat Input** node (triggers on user message)
+2. Add the **Helicone Chat Model** node
+   - Model: `gpt-4.1-mini`
+   - Temperature: 0.7
+3. Add a **Chat Output** node to display the response
+
+### Multi-Step AI Chain
+
+```
+[Webhook] → [Helicone Chat Model] → [Extract Data] → [Helicone Chat Model] → [Response]
+```
+
+1. Receive data via webhook
+2. First Helicone Chat Model analyzes the input
+3. Extract structured data
+4. Second Helicone Chat Model generates a response
+5. Both requests appear in Helicone dashboard with session tracking
+
+### Workflow with Custom Properties
+
+Configure the node with custom properties to track workflow metadata:
+
+1. Open the **Helicone Chat Model** node
+2. Expand **Helicone Options** → **Custom Properties**
+3. Add a JSON object:
+
+```json
+{
+  "workflow_name": "customer-onboarding",
+  "environment": "production",
+  "version": "2.1.0"
+}
+```
+
+All requests from this node will include these properties in Helicone.
+
+## Troubleshooting
+
+### Node Installation Issues
+
+- **Node not appearing**: Wait 30 seconds after installation, then refresh n8n
+- **Installation failed**: Check your n8n instance has internet access
+- **Version conflicts**: Ensure you're running a compatible n8n version (>= 1.0)
+
+### Authentication Errors
+
+- **Invalid API key**: Verify your Helicone API key starts with `sk-helicone-`
+- **403 Forbidden**: Ensure your API key has write access enabled
+- **Provider not configured**: Check the name of the model is exactly the [model ID expected by the gateway](https://helicone.ai/models). If you've added your own provider keys, make sure they are correctly set in [your Helicone dashboard](https://us.helicone.ai/settings/providers)
+
+### Model Errors
+
+- **Model not found**: Check the exact model name at [Helicone's model registry](https://helicone.ai/models)
+- **Model unavailable**: Verify provider access in your Helicone account
+- **Different naming**: Providers use different conventions (e.g., OpenAI uses `gpt-4o-mini`, while the gateway uses `gpt-4.1-mini`)
+
+### Getting Help
+
+- [n8n Community Forum](https://community.n8n.io/)
+- [Helicone Documentation](https://docs.helicone.ai)
+- [Helicone Discord](https://discord.gg/7aSCGCGUeu)
+- [GitHub Repository](https://github.com/Helicone/n8n-nodes-helicone)
+
+<RequestIntegration />
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="AI Gateway Overview" icon="arrow-progress" href="/gateway/overview">
+    Learn about Helicone's AI Gateway features and capabilities
+  </Card>
+  <Card title="Provider Routing" icon="route" href="/gateway/provider-routing">
+    Configure intelligent routing and automatic failover
+  </Card>
+  <Card title="Model Registry" icon="database" href="https://helicone.ai/models">
+    Browse all available models and providers
+  </Card>
+  <Card title="Gateway Features" icon="sparkles" href="/gateway/gateway-features">
+    Explore caching, session tracking, and more
+  </Card>
+  <Card title="Custom Properties" icon="tags" href="/features/advanced-usage/custom-properties">
+    Add metadata to track and filter your requests
+  </Card>
+  <Card title="Sessions" icon="link" href="/features/sessions">
+    Track multi-turn conversations and user sessions
+  </Card>
+</CardGroup>
+

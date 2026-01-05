@@ -55,8 +55,8 @@ export type CapturedCall = {
  * Defines expected behavior for a provider call
  */
 export type ProviderExpectation = {
-  /** The provider's full URL including path (e.g., "https://api.x.ai/v1/chat/completions") */
-  url: string;
+  /** The provider's full URL including path (e.g., "https://api.x.ai/v1/chat/completions") - can be string or RegExp */
+  url: string | RegExp;
   /** Whether this provider should succeed or fail */
   response: "success" | "failure";
   /** HTTP status code (defaults: success=200, failure=500) */
@@ -67,6 +67,8 @@ export type ProviderExpectation = {
   errorMessage?: string;
   /** Custom response data */
   data?: any;
+  /** Optional: headers to attach to the mocked provider response */
+  responseHeaders?: Record<string, string>;
 
   /** Declarative expectations */
   expects?: {
@@ -150,7 +152,7 @@ export async function runGatewayTest(
         if (escrowInfo !== undefined) {
           if (escrowInfo) {
             expect(targetProps.escrowInfo).toBeDefined();
-            expect(targetProps.escrowInfo).toHaveProperty("escrowId");
+            expect(targetProps.escrowInfo).toHaveProperty("escrow");
           } else {
             expect(targetProps.escrowInfo).toBeUndefined();
           }
@@ -161,6 +163,10 @@ export async function runGatewayTest(
           const requestHeaders = requestWrapper.getHeaders();
           for (const [key, expectedValue] of Object.entries(headers)) {
             const actualValue = requestHeaders.get(key);
+            // Handle null/undefined values
+            if (actualValue === null || actualValue === undefined) {
+              throw new Error(`Expected header "${key}" but it was not present. Available headers: ${JSON.stringify(Object.fromEntries(requestHeaders.entries()))}`);
+            }
             if (expectedValue instanceof RegExp) {
               expect(actualValue).toMatch(expectedValue);
             } else {
@@ -217,8 +223,13 @@ export async function runGatewayTest(
         });
       }
 
-      // Verify the URL matches expectation
-      if (targetProps.targetBaseUrl !== expectation.url) {
+      // Verify the URL matches expectation (supports string or RegExp)
+      const urlMatches = expectation.url instanceof RegExp
+        ? expectation.url.test(targetProps.targetBaseUrl)
+        : targetProps.targetBaseUrl === expectation.url;
+
+      if (!urlMatches) {
+        console.error(`URL MISMATCH: Expected ${expectation.url} but got ${targetProps.targetBaseUrl}`);
         return new Response(
           JSON.stringify({
             error: `Expected URL ${expectation.url} but got ${targetProps.targetBaseUrl}`,
@@ -242,6 +253,7 @@ export async function runGatewayTest(
             "content-type": "application/json",
             "Helicone-Status": "success",
             "Helicone-Id": crypto.randomUUID(),
+            ...(expectation.responseHeaders || {}),
           },
         });
       } else {
@@ -255,6 +267,7 @@ export async function runGatewayTest(
               "content-type": "application/json",
               "Helicone-Status": "failed",
               "Helicone-Id": crypto.randomUUID(),
+              ...(expectation.responseHeaders || {}),
             },
           }
         );

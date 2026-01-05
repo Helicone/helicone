@@ -8,6 +8,7 @@ import PlaygroundToolAttributes from "./PlaygroundToolAttributes";
 
 interface ToolMessageProps {
   message: Message;
+  displayContent?: string;
   playgroundMode: boolean;
   mappedRequest?: MappedLLMRequest;
   messageIndex?: number;
@@ -15,11 +16,14 @@ interface ToolMessageProps {
 }
 export default function ToolMessage({
   message,
+  displayContent,
   playgroundMode,
   mappedRequest,
   messageIndex,
   onChatChange,
 }: ToolMessageProps) {
+  // Use displayContent if provided, otherwise fall back to message.content
+  const contentToRender = displayContent ?? message.content ?? "";
   const updateMessageField = (field: string, value: string) => {
     if (!mappedRequest || !onChatChange || messageIndex === undefined) {
       return;
@@ -72,9 +76,9 @@ export default function ToolMessage({
       {!playgroundMode ? (
         <JsonRenderer
           data={
-            isJson(message.content || "")
-              ? JSON.parse(message.content || "")
-              : message.content || ""
+            isJson(contentToRender)
+              ? JSON.parse(contentToRender)
+              : contentToRender
           }
         />
       ) : (

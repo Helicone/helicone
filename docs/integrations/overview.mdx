@@ -1,190 +1,63 @@
 ---
-title: "Alternative Integration Methods"
+title: "Legacy Integrations"
 sidebarTitle: "Overview"
-description: "Add Helicone observability to your existing LLM setup without changing your SDK or architecture"
+description: "Legacy proxy-based integrations for existing codebases"
 ---
 
-These integration methods let you add Helicone's observability to your existing LLM applications without adopting the AI Gateway. Perfect for teams with established codebases or specific provider requirements.
+<Warning>
+  These integration methods are maintained but no longer actively developed. For new projects and the best experience, use our [AI Gateway](/gateway/overview) with unified API access to 100+ models.
+</Warning>
 
-## When to Use These Methods
+## What Are Legacy Integrations?
 
-<CardGroup cols={2}>
-<Card title="Existing Codebase" icon="code">
-  Your application is already built with provider-specific SDKs and refactoring would be costly
-</Card>
-<Card title="Provider Features" icon="sparkles">
-  You need native SDK features like OpenAI's complex function calling or Anthropic's specific formats
-</Card>
-<Card title="Minimal Changes" icon="shield-check">
-  You want observability without changing your current authentication or request flow
-</Card>
-<Card title="Framework Users" icon="layer-group">
-  You're using LangChain, LlamaIndex, or other frameworks that handle LLM calls
-</Card>
-</CardGroup>
+Legacy proxy-based integrations that add Helicone observability by changing your base URL:
 
-## Quick Comparison
+- **OpenAI**: `api.openai.com` → `oai.helicone.ai`
+- **Anthropic**: `api.anthropic.com` → `anthropic.helicone.ai`
+- **Others**: Provider-specific proxy endpoints
 
-| Aspect | Alternative Integrations | AI Gateway |
-|--------|-------------------------|------------|
-| **Setup** | Change endpoint URL only | ✅ Simple - one endpoint for 100+ models |
-| **Code changes** | Minimal - keep existing SDK | Minimal - unified OpenAI format |
-| **Switch providers** | ❌ Rewrite for each provider | ✅ Just change model name |
-| **Provider features** | ✅ Full native support | Standard OpenAI format |
-| **Observability** | ✅ Full Helicone features | ✅ Full Helicone features |
-| **Fallbacks** | ❌ Manual implementation | ✅ Automatic |
-| **Best for** | Existing apps, native features | New projects, multi-provider |
+You keep using your existing SDK and code — just point to our proxy URL and add a Helicone-Auth header.
 
-## Direct Provider Integrations
+## Why We Built the AI Gateway
 
-### Popular Providers
+These provider-specific proxies have limitations:
 
-Simply change your base URL to add Helicone observability:
+- **No automatic fallbacks** - If OpenAI goes down, your app goes down
+- **Can't switch providers easily** - Each provider needs different code
+- **Multiple endpoints to manage** - Different proxy for each provider
+- **No unified routing** - Can't optimize for cost or latency across providers
 
-<CardGroup cols={2}>
-<Card title="OpenAI" icon="robot" href="/integrations/openai/javascript">
-  **Proxy**: `oai.helicone.ai`  
-  Keep using OpenAI SDK as-is
-</Card>
-<Card title="Anthropic" icon="brain" href="/integrations/anthropic/javascript">
-  **Proxy**: `anthropic.helicone.ai`  
-  Works with Claude models
-</Card>
-<Card title="Google Gemini" icon="google" href="/integrations/gemini/api/javascript">
-  **Proxy**: Available  
-  Support for Gemini models
-</Card>
-<Card title="Together AI" icon="link" href="/getting-started/integration-method/together">
-  **Headers**: Add to existing  
-  Open source model hosting
-</Card>
-<Card title="OpenRouter" icon="route" href="/getting-started/integration-method/openrouter">
-  **Proxy**: `openrouter.helicone.com`  
-  Access 100+ models with one API
-</Card>
-</CardGroup>
+The [AI Gateway](/gateway/overview) solves these problems with one unified API that routes to 100+ models with automatic fallbacks, intelligent routing, and zero markup.
 
-### Cloud Providers
+## When to Use Legacy Integrations
 
-<CardGroup cols={2}>
-<Card title="AWS Bedrock" icon="aws" href="/integrations/bedrock/javascript">
-  Use AWS SDK with Helicone logging for Bedrock models
-</Card>
-<Card title="Azure OpenAI" icon="microsoft" href="/integrations/azure/javascript">
-  OpenAI SDK with Azure endpoints and Helicone headers
-</Card>
-<Card title="Google Vertex AI" icon="cloud" href="/integrations/gemini/vertex/javascript">
-  Vertex AI with Helicone observability
-</Card>
-</CardGroup>
+Only use these if:
 
-### Speed-Optimized Providers
+- **Existing production code** - You have a large codebase built with provider-specific SDKs and refactoring would be costly
+- **Native SDK features** - You need specific features only available in the native SDK (rare)
 
-<CardGroup cols={2}>
-<Card title="Groq" icon="bolt" href="/integrations/groq/javascript">
-  Ultra-fast inference with LPU technology
-</Card>
-<Card title="Fireworks AI" icon="fire" href="/getting-started/integration-method/fireworks">
-  Fast open-source model serving
-</Card>
-<Card title="Perplexity" icon="magnifying-glass" href="/getting-started/integration-method/perplexity">
-  Search-optimized language models
-</Card>
-</CardGroup>
+Otherwise, use the [AI Gateway](/gateway/overview) for better reliability, flexibility, and features.
 
-## Framework Integrations
+## How to Migrate to AI Gateway
 
-If you're using an AI framework, add Helicone with minimal configuration:
+Ready to switch to the unified API? It's simple:
 
-<CardGroup cols={2}>
-<Card title="LangChain" icon="link-simple" href="/integrations/openai/langchain">
-  Monitor chains, agents, and retrieval flows
-</Card>
-<Card title="LlamaIndex" icon="database" href="/integrations/openai/llamaindex">
-  Track document queries and RAG pipelines
-</Card>
-<Card title="LiteLLM" icon="layer-group" href="/getting-started/integration-method/litellm">
-  Unified interface with 100+ models
-</Card>
-<Card title="Vercel AI SDK" icon="triangle" href="/getting-started/integration-method/vercelai">
-  Stream responses in Next.js apps
-</Card>
-<Card title="CrewAI" icon="users" href="/getting-started/integration-method/crewai">
-  Monitor multi-agent workflows
-</Card>
-</CardGroup>
+```typescript
+// Before: Provider-specific proxy
+const client = new OpenAI({
+  baseURL: "https://oai.helicone.ai/v1",
+  apiKey: process.env.OPENAI_API_KEY,
+  defaultHeaders: { "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}` }
+});
 
-## Custom Integration Options
+// After: AI Gateway
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY, // Just your Helicone key
+});
 
-### Async Logging
-
-For zero-latency observability, log requests asynchronously after they complete:
-
-<Card title="Async Logging" icon="clock" href="/getting-started/integration-method/manual-logger-typescript">
-  Send logs to Helicone after receiving LLM responses - no proxy latency
-</Card>
-
-
-### Custom HTTP Clients
-
-Any HTTP client can work with Helicone:
-
-<CodeGroup>
-```bash cURL
-curl https://oai.helicone.ai/v1/chat/completions \
-  -H "Authorization: Bearer $OPENAI_API_KEY" \
-  -H "Helicone-Auth: Bearer $HELICONE_API_KEY" \
-  -d '{"model": "gpt-4", "messages": [...]}'
+// Now access any model: gpt-4o, claude-sonnet-4, gemini-2.0-flash, etc.
 ```
 
-```python Requests
-import requests
-
-response = requests.post(
-    "https://oai.helicone.ai/v1/chat/completions",
-    headers={
-        "Authorization": f"Bearer {openai_key}",
-        "Helicone-Auth": f"Bearer {helicone_key}"
-    },
-    json={"model": "gpt-4", "messages": [...]}
-)
-```
-</CodeGroup>
-
-## Implementation Patterns
-
-<AccordionGroup>
-  <Accordion title="Proxy Pattern">
-    Change your base URL to route through Helicone:
-    - OpenAI: `api.openai.com` → `oai.helicone.ai`
-    - Anthropic: `api.anthropic.com` → `anthropic.helicone.ai`
-    - Add Helicone-Auth header
-  </Accordion>
-  
-  <Accordion title="Header Pattern">
-    Keep your existing endpoint, add Helicone headers:
-    - Add `Helicone-Auth` header
-    - Add custom properties as needed
-    - Works with any provider
-  </Accordion>
-  
-  <Accordion title="Async Pattern">
-    Log after the request completes:
-    - Make normal LLM request
-    - Send logs to Helicone async endpoint
-    - Zero added latency
-  </Accordion>
-</AccordionGroup>
-
-## Still Considering the AI Gateway?
-
-The AI Gateway might be better if you:
-- Want automatic fallbacks between providers
-- Need a unified API for multiple models
-- Are starting a new project
-- Want built-in prompt management
-
-<Card title="Learn About AI Gateway" icon="sparkles" href="/gateway/overview">
-  See how the AI Gateway simplifies multi-provider LLM applications
-</Card>
+See the [AI Gateway migration guide](/blog/migration-openrouter) for full details.
 

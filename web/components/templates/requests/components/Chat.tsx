@@ -53,6 +53,7 @@ export default function Chat({
           : [...requestMessages, ...responseMessages];
 
     // For contentArray messages, flatten. In playground, we treat as one message dynamically.
+    // Also handle reasoning messages by splitting them into separate reasoning + content messages
     return mode === "PLAYGROUND_INPUT"
       ? allMessages
       : allMessages.reduce<Message[]>((acc, message) => {
@@ -70,7 +71,46 @@ export default function Chat({
             );
             return [...acc, ...flattenedParts];
           }
-          // If not a contentArray or it's empty, just add the message itself
+
+          // Handle messages with reasoning content - split into reasoning + content messages
+          if (message.reasoning) {
+            const reasoningMessage: Message = {
+              ...message,
+              role: "reasoning",
+              content: message.reasoning,
+              reasoning: undefined,
+              id: `${message.id || "msg"}-reasoning`,
+              _type: "message",
+            };
+            
+            if (message.content) {
+              const contentMessage: Message = {
+                ...message,
+                reasoning: undefined,
+                id: message.id || `msg-content`,
+              };
+              return [...acc, reasoningMessage, contentMessage];
+            }
+            return [...acc, reasoningMessage];
+          }
+
+          // Handle messages with only reasoning (no content)
+          if (message.reasoning && !message.content) {
+            const reasoningMessage: Message = {
+              ...message,
+              role: "reasoning",
+              content: message.reasoning,
+              reasoning: undefined,
+              id: message.id || `msg-reasoning`,
+              _type: "message",
+            };
+            return [...acc, reasoningMessage];
+          }
+
+          if (!message.content && !message.reasoning) {
+            return acc;
+          }
+
           return [...acc, message];
         }, []);
   }, [mappedRequest, mode]);
@@ -183,7 +223,7 @@ export default function Chat({
 
   return (
     <div className="flex h-full w-full flex-col">
-      <div className="border-b">
+      <div className="border-b border-border">
         <ToolsRenderer tools={tools} chatMode={mode} />
       </div>
       {renderMessages()}

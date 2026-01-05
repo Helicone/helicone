@@ -15,18 +15,18 @@ export const AUTHORS = [
   "openai",
   "google",
   "meta-llama",
-  "mistralai",
+  "mistral",
   "amazon",
   "microsoft",
   "nvidia",
-  "cohere",
   "deepseek",
   "qwen",
   "xai",
   "moonshotai",
   "perplexity",
   "alibaba",
-  "zai"
+  "zai",
+  "baidu",
 ] as const;
 
 export type AuthorName = (typeof AUTHORS)[number] | "passthrough";
@@ -39,7 +39,7 @@ export interface Modality {
   outputs: OutputModality[];
 }
 
-export type ResponseFormat = "ANTHROPIC" | "OPENAI";
+export type ResponseFormat = "ANTHROPIC" | "OPENAI" | "GOOGLE";
 
 export type Tokenizer =
   | "Claude"
@@ -49,12 +49,14 @@ export type Tokenizer =
   | "Llama4"
   | "Gemini"
   | "Mistral"
+  | "MoonshotAI"
   | "Qwen"
   | "DeepSeek"
   | "Cohere"
   | "Grok"
   | "Tekken"
-  | "Zai";
+  | "Zai"
+  | "Baidu";
 
 export type StandardParameter =
   | "max_tokens"
@@ -83,7 +85,8 @@ export type StandardParameter =
   | "logprobs"
   | "top_logprobs"
   | "structured_outputs"
-  | "verbosity";
+  | "verbosity"
+  | "n";
 
 export const PARAMETER_LABELS: Record<StandardParameter, string> = {
   max_tokens: "Max Tokens",
@@ -113,13 +116,23 @@ export const PARAMETER_LABELS: Record<StandardParameter, string> = {
   top_logprobs: "Top Log Probs",
   structured_outputs: "Structured Outputs",
   verbosity: "Verbosity",
+  n: "Number of Completions",
 };
+
+/**
+ * Per-modality pricing configuration.
+ * Supports input, cached input (as multiplier), and output rates.
+ */
+export interface ModalityPricing {
+  input?: number; // cost per input token
+  cachedInputMultiplier?: number; // multiplier on input rate (0.1 = 10% of input)
+  output?: number; // cost per output token
+}
 
 export interface ModelPricing {
   threshold: number;
   input: number;
   output: number;
-  image?: number;
   cacheMultipliers?: {
     cachedInput: number;
     write5m?: number;
@@ -128,8 +141,13 @@ export interface ModelPricing {
   cacheStoragePerHour?: number;
   thinking?: number;
   request?: number;
-  audio?: number;
-  video?: number;
+
+  // Per-modality pricing
+  image?: ModalityPricing;
+  audio?: ModalityPricing;
+  video?: ModalityPricing;
+  file?: ModalityPricing;
+
   web_search?: number;
 }
 
@@ -142,6 +160,7 @@ export interface ModelConfig {
   created: string;
   modality: Modality;
   tokenizer: Tokenizer;
+  pinnedVersionOfModel?: string;
 }
 
 interface BaseConfig {
@@ -181,6 +200,8 @@ export interface WebSearchPlugin extends BasePlugin<"web"> {
 
 export type Plugin = WebSearchPlugin; // Add more with | as we add plugin types
 
+export type BodyMappingType = "OPENAI" | "NO_MAPPING" | "RESPONSES";
+
 export interface ModelProviderConfig extends BaseConfig {
   providerModelId: string;
   provider: ModelProviderName;
@@ -191,8 +212,10 @@ export interface ModelProviderConfig extends BaseConfig {
   endpointConfigs: Record<string, EndpointConfig>;
   crossRegion?: boolean;
   priority?: number;
-  quantization?: "fp4" | "fp8" | "bf16";
+  quantization?: "fp4" | "fp8" | "fp16" | "bf16" | "int4";
   responseFormat?: ResponseFormat;
+  requireExplicitRouting?: boolean;
+  providerModelIdAliases?: string[];
 }
 
 export interface EndpointConfig extends UserEndpointConfig {
@@ -208,6 +231,8 @@ export interface EndpointConfig extends UserEndpointConfig {
 
 export interface RequestParams {
   isStreaming?: boolean;
+  bodyMapping?: BodyMappingType;
+  apiKey?: string;
 }
 
 export interface Endpoint extends BaseConfig {
@@ -229,8 +254,9 @@ export interface UserEndpointConfig {
   resourceName?: string;
   apiVersion?: string; // Azure OpenAI
   crossRegion?: boolean;
-  gatewayMapping?: "OPENAI" | "NO_MAPPING";
+  gatewayMapping?: BodyMappingType;
   modelName?: string;
+  heliconeModelId?: string; // Azure OpenAI
 }
 
 export interface ModelSpec {
@@ -244,7 +270,7 @@ export interface AuthContext {
   apiKey?: string;
   secretKey?: string;
   orgId?: string;
-  bodyMapping?: "OPENAI" | "NO_MAPPING";
+  bodyMapping?: BodyMappingType;
   requestMethod?: string;
   requestUrl?: string;
   requestBody?: string;
@@ -256,6 +282,11 @@ export interface AuthResult {
 
 export interface RequestBodyContext {
   parsedBody: any;
-  bodyMapping: "OPENAI" | "NO_MAPPING";
-  toAnthropic: (body: any, providerModelId?: string) => any;
+  bodyMapping: BodyMappingType;
+  toAnthropic: (
+    body: any,
+    providerModelId?: string,
+    options?: { includeCacheBreakpoints?: boolean }
+  ) => any;
+  toChatCompletions: (body: any) => any;
 }

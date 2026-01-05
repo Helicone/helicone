@@ -96,10 +96,22 @@ export class ScoreStore extends BaseStore {
       uniqueRequestResponseLogs
     );
 
+    // Create a map of newVersions by request_id and organization_id for correct matching
+    const newVersionsMap = new Map(
+      newVersions.map((v) => [`${v.requestId}-${v.organizationId}`, v])
+    );
+
     const res = await clickhouseDb.dbInsertClickhouse(
       "request_response_rmt",
-      filteredRequestResponseLogs.flatMap((row, index) => {
-        const newVersion = newVersions[index];
+      filteredRequestResponseLogs.flatMap((row) => {
+        const key = `${row.request_id}-${row.organization_id}`;
+        const newVersion = newVersionsMap.get(key);
+
+        // Skip if no matching newVersion found (shouldn't happen but be safe)
+        if (!newVersion) {
+          console.warn(`No matching newVersion for request ${row.request_id}`);
+          return [];
+        }
 
         // Merge existing scores with new scores
         const combinedScores = {
@@ -141,6 +153,7 @@ export class ScoreStore extends BaseStore {
             prompt_cache_read_tokens: row.prompt_cache_read_tokens,
             prompt_audio_tokens: row.prompt_audio_tokens,
             completion_audio_tokens: row.completion_audio_tokens,
+            reasoning_tokens: row.reasoning_tokens,
             model:
               row.model && row.model !== ""
                 ? row.model
@@ -163,8 +176,10 @@ export class ScoreStore extends BaseStore {
             cache_enabled: row.cache_enabled,
             cache_reference_id: row.cache_reference_id,
             cost: row.cost,
-            gateway_endpoint_version: row.gateway_endpoint_version,
+            ai_gateway_body_mapping: row.ai_gateway_body_mapping,
             is_passthrough_billing: row.is_passthrough_billing,
+            storage_location: row.storage_location,
+            size_bytes: row.size_bytes,
           },
         ];
       })
@@ -193,30 +208,5 @@ export class ScoreStore extends BaseStore {
     }
 
     return "";
-  }
-
-  public async bumpRequestVersion(
-    requests: { id: string; organizationId: string }[]
-  ): Promise<Result<UpdatedRequestVersion[], string>> {
-    const placeholders = requests
-      .map((_, index) => `($${index * 2 + 1}::uuid, $${index * 2 + 2}::uuid)`)
-      .join(", ");
-
-    const values = requests.flatMap((request) => [
-      request.organizationId,
-      request.id,
-    ]);
-
-    const query = `
-      UPDATE request AS r
-      SET version = r.version + 1
-      FROM (VALUES ${placeholders}) AS v(org_id, req_id)
-      WHERE r.helicone_org_id = v.org_id AND r.id = v.req_id
-      RETURNING r.id, r.version, r.provider, r.helicone_org_id
-    `;
-
-    const result = await dbExecute<UpdatedRequestVersion>(query, values);
-
-    return result;
   }
 }

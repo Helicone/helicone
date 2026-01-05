@@ -1,6 +1,7 @@
 import { Endpoint, Plugin } from "@helicone-package/cost/models/types";
 import { ProviderKey } from "../db/ProviderKeysStore";
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
+import { Result } from "../util/results";
 
 export interface Attempt {
   endpoint: Endpoint;
@@ -16,9 +17,18 @@ export interface DisallowListEntry {
   model: string;
 }
 
+export type PendingEscrow = Promise<
+  Result<
+    {
+      reservedEscrowId: string;
+    },
+    AttemptError
+  >
+>;
+
 // For backwards compatibility
 export interface EscrowInfo {
-  escrowId: string;
+  escrow: PendingEscrow;
   endpoint: Endpoint;
 }
 
@@ -28,6 +38,7 @@ export type AttemptError = {
     | "invalid_format"
     | "missing_provider_key"
     | "request_failed"
+    | "rate_limited"
     | "invalid_prompt"
     | "model_not_supported"
     | "insufficient_credit_limit"
@@ -35,5 +46,5 @@ export type AttemptError = {
   message: string;
   statusCode: number;
   source?: string;
-  details?: string;
+  details?: any;
 };

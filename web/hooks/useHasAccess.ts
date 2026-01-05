@@ -20,7 +20,9 @@ export const useHasAccess = (feature: FeatureId) => {
       tier === "enterprise" ||
       tier === "pro" ||
       tier === "demo" ||
-      tier === "team-20250130"
+      tier === "team-20250130" ||
+      tier === "team-20251210" ||
+      tier === "pro-20251210"
     ) {
       return true;
     }
@@ -34,11 +36,8 @@ export const useHasAccess = (feature: FeatureId) => {
       return true;
     }
 
-    if (
-      tier === "pro-20240913" ||
-      tier === "pro-20250202" ||
-      tier === "team-20250130"
-    ) {
+    // Legacy pro tiers require add-ons for certain features
+    if (tier === "pro-20240913" || tier === "pro-20250202") {
       return (
         stripeMetadata?.addons?.[feature as (typeof ADDON_FEATURES)[number]] ??
         false

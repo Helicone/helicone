@@ -60,6 +60,7 @@ function makeHeliconeRequest(overrides: Partial<HeliconeRequest>): HeliconeReque
     prompt_cache_write_tokens: 0,
     prompt_cache_read_tokens: 0,
     completion_tokens: 0,
+    reasoning_tokens: 0,
     prompt_audio_tokens: 0,
     completion_audio_tokens: 0,
     cost: 0,
@@ -81,7 +82,7 @@ function makeHeliconeRequest(overrides: Partial<HeliconeRequest>): HeliconeReque
     cache_reference_id: null,
     cache_enabled: false,
     updated_at: new Date().toISOString(),
-    gateway_endpoint_version: null,
+    ai_gateway_body_mapping: null,
     ...overrides,
   };
 }

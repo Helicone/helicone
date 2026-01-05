@@ -7,11 +7,14 @@ from .types import (
     PromptCompilationResult,
     ChatMessage,
     ChatCompletionParams,
-    HeliconeChatParams
+    HeliconeChatParams,
+    PromptPartialVariable,
+    TemplateVariable,
+    SubstitutionResult
 )
 
 __all__ = [
-    "HeliconeManualLogger", 
+    "HeliconeManualLogger",
     "HeliconeLogBuilder",
     "HeliconePromptManager",
     "ValidationError",
@@ -20,5 +23,8 @@ __all__ = [
     "PromptCompilationResult",
     "ChatMessage",
     "ChatCompletionParams",
-    "HeliconeChatParams"
+    "HeliconeChatParams",
+    "PromptPartialVariable",
+    "TemplateVariable",
+    "SubstitutionResult"
 ]

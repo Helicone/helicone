@@ -30,7 +30,7 @@ export interface TraceNode {
   parents: TraceNode[];
 }
 
-export type HeliconeRequestType = "Tool" | "LLM" | "VectorDB";
+export type HeliconeRequestType = "Tool" | "LLM" | "VectorDB" | "Data";
 
 export interface TreeNodeData {
   subPathName?: string;

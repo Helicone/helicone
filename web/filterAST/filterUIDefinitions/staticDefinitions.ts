@@ -85,6 +85,22 @@ export const STATIC_USER_VIEW_DEFINITIONS: FilterUIDefinition[] = [
 
 export const STATIC_SESSIONS_VIEW_DEFINITIONS: FilterUIDefinition[] = [
   {
+    id: "session_session_id",
+    label: "Session ID",
+    type: "string",
+    operators: ["eq", "neq", "like", "ilike", "contains", "not-contains"],
+    table: "sessions_request_response_rmt",
+    subType: "sessions",
+  },
+  {
+    id: "session_session_name",
+    label: "Session Name",
+    type: "string",
+    operators: ["eq", "neq", "like", "ilike", "contains", "not-contains"],
+    table: "sessions_request_response_rmt",
+    subType: "sessions",
+  },
+  {
     id: "session_created_at",
     label: "Created At",
     type: "datetime",
@@ -291,6 +307,13 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
     table: "request_response_rmt",
   },
   {
+    id: "reasoning_tokens",
+    label: "Reasoning Tokens",
+    type: "number",
+    operators: ["eq", "neq", "gt", "gte", "lt", "lte"],
+    table: "request_response_rmt",
+  },
+  {
     id: "time_to_first_token",
     label: "Time to First Token (ms)",
     type: "number",
@@ -343,6 +366,17 @@ export const STATIC_FILTER_DEFINITIONS: FilterUIDefinition[] = [
     ],
     table: "request_response_rmt",
 
+  },
+  {
+    id: "ai_gateway",
+    label: "AI Gateway",
+    type: "boolean",
+    operators: ["is"],
+    valueOptions: [
+      { label: "Yes", value: true },
+      { label: "No", value: false },
+    ],
+    table: "request_response_rmt",
   },
 
   // Datetime fields

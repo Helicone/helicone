@@ -1,39 +1,99 @@
 import { AnthropicProvider } from "./anthropic";
-import { OpenAIProvider } from "./openai";
-import { BedrockProvider } from "./bedrock";
-import { VertexProvider } from "./vertex";
 import { AzureOpenAIProvider } from "./azure";
-import { PerplexityProvider } from "./perplexity";
-import { GroqProvider } from "./groq";
-import { DeepSeekProvider } from "./deepseek";
-import { CohereProvider } from "./cohere";
-import { XAIProvider } from "./xai";
-import { GoogleProvider } from "./google";
+import { BasetenProvider } from "./baseten";
+import { BedrockProvider } from "./bedrock";
+import { CanopyWaveProvider } from "./canopywave";
+import { CerebrasProvider } from "./cerebras";
+import { ChutesProvider } from "./chutes";
 import { DeepInfraProvider } from "./deepinfra";
-import { OpenRouterProvider } from "./openrouter";
-import { NovitaProvider } from "./novita";
+import { DeepSeekProvider } from "./deepseek";
+import { FireworksProvider } from "./fireworks";
+import { GoogleProvider } from "./google";
+import { GroqProvider } from "./groq";
+import { HeliconeProvider } from "./helicone";
+import { MistralProvider } from "./mistral";
 import { NebiusProvider } from "./nebius";
+import { NovitaProvider } from "./novita";
+import { OpenAIProvider } from "./openai";
+import { OpenRouterProvider } from "./openrouter";
+import { PerplexityProvider } from "./perplexity";
+import { VertexProvider } from "./vertex";
+import { XAIProvider } from "./xai";
 
 // Create singleton instances (stateless, so safe to share)
 export const providers = {
+  baseten: new BasetenProvider(),
   anthropic: new AnthropicProvider(),
-  openai: new OpenAIProvider(),
-  bedrock: new BedrockProvider(),
-  vertex: new VertexProvider(),
   azure: new AzureOpenAIProvider(),
-  perplexity: new PerplexityProvider(),
-  groq: new GroqProvider(),
-  deepseek: new DeepSeekProvider(),
-  cohere: new CohereProvider(),
-  xai: new XAIProvider(),
+  bedrock: new BedrockProvider(),
+  canopywave: new CanopyWaveProvider(),
+  cerebras: new CerebrasProvider(),
+  chutes: new ChutesProvider(),
   deepinfra: new DeepInfraProvider(),
+  deepseek: new DeepSeekProvider(),
+  fireworks: new FireworksProvider(),
   "google-ai-studio": new GoogleProvider(),
-  openrouter: new OpenRouterProvider(),
+  groq: new GroqProvider(),
+  helicone: new HeliconeProvider(),
+  mistral: new MistralProvider(),
+  nebius: new NebiusProvider(),
   novita: new NovitaProvider(),
-  nebius: new NebiusProvider()
+  openai: new OpenAIProvider(),
+  openrouter: new OpenRouterProvider(),
+  perplexity: new PerplexityProvider(),
+  vertex: new VertexProvider(),
+  xai: new XAIProvider()
 } as const;
 
 export type ModelProviderName = keyof typeof providers;
+
+/**
+ * Providers that support the context editing feature.
+ * Context editing allows automatic management of conversation context,
+ * clearing old tool uses and thinking blocks to optimize costs and stay
+ * within context window limits.
+ *
+ * Currently only Anthropic models support this feature.
+ * @see https://docs.anthropic.com/en/docs/build-with-claude/context-editing
+ */
+export const ContextEditingEnabledProviders: ModelProviderName[] = [
+  "anthropic",
+];
+
+// TODO: temporarily whitelist responses API providers until all mappings are done
+export const ResponsesAPIEnabledProviders: ModelProviderName[] = [
+  "openai",
+  "helicone",
+  "anthropic",
+  "bedrock",
+  "google-ai-studio",
+
+  // chat completions only
+  "azure",
+  "chutes",
+  "deepinfra",
+  "deepseek",
+
+  // has known issues with returning structured JSONS
+  // should be okay to enable, but its not stable enough to add without request
+  // "google-ai-studio",
+  "cerebras",
+  "groq",
+  "mistral",
+  "nebius",
+  "novita",
+  "openrouter",
+  "perplexity",
+  "xai",
+  "baseten",
+  "fireworks",
+
+  // anthropic and chat completions provider
+  "vertex"
+
+  // anthropic only
+  // none right now, need anthropic mapper
+];
 
 // Re-export base for extending
 export { BaseProvider } from "./base";

@@ -1,0 +1,200 @@
+---
+title: "LangGraph Integration"
+sidebarTitle: "LangGraph"
+description: "Integrate Helicone AI Gateway with LangGraph to build multi-agent workflows with access to 100+ LLM providers."
+"twitter:title": "LangGraph Integration - Helicone OSS LLM Observability"
+iconType: "solid"
+---
+
+import { strings } from "/snippets/strings.mdx";
+import Star from "/snippets/star.mdx";
+import RequestIntegration from "/snippets/request-integration.mdx";
+
+## Introduction
+
+[LangGraph](https://www.langchain.com/langgraph) is a framework for building stateful, multi-agent applications with LLMs. The integration with Helicone AI Gateway is nearly identical to the [LangChain integration](/gateway/integrations/langchain), with the addition of agent-specific features.
+
+<Note>
+  This integration requires only **two changes** to your existing LangGraph code - updating the base URL and API key. See the [LangChain AI Gateway docs](/gateway/integrations/langchain) for full feature details.
+</Note>
+
+## Quick Start
+
+Follow the same setup as [LangChain AI Gateway integration](/gateway/integrations/langchain), then create your agent:
+
+<CodeGroup>
+```typescript TypeScript - OpenAI
+import { ChatOpenAI } from "@langchain/openai";
+import { createReactAgent } from "@langchain/langgraph/prebuilt";
+import { MemorySaver } from "@langchain/langgraph";
+
+const model = new ChatOpenAI({
+    model: 'gpt-4.1-mini',
+    apiKey: process.env.HELICONE_API_KEY,
+    configuration: {
+        baseURL: "https://ai-gateway.helicone.ai/v1",
+    },
+});
+
+const agent = createReactAgent({
+    llm: model,
+    tools: yourTools,
+    checkpointer: new MemorySaver(),
+});
+```
+
+```python Python - OpenAI
+from langchain_openai import ChatOpenAI
+from langgraph.prebuilt import create_react_agent
+from langgraph.checkpoint.memory import MemorySaver
+
+model = ChatOpenAI(
+    model='gpt-4.1-mini',
+    api_key=os.getenv('HELICONE_API_KEY'),
+    base_url="https://ai-gateway.helicone.ai/v1",
+)
+
+agent = create_react_agent(
+    model,
+    tools=your_tools,
+    checkpointer=MemorySaver(),
+)
+```
+</CodeGroup>
+
+<Star />
+
+## Migration Example
+
+### Before (Direct Provider)
+
+<CodeGroup>
+```typescript TypeScript
+import { ChatOpenAI } from "@langchain/openai";
+import { createReactAgent } from "@langchain/langgraph/prebuilt";
+
+const model = new ChatOpenAI({
+    model: 'gpt-4o-mini',
+    apiKey: process.env.OPENAI_API_KEY,
+});
+
+const agent = createReactAgent({
+    llm: model,
+    tools: myTools,
+});
+```
+
+```python Python
+from langchain_openai import ChatOpenAI
+from langgraph.prebuilt import create_react_agent
+
+model = ChatOpenAI(
+    model='gpt-4o-mini',
+    api_key=os.getenv('OPENAI_API_KEY'),
+)
+
+agent = create_react_agent(model, tools=my_tools)
+```
+</CodeGroup>
+
+### After (Helicone AI Gateway)
+
+<CodeGroup>
+```typescript TypeScript
+import { ChatOpenAI } from "@langchain/openai";
+import { createReactAgent } from "@langchain/langgraph/prebuilt";
+
+const model = new ChatOpenAI({
+    model: 'gpt-4.1-mini',                      // 100+ models supported
+    apiKey: process.env.HELICONE_API_KEY,      // Your Helicone API key
+    configuration: {
+        baseURL: "https://ai-gateway.helicone.ai/v1"  // Add this!
+    },
+});
+
+const agent = createReactAgent({
+    llm: model,
+    tools: myTools,
+});
+```
+
+```python Python
+from langchain_openai import ChatOpenAI
+from langgraph.prebuilt import create_react_agent
+
+model = ChatOpenAI(
+    model='gpt-4.1-mini',                      # 100+ models supported
+    api_key=os.getenv('HELICONE_API_KEY'),    # Your Helicone API key
+    base_url="https://ai-gateway.helicone.ai/v1"  # Add this!
+)
+
+agent = create_react_agent(model, tools=my_tools)
+```
+</CodeGroup>
+
+## Adding Custom Headers to Agent Invocations
+
+You can add custom properties when calling your agent with `invoke()`:
+
+<CodeGroup>
+```typescript TypeScript
+import { HumanMessage } from "@langchain/core/messages";
+import { v4 as uuidv4 } from 'uuid';
+
+const result = await agent.invoke(
+    { messages: [new HumanMessage("What is the weather in San Francisco?")] },
+    {
+        options: {
+            headers: {
+                "Helicone-Session-Id": uuidv4(),
+                "Helicone-Session-Path": "/weather/query",
+                "Helicone-Property-Query-Type": "weather",
+            },
+        },
+    }
+);
+```
+
+```python Python
+from langchain_core.messages import HumanMessage
+import uuid
+
+result = agent.invoke(
+    {"messages": [HumanMessage(content="What is the weather in San Francisco?")]},
+    {
+        "configurable": {
+            "headers": {
+                "Helicone-Session-Id": str(uuid.uuid4()),
+                "Helicone-Session-Path": "/weather/query",
+                "Helicone-Property-Query-Type": "weather",
+            }
+        }
+    }
+)
+```
+</CodeGroup>
+
+<RequestIntegration />
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="AI Gateway Overview" icon="arrow-progress" href="/gateway/overview">
+    Learn about Helicone's AI Gateway features and capabilities
+  </Card>
+  <Card title="Provider Routing" icon="route" href="/gateway/provider-routing">
+    Configure intelligent routing and automatic failover
+  </Card>
+  <Card title="Model Registry" icon="database" href="https://helicone.ai/models">
+    Browse all available models and providers
+  </Card>
+  <Card title="LangChain Integration" icon="link" href="/gateway/integrations/langchain">
+    Full AI Gateway feature documentation
+  </Card>
+  <Card title="Sessions" icon="chart-network" href="/features/sessions">
+    Track multi-turn conversations and agent workflows
+  </Card>
+  <Card title="Custom Properties" icon="tags" href="/features/advanced-usage/custom-properties">
+    Add metadata to track and filter your requests
+  </Card>
+</CardGroup>

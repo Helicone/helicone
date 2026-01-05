@@ -12,10 +12,6 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000075,
         output: 0.00000099,
-        request: 0.0,
-        image: 0.0,
-        audio: 0.0,
-        web_search: 0.0,
       },
     ],
     contextLength: 128_000,
@@ -71,7 +67,6 @@ export const endpoints = {
       "top_p",
     ],
     ptbEnabled: true,
-    priority: 3, // Fallback priority
     endpointConfigs: {
       "*": {},
     },
@@ -83,8 +78,8 @@ export const endpoints = {
     pricing: [
       {
         threshold: 0,
-        input: 0.0000002, // $0.20 per 1M tokens
-        output: 0.0000006, // $0.60 per 1M tokens
+        input: 0.0000006, // $0.60 per 1M tokens
+        output: 0.0000012, // $1.20 per 1M tokens
       },
     ],
     contextLength: 131_072,
@@ -102,6 +97,33 @@ export const endpoints = {
       "seed",
       "min_p",
       "response_format",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "deepseek-r1-distill-llama-70b:chutes": {
+    provider: "chutes",
+    author: "deepseek",
+    providerModelId: "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000003, // $0.0300 per 1M tokens
+        output: 0.00000013, // $0.1300 per 1M tokens
+      },
+    ],
+    contextLength: 128_000,
+    maxCompletionTokens: 32_768,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "top_k",
+      "seed",
+      "min_p"
     ],
     ptbEnabled: true,
     endpointConfigs: {

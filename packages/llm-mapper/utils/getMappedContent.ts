@@ -18,6 +18,7 @@ import { mapOpenAIAssistant } from "../mappers/openai/assistant";
 import { mapOpenAIModeration } from "../mappers/openai/moderation";
 import { mapRealtimeRequest } from "../mappers/openai/realtime";
 import { mapTool } from "../mappers/tool";
+import { mapData } from "../mappers/data";
 import { MapperFn } from "../mappers/types";
 import { mapVectorDB } from "../mappers/vector-db";
 import { getMapperTypeFromHeliconeRequest } from "./getMapperType";
@@ -28,7 +29,8 @@ const MAX_PREVIEW_LENGTH = 1_000;
 export const MAPPERS: Record<MapperType, MapperFn<any, any>> = {
   // the request-response will be converted to openai format if necessary
   // thus uses the same mapper.
-  "ai-gateway": mapOpenAIRequest,
+  "ai-gateway-chat": mapOpenAIRequest,
+  "ai-gateway-responses": mapOpenAIResponse,
   "openai-chat": mapOpenAIRequest,
   "openai-response": mapOpenAIResponse,
   "anthropic-chat": mapAnthropicRequest,
@@ -44,6 +46,7 @@ export const MAPPERS: Record<MapperType, MapperFn<any, any>> = {
   "openai-realtime": mapRealtimeRequest,
   "vector-db": mapVectorDB,
   tool: mapTool,
+  data: mapData,
   unknown: mapOpenAIRequest,
 } satisfies Record<MapperType, MapperFn<any, any>>;
 
@@ -77,6 +80,7 @@ const metaDataFromHeliconeRequest = (
     createdAt: heliconeRequest.request_created_at,
     path: heliconeRequest.request_path,
     completionTokens: heliconeRequest.completion_tokens,
+    reasoningTokens: heliconeRequest.reasoning_tokens,
     promptCacheWriteTokens: heliconeRequest.prompt_cache_write_tokens,
     promptCacheReadTokens: heliconeRequest.prompt_cache_read_tokens,
     promptTokens: heliconeRequest.prompt_tokens,

@@ -7,7 +7,6 @@ import type {
   AuthResult,
   RequestBodyContext,
   RequestParams,
-  ResponseFormat,
   ModelSpec,
 } from "./types";
 import { providers, ModelProviderName } from "./providers";
@@ -43,16 +42,26 @@ export function heliconeProviderToModelProviderName(
       return "perplexity";
     case "DEEPSEEK":
       return "deepseek";
-    case "COHERE":
-      return "cohere";
     case "OPENROUTER":
       return "openrouter";
     case "DEEPINFRA":
       return "deepinfra";
+    case "MISTRAL":
+      return "mistral";
     case "NOVITA":
       return "novita";
     case "NEBIUS":
       return "nebius";
+    case "CHUTES":
+      return "chutes";
+    case "CEREBRAS":
+      return "cerebras";
+    case "BASETEN":
+      return "baseten";
+    case "FIREWORKS":
+      return "fireworks";
+    case "CANOPYWAVE":
+      return "canopywave";
     // new registry does not have
     case "LOCAL":
     case "HELICONE":
@@ -62,14 +71,11 @@ export function heliconeProviderToModelProviderName(
     case "2YFV":
     case "TOGETHER":
     case "LEMONFOX":
-    case "FIREWORKS":
     case "WISDOMINANUTSHELL":
-    case "MISTRAL":
     case "QSTASH":
     case "FIRECRAWL":
     case "AVIAN":
     case "OPENPIPE":
-    case "CHUTES":
     case "LLAMA":
     case "NVIDIA":
     case "VERCEL":
@@ -129,18 +135,36 @@ export const dbProviderToProvider = (
   if (provider === "openrouter" || provider === "OpenRouter") {
     return "openrouter";
   }
+  if (provider === "canopywave" || provider === "Canopy Wave") {
+    return "canopywave";
+  }
   if (provider === "novita" || provider === "Novita") {
     return "novita";
   }
   if (provider === "deepinfra" || provider === "DeepInfra") {
     return "deepinfra";
   }
+  if (provider === "fireworks" || provider === "Fireworks") {
+    return "fireworks";
+  }
+  if (provider === "baseten" || provider === "Baseten") {
+    return "baseten";
+  }
+  if (provider === "cerebras" || provider === "Cerebras") {
+    return "cerebras";
+  }
+  if (provider === "chutes" || provider === "Chutes") {
+    return "chutes";
+  }
+  if (provider === "nebius" || provider === "Nebius") {
+    return "nebius";
+  }
   return null;
 };
 
 export function buildEndpointUrl(
   endpoint: Endpoint,
-  requestParams: RequestParams
+  requestParams: RequestParams,
 ): Result<string> {
   const providerResult = getProvider(endpoint.provider);
   if (providerResult.error) {
@@ -292,7 +316,7 @@ export async function buildRequestBody(
 export async function buildErrorMessage(
   endpoint: Endpoint,
   response: Response
-): Promise<Result<string>> {
+): Promise<Result<{ message: string; details?: any }>> {
   const providerResult = getProvider(endpoint.provider);
   if (providerResult.error) {
     return err(providerResult.error);
@@ -306,9 +330,27 @@ export async function buildErrorMessage(
   return ok(await provider.buildErrorMessage(response));
 }
 
-function validateProvider(provider: string): provider is ModelProviderName {
+export function validateProvider(
+  provider: string
+): provider is ModelProviderName {
   return provider in providers;
 }
+
+/**
+ * Model name mapping for backward compatibility
+ * Maps deprecated/incorrect model names to their correct counterparts
+ */
+export const MODEL_NAME_MAPPINGS: Record<string, string> = {
+  "gemini-1.5-flash": "gemini-2.5-flash-lite",
+  "claude-3.5-sonnet": "claude-3.5-sonnet-v2",
+  "claude-3.5-sonnet-20240620": "claude-3.5-sonnet-v2",
+  "deepseek-r1": "deepseek-reasoner",
+  "kimi-k2": "kimi-k2-0905",
+  "kimi-k2-instruct": "kimi-k2-0905",
+  // Grok 4.1 backwards compatibility (period to dash)
+  "grok-4.1-fast-non-reasoning": "grok-4-1-fast-non-reasoning",
+  "grok-4.1-fast-reasoning": "grok-4-1-fast-reasoning",
+};
 
 export function parseModelString(
   modelString: string
@@ -322,6 +364,9 @@ export function parseModelString(
     isOnline = true;
     modelName = modelName.slice(0, -7);
   }
+
+  // Apply model name mapping for backward compatibility
+  modelName = MODEL_NAME_MAPPINGS[modelName] || modelName;
 
   // Just model name: "gpt-4"
   if (parts.length === 1) {

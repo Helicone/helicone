@@ -4,6 +4,10 @@ import {
   AnthropicTool,
   AnthropicWebSearchTool,
   AnthropicToolChoice,
+  AnthropicContextManagement,
+  AnthropicContextEdit,
+  AnthropicClearToolUsesEdit,
+  AnthropicClearThinkingEdit,
 } from "../../../types/anthropic";
 import {
   HeliconeChatCompletionContentPart,
@@ -14,18 +18,43 @@ import { Plugin } from "@helicone-package/cost/models/types";
 export function toAnthropic(
   openAIBody: HeliconeChatCreateParams,
   providerModelId?: string,
-  plugins?: Plugin[]
+  plugins?: Plugin[],
+  options?: {
+    includeCacheBreakpoints?: boolean;
+  }
 ): AnthropicRequestBody {
+  const includeCache = options?.includeCacheBreakpoints !== false;
+  
+  // Determine max_tokens with default fallback
+  const maxTokens = openAIBody.max_completion_tokens ?? openAIBody.max_tokens ?? 4096;
+  
   const antBody: AnthropicRequestBody = {
     model: providerModelId || openAIBody.model,
     messages: [],
-    max_tokens:
-      openAIBody.max_completion_tokens ?? openAIBody.max_tokens ?? 1024,
+    max_tokens: maxTokens,
     temperature: openAIBody.temperature ?? undefined,
     top_p: openAIBody.top_p ?? undefined,
 
     stream: openAIBody.stream ?? undefined,
   };
+
+  if (openAIBody.reasoning_effort) {
+    let budgetTokens: number;
+    
+    if (openAIBody.reasoning_options?.budget_tokens) {
+      budgetTokens = openAIBody.reasoning_options.budget_tokens;
+    } else {
+      budgetTokens = Math.floor(maxTokens / 2);
+    }
+
+    antBody.thinking = {
+      type: "enabled",
+      budget_tokens: budgetTokens,
+    };
+
+    // temperature 1 is required for Anthropic models to enable reasoning
+    antBody.temperature = 1;
+  }
 
   if (openAIBody.stop) {
     antBody.stop_sequences = Array.isArray(openAIBody.stop)
@@ -35,10 +64,19 @@ export function toAnthropic(
         : [];
   }
 
-  const { messages, system } = extractSystemMessage(openAIBody.messages);
-  antBody.messages = mapMessages(messages);
+  const { messages, system } = extractSystemMessage(
+    openAIBody.messages,
+    includeCache
+  );
+  antBody.messages = mapMessages(messages, includeCache);
   if (system) {
     antBody.system = system;
+  }
+
+  if (antBody.messages.length === 0) {
+    throw new Error(
+      "Request with Anthropic models must contain at least one non-system message."
+    );
   }
 
   const user_id =
@@ -87,11 +125,23 @@ export function toAnthropic(
     throw new Error("Logit bias is not supported");
   }
 
+  // Map context_editing to Anthropic's context_management
+  if (openAIBody.context_editing?.enabled) {
+    antBody.context_management = mapContextEditing(openAIBody.context_editing);
+  }
+
+  // if and only if the user did not provide any cache control breakpoints,
+  // add a default ephemeral 5m breakpoint at the end of the content.
+  if (includeCache && !hasAnyCacheControl(openAIBody)) {
+    appendDefaultCacheBreakpoint(antBody);
+  }
+
   return antBody;
 }
 
 function openAIContentToAnthropicContent(
-  content: string | HeliconeChatCompletionContentPart[] | null
+  content: string | HeliconeChatCompletionContentPart[] | null,
+  includeCache: boolean
 ): string | AnthropicContentBlock[] {
   if (content === null) {
     return "";
@@ -107,7 +157,9 @@ function openAIContentToAnthropicContent(
         return {
           type: "text",
           text: part.text,
-          cache_control: part.cache_control,
+          ...(includeCache && part.cache_control
+            ? { cache_control: part.cache_control }
+            : {}),
         };
       case "image_url":
         // expected format: { type: "image_url", image_url: { url: string } }
@@ -132,7 +184,9 @@ function openAIContentToAnthropicContent(
               media_type: mediaType,
               data: base64Data,
             },
-            cache_control: part.cache_control,
+            ...(includeCache && part.cache_control
+              ? { cache_control: part.cache_control }
+              : {}),
           };
         } else {
           return {
@@ -141,12 +195,24 @@ function openAIContentToAnthropicContent(
               type: "url",
               url: url,
             },
-            cache_control: part.cache_control,
+            ...(includeCache && part.cache_control
+              ? { cache_control: part.cache_control }
+              : {}),
           };
         }
       case "input_audio":
         // expected format: { type: "input_audio", input_audio: { data: base64str, format: "wav" }}
         throw new Error(`${part.type} is not supported by Anthropic Messages.`);
+      case "document":
+        // Anthropic document type - pass through as-is since it's already in Anthropic format
+        // Document blocks are used for extended context features with citations
+        return {
+          type: "document",
+          source: part.source,
+          title: part.title,
+          citations: part.citations,
+          cache_control: part.cache_control,
+        };
       case "file":
         // TODO: Chat Completions API does not support files whereas Anthropic Messages API does
         // would need to extend the HeliconeChatCreateParams types to support files, and map it to the Anthropic format:
@@ -158,7 +224,67 @@ function openAIContentToAnthropicContent(
   });
 }
 
-function extractSystemMessage(messages: HeliconeChatCreateParams["messages"]): {
+function hasAnyCacheControl(body: HeliconeChatCreateParams): boolean {
+  const msgs = body.messages || [];
+  for (const m of msgs) {
+    if ((m as any).cache_control) {
+      return true;
+    }
+    const content = (m as any).content;
+    if (Array.isArray(content)) {
+      for (const part of content) {
+        if ((part as any)?.cache_control) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+function appendDefaultCacheBreakpoint(antBody: AnthropicRequestBody) {
+  const defaultCache = { type: "ephemeral" as const, ttl: "5m" as const };
+
+  if (antBody.messages.length > 0) {
+    const last = antBody.messages[antBody.messages.length - 1];
+    if (typeof last.content === "string") {
+      last.content = [
+        {
+          type: "text",
+          text: last.content,
+          cache_control: defaultCache,
+        },
+      ];
+      return;
+    }
+    if (Array.isArray(last.content) && last.content.length > 0) {
+      const idx = last.content.length - 1;
+      const block = last.content[idx];
+      last.content[idx] = {
+        ...block,
+        cache_control: defaultCache,
+      } as AnthropicContentBlock;
+      return;
+    }
+  }
+
+  if (antBody.system && Array.isArray(antBody.system) && antBody.system.length > 0) {
+    const idx = antBody.system.length - 1;
+    const block = antBody.system[idx];
+    antBody.system[idx] = {
+      ...block,
+      cache_control: defaultCache,
+    } as AnthropicContentBlock;
+    return;
+  }
+
+  // If system is a string and there are no messages, it's okay not to add it
+}
+
+function extractSystemMessage(
+  messages: HeliconeChatCreateParams["messages"],
+  includeCache: boolean
+): {
   messages: HeliconeChatCreateParams["messages"];
   system?: string | AnthropicContentBlock[];
 } {
@@ -173,7 +299,7 @@ function extractSystemMessage(messages: HeliconeChatCreateParams["messages"]): {
     typeof systemMessages[0].content === "string"
   ) {
     const content = systemMessages[0].content;
-    if (!systemMessages[0].cache_control) {
+    if (!includeCache || !systemMessages[0].cache_control) {
       return {
         messages: otherMessages,
         system: content,
@@ -185,7 +311,9 @@ function extractSystemMessage(messages: HeliconeChatCreateParams["messages"]): {
         {
           type: "text",
           text: systemMessages[0].content,
-          cache_control: systemMessages[0].cache_control,
+          ...(includeCache && systemMessages[0].cache_control
+            ? { cache_control: systemMessages[0].cache_control }
+            : {}),
         },
       ],
     };
@@ -193,12 +321,17 @@ function extractSystemMessage(messages: HeliconeChatCreateParams["messages"]): {
 
   const systemMessageBlocks: AnthropicContentBlock[] = [];
   for (const msg of systemMessages) {
-    const convertedBlock = openAIContentToAnthropicContent(msg.content);
+    const convertedBlock = openAIContentToAnthropicContent(
+      msg.content,
+      includeCache
+    );
     if (typeof convertedBlock === "string") {
       systemMessageBlocks.push({
         type: "text",
         text: convertedBlock,
-        cache_control: msg.cache_control,
+        ...(includeCache && msg.cache_control
+          ? { cache_control: msg.cache_control }
+          : {}),
       });
     } else {
       systemMessageBlocks.push(...convertedBlock);
@@ -212,7 +345,8 @@ function extractSystemMessage(messages: HeliconeChatCreateParams["messages"]): {
 }
 
 function mapMessages(
-  messages: HeliconeChatCreateParams["messages"]
+  messages: HeliconeChatCreateParams["messages"],
+  includeCache: boolean
 ): AnthropicRequestBody["messages"] {
   if (!messages) {
     return [];
@@ -231,7 +365,9 @@ function mapMessages(
             type: "tool_result",
             tool_use_id: message.tool_call_id,
             content: typeof message.content === "string" ? message.content : "",
-            cache_control: message.cache_control,
+            ...(includeCache && message.cache_control
+              ? { cache_control: message.cache_control }
+              : {}),
           },
         ],
       };
@@ -243,6 +379,11 @@ function mapMessages(
     };
 
     if (message.role === "assistant" || message.role === "user") {
+      // Check if assistant message has images - not supported by Anthropic
+      if (message.role === "assistant" && message.images && message.images.length > 0) {
+        throw new Error("Image outputs in assistant messages are not supported by Anthropic");
+      }
+
       const processedToolCallContent: AnthropicContentBlock[] = [];
 
       if (message.role === "assistant" && message.tool_calls) {
@@ -258,26 +399,48 @@ function mapMessages(
           }
         });
       }
-      
+
+      const hasReasoningDetails = message.role === "assistant" && message.reasoning_details && message.reasoning_details?.length > 0;
+      const hasReasoning = message.role === "assistant" && !!message.reasoning;
       let processedContent: string | AnthropicContentBlock[] = [];
+
+      // Thinking blocks MUST be first in Anthropic format to be valid
+      if (message.reasoning_details && hasReasoningDetails) {
+        // Use reasoning_details when available (includes signatures for multi-turn)
+        for (const detail of message.reasoning_details) {
+          processedContent.push({
+            type: "thinking",
+            thinking: detail.thinking,
+            signature: detail.signature,
+          });
+        }
+      } else if (hasReasoning) {
+        // Fallback to simple reasoning string (no signature - may fail on multi-turn)
+        processedContent.push({
+          type: "thinking",
+          thinking: message.reasoning,
+        });
+      }
+
       if (message.content) {
         const convertedContent = openAIContentToAnthropicContent(
-          message.content
+          message.content,
+          includeCache
         );
         if (typeof convertedContent === "string") {
           // if the message requires forming a content array
-          if (
-            message.cache_control ||
-            processedToolCallContent.length > 0
-          ) {
+          const hasMsgCache = includeCache && !!(message as any).cache_control;
+          if (hasMsgCache || processedToolCallContent.length > 0 || hasReasoning) {
             processedContent.push({
               type: "text",
               text: convertedContent,
-              cache_control: message.cache_control,
+              ...(includeCache && (message as any).cache_control
+                ? { cache_control: (message as any).cache_control }
+                : {}),
             });
           } else {
             // there was no cache control breakpoint, the content was just string,
-            // and no tool calls, so we create a non-content array message.
+            // no tool calls, and no reasoning, so we create a non-content array message.
             antMessage.content = convertedContent;
             return antMessage;
           }
@@ -290,8 +453,10 @@ function mapMessages(
       antMessage.content = processedContent;
       return antMessage;
     }
-
-    antMessage.content = openAIContentToAnthropicContent(message.content);
+    antMessage.content = openAIContentToAnthropicContent(
+      message.content,
+      includeCache
+    );
     return antMessage;
   });
 }
@@ -409,4 +574,73 @@ function mapWebSearch(
   }
 
   return webSearchTool;
+}
+
+/**
+ * Maps the Helicone context_editing configuration to Anthropic's context_management format.
+ *
+ * Helicone uses a unified `context_editing` object with `enabled` flag and optional strategies,
+ * while Anthropic uses `context_management` with an `edits` array containing versioned strategy objects.
+ *
+ * @see https://docs.anthropic.com/en/docs/build-with-claude/context-editing
+ */
+function mapContextEditing(
+  contextEditing: NonNullable<HeliconeChatCreateParams["context_editing"]>
+): AnthropicContextManagement {
+  const edits: AnthropicContextEdit[] = [];
+
+  // clear_thinking must come first in the array per Anthropic docs
+  if (contextEditing.clear_thinking) {
+    const thinkingConfig = contextEditing.clear_thinking;
+    const thinkingEdit: AnthropicClearThinkingEdit = {
+      type: "clear_thinking_20251015",
+    };
+    if (thinkingConfig.keep !== undefined) {
+      thinkingEdit.keep =
+        thinkingConfig.keep === "all"
+          ? "all"
+          : { type: "thinking_turns", value: thinkingConfig.keep };
+    }
+    edits.push(thinkingEdit);
+  }
+
+  // Map clear_tool_uses to Anthropic's clear_tool_uses_20250919 strategy
+  if (contextEditing.clear_tool_uses) {
+    const toolUsesConfig = contextEditing.clear_tool_uses;
+    const toolUsesEdit: AnthropicClearToolUsesEdit = {
+      type: "clear_tool_uses_20250919",
+    };
+
+    if (toolUsesConfig.trigger !== undefined) {
+      toolUsesEdit.trigger = {
+        type: "input_tokens",
+        value: toolUsesConfig.trigger,
+      };
+    }
+    if (toolUsesConfig.keep !== undefined) {
+      toolUsesEdit.keep = { type: "tool_uses", value: toolUsesConfig.keep };
+    }
+    if (toolUsesConfig.clear_at_least !== undefined) {
+      toolUsesEdit.clear_at_least = {
+        type: "input_tokens",
+        value: toolUsesConfig.clear_at_least,
+      };
+    }
+    if (toolUsesConfig.exclude_tools !== undefined) {
+      toolUsesEdit.exclude_tools = toolUsesConfig.exclude_tools;
+    }
+    if (toolUsesConfig.clear_tool_inputs !== undefined) {
+      toolUsesEdit.clear_tool_inputs = toolUsesConfig.clear_tool_inputs;
+    }
+    edits.push(toolUsesEdit);
+  }
+
+  // If enabled but no specific strategies provided, use defaults
+  // Add clear_tool_uses with defaults when context_editing is enabled
+  // but no specific strategies are provided
+  if (edits.length === 0) {
+    edits.push({ type: "clear_tool_uses_20250919" });
+  }
+
+  return { edits };
 }

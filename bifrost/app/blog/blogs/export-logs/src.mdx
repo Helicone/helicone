@@ -1,0 +1,175 @@
+We built Helicone's data export tool because we kept seeing the same pattern: teams were using our observability platform to build better AI products.
+
+Teams would ask us, "Can I get my raw data out?". They wanted to fine-tune their models on real production data, build custom dashboards, and analyze user patterns.
+
+So we built the easiest export tool for an engineer - a simple CLI command to filter and export your logs in seconds.
+
+![Make The Most Of Your LLM Logs](/static/blog/export-logs/export-logs-data.webp)
+
+## How to Export Your Data
+
+Helicone's export tool is an npx command that pulls your logs directly from our API.
+
+- You can export your data in JSON, JSONL, or CSV format.
+- You can filter by date range, property, include full request/response bodies, or just grab the metadata.
+- The tool has built-in retry logic and progress tracking, so even massive exports (we're talking millions of requests) are exported in seconds.
+
+```bash
+npx @helicone/export --start-date 2024-01-01 --limit 5000 --include-body
+```
+
+## Here's 10 Ways to Maximize Your Data
+
+### 1. Fine-Tune Your Model on Real Production Data
+
+**The use case:** Your users interactions are your company's most valuable data. Real prompts, real responses, and implicit feedback about what works and what doesn't. Fine-tuning on this data makes your model better than your competitors.
+
+**How to do it:**
+
+1. Export your data with `--include-body` flag to get full prompts and completions
+2. Filter for successful requests with good user engagement (session length, follow-up queries, positive feedback scores)
+3. Format as JSONL for OpenAI/Anthropic fine-tuning: `{"messages": [{"role": "user", "content": "..."}, {"role": "assistant", "content": "..."}]}`
+4. Clean the data: remove PII, filter out error cases, deduplicate near-identical prompts
+5. Upload to your fine-tuning platform
+6. Track new model performance back in Helicone using custom properties to compare versions
+
+## 2. Perform Advanced Statistical Analysis on Model Performance
+
+**The use case:** Helicone's dashboard shows you trends and averages, but if you want to know whether latency correlate with token count, your p95 cost by user segment or whether weekend queries are fundamentally different from weekday ones - you'll need to run statistical analysis to reveal patterns that basic dashboards simply can't provide.
+
+**How to do it:**
+
+1. Export with date ranges that capture different periods (pre-launch vs post-launch, seasonal variations)
+2. Load into Python with pandas: `df = pd.read_json('helicone-export.jsonl', lines=True)`
+3. Run correlation analysis between latency, token count, model choice, and time of day
+4. Use scipy for hypothesis testing: "Did our prompt change actually improve response quality?"
+5. Build regression models to predict which queries will be expensive or slow
+6. Create distribution plots to spot outliers and anomalies
+
+## 3. Calculate Unit Economics by Customer Segment
+
+**The use case:** Not all users cost the same. Power users might generate 100x the requests of free users. Enterprise customers might prefer expensive models. What does each customer segment actually cost to serve? Which segments are profitable?
+
+**How to do it:**
+
+1. Export with `--property user_tier` (or whatever property tracks your segments)
+2. Calculate per-segment metrics: average requests/user, average cost/request, total monthly cost
+3. Join with your revenue data: LTV vs CAC vs COGS (including LLM costs)
+4. Identify money-losing segments: "Free tier users cost $12/month to serve but convert at 2%"
+5. Model scenarios: "If we limit free tier to 50 requests/month, we save $50k/year"
+6. Track over time to see if product changes improved unit economics
+
+## 4. Analyze Semantic Patterns in User Prompts
+
+**The use case:** You're getting thousands of prompts daily, but what are users actually asking for? Are there common themes? Are people using your AI feature in ways you didn't expect? Semantic analysis reveals user intent at scale.
+
+**How to do it:**
+
+1. Export request bodies with `--include-body` and `--format json`
+2. Extract just the user messages from the prompts
+3. Use embeddings (OpenAI's text-embedding-3-small, $0.02/1M tokens) to convert prompts to vectors
+4. Run clustering (K-means, DBSCAN) to group similar prompts
+5. Sample from each cluster to understand what users in that cluster want
+6. Use LLMs to auto-generate cluster labels: "These are all requests about data analysis"
+7. Track cluster sizes over time to see how usage evolves
+
+## 5. Create Synthetic Test Data for Edge Cases
+
+**The use case:** Your AI works great for common queries but breaks on edge cases. You need a comprehensive test suite but don't have enough real examples of rare scenarios (malicious prompts, unusual languages, extremely long inputs).
+
+**How to do it:**
+
+1. Export a dataset of real production prompts (10k+ examples)
+2. Identify rare edge cases: prompts >5k tokens, non-English languages, error-inducing patterns
+3. Use your exported examples as seeds for an LLM: "Generate 100 variations of this edge case"
+4. Create a synthetic test dataset with controlled distributions: 70% common cases, 20% uncommon, 10% rare
+5. Run your AI against the synthetic dataset and measure failure modes
+6. Use the synthetic data to train guardrails or improve error handling
+7. Re-export monthly and update your synthetic dataset as new patterns emerge
+
+## 6. Develop Custom Embedding Models for Your Domain
+
+**The use case:** Generic embeddings (from OpenAI, Cohere) work okay, but they weren't trained on your domain. Custom embeddings trained on your data will improve search, clustering, and recommendations for your specific use case.
+
+**How to do it:**
+
+1. Export your prompts and responses with `--include-body`
+2. Create training pairs: (user query, relevant response) as positive pairs, (user query, random response) as negative pairs
+3. Start with a pre-trained model (all-MiniLM-L6-v2 or similar) and fine-tune with contrastive learning
+4. Use sentence-transformers library: `model.fit(train_objectives=[(train_dataloader, train_loss)])`
+5. Evaluate on held-out data: measure cosine similarity for relevant vs irrelevant pairs
+6. Deploy your custom embedding model and use it for semantic search, recommendations, or RAG retrieval
+7. Track improvement in your application metrics (retrieval accuracy, user satisfaction)
+
+## 7. Build Automated Regression Testing Suites
+
+**The use case:** You're about to switch models, update a prompt, or change your RAG pipeline. How do you know you're not breaking things? Automated regression tests that run against real production scenarios tell you immediately.
+
+**How to do it:**
+
+1. Export a representative sample of production requests (1000 examples covering different user types and query types)
+2. Save the prompt, response, and expected behavior for each
+3. Create test cases: expected response characteristics (length, sentiment, contains key terms)
+4. Set up a CI/CD pipeline that runs your test suite on every PR
+5. Compare new model outputs against baselines using automated scoring (BLEU, semantic similarity, custom rubrics)
+6. Track performance deltas: "This change increased average latency by 200ms and reduced cost by 30%"
+7. Build a dashboard showing test pass rates over time
+
+## 8. Build User Journey Maps Across Your Entire Product
+
+**The use case:** Your AI feature exists within a larger product. Users sign up, onboard, use AI features, use non-AI features, maybe churn. Where does AI fit in the journey? Do AI users retain better? What paths lead to AI activation?
+
+**How to do it:**
+
+1. Export Helicone data with user_id and timestamp
+2. Load into your data warehouse alongside product analytics (Mixpanel, Amplitude, custom events)
+3. Build event sequences: Signup → Onboarding → First AI Request → Feature A → Feature B → etc.
+4. Use Sankey diagrams or path analysis to visualize flows
+5. Calculate conversion funnels: How many users who sign up actually use AI? How many who use AI once come back?
+6. Identify drop-off points: "60% of users who try AI once never return—why?"
+7. A/B test interventions: Does better AI onboarding increase retention?
+
+## 9. Build Custom ROI and Payback Models
+
+**The use case:** Your product team needs to justify the cost of LLM features. You need to prove AI drives revenue, reduces churn, or improves efficiency.
+
+**How to do it:**
+
+1. Export Helicone data with `user_id`, `cost`, `timestamp`
+2. Tag users as "AI users" vs "non-AI users" based on whether they've made LLM requests
+3. Calculate cohort metrics: retention curves, LTV, revenue per user, support ticket volume
+4. Compare cohorts: Do AI users have higher LTV? Lower churn? Higher NPS?
+5. Build a financial model: AI cost per user vs incremental revenue per user
+6. Calculate payback period: How long until AI investment is profitable?
+7. Run sensitivity analysis: "If we reduce AI costs by 40% through caching, payback improves to 4 months"
+
+## 10. Build Real-Time Dashboards in Your BI Tool
+
+**The use case:** Your exec team wants to see LLM metrics alongside revenue, MAU, and support tickets. Your data team wants to slice usage by customer tier, geography, and product feature. You need LLM data in the same place as everything else.
+
+**How to do it:**
+
+1. Set up a daily cron job to export data every x amount of time: `npx @helicone/export --start-date $(date -d yesterday +%Y-%m-%d)`
+2. Write export directly to your data warehouse (Snowflake, BigQuery, Redshift) or object storage (S3, GCS)
+3. Create your schema with proper indexing on `user_id`, `timestamp`, `model`, and `custom properties`
+4. Build Tableau/Looker/Mode dashboards with calculated fields: cost per user, success rate by feature, p99 latency
+5. Set up alerts in your BI tool for anomalies (costs spike >50%, error rates >5%)
+6. Join with other tables: `LLM usage × revenue = unit economics`, `LLM usage × churn = engagement health`
+
+## Conclusion
+
+Your LLM logs contain answers to questions you haven't asked yet. Which users are your most valuable? What are people really using your AI for? Where should you optimize? What's actually driving retention?
+
+The teams winning with AI treat observability data like raw material for their products. They export it, analyze it, build on it, and use it to make their products faster, cheaper, and better.
+
+Helicone's export tool exists because we kept seeing teams hit the limits of any dashboard. You can't fine-tune models in a dashboard. You can't join with revenue data in a dashboard. You can't build custom ML pipelines in a dashboard. We built it to help teams get the most value out of their data.
+
+The data's yours. You're already collecting it. Now go use it.
+
+---
+
+Ready to start? Export your first dataset:
+
+```bash
+npx @helicone/export --help
+```

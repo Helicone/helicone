@@ -1,0 +1,59 @@
+## About Brand.dev
+
+**Brand.dev is the internet's brand API** - the fastest way to personalize software with company logos, colors, and data from any domain.
+
+When your users sign up with their work email, Brand.dev lets you instantly show their company logo instead of asking them to upload it manually. Their API powers personalized onboarding across CRMs, dashboards, recruiting platforms, and any product that wants to feel tailored from day one.
+
+> I've started using the new AI Gateway and it simplifies things really well. One less dependency to work with.
+
+## Why Helicone
+
+Brand.dev moved to Helicone for three key reasons:
+
+**1) Properties for cost attribution:**
+Helicone's [custom properties](/docs/features/advanced-usage/custom-properties) let the team tag requests by organization, making it trivial to see which customers are driving the most [cost](/docs/guides/cookbooks/cost-tracking) and optimize around them.
+
+**2) Caching that works out of the box:**
+Brand data doesn't change often. Helicone's [built-in caching](/docs/features/advanced-usage/caching) makes it so Brand.dev can serve repeated requests instantly without hitting their models again.
+
+**3) Cole, Helicone's co-founder, has been great:**
+Always responsive, helpful, and quick to help. Helicone's support has been top-notch and Cole specifically is one of the key reasons we keep coming back!
+
+> Observability and gateway are table stakes. The question was whether we wanted to self-host or use cloud and Helicone just made sense for both, so we did cloud.
+
+## The Results
+
+#### Debugging time cut by 90%+ - from a week to an hour
+
+When latency spikes or requests fail, Brand.dev needs to know immediately whether the issue is their parameters, their [prompts](/docs/features/advanced-usage/prompts), or their fallback configuration.
+
+Helicone's tracing and observability means Brand.dev no longer spends hours [investigating issues](/docs/guides/cookbooks/debugging).
+
+#### Cost visibility and optimization by customer
+
+Using Helicone properties, Brand.dev can see exactly which customer organizations are driving the most LLM spend.
+
+This enables targeted optimization: [cache more aggressively](/docs/gateway/concepts/prompt-caching) for high-volume accounts, tune and manage prompts using the right tools for expensive use cases, and make data-driven infrastructure decisions.
+
+#### Focus on the product
+
+Instead of building and maintaining custom observability infrastructure, Brand.dev's engineering team can focus on what matters: making the best brand data API on the internet.
+
+> Latency matters most to us. Requests and responses need to be quick. Debugging that without Helicone would be a nightmare. Especially if the root cause is you need to tune your parameters or fallbacks.
+
+## Looking Ahead
+
+Brand.dev is growing fast, with a changelog that's constantly shipping updates. As their API handles more volume and more complex brand retrieval use cases, Helicone's [AI gateway](/docs/gateway/overview) and observability means they can scale without adding infrastructure overhead.
+
+For any API company where latency is the product, having instant visibility into what's slow, what's failing, and what's expensive is more than a nice-to-have. It's table-stakes.
+
+---
+
+## Try Helicone for free
+
+If you're building an API where latency matters and need visibility into your AI infrastructure:
+- [Built-in caching](/docs/features/advanced-usage/caching) that just works
+- [Custom properties](/docs/features/advanced-usage/custom-properties) for cost attribution
+- [AI Gateway](/docs/gateway/overview) with unified routing and fallbacks
+
+[Start for free today](https://us.helicone.ai/signup)

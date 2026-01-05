@@ -13,7 +13,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.000015,
         output: 0.000075,
-        web_search: 0.00001, // $10 per 1000 searches
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         cacheMultipliers: {
           cachedInput: 0.1,
           write5m: 1.25,
@@ -52,7 +52,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.000015,
         output: 0.000075,
-        web_search: 0.00001, // $10 per 1000 searches
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         cacheMultipliers: {
           cachedInput: 0.1,
           write5m: 1.25,
@@ -88,7 +88,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.000015,
         output: 0.000075,
-        web_search: 0.00001, // $10 per 1000 searches
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         cacheMultipliers: {
           cachedInput: 0.1,
           write5m: 1.25,
@@ -123,7 +123,7 @@ export const endpoints = {
         threshold: 0,
         input: 0.00001583, // $15.83/1M - worst-case: $15.00/1M (Anthropic/Google) * 1.055
         output: 0.00007913, // $79.13/1M - worst-case: $75.00/1M (Anthropic/Google) * 1.055
-        web_search: 0.00001, // $10 per 1000 searches
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
       },
     ],
     contextLength: 200000,
@@ -138,7 +138,40 @@ export const endpoints = {
       "top_k",
     ],
     ptbEnabled: true,
-    priority: 3,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "claude-opus-4-1:helicone": {
+    provider: "helicone",
+    author: "anthropic",
+    providerModelId: "pa/claude-opus-4-1-20250805",
+    version: "20250805",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000015,
+        output: 0.000075,
+        cacheMultipliers: {
+          cachedInput: 0.1,
+          write5m: 1.25,
+          write1h: 2.0,
+        },
+      },
+    ],
+    contextLength: 200000,
+    maxCompletionTokens: 32000,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "stop",
+      "reasoning",
+      "include_reasoning",
+      "tools",
+      "tool_choice",
+    ],
+    ptbEnabled: true,
+    responseFormat: "ANTHROPIC",
     endpointConfigs: {
       "*": {},
     },

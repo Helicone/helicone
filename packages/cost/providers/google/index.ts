@@ -89,6 +89,28 @@ export const costs: ModelRow[] = [
   },
   {
     model: {
+      operator: "includes",
+      value: "gemini-2.5-flash-preview-image",
+    },
+    cost: {
+      prompt_token: 0.0000003,
+      completion_token: 0.0000025,
+      prompt_cache_read_token: 0.000000075,
+    }
+  },
+  {
+    model: {
+      operator: "includes",
+      value: "gemini-2.5-flash-image",
+    },
+    cost: {
+      prompt_token: 0.0000003,
+      completion_token: 0.0000025,
+      prompt_cache_read_token: 0.000000075,
+    }
+  },
+  {
+    model: {
       operator: "equals",
       value: "gemini-2.5-pro",
     },
@@ -206,6 +228,28 @@ export const costs: ModelRow[] = [
     cost: {
       prompt_token: 0.0000001,
       completion_token: 0.0000004,
+    },
+  },
+  {
+    model: {
+      operator: "includes",
+      value: "gemini-3-pro-preview",
+    },
+    cost: {
+      prompt_token: 0.000002,
+      completion_token: 0.000012,
+      prompt_cache_read_token: 0.0000002,
+    },
+  },
+  {
+    model: {
+      operator: "includes",
+      value: "gemini-3-flash-preview",
+    },
+    cost: {
+      prompt_token: 0.0000005,
+      completion_token: 0.000003,
+      prompt_cache_read_token: 0.00000005,
     },
   },
 ];

@@ -11,8 +11,6 @@ import { checkPromptSecurity } from "../clients/PromptSecurityClient";
 import { S3Client } from "../clients/S3Client";
 import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 import { DBWrapper } from "../db/DBWrapper";
-import { RequestResponseStore } from "../db/RequestResponseStore";
-import { Valhalla } from "../db/valhalla";
 import { DBLoggable } from "../dbLogger/DBLoggable";
 import { Moderator } from "../managers/ModerationManager";
 import { RateLimitManager } from "../managers/RateLimitManager";
@@ -35,7 +33,6 @@ import {
 import { WalletManager } from "../managers/WalletManager";
 import { costOfPrompt } from "@helicone-package/cost";
 import { EscrowInfo } from "../ai-gateway/types";
-import { CostBreakdown } from "@helicone-package/cost/models/calculate-cost";
 import { getUsageProcessor } from "@helicone-package/cost/usage/getUsageProcessor";
 import { modelCostBreakdownFromRegistry } from "@helicone-package/cost/costCalc";
 import { heliconeProviderToModelProviderName } from "@helicone-package/cost/models/provider-helpers";
@@ -483,18 +480,6 @@ async function log(
       clickhouse: new ClickhouseClientWrapper(env),
       supabase: supabase,
       dbWrapper: new DBWrapper(env, auth),
-      queue: new RequestResponseStore(
-        createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY),
-        new DBQueryTimer(ctx, {
-          enabled: (env.DATADOG_ENABLED ?? "false") === "true",
-          apiKey: env.DATADOG_API_KEY,
-          endpoint: env.DATADOG_ENDPOINT,
-        }),
-        new Valhalla(env.VALHALLA_URL, auth),
-        new ClickhouseClientWrapper(env),
-        env.FALLBACK_QUEUE,
-        env.REQUEST_AND_RESPONSE_QUEUE_KV
-      ),
       requestResponseManager: new RequestResponseManager(
         new S3Client(
           env.S3_ACCESS_KEY ?? "",
@@ -540,22 +525,14 @@ async function log(
           });
 
           if (usage.data) {
-            // For OpenRouter, use the direct cost from their response if available
-            if (
-              attemptProvider === "openrouter" &&
-              "cost" in usage.data &&
-              typeof usage.data.cost === "number"
-            ) {
-              // OpenRouter provides total cost in USD directly
-              cost = usage.data.cost;
-            } else {
-              // Use the standard cost calculation from registry
-              const breakdown = modelCostBreakdownFromRegistry({
-                modelUsage: usage.data,
-                providerModelId: attemptModel,
-                provider: attemptProvider,
-              });
-              cost = breakdown?.totalCost;
+            const breakdown = modelCostBreakdownFromRegistry({
+              modelUsage: usage.data,
+              providerModelId: attemptModel,
+              provider: attemptProvider,
+            });
+
+            if (breakdown) {
+              cost = breakdown.totalCost;
             }
           } else {
             console.error(
@@ -630,26 +607,43 @@ async function log(
       }
 
       // Handle escrow finalization if needed
-      if (proxyRequest.escrowInfo) {
-        const walletId = env.WALLET.idFromName(orgData.organizationId);
-        const walletStub = env.WALLET.get(walletId);
-        const walletManager = new WalletManager(env, ctx, walletStub);
-        // Convert cost from USD to cents (cost is in USD dollars, wallet expects cents)
-        const costInCents = cost !== undefined ? cost * 100 : undefined;
+      const walletId = env.WALLET.idFromName(orgData.organizationId);
+      const walletStub = env.WALLET.get(walletId);
+      const walletManager = new WalletManager(env, ctx, walletStub);
 
-        const escrowFinalizationResult =
-          await walletManager.finalizeEscrowAndSyncSpend(
-            orgData.organizationId,
-            proxyRequest,
-            costInCents,
-            statusCode,
-            cachedResponse
+      if (!cachedResponse) {
+        const checkTopOffPromise =
+          walletManager.walletStub.checkAndScheduleAutoTopoffAlarm(
+            orgData.organizationId
           );
-        if (escrowFinalizationResult.error !== null) {
-          console.error(
-            "Error finalizing escrow and syncing spend",
-            escrowFinalizationResult.error
-          );
+
+        if (proxyRequest.escrowInfo) {
+          // Convert cost from USD to cents (cost is in USD dollars, wallet expects cents)
+          const costInCents = cost !== undefined ? cost * 100 : undefined;
+
+          const escrowFinalizationResult =
+            await walletManager.finalizeEscrowAndSyncSpend(
+              orgData.organizationId,
+              proxyRequest,
+              costInCents,
+              statusCode
+            );
+          if (escrowFinalizationResult.error !== null) {
+            console.error(
+              "Error finalizing escrow and syncing spend",
+              escrowFinalizationResult.error
+            );
+          }
+        }
+
+        // Wait for top-off check to complete
+        await checkTopOffPromise;
+      } else {
+        if (proxyRequest.escrowInfo) {
+          const escrowResult = await proxyRequest.escrowInfo.escrow;
+          if (escrowResult.data) {
+            await walletStub.cancelEscrow(escrowResult.data.reservedEscrowId);
+          }
         }
       }
 

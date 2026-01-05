@@ -102,6 +102,7 @@ const SignUp = () => {
             return;
           }
         }}
+        showSSOButton={true}
         authFormType={"signup"}
       />
       <ThemedModal

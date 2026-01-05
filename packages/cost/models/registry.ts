@@ -30,8 +30,13 @@ import {
 } from "./authors/moonshotai";
 import { alibabaModels, alibabaEndpointConfig } from "./authors/alibaba";
 import { deepseekModels, deepseekEndpointConfig } from "./authors/deepseek";
-import { mistralModels, mistralEndpointConfig } from "./authors/mistralai";
+import { mistralModels, mistralEndpointConfig } from "./authors/mistral";
 import { zaiModels, zaiEndpointConfig } from "./authors/zai";
+import { baiduModels, baiduEndpointConfig } from "./authors/baidu";
+import {
+  perplexityModels,
+  perplexityEndpointConfig,
+} from "./authors/perplexity/sonar";
 
 // Combine all models
 const allModels = {
@@ -44,7 +49,9 @@ const allModels = {
   ...alibabaModels,
   ...deepseekModels,
   ...mistralModels,
-  ...zaiModels
+  ...zaiModels,
+  ...baiduModels,
+  ...perplexityModels,
 } satisfies Record<string, ModelConfig>;
 
 // Combine all endpoint configs
@@ -58,7 +65,9 @@ const modelProviderConfigs = {
   ...alibabaEndpointConfig,
   ...deepseekEndpointConfig,
   ...mistralEndpointConfig,
-  ...zaiEndpointConfig
+  ...zaiEndpointConfig,
+  ...baiduEndpointConfig,
+  ...perplexityEndpointConfig,
 } satisfies Record<string, ModelProviderConfig>;
 
 // Combine all archived endpoints
@@ -66,7 +75,10 @@ const archivedModelProviderConfigs = {
   // TODO: if any archived endpoints are added, make sure they are included here
 } satisfies Record<string, ModelProviderConfig>;
 
-const indexes: ModelIndexes = buildIndexes(modelProviderConfigs, archivedModelProviderConfigs);
+const indexes: ModelIndexes = buildIndexes(
+  modelProviderConfigs,
+  archivedModelProviderConfigs
+);
 
 function getAllModelIds(): Result<ModelName[]> {
   return ok(Object.keys(allModels) as ModelName[]);
@@ -74,6 +86,16 @@ function getAllModelIds(): Result<ModelName[]> {
 
 function getAllModelsWithIds(): Result<Record<ModelName, ModelConfig>> {
   return ok(allModels);
+}
+
+const modelToAuthorMap: Map<string, string> = new Map();
+for (const [modelName, config] of Object.entries(allModels)) {
+  modelToAuthorMap.set(modelName.toLowerCase(), config.author);
+}
+
+function getAuthorByModel(model: string): string | null {
+  const normalizedModel = model.toLowerCase();
+  return modelToAuthorMap.get(normalizedModel) ?? null;
 }
 
 function getEndpointsByModel(model: string): Result<Endpoint[]> {
@@ -106,7 +128,10 @@ function createPassthroughEndpoint(
     maxCompletionTokens: 0,
     supportedParameters: [],
     // Use the provider's supportedPlugins if available
-    supportedPlugins: supportedPlugins && supportedPlugins.length > 0 ? supportedPlugins : undefined,
+    supportedPlugins:
+      supportedPlugins && supportedPlugins.length > 0
+        ? supportedPlugins
+        : undefined,
     endpointConfigs: {},
   };
 
@@ -167,10 +192,18 @@ function getModelProviderConfigByProviderModelId(
   provider: ModelProviderName
 ): Result<ModelProviderConfig> {
   const providerModelIdKey = `${providerModelId}:${provider}`;
-  const result = indexes.providerModelIdToConfig.get(providerModelIdKey);
-  return result
-    ? ok(result)
-    : err(`Config not found for providerModelId: ${providerModelId}`);
+
+  let result = indexes.providerModelIdToConfig.get(providerModelIdKey);
+  if (result) {
+    return ok(result);
+  }
+
+  result = indexes.providerModelIdAliasToConfig.get(providerModelIdKey);
+  if (result) {
+    return ok(result);
+  }
+
+  return err(`Config not found for providerModelId: ${providerModelId}`);
 }
 
 function getModelProviderConfigs(model: string): Result<ModelProviderConfig[]> {
@@ -232,7 +265,7 @@ function getModelProviderConfigByVersion(
   // if the given version matches the active config version (or both are undefined/empty)
   if (
     (!currentEntry.data?.config.version && !version) ||
-    (currentEntry.data?.config.version === version)
+    currentEntry.data?.config.version === version
   ) {
     return ok(currentEntry.data?.config ?? null);
   }
@@ -260,4 +293,5 @@ export const registry = {
   getModelProviderEntriesByModel,
   getModelProviderEntry,
   getModelProviderConfigByVersion,
+  getAuthorByModel,
 };

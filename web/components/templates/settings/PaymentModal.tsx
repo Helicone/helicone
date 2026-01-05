@@ -12,16 +12,21 @@ import {
 interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
+  returnUrl?: string;
 }
 
-const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) => {
-  const [amount, setAmount] = useState(5);
+const PaymentModal: React.FC<PaymentModalProps> = ({
+  isOpen,
+  onClose,
+  returnUrl,
+}) => {
+  const [amount, setAmount] = useState(10);
   const [customAmount, setCustomAmount] = useState("");
   const createCheckoutSession = useCreateCheckoutSession();
   const { setNotification } = useNotification();
 
-  const presetAmounts = [5, 20, 100, 500];
-  const MIN_AMOUNT = 5;
+  const presetAmounts = [10, 20, 100, 500];
+  const MIN_AMOUNT = 10;
 
   const creditsAmountCents = Math.round(amount * 100);
   const percentageFeeCents = Math.ceil(
@@ -42,7 +47,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) => {
     setCustomAmount(value);
 
     if (value === "") {
-      setAmount(5);
+      setAmount(10);
       return;
     }
 
@@ -55,7 +60,12 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose }) => {
   const handleSubmit = async () => {
     if (amount >= MIN_AMOUNT) {
       try {
-        await createCheckoutSession.mutateAsync({ body: { amount } });
+        await createCheckoutSession.mutateAsync({
+          body: {
+            amount,
+            ...(returnUrl && { returnUrl }),
+          },
+        });
       } catch (error) {
         setNotification("Failed to start checkout. Please try again.", "error");
       }

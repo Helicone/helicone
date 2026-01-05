@@ -5,7 +5,6 @@ import type {
   Endpoint,
   RequestBodyContext,
   RequestParams,
-  ResponseFormat,
   PluginId,
 } from "../types";
 
@@ -25,12 +24,19 @@ export class AnthropicProvider extends BaseProvider {
     return "https://api.anthropic.com/v1/messages";
   }
 
-  authenticate(authContext: AuthContext): AuthResult {
+  authenticate(authContext: AuthContext, endpoint: Endpoint): AuthResult {
     const headers: Record<string, string> = {};
     headers["x-api-key"] = authContext.apiKey || "";
+    const enabledBetaHeaders = [
+      "context-management-2025-06-27"
+    ];
     if (authContext.bodyMapping === "OPENAI" || !headers["anthropic-version"]) {
       headers["anthropic-version"] = "2023-06-01";
     }
+    if (endpoint.providerModelId.includes("sonnet-4")) {
+      enabledBetaHeaders.push("context-1m-2025-08-07");
+    }
+    headers["anthropic-beta"] = enabledBetaHeaders.join(",");
     return { headers };
   }
 
@@ -41,7 +47,12 @@ export class AnthropicProvider extends BaseProvider {
         model: endpoint.providerModelId,
       });
     }
-    const anthropicBody = context.toAnthropic(context.parsedBody, endpoint.providerModelId);
+    let updatedBody = context.parsedBody;
+
+    if (context.bodyMapping === "RESPONSES") {
+      updatedBody = context.toChatCompletions(updatedBody);
+    }
+    const anthropicBody = context.toAnthropic(updatedBody, endpoint.providerModelId);
     return JSON.stringify(anthropicBody);
   }
 

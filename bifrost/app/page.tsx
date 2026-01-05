@@ -10,12 +10,10 @@ const BigDashboard = dynamic(() => import("@/components/home/BigDashboard"));
 const Companies = dynamic(() => import("@/components/home/Companies"));
 const CTA = dynamic(() => import("@/components/home/CTA"));
 const FAQ = dynamic(() => import("@/components/home/FAQ"));
-const LLMLifecycle = dynamic(() => import("@/components/home/LLMLifecycle"));
 const Log = dynamic(() => import("@/components/home/Log"));
 const OpenSource = dynamic(() => import("@/components/home/OpenSource"));
 const Production = dynamic(() => import("@/components/home/Production"));
 const Prototype = dynamic(() => import("@/components/home/Prototype"));
-const Quote = dynamic(() => import("@/components/home/Quote"));
 const Quote2 = dynamic(() => import("@/components/home/Quote2"));
 const Quote3 = dynamic(() => import("@/components/home/Quote3"));
 const Stats = dynamic(() => import("@/components/home/Stats"));
@@ -56,16 +54,10 @@ export default async function Home() {
             <Companies className={cn("bg-[#f2f9fc]")} />
           </LazyLoadComponent>
           <LazyLoadComponent fallback={<LoadingSection />}>
-            <Quote2 />
-          </LazyLoadComponent>
-          <LazyLoadComponent fallback={<LoadingSection />}>
             <Integrations />
           </LazyLoadComponent>
           <LazyLoadComponent fallback={<LoadingSection />}>
-            <Quote />
-          </LazyLoadComponent>
-          <LazyLoadComponent fallback={<LoadingSection />}>
-            <LLMLifecycle />
+            <Quote2 />
           </LazyLoadComponent>
           <LazyLoadComponent fallback={<LoadingSection />}>
             <AiGateway />

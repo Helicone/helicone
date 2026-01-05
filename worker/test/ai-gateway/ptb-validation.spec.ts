@@ -3,10 +3,13 @@ import { env, runInDurableObject } from "cloudflare:test";
 import "../setup";
 import { runGatewayTest } from "./test-framework";
 import { setSupabaseTestCase } from "../setup";
+import { clearProviderKeysInMemoryCache } from "../../src/lib/util/cache/inMemoryCache";
 
 describe("PTB request validation", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Clear in-memory cache to prevent stale data from previous tests
+    clearProviderKeysInMemoryCache();
   });
 
   afterEach(() => {
@@ -27,8 +30,11 @@ describe("PTB request validation", () => {
       },
     });
 
-    const body = await response.json();
+    const body = (await response.json()) as any;
     expect(body.error).toContain("messages");
+    expect(body.error).toContain(
+      "https://docs.helicone.ai/rest/ai-gateway/post-v1-chat-completions"
+    );
   });
 
   it("allows BYOK requests with the same payload", async () => {
@@ -120,7 +126,7 @@ describe("PTB request validation", () => {
       },
     });
 
-    const body = await response.json() as any;
+    const body = (await response.json()) as any;
     expect(body.error).toContain("web_search_options");
   });
 
@@ -131,9 +137,7 @@ describe("PTB request validation", () => {
       model: "gpt-4o-mini/openai",
       request: {
         body: {
-          messages: [
-            { role: "user", content: "Hello" },
-          ],
+          messages: [{ role: "user", content: "Hello" }],
           model: "gpt-4o-mini",
           modalities: ["text", "audio"],
         },
@@ -144,7 +148,7 @@ describe("PTB request validation", () => {
       },
     });
 
-    const body = await response.json() as any;
+    const body = (await response.json()) as any;
     expect(body.error).toContain("modalities");
   });
 
@@ -155,9 +159,7 @@ describe("PTB request validation", () => {
       model: "gpt-4o-mini/openai",
       request: {
         body: {
-          messages: [
-            { role: "user", content: "Say hello" },
-          ],
+          messages: [{ role: "user", content: "Say hello" }],
           model: "gpt-4o-mini",
           audio: {
             voice: "alloy",
@@ -171,7 +173,7 @@ describe("PTB request validation", () => {
       },
     });
 
-    const body = await response.json() as any;
+    const body = (await response.json()) as any;
     expect(body.error).toContain("audio");
   });
 
@@ -188,19 +190,19 @@ describe("PTB request validation", () => {
               content: [
                 {
                   type: "text",
-                  text: "What do you hear in this audio?"
+                  text: "What do you hear in this audio?",
                 },
                 {
                   type: "input_audio",
                   input_audio: {
                     data: "base64-audio-data",
-                    format: "wav"
-                  }
-                }
-              ]
+                    format: "wav",
+                  },
+                },
+              ],
             },
           ],
-          model: "gpt-4o-mini"
+          model: "gpt-4o-mini",
         },
       },
       expected: {
@@ -209,7 +211,7 @@ describe("PTB request validation", () => {
       },
     });
 
-    const body = await response.json() as any;
+    const body = (await response.json()) as any;
     expect(body.error).toContain("Invalid input");
   });
 
@@ -231,9 +233,7 @@ describe("PTB request validation", () => {
         model: "gpt-4o-mini/openai",
         request: {
           body: {
-            messages: [
-              { role: "user", content: "Hello" },
-            ],
+            messages: [{ role: "user", content: "Hello" }],
             model: "gpt-4o-mini",
             prompt_cache_key: "doc-analysis-123",
           },
@@ -241,9 +241,9 @@ describe("PTB request validation", () => {
         expected: {
           providers: [
             {
-              url: "https://api.openai.com/v1/chat/completions",
+              url: "https://inference.helicone.ai/openai/v1/chat/completions",
               response: "success",
-              model: "gpt-4o-mini",
+              model: "pa/gt-4p-m",
               expects: {
                 escrowInfo: true,
               },
@@ -271,9 +271,7 @@ describe("PTB request validation", () => {
         model: "gpt-4o-mini/openai",
         request: {
           body: {
-            messages: [
-              { role: "user", content: "Hello" },
-            ],
+            messages: [{ role: "user", content: "Hello" }],
             model: "gpt-4o-mini",
             cache_control: {
               type: "ephemeral",
@@ -284,9 +282,9 @@ describe("PTB request validation", () => {
         expected: {
           providers: [
             {
-              url: "https://api.openai.com/v1/chat/completions",
+              url: "https://inference.helicone.ai/openai/v1/chat/completions",
               response: "success",
-              model: "gpt-4o-mini",
+              model: "pa/gt-4p-m",
               expects: {
                 escrowInfo: true,
               },
@@ -314,9 +312,7 @@ describe("PTB request validation", () => {
         model: "gpt-4o-mini/openai",
         request: {
           body: {
-            messages: [
-              { role: "user", content: "Hello" },
-            ],
+            messages: [{ role: "user", content: "Hello" }],
             model: "gpt-4o-mini",
             user: "user-123",
             safety_identifier: "safe-session-456",
@@ -325,9 +321,9 @@ describe("PTB request validation", () => {
         expected: {
           providers: [
             {
-              url: "https://api.openai.com/v1/chat/completions",
+              url: "https://inference.helicone.ai/openai/v1/chat/completions",
               response: "success",
-              model: "gpt-4o-mini",
+              model: "pa/gt-4p-m",
               expects: {
                 escrowInfo: true,
               },
@@ -355,9 +351,7 @@ describe("PTB request validation", () => {
         model: "gpt-4o-mini/openai",
         request: {
           body: {
-            messages: [
-              { role: "user", content: "Hello" },
-            ],
+            messages: [{ role: "user", content: "Hello" }],
             model: "gpt-4o-mini",
             prompt_cache_key: "doc-analysis-123",
             user: "user-123",
@@ -375,9 +369,9 @@ describe("PTB request validation", () => {
         expected: {
           providers: [
             {
-              url: "https://api.openai.com/v1/chat/completions",
+              url: "https://inference.helicone.ai/openai/v1/chat/completions",
               response: "success",
-              model: "gpt-4o-mini",
+              model: "pa/gt-4p-m",
               expects: {
                 escrowInfo: true,
               },
@@ -395,9 +389,7 @@ describe("PTB request validation", () => {
         model: "gpt-4o-mini/openai",
         request: {
           body: {
-            messages: [
-              { role: "user", content: "Hello" },
-            ],
+            messages: [{ role: "user", content: "Hello" }],
             model: "gpt-4o-mini",
             cache_control: {
               type: "permanent", // Should be 'ephemeral'
@@ -411,7 +403,7 @@ describe("PTB request validation", () => {
         },
       });
 
-      const body = await response.json() as any;
+      const body = (await response.json()) as any;
       expect(body.error).toContain("cache_control");
     });
 
@@ -422,9 +414,7 @@ describe("PTB request validation", () => {
         model: "gpt-4o-mini/openai",
         request: {
           body: {
-            messages: [
-              { role: "user", content: "Hello" },
-            ],
+            messages: [{ role: "user", content: "Hello" }],
             model: "gpt-4o-mini",
             cache_control: "invalid-string", // Should be object
           },
@@ -435,9 +425,8 @@ describe("PTB request validation", () => {
         },
       });
 
-      const body = await response.json() as any;
+      const body = (await response.json()) as any;
       expect(body.error).toContain("cache_control");
     });
   });
 });
-

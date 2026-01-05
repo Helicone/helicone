@@ -4,6 +4,7 @@ import { AnthropicUsageProcessor } from "@helicone-package/cost/usage/anthropicU
 import { GroqUsageProcessor } from "@helicone-package/cost/usage/groqUsageProcessor";
 import { XAIUsageProcessor } from "@helicone-package/cost/usage/xaiUsageProcessor";
 import { DeepSeekUsageProcessor } from "@helicone-package/cost/usage/deepseekUsageProcessor";
+import { GoogleUsageProcessor } from "@helicone-package/cost/usage/googleUsageProcessor";
 import {
   VertexUsageProcessor,
   VertexOpenAIUsageProcessor,
@@ -21,6 +22,11 @@ describe("getUsageProcessor", () => {
   it("should return AnthropicUsageProcessor for anthropic provider", () => {
     const processor = getUsageProcessor("anthropic");
     expect(processor).toBeInstanceOf(AnthropicUsageProcessor);
+  });
+
+  it("should return GoogleUsageProcessor for google ai provider", () => {
+    const processor = getUsageProcessor("google-ai-studio");
+    expect(processor).toBeInstanceOf(GoogleUsageProcessor);
   });
 
   it("should return OpenAIUsageProcessor for xai provider", () => {
@@ -43,9 +49,45 @@ describe("getUsageProcessor", () => {
     expect(processor).toBeInstanceOf(OpenAIUsageProcessor);
   });
 
+  it("should return OpenAIUsageProcessor for mistral provider", () => {
+    const processor = getUsageProcessor("mistral");
+    expect(processor).toBeInstanceOf(OpenAIUsageProcessor);
+  });
+
   it("should return null for unsupported provider", () => {
     const processor = getUsageProcessor("unsupported-provider" as any);
     expect(processor).toBeNull();
+  });
+
+  it("should parse native google usage metadata", async () => {
+    const processor = new GoogleUsageProcessor();
+    const mockGoogleResponse = {
+      usageMetadata: {
+        promptTokenCount: 6,
+        candidatesTokenCount: 19,
+        totalTokenCount: 60,
+        thoughtsTokenCount: 35,
+        promptTokensDetails: [{ modality: "TEXT", tokenCount: 6 }],
+        candidatesTokensDetails: [{ modality: "TEXT", tokenCount: 19 }],
+      },
+      modelVersion: "gemini-2.5-flash",
+      responseId: "abc",
+      name: "abc",
+      candidates: [],
+    };
+
+    const result = await processor.parse({
+      responseBody: JSON.stringify(mockGoogleResponse),
+      isStream: false,
+      model: "gemini-2.5-flash",
+    });
+
+    expect(result.error).toBeNull();
+    expect(result.data).toEqual({
+      input: 6,
+      output: 19,
+      thinking: 35,
+    });
   });
 });
 
@@ -70,6 +112,8 @@ describe("OpenAIUsageProcessor", () => {
       output: 10,
       cacheDetails: {
         cachedInput: 1152,
+        write5m: 0,
+        write1h: 0,
       },
     });
   });
@@ -334,7 +378,7 @@ describe("XAI/Grok specific features", () => {
     expect(result.error).toBeNull();
     expect(result.data).toEqual({
       input: 45, // text_tokens (45)
-      output: 35, // completion_tokens (120) - XAI excludes reasoning from this (new behavior)
+      output: 120, // completion_tokens (120) - XAI doesn't include reasoning in completion_tokens
       cacheDetails: {
         cachedInput: 5,
       },
@@ -528,13 +572,19 @@ describe("VertexUsageProcessor", () => {
 
   it("should use VertexOpenAIUsageProcessor for non-claude models", async () => {
     const mockVertexResponse = {
-      usage: {
-        prompt_tokens: 100,
-        completion_tokens: 50,
-        completion_tokens_details: {
-          reasoning_tokens: 20,
-          audio_tokens: 5,
-        },
+      usageMetadata: {
+        promptTokenCount: 100,
+        candidatesTokenCount: 45,
+        totalTokenCount: 170,
+        thoughtsTokenCount: 20,
+        promptTokensDetails: [
+          { modality: "TEXT", tokenCount: 90 },
+          { modality: "IMAGE", tokenCount: 10 },
+        ],
+        candidatesTokensDetails: [
+          { modality: "TEXT", tokenCount: 45 },
+          { modality: "AUDIO", tokenCount: 5 },
+        ],
       },
     };
 
@@ -546,10 +596,113 @@ describe("VertexUsageProcessor", () => {
 
     expect(result.error).toBeNull();
     expect(result.data).toEqual({
-      input: 100,
-      output: 45, // completion_tokens (50) - audio_tokens (5)
+      input: 90,
+      output: 45,
       thinking: 20,
-      audio: 5,
+      audio: {
+        input: 0,
+        cachedInput: 0,
+        output: 5,
+      },
+      image: {
+        input: 10,
+        cachedInput: 0,
+        output: 0,
+      },
+    });
+  });
+
+  it("should keep modality-specific counts for vertex responses", async () => {
+    const mockVertexResponse = {
+      usageMetadata: {
+        promptTokenCount: 200,
+        candidatesTokenCount: 120,
+        totalTokenCount: 320,
+        cachedContentTokenCount: 20,
+        promptTokensDetails: [
+          { modality: "TEXT", tokenCount: 150 },
+          { modality: "AUDIO", tokenCount: 10 },
+          { modality: "IMAGE", tokenCount: 5 },
+          { modality: "VIDEO", tokenCount: 15 },
+        ],
+        candidatesTokensDetails: [
+          { modality: "TEXT", tokenCount: 106 },
+          { modality: "AUDIO", tokenCount: 8 },
+          { modality: "IMAGE", tokenCount: 2 },
+          { modality: "VIDEO", tokenCount: 4 },
+        ],
+        cacheTokenDetails: [{ modality: "TEXT", tokenCount: 20 }],
+      },
+    };
+
+    const result = await vertexProcessor.parse({
+      responseBody: JSON.stringify(mockVertexResponse),
+      isStream: false,
+      model: "gemini-2.5-flash",
+    });
+
+    expect(result.error).toBeNull();
+    expect(result.data).toEqual({
+      input: 130, // TEXT (150) - cached TEXT (20)
+      output: 106, // TEXT completion tokens
+      cacheDetails: {
+        cachedInput: 20,
+      },
+      audio: {
+        input: 10,
+        cachedInput: 0,
+        output: 8,
+      },
+      image: {
+        input: 5,
+        cachedInput: 0,
+        output: 2,
+      },
+      video: {
+        input: 15,
+        cachedInput: 0,
+        output: 4,
+      },
+    });
+  });
+
+  it("should parse native google usageMetadata from vertex responses", async () => {
+    const mockGoogleResponse = {
+      usageMetadata: {
+        promptTokenCount: 14,
+        candidatesTokenCount: 19,
+        totalTokenCount: 68,
+        thoughtsTokenCount: 35,
+        promptTokensDetails: [
+          { modality: "TEXT", tokenCount: 6 },
+          { modality: "IMAGE", tokenCount: 8 },
+        ],
+        candidatesTokensDetails: [
+          { modality: "TEXT", tokenCount: 19 },
+        ],
+      },
+      modelVersion: "gemini-2.5-flash",
+      responseId: "abc",
+      name: "abc",
+      candidates: [],
+    };
+
+    const result = await vertexProcessor.parse({
+      responseBody: JSON.stringify(mockGoogleResponse),
+      isStream: false,
+      model: "gemini-2.5-flash",
+    });
+
+    expect(result.error).toBeNull();
+    expect(result.data).toEqual({
+      input: 6,
+      output: 19,
+      thinking: 35,
+      image: {
+        input: 8,
+        cachedInput: 0,
+        output: 0,
+      },
     });
   });
 });
@@ -558,26 +711,38 @@ describe("VertexOpenAIUsageProcessor vs OpenAIUsageProcessor", () => {
   const vertexProcessor = new VertexOpenAIUsageProcessor();
   const openaiProcessor = new OpenAIUsageProcessor();
 
-  it("should handle reasoning tokens differently between OpenAI and Vertex", async () => {
-    // This represents a response where reasoning tokens are included
-    const mockResponse = {
+  it("should handle reasoning tokens in their respective native formats", async () => {
+    // OpenAI format: reasoning_tokens included in completion_tokens
+    const mockOpenAIResponse = {
       usage: {
         prompt_tokens: 100,
-        completion_tokens: 50, // For OpenAI: includes reasoning, For Vertex: excludes reasoning
+        completion_tokens: 50, // includes reasoning tokens
         completion_tokens_details: {
           reasoning_tokens: 20,
         },
       },
     };
 
+    // Vertex/Google native format: thoughtsTokenCount is separate
+    const mockVertexResponse = {
+      usageMetadata: {
+        promptTokenCount: 100,
+        candidatesTokenCount: 50, // excludes reasoning tokens
+        totalTokenCount: 170,
+        thoughtsTokenCount: 20,
+        promptTokensDetails: [{ modality: "TEXT", tokenCount: 100 }],
+        candidatesTokensDetails: [{ modality: "TEXT", tokenCount: 50 }],
+      },
+    };
+
     const openaiResult = await openaiProcessor.parse({
-      responseBody: JSON.stringify(mockResponse),
+      responseBody: JSON.stringify(mockOpenAIResponse),
       isStream: false,
       model: "gpt-4o",
     });
 
     const vertexResult = await vertexProcessor.parse({
-      responseBody: JSON.stringify(mockResponse),
+      responseBody: JSON.stringify(mockVertexResponse),
       isStream: false,
       model: "gemini-pro",
     });
@@ -586,13 +751,14 @@ describe("VertexOpenAIUsageProcessor vs OpenAIUsageProcessor", () => {
     expect(openaiResult.data?.output).toBe(30); // 50 - 20
     expect(openaiResult.data?.thinking).toBe(20);
 
-    // Vertex uses completion_tokens as-is (already excludes reasoning tokens)
-    expect(vertexResult.data?.output).toBe(50); // 50 (no subtraction)
+    // Vertex uses candidatesTokenCount as-is (already excludes reasoning tokens)
+    expect(vertexResult.data?.output).toBe(50);
     expect(vertexResult.data?.thinking).toBe(20);
   });
 
-  it("should handle cached tokens consistently", async () => {
-    const mockResponse = {
+  it("should handle cached tokens in their respective native formats", async () => {
+    // OpenAI format
+    const mockOpenAIResponse = {
       usage: {
         prompt_tokens: 100,
         completion_tokens: 50,
@@ -602,24 +768,37 @@ describe("VertexOpenAIUsageProcessor vs OpenAIUsageProcessor", () => {
       },
     };
 
+    // Vertex/Google native format
+    const mockVertexResponse = {
+      usageMetadata: {
+        promptTokenCount: 100,
+        candidatesTokenCount: 50,
+        totalTokenCount: 150,
+        cachedContentTokenCount: 30,
+        promptTokensDetails: [{ modality: "TEXT", tokenCount: 100 }],
+        candidatesTokensDetails: [{ modality: "TEXT", tokenCount: 50 }],
+        cacheTokenDetails: [{ modality: "TEXT", tokenCount: 30 }],
+      },
+    };
+
     const openaiResult = await openaiProcessor.parse({
-      responseBody: JSON.stringify(mockResponse),
+      responseBody: JSON.stringify(mockOpenAIResponse),
       isStream: false,
       model: "gpt-4o",
     });
 
     const vertexResult = await vertexProcessor.parse({
-      responseBody: JSON.stringify(mockResponse),
+      responseBody: JSON.stringify(mockVertexResponse),
       isStream: false,
       model: "gemini-pro",
     });
 
-    // Both should handle cached tokens the same way
+    // Both should handle cached tokens similarly
     expect(openaiResult.data?.input).toBe(70); // 100 - 30
     expect(openaiResult.data?.output).toBe(50);
     expect(openaiResult.data?.cacheDetails?.cachedInput).toBe(30);
 
-    expect(vertexResult.data?.input).toBe(70); // 100 - 30
+    expect(vertexResult.data?.input).toBe(70); // TEXT (100) - cached TEXT (30)
     expect(vertexResult.data?.output).toBe(50);
     expect(vertexResult.data?.cacheDetails?.cachedInput).toBe(30);
   });

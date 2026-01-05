@@ -23,7 +23,7 @@ const Slider = React.forwardRef<
     {props.value?.map((_, index) => (
       <SliderPrimitive.Thumb
         key={index}
-        className="block h-4 w-4 rounded-full border-2 border-blue-500 dark:border-blue-400 bg-white dark:bg-gray-900 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+        className="block h-4 w-4 rounded-full border-2 border-blue-500 dark:border-blue-400 bg-white dark:bg-gray-900 shadow-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-grab active:cursor-grabbing hover:border-blue-600 dark:hover:border-blue-300"
       />
     ))}
   </SliderPrimitive.Root>

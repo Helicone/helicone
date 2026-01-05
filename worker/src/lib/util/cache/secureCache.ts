@@ -5,6 +5,10 @@ import {
   CacheProvider,
   TokenWithTTL,
 } from "../../../../../packages/common/cache/provider";
+import { InMemoryCache } from "./inMemoryCache";
+
+// Re-export InMemoryCache for backwards compatibility
+export { InMemoryCache };
 
 const hashWithHmac = async (key: string, hmac_key: 1 | 2) => {
   const hashedKey = await hash(hmac_key === 1 ? key : `${key}_2`);
@@ -15,47 +19,6 @@ export interface SecureCacheEnv {
   SECURE_CACHE: Env["SECURE_CACHE"];
   REQUEST_CACHE_KEY: Env["REQUEST_CACHE_KEY"];
   REQUEST_CACHE_KEY_2: Env["REQUEST_CACHE_KEY_2"];
-}
-
-class InMemoryCache<T> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private static instance: InMemoryCache<any>;
-  private cache: Map<string, T>;
-  private maxEntries: number;
-
-  private constructor(maxEntries = 100) {
-    this.cache = new Map<string, T>();
-    this.maxEntries = maxEntries;
-  }
-
-  public static getInstance<T>(maxEntries = 100): InMemoryCache<T> {
-    if (!InMemoryCache.instance) {
-      InMemoryCache.instance = new InMemoryCache<T>(maxEntries);
-    }
-    return InMemoryCache.instance;
-  }
-
-  set(key: string, value: T): void {
-    if (this.cache.size >= this.maxEntries) {
-      const firstKey = this.cache.keys().next().value;
-      if (firstKey) {
-        this.cache.delete(firstKey);
-      }
-    }
-    this.cache.set(key, value);
-  }
-
-  get(key: string): T | undefined {
-    return this.cache.get(key);
-  }
-
-  delete(key: string): boolean {
-    return this.cache.delete(key);
-  }
-
-  clear(): void {
-    this.cache.clear();
-  }
 }
 
 async function getCacheKey(
@@ -195,7 +158,7 @@ export async function storeInCache(
       expirationTtl,
       useMemoryCache,
     }),
-    await storeInCacheWithHmac({
+    storeInCacheWithHmac({
       key,
       value,
       env,

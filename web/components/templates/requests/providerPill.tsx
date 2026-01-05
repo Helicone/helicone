@@ -17,7 +17,7 @@ const ProviderPill = (props: ProviderPillProps) => {
     <span
       className={clsx(
         colorClass,
-        `-my-1 w-max items-center truncate rounded-lg px-2 py-1 text-xs font-medium ring-1 ring-inset`,
+        `inline-flex h-6 items-center truncate rounded-lg px-2 py-1 text-xs font-semibold ring-1 ring-inset`,
       )}
     >
       {displayName}

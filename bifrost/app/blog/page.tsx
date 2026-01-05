@@ -226,6 +226,31 @@ export const BLOG_CONTENT: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "what-is-ai-gateway",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "openrouter-alternatives",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "how-to-gateway",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "n8n-helicone-node",
+    },
+  },
+  {
+    dynmaicEntry: {
+      folderName: "export-logs",
+    },
+  },
+  {
+    dynmaicEntry: {
       folderName: "migration-openrouter",
     },
   },

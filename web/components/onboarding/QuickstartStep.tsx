@@ -1,6 +1,12 @@
 import { cn } from "@/lib/utils";
-import { MoveUpRight } from "lucide-react";
+import { Lock, MoveUpRight } from "lucide-react";
 import Link from "next/link";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
 
 interface QuickstartStepProps {
   stepNumber: number;
@@ -44,7 +50,11 @@ interface QuickstartStepCardProps {
   isCompleted: boolean;
   link: string;
   rightContent?: string;
+  rightComponent?: React.ReactNode;
+  headerAction?: React.ReactNode;
   children?: React.ReactNode;
+  disabled?: boolean;
+  lockedMessage?: string;
 }
 
 export const QuickstartStepCard = ({
@@ -53,16 +63,22 @@ export const QuickstartStepCard = ({
   isCompleted,
   link,
   rightContent,
+  rightComponent,
+  headerAction,
   children,
+  disabled = false,
+  lockedMessage = "Complete previous steps to unlock",
 }: QuickstartStepCardProps) => {
-  return (
+  const cardContent = (
     <div
       className={cn(
-        "cursor-pointer rounded border border-border px-4 py-4 transition-colors duration-150",
-        "bg-background hover:bg-background",
+        "rounded border border-border px-4 py-4 transition-colors duration-150",
+        disabled
+          ? "cursor-not-allowed bg-muted/30 opacity-60"
+          : "cursor-pointer bg-background hover:bg-background",
       )}
     >
-      <Link href={link}>
+      <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div
@@ -71,26 +87,60 @@ export const QuickstartStepCard = ({
                 "bg-muted text-muted-foreground",
               )}
             >
-              {stepNumber}
+              {disabled ? <Lock size={12} /> : stepNumber}
             </div>
-            <h3
-              className={cn(
-                "font-medium",
-                isCompleted && "text-muted-foreground line-through",
-              )}
-            >
-              {title}
-            </h3>
+            {disabled ? (
+              <h3 className="font-medium text-muted-foreground">{title}</h3>
+            ) : (
+              <Link href={link}>
+                <h3
+                  className={cn(
+                    "font-medium",
+                    isCompleted && "text-muted-foreground line-through",
+                  )}
+                >
+                  {title}
+                </h3>
+              </Link>
+            )}
           </div>
-          {rightContent && (
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <span>{rightContent}</span>
-              <MoveUpRight className="h-3 w-3" />
-            </div>
-          )}
+          <div className="flex items-center gap-3">
+            {!disabled && headerAction}
+            {!disabled &&
+              (rightComponent ? (
+                rightComponent
+              ) : rightContent ? (
+                <Link href={link}>
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <span>{rightContent}</span>
+                    <MoveUpRight className="h-3 w-3" />
+                  </div>
+                </Link>
+              ) : null)}
+          </div>
         </div>
-      </Link>
-      {children}
+      </div>
+      {!disabled && children}
+      {disabled && (
+        <div className="mt-3 rounded-sm bg-muted/50 px-3 py-2">
+          <p className="text-sm text-muted-foreground">{lockedMessage}</p>
+        </div>
+      )}
     </div>
   );
+
+  if (disabled) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>{cardContent}</TooltipTrigger>
+          <TooltipContent>
+            <p>{lockedMessage}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
+
+  return cardContent;
 };

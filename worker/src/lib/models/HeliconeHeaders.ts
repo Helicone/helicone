@@ -1,4 +1,5 @@
 import { HELICONE_RATE_LIMITED_API_KEY_REGEX } from "../util/apiKeyRegex";
+import { BodyMappingType } from "@helicone-package/cost/models/types";
 
 type Nullable<T> = T | null;
 
@@ -57,7 +58,7 @@ export interface IHeliconeHeaders {
   promptName: Nullable<string>;
   userId: Nullable<string>;
   gatewayConfig: {
-    bodyMapping: "OPENAI" | "NO_MAPPING";
+    bodyMapping: BodyMappingType;
   };
   omitHeaders: {
     omitResponse: boolean;
@@ -146,7 +147,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   posthogKey: Nullable<string>;
   posthogHost: Nullable<string>;
   gatewayConfig: {
-    bodyMapping: "OPENAI" | "NO_MAPPING";
+    bodyMapping: BodyMappingType;
   };
   webhookEnabled: boolean;
 
@@ -322,10 +323,12 @@ export class HeliconeHeaders implements IHeliconeHeaders {
 
   private getGatewayConfig(): IHeliconeHeaders["gatewayConfig"] {
     return {
-      bodyMapping:
-        this.headers.get("Helicone-Gateway-Body-Mapping") === "NO_MAPPING"
-          ? "NO_MAPPING"
-          : "OPENAI",
+      bodyMapping: (() => {
+        const header = this.headers.get("Helicone-Gateway-Body-Mapping");
+        if (header === "NO_MAPPING") return "NO_MAPPING" as const;
+        if (header === "RESPONSES") return "RESPONSES" as const;
+        return "OPENAI" as const;
+      })(),
     };
   }
 

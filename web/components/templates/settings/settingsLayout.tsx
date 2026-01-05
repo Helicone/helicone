@@ -92,7 +92,6 @@ const SettingsLayout = ({ children }: SettingsLayoutProps) => {
   const org = useOrg();
   const isBetterAuthEnabled = process.env.NEXT_PUBLIC_BETTER_AUTH === "true";
 
-  // Add access keys for governance orgs and filter credits based on feature flag
   const organizationTabs = ORGANIZATION_TABS;
 
   const renderNavSection = (title: string, tabs: typeof ORGANIZATION_TABS) => (

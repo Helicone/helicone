@@ -36,6 +36,7 @@ const llamaApiPattern = /^https:\/\/api\.llama\.com/;
 const nvidiaApiPattern = /^https:\/\/integrate\.api\.nvidia\.com/;
 const localProxyPattern = /^http:\/\/127\.0\.0\.1:\d+\/v\d+\/?$/;
 const heliconeProxyPattern = /^https:\/\/oai\.hconeai\.com/;
+const heliconeInferencePattern = /^https:\/\/inference\.helicone\.ai/;
 const amdbartekPattern = /^https:\/\/.*\.amdbartek\.dev/;
 const anyscalePattern = /^https:\/\/api\.endpoints\.anyscale\.com/;
 const cloudflareAiGatewayPattern = /^https:\/\/gateway\.ai\.cloudflare\.com/;
@@ -71,8 +72,8 @@ const deepseek = /^https:\/\/api\.deepseek\.com/;
 const x = /^https:\/\/api\.x\.ai/;
 const avianPattern = /^https:\/\/api\.avian\.io/;
 
-//https://api.studio.nebius.ai
-const nebius = /^https:\/\/api\.studio\.nebius\.ai/;
+//https://api.tokenfactory.nebius.com
+const nebius = /^https:\/\/api\.tokenfactory\.nebius\.com/;
 
 // https://ai-gateway.vercel.sh
 const vercelGateway = /^https:\/\/ai-gateway\.vercel\.sh/;
@@ -85,6 +86,12 @@ const openpipe = /^https:\/\/api\.openpipe\.ai/;
 
 // llm.chutes.com and chutes.com
 const chutes = /^https:\/\/(llm\.)?chutes\.com/;
+
+// https://api.cerebras.ai
+const cerebras = /^https:\/\/api\.cerebras\.ai/;
+
+// https://inference.canopywave.io
+const canopywave = /^https:\/\/inference\.canopywave\.io/;
 
 export const providersNames = [
   "OPENAI",
@@ -121,6 +128,9 @@ export const providersNames = [
   "LLAMA",
   "NVIDIA",
   "VERCEL",
+  "CEREBRAS",
+  "BASETEN",
+  "CANOPYWAVE",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -171,6 +181,10 @@ export const providers: {
   },
   {
     pattern: heliconeProxyPattern,
+    provider: "HELICONE",
+  },
+  {
+    pattern: heliconeInferencePattern,
     provider: "HELICONE",
   },
   {
@@ -301,14 +315,21 @@ export const providers: {
     provider: "VERCEL",
     costs: vercelCosts,
   },
+  {
+    pattern: cerebras,
+    provider: "CEREBRAS",
+    costs: [],
+  },
+  {
+    pattern: canopywave,
+    provider: "CANOPYWAVE",
+    costs: [],
+  }
 ];
-
-export const playgroundModels =
-  openRouterCosts.map((cost) => cost.model.value) ?? [];
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 export const defaultProvider = providers.find(
-  (provider) => provider.provider === "OPENAI"
+  (provider) => provider.provider === "OPENAI",
 )!;
 
 export const allCosts = providers.flatMap((provider) => provider.costs ?? []);
@@ -324,5 +345,5 @@ export const parentModelNames = providers.reduce(
     }
     return acc;
   },
-  {} as Record<ProviderName, string[]>
+  {} as Record<ProviderName, string[]>,
 );

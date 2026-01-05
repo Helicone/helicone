@@ -8,15 +8,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { OnboardingHeader } from "@/components/onboarding/OnboardingHeader";
-import { useEffect, useState, useRef } from "react";
-import { ArrowRight, Loader, Play } from "lucide-react";
+import { useEffect, useState, useRef, useMemo } from "react";
+import { ArrowRight, Loader, Play, AlertCircle } from "lucide-react";
 import { useOrgOnboarding } from "@/services/hooks/useOrgOnboarding";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { useRouter } from "next/navigation";
-import { H1, Muted } from "@/components/ui/typography";
+import { H1, Muted, Small } from "@/components/ui/typography";
 import { generateStream } from "@/lib/api/llm/generate-stream";
 import { processStream } from "@/lib/api/llm/process-stream";
 import useNotification from "@/components/shared/notification/useNotification";
+import { useCredits } from "@/services/hooks/useCredits";
+import Link from "next/link";
 
 const MODELS = [
   { value: "openai/gpt-4o-mini", label: "GPT-4o Mini" },
@@ -35,15 +37,30 @@ export default function RequestPage() {
   const [error, setError] = useState<string | null>(null);
   const [isCompleting, setIsCompleting] = useState(false);
   const abortController = useRef<AbortController | null>(null);
-  const { updateCurrentStep, updateOnboardingStatus } = useOrgOnboarding(
-    org?.currentOrg?.id ?? "",
-  );
+  const { updateCurrentStep, updateOnboardingStatus, hasProviderKeys } =
+    useOrgOnboarding(org?.currentOrg?.id ?? "");
+
+  const { data: creditData, isLoading: creditsLoading } = useCredits();
+
+  const hasCredits = useMemo(() => {
+    return (creditData?.balance ?? 0) > 0;
+  }, [creditData]);
+
+  const hasBillingSetup = hasCredits || hasProviderKeys;
 
   useEffect(() => {
     if (org?.currentOrg?.id) {
       updateCurrentStep("REQUEST");
     }
   }, [org?.currentOrg?.id]);
+
+  // Redirect back to billing if not set up
+  useEffect(() => {
+    if (!creditsLoading && !hasBillingSetup) {
+      setNotification("Please set up billing before sending requests", "error");
+      router.push("/onboarding/billing");
+    }
+  }, [creditsLoading, hasBillingSetup, router, setNotification]);
 
   const onSendRequest = async () => {
     if (!prompt.trim()) {
@@ -123,6 +140,18 @@ export default function RequestPage() {
     setIsCompleting(true);
   };
 
+  if (creditsLoading) {
+    return (
+      <OnboardingHeader>
+        <div className="mx-auto mt-12 w-full max-w-md px-4">
+          <div className="flex flex-col gap-4">
+            <div className="animate-pulse">Loading...</div>
+          </div>
+        </div>
+      </OnboardingHeader>
+    );
+  }
+
   return (
     <OnboardingHeader>
       <div className="mx-auto flex max-w-md flex-col gap-6 px-4 py-12">
@@ -132,6 +161,28 @@ export default function RequestPage() {
             Try out Helicone with a simple AI request to see it in action.
           </Muted>
         </div>
+
+        {/* Billing status indicator */}
+        {hasBillingSetup && (
+          <div className="rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-900 dark:bg-green-950">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="mt-0.5 h-4 w-4 text-green-600 dark:text-green-400" />
+              <div className="flex-1">
+                <Small className="text-green-900 dark:text-green-100">
+                  {hasCredits &&
+                    `You have $${(creditData?.balance ?? 0).toFixed(2)} in credits. `}
+                  {hasProviderKeys && "Provider keys configured. "}
+                  <Link
+                    href="/settings/providers"
+                    className="underline hover:no-underline"
+                  >
+                    Manage billing
+                  </Link>
+                </Small>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="flex flex-col gap-4">
           <Input
@@ -199,7 +250,13 @@ export default function RequestPage() {
                 <div className="text-sm text-destructive">{error}</div>
               ) : (
                 <div className="whitespace-pre-wrap text-sm">
-                  {JSON.parse(response).content}
+                  {(() => {
+                    try {
+                      return JSON.parse(response).content;
+                    } catch {
+                      return response;
+                    }
+                  })()}
                 </div>
               )}
               {isStreaming && (

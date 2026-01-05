@@ -71,6 +71,94 @@ export const CLICKHOUSE_KEYWORDS = [
 
 export const ALL_KEYWORDS = [...SQL_KEYWORDS, ...CLICKHOUSE_KEYWORDS];
 
+// Predefined example queries for users to learn from
+export interface PredefinedQuery {
+  name: string;
+  description: string;
+  sql: string;
+  category: "analytics" | "debugging";
+}
+
+export const PREDEFINED_QUERIES: PredefinedQuery[] = [
+  {
+    name: "Requests by Model",
+    description: "Count of requests grouped by model",
+    category: "analytics",
+    sql: `SELECT
+  model,
+  COUNT(*) as request_count
+FROM request_response_rmt
+GROUP BY model
+ORDER BY request_count DESC
+LIMIT 100`,
+  },
+  {
+    name: "Error Rate by Status",
+    description: "Error breakdown by status code",
+    category: "analytics",
+    sql: `SELECT
+  status,
+  COUNT(*) as count,
+  ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (), 2) as percentage
+FROM request_response_rmt
+GROUP BY status
+ORDER BY count DESC`,
+  },
+  {
+    name: "Latency Percentiles",
+    description: "P50, P90, P99 latency stats",
+    category: "analytics",
+    sql: `SELECT
+  quantile(0.5)(latency) as p50_ms,
+  quantile(0.9)(latency) as p90_ms,
+  quantile(0.99)(latency) as p99_ms,
+  AVG(latency) as avg_ms
+FROM request_response_rmt`,
+  },
+  {
+    name: "Cost by Provider",
+    description: "Total cost grouped by provider",
+    category: "analytics",
+    sql: `SELECT
+  provider,
+  SUM(cost) / 1000000000 as total_cost_usd,
+  COUNT(*) as request_count
+FROM request_response_rmt
+GROUP BY provider
+ORDER BY total_cost_usd DESC`,
+  },
+  {
+    name: "Recent Errors",
+    description: "Last 100 failed requests",
+    category: "debugging",
+    sql: `SELECT
+  request_created_at,
+  model,
+  provider,
+  status,
+  latency
+FROM request_response_rmt
+WHERE status >= 400
+ORDER BY request_created_at DESC
+LIMIT 100`,
+  },
+  {
+    name: "Slow Requests",
+    description: "Requests with latency > 5 seconds",
+    category: "debugging",
+    sql: `SELECT
+  request_created_at,
+  model,
+  latency,
+  prompt_tokens,
+  completion_tokens
+FROM request_response_rmt
+WHERE latency > 5000
+ORDER BY latency DESC
+LIMIT 100`,
+  },
+];
+
 export const getTableNames = (
   schemas: {
     table_name: string;
@@ -104,6 +192,24 @@ export function parseSqlAndFindTableNameAndAliases(sql: string) {
   return tables;
 }
 
+// Helper to extract error message from various response formats
+function extractQueryError(data: any): string {
+  // Handle openapi-fetch error response: { error: { error: "message" } }
+  if (data?.error?.error && typeof data.error.error === "string") {
+    return data.error.error;
+  }
+  // Handle direct error object: { error: "message" }
+  if (data?.error && typeof data.error === "string") {
+    return data.error;
+  }
+  // Handle nested data error: { data: { error: "message" } }
+  if (data?.data?.error && typeof data.data.error === "string") {
+    return data.data.error;
+  }
+  // Fallback
+  return "An unexpected error occurred";
+}
+
 // Execute query mutation
 export const createExecuteQueryMutation = (
   setResult: React.Dispatch<
@@ -125,8 +231,8 @@ export const createExecuteQueryMutation = (
     onSuccess: (data: any) => {
       setQueryLoading(false);
       if (data.error || !data.data?.data) {
-        // @ts-ignore
-        setQueryError(data.error.error);
+        const errorMessage = extractQueryError(data);
+        setQueryError(errorMessage);
         setResult({
           rows: [],
           elapsedMilliseconds: 0,
@@ -144,7 +250,8 @@ export const createExecuteQueryMutation = (
       }
     },
     onError: (error: any) => {
-      setQueryError(error.message);
+      setQueryLoading(false);
+      setQueryError(error.message || "An unexpected error occurred");
       setResult({
         rows: [],
         elapsedMilliseconds: 0,
@@ -157,9 +264,7 @@ export const createExecuteQueryMutation = (
 
 // Save query mutation
 export const useSaveQueryMutation = (
-  setCurrentQuery: React.Dispatch<
-    React.SetStateAction<{ id: string | undefined; name: string; sql: string }>
-  >,
+  setCurrentQuery: (query: { id: string | undefined; name: string; sql: string }) => void,
   setNotification: (_message: string, _type: "success" | "error") => void,
 ) => {
   const queryClient = useQueryClient();

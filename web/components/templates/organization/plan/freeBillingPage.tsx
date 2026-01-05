@@ -98,17 +98,15 @@ export const FreePlanCard = () => {
                   <div className="space-y-2">
                     <h3 className="text-xl font-bold">Pro Plan</h3>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-3xl font-bold">$20</span>
-                      <span className="text-sm text-muted-foreground">
-                        /seat/mo
-                      </span>
+                      <span className="text-3xl font-bold">$79</span>
+                      <span className="text-sm text-muted-foreground">/mo</span>
                     </div>
                   </div>
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex-1 space-y-4">
                 <p className="text-sm text-slate-500">
-                  + Prompts workspace add-on $50/mo
+                  Unlimited seats, tiered usage-based billing
                 </p>
                 <ul className="space-y-2.5">
                   {proFeatures.slice(0, 4).map((feature) => (
@@ -137,14 +135,14 @@ export const FreePlanCard = () => {
                   <div className="space-y-2">
                     <h3 className="text-xl font-bold">Team Bundle</h3>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-3xl font-bold">$200</span>
+                      <span className="text-3xl font-bold">$799</span>
                       <span className="text-sm text-muted-foreground">/mo</span>
                     </div>
                   </div>
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex-1 space-y-4">
-                <p className="text-sm font-medium">Unlimited seats</p>
+                <p className="text-sm font-medium">Unlimited seats, 5 orgs</p>
                 <ul className="space-y-2.5">
                   {teamBundleFeatures.map((feature) => (
                     <li key={feature} className="flex items-center gap-2">
@@ -288,8 +286,16 @@ export const FreePlanCard = () => {
 
 const proFeatures = [
   {
-    title: "Unlimited scaling",
+    title: "Unlimited seats",
+    description: "Add your whole team at no extra cost",
+  },
+  {
+    title: "Unlimited requests",
     description: "Scale your requests without limits",
+  },
+  {
+    title: "Usage-based billing",
+    description: "Tiered GB + request pricing - costs decrease as you scale",
   },
   {
     title: "Sessions",
@@ -300,54 +306,38 @@ const proFeatures = [
     description: "Test your prompts with different models",
   },
   {
-    title: "User Tracking",
-    description: "Keep track of your users",
-  },
-  {
-    title: "Rate Limits",
-    description: "Limit your user's usage",
-  },
-  {
-    title: "Datasets",
-    description: "Collect historical requests for training and finetuning",
-  },
-  {
-    title: "API Access",
-    description: "Access to 60 calls/min using our expansive API",
-  },
-  {
-    title: "3 month log retention",
-    description: "Longer log retention compared to 1 month",
-  },
-  {
-    title: "Caching",
-    description: "Cache frequent responses to save costs and time",
-  },
-  {
-    title: "SOC-2 Type II Compliance",
-    description: "Safety and privacy",
-  },
-  {
-    title: "Alerts",
-    description: "Get notified via Slack + Email",
-  },
-  {
-    title: "Prompts (Optional Add-on)",
+    title: "Prompts",
     description: "Manage and version your prompts",
   },
   {
-    title: "Experiments (Optional Add-on)",
-    description: "Run and track experiments",
+    title: "HQL & Alerts",
+    description: "Query language and notifications",
   },
   {
-    title: "Evals (Optional Add-on)",
-    description: "Evaluate model performance",
+    title: "API Access",
+    description: "Access to 10 calls/min using our API",
+  },
+  {
+    title: "1 month log retention",
+    description: "Store your logs for 30 days",
+  },
+  {
+    title: "Caching & Rate Limits",
+    description: "Gateway features included",
+  },
+  {
+    title: "Webhooks",
+    description: "Connect to external services",
+  },
+  {
+    title: "Chat & Email Support",
+    description: "Get help when you need it",
   },
 ];
 
 const teamBundleFeatures = [
-  "Unlimited seats",
-  "Everything in Pro plan",
-  "Prompts workspace included",
-  "Priority support",
+  "Everything in Pro",
+  "SOC-2 & HIPAA compliance",
+  "Dedicated Slack channel",
+  "Support engineer & SLAs",
 ];

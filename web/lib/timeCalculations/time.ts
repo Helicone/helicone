@@ -98,7 +98,8 @@ export const getTimeInterval = ({
 
   if (diff < 1000 * 60 * 60 * 2) {
     return "min";
-  } else if (diff < 1000 * 60 * 60 * 24 * 7) {
+  } else if (diff < 1000 * 60 * 60 * 24 * 3) {
+    // Use hourly granularity for ranges up to 3 days
     return "hour";
   } else {
     return "day";

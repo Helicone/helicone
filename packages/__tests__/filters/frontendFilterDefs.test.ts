@@ -246,7 +246,7 @@ describe('Frontend Filter Definitions', () => {
 
   describe('REQUEST_TABLE_FILTERS', () => {
     test('should have correct structure and length', () => {
-      expect(REQUEST_TABLE_FILTERS).toHaveLength(11);
+      expect(REQUEST_TABLE_FILTERS).toHaveLength(12);
 
       const filterLabels = REQUEST_TABLE_FILTERS.map(f => f.label);
       const expectedLabels = [
@@ -261,6 +261,7 @@ describe('Frontend Filter Definitions', () => {
         'Status',
         'Path',
         'Feedback',
+        'AI Gateway',
       ];
 
       expect(filterLabels).toEqual(expectedLabels);
@@ -277,7 +278,7 @@ describe('Frontend Filter Definitions', () => {
       const responseFilters = REQUEST_TABLE_FILTERS.filter(f => f.category === 'response');
       const feedbackFilters = REQUEST_TABLE_FILTERS.filter(f => f.category === 'feedback');
 
-      expect(requestFilters).toHaveLength(9);
+      expect(requestFilters).toHaveLength(10);
       expect(responseFilters).toHaveLength(1);
       expect(feedbackFilters).toHaveLength(1);
     });
@@ -315,6 +316,17 @@ describe('Frontend Filter Definitions', () => {
       expect(feedbackFilter?.operators).toHaveLength(1); // boolean equals
       expect(feedbackFilter?.operators[0].value).toBe('equals');
       expect(feedbackFilter?.operators[0].type).toBe('bool');
+    });
+
+    test('should have boolean operators for AI Gateway', () => {
+      const aiGatewayFilter = REQUEST_TABLE_FILTERS.find(f => f.label === 'AI Gateway');
+      
+      expect(aiGatewayFilter).toBeDefined();
+      expect(aiGatewayFilter?.column).toBe('request_referrer');
+      expect(aiGatewayFilter?.category).toBe('request');
+      expect(aiGatewayFilter?.operators).toHaveLength(1); // boolean equals
+      expect(aiGatewayFilter?.operators[0].value).toBe('equals');
+      expect(aiGatewayFilter?.operators[0].type).toBe('bool');
     });
 
     test('should have status filter with suggestions', () => {

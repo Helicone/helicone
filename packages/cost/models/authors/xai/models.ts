@@ -2,7 +2,7 @@ import { ModelConfig } from "../../types";
 
 export const models = {
   "grok-code-fast-1": {
-    name: "xAI: Grok Code Fast 1",
+    name: "xAI Grok Code Fast 1",
     author: "xai",
     description:
       "Speedy and economical reasoning model that excels at agentic coding. Features function calling, structured outputs, and reasoning capabilities.",
@@ -13,7 +13,7 @@ export const models = {
     tokenizer: "Grok",
   },
   "grok-4": {
-    name: "xAI: Grok 4",
+    name: "xAI Grok 4",
     author: "xai",
     description:
       "Latest and greatest flagship model, offering unparalleled performance in natural language, math and reasoning - the perfect jack of all trades. Features function calling, structured outputs, and reasoning capabilities.",
@@ -45,8 +45,30 @@ export const models = {
     modality: { inputs: ["text", "image", "audio"], outputs: ["text"] },
     tokenizer: "Grok",
   },
+  "grok-4-1-fast-non-reasoning": {
+    name: "xAI Grok 4.1 Fast Non-Reasoning",
+    author: "xai",
+    description:
+      "A frontier multimodal model optimized specifically for high-performance agentic tool calling.",
+    contextLength: 2000000,
+    maxOutputTokens: 30000,
+    created: "2025-11-17T00:00:00.000Z",
+    modality: { inputs: ["text", "image"], outputs: ["text", "image"] },
+    tokenizer: "Grok",
+  },
+  "grok-4-1-fast-reasoning": {
+    name: "xAI Grok 4.1 Fast Reasoning",
+    author: "xai",
+    description:
+      "A frontier multimodal model optimized for high-performance agentic tool calling with reasoning capabilities.",
+    contextLength: 2000000,
+    maxOutputTokens: 2000000,
+    created: "2025-11-17T00:00:00.000Z",
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
+    tokenizer: "Grok",
+  },
   "grok-3": {
-    name: "xAI: Grok 3",
+    name: "xAI Grok 3",
     author: "xai",
     description:
       "Excels at enterprise use cases like data extraction, coding, and text summarization. Possesses deep domain knowledge in finance, healthcare, law, and science. Features function calling, structured outputs, and reasoning capabilities.",
@@ -57,7 +79,7 @@ export const models = {
     tokenizer: "Grok",
   },
   "grok-3-mini": {
-    name: "xAI: Grok 3 Mini",
+    name: "xAI Grok 3 Mini",
     author: "xai",
     description:
       "Lightweight model that thinks before responding. Fast, smart, and great for logic-based tasks that do not require deep domain knowledge. Features function calling, structured outputs, and reasoning capabilities.",

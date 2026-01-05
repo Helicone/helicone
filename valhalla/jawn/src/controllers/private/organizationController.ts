@@ -29,6 +29,11 @@ import { Database } from "../../lib/db/database.types";
 import { RequestWrapper } from "../../lib/requestWrapper";
 import { Request as ExpressRequest } from "express";
 import { getHeliconeAuthClient } from "../../packages/common/auth/server/AuthClientFactory";
+import { KVCache } from "../../lib/cache/kvCache";
+import { cacheResultCustom } from "../../utils/cacheResult";
+import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
+
+const kvCache = new KVCache(12 * 60 * 60 * 1000);
 
 @Route("v1/organization")
 @Tags("Organization")
@@ -247,8 +252,13 @@ export class OrganizationController extends Controller {
       return ok(null); // Silently succeed if member already exists
     }
 
-    if (org.data.tier === "enterprise" || org.data.tier === "team-20250130") {
-      // Enterprise tier: Proceed to add member without additional checks
+    if (
+      org.data.tier === "enterprise" ||
+      org.data.tier === "team-20250130" ||
+      org.data.tier === "team-20251210" ||
+      org.data.tier === "pro-20251210"
+    ) {
+      // Enterprise, Team, and new Pro tiers: Proceed to add member without additional checks (unlimited seats)
     } else if (
       org.data.tier === "pro-20240913" ||
       org.data.tier === "pro-20250202"
@@ -497,8 +507,11 @@ export class OrganizationController extends Controller {
       memberCount.data > 0 &&
       org.data.tier != "free" &&
       org.data.tier != "team-20250130" &&
+      org.data.tier != "team-20251210" &&
+      org.data.tier != "pro-20251210" &&
       org.data.tier != "enterprise"
     ) {
+      // Only update seat count for legacy per-seat tiers
       const userCount = await stripeManager.updateProUserCount(
         memberCount.data - 1
       );
@@ -583,6 +596,49 @@ export class OrganizationController extends Controller {
     } else {
       this.setStatus(201);
       return ok(null);
+    }
+  }
+
+  @Get("/models")
+  public async getModels(@Request() request: JawnAuthenticatedRequest): Promise<
+    Result<
+      {
+        model: string;
+      }[],
+      string
+    >
+  > {
+    const result = await cacheResultCustom(
+      "v1/organization/models" + JSON.stringify(request.authParams),
+      async () => {
+        const result = await dbQueryClickhouse<{
+          model: string;
+          count: number;
+        }>(
+          `
+          SELECT
+          model,
+          count() as count
+          FROM request_response_rmt
+          WHERE organization_id = {val_0: UUID}
+          GROUP BY model
+          ORDER BY count() DESC
+          `,
+          [request.authParams.organizationId]
+        );
+        return ok(result);
+      },
+      kvCache
+    );
+
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      return err(
+        JSON.stringify(result.error) || "Failed to fetch models"
+      );
+    } else {
+      this.setStatus(200);
+      return ok(result.data.data?.map((r) => ({ model: r.model })) ?? []);
     }
   }
 }

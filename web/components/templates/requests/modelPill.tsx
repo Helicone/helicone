@@ -21,7 +21,8 @@ const ModelPill = (props: ModelPillProps) => {
 
   // Model-specific color mappings based on the mapper type
   const modelMapping: Record<MapperType, ColorKey> = {
-    "ai-gateway": "blue",
+    "ai-gateway-chat": "blue",
+    "ai-gateway-responses": "blue",
     "openai-chat": "purple",
     "gemini-chat": "teal",
     "vercel-chat": "purple",
@@ -36,6 +37,7 @@ const ModelPill = (props: ModelPillProps) => {
     "openai-realtime": "indigo",
     "vector-db": "green",
     tool: "pink",
+    data: "blue",
     "openai-response": "purple",
     unknown: "gray",
   };
@@ -51,7 +53,7 @@ const ModelPill = (props: ModelPillProps) => {
     <span
       className={clsx(
         colorClass,
-        `-my-1 w-max items-center truncate rounded-lg px-2 py-1 text-xs font-medium ring-1 ring-inset`,
+        `inline-flex h-6 items-center rounded-lg px-2 py-1 text-xs font-semibold ring-1 ring-inset`,
       )}
     >
       {model && model !== "" ? model : "Unsupported"}

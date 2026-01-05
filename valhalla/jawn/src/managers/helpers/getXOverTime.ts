@@ -84,7 +84,8 @@ export async function getXOverTime<T>(
     orgId: string;
     countColumns: string[];
     groupByColumns?: string[];
-  }
+  },
+  argsAccInit: any[] = []
 ): Promise<
   Result<
     (T & {
@@ -131,7 +132,7 @@ export async function getXOverTime<T>(
     await buildFilterWithAuthClickHouse({
       org_id: orgId,
       filter,
-      argsAcc: [],
+      argsAcc: argsAccInit,
     });
   const { fill, argsAcc } = buildFill(
     startDate,

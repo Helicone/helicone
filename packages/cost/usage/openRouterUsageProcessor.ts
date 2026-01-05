@@ -2,8 +2,41 @@ import { IUsageProcessor, ParseInput } from "./IUsageProcessor";
 import { ModelUsage } from "./types";
 import { Result } from "../../common/result";
 
+export interface OpenRouterCostDetails {
+  upstream_inference_cost?: number;
+  upstream_inference_prompt_cost?: number;
+  upstream_inference_completions_cost?: number;
+}
+
+export function getOpenRouterDeclaredCost(
+  cost?: number,
+  cost_details?: OpenRouterCostDetails
+): number | undefined {
+  // Priority 1: Direct cost field
+  if (cost && cost > 0) {
+    return cost;
+  }
+
+  // Priority 2: Upstream inference cost
+  if (cost_details?.upstream_inference_cost && cost_details.upstream_inference_cost > 0) {
+    return cost_details.upstream_inference_cost;
+  }
+
+  // Priority 3: Sum of prompt and completion costs
+  if (
+    cost_details?.upstream_inference_prompt_cost &&
+    cost_details?.upstream_inference_completions_cost &&
+    cost_details.upstream_inference_prompt_cost > 0 &&
+    cost_details.upstream_inference_completions_cost > 0
+  ) {
+    return cost_details.upstream_inference_prompt_cost + cost_details.upstream_inference_completions_cost;
+  }
+
+  return undefined;
+}
+
 export interface OpenRouterUsage extends ModelUsage {
-  cost?: number; // Direct USD cost from OpenRouter
+  cost_details?: OpenRouterCostDetails;
   provider?: string; // Actual provider used (e.g., "google", "anthropic")
   is_byok?: boolean; // Whether using customer's own API keys
 }
@@ -28,7 +61,6 @@ export class OpenRouterUsageProcessor implements IUsageProcessor {
     try {
       const parsedResponse = JSON.parse(responseBody);
       const usage = this.extractUsageFromResponse(parsedResponse);
-
       return {
         data: usage,
         error: null,
@@ -111,6 +143,7 @@ export class OpenRouterUsageProcessor implements IUsageProcessor {
 
     // OpenRouter provides direct cost in USD
     const cost = usage.cost;
+    const cost_details = usage.cost_details;
     const provider = usage.provider;
     const is_byok = usage.is_byok;
 
@@ -130,11 +163,15 @@ export class OpenRouterUsageProcessor implements IUsageProcessor {
     const effectivePromptTokens = Math.max(0, promptTokens - cachedTokens - promptAudioTokens);
     const effectiveCompletionTokens = Math.max(0, completionTokens - completionAudioTokens - reasoningTokens);
 
+    // Get declared cost and apply passthrough billing markup if needed
+    let declaredCost = getOpenRouterDeclaredCost(cost, cost_details);
     const modelUsage: OpenRouterUsage = {
       input: effectivePromptTokens,
       output: effectiveCompletionTokens,
-      // Include the direct cost from OpenRouter
-      cost: cost,
+      cost: declaredCost,
+
+      // OpenRouterUsage specific info
+      cost_details: cost_details,
       provider: provider,
       is_byok: is_byok,
     };
@@ -151,7 +188,10 @@ export class OpenRouterUsageProcessor implements IUsageProcessor {
     }
 
     if (promptAudioTokens > 0 || completionAudioTokens > 0) {
-      modelUsage.audio = promptAudioTokens + completionAudioTokens;
+      modelUsage.audio = {
+        input: promptAudioTokens,
+        output: completionAudioTokens,
+      };
     }
 
     return modelUsage;

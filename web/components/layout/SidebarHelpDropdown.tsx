@@ -12,14 +12,16 @@ import clsx from "clsx";
 import {
   ArrowUpRightIcon,
   CalendarIcon,
-  FileTextIcon,
+  HelpCircle,
   MessageCircleMore,
+  Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FaDiscord } from "react-icons/fa6";
 import { ChangelogItem } from "./auth/types";
 import { useOrg } from "./org/organizationContext";
+import { useRouter } from "next/router";
 import Intercom from "@intercom/messenger-js-sdk";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import { usePathname } from "next/navigation";
@@ -43,6 +45,7 @@ const SidebarHelpDropdown = ({
 
   const [chatOpen, setChatOpen] = useState(false);
   const orgContext = useOrg();
+  const router = useRouter();
   const heliconeAuthClient = useHeliconeAuthClient();
   Intercom({
     app_id: INTERCOM_APP_ID,
@@ -61,7 +64,7 @@ const SidebarHelpDropdown = ({
     }
   }, [pathname]);
   return (
-    <div className="flex w-full flex-col items-center">
+    <div className="mt-1.5 flex w-full flex-col items-center">
       <DropdownMenu
         modal={false}
         onOpenChange={
@@ -76,30 +79,24 @@ const SidebarHelpDropdown = ({
             size="none"
             className={clsx(
               "flex h-8 items-center text-xs text-muted-foreground hover:text-foreground",
-              isCollapsed ? "w-8" : "w-full gap-1",
+              isCollapsed ? "w-8" : "w-full gap-2 px-3",
+              hasNewChangelog && "text-primary",
             )}
           >
             <div className="relative flex items-center">
-              <span
-                className={clsx(
-                  "text-xs font-medium",
-                  hasNewChangelog && "text-primary",
-                )}
-              >
-                ?
-              </span>
+              <HelpCircle size={16} />
             </div>
             {!isCollapsed && <span>Help</span>}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="ml-4 w-64 text-slate-700 dark:text-slate-200">
-          <Link href="https://docs.helicone.ai" target="_blank">
-            <DropdownMenuItem className="cursor-pointer">
-              <FileTextIcon className="mr-2 h-4 w-4 text-slate-500" />
-              Docs
-              <ArrowUpRightIcon className="ml-2 h-3.5 w-3.5 text-slate-400 dark:text-slate-600" />
-            </DropdownMenuItem>
-          </Link>
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onSelect={() => router.push("/quickstart")}
+          >
+            <Zap className="mr-2 h-4 w-4 text-slate-500" />
+            Quickstart
+          </DropdownMenuItem>
           <DropdownMenuItem
             className="cursor-pointer"
             onSelect={() => {
@@ -117,6 +114,13 @@ const SidebarHelpDropdown = ({
             <DropdownMenuItem className="cursor-pointer">
               <FaDiscord className="mr-2 h-4 w-4 text-slate-500" />
               Help and Support
+              <ArrowUpRightIcon className="ml-2 h-3.5 w-3.5 text-slate-400 dark:text-slate-600" />
+            </DropdownMenuItem>
+          </Link>
+          <Link href="https://helicone.ai/contact" target="_blank">
+            <DropdownMenuItem className="cursor-pointer">
+              <CalendarIcon className="mr-2 h-4 w-4 text-slate-500" />
+              Book call
               <ArrowUpRightIcon className="ml-2 h-3.5 w-3.5 text-slate-400 dark:text-slate-600" />
             </DropdownMenuItem>
           </Link>

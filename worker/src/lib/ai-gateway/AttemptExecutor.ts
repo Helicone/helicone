@@ -1,22 +1,32 @@
 import {
-  buildRequestBody,
   authenticateRequest,
-  buildErrorMessage,
   buildEndpointUrl,
+  buildErrorMessage,
+  buildRequestBody,
 } from "@helicone-package/cost/models/provider-helpers";
-import { RequestWrapper } from "../RequestWrapper";
-import { toAnthropic } from "@helicone-package/llm-mapper/transform/providers/openai/request/toAnthropic";
-import { isErr, Result, ok, err } from "../util/results";
-import { Plugin } from "@helicone-package/cost/models/types";
-import { Attempt, EscrowInfo, AttemptError } from "./types";
 import {
   AuthContext,
   Endpoint,
+  Plugin,
   RequestParams,
 } from "@helicone-package/cost/models/types";
-import { ProviderKey } from "../db/ProviderKeysStore";
+import { toAnthropic } from "@helicone-package/llm-mapper/transform/providers/openai/request/toAnthropic";
 import { CacheProvider } from "../../../../packages/common/cache/provider";
+import { ProviderKey } from "../db/ProviderKeysStore";
+import {
+  createDataDogTracer,
+  DataDogTracer,
+  TraceContext,
+} from "../monitoring/DataDogTracer";
+import { RequestWrapper } from "../RequestWrapper";
+import { err, isErr, ok, Result } from "../util/results";
 import { GatewayMetrics } from "./GatewayMetrics";
+import { Attempt, AttemptError, EscrowInfo, PendingEscrow } from "./types";
+import { toChatCompletions } from "@helicone-package/llm-mapper/transform/providers/responses/request/toChatCompletions";
+import { WalletKVSync } from "./WalletKVSync";
+
+// Minimum balance (in cents) to allow optimistic execution without waiting for escrow
+const ALLOWABLE_BALANCE_TO_SKIP_CHECK = 450; // $4.50 in cents
 
 interface ExecutorProps {
   attempt: Attempt;
@@ -31,30 +41,29 @@ interface ExecutorProps {
   metrics: GatewayMetrics;
   orgMeta: {
     allowNegativeBalance: boolean;
+    /** Credit line limit in cents (e.g., 5000 = $50.00). Sourced from organization.credit_limit in Supabase. */
     creditLimit: number;
   };
+  traceContext: TraceContext | null;
+}
+
+interface PTBProps {
+  attempt: Attempt;
+  requestWrapper: RequestWrapper;
+  orgId: string;
+  orgMeta: ExecutorProps["orgMeta"];
+  traceContext?: TraceContext | null;
 }
 
 export class AttemptExecutor {
   constructor(
     private readonly env: Env,
     private readonly ctx: ExecutionContext,
-    private readonly cacheProvider?: CacheProvider
+    private readonly cacheProvider: CacheProvider,
+    private readonly tracer: DataDogTracer
   ) {}
 
-  async PTBPreCheck(props: {
-    attempt: Attempt;
-    requestWrapper: RequestWrapper;
-    orgId: string;
-    orgMeta: ExecutorProps["orgMeta"];
-  }): Promise<
-    Result<
-      {
-        reservedEscrowId: string;
-      },
-      AttemptError
-    >
-  > {
+  async reserveEscrowAndGetId(props: PTBProps): PendingEscrow {
     const escrowResult = await this.reserveEscrow(
       props.attempt,
       props.requestWrapper.heliconeHeaders.requestId,
@@ -64,29 +73,148 @@ export class AttemptExecutor {
 
     if (isErr(escrowResult)) {
       return err({
-        type: "request_failed",
+        type:
+          (escrowResult.error.statusCode || 500) === 429
+            ? "insufficient_credit_limit"
+            : "request_failed",
         message: escrowResult.error.message,
         statusCode: escrowResult.error.statusCode || 500,
       });
     }
+
     return ok({ reservedEscrowId: escrowResult.data.escrowId });
+  }
+
+  async PTBPreCheck(props: PTBProps): Promise<
+    Result<
+      {
+        pendingEscrow: PendingEscrow;
+      },
+      AttemptError
+    >
+  > {
+    const walletSpanId = props.traceContext?.sampled
+      ? this.tracer.startSpan(
+          "ai_gateway.ptb.credit_validation.reserve_escrow",
+          "reserveEscrow",
+          "helicone-wallet",
+          {
+            operation: "reserve_escrow",
+          },
+          props.traceContext
+        )
+      : null;
+    const walletKVSync = new WalletKVSync(this.env.WALLET_KV, props.orgId);
+
+    const pendingEscrow = this.reserveEscrowAndGetId(props);
+
+    // Check KV cache for wallet balance
+    const walletState = await walletKVSync.getWalletState();
+
+    // Tag KV cache status
+    if (walletSpanId) {
+      this.tracer.setTag(
+        walletSpanId,
+        "kv_cache_hit",
+        walletState ? "true" : "false"
+      );
+    }
+
+    if (walletState) {
+      const creditLineAmount = props.orgMeta.allowNegativeBalance
+        ? (props.orgMeta.creditLimit ?? 0)
+        : 0;
+      const effectiveBalance =
+        creditLineAmount + walletState.remainingBalanceCents;
+
+      if (effectiveBalance > ALLOWABLE_BALANCE_TO_SKIP_CHECK) {
+        // OPTIMISTIC PATH - proceed without waiting for escrow
+        if (walletSpanId) {
+          this.tracer.setTag(walletSpanId, "execution_mode", "optimistic");
+          this.tracer.setTag(
+            walletSpanId,
+            "effective_balance_cents",
+            effectiveBalance
+          );
+          this.tracer.finishSpan(walletSpanId);
+        }
+        return ok({
+          pendingEscrow,
+        });
+      }
+    }
+
+    // BLOCKING PATH - balance too low, must wait for escrow result
+    if (walletSpanId) {
+      this.tracer.setTag(walletSpanId, "execution_mode", "blocking");
+    }
+
+    const awaitedEscrow = await pendingEscrow;
+    if (awaitedEscrow.error) {
+      if (walletSpanId) {
+        this.tracer.setError(walletSpanId, awaitedEscrow.error.message);
+        this.tracer.finishSpan(walletSpanId);
+      }
+      return err(awaitedEscrow.error);
+    }
+    // Finish wallet span with success tags
+    if (walletSpanId) {
+      this.tracer.setTag(
+        walletSpanId,
+        "escrow_id",
+        awaitedEscrow.data.reservedEscrowId
+      );
+      this.tracer.finishSpan(walletSpanId);
+    }
+
+    // Wrap the already-resolved result back in a promise for consistent return type
+    return ok({
+      pendingEscrow: Promise.resolve(awaitedEscrow),
+    });
   }
 
   async execute(props: ExecutorProps): Promise<Result<Response, AttemptError>> {
     const { endpoint, providerKey } = props.attempt;
 
     let escrowInfo: EscrowInfo | undefined;
+    let ptbSpanId: string | null = null;
+
+    // Start PTB span for PTB requests
+    if (props.attempt.authType === "ptb" && endpoint.ptbEnabled) {
+      ptbSpanId = props.traceContext?.sampled
+        ? this.tracer.startSpan(
+            "ai_gateway.ptb",
+            `${props.requestWrapper.getMethod()} ${props.requestWrapper.getUrl()}`,
+            "ai-gateway-ptb",
+            {
+              provider: endpoint.provider,
+              model: endpoint.providerModelId,
+              http_method: props.requestWrapper.getMethod(),
+            },
+            props.traceContext
+          )
+        : null;
+    }
 
     // Reserve escrow if needed (PTB only)
     if (props.attempt.authType === "ptb" && endpoint.ptbEnabled) {
-      const ptbCheck = await this.PTBPreCheck(props);
+      const ptbCheck = await this.PTBPreCheck({
+        ...props,
+      });
 
       if (isErr(ptbCheck)) {
+        // Finish PTB span with error
+        if (ptbSpanId) {
+          this.tracer.setError(ptbSpanId, ptbCheck.error.message);
+          this.tracer.finishSpan(ptbSpanId, {
+            http_status_code: ptbCheck.error.statusCode?.toString(),
+          });
+        }
         return err(ptbCheck.error);
       }
 
       escrowInfo = {
-        escrowId: ptbCheck.data.reservedEscrowId,
+        escrow: ptbCheck.data.pendingEscrow,
         endpoint: endpoint,
       };
     }
@@ -101,18 +229,44 @@ export class AttemptExecutor {
       props.forwarder,
       escrowInfo,
       props.metrics,
-      props.attempt.plugins
+      props.attempt.plugins,
+      props.traceContext
     );
 
     // If error, cancel escrow and return the error
     if (isErr(result)) {
       if (escrowInfo) {
-        this.ctx.waitUntil(this.cancelEscrow(escrowInfo.escrowId, props.orgId));
+        // Need to await the pending escrow to get escrowId for cancellation
+        this.ctx.waitUntil(
+          escrowInfo.escrow.then((escrowResult) => {
+            if (escrowResult.data) {
+              return this.cancelEscrow(
+                escrowResult.data.reservedEscrowId,
+                props.orgId
+              );
+            }
+          })
+        );
       }
+
+      // Finish PTB span with error
+      if (ptbSpanId) {
+        this.tracer.setError(ptbSpanId, result.error.message);
+        this.tracer.finishSpan(ptbSpanId, {
+          http_status_code: result.error.statusCode?.toString(),
+        });
+      }
+
       return result;
     }
 
-    // Success
+    // Success - finish PTB span
+    if (ptbSpanId) {
+      this.tracer.finishSpan(ptbSpanId, {
+        http_status_code: result.data.status.toString(),
+      });
+    }
+
     return result;
   }
 
@@ -129,13 +283,19 @@ export class AttemptExecutor {
     ) => Promise<Response>,
     escrowInfo: EscrowInfo | undefined,
     metrics: GatewayMetrics,
-    plugins?: Plugin[]
+    plugins?: Plugin[],
+    traceContext?: TraceContext | null
   ): Promise<Result<Response, AttemptError>> {
+    const bodyMapping =
+      endpoint.userConfig.gatewayMapping ||
+      requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping;
     try {
       const bodyResult = await buildRequestBody(endpoint, {
         parsedBody,
-        bodyMapping: requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
-        toAnthropic: (body, modelId) => toAnthropic(body, modelId, plugins),
+        bodyMapping: bodyMapping,
+        toAnthropic: (body, modelId, options) =>
+          toAnthropic(body, modelId, plugins, options),
+        toChatCompletions: (body) => toChatCompletions(body),
       });
 
       if (isErr(bodyResult) || !bodyResult.data) {
@@ -146,6 +306,7 @@ export class AttemptExecutor {
         });
       }
 
+      requestParams.apiKey = providerKey.decrypted_provider_key;
       const urlResult = buildEndpointUrl(endpoint, requestParams);
 
       if (isErr(urlResult)) {
@@ -160,7 +321,7 @@ export class AttemptExecutor {
         apiKey: providerKey.decrypted_provider_key,
         secretKey: providerKey.decrypted_provider_secret_key || undefined,
         orgId: orgId,
-        bodyMapping: requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping,
+        bodyMapping: bodyMapping,
         requestMethod: requestWrapper.getMethod(),
         requestUrl: urlResult.data,
         requestBody: bodyResult.data,
@@ -198,33 +359,87 @@ export class AttemptExecutor {
 
       await requestWrapper.setBody(bodyResult.data);
 
-      for (const [key, value] of Object.entries(
-        authResult.data?.headers || {}
-      )) {
+      // Apply auth headers from provider
+      const authHeaders = authResult.data?.headers || {};
+      for (const [key, value] of Object.entries(authHeaders)) {
         requestWrapper.setHeader(key, value);
+      }
+
+      // If provider doesn't return Authorization header, remove the original one
+      // This handles providers that use URL-based auth (like Google's native API)
+      // Check both cases since headers can be lowercase or capitalized
+      const hasAuthHeader =
+        "Authorization" in authHeaders || "authorization" in authHeaders;
+      if (!hasAuthHeader && endpoint.provider === "google-ai-studio") {
+        requestWrapper.getHeaders().delete("Authorization");
       }
 
       metrics.markPreRequestEnd();
       metrics.markProviderStart();
 
+      // Start provider request span
+      const providerSpanId = traceContext?.sampled
+        ? this.tracer.startSpan(
+            `ai_gateway.${
+              endpoint.ptbEnabled ? "ptb" : "byok"
+            }.provider.llm_request`,
+            `${endpoint.provider} ${endpoint.providerModelId}`,
+            "llm-provider",
+            {
+              provider: endpoint.provider,
+              model: endpoint.providerModelId,
+            },
+            traceContext
+          )
+        : null;
+
+      const providerStartTime = Date.now();
       const response = await forwarder(urlResult.data, escrowInfo);
+      const providerLatency = Date.now() - providerStartTime;
 
       metrics.markProviderEnd(response.status);
 
+      // Finish provider span
+      if (providerSpanId) {
+        this.tracer.setTag(
+          providerSpanId,
+          "http.status_code",
+          response.status.toString()
+        );
+        this.tracer.setTag(
+          providerSpanId,
+          "provider.latency_ms",
+          providerLatency
+        );
+        if (!response.ok) {
+          this.tracer.setTag(providerSpanId, "error", "true");
+        }
+        this.tracer.finishSpan(providerSpanId);
+      }
+
       if (!response.ok) {
+        // Detect Helicone-generated rate limit responses
+        const heliconeError = response.headers.get("X-Helicone-Error");
         const errorMessageResult = await buildErrorMessage(endpoint, response);
         if (isErr(errorMessageResult)) {
           return err({
-            type: "request_failed",
+            type:
+              response.status === 429 && heliconeError === "rate_limited"
+                ? "rate_limited"
+                : "request_failed",
             message: errorMessageResult.error,
             statusCode: response.status,
           });
         }
 
         return err({
-          type: "request_failed",
-          message: errorMessageResult.data,
+          type:
+            response.status === 429 && heliconeError === "rate_limited"
+              ? "rate_limited"
+              : "request_failed",
+          message: errorMessageResult.data.message,
           statusCode: response.status,
+          details: errorMessageResult.data.details,
         });
       }
 
@@ -313,18 +528,6 @@ export class AttemptExecutor {
       await walletStub.cancelEscrow(escrowId);
     } catch (error) {
       console.error(`Failed to cancel escrow ${escrowId}:`, error);
-    }
-  }
-
-  private async getTotalDebits(orgId: string): Promise<number> {
-    try {
-      const walletId = this.env.WALLET.idFromName(orgId);
-      const walletStub = this.env.WALLET.get(walletId);
-      const result = await walletStub.getTotalDebits(orgId);
-      return result.totalDebits;
-    } catch (error) {
-      console.error(`Failed to get total debits for org ${orgId}:`, error);
-      return 0;
     }
   }
 }

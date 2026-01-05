@@ -1,0 +1,552 @@
+---
+title: "LangChain Integration"
+sidebarTitle: "LangChain"
+description: "Integrate Helicone AI Gateway with LangChain to access 100+ LLM providers with unified observability."
+"twitter:title": "LangChain Integration - Helicone OSS LLM Observability"
+iconType: "solid"
+---
+
+import { strings } from "/snippets/strings.mdx";
+import Star from "/snippets/star.mdx";
+import RequestIntegration from "/snippets/request-integration.mdx";
+
+## Introduction
+
+[LangChain](https://www.langchain.com/) is a popular open-source framework for building applications with large language models across Python, TypeScript, and other languages. By integrating Helicone AI Gateway with LangChain, you can:
+
+- **Route to different models & providers** with automatic failover through a single endpoint
+- **Unified billing** with pass-through billing or bring your own keys
+- **Monitor all requests** with automatic cost tracking in one dashboard
+- **Stream responses** with full observability for real-time applications
+
+<Note>
+  This integration requires only **two changes** to your existing LangChain code - updating the base URL and API key.
+</Note>
+
+## Integration Steps
+
+<Steps>
+  <Step title="Create an account + Generate an API Key">
+    Sign up at [helicone.ai](https://www.helicone.ai) and generate an [API key](https://us.helicone.ai/settings/api-keys).
+
+    <Note>
+      You'll also need to configure your provider API keys (OpenAI, Anthropic, etc.) at [Helicone Providers](https://us.helicone.ai/providers) for BYOK (Bring Your Own Keys).
+    </Note>
+  </Step>
+
+  <Step title="Set environment variables">
+    ```bash
+    # Your Helicone API key
+    export HELICONE_API_KEY=<your-helicone-api-key>
+    ```
+
+    Create a `.env` file in your project:
+    ```env
+    HELICONE_API_KEY=sk-helicone-...
+    ```
+  </Step>
+
+  <Step title="Install LangChain packages">
+    <CodeGroup>
+    ```bash TypeScript
+    npm install @langchain/openai @langchain/core dotenv
+    # or
+    yarn add @langchain/openai @langchain/core dotenv
+    ```
+
+    ```bash Python
+    pip install langchain-openai langchain-core python-dotenv
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Configure LangChain with Helicone AI Gateway">
+    <CodeGroup>
+    ```typescript TypeScript
+    import { ChatOpenAI } from "@langchain/openai";
+    import { HumanMessage, SystemMessage } from "@langchain/core/messages";
+    import dotenv from 'dotenv';
+
+    dotenv.config();
+
+    // Initialize ChatOpenAI with Helicone AI Gateway
+    const chat = new ChatOpenAI({
+        model: 'gpt-4.1-mini',  // 100+ models supported
+        apiKey: process.env.HELICONE_API_KEY,
+        configuration: {
+            baseURL: "https://ai-gateway.helicone.ai/v1",
+            defaultHeaders: {
+                // Optional: Add custom tracking headers
+                "Helicone-Session-Id": "my-session",
+                "Helicone-User-Id": "user-123",
+                "Helicone-Property-Environment": "production",
+            },
+        },
+    });
+    ```
+
+    ```python Python
+    import os
+    from langchain_openai import ChatOpenAI
+    from langchain_core.messages import HumanMessage, SystemMessage
+    from dotenv import load_dotenv
+
+    load_dotenv()
+
+    # Initialize ChatOpenAI with Helicone AI Gateway
+    chat = ChatOpenAI(
+        model='gpt-4.1-mini',  # 100+ models supported
+        api_key=os.getenv('HELICONE_API_KEY'),
+        base_url="https://ai-gateway.helicone.ai/v1",
+        default_headers={
+            # Optional: Add custom tracking headers
+            'Helicone-Session-Id': 'my-session',
+            'Helicone-User-Id': 'user-123',
+            'Helicone-Property-Environment': 'production',
+        },
+    )
+    ```
+    </CodeGroup>
+
+    <Info>
+      The **only changes** from a standard LangChain setup are the `apiKey`, `baseURL` (or `base_url` in Python), and optional tracking headers. Everything else stays the same!
+    </Info>
+
+    <div dangerouslySetInnerHTML={{ __html: strings.modelRegistryDescription }} />
+  </Step>
+
+  <Step title="Use LangChain normally">
+    Your existing LangChain code continues to work without any changes:
+
+    <CodeGroup>
+    ```typescript TypeScript
+    // Simple completion
+    const response = await chat.invoke([
+        new SystemMessage("You are a helpful assistant."),
+        new HumanMessage("What is the capital of France?"),
+    ]);
+
+    console.log(response.content);
+    ```
+
+    ```python Python
+    # Simple completion
+    messages = [
+        SystemMessage(content="You are a helpful assistant."),
+        HumanMessage(content="What is the capital of France?"),
+    ]
+
+    response = chat.invoke(messages)
+    print(response.content)
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title={strings.viewRequestsInDashboard}>
+    <div dangerouslySetInnerHTML={{ __html: strings.viewRequestsInDashboardDescription("LangChain") }} />
+
+    - Request/response bodies
+    - Latency metrics
+    - Token usage and costs
+    - Model performance analytics
+    - Error tracking
+    - Session tracking
+
+    <Star />
+  </Step>
+</Steps>
+
+## Migration Example
+
+Here's what migrating an existing LangChain application looks like:
+
+### Before (Direct OpenAI)
+
+<CodeGroup>
+```typescript TypeScript
+import { ChatOpenAI } from "@langchain/openai";
+
+const chat = new ChatOpenAI({
+    model: 'gpt-4o-mini',
+    apiKey: process.env.OPENAI_API_KEY,
+});
+```
+
+```python Python
+from langchain_openai import ChatOpenAI
+
+chat = ChatOpenAI(
+    model='gpt-4o-mini',
+    api_key=os.getenv('OPENAI_API_KEY'),
+)
+```
+</CodeGroup>
+
+### After (Helicone AI Gateway)
+
+<CodeGroup>
+```typescript TypeScript
+import { ChatOpenAI } from "@langchain/openai";
+
+const chat = new ChatOpenAI({
+    model: 'gpt-4.1-mini',                      // 100+ models supported
+    apiKey: process.env.HELICONE_API_KEY,      // Your Helicone API key
+    configuration: {
+        baseURL: "https://ai-gateway.helicone.ai/v1"  // Add this!
+    },
+});
+```
+
+```python Python
+from langchain_openai import ChatOpenAI
+
+chat = ChatOpenAI(
+    model='gpt-4.1-mini',                      # 100+ models supported
+    api_key=os.getenv('HELICONE_API_KEY'),    # Your Helicone API key
+    base_url="https://ai-gateway.helicone.ai/v1"  # Add this!
+)
+```
+</CodeGroup>
+
+That's it! Just two changes and you're routing through Helicone's AI Gateway.
+
+## Complete Working Examples
+
+### Basic Example
+
+<CodeGroup>
+```typescript TypeScript
+import { ChatOpenAI } from "@langchain/openai";
+import { HumanMessage, SystemMessage } from "@langchain/core/messages";
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const chat = new ChatOpenAI({
+    model: 'gpt-4.1-mini',  // 100+ models supported
+    apiKey: process.env.HELICONE_API_KEY,
+    configuration: {
+        baseURL: "https://ai-gateway.helicone.ai/v1",
+        defaultHeaders: {
+            "Helicone-Session-Id": "langchain-example",
+            "Helicone-User-Id": "demo-user",
+        },
+    },
+});
+
+async function main() {
+    console.log('🦜 Starting LangChain + Helicone AI Gateway example...\n');
+
+    const response = await chat.invoke([
+        new SystemMessage("You are a helpful assistant."),
+        new HumanMessage("Tell me a joke about programming."),
+    ]);
+
+    console.log('🤖 Assistant response:');
+    console.log(response.content);
+    console.log('\n✅ Completed successfully!');
+}
+
+main().catch(console.error);
+```
+
+```python Python
+import os
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage, SystemMessage
+from dotenv import load_dotenv
+
+load_dotenv()
+
+chat = ChatOpenAI(
+    model='gpt-4.1-mini',  # 100+ models supported
+    api_key=os.getenv('HELICONE_API_KEY'),
+    base_url="https://ai-gateway.helicone.ai/v1",
+    default_headers={
+        'Helicone-Session-Id': 'langchain-example',
+        'Helicone-User-Id': 'demo-user',
+    },
+)
+
+def main():
+    print('🐍 Starting LangChain + Helicone AI Gateway example...\n')
+
+    messages = [
+        SystemMessage(content="You are a helpful assistant."),
+        HumanMessage(content="Tell me a joke about Python programming."),
+    ]
+
+    response = chat.invoke(messages)
+
+    print('🤖 Assistant response:')
+    print(response.content)
+    print('\n✅ Completed successfully!')
+
+if __name__ == "__main__":
+    main()
+```
+</CodeGroup>
+
+### Streaming Example
+
+<CodeGroup>
+```typescript TypeScript
+async function streamingExample() {
+    console.log('\n🌊 Streaming example...\n');
+
+    const stream = await chat.stream([
+        new SystemMessage("You are a helpful assistant."),
+        new HumanMessage("Write a short story about a robot learning to code."),
+    ]);
+
+    console.log('🤖 Assistant (streaming):');
+    for await (const chunk of stream) {
+        process.stdout.write(chunk.content as string);
+    }
+    console.log('\n\n✅ Streaming completed!');
+}
+
+streamingExample().catch(console.error);
+```
+
+```python Python
+def streaming_example():
+    print('\n🌊 Streaming example...\n')
+
+    messages = [
+        SystemMessage(content="You are a helpful assistant."),
+        HumanMessage(content="Write a short story about a robot learning to code."),
+    ]
+
+    print('🤖 Assistant (streaming):')
+    for chunk in chat.stream(messages):
+        print(chunk.content, end='', flush=True)
+
+    print('\n\n✅ Streaming completed!')
+
+streaming_example()
+```
+</CodeGroup>
+
+### Multiple Models Example
+
+<CodeGroup>
+```typescript TypeScript
+async function testMultipleModels() {
+    console.log('🚀 Testing multiple models through Helicone AI Gateway\n');
+
+    const models = [
+        { id: 'gpt-4.1-mini', name: 'OpenAI GPT-4.1 Mini' },
+        { id: 'claude-opus-4-1', name: 'Anthropic Claude Opus 4.1' },
+        { id: 'gemini-2.5-flash-lite', name: 'Google Gemini 2.5 Flash Lite' },
+    ];
+
+    for (const model of models) {
+        try {
+            const chat = new ChatOpenAI({
+                model: model.id,
+                apiKey: process.env.HELICONE_API_KEY,
+                configuration: {
+                    baseURL: "https://ai-gateway.helicone.ai/v1",
+                },
+            });
+
+            console.log(`🤖 Testing ${model.name}... `);
+            const response = await chat.invoke([
+                new HumanMessage("Say hello in one sentence."),
+            ]);
+            console.log(`   Response: ${response.content}\n`);
+        } catch (error) {
+            console.error(`   Error: ${error}\n`);
+        }
+    }
+
+    console.log('✅ All models tested!');
+    console.log('🔍 Check your dashboard: https://us.helicone.ai/dashboard');
+}
+
+testMultipleModels().catch(console.error);
+```
+
+```python Python
+def test_multiple_models():
+    print('🚀 Testing multiple models through Helicone AI Gateway\n')
+
+    models = [
+        {'id': 'gpt-4.1-mini', 'name': 'OpenAI GPT-4.1 Mini'},
+        {'id': 'claude-opus-4-1', 'name': 'Anthropic Claude Opus 4.1'},
+        {'id': 'gemini-2.5-flash-lite', 'name': 'Google Gemini 2.5 Flash Lite'},
+    ]
+
+    for model in models:
+        try:
+            chat = ChatOpenAI(
+                model=model['id'],
+                api_key=os.getenv('HELICONE_API_KEY'),
+                base_url="https://ai-gateway.helicone.ai/v1",
+            )
+
+            print(f"🤖 Testing {model['name']}... ")
+            response = chat.invoke([
+                HumanMessage(content="Say hello in one sentence."),
+            ])
+            print(f"   Response: {response.content}\n")
+        except Exception as error:
+            print(f"   Error: {error}\n")
+
+    print('✅ All models tested!')
+    print('🔍 Check your dashboard: https://us.helicone.ai/dashboard')
+
+test_multiple_models()
+```
+</CodeGroup>
+
+### Batch Processing Example (Python)
+
+```python Python
+def batch_example():
+    print('\n📦 Batch processing example...\n')
+
+    message_batches = [
+        [HumanMessage(content="What is Python?")],
+        [HumanMessage(content="What is JavaScript?")],
+        [HumanMessage(content="What is TypeScript?")],
+    ]
+
+    responses = chat.batch(message_batches)
+
+    print('🤖 Batch responses:')
+    for i, response in enumerate(responses, 1):
+        print(f'\nResponse {i}: {response.content}')
+
+    print('\n✅ Batch processing completed!')
+
+batch_example()
+```
+
+## Helicone Prompts Integration
+
+You can use Helicone Prompts for centralized prompt management and versioning by passing parameters through `modelKwargs`:
+
+<CodeGroup>
+```typescript TypeScript
+const chat = new ChatOpenAI({
+    model: 'gpt-4.1-mini',
+    apiKey: process.env.HELICONE_API_KEY,
+    modelKwargs: {
+        prompt_id: 'customer-support-prompt',
+        version_id: 'version-uuid',
+        environment: 'production',
+        inputs: { customer_name: 'John', issue_type: 'billing' },
+    },
+    configuration: {
+        baseURL: "https://ai-gateway.helicone.ai/v1",
+    },
+});
+```
+
+```python Python
+chat = ChatOpenAI(
+    model='gpt-4.1-mini',
+    api_key=os.getenv('HELICONE_API_KEY'),
+    base_url="https://ai-gateway.helicone.ai/v1",
+    model_kwargs={
+        'prompt_id': 'customer-support-prompt',
+        'version_id': 'version-uuid',
+        'environment': 'production',
+        'inputs': {'customer_name': 'John', 'issue_type': 'billing'},
+    },
+)
+```
+</CodeGroup>
+
+<Note>
+  All prompt parameters (`prompt_id`, `version_id`, `environment`, `inputs`) are optional. Learn more about [Prompts with AI Gateway](/gateway/concepts/prompt-caching).
+</Note>
+
+## Custom Headers and Properties
+
+You can add custom properties to track and filter your requests:
+
+<CodeGroup>
+```typescript TypeScript
+const chat = new ChatOpenAI({
+    model: 'gpt-4.1-mini',
+    apiKey: process.env.HELICONE_API_KEY,
+    configuration: {
+        baseURL: "https://ai-gateway.helicone.ai/v1",
+        defaultHeaders: {
+            // Session tracking
+            "Helicone-Session-Id": "session-abc-123",
+            "Helicone-Session-Name": "Customer Support Chat",
+            "Helicone-Session-Path": "/support/chat/456",
+
+            // User tracking
+            "Helicone-User-Id": "user-789",
+
+            // Custom properties for filtering
+            "Helicone-Property-Environment": "production",
+            "Helicone-Property-App-Version": "2.1.0",
+            "Helicone-Property-Feature": "customer-support",
+
+            // Rate limiting (optional)
+            "Helicone-Rate-Limit-Policy": "basic-100",
+        },
+    },
+});
+```
+
+```python Python
+chat = ChatOpenAI(
+    model='gpt-4.1-mini',
+    api_key=os.getenv('HELICONE_API_KEY'),
+    base_url="https://ai-gateway.helicone.ai/v1",
+    default_headers={
+        # Session tracking
+        'Helicone-Session-Id': 'session-abc-123',
+        'Helicone-Session-Name': 'Customer Support Chat',
+        'Helicone-Session-Path': '/support/chat/456',
+
+        # User tracking
+        'Helicone-User-Id': 'user-789',
+
+        # Custom properties for filtering
+        'Helicone-Property-Environment': 'production',
+        'Helicone-Property-App-Version': '2.1.0',
+        'Helicone-Property-Feature': 'customer-support',
+
+        # Rate limiting (optional)
+        'Helicone-Rate-Limit-Policy': 'basic-100',
+    },
+)
+```
+</CodeGroup>
+
+<RequestIntegration />
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="AI Gateway Overview" icon="arrow-progress" href="/gateway/overview">
+    Learn about Helicone's AI Gateway features and capabilities
+  </Card>
+  <Card title="Provider Routing" icon="route" href="/gateway/provider-routing">
+    Configure intelligent routing and automatic failover
+  </Card>
+  <Card title="Model Registry" icon="database" href="https://helicone.ai/models">
+    Browse all available models and providers
+  </Card>
+  <Card title="Prompt Management" icon="code" href="/gateway/concepts/prompt-caching">
+    Version and manage prompts with Helicone Prompts
+  </Card>
+  <Card title="Custom Properties" icon="tags" href="/features/advanced-usage/custom-properties">
+    Add metadata to track and filter your requests
+  </Card>
+  <Card title="Sessions" icon="link" href="/features/sessions">
+    Track multi-turn conversations and user sessions
+  </Card>
+  <Card title="Rate Limiting" icon="gauge" href="/features/advanced-usage/custom-rate-limits">
+    Configure rate limits for your applications
+  </Card>
+</CardGroup>
+

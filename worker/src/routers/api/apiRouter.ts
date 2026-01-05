@@ -79,6 +79,77 @@ function getAPIRouterV1(
   );
 
   router.post(
+    "/reset-prompt-cache/:orgId",
+    async (
+      { params: { orgId } },
+      requestWrapper: RequestWrapper,
+      env: Env,
+      ctx: ExecutionContext
+    ) => {
+      if (env.ENVIRONMENT !== "development") {
+        return new Response("not allowed", { status: 403 });
+      }
+
+      const data = await requestWrapper.unsafeGetJson<{
+        promptId: string;
+        versionId?: string;
+        environment?: string;
+      }>();
+
+      if (!data || !data.promptId) {
+        return new Response("promptId is required", { status: 400 });
+      }
+
+      try {
+        const { removeFromCache } = await import(
+          "../../lib/util/cache/secureCache"
+        );
+        const cacheKeysToDelete: string[] = [];
+
+        if (data.versionId) {
+          const promptBodyCacheKey = `prompt_body_${data.promptId}_${data.versionId}_${orgId}`;
+          cacheKeysToDelete.push(promptBodyCacheKey);
+
+          const promptVersionCacheKey = `prompt_version_${data.promptId}_version:${data.versionId}_${orgId}`;
+          cacheKeysToDelete.push(promptVersionCacheKey);
+        }
+
+        if (data.environment) {
+          const promptVersionCacheKey = `prompt_version_${data.promptId}_env:${data.environment}_${orgId}`;
+          cacheKeysToDelete.push(promptVersionCacheKey);
+        }
+
+        await Promise.all(
+          cacheKeysToDelete.map((key) => removeFromCache(key, env))
+        );
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            deletedKeys: cacheKeysToDelete,
+          }),
+          {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+      } catch (error) {
+        console.error("Error resetting prompt cache:", error);
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: error instanceof Error ? error.message : "Unknown error",
+          }),
+          {
+            status: 500,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+      }
+    }
+  );
+
+  router.post(
     "/mock-set-provider-keys/:orgId",
     async (
       { params: { orgId } },
@@ -507,6 +578,7 @@ function getAPIRouterV1(
       });
     }
   );
+  // Note: catch-all route is handled at the router level in getAPIRouter()
 }
 
 export const getAPIRouter = (router: BaseOpenAPIRouter) => {
@@ -521,7 +593,7 @@ export const getAPIRouter = (router: BaseOpenAPIRouter) => {
       _env: Env,
       _ctx: ExecutionContext
     ) => {
-      return new Response("invalid path", { status: 400 });
+      return new Response("invalid path", { status: 404 });
     }
   );
 

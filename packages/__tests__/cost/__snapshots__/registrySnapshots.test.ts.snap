@@ -4,7 +4,35 @@ exports[`Registry Snapshots archived endpoints snapshot 1`] = `{}`;
 
 exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
 {
-  "alibaba/qwen": {
+  "alibaba/qwen2.5": {
+    "qwen2.5-coder-7b-fast:nebius": {
+      "context": 32000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "Qwen/Qwen2.5-Coder-7B-fast",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "top_k",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "nebius",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
+  "alibaba/qwen3": {
     "qwen3-235b-a22b-thinking:deepinfra": {
       "context": 262000,
       "crossRegion": false,
@@ -138,6 +166,58 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "qwen3-coder-30b-a3b-instruct:nebius": {
+      "context": 262144,
+      "crossRegion": false,
+      "maxTokens": 262144,
+      "modelId": "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "nebius",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "qwen3-coder:canopywave": {
+      "context": 262144,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "qwen/qwen3-coder",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "canopywave",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "qwen3-coder:deepinfra": {
       "context": 262144,
       "crossRegion": false,
@@ -190,6 +270,76 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "qwen3-vl-235b-a22b-instruct:novita": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "qwen/qwen3-vl-235b-a22b-instruct",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
+  "anthropic/claude-3-haiku-20240307": {
+    "claude-3-haiku-20240307:anthropic": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 4096,
+      "modelId": "claude-3-haiku-20240307",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "anthropic",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-3-haiku-20240307:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 4096,
+      "modelId": "pa/cd-3-hk-20240307",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
   },
   "anthropic/claude-3.5-haiku": {
     "claude-3.5-haiku:anthropic": {
@@ -230,6 +380,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "ptbEnabled": true,
       "regions": [
         "us-east-1",
+      ],
+    },
+    "claude-3.5-haiku:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "pa/cd-3-5-hk-20241022",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
       ],
     },
     "claude-3.5-haiku:openrouter": {
@@ -314,6 +484,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "us-east-1",
       ],
     },
+    "claude-3.5-sonnet-v2:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "pa/cd-3-5-st-20241022",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "claude-3.5-sonnet-v2:openrouter": {
       "context": 200000,
       "crossRegion": false,
@@ -396,6 +586,46 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "us-east-1",
       ],
     },
+    "claude-3.7-sonnet:deepinfra": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "anthropic/claude-3-7-sonnet-latest",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-3.7-sonnet:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 64000,
+      "modelId": "pa/cd-3-7-st-20250219",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "claude-3.7-sonnet:openrouter": {
       "context": 200000,
       "crossRegion": false,
@@ -429,6 +659,212 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
         "top_k",
         "top_p",
+      ],
+      "provider": "vertex",
+      "ptbEnabled": true,
+      "regions": [
+        "global",
+      ],
+    },
+  },
+  "anthropic/claude-4.5-haiku": {
+    "claude-4.5-haiku:anthropic": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "claude-haiku-4-5-20251001",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "anthropic",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-4.5-haiku:bedrock": {
+      "context": 200000,
+      "crossRegion": true,
+      "maxTokens": 8192,
+      "modelId": "anthropic.claude-haiku-4-5-20251001-v1:0",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "bedrock",
+      "ptbEnabled": true,
+      "regions": [
+        "us-east-1",
+      ],
+    },
+    "claude-4.5-haiku:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "pa/claude-haiku-4-5-20251001",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-4.5-haiku:openrouter": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "anthropic/claude-haiku-4.5",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-4.5-haiku:vertex": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "claude-haiku-4-5@20251001",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "vertex",
+      "ptbEnabled": true,
+      "regions": [
+        "us-east5",
+      ],
+    },
+  },
+  "anthropic/claude-4.5-opus": {
+    "claude-4.5-opus:anthropic": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 64000,
+      "modelId": "claude-opus-4-5-20251101",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "anthropic",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-4.5-opus:bedrock": {
+      "context": 200000,
+      "crossRegion": true,
+      "maxTokens": 64000,
+      "modelId": "anthropic.claude-opus-4-5-20251101-v1:0",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "bedrock",
+      "ptbEnabled": true,
+      "regions": [
+        "us-east-1",
+      ],
+    },
+    "claude-4.5-opus:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 64000,
+      "modelId": "pa/claude-opus-4-5-20251101",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-4.5-opus:openrouter": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 64000,
+      "modelId": "anthropic/claude-opus-4.5",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-4.5-opus:vertex": {
+      "context": 200000,
+      "crossRegion": true,
+      "maxTokens": 64000,
+      "modelId": "claude-opus-4-5@20251101",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
       ],
       "provider": "vertex",
       "ptbEnabled": true,
@@ -480,6 +916,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "us-east-1",
       ],
     },
+    "claude-4.5-sonnet:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 64000,
+      "modelId": "pa/claude-sonnet-4-5-20250929",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "claude-4.5-sonnet:openrouter": {
       "context": 200000,
       "crossRegion": false,
@@ -518,6 +974,108 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "ptbEnabled": true,
       "regions": [
         "global",
+      ],
+    },
+  },
+  "anthropic/claude-haiku-4-5-20251001": {
+    "claude-haiku-4-5-20251001:anthropic": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "claude-haiku-4-5-20251001",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "anthropic",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-haiku-4-5-20251001:bedrock": {
+      "context": 200000,
+      "crossRegion": true,
+      "maxTokens": 8192,
+      "modelId": "anthropic.claude-haiku-4-5-20251001-v1:0",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "bedrock",
+      "ptbEnabled": true,
+      "regions": [
+        "us-east-1",
+      ],
+    },
+    "claude-haiku-4-5-20251001:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "pa/claude-haiku-4-5-20251001",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-haiku-4-5-20251001:openrouter": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "anthropic/claude-haiku-4.5",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-haiku-4-5-20251001:vertex": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "claude-haiku-4-5@20251001",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "vertex",
+      "ptbEnabled": true,
+      "regions": [
+        "us-east5",
       ],
     },
   },
@@ -562,6 +1120,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "ptbEnabled": true,
       "regions": [
         "us-east-1",
+      ],
+    },
+    "claude-opus-4:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 32000,
+      "modelId": "pa/cd-op-4-20250514",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
       ],
     },
     "claude-opus-4:openrouter": {
@@ -648,6 +1226,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "us-east-1",
       ],
     },
+    "claude-opus-4-1:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 32000,
+      "modelId": "pa/claude-opus-4-1-20250805",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "claude-opus-4-1:openrouter": {
       "context": 200000,
       "crossRegion": false,
@@ -689,9 +1287,113 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "anthropic/claude-opus-4-1-20250805": {
+    "claude-opus-4-1-20250805:anthropic": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 32000,
+      "modelId": "claude-opus-4-1-20250805",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "anthropic",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-opus-4-1-20250805:bedrock": {
+      "context": 200000,
+      "crossRegion": true,
+      "maxTokens": 32000,
+      "modelId": "anthropic.claude-opus-4-1-20250805-v1:0",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "bedrock",
+      "ptbEnabled": true,
+      "regions": [
+        "us-east-1",
+      ],
+    },
+    "claude-opus-4-1-20250805:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 32000,
+      "modelId": "pa/claude-opus-4-1-20250805",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-opus-4-1-20250805:openrouter": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 32000,
+      "modelId": "anthropic/claude-opus-4.1",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-opus-4-1-20250805:vertex": {
+      "context": 200000,
+      "crossRegion": true,
+      "maxTokens": 32000,
+      "modelId": "claude-opus-4-1@20250805",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "vertex",
+      "ptbEnabled": true,
+      "regions": [
+        "global",
+      ],
+    },
+  },
   "anthropic/claude-sonnet-4": {
     "claude-sonnet-4:anthropic": {
-      "context": 200000,
+      "context": 1000000,
       "crossRegion": false,
       "maxTokens": 64000,
       "modelId": "claude-sonnet-4-20250514",
@@ -711,7 +1413,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
     "claude-sonnet-4:bedrock": {
-      "context": 200000,
+      "context": 1000000,
       "crossRegion": true,
       "maxTokens": 64000,
       "modelId": "anthropic.claude-sonnet-4-20250514-v1:0",
@@ -730,6 +1432,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "ptbEnabled": true,
       "regions": [
         "us-east-1",
+      ],
+    },
+    "claude-sonnet-4:helicone": {
+      "context": 1000000,
+      "crossRegion": false,
+      "maxTokens": 64000,
+      "modelId": "pa/cd-st-4-20250514",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
       ],
     },
     "claude-sonnet-4:openrouter": {
@@ -753,7 +1475,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
     "claude-sonnet-4:vertex": {
-      "context": 200000,
+      "context": 1000000,
       "crossRegion": true,
       "maxTokens": 64000,
       "modelId": "claude-sonnet-4@20250514",
@@ -770,6 +1492,137 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "ptbEnabled": true,
       "regions": [
         "global",
+      ],
+    },
+  },
+  "anthropic/claude-sonnet-4-5-20250929": {
+    "claude-sonnet-4-5-20250929:anthropic": {
+      "context": 1000000,
+      "crossRegion": false,
+      "maxTokens": 64000,
+      "modelId": "claude-sonnet-4-5-20250929",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "anthropic",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-sonnet-4-5-20250929:bedrock": {
+      "context": 1000000,
+      "crossRegion": true,
+      "maxTokens": 64000,
+      "modelId": "anthropic.claude-sonnet-4-5-20250929-v1:0",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "bedrock",
+      "ptbEnabled": true,
+      "regions": [
+        "us-east-1",
+      ],
+    },
+    "claude-sonnet-4-5-20250929:helicone": {
+      "context": 1000000,
+      "crossRegion": false,
+      "maxTokens": 64000,
+      "modelId": "pa/claude-sonnet-4-5-20250929",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-sonnet-4-5-20250929:openrouter": {
+      "context": 1000000,
+      "crossRegion": false,
+      "maxTokens": 64000,
+      "modelId": "anthropic/claude-sonnet-4.5",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-sonnet-4-5-20250929:vertex": {
+      "context": 1000000,
+      "crossRegion": true,
+      "maxTokens": 64000,
+      "modelId": "claude-sonnet-4-5@20250929",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "vertex",
+      "ptbEnabled": true,
+      "regions": [
+        "global",
+      ],
+    },
+  },
+  "baidu/ernie": {
+    "ernie-4.5-21b-a3b-thinking:novita": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "baidu/ernie-4.5-21B-A3B-Thinking",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "reasoning",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
       ],
     },
   },
@@ -846,6 +1699,34 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "deepseek-tng-r1t2-chimera:chutes": {
+      "context": 130000,
+      "crossRegion": false,
+      "maxTokens": 163840,
+      "modelId": "tngtech/DeepSeek-TNG-R1T2-Chimera",
+      "parameters": [
+        "frequency_penalty",
+        "functions",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "tools",
+        "top_k",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "chutes",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
   },
   "deepseek/deepseek-v3": {
     "deepseek-v3.1-terminus:deepinfra": {
@@ -896,6 +1777,54 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "deepseek-v3.2:baseten": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "deepseek-ai/DeepSeek-V3.2",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "baseten",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "deepseek-v3.2:canopywave": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "deepseek/deepseek-chat-v3.2",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "canopywave",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -1011,6 +1940,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "deepseek/r1-distill": {
+    "deepseek-r1-distill-llama-70b:chutes": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+      "parameters": [
+        "max_tokens",
+        "min_p",
+        "seed",
+        "stop",
+        "temperature",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "chutes",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "deepseek-r1-distill-llama-70b:deepinfra": {
       "context": 131072,
       "crossRegion": false,
@@ -1303,28 +2252,225 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "google/gemini-3": {
+    "gemini-3-pro-preview:google-ai-studio": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "gemini-3-pro-preview",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "google-ai-studio",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-3-pro-preview:openrouter": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "google/gemini-3-pro-preview",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-3-pro-preview:vertex": {
+      "context": 1048576,
+      "crossRegion": true,
+      "maxTokens": 65536,
+      "modelId": "gemini-3-pro-preview",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "vertex",
+      "ptbEnabled": true,
+      "regions": [
+        "global",
+      ],
+    },
+  },
+  "google/gemini-3-flash-preview": {
+    "gemini-3-flash-preview:google-ai-studio": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "gemini-3-flash-preview",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "google-ai-studio",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-3-flash-preview:openrouter": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "google/gemini-3-flash-preview",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-3-flash-preview:vertex": {
+      "context": 1048576,
+      "crossRegion": true,
+      "maxTokens": 65536,
+      "modelId": "gemini-3-flash-preview",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "vertex",
+      "ptbEnabled": true,
+      "regions": [
+        "global",
+      ],
+    },
+  },
+  "google/gemini-3-pro-image": {
+    "gemini-3-pro-image-preview:google-ai-studio": {
+      "context": 65536,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "gemini-3-pro-image-preview",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "google-ai-studio",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-3-pro-image-preview:openrouter": {
+      "context": 65536,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "google/gemini-3-pro-image-preview",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-3-pro-image-preview:vertex": {
+      "context": 65536,
+      "crossRegion": true,
+      "maxTokens": 32768,
+      "modelId": "gemini-3-pro-image-preview",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "vertex",
+      "ptbEnabled": true,
+      "regions": [
+        "global",
+      ],
+    },
+  },
   "google/gemma": {
-    "gemma2-9b-it:groq": {
+    "gemma2-9b-it:chutes": {
       "context": 8192,
       "crossRegion": false,
       "maxTokens": 8192,
-      "modelId": "gemma2-9b-it",
+      "modelId": "unsloth/gemma-2-9b-it",
       "parameters": [
         "frequency_penalty",
-        "logit_bias",
-        "logprobs",
         "max_tokens",
-        "min_p",
         "presence_penalty",
         "repetition_penalty",
         "seed",
         "stop",
         "temperature",
         "top_k",
-        "top_logprobs",
         "top_p",
       ],
-      "provider": "groq",
+      "provider": "chutes",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -1375,6 +2521,33 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "deepinfra",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
+  "meta/hermes": {
+    "hermes-2-pro-llama-3-8b:novita": {
+      "context": 8192,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "nousresearch/hermes-2-pro-llama-3-8b",
+      "parameters": [
+        "functions",
+        "max_tokens",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "novita",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -1538,26 +2711,23 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
-    "llama-3.3-70b-instruct:groq": {
-      "context": 131072,
+    "llama-3.3-70b-instruct:nebius": {
+      "context": 128000,
       "crossRegion": false,
-      "maxTokens": 32678,
-      "modelId": "llama-3.3-70b-versatile",
+      "maxTokens": 128000,
+      "modelId": "meta-llama/Llama-3.3-70B-Instruct",
       "parameters": [
         "frequency_penalty",
-        "logit_bias",
         "max_tokens",
-        "min_p",
         "presence_penalty",
         "repetition_penalty",
-        "stop",
         "temperature",
         "tool_choice",
         "tools",
         "top_k",
         "top_p",
       ],
-      "provider": "groq",
+      "provider": "nebius",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -1609,6 +2779,31 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "llama-3.3-70b-versatile:groq": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 32678,
+      "modelId": "llama-3.3-70b-versatile",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "groq",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -1712,6 +2907,33 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "llama-4-scout:deepinfra": {
+      "context": 10000000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "meta-llama/Llama-4-Scout-17B-16E-Instruct",
+      "parameters": [
+        "frequency_penalty",
+        "functions",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -1871,7 +3093,33 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
-  "mistralai/mistral-nemo": {
+  "mistral/mistral-large": {
+    "mistral-large-2411:mistral": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 4096,
+      "modelId": "mistral-large-2411",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "mistral",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
+  "mistral/mistral-nemo": {
     "mistral-nemo:deepinfra": {
       "context": 128000,
       "crossRegion": false,
@@ -1897,7 +3145,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
-  "mistralai/mistral-small": {
+  "mistral/mistral-small": {
     "mistral-small:deepinfra": {
       "context": 128000,
       "crossRegion": false,
@@ -1924,6 +3172,131 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "moonshotai/kimi-k2": {
+    "kimi-k2-0711:novita": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "moonshotai/kimi-k2-instruct",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "kimi-k2-0711:openrouter": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "moonshotai/kimi-k2",
+      "parameters": [
+        "frequency_penalty",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "kimi-k2-0905:baseten": {
+      "context": 262000,
+      "crossRegion": false,
+      "maxTokens": 163800,
+      "modelId": "moonshotai/Kimi-K2-Instruct-0905",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "baseten",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "kimi-k2-0905:deepinfra": {
+      "context": 256000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "moonshotai/Kimi-K2-Instruct-0905",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "kimi-k2-0905:fireworks": {
+      "context": 262144,
+      "crossRegion": false,
+      "maxTokens": 262144,
+      "modelId": "accounts/fireworks/models/kimi-k2-instruct-0905",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "fireworks",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "kimi-k2-0905:groq": {
       "context": 262144,
       "crossRegion": false,
@@ -2007,48 +3380,68 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
-    "kimi-k2-instruct:novita": {
-      "context": 131072,
+    "kimi-k2-thinking:canopywave": {
+      "context": 262144,
       "crossRegion": false,
-      "maxTokens": 131072,
-      "modelId": "moonshotai/kimi-k2-instruct",
+      "maxTokens": 262144,
+      "modelId": "moonshotai/kimi-k2-thinking",
       "parameters": [
         "frequency_penalty",
-        "functions",
-        "logprobs",
         "max_tokens",
         "presence_penalty",
         "response_format",
-        "seed",
         "stop",
         "structured_outputs",
         "temperature",
         "tool_choice",
         "tools",
-        "top_logprobs",
         "top_p",
       ],
-      "provider": "novita",
+      "provider": "canopywave",
       "ptbEnabled": true,
       "regions": [
         "*",
       ],
     },
-    "kimi-k2:groq": {
-      "context": 131072,
+    "kimi-k2-thinking:deepinfra": {
+      "context": 256000,
       "crossRegion": false,
-      "maxTokens": 16384,
-      "modelId": "moonshotai/kimi-k2-instruct",
+      "maxTokens": 8000,
+      "modelId": "moonshotai/Kimi-K2-Thinking",
       "parameters": [
         "frequency_penalty",
-        "logit_bias",
-        "logprobs",
         "max_tokens",
         "min_p",
         "presence_penalty",
         "repetition_penalty",
         "response_format",
         "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "deepinfra",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "kimi-k2-thinking:fireworks": {
+      "context": 256000,
+      "crossRegion": false,
+      "maxTokens": 4096,
+      "modelId": "fireworks/kimi-k2-thinking",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
         "stop",
         "structured_outputs",
         "temperature",
@@ -2058,32 +3451,30 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_logprobs",
         "top_p",
       ],
-      "provider": "groq",
+      "provider": "fireworks",
       "ptbEnabled": true,
       "regions": [
         "*",
       ],
     },
-    "kimi-k2:openrouter": {
-      "context": 131072,
+    "kimi-k2-thinking:novita": {
+      "context": 262144,
       "crossRegion": false,
-      "maxTokens": 131072,
-      "modelId": "moonshotai/kimi-k2",
+      "maxTokens": 262144,
+      "modelId": "moonshotai/kimi-k2-thinking",
       "parameters": [
         "frequency_penalty",
-        "logprobs",
         "max_tokens",
         "presence_penalty",
         "response_format",
-        "seed",
         "stop",
+        "structured_outputs",
         "temperature",
         "tool_choice",
         "tools",
-        "top_logprobs",
         "top_p",
       ],
-      "provider": "openrouter",
+      "provider": "novita",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -2109,6 +3500,25 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "azure",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-4.1-mini:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "pa/gt-4.1-m",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "helicone",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -2183,6 +3593,23 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "gpt-4.1-nano:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "pa/gt-4.1-n",
+      "parameters": [
+        "max_tokens",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-4.1-nano:openai": {
       "context": 1047576,
       "crossRegion": false,
@@ -2247,6 +3674,25 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "azure",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-4.1:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "pa/gt-4.1",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "helicone",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -2369,6 +3815,25 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "gpt-4o-mini:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "pa/gt-4p-m",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-4o-mini:openai": {
       "context": 128000,
       "crossRegion": false,
@@ -2438,6 +3903,25 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "gpt-4o:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "pa/gt-4p",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-4o:openai": {
       "context": 128000,
       "crossRegion": false,
@@ -2486,21 +3970,123 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "openai/gpt-5": {
+    "gpt-5-2025-08-07:azure": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "azure",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-2025-08-07:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-2025-08-07:novita": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-2025-08-07:openai": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-2025-08-07:openrouter": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "openai/gpt-5-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-chat-latest:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5-chat-latest",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-5-chat-latest:openai": {
       "context": 128000,
       "crossRegion": false,
       "maxTokens": 16384,
       "modelId": "gpt-5-chat-latest",
       "parameters": [
-        "frequency_penalty",
         "max_completion_tokens",
-        "presence_penalty",
         "response_format",
         "seed",
         "stop",
         "tool_choice",
         "tools",
-        "top_p",
         "verbosity",
       ],
       "provider": "openai",
@@ -2515,17 +4101,191 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "maxTokens": 16384,
       "modelId": "openai/gpt-5-chat",
       "parameters": [
-        "frequency_penalty",
         "max_completion_tokens",
-        "presence_penalty",
         "response_format",
         "seed",
         "stop",
         "tool_choice",
         "tools",
-        "top_p",
       ],
       "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-codex:helicone": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "pa/gpt-5-codex",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-codex:openai": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5-codex",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-codex:openrouter": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "openai/gpt-5-codex",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-mini-2025-08-07:azure": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5-mini-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "azure",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-mini-2025-08-07:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5-mini-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-mini-2025-08-07:novita": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5-mini-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-mini-2025-08-07:openai": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5-mini-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-mini-2025-08-07:openrouter": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "openai/gpt-5-mini-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-mini:azure": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5-mini",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "azure",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-mini:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "pa/gpt-5-mini",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "helicone",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -2537,15 +4297,12 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "maxTokens": 128000,
       "modelId": "gpt-5-mini",
       "parameters": [
-        "frequency_penalty",
         "max_completion_tokens",
-        "presence_penalty",
         "response_format",
         "seed",
         "stop",
         "tool_choice",
         "tools",
-        "top_p",
         "verbosity",
       ],
       "provider": "openai",
@@ -2560,17 +4317,118 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "maxTokens": 128000,
       "modelId": "openai/gpt-5-mini",
       "parameters": [
-        "frequency_penalty",
         "max_completion_tokens",
-        "presence_penalty",
         "response_format",
         "seed",
         "stop",
         "tool_choice",
         "tools",
-        "top_p",
       ],
       "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-nano-2025-08-07:azure": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5-nano-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "azure",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-nano-2025-08-07:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5-nano-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-nano-2025-08-07:novita": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5-nano-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-nano-2025-08-07:openai": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5-nano-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-nano-2025-08-07:openrouter": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "openai/gpt-5-nano-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-nano:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "pa/gpt-5-nano",
+      "parameters": [
+        "max_completion_tokens",
+      ],
+      "provider": "helicone",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -2582,15 +4440,11 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "maxTokens": 128000,
       "modelId": "gpt-5-nano",
       "parameters": [
-        "frequency_penalty",
         "max_completion_tokens",
-        "presence_penalty",
         "response_format",
         "seed",
-        "stop",
         "tool_choice",
         "tools",
-        "top_p",
         "verbosity",
       ],
       "provider": "openai",
@@ -2605,17 +4459,205 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "maxTokens": 128000,
       "modelId": "openai/gpt-5-nano",
       "parameters": [
-        "frequency_penalty",
         "max_completion_tokens",
-        "presence_penalty",
+        "response_format",
+        "seed",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-pro-2025-10-01:azure": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "gpt-5-pro-2025-10-01",
+      "parameters": [
+        "max_completion_tokens",
         "response_format",
         "seed",
         "stop",
         "tool_choice",
         "tools",
-        "top_p",
+      ],
+      "provider": "azure",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-pro-2025-10-01:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5-pro-2025-10-01",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-pro-2025-10-01:novita": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5-pro-2025-10-01",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-pro-2025-10-01:openai": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "gpt-5-pro-2025-10-01",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-pro-2025-10-01:openrouter": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "openai/gpt-5-pro-2025-10-01",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
       ],
       "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-pro:azure": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "gpt-5-pro",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "azure",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-pro:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5-pro",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-pro:openai": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "gpt-5-pro",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-pro:openrouter": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "openai/gpt-5-pro",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5:azure": {
+      "context": 272000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "azure",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "helicone",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -2627,15 +4669,12 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "maxTokens": 128000,
       "modelId": "gpt-5",
       "parameters": [
-        "frequency_penalty",
         "max_completion_tokens",
-        "presence_penalty",
         "response_format",
         "seed",
         "stop",
         "tool_choice",
         "tools",
-        "top_p",
         "verbosity",
       ],
       "provider": "openai",
@@ -2650,17 +4689,476 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "maxTokens": 128000,
       "modelId": "openai/gpt-5",
       "parameters": [
-        "frequency_penalty",
         "max_completion_tokens",
-        "presence_penalty",
         "response_format",
         "seed",
         "stop",
         "tool_choice",
         "tools",
-        "top_p",
       ],
       "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
+  "openai/gpt-5.1": {
+    "codex-mini-latest:openai": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 100000,
+      "modelId": "codex-mini-latest",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "codex-mini-latest:openrouter": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 100000,
+      "modelId": "openai/codex-mini-latest",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.1-2025-11-13:azure": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5.1-2025-11-13",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "azure",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.1-2025-11-13:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5.1-2025-11-13",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.1-2025-11-13:novita": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5.1-2025-11-13",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.1-2025-11-13:openai": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5.1-2025-11-13",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.1-2025-11-13:openrouter": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "openai/gpt-5.1-2025-11-13",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.1-chat-latest:openai": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "gpt-5.1-chat-latest",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.1-chat-latest:openrouter": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "openai/gpt-5.1-chat-latest",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.1-codex-mini:openai": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5.1-codex-mini",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.1-codex-mini:openrouter": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "openai/gpt-5.1-codex-mini",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.1-codex:openai": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5.1-codex",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.1-codex:openrouter": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "openai/gpt-5.1-codex",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.1:openai": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5.1",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.1:openrouter": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "openai/gpt-5.1",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
+  "openai/gpt-5.2": {
+    "gpt-5.2-chat-latest:openai": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "gpt-5.2-chat-latest",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.2-chat-latest:openrouter": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "openai/gpt-5.2-chat-latest",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_completion_tokens",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+        "verbosity",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.2-pro:openai": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5.2-pro",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.2-pro:openrouter": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "openai/gpt-5.2-pro",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_completion_tokens",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+        "verbosity",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.2:openai": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5.2",
+      "parameters": [
+        "logprobs",
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+        "verbosity",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.2:openrouter": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "openai/gpt-5.2",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_completion_tokens",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+        "verbosity",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
+  "openai/o1": {
+    "o1-mini:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "pa/p1-m",
+      "parameters": [
+        "max_tokens",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "o1:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 100000,
+      "modelId": "pa/p1",
+      "parameters": [
+        "max_tokens",
+      ],
+      "provider": "helicone",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -2681,6 +5179,20 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
       ],
       "provider": "azure",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "o3-mini:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 100000,
+      "modelId": "pa/p3-m",
+      "parameters": [
+        "max_tokens",
+      ],
+      "provider": "helicone",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -2722,6 +5234,20 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "o3-pro:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 100000,
+      "modelId": "pa/p3-pro",
+      "parameters": [
+        "max_tokens",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "o3-pro:openai": {
       "context": 200000,
       "crossRegion": false,
@@ -2753,6 +5279,20 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
       ],
       "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "o3:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 100000,
+      "modelId": "pa/p3",
+      "parameters": [
+        "max_tokens",
+      ],
+      "provider": "helicone",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -2814,6 +5354,20 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "o4-mini:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 100000,
+      "modelId": "pa/o4-mini",
+      "parameters": [
+        "max_tokens",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "o4-mini:openai": {
       "context": 200000,
       "crossRegion": false,
@@ -2852,6 +5406,50 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "openai/oss": {
+    "gpt-oss-120b:baseten": {
+      "context": 128072,
+      "crossRegion": false,
+      "maxTokens": 128072,
+      "modelId": "openai/gpt-oss-120b",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "baseten",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-oss-120b:cerebras": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 40000,
+      "modelId": "gpt-oss-120b",
+      "parameters": [
+        "logprobs",
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "cerebras",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-oss-120b:deepinfra": {
       "context": 131072,
       "crossRegion": false,
@@ -3023,7 +5621,133 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "perplexity/sonar": {
+    "sonar-deep-research:perplexity": {
+      "context": 127000,
+      "crossRegion": false,
+      "maxTokens": 4096,
+      "modelId": "sonar-deep-research",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "perplexity",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "sonar-pro:perplexity": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 4096,
+      "modelId": "sonar-pro",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "response_format",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "perplexity",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "sonar-reasoning-pro:perplexity": {
+      "context": 127000,
+      "crossRegion": false,
+      "maxTokens": 4096,
+      "modelId": "sonar-reasoning-pro",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "perplexity",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "sonar-reasoning:perplexity": {
+      "context": 127000,
+      "crossRegion": false,
+      "maxTokens": 4096,
+      "modelId": "sonar-reasoning",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "perplexity",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "sonar:perplexity": {
+      "context": 127000,
+      "crossRegion": false,
+      "maxTokens": 4096,
+      "modelId": "sonar",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "response_format",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "perplexity",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
   "xai/endpoints.ts": {
+    "grok-3-mini:helicone": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "pa/grok-3-mini",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "grok-3-mini:openrouter": {
       "context": 131072,
       "crossRegion": false,
@@ -3071,6 +5795,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "xai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "grok-3:helicone": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "pa/grk-3",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "helicone",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -3128,6 +5878,123 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "grok-4-1-fast-non-reasoning:helicone": {
+      "context": 2000000,
+      "crossRegion": false,
+      "maxTokens": 2000000,
+      "modelId": "pa/grok-4-1-fast-non-reasoning",
+      "parameters": [
+        "logprobs",
+        "max_tokens",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "grok-4-1-fast-non-reasoning:xai": {
+      "context": 2000000,
+      "crossRegion": false,
+      "maxTokens": 2000000,
+      "modelId": "grok-4-1-fast-non-reasoning",
+      "parameters": [
+        "logprobs",
+        "max_tokens",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "xai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "grok-4-1-fast-reasoning:helicone": {
+      "context": 2000000,
+      "crossRegion": false,
+      "maxTokens": 2000000,
+      "modelId": "pa/grok-4-1-fast-reasoning",
+      "parameters": [
+        "logprobs",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "grok-4-1-fast-reasoning:xai": {
+      "context": 2000000,
+      "crossRegion": false,
+      "maxTokens": 2000000,
+      "modelId": "grok-4-1-fast-reasoning",
+      "parameters": [
+        "logprobs",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "xai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "grok-4-fast-non-reasoning:helicone": {
+      "context": 2000000,
+      "crossRegion": false,
+      "maxTokens": 2000000,
+      "modelId": "pa/grok-4-fast-non-reasoning",
+      "parameters": [
+        "logprobs",
+        "max_tokens",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "grok-4-fast-non-reasoning:xai": {
       "context": 2000000,
       "crossRegion": false,
@@ -3146,6 +6013,30 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "xai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "grok-4-fast-reasoning:helicone": {
+      "context": 2000000,
+      "crossRegion": false,
+      "maxTokens": 2000000,
+      "modelId": "pa/grok-4-fast-reasoning",
+      "parameters": [
+        "logprobs",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "helicone",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -3170,6 +6061,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "xai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "grok-4:helicone": {
+      "context": 256000,
+      "crossRegion": false,
+      "maxTokens": 256000,
+      "modelId": "pa/grk-4",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "helicone",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -3222,6 +6139,32 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "xai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "grok-code-fast-1:helicone": {
+      "context": 256000,
+      "crossRegion": false,
+      "maxTokens": 10000,
+      "modelId": "pa/grok-code-fast-1",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "helicone",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -3281,6 +6224,36 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "zai/glm-4": {
+    "glm-4.6:canopywave": {
+      "context": 204800,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "zai/glm-4.6",
+      "parameters": [
+        "frequency_penalty",
+        "functions",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "reasoning",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "canopywave",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "glm-4.6:novita": {
       "context": 204800,
       "crossRegion": false,
@@ -3317,63 +6290,122 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
 
 exports[`Registry Snapshots model coverage snapshot 1`] = `
 {
-  "alibaba/qwen": [
+  "alibaba/qwen2.5": [
+    "nebius",
+  ],
+  "alibaba/qwen3": [
+    "canopywave",
     "deepinfra",
     "deepinfra",
     "deepinfra",
     "deepinfra",
     "groq",
+    "nebius",
+    "novita",
     "novita",
     "openrouter",
+  ],
+  "anthropic/claude-3-haiku-20240307": [
+    "anthropic",
+    "helicone",
   ],
   "anthropic/claude-3.5-haiku": [
     "anthropic",
     "bedrock",
+    "helicone",
     "openrouter",
     "vertex",
   ],
   "anthropic/claude-3.5-sonnet-v2": [
     "anthropic",
     "bedrock",
+    "helicone",
     "openrouter",
     "vertex",
   ],
   "anthropic/claude-3.7-sonnet": [
     "anthropic",
     "bedrock",
+    "deepinfra",
+    "helicone",
+    "openrouter",
+    "vertex",
+  ],
+  "anthropic/claude-4.5-haiku": [
+    "anthropic",
+    "bedrock",
+    "helicone",
+    "openrouter",
+    "vertex",
+  ],
+  "anthropic/claude-4.5-opus": [
+    "anthropic",
+    "bedrock",
+    "helicone",
     "openrouter",
     "vertex",
   ],
   "anthropic/claude-4.5-sonnet": [
     "anthropic",
     "bedrock",
+    "helicone",
+    "openrouter",
+    "vertex",
+  ],
+  "anthropic/claude-haiku-4-5-20251001": [
+    "anthropic",
+    "bedrock",
+    "helicone",
     "openrouter",
     "vertex",
   ],
   "anthropic/claude-opus-4": [
     "anthropic",
     "bedrock",
+    "helicone",
     "openrouter",
     "vertex",
   ],
   "anthropic/claude-opus-4-1": [
     "anthropic",
     "bedrock",
+    "helicone",
+    "openrouter",
+    "vertex",
+  ],
+  "anthropic/claude-opus-4-1-20250805": [
+    "anthropic",
+    "bedrock",
+    "helicone",
     "openrouter",
     "vertex",
   ],
   "anthropic/claude-sonnet-4": [
     "anthropic",
     "bedrock",
+    "helicone",
     "openrouter",
     "vertex",
   ],
+  "anthropic/claude-sonnet-4-5-20250929": [
+    "anthropic",
+    "bedrock",
+    "helicone",
+    "openrouter",
+    "vertex",
+  ],
+  "baidu/ernie": [
+    "novita",
+  ],
   "deepseek/deepseek-reasoner": [
+    "chutes",
     "deepinfra",
     "deepseek",
     "openrouter",
   ],
   "deepseek/deepseek-v3": [
+    "baseten",
+    "canopywave",
     "deepinfra",
     "deepinfra",
     "deepseek",
@@ -3382,6 +6414,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
   ],
   "deepseek/r1-distill": [
+    "chutes",
     "deepinfra",
     "groq",
     "openrouter",
@@ -3401,14 +6434,33 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "vertex",
   ],
+  "google/gemini-3": [
+    "google-ai-studio",
+    "openrouter",
+    "vertex",
+  ],
+  "google/gemini-3-flash-preview": [
+    "google-ai-studio",
+    "openrouter",
+    "vertex",
+  ],
+  "google/gemini-3-pro-image": [
+    "google-ai-studio",
+    "openrouter",
+    "vertex",
+  ],
   "google/gemma": [
-    "groq",
+    "chutes",
     "openrouter",
   ],
   "google/gemma-3": [
     "deepinfra",
   ],
+  "meta/hermes": [
+    "novita",
+  ],
   "meta/llama": [
+    "deepinfra",
     "deepinfra",
     "deepinfra",
     "deepinfra",
@@ -3420,6 +6472,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "groq",
     "groq",
     "nebius",
+    "nebius",
     "novita",
     "novita",
     "novita",
@@ -3430,15 +6483,24 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "openrouter",
   ],
-  "mistralai/mistral-nemo": [
+  "mistral/mistral-large": [
+    "mistral",
+  ],
+  "mistral/mistral-nemo": [
     "deepinfra",
   ],
-  "mistralai/mistral-small": [
+  "mistral/mistral-small": [
     "deepinfra",
   ],
   "moonshotai/kimi-k2": [
+    "baseten",
+    "canopywave",
+    "deepinfra",
+    "deepinfra",
+    "fireworks",
+    "fireworks",
     "groq",
-    "groq",
+    "novita",
     "novita",
     "novita",
     "openrouter",
@@ -3448,6 +6510,9 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "azure",
     "azure",
     "azure",
+    "helicone",
+    "helicone",
+    "helicone",
     "openai",
     "openai",
     "openai",
@@ -3458,6 +6523,8 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   "openai/gpt-4o": [
     "azure",
     "azure",
+    "helicone",
+    "helicone",
     "openai",
     "openai",
     "openai",
@@ -3466,17 +6533,82 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
   ],
   "openai/gpt-5": [
+    "azure",
+    "azure",
+    "azure",
+    "azure",
+    "azure",
+    "azure",
+    "azure",
+    "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
+    "novita",
+    "novita",
+    "novita",
+    "novita",
     "openai",
     "openai",
     "openai",
     "openai",
+    "openai",
+    "openai",
+    "openai",
+    "openai",
+    "openai",
+    "openai",
+    "openrouter",
+    "openrouter",
+    "openrouter",
+    "openrouter",
+    "openrouter",
+    "openrouter",
     "openrouter",
     "openrouter",
     "openrouter",
     "openrouter",
   ],
+  "openai/gpt-5.1": [
+    "azure",
+    "helicone",
+    "novita",
+    "openai",
+    "openai",
+    "openai",
+    "openai",
+    "openai",
+    "openai",
+    "openrouter",
+    "openrouter",
+    "openrouter",
+    "openrouter",
+    "openrouter",
+    "openrouter",
+  ],
+  "openai/gpt-5.2": [
+    "openai",
+    "openai",
+    "openai",
+    "openrouter",
+    "openrouter",
+    "openrouter",
+  ],
+  "openai/o1": [
+    "helicone",
+    "helicone",
+  ],
   "openai/o3": [
     "azure",
+    "helicone",
+    "helicone",
+    "helicone",
     "openai",
     "openai",
     "openai",
@@ -3486,10 +6618,13 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   ],
   "openai/o4": [
     "azure",
+    "helicone",
     "openai",
     "openrouter",
   ],
   "openai/oss": [
+    "baseten",
+    "cerebras",
     "deepinfra",
     "groq",
     "groq",
@@ -3497,11 +6632,28 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "openrouter",
   ],
+  "perplexity/sonar": [
+    "perplexity",
+    "perplexity",
+    "perplexity",
+    "perplexity",
+    "perplexity",
+  ],
   "xai/endpoints.ts": [
+    "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
     "openrouter",
     "openrouter",
     "openrouter",
     "openrouter",
+    "xai",
+    "xai",
     "xai",
     "xai",
     "xai",
@@ -3510,6 +6662,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "xai",
   ],
   "zai/glm-4": [
+    "canopywave",
     "novita",
   ],
 }
@@ -3517,7 +6670,23 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
 
 exports[`Registry Snapshots pricing snapshot 1`] = `
 {
-  "alibaba/qwen": {
+  "alibaba/qwen2.5": {
+    "nebius": [
+      {
+        "input": 3e-8,
+        "output": 9e-8,
+        "threshold": 0,
+      },
+    ],
+  },
+  "alibaba/qwen3": {
+    "canopywave": [
+      {
+        "input": 2.2e-7,
+        "output": 9.5e-7,
+        "threshold": 0,
+      },
+    ],
     "deepinfra": [
       {
         "input": 3e-7,
@@ -3527,19 +6696,22 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "groq": [
       {
-        "audio": 0,
-        "image": 0,
         "input": 2.9e-7,
         "output": 5.9e-7,
-        "request": 0,
         "threshold": 0,
-        "web_search": 0,
+      },
+    ],
+    "nebius": [
+      {
+        "input": 1e-7,
+        "output": 3e-7,
+        "threshold": 0,
       },
     ],
     "novita": [
       {
         "input": 3e-7,
-        "output": 0.000003,
+        "output": 0.0000015,
         "threshold": 0,
       },
     ],
@@ -3547,6 +6719,32 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       {
         "input": 4.22e-7,
         "output": 8.44e-7,
+        "threshold": 0,
+      },
+    ],
+  },
+  "anthropic/claude-3-haiku-20240307": {
+    "anthropic": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.12,
+          "write1h": 2,
+          "write5m": 1.2,
+        },
+        "input": 2.5e-7,
+        "output": 0.00000125,
+        "threshold": 0,
+      },
+    ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.12,
+          "write1h": 2,
+          "write5m": 1.2,
+        },
+        "input": 2.5e-7,
+        "output": 0.00000125,
         "threshold": 0,
       },
     ],
@@ -3562,7 +6760,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 8e-7,
         "output": 0.000004,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
     "bedrock": [
@@ -3574,7 +6772,19 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 8e-7,
         "output": 0.000004,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
+      },
+    ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 8e-7,
+        "output": 0.000004,
+        "threshold": 0,
       },
     ],
     "openrouter": [
@@ -3593,7 +6803,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 8e-7,
         "output": 0.000004,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
   },
@@ -3608,7 +6818,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000003,
         "output": 0.000015,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
     "bedrock": [
@@ -3620,7 +6830,19 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000003,
         "output": 0.000015,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
+      },
+    ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
       },
     ],
     "openrouter": [
@@ -3639,7 +6861,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000003,
         "output": 0.000015,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
   },
@@ -3654,7 +6876,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000003,
         "output": 0.000015,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
     "bedrock": [
@@ -3666,7 +6888,29 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000003,
         "output": 0.000015,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
+      },
+    ],
+    "deepinfra": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+        },
+        "input": 0.0000033,
+        "output": 0.0000165,
+        "threshold": 0,
+      },
+    ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
       },
     ],
     "openrouter": [
@@ -3685,7 +6929,125 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000003,
         "output": 0.000015,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
+      },
+    ],
+  },
+  "anthropic/claude-4.5-haiku": {
+    "anthropic": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000001,
+        "output": 0.000005,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "bedrock": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000001,
+        "output": 0.000005,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000001,
+        "output": 0.000005,
+        "threshold": 0,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.00000105,
+        "output": 0.00000527,
+        "threshold": 0,
+      },
+    ],
+    "vertex": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000001,
+        "output": 0.000005,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+  },
+  "anthropic/claude-4.5-opus": {
+    "anthropic": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000005,
+        "output": 0.000025,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "bedrock": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000005,
+        "output": 0.000025,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000005,
+        "output": 0.000025,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.000005275,
+        "output": 0.000026375,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "vertex": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000005,
+        "output": 0.000025,
+        "threshold": 0,
+        "web_search": 0.01,
       },
     ],
   },
@@ -3723,6 +7085,23 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 200000,
       },
     ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000006,
+        "output": 0.0000225,
+        "threshold": 200000,
+      },
+    ],
     "openrouter": [
       {
         "input": 0.00000633,
@@ -3744,6 +7123,64 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000006,
         "output": 0.0000225,
         "threshold": 200000,
+      },
+    ],
+  },
+  "anthropic/claude-haiku-4-5-20251001": {
+    "anthropic": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000001,
+        "output": 0.000005,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "bedrock": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000001,
+        "output": 0.000005,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000001,
+        "output": 0.000005,
+        "threshold": 0,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.00000105,
+        "output": 0.00000527,
+        "threshold": 0,
+      },
+    ],
+    "vertex": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000001,
+        "output": 0.000005,
+        "threshold": 0,
+        "web_search": 0.01,
       },
     ],
   },
@@ -3758,7 +7195,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000015,
         "output": 0.000075,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
     "bedrock": [
@@ -3770,7 +7207,19 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000015,
         "output": 0.000075,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
+      },
+    ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000015,
+        "output": 0.000075,
+        "threshold": 0,
       },
     ],
     "openrouter": [
@@ -3778,7 +7227,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.00001583,
         "output": 0.00007913,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
     "vertex": [
@@ -3790,7 +7239,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000015,
         "output": 0.000075,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
   },
@@ -3805,7 +7254,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000015,
         "output": 0.000075,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
     "bedrock": [
@@ -3817,7 +7266,19 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000015,
         "output": 0.000075,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
+      },
+    ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000015,
+        "output": 0.000075,
+        "threshold": 0,
       },
     ],
     "openrouter": [
@@ -3825,7 +7286,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.00001583,
         "output": 0.00007913,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
     ],
     "vertex": [
@@ -3837,7 +7298,66 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000015,
         "output": 0.000075,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
+      },
+    ],
+  },
+  "anthropic/claude-opus-4-1-20250805": {
+    "anthropic": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000015,
+        "output": 0.000075,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "bedrock": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000015,
+        "output": 0.000075,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000015,
+        "output": 0.000075,
+        "threshold": 0,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.00001583,
+        "output": 0.00007913,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "vertex": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000015,
+        "output": 0.000075,
+        "threshold": 0,
+        "web_search": 0.01,
       },
     ],
   },
@@ -3852,13 +7372,12 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000003,
         "output": 0.000015,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
       {
         "input": 0.000006,
         "output": 0.0000225,
         "threshold": 200000,
-        "web_search": 0.00001,
       },
     ],
     "bedrock": [
@@ -3870,13 +7389,29 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000003,
         "output": 0.000015,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
       {
         "input": 0.000006,
         "output": 0.0000225,
         "threshold": 200000,
-        "web_search": 0.00001,
+      },
+    ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000006,
+        "output": 0.0000225,
+        "threshold": 200000,
       },
     ],
     "openrouter": [
@@ -3884,7 +7419,12 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.00000633,
         "output": 0.00002374,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
+      },
+      {
+        "input": 0.00000633,
+        "output": 0.0000237375,
+        "threshold": 200000,
       },
     ],
     "vertex": [
@@ -3896,17 +7436,112 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000003,
         "output": 0.000015,
         "threshold": 0,
-        "web_search": 0.00001,
+        "web_search": 0.01,
       },
       {
         "input": 0.000006,
         "output": 0.0000225,
         "threshold": 200000,
-        "web_search": 0.00001,
+      },
+    ],
+  },
+  "anthropic/claude-sonnet-4-5-20250929": {
+    "anthropic": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000006,
+        "output": 0.0000225,
+        "threshold": 200000,
+      },
+    ],
+    "bedrock": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000006,
+        "output": 0.0000225,
+        "threshold": 200000,
+      },
+    ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000006,
+        "output": 0.0000225,
+        "threshold": 200000,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.00000633,
+        "output": 0.00002374,
+        "threshold": 0,
+      },
+      {
+        "input": 0.00000633,
+        "output": 0.0000237375,
+        "threshold": 200000,
+      },
+    ],
+    "vertex": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000006,
+        "output": 0.0000225,
+        "threshold": 200000,
+      },
+    ],
+  },
+  "baidu/ernie": {
+    "novita": [
+      {
+        "input": 7e-8,
+        "output": 2.8e-7,
+        "threshold": 0,
       },
     ],
   },
   "deepseek/deepseek-reasoner": {
+    "chutes": [
+      {
+        "input": 3e-7,
+        "output": 0.0000012,
+        "threshold": 0,
+      },
+    ],
     "deepinfra": [
       {
         "cacheMultipliers": {
@@ -3936,6 +7571,20 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "deepseek/deepseek-v3": {
+    "baseten": [
+      {
+        "input": 3e-7,
+        "output": 4.5e-7,
+        "threshold": 0,
+      },
+    ],
+    "canopywave": [
+      {
+        "input": 2.6e-7,
+        "output": 4e-7,
+        "threshold": 0,
+      },
+    ],
     "deepinfra": [
       {
         "cacheMultipliers": {
@@ -3972,22 +7621,25 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "deepseek/r1-distill": {
+    "chutes": [
+      {
+        "input": 3e-8,
+        "output": 1.3e-7,
+        "threshold": 0,
+      },
+    ],
     "deepinfra": [
       {
-        "input": 2e-7,
-        "output": 6e-7,
+        "input": 6e-7,
+        "output": 0.0000012,
         "threshold": 0,
       },
     ],
     "groq": [
       {
-        "audio": 0,
-        "image": 0,
         "input": 7.5e-7,
         "output": 9.9e-7,
-        "request": 0,
         "threshold": 0,
-        "web_search": 0,
       },
     ],
     "openrouter": [
@@ -4001,13 +7653,15 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "google/gemini-2.5-flash": {
     "google-ai-studio": [
       {
-        "audio": 0.000001,
+        "audio": {
+          "cachedInputMultiplier": 0.1,
+          "input": 0.000001,
+        },
         "cacheMultipliers": {
           "cachedInput": 0.25,
           "write5m": 1,
         },
         "cacheStoragePerHour": 0.000001,
-        "image": 0.001238,
         "input": 3e-7,
         "output": 0.0000025,
         "threshold": 0,
@@ -4022,13 +7676,15 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "vertex": [
       {
-        "audio": 0.000001,
+        "audio": {
+          "cachedInputMultiplier": 0.1,
+          "input": 0.000001,
+        },
         "cacheMultipliers": {
           "cachedInput": 0.25,
           "write5m": 1,
         },
         "cacheStoragePerHour": 0.000001,
-        "image": 0.001238,
         "input": 3e-7,
         "output": 0.0000025,
         "threshold": 0,
@@ -4038,7 +7694,10 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "google/gemini-2.5-flash-lite": {
     "google-ai-studio": [
       {
-        "audio": 3e-7,
+        "audio": {
+          "cachedInputMultiplier": 0.0833333,
+          "input": 3e-7,
+        },
         "cacheMultipliers": {
           "cachedInput": 0.25,
           "write5m": 1,
@@ -4058,7 +7717,10 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "vertex": [
       {
-        "audio": 3e-7,
+        "audio": {
+          "cachedInputMultiplier": 0.0833333,
+          "input": 3e-7,
+        },
         "cacheMultipliers": {
           "cachedInput": 0.25,
           "write5m": 1,
@@ -4078,13 +7740,11 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
           "write5m": 1,
         },
         "cacheStoragePerHour": 0.0000045,
-        "image": 0.00516,
         "input": 0.00000125,
         "output": 0.00001,
         "threshold": 0,
       },
       {
-        "image": 0.00516,
         "input": 0.0000025,
         "output": 0.000015,
         "threshold": 200000,
@@ -4104,25 +7764,143 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
           "write5m": 1,
         },
         "cacheStoragePerHour": 0.0000045,
-        "image": 0.00516,
         "input": 0.00000125,
         "output": 0.00001,
         "threshold": 0,
       },
       {
-        "image": 0.00516,
         "input": 0.0000025,
         "output": 0.000015,
         "threshold": 200000,
       },
     ],
   },
-  "google/gemma": {
-    "groq": [
+  "google/gemini-3": {
+    "google-ai-studio": [
       {
-        "image": 0,
-        "input": 2e-7,
-        "output": 2e-7,
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+        },
+        "cacheStoragePerHour": 0.0000045,
+        "input": 0.000002,
+        "output": 0.000012,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000004,
+        "output": 0.000018,
+        "threshold": 200000,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.00000211,
+        "output": 0.00001266,
+        "threshold": 0,
+      },
+      {
+        "input": 0.00000422,
+        "output": 0.00001899,
+        "threshold": 200000,
+      },
+    ],
+    "vertex": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+        },
+        "cacheStoragePerHour": 0.0000045,
+        "input": 0.000002,
+        "output": 0.000012,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000004,
+        "output": 0.000018,
+        "threshold": 200000,
+      },
+    ],
+  },
+  "google/gemini-3-flash-preview": {
+    "google-ai-studio": [
+      {
+        "audio": {
+          "cachedInputMultiplier": 0.1,
+          "input": 0.000001,
+        },
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+        },
+        "input": 5e-7,
+        "output": 0.000003,
+        "threshold": 0,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 5.275e-7,
+        "output": 0.000003165,
+        "threshold": 0,
+      },
+    ],
+    "vertex": [
+      {
+        "audio": {
+          "cachedInputMultiplier": 0.1,
+          "input": 0.000001,
+        },
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+        },
+        "input": 5e-7,
+        "output": 0.000003,
+        "threshold": 0,
+      },
+    ],
+  },
+  "google/gemini-3-pro-image": {
+    "google-ai-studio": [
+      {
+        "input": 0.000002,
+        "output": 0.000012,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000004,
+        "output": 0.000018,
+        "threshold": 200000,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.00000211,
+        "output": 0.00001266,
+        "threshold": 0,
+      },
+      {
+        "input": 0.00000422,
+        "output": 0.00001899,
+        "threshold": 200000,
+      },
+    ],
+    "vertex": [
+      {
+        "input": 0.000002,
+        "output": 0.000012,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000004,
+        "output": 0.000018,
+        "threshold": 200000,
+      },
+    ],
+  },
+  "google/gemma": {
+    "chutes": [
+      {
+        "input": 1e-8,
+        "output": 3e-8,
         "threshold": 0,
       },
     ],
@@ -4143,6 +7921,15 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "meta/hermes": {
+    "novita": [
+      {
+        "input": 1.4e-7,
+        "output": 1.4e-7,
+        "threshold": 0,
+      },
+    ],
+  },
   "meta/llama": {
     "deepinfra": [
       {
@@ -4153,13 +7940,9 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "groq": [
       {
-        "audio": 0,
-        "image": 0,
         "input": 1e-8,
         "output": 1e-8,
-        "request": 0,
         "threshold": 0,
-        "web_search": 0,
       },
     ],
     "nebius": [
@@ -4184,43 +7967,76 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
-  "mistralai/mistral-nemo": {
-    "deepinfra": [
+  "mistral/mistral-large": {
+    "mistral": [
       {
-        "input": 0.02,
-        "output": 0.04,
+        "input": 0.000002,
+        "output": 0.000006,
         "threshold": 0,
       },
     ],
   },
-  "mistralai/mistral-small": {
+  "mistral/mistral-nemo": {
     "deepinfra": [
       {
-        "input": 0.05,
-        "output": 0.1,
+        "input": 0.00002,
+        "output": 0.00004,
+        "threshold": 0,
+      },
+    ],
+  },
+  "mistral/mistral-small": {
+    "deepinfra": [
+      {
+        "input": 0.000075,
+        "output": 0.0002,
         "threshold": 0,
       },
     ],
   },
   "moonshotai/kimi-k2": {
+    "baseten": [
+      {
+        "input": 6e-7,
+        "output": 0.0000025,
+        "threshold": 0,
+      },
+    ],
+    "canopywave": [
+      {
+        "input": 4.8e-7,
+        "output": 0.000002,
+        "threshold": 0,
+      },
+    ],
+    "deepinfra": [
+      {
+        "input": 5.5e-7,
+        "output": 0.0000025,
+        "threshold": 0,
+      },
+    ],
+    "fireworks": [
+      {
+        "input": 6e-7,
+        "output": 0.0000025,
+        "threshold": 0,
+      },
+    ],
     "groq": [
       {
-        "audio": 0,
         "cacheMultipliers": {
           "cachedInput": 0.5,
         },
-        "image": 0,
         "input": 0.000001,
         "output": 0.000003,
-        "request": 0,
         "threshold": 0,
-        "web_search": 0,
       },
     ],
     "novita": [
       {
-        "input": 5.7e-7,
-        "output": 0.0000023,
+        "input": 6e-7,
+        "output": 0.0000025,
         "threshold": 0,
       },
     ],
@@ -4236,11 +8052,23 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "azure": [
       {
         "cacheMultipliers": {
-          "cachedInput": 0.3,
+          "cachedInput": 0.25,
         },
         "input": 1e-7,
         "output": 4e-7,
         "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.25,
+        },
+        "input": 4e-7,
+        "output": 0.0000016,
+        "threshold": 0,
+        "web_search": 0.01,
       },
     ],
     "openai": [
@@ -4251,6 +8079,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 1e-7,
         "output": 4e-7,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
     "openrouter": [
@@ -4258,6 +8087,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 1.1e-7,
         "output": 4.2e-7,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
   },
@@ -4270,6 +8100,18 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 1.5e-7,
         "output": 6e-7,
         "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.5,
+        },
+        "input": 1.5e-7,
+        "output": 6e-7,
+        "threshold": 0,
+        "web_search": 0.01,
       },
     ],
     "openai": [
@@ -4280,6 +8122,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.000005,
         "output": 0.00002,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
     "openrouter": [
@@ -4287,10 +8130,86 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.00000528,
         "output": 0.00001582,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
   },
   "openai/gpt-5": {
+    "azure": [
+      {
+        "input": 0.000015,
+        "output": 0.00012,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "helicone": [
+      {
+        "input": 0.000015,
+        "output": 0.00012,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "novita": [
+      {
+        "input": 0.000015,
+        "output": 0.00012,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "openai": [
+      {
+        "input": 0.000015,
+        "output": 0.00012,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.00001583,
+        "output": 0.0001266,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+  },
+  "openai/gpt-5.1": {
+    "azure": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.104,
+        },
+        "input": 0.00000125,
+        "output": 0.00001,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+        },
+        "input": 0.00000125,
+        "output": 0.00001,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "novita": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+        },
+        "input": 0.00000125,
+        "output": 0.00001,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
     "openai": [
       {
         "cacheMultipliers": {
@@ -4299,6 +8218,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.00000125,
         "output": 0.00001,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
     "openrouter": [
@@ -4306,6 +8226,41 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.00000132,
         "output": 0.00001055,
         "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+  },
+  "openai/gpt-5.2": {
+    "openai": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+        },
+        "input": 0.00000175,
+        "output": 0.000014,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.00000185,
+        "output": 0.00001477,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+  },
+  "openai/o1": {
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.5,
+        },
+        "input": 0.0000011,
+        "output": 0.0000044,
+        "threshold": 0,
+        "web_search": 0.01,
       },
     ],
   },
@@ -4318,6 +8273,15 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.0000011,
         "output": 0.0000044,
         "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "helicone": [
+      {
+        "input": 0.00002,
+        "output": 0.00008,
+        "threshold": 0,
+        "web_search": 0.01,
       },
     ],
     "openai": [
@@ -4328,6 +8292,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.0000011,
         "output": 0.0000044,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
     "openrouter": [
@@ -4335,6 +8300,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.0000211,
         "output": 0.0000844,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
   },
@@ -4347,6 +8313,18 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.0000011,
         "output": 0.0000044,
         "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.25,
+        },
+        "input": 0.0000011,
+        "output": 0.0000044,
+        "threshold": 0,
+        "web_search": 0.01,
       },
     ],
     "openai": [
@@ -4357,6 +8335,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.0000011,
         "output": 0.0000044,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
     "openrouter": [
@@ -4364,30 +8343,39 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 0.00000116,
         "output": 0.00000464,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
   },
   "openai/oss": {
+    "baseten": [
+      {
+        "input": 1e-7,
+        "output": 5e-7,
+        "threshold": 0,
+      },
+    ],
+    "cerebras": [
+      {
+        "input": 3.5e-7,
+        "output": 7.5e-7,
+        "threshold": 0,
+      },
+    ],
     "deepinfra": [
       {
-        "audio": 0,
-        "image": 0,
         "input": 4e-8,
         "output": 1.6e-7,
-        "request": 0,
         "threshold": 0,
-        "web_search": 0,
+        "web_search": 0.01,
       },
     ],
     "groq": [
       {
-        "audio": 0,
-        "image": 0,
         "input": 1e-7,
         "output": 5e-7,
-        "request": 0,
         "threshold": 0,
-        "web_search": 0,
+        "web_search": 0.01,
       },
     ],
     "novita": [
@@ -4395,6 +8383,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 5e-8,
         "output": 2e-7,
         "threshold": 0,
+        "web_search": 0.01,
       },
     ],
     "openrouter": [
@@ -4402,10 +8391,34 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "input": 3.7e-7,
         "output": 7.9e-7,
         "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+  },
+  "perplexity/sonar": {
+    "perplexity": [
+      {
+        "input": 0.000002,
+        "output": 0.000008,
+        "request": 0,
+        "threshold": 0,
+        "web_search": 0.005,
       },
     ],
   },
   "xai/endpoints.ts": {
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.25,
+        },
+        "input": 3e-7,
+        "output": 5e-7,
+        "request": 0,
+        "threshold": 0,
+        "web_search": 0.025,
+      },
+    ],
     "openrouter": [
       {
         "input": 2.1e-7,
@@ -4415,11 +8428,9 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "xai": [
       {
-        "audio": 0,
         "cacheMultipliers": {
           "cachedInput": 0.25,
         },
-        "image": 0,
         "input": 3e-7,
         "output": 5e-7,
         "request": 0,
@@ -4429,6 +8440,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "zai/glm-4": {
+    "canopywave": [
+      {
+        "input": 4.5e-7,
+        "output": 0.0000015,
+        "threshold": 0,
+      },
+    ],
     "novita": [
       {
         "input": 6e-7,
@@ -4451,10 +8469,18 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "claude-3-haiku-20240307",
+      "providers": [
+        "anthropic",
+        "helicone",
+      ],
+    },
+    {
       "model": "claude-3.5-haiku",
       "providers": [
         "anthropic",
         "bedrock",
+        "helicone",
         "openrouter",
         "vertex",
       ],
@@ -4464,6 +8490,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "providers": [
         "anthropic",
         "bedrock",
+        "helicone",
         "openrouter",
         "vertex",
       ],
@@ -4473,6 +8500,28 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "providers": [
         "anthropic",
         "bedrock",
+        "deepinfra",
+        "helicone",
+        "openrouter",
+        "vertex",
+      ],
+    },
+    {
+      "model": "claude-4.5-haiku",
+      "providers": [
+        "anthropic",
+        "bedrock",
+        "helicone",
+        "openrouter",
+        "vertex",
+      ],
+    },
+    {
+      "model": "claude-4.5-opus",
+      "providers": [
+        "anthropic",
+        "bedrock",
+        "helicone",
         "openrouter",
         "vertex",
       ],
@@ -4482,6 +8531,17 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "providers": [
         "anthropic",
         "bedrock",
+        "helicone",
+        "openrouter",
+        "vertex",
+      ],
+    },
+    {
+      "model": "claude-haiku-4-5-20251001",
+      "providers": [
+        "anthropic",
+        "bedrock",
+        "helicone",
         "openrouter",
         "vertex",
       ],
@@ -4491,6 +8551,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "providers": [
         "anthropic",
         "bedrock",
+        "helicone",
         "openrouter",
         "vertex",
       ],
@@ -4500,6 +8561,17 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "providers": [
         "anthropic",
         "bedrock",
+        "helicone",
+        "openrouter",
+        "vertex",
+      ],
+    },
+    {
+      "model": "claude-opus-4-1-20250805",
+      "providers": [
+        "anthropic",
+        "bedrock",
+        "helicone",
         "openrouter",
         "vertex",
       ],
@@ -4509,13 +8581,32 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "providers": [
         "anthropic",
         "bedrock",
+        "helicone",
         "openrouter",
         "vertex",
       ],
     },
     {
+      "model": "claude-sonnet-4-5-20250929",
+      "providers": [
+        "anthropic",
+        "bedrock",
+        "helicone",
+        "openrouter",
+        "vertex",
+      ],
+    },
+    {
+      "model": "codex-mini-latest",
+      "providers": [
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
       "model": "deepseek-r1-distill-llama-70b",
       "providers": [
+        "chutes",
         "deepinfra",
         "groq",
         "openrouter",
@@ -4527,6 +8618,12 @@ exports[`Registry Snapshots verify registry state 1`] = `
         "deepinfra",
         "deepseek",
         "openrouter",
+      ],
+    },
+    {
+      "model": "deepseek-tng-r1t2-chimera",
+      "providers": [
+        "chutes",
       ],
     },
     {
@@ -4546,6 +8643,14 @@ exports[`Registry Snapshots verify registry state 1`] = `
     },
     {
       "model": "deepseek-v3.2",
+      "providers": [
+        "baseten",
+        "canopywave",
+        "novita",
+      ],
+    },
+    {
+      "model": "ernie-4.5-21b-a3b-thinking",
       "providers": [
         "novita",
       ],
@@ -4575,6 +8680,30 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "gemini-3-flash-preview",
+      "providers": [
+        "google-ai-studio",
+        "openrouter",
+        "vertex",
+      ],
+    },
+    {
+      "model": "gemini-3-pro-image-preview",
+      "providers": [
+        "google-ai-studio",
+        "openrouter",
+        "vertex",
+      ],
+    },
+    {
+      "model": "gemini-3-pro-preview",
+      "providers": [
+        "google-ai-studio",
+        "openrouter",
+        "vertex",
+      ],
+    },
+    {
       "model": "gemma-3-12b-it",
       "providers": [
         "deepinfra",
@@ -4583,13 +8712,14 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "gemma2-9b-it",
       "providers": [
-        "groq",
+        "chutes",
         "openrouter",
       ],
     },
     {
       "model": "glm-4.6",
       "providers": [
+        "canopywave",
         "novita",
       ],
     },
@@ -4597,6 +8727,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "gpt-4.1",
       "providers": [
         "azure",
+        "helicone",
         "openai",
         "openrouter",
       ],
@@ -4605,6 +8736,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "gpt-4.1-mini",
       "providers": [
         "azure",
+        "helicone",
         "openai",
         "openrouter",
       ],
@@ -4613,6 +8745,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "gpt-4.1-nano",
       "providers": [
         "azure",
+        "helicone",
         "openai",
         "openrouter",
       ],
@@ -4621,6 +8754,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "gpt-4o",
       "providers": [
         "azure",
+        "helicone",
         "openai",
         "openrouter",
       ],
@@ -4629,6 +8763,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "gpt-4o-mini",
       "providers": [
         "azure",
+        "helicone",
         "openai",
         "openrouter",
       ],
@@ -4636,6 +8771,18 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "gpt-5",
       "providers": [
+        "azure",
+        "helicone",
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
+      "model": "gpt-5-2025-08-07",
+      "providers": [
+        "azure",
+        "helicone",
+        "novita",
         "openai",
         "openrouter",
       ],
@@ -4643,6 +8790,15 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "gpt-5-chat-latest",
       "providers": [
+        "helicone",
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
+      "model": "gpt-5-codex",
+      "providers": [
+        "helicone",
         "openai",
         "openrouter",
       ],
@@ -4650,12 +8806,113 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "gpt-5-mini",
       "providers": [
+        "azure",
+        "helicone",
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
+      "model": "gpt-5-mini-2025-08-07",
+      "providers": [
+        "azure",
+        "helicone",
+        "novita",
         "openai",
         "openrouter",
       ],
     },
     {
       "model": "gpt-5-nano",
+      "providers": [
+        "helicone",
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
+      "model": "gpt-5-nano-2025-08-07",
+      "providers": [
+        "azure",
+        "helicone",
+        "novita",
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
+      "model": "gpt-5-pro",
+      "providers": [
+        "azure",
+        "helicone",
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
+      "model": "gpt-5-pro-2025-10-01",
+      "providers": [
+        "azure",
+        "helicone",
+        "novita",
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
+      "model": "gpt-5.1",
+      "providers": [
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
+      "model": "gpt-5.1-2025-11-13",
+      "providers": [
+        "azure",
+        "helicone",
+        "novita",
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
+      "model": "gpt-5.1-chat-latest",
+      "providers": [
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
+      "model": "gpt-5.1-codex",
+      "providers": [
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
+      "model": "gpt-5.1-codex-mini",
+      "providers": [
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
+      "model": "gpt-5.2",
+      "providers": [
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
+      "model": "gpt-5.2-chat-latest",
+      "providers": [
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
+      "model": "gpt-5.2-pro",
       "providers": [
         "openai",
         "openrouter",
@@ -4664,6 +8921,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "gpt-oss-120b",
       "providers": [
+        "baseten",
+        "cerebras",
         "deepinfra",
         "groq",
         "openrouter",
@@ -4680,6 +8939,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "grok-3",
       "providers": [
+        "helicone",
         "openrouter",
         "xai",
       ],
@@ -4687,6 +8947,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "grok-3-mini",
       "providers": [
+        "helicone",
         "openrouter",
         "xai",
       ],
@@ -4694,47 +8955,77 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "grok-4",
       "providers": [
+        "helicone",
         "openrouter",
+        "xai",
+      ],
+    },
+    {
+      "model": "grok-4-1-fast-non-reasoning",
+      "providers": [
+        "helicone",
+        "xai",
+      ],
+    },
+    {
+      "model": "grok-4-1-fast-reasoning",
+      "providers": [
+        "helicone",
         "xai",
       ],
     },
     {
       "model": "grok-4-fast-non-reasoning",
       "providers": [
+        "helicone",
         "xai",
       ],
     },
     {
       "model": "grok-4-fast-reasoning",
       "providers": [
+        "helicone",
         "xai",
       ],
     },
     {
       "model": "grok-code-fast-1",
       "providers": [
+        "helicone",
         "openrouter",
         "xai",
       ],
     },
     {
-      "model": "kimi-k2",
+      "model": "hermes-2-pro-llama-3-8b",
       "providers": [
-        "groq",
+        "novita",
+      ],
+    },
+    {
+      "model": "kimi-k2-0711",
+      "providers": [
+        "novita",
         "openrouter",
       ],
     },
     {
       "model": "kimi-k2-0905",
       "providers": [
+        "baseten",
+        "deepinfra",
+        "fireworks",
         "groq",
         "novita",
         "openrouter",
       ],
     },
     {
-      "model": "kimi-k2-instruct",
+      "model": "kimi-k2-thinking",
       "providers": [
+        "canopywave",
+        "deepinfra",
+        "fireworks",
         "novita",
       ],
     },
@@ -4762,9 +9053,15 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "llama-3.3-70b-instruct",
       "providers": [
-        "groq",
+        "nebius",
         "novita",
         "openrouter",
+      ],
+    },
+    {
+      "model": "llama-3.3-70b-versatile",
+      "providers": [
+        "groq",
       ],
     },
     {
@@ -4779,6 +9076,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "llama-4-scout",
       "providers": [
+        "deepinfra",
         "groq",
         "novita",
         "openrouter",
@@ -4804,6 +9102,12 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "mistral-large-2411",
+      "providers": [
+        "mistral",
+      ],
+    },
+    {
       "model": "mistral-nemo",
       "providers": [
         "deepinfra",
@@ -4816,8 +9120,21 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "o1",
+      "providers": [
+        "helicone",
+      ],
+    },
+    {
+      "model": "o1-mini",
+      "providers": [
+        "helicone",
+      ],
+    },
+    {
       "model": "o3",
       "providers": [
+        "helicone",
         "openai",
         "openrouter",
       ],
@@ -4826,6 +9143,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "o3-mini",
       "providers": [
         "azure",
+        "helicone",
         "openai",
         "openrouter",
       ],
@@ -4833,6 +9151,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "o3-pro",
       "providers": [
+        "helicone",
         "openai",
         "openrouter",
       ],
@@ -4841,8 +9160,15 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "o4-mini",
       "providers": [
         "azure",
+        "helicone",
         "openai",
         "openrouter",
+      ],
+    },
+    {
+      "model": "qwen2.5-coder-7b-fast",
+      "providers": [
+        "nebius",
       ],
     },
     {
@@ -4868,7 +9194,14 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "qwen3-coder",
       "providers": [
+        "canopywave",
         "deepinfra",
+      ],
+    },
+    {
+      "model": "qwen3-coder-30b-a3b-instruct",
+      "providers": [
+        "nebius",
       ],
     },
     {
@@ -4877,22 +9210,74 @@ exports[`Registry Snapshots verify registry state 1`] = `
         "deepinfra",
       ],
     },
+    {
+      "model": "qwen3-vl-235b-a22b-instruct",
+      "providers": [
+        "novita",
+      ],
+    },
+    {
+      "model": "sonar",
+      "providers": [
+        "perplexity",
+      ],
+    },
+    {
+      "model": "sonar-deep-research",
+      "providers": [
+        "perplexity",
+      ],
+    },
+    {
+      "model": "sonar-pro",
+      "providers": [
+        "perplexity",
+      ],
+    },
+    {
+      "model": "sonar-reasoning",
+      "providers": [
+        "perplexity",
+      ],
+    },
+    {
+      "model": "sonar-reasoning-pro",
+      "providers": [
+        "perplexity",
+      ],
+    },
   ],
   "providerBreakdown": [
     {
-      "modelCount": 7,
+      "modelCount": 13,
       "provider": "anthropic",
     },
     {
-      "modelCount": 7,
+      "modelCount": 15,
       "provider": "azure",
     },
     {
-      "modelCount": 7,
+      "modelCount": 3,
+      "provider": "baseten",
+    },
+    {
+      "modelCount": 12,
       "provider": "bedrock",
     },
     {
-      "modelCount": 15,
+      "modelCount": 4,
+      "provider": "canopywave",
+    },
+    {
+      "modelCount": 1,
+      "provider": "cerebras",
+    },
+    {
+      "modelCount": 3,
+      "provider": "chutes",
+    },
+    {
+      "modelCount": 19,
       "provider": "deepinfra",
     },
     {
@@ -4900,55 +9285,83 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "deepseek",
     },
     {
-      "modelCount": 3,
-      "provider": "google-ai-studio",
-    },
-    {
-      "modelCount": 14,
-      "provider": "groq",
-    },
-    {
-      "modelCount": 1,
-      "provider": "nebius",
-    },
-    {
-      "modelCount": 11,
-      "provider": "novita",
-    },
-    {
-      "modelCount": 14,
-      "provider": "openai",
-    },
-    {
-      "modelCount": 42,
-      "provider": "openrouter",
-    },
-    {
-      "modelCount": 10,
-      "provider": "vertex",
+      "modelCount": 2,
+      "provider": "fireworks",
     },
     {
       "modelCount": 6,
+      "provider": "google-ai-studio",
+    },
+    {
+      "modelCount": 12,
+      "provider": "groq",
+    },
+    {
+      "modelCount": 43,
+      "provider": "helicone",
+    },
+    {
+      "modelCount": 1,
+      "provider": "mistral",
+    },
+    {
+      "modelCount": 4,
+      "provider": "nebius",
+    },
+    {
+      "modelCount": 20,
+      "provider": "novita",
+    },
+    {
+      "modelCount": 29,
+      "provider": "openai",
+    },
+    {
+      "modelCount": 65,
+      "provider": "openrouter",
+    },
+    {
+      "modelCount": 5,
+      "provider": "perplexity",
+    },
+    {
+      "modelCount": 18,
+      "provider": "vertex",
+    },
+    {
+      "modelCount": 8,
       "provider": "xai",
     },
   ],
   "ptbEnabledModels": [
     "chatgpt-4o-latest",
+    "claude-3-haiku-20240307",
     "claude-3.5-haiku",
     "claude-3.5-sonnet-v2",
     "claude-3.7-sonnet",
+    "claude-4.5-haiku",
+    "claude-4.5-opus",
     "claude-4.5-sonnet",
+    "claude-haiku-4-5-20251001",
     "claude-opus-4",
     "claude-opus-4-1",
+    "claude-opus-4-1-20250805",
     "claude-sonnet-4",
+    "claude-sonnet-4-5-20250929",
+    "codex-mini-latest",
     "deepseek-r1-distill-llama-70b",
     "deepseek-reasoner",
+    "deepseek-tng-r1t2-chimera",
     "deepseek-v3",
     "deepseek-v3.1-terminus",
     "deepseek-v3.2",
+    "ernie-4.5-21b-a3b-thinking",
     "gemini-2.5-flash",
     "gemini-2.5-flash-lite",
     "gemini-2.5-pro",
+    "gemini-3-flash-preview",
+    "gemini-3-pro-image-preview",
+    "gemini-3-pro-preview",
     "gemma-3-12b-it",
     "gemma2-9b-it",
     "glm-4.6",
@@ -4958,53 +9371,82 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "gpt-4o",
     "gpt-4o-mini",
     "gpt-5",
+    "gpt-5-2025-08-07",
     "gpt-5-chat-latest",
+    "gpt-5-codex",
     "gpt-5-mini",
+    "gpt-5-mini-2025-08-07",
     "gpt-5-nano",
+    "gpt-5-nano-2025-08-07",
+    "gpt-5-pro",
+    "gpt-5-pro-2025-10-01",
+    "gpt-5.1",
+    "gpt-5.1-2025-11-13",
+    "gpt-5.1-chat-latest",
+    "gpt-5.1-codex",
+    "gpt-5.1-codex-mini",
+    "gpt-5.2",
+    "gpt-5.2-chat-latest",
+    "gpt-5.2-pro",
     "gpt-oss-120b",
     "gpt-oss-20b",
     "grok-3",
     "grok-3-mini",
     "grok-4",
+    "grok-4-1-fast-non-reasoning",
+    "grok-4-1-fast-reasoning",
     "grok-4-fast-non-reasoning",
     "grok-4-fast-reasoning",
     "grok-code-fast-1",
-    "kimi-k2",
+    "hermes-2-pro-llama-3-8b",
+    "kimi-k2-0711",
     "kimi-k2-0905",
-    "kimi-k2-instruct",
+    "kimi-k2-thinking",
     "llama-3.1-8b-instant",
     "llama-3.1-8b-instruct",
     "llama-3.1-8b-instruct-turbo",
     "llama-3.3-70b-instruct",
+    "llama-3.3-70b-versatile",
     "llama-4-maverick",
     "llama-4-scout",
     "llama-guard-4",
     "llama-prompt-guard-2-22m",
     "llama-prompt-guard-2-86m",
+    "mistral-large-2411",
     "mistral-nemo",
     "mistral-small",
+    "o1",
+    "o1-mini",
     "o3",
     "o3-mini",
     "o3-pro",
     "o4-mini",
+    "qwen2.5-coder-7b-fast",
     "qwen3-235b-a22b-thinking",
     "qwen3-30b-a3b",
     "qwen3-32b",
     "qwen3-coder",
+    "qwen3-coder-30b-a3b-instruct",
     "qwen3-next-80b-a3b-instruct",
+    "qwen3-vl-235b-a22b-instruct",
+    "sonar",
+    "sonar-deep-research",
+    "sonar-pro",
+    "sonar-reasoning",
+    "sonar-reasoning-pro",
   ],
   "sampleArchivedKeys": [],
   "sampleEndpointIds": [
     "chatgpt-4o-latest:openai:*",
     "chatgpt-4o-latest:openrouter:*",
+    "claude-3-haiku-20240307:anthropic:*",
+    "claude-3-haiku-20240307:helicone:*",
     "claude-3.5-haiku:anthropic:*",
-    "claude-3.5-haiku:bedrock:us-east-1",
-    "claude-3.5-haiku:openrouter:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 139,
-  "totalModelProviderConfigs": 139,
-  "totalModelsWithPtb": 59,
-  "totalProviders": 13,
+  "totalEndpoints": 285,
+  "totalModelProviderConfigs": 285,
+  "totalModelsWithPtb": 100,
+  "totalProviders": 21,
 }
 `;

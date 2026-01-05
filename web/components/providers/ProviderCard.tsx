@@ -124,6 +124,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
         baseUri: "",
         apiVersion: "",
         deploymentName: "",
+        heliconeModelId: "",
       };
     } else if (provider.id === "bedrock") {
       initialConfig = {
@@ -404,6 +405,11 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
           label: "Deployment Name",
           key: "deploymentName",
           placeholder: "gpt-35-turbo",
+        },
+        {
+          label: "Helicone Model Id",
+          key: "heliconeModelId",
+          placeholder: "e.g gpt-4o",
         },
       ];
     } else if (provider.id === "bedrock") {

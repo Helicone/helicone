@@ -694,7 +694,7 @@ const TeamVersion20250130 = {
     const { data: orgDataArray, error: orgDataError } =
       await dbExecute<OrgSubscriptionData>(
         `SELECT stripe_subscription_id, name, owner FROM organization WHERE id = $1 LIMIT 1`,
-        [orgId || ""],
+        [orgId],
       );
 
     if (orgDataError) {
@@ -707,11 +707,12 @@ const TeamVersion20250130 = {
     const orgData =
       orgDataArray && orgDataArray.length > 0 ? orgDataArray[0] : null;
 
-    // Cancel old subscription if it exists
+    // Cancel old subscription if it exists AND it's different from the new one
     if (
       orgData &&
       orgData.stripe_subscription_id &&
-      typeof orgData.stripe_subscription_id === "string"
+      typeof orgData.stripe_subscription_id === "string" &&
+      orgData.stripe_subscription_id !== subscriptionId // Don't cancel the subscription we just created!
     ) {
       try {
         logger.info("Cancelling old subscription");
@@ -783,11 +784,11 @@ const PricingVersion20240913 = {
     });
 
     const { error: updateError } = await dbExecute(
-      `UPDATE organization 
-       SET subscription_status = 'active', 
-           stripe_subscription_id = $1, 
-           stripe_subscription_item_id = $2, 
-           tier = 'pro-20250202', 
+      `UPDATE organization
+       SET subscription_status = 'active',
+           stripe_subscription_id = $1,
+           stripe_subscription_item_id = $2,
+           tier = 'pro-20250202',
            stripe_metadata = $3
        WHERE id = $4`,
       [subscriptionId, subscriptionItemId, { addons: addons }, orgId || ""],
@@ -814,6 +815,165 @@ const PricingVersion20240913 = {
   handleCheckoutSessionCompleted: async (_event: Stripe.Event) => {
     // We don't need to do anything here because the subscription is already active
     // All update states are handled in the jawn StripeManager
+    return;
+  },
+  handleDelete: PricingVersionOld.handleDelete,
+};
+
+// New pricing version (2025-12-10): $79/mo flat + $6/GB byte-based billing
+// Prompts now included, no per-seat, no per-request
+const ProVersion20251210 = {
+  async handleCreate(event: Stripe.Event) {
+    const subscription = event.data.object as Stripe.Subscription;
+    const subscriptionId = subscription.id;
+    const subscriptionItemId = subscription?.items.data[0].id;
+    const orgId = subscription.metadata?.orgId;
+
+    if (!orgId || typeof orgId !== "string" || orgId.trim() === "") {
+      logger.error({ subscriptionId }, "Missing or invalid orgId in subscription metadata");
+      return;
+    }
+
+    // New pricing: all features included in base plan
+    const addons: Addons = {
+      alerts: true,
+      prompts: true,
+      experiments: true,
+      evals: true,
+    };
+
+    const { error: updateError } = await dbExecute(
+      `UPDATE organization
+       SET subscription_status = 'active',
+           stripe_subscription_id = $1,
+           stripe_subscription_item_id = $2,
+           tier = 'pro-20251210',
+           stripe_metadata = $3
+       WHERE id = $4`,
+      [subscriptionId, subscriptionItemId, { addons: addons }, orgId],
+    );
+
+    if (updateError) {
+      logger.error({ error: updateError }, "Failed to update organization");
+    }
+
+    // Invite members after org is updated
+    await inviteOnboardingMembers(orgId);
+
+    // Send PostHog event
+    await sendSubscriptionEvent("subscription_created", subscription, {
+      includeOrgData: true,
+      addons: JSON.stringify(addons),
+    });
+  },
+
+  handleUpdate: async (_event: Stripe.Event) => {
+    const subscription = _event.data.object as Stripe.Subscription;
+    await sendSubscriptionCanceledEvent(subscription);
+  },
+  handleCheckoutSessionCompleted: async (_event: Stripe.Event) => {
+    return;
+  },
+  handleDelete: PricingVersionOld.handleDelete,
+};
+
+// New Team pricing version (2025-12-10): $799/mo flat + $6/GB byte-based billing
+const TeamVersion20251210 = {
+  async handleCreate(event: Stripe.Event) {
+    const subscription = event.data.object as Stripe.Subscription;
+    const subscriptionId = subscription.id;
+    const subscriptionItemId = subscription?.items.data[0].id;
+    const orgId = subscription.metadata?.orgId;
+
+    if (!orgId || typeof orgId !== "string" || orgId.trim() === "") {
+      logger.error({ subscriptionId }, "Missing or invalid orgId in subscription metadata");
+      return;
+    }
+
+    // Get the existing subscription from the organization
+    type OrgSubscriptionData = {
+      stripe_subscription_id: string | null;
+      name: string | null;
+      owner: string | null;
+    };
+
+    const { data: orgDataArray, error: orgDataError } =
+      await dbExecute<OrgSubscriptionData>(
+        `SELECT stripe_subscription_id, name, owner FROM organization WHERE id = $1 LIMIT 1`,
+        [orgId],
+      );
+
+    if (orgDataError) {
+      logger.error(
+        { error: orgDataError },
+        "Failed to fetch organization data",
+      );
+    }
+
+    const orgData =
+      orgDataArray && orgDataArray.length > 0 ? orgDataArray[0] : null;
+
+    // Cancel old subscription if it exists AND it's different from the new one
+    if (
+      orgData &&
+      orgData.stripe_subscription_id &&
+      typeof orgData.stripe_subscription_id === "string" &&
+      orgData.stripe_subscription_id !== subscriptionId // Don't cancel the subscription we just created!
+    ) {
+      try {
+        logger.info("Cancelling old subscription");
+        await stripe.subscriptions.cancel(orgData.stripe_subscription_id, {
+          invoice_now: true,
+          prorate: true,
+        });
+      } catch (_e) {
+        logger.error({ error: _e }, "Error canceling old subscription");
+      }
+    }
+
+    // New pricing: all features included in base plan
+    const addons: Addons = {
+      alerts: true,
+      prompts: true,
+      experiments: true,
+      evals: true,
+    };
+
+    // Update to new subscription
+    const { error: updateError } = await dbExecute(
+      `UPDATE organization
+       SET subscription_status = 'active',
+           stripe_subscription_id = $1,
+           stripe_subscription_item_id = $2,
+           tier = 'team-20251210',
+           stripe_metadata = $3
+       WHERE id = $4`,
+      [subscriptionId, subscriptionItemId, { addons }, orgId],
+    );
+
+    if (updateError) {
+      logger.error({ error: updateError }, "Failed to update organization");
+    }
+
+    // Invite members after org is updated
+    await inviteOnboardingMembers(orgId);
+
+    // Create Slack channel and invite team members
+    if (orgData?.name) {
+      await createSlackChannelAndInviteMembers(orgId, orgData.name);
+    }
+
+    // Send PostHog event
+    await sendSubscriptionEvent("subscription_created", subscription, {
+      includeOrgData: true,
+    });
+  },
+
+  handleUpdate: async (_event: Stripe.Event) => {
+    const subscription = _event.data.object as Stripe.Subscription;
+    await sendSubscriptionCanceledEvent(subscription);
+  },
+  handleCheckoutSessionCompleted: async (_event: Stripe.Event) => {
     return;
   },
   handleDelete: PricingVersionOld.handleDelete,
@@ -998,13 +1158,20 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       | Stripe.Subscription
       | Stripe.Checkout.Session;
 
-    const pricingFunctions =
-      stripeObject.metadata?.["tier"] === "pro-20240913" ||
-      stripeObject.metadata?.["tier"] === "pro-20250202"
-        ? PricingVersion20240913
-        : stripeObject.metadata?.["tier"] === "team-20250130"
-          ? TeamVersion20250130
-          : PricingVersionOld;
+    const tier = stripeObject.metadata?.["tier"];
+    let pricingFunctions;
+
+    if (tier === "pro-20251210") {
+      pricingFunctions = ProVersion20251210;
+    } else if (tier === "team-20251210") {
+      pricingFunctions = TeamVersion20251210;
+    } else if (tier === "pro-20240913" || tier === "pro-20250202") {
+      pricingFunctions = PricingVersion20240913;
+    } else if (tier === "team-20250130") {
+      pricingFunctions = TeamVersion20250130;
+    } else {
+      pricingFunctions = PricingVersionOld;
+    }
 
     if (event.type === "test_helpers.test_clock.advancing") {
       return res.status(200).end();

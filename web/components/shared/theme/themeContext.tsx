@@ -17,7 +17,10 @@ export default function ThemeProvider({
     <NextThemesProvider
       {...props}
       forcedTheme={
-        pathname?.includes("/signup") || pathname?.includes("/signin")
+        pathname?.includes("/signup") ||
+        pathname?.includes("/signin") ||
+        pathname?.includes("/sso") ||
+        pathname?.includes("/reset")
           ? "light"
           : undefined
       }
