@@ -30,6 +30,7 @@
               "features/advanced-usage/caching",
               "features/advanced-usage/custom-rate-limits",
               "features/advanced-usage/llm-security",
+              "features/advanced-usage/token-limit-exception-handlers"
               {
                 "group": "Provider Concepts",
                 "pages": [
