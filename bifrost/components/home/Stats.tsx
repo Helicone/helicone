@@ -8,9 +8,9 @@ import { useEffect, useRef, useState } from "react";
 const BASELINE_DATE = new Date("2025-01-06T00:00:00Z");
 
 // Baseline values (update these periodically with real numbers)
-const BASELINE_REQUESTS = 3_000_000_000; // 3 billion
-const BASELINE_TOKENS_TRILLION = 31.5; // 31.5 trillion
-const BASELINE_USERS = 20_600_000; // 20.6 million
+const BASELINE_REQUESTS = 4_855_213_721; // ~4.9 billion
+const BASELINE_TOKENS_TRILLION = 1.1; // ~1.1 trillion tokens per month
+const BASELINE_USERS = 28_645_282; // ~28.6 million
 
 // Growth rates
 const REQUESTS_PER_DAY = 50_000_000; // 50 million per day
