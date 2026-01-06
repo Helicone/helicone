@@ -13,9 +13,8 @@ const BASELINE_TOKENS_TRILLION = 1.1; // ~1.1 trillion tokens per month
 const BASELINE_USERS = 28_645_282; // ~28.6 million
 
 // Growth rates
-const REQUESTS_PER_DAY = 50_000_000; // 50 million per day
-const TOKENS_TRILLION_PER_MONTH = 1; // 1 trillion per month
-const USERS_PER_MONTH = 1_000_000; // 1 million per month
+const REQUESTS_PER_DAY = 10_000_000; // 10 million per day
+const MONTHLY_GROWTH_RATE = 0.05; // 5% MoM for tokens and users
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 const DAYS_PER_MONTH = 30.44; // Average days per month
@@ -30,8 +29,8 @@ function getGrowthMetrics() {
   return {
     requests: BASELINE_REQUESTS + daysSinceBaseline * REQUESTS_PER_DAY,
     tokensTrillion:
-      BASELINE_TOKENS_TRILLION + monthsSinceBaseline * TOKENS_TRILLION_PER_MONTH,
-    users: BASELINE_USERS + monthsSinceBaseline * USERS_PER_MONTH,
+      BASELINE_TOKENS_TRILLION * Math.pow(1 + MONTHLY_GROWTH_RATE, monthsSinceBaseline),
+    users: BASELINE_USERS * Math.pow(1 + MONTHLY_GROWTH_RATE, monthsSinceBaseline),
   };
 }
 
