@@ -742,9 +742,7 @@ export function estimateTokenCount(
       .join(" ");
 
     const heuristic = getTokenHeuristic(primaryModel ?? undefined);
-    const estimated = Math.ceil(
-      (combinedText.length + toolsText.length) * heuristic
-    );
+    const estimated = Math.ceil(combinedText.length * heuristic);
 
     return Number.isFinite(estimated) ? estimated : null;
   } catch (error) {
@@ -1185,7 +1183,7 @@ export function applyMiddleOutStrategy(
           .filter((s) => s.length > 0)
           .join(" ");
         const heuristic = getTokenHeuristic(primaryModel);
-        return Math.ceil((combinedText.length + toolsText.length) * heuristic);
+        return Math.ceil(combinedText.length * heuristic);
       }
     );
 
