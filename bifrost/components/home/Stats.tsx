@@ -4,8 +4,8 @@ import { ISLAND_WIDTH } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 
-// Baseline date: January 2, 2025
-const BASELINE_DATE = new Date("2025-01-02");
+// Baseline date: January 6, 2025 (UTC)
+const BASELINE_DATE = new Date("2025-01-06T00:00:00Z");
 
 // Baseline values (update these periodically with real numbers)
 const BASELINE_REQUESTS = 3_000_000_000; // 3 billion
@@ -17,22 +17,21 @@ const REQUESTS_PER_DAY = 50_000_000; // 50 million per day
 const TOKENS_TRILLION_PER_MONTH = 1; // 1 trillion per month
 const USERS_PER_MONTH = 1_000_000; // 1 million per month
 
+const MS_PER_DAY = 1000 * 60 * 60 * 24;
+const DAYS_PER_MONTH = 30.44; // Average days per month
+
 function getGrowthMetrics() {
   const now = new Date();
   const daysSinceBaseline = Math.floor(
-    (now.getTime() - BASELINE_DATE.getTime()) / (1000 * 60 * 60 * 24)
+    (now.getTime() - BASELINE_DATE.getTime()) / MS_PER_DAY
   );
-  const monthsSinceBaseline = daysSinceBaseline / 30;
-
-  const totalRequests = BASELINE_REQUESTS + daysSinceBaseline * REQUESTS_PER_DAY;
-  const totalTokensTrillion =
-    BASELINE_TOKENS_TRILLION + monthsSinceBaseline * TOKENS_TRILLION_PER_MONTH;
-  const totalUsers = BASELINE_USERS + monthsSinceBaseline * USERS_PER_MONTH;
+  const monthsSinceBaseline = daysSinceBaseline / DAYS_PER_MONTH;
 
   return {
-    requests: totalRequests,
-    tokensTrillion: totalTokensTrillion,
-    users: totalUsers,
+    requests: BASELINE_REQUESTS + daysSinceBaseline * REQUESTS_PER_DAY,
+    tokensTrillion:
+      BASELINE_TOKENS_TRILLION + monthsSinceBaseline * TOKENS_TRILLION_PER_MONTH,
+    users: BASELINE_USERS + monthsSinceBaseline * USERS_PER_MONTH,
   };
 }
 
@@ -56,11 +55,11 @@ function formatUsers(num: number): string {
 
 const Stats = () => {
   const [isVisible, setIsVisible] = useState(false);
-  const [metrics, setMetrics] = useState(getGrowthMetrics());
+  const [metrics, setMetrics] = useState<ReturnType<typeof getGrowthMetrics> | null>(null);
   const elementRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Update metrics on mount (for SSR hydration)
+    // Only compute metrics on client to avoid SSR hydration mismatch
     setMetrics(getGrowthMetrics());
   }, []);
 
@@ -99,11 +98,11 @@ const Stats = () => {
               isVisible ? "rotate-[-3deg]" : "rotate-[0  deg]"
             )}
           >
-            {formatRequests(metrics.requests)}
+            {formatRequests(metrics?.requests ?? BASELINE_REQUESTS)}
           </span>{" "}
           requests processed,{" "}
-          <span className="text-brand">{formatTokens(metrics.tokensTrillion)}</span> tokens a month,{" "}
-          <span className="text-brand">{formatUsers(metrics.users)}</span> users tracked
+          <span className="text-brand">{formatTokens(metrics?.tokensTrillion ?? BASELINE_TOKENS_TRILLION)}</span> tokens a month,{" "}
+          <span className="text-brand">{formatUsers(metrics?.users ?? BASELINE_USERS)}</span> users tracked
         </h1>
       </div>
     </div>
