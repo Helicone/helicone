@@ -957,7 +957,7 @@ function modelIdentifierMatches(
   }
 
   const index = sanitizedRequest.indexOf(sanitizedProvider);
-  if (index > 0) {
+  if (index >= 0) {
     return true;
   }
 
