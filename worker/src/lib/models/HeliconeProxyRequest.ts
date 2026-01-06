@@ -5,10 +5,7 @@ import { approvedDomains } from "@helicone-package/cost/providers/mappings";
 import { RequestWrapper } from "../RequestWrapper";
 import { buildTargetUrl } from "../clients/ProviderClient";
 import { Result, ok } from "../util/results";
-import {
-  HeliconeTokenLimitExceptionHandler,
-  IHeliconeHeaders,
-} from "./HeliconeHeaders";
+import { IHeliconeHeaders } from "./HeliconeHeaders";
 
 import { parseJSXObject } from "@helicone/prompts";
 import { TemplateWithInputs } from "@helicone/prompts/dist/objectParser";
@@ -28,16 +25,6 @@ export type RetryOptions = {
 
 export type HeliconeProperties = Record<string, string>;
 type Nullable<T> = T | null;
-
-import {
-  applyFallbackStrategy,
-  applyMiddleOutStrategy,
-  applyTruncateStrategy,
-  estimateTokenCount,
-  getModelTokenLimit,
-  parseRequestPayload,
-  resolvePrimaryModel,
-} from "../util/tokenLimitException";
 
 // This neatly formats and holds all of the state that a request can come into Helicone
 export interface HeliconeProxyRequest {
@@ -176,14 +163,13 @@ export class HeliconeProxyRequestMapper {
       body = await this.request.unsafeGetBodyText();
     }
 
-    // Apply token limit exception handler here and update buffer if changed
-    const bodyWithTokenLimitExceptionHandler =
-      this.applyTokenLimitExceptionHandler(body);
-    if (typeof bodyWithTokenLimitExceptionHandler === "string") {
-      body = bodyWithTokenLimitExceptionHandler;
-      await this.request.requestBodyBuffer.tempSetBody(
-        bodyWithTokenLimitExceptionHandler
-      );
+    // Apply token limit exception handler
+    await this.request.applyTokenLimitExceptionHandler(this.provider);
+    // Re-fetch body after potential modification
+    try {
+      body = await this.request.safelyGetBody();
+    } catch (e) {
+      body = await this.request.unsafeGetBodyText();
     }
 
     return {
@@ -220,90 +206,6 @@ export class HeliconeProxyRequestMapper {
       },
       error: null,
     };
-  }
-
-  public applyTokenLimitExceptionHandler(
-    body: ValidRequestBody
-  ): ValidRequestBody | undefined {
-    const handler = this.request.heliconeHeaders.tokenLimitExceptionHandler;
-    if (!handler) {
-      return;
-    }
-
-    const parsedBody = parseRequestPayload(body);
-    if (!parsedBody) {
-      return;
-    }
-
-    const primaryModel = resolvePrimaryModel(
-      parsedBody,
-      this.request.heliconeHeaders.modelOverride
-    );
-    const estimatedTokens = estimateTokenCount(parsedBody, primaryModel);
-
-    if (!primaryModel) {
-      return;
-    }
-
-    const modelContextLimit = getModelTokenLimit(this.provider, primaryModel);
-
-    // Extract requested completion/output limit directly here (provider-agnostic best-effort)
-    const anyBody = parsedBody as any;
-    const completionCandidates: Array<unknown> = [
-      anyBody?.max_completion_tokens,
-      anyBody?.max_tokens,
-      anyBody?.max_output_tokens,
-      anyBody?.maxOutputTokens,
-      anyBody?.response?.max_tokens,
-      anyBody?.response?.max_output_tokens,
-      anyBody?.response?.maxOutputTokens,
-      anyBody?.generation_config?.max_output_tokens,
-      anyBody?.generation_config?.maxOutputTokens,
-      anyBody?.generationConfig?.max_output_tokens,
-      anyBody?.generationConfig?.maxOutputTokens,
-    ];
-    const requestedCompletionTokens = (() => {
-      for (const val of completionCandidates) {
-        if (typeof val === "number" && Number.isFinite(val) && val > 0) {
-          return Math.floor(val);
-        }
-      }
-      return 0;
-    })();
-    const tokenLimit =
-      modelContextLimit === null
-        ? null
-        : Math.max(
-            0,
-            modelContextLimit -
-              (requestedCompletionTokens || modelContextLimit * 0.1)
-          );
-
-    if (
-      estimatedTokens === null ||
-      tokenLimit === null ||
-      (estimatedTokens <= tokenLimit &&
-        handler != HeliconeTokenLimitExceptionHandler.Fallback) //needed to sort the extra model passed in request
-    ) {
-      return;
-    }
-
-    // TODO: Add some indicator as to what was applied so users understand why their request looks different
-    switch (handler) {
-      case HeliconeTokenLimitExceptionHandler.Truncate:
-        return applyTruncateStrategy(parsedBody);
-      case HeliconeTokenLimitExceptionHandler.MiddleOut:
-        return applyMiddleOutStrategy(parsedBody, primaryModel, tokenLimit);
-      case HeliconeTokenLimitExceptionHandler.Fallback:
-        return applyFallbackStrategy(
-          parsedBody,
-          primaryModel,
-          estimatedTokens,
-          tokenLimit
-        );
-      default:
-        return;
-    }
   }
 
   private validateApiConfiguration(api_base: string | undefined): boolean {

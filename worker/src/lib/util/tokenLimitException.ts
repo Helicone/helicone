@@ -5,13 +5,91 @@ import type { ModelProviderName } from "@helicone-package/cost/models/providers"
 import type { ModelProviderConfig } from "@helicone-package/cost/models/types";
 import { ValidRequestBody } from "../../RequestBodyBuffer/IRequestBodyBuffer";
 
+// === Chat Completions API Types ===
 export type LLMMessage = {
   role?: string;
   content?: unknown;
   [key: string]: unknown;
 };
 
-export type ParsedRequestPayload = {
+export type ChatCompletionsPayload = {
+  _type: "chat_completions";
+  model?: string;
+  messages?: LLMMessage[];
+  tools?: unknown;
+};
+
+// === Responses API Types ===
+export type ResponsesInputTextPart = {
+  type: "input_text";
+  text: string;
+};
+
+export type ResponsesInputImagePart = {
+  type: "input_image";
+  image_url?: string;
+  file_id?: string;
+  detail?: "high" | "low" | "auto";
+};
+
+export type ResponsesInputFilePart = {
+  type: "input_file";
+  file_data?: string;
+  file_id?: string;
+  filename?: string;
+};
+
+export type ResponsesInputContentPart =
+  | ResponsesInputTextPart
+  | ResponsesInputImagePart
+  | ResponsesInputFilePart;
+
+export type ResponsesMessageInputItem = {
+  type?: "message";
+  role: "user" | "assistant" | "system" | "developer";
+  content: string | ResponsesInputContentPart[];
+};
+
+export type ResponsesFunctionCallInputItem = {
+  type: "function_call";
+  id?: string;
+  call_id?: string;
+  name: string;
+  arguments: string;
+};
+
+export type ResponsesFunctionCallOutputInputItem = {
+  type: "function_call_output";
+  call_id: string;
+  output: string;
+};
+
+export type ResponsesReasoningItem = {
+  type: "reasoning";
+  id: string;
+  summary: Array<{ type: "summary_text"; text: string }>;
+  encrypted_content?: string;
+};
+
+export type ResponsesInputItem =
+  | ResponsesMessageInputItem
+  | ResponsesFunctionCallInputItem
+  | ResponsesFunctionCallOutputInputItem
+  | ResponsesReasoningItem;
+
+export type ResponsesPayload = {
+  _type: "responses";
+  model?: string;
+  input: string | ResponsesInputItem[];
+  instructions?: string;
+  tools?: unknown;
+};
+
+// === Union Type ===
+export type ParsedRequestPayload = ChatCompletionsPayload | ResponsesPayload;
+
+// Legacy type alias for backward compatibility
+export type LegacyParsedRequestPayload = {
   model?: string;
   messages?: LLMMessage[];
   tools?: unknown;
@@ -388,6 +466,267 @@ export function serializeTools(tools: unknown): string {
   }
 }
 
+/**
+ * Detects if the parsed body is a Responses API request.
+ * Responses API has `input` field instead of `messages`.
+ */
+export function isResponsesApiPayload(parsed: any): boolean {
+  return (
+    parsed &&
+    typeof parsed === "object" &&
+    "input" in parsed &&
+    !("messages" in parsed)
+  );
+}
+
+/**
+ * Detects if the parsed body is a Chat Completions API request.
+ */
+export function isChatCompletionsPayload(parsed: any): boolean {
+  return parsed && typeof parsed === "object" && "messages" in parsed;
+}
+
+/**
+ * Extracts text content from a Responses API input item.
+ */
+export function extractTextFromResponsesInputItem(
+  item: ResponsesInputItem
+): string {
+  if (!item) return "";
+
+  // Message input item
+  if (!item.type || item.type === "message") {
+    const messageItem = item as ResponsesMessageInputItem;
+    if (typeof messageItem.content === "string") {
+      return messageItem.content;
+    }
+    if (Array.isArray(messageItem.content)) {
+      return messageItem.content
+        .filter((part): part is ResponsesInputTextPart => part.type === "input_text")
+        .map((part) => part.text)
+        .join(" ");
+    }
+    return "";
+  }
+
+  // Function call input
+  if (item.type === "function_call") {
+    const funcItem = item as ResponsesFunctionCallInputItem;
+    return funcItem.arguments || "";
+  }
+
+  // Function call output
+  if (item.type === "function_call_output") {
+    const outputItem = item as ResponsesFunctionCallOutputInputItem;
+    return outputItem.output || "";
+  }
+
+  // Reasoning item
+  if (item.type === "reasoning") {
+    const reasoningItem = item as ResponsesReasoningItem;
+    return reasoningItem.summary
+      ?.map((s) => s.text)
+      .join(" ") || "";
+  }
+
+  return "";
+}
+
+/**
+ * Extracts all text content from a Responses API payload.
+ */
+export function extractTextFromResponsesPayload(
+  payload: ResponsesPayload
+): string {
+  let text = "";
+
+  // Add instructions if present
+  if (payload.instructions) {
+    text += payload.instructions + " ";
+  }
+
+  // Handle input
+  if (typeof payload.input === "string") {
+    text += payload.input;
+  } else if (Array.isArray(payload.input)) {
+    for (const item of payload.input) {
+      text += extractTextFromResponsesInputItem(item) + " ";
+    }
+  }
+
+  return text.trim();
+}
+
+/**
+ * Converts a Responses API input to LLMMessage array for processing.
+ * This allows reuse of existing message-based strategies.
+ */
+export function responsesInputToMessages(
+  payload: ResponsesPayload
+): LLMMessage[] {
+  const messages: LLMMessage[] = [];
+
+  // Add instructions as system message if present
+  if (payload.instructions) {
+    messages.push({
+      role: "system",
+      content: payload.instructions,
+      _source: "instructions",
+    });
+  }
+
+  // Handle string input
+  if (typeof payload.input === "string") {
+    messages.push({
+      role: "user",
+      content: payload.input,
+      _source: "input_string",
+    });
+    return messages;
+  }
+
+  // Handle array input
+  if (Array.isArray(payload.input)) {
+    for (const item of payload.input) {
+      if (!item.type || item.type === "message") {
+        const messageItem = item as ResponsesMessageInputItem;
+        let content: string;
+        if (typeof messageItem.content === "string") {
+          content = messageItem.content;
+        } else if (Array.isArray(messageItem.content)) {
+          content = messageItem.content
+            .filter((part): part is ResponsesInputTextPart => part.type === "input_text")
+            .map((part) => part.text)
+            .join(" ");
+        } else {
+          content = "";
+        }
+        messages.push({
+          role: messageItem.role,
+          content,
+          _source: "input_message",
+          _originalContent: messageItem.content,
+        });
+      } else if (item.type === "function_call") {
+        const funcItem = item as ResponsesFunctionCallInputItem;
+        messages.push({
+          role: "assistant",
+          content: `Function call: ${funcItem.name}(${funcItem.arguments})`,
+          _source: "input_function_call",
+          _originalItem: funcItem,
+        });
+      } else if (item.type === "function_call_output") {
+        const outputItem = item as ResponsesFunctionCallOutputInputItem;
+        messages.push({
+          role: "tool",
+          content: outputItem.output,
+          _source: "input_function_output",
+          _originalItem: outputItem,
+        });
+      } else if (item.type === "reasoning") {
+        const reasoningItem = item as ResponsesReasoningItem;
+        messages.push({
+          role: "assistant",
+          content: reasoningItem.summary?.map((s) => s.text).join(" ") || "",
+          _source: "input_reasoning",
+          _originalItem: reasoningItem,
+        });
+      }
+    }
+  }
+
+  return messages;
+}
+
+/**
+ * Converts processed LLMMessages back to Responses API input format.
+ */
+export function messagesToResponsesInput(
+  messages: LLMMessage[],
+  originalPayload: ResponsesPayload
+): ResponsesPayload {
+  const result: ResponsesPayload = {
+    ...originalPayload,
+    _type: "responses",
+  };
+
+  // Extract instructions from system message if it was from instructions
+  const instructionsMessage = messages.find(
+    (m) => m._source === "instructions"
+  );
+  if (instructionsMessage && typeof instructionsMessage.content === "string") {
+    result.instructions = instructionsMessage.content;
+  }
+
+  // Check if original input was a string
+  const stringInputMessage = messages.find(
+    (m) => m._source === "input_string"
+  );
+  if (stringInputMessage && typeof stringInputMessage.content === "string") {
+    result.input = stringInputMessage.content;
+    return result;
+  }
+
+  // Convert messages back to input items
+  const inputItems: ResponsesInputItem[] = [];
+  for (const message of messages) {
+    if (message._source === "instructions") continue; // Already handled
+
+    if (message._source === "input_message") {
+      const item: ResponsesMessageInputItem = {
+        role: message.role as "user" | "assistant" | "system" | "developer",
+        content:
+          message._originalContent !== undefined
+            ? (message._originalContent as string | ResponsesInputContentPart[])
+            : (message.content as string),
+      };
+      // Update text content if it was modified
+      if (
+        typeof message._originalContent === "string" &&
+        typeof message.content === "string"
+      ) {
+        item.content = message.content;
+      } else if (
+        Array.isArray(message._originalContent) &&
+        typeof message.content === "string"
+      ) {
+        // Content was flattened to string, need to reconstruct
+        const textParts = message._originalContent.filter(
+          (p: any) => p.type === "input_text"
+        );
+        if (textParts.length === 1) {
+          textParts[0].text = message.content;
+          item.content = message._originalContent;
+        } else {
+          // Multiple text parts or mixed content - use string
+          item.content = message.content;
+        }
+      }
+      inputItems.push(item);
+    } else if (
+      message._source === "input_function_call" &&
+      message._originalItem
+    ) {
+      inputItems.push(message._originalItem as ResponsesFunctionCallInputItem);
+    } else if (
+      message._source === "input_function_output" &&
+      message._originalItem
+    ) {
+      inputItems.push(
+        message._originalItem as ResponsesFunctionCallOutputInputItem
+      );
+    } else if (
+      message._source === "input_reasoning" &&
+      message._originalItem
+    ) {
+      inputItems.push(message._originalItem as ResponsesReasoningItem);
+    }
+  }
+
+  result.input = inputItems;
+  return result;
+}
+
 export function parseRequestPayload(
   body: ValidRequestBody
 ): ParsedRequestPayload | null {
@@ -400,7 +739,27 @@ export function parseRequestPayload(
     if (!parsed || typeof parsed !== "object") {
       return null;
     }
-    return parsed as ParsedRequestPayload;
+
+    // Detect and tag the payload type
+    if (isResponsesApiPayload(parsed)) {
+      return {
+        ...parsed,
+        _type: "responses",
+      } as ResponsesPayload;
+    }
+
+    if (isChatCompletionsPayload(parsed)) {
+      return {
+        ...parsed,
+        _type: "chat_completions",
+      } as ChatCompletionsPayload;
+    }
+
+    // Default to chat completions for backward compatibility
+    return {
+      ...parsed,
+      _type: "chat_completions",
+    } as ChatCompletionsPayload;
   } catch (error) {
     return null;
   }
@@ -415,13 +774,21 @@ export function estimateTokenCount(
   }
   try {
     let contentText = "";
-    if (parsedBody.messages) {
-      for (const message of parsedBody.messages) {
-        if (typeof message?.content === "string") {
-          contentText += message.content;
+
+    if (parsedBody._type === "responses") {
+      // Responses API: extract from input and instructions
+      contentText = extractTextFromResponsesPayload(parsedBody);
+    } else {
+      // Chat Completions API: extract from messages
+      if (parsedBody.messages) {
+        for (const message of parsedBody.messages) {
+          if (typeof message?.content === "string") {
+            contentText += message.content;
+          }
         }
       }
     }
+
     const toolsText = serializeTools(parsedBody.tools);
 
     const combinedText = [toolsText, contentText]
@@ -454,8 +821,10 @@ export function getModelTokenLimit(
   }
 
   const providerName = heliconeProviderToModelProviderName(provider);
+
+  // If provider is not recognized (e.g., CUSTOM), search across all providers
   if (!providerName) {
-    return null;
+    return getModelTokenLimitAnyProvider(model);
   }
 
   const config = findModelProviderConfig(model, providerName);
@@ -464,6 +833,57 @@ export function getModelTokenLimit(
   }
 
   return config.contextLength;
+}
+
+/**
+ * Get the token limit for a model by searching across all providers.
+ * This is used when the provider is unknown (e.g., AI Gateway with CUSTOM provider).
+ */
+export function getModelTokenLimitAnyProvider(
+  model: string | null | undefined
+): number | null {
+  if (!model) {
+    return null;
+  }
+
+  // Build candidates including stripping provider prefixes (e.g., "meta-llama/model" -> "model")
+  const candidates = buildLookupCandidatesWithPrefixStripping(model);
+
+  for (const candidate of candidates) {
+    const configsResult = registry.getModelProviderConfigs(candidate);
+    if (configsResult.error === null && configsResult.data && configsResult.data.length > 0) {
+      // Return the first config with a valid contextLength
+      for (const config of configsResult.data) {
+        if (typeof config.contextLength === "number") {
+          return config.contextLength;
+        }
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Build lookup candidates including stripping provider prefixes.
+ * Handles formats like "meta-llama/llama-prompt-guard-2-22m" -> "llama-prompt-guard-2-22m"
+ */
+function buildLookupCandidatesWithPrefixStripping(model: string): string[] {
+  const baseCandidates = buildLookupCandidates(model);
+  const allCandidates = new Set<string>(baseCandidates);
+
+  // Also try stripping everything before "/" (provider prefix)
+  if (model.includes("/")) {
+    const afterSlash = model.split("/").pop();
+    if (afterSlash) {
+      const strippedCandidates = buildLookupCandidates(afterSlash);
+      for (const c of strippedCandidates) {
+        allCandidates.add(c);
+      }
+    }
+  }
+
+  return Array.from(allCandidates);
 }
 
 export function findModelProviderConfig(
@@ -503,7 +923,7 @@ export function searchProviderModels(
     return null;
   }
 
-  for (const canonicalModel of providerModelsResult.data.values()) {
+  for (const canonicalModel of Array.from(providerModelsResult.data.values())) {
     const configsResult = registry.getModelProviderConfigs(canonicalModel);
     if (configsResult.error !== null || !configsResult.data) {
       continue;
@@ -638,27 +1058,256 @@ export function resolvePrimaryModel(
   return bodyModel ?? headerModel;
 }
 
+/**
+ * Truncates and normalizes text content in a Responses API payload.
+ */
+function applyTruncateToResponsesPayload(
+  payload: ResponsesPayload
+): ResponsesPayload {
+  const result = { ...payload };
+
+  // Truncate instructions
+  if (result.instructions) {
+    result.instructions = truncateAndNormalizeText(result.instructions);
+  }
+
+  // Truncate input
+  if (typeof result.input === "string") {
+    result.input = truncateAndNormalizeText(result.input);
+  } else if (Array.isArray(result.input)) {
+    result.input = result.input.map((item) => {
+      if (!item.type || item.type === "message") {
+        const messageItem = item as ResponsesMessageInputItem;
+        if (typeof messageItem.content === "string") {
+          return {
+            ...messageItem,
+            content: truncateAndNormalizeText(messageItem.content),
+          };
+        }
+        if (Array.isArray(messageItem.content)) {
+          return {
+            ...messageItem,
+            content: messageItem.content.map((part) => {
+              if (part.type === "input_text") {
+                return {
+                  ...part,
+                  text: truncateAndNormalizeText(part.text),
+                };
+              }
+              return part;
+            }),
+          };
+        }
+      }
+      return item;
+    });
+  }
+
+  return result;
+}
+
 export function applyTruncateStrategy(
-  parsedBody: ParsedRequestPayload
+  parsedBody: ParsedRequestPayload,
+  primaryModel: string,
+  tokenLimit: number | null
 ): ValidRequestBody | undefined {
+  // Can't truncate without knowing the limit
+  if (tokenLimit === null) {
+    return;
+  }
+
+  // Get the token heuristic (tokens per character) for this model
+  // e.g., 0.25 means ~4 chars per token
+  const tokensPerChar = getTokenHeuristic(primaryModel);
+  // Calculate max characters to keep (leave some buffer)
+  // maxChars = tokenLimit / tokensPerChar = tokenLimit * (1 / tokensPerChar) = tokenLimit * charsPerToken
+  const charsPerToken = 1 / tokensPerChar;
+  const maxChars = Math.floor(tokenLimit * charsPerToken * 0.9);
+
+  if (parsedBody._type === "responses") {
+    // Responses API
+    const hasContent =
+      parsedBody.instructions ||
+      (typeof parsedBody.input === "string" && parsedBody.input) ||
+      (Array.isArray(parsedBody.input) && parsedBody.input.length > 0);
+
+    if (!hasContent) {
+      return;
+    }
+
+    const truncated = applyTruncateToResponsesPayloadWithLimit(parsedBody, maxChars);
+    // Remove _type before serializing
+    const { _type, ...rest } = truncated;
+    return JSON.stringify(rest);
+  }
+
+  // Chat Completions API
   if (!parsedBody.messages) {
     return;
   }
 
+  // Calculate total content length to distribute the budget
+  let totalContentLength = 0;
   for (const message of parsedBody.messages) {
     if (typeof message?.content === "string") {
-      message.content = truncateAndNormalizeText(message.content);
+      totalContentLength += message.content.length;
     }
   }
 
-  return JSON.stringify(parsedBody);
+  // Truncate each message proportionally
+  let remainingChars = maxChars;
+  for (const message of parsedBody.messages) {
+    if (typeof message?.content === "string") {
+      const content = message.content as string;
+      const proportion = content.length / totalContentLength;
+      const messageMaxChars = Math.floor(maxChars * proportion);
+      message.content = truncateTextToLimit(content, Math.min(messageMaxChars, remainingChars));
+      remainingChars -= (message.content as string).length;
+    }
+  }
+
+  // Remove _type before serializing
+  const { _type, ...rest } = parsedBody;
+  return JSON.stringify(rest);
+}
+
+/**
+ * Truncate text to a maximum character limit.
+ */
+function truncateTextToLimit(text: string, maxChars: number): string {
+  if (!text || maxChars <= 0) {
+    return "";
+  }
+
+  // First normalize the text
+  let normalized = truncateAndNormalizeText(text);
+
+  if (normalized.length <= maxChars) {
+    return normalized;
+  }
+
+  // Truncate to max chars, trying to break at word boundary
+  let truncated = normalized.substring(0, maxChars);
+  const lastSpace = truncated.lastIndexOf(" ");
+  if (lastSpace > maxChars * 0.8) {
+    truncated = truncated.substring(0, lastSpace);
+  }
+
+  return truncated + "...";
+}
+
+/**
+ * Apply truncation to Responses API payload with a character limit.
+ * Prioritizes instructions (system prompt) over input since it has higher semantic weight.
+ */
+function applyTruncateToResponsesPayloadWithLimit(
+  payload: ResponsesPayload,
+  maxChars: number
+): ResponsesPayload {
+  const result = { ...payload };
+
+  // Prioritize instructions (system prompt) - give it budget first, then remaining to input
+  let remainingChars = maxChars;
+
+  // Truncate instructions first (higher semantic weight, like system prompt)
+  if (result.instructions) {
+    // Give instructions up to 30% of budget or its full length, whichever is smaller
+    const instructionsMax = Math.min(
+      result.instructions.length,
+      Math.floor(maxChars * 0.3)
+    );
+    result.instructions = truncateTextToLimit(result.instructions, instructionsMax);
+    remainingChars -= result.instructions.length;
+  }
+
+  // Truncate input with remaining budget
+  const inputMaxChars = Math.max(0, remainingChars);
+
+  if (typeof result.input === "string") {
+    result.input = truncateTextToLimit(result.input, inputMaxChars);
+  } else if (Array.isArray(result.input)) {
+    result.input = result.input.map((item) => {
+      if (!item.type || item.type === "message") {
+        const messageItem = item as ResponsesMessageInputItem;
+        if (typeof messageItem.content === "string") {
+          return {
+            ...messageItem,
+            content: truncateTextToLimit(messageItem.content, inputMaxChars),
+          };
+        }
+        if (Array.isArray(messageItem.content)) {
+          return {
+            ...messageItem,
+            content: messageItem.content.map((part) => {
+              if (part.type === "input_text") {
+                return {
+                  ...part,
+                  text: truncateTextToLimit(part.text, inputMaxChars),
+                };
+              }
+              return part;
+            }),
+          };
+        }
+      }
+      return item;
+    });
+  }
+
+  return result;
 }
 
 export function applyMiddleOutStrategy(
   parsedBody: ParsedRequestPayload,
   primaryModel: string,
-  tokenLimit: number
+  tokenLimit: number | null
 ): ValidRequestBody | undefined {
+  // Can't apply middle-out without knowing the token limit
+  if (tokenLimit === null) {
+    return;
+  }
+
+  if (parsedBody._type === "responses") {
+    // Responses API: convert to messages, apply middle-out, convert back
+    const messages = responsesInputToMessages(parsedBody);
+
+    if (messages.length === 0) {
+      return;
+    }
+
+    const trimmedMessages = middleOutMessagesToFitLimit(
+      messages,
+      tokenLimit,
+      (candidate) => {
+        // Estimate based on the candidate messages
+        let contentText = "";
+        for (const m of candidate) {
+          if (typeof m.content === "string") {
+            contentText += m.content;
+          }
+        }
+        const toolsText = serializeTools(parsedBody.tools);
+        const combinedText = [toolsText, contentText]
+          .filter((s) => s.length > 0)
+          .join(" ");
+        const heuristic = getTokenHeuristic(primaryModel);
+        return Math.ceil((combinedText.length + toolsText.length) * heuristic);
+      }
+    );
+
+    const changed =
+      JSON.stringify(trimmedMessages) !== JSON.stringify(messages);
+    if (!changed) {
+      return;
+    }
+
+    const resultPayload = messagesToResponsesInput(trimmedMessages, parsedBody);
+    // Remove _type before serializing
+    const { _type, ...rest } = resultPayload;
+    return JSON.stringify(rest);
+  }
+
+  // Chat Completions API
   if (!Array.isArray(parsedBody.messages)) {
     return;
   }
@@ -673,7 +1322,7 @@ export function applyMiddleOutStrategy(
         {
           ...parsedBody,
           messages: candidate,
-        },
+        } as ChatCompletionsPayload,
         primaryModel
       )
   );
@@ -684,31 +1333,45 @@ export function applyMiddleOutStrategy(
     return;
   }
 
-  const finalPayload: ParsedRequestPayload = {
+  const finalPayload = {
     ...parsedBody,
     messages: trimmedMessages,
   };
 
-  return JSON.stringify(finalPayload);
+  // Remove _type before serializing
+  const { _type, ...rest } = finalPayload;
+  return JSON.stringify(rest);
 }
 
 export function applyFallbackStrategy(
   parsedBody: ParsedRequestPayload,
   primaryModel: string,
-  estimatedTokens: number,
-  tokenLimit: number
+  estimatedTokens: number | null,
+  tokenLimit: number | null
 ): ValidRequestBody | undefined {
   const fallbackModel = selectFallbackModel(parsedBody.model);
   if (!fallbackModel) {
     return;
   }
 
-  if (estimatedTokens >= tokenLimit) {
-    parsedBody.model = fallbackModel;
+  // Use fallback model if:
+  // - tokenLimit is null (model not in registry, can't determine limit)
+  // - estimatedTokens is null (can't estimate, be safe and use fallback)
+  // - estimatedTokens >= tokenLimit (actually exceeded)
+  const shouldUseFallback =
+    tokenLimit === null ||
+    estimatedTokens === null ||
+    estimatedTokens >= tokenLimit;
 
-    return JSON.stringify(parsedBody);
+  if (shouldUseFallback) {
+    parsedBody.model = fallbackModel;
+    // Remove _type before serializing
+    const { _type, ...rest } = parsedBody;
+    return JSON.stringify(rest);
   }
 
   parsedBody.model = primaryModel;
-  return JSON.stringify(parsedBody);
+  // Remove _type before serializing
+  const { _type, ...rest } = parsedBody;
+  return JSON.stringify(rest);
 }
