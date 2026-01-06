@@ -1239,18 +1239,15 @@ export function applyFallbackStrategy(
   tokenLimit: number | null
 ): ValidRequestBody | undefined {
   const fallbackModel = selectFallbackModel(parsedBody.model);
-  if (!fallbackModel) {
-    return;
-  }
 
   // Use fallback model if:
   // - tokenLimit is null (model not in registry, can't determine limit)
   // - estimatedTokens is null (can't estimate, be safe and use fallback)
   // - estimatedTokens >= tokenLimit (actually exceeded)
   const shouldUseFallback =
-    tokenLimit === null ||
-    estimatedTokens === null ||
-    estimatedTokens >= tokenLimit;
+    (tokenLimit === null ||
+      estimatedTokens === null ||
+      estimatedTokens >= tokenLimit) && fallbackModel !== null;
 
   if (shouldUseFallback) {
     parsedBody.model = fallbackModel;

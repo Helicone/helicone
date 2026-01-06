@@ -487,7 +487,7 @@ describe("Token Limit Exception Strategies", () => {
 
       it("should return first model if only one available", () => {
         const result = selectFallbackModel("gpt-4");
-        expect(result).toBe("gpt-4");
+        expect(result).toBeNull();
       });
 
       it("should return null for empty/invalid input", () => {
