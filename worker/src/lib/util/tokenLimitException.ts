@@ -5,6 +5,23 @@ import type { ModelProviderName } from "@helicone-package/cost/models/providers"
 import type { ModelProviderConfig } from "@helicone-package/cost/models/types";
 import { ValidRequestBody } from "../../RequestBodyBuffer/IRequestBodyBuffer";
 
+// Import Responses API types from llm-mapper
+import type {
+  ResponsesInputTextPart,
+  ResponsesInputImagePart,
+  ResponsesInputFilePart,
+  ResponsesInputContentPart,
+  ResponsesMessageInputItem,
+  ResponsesFunctionCallInputItem,
+  ResponsesFunctionCallOutputInputItem,
+  ResponsesReasoningItem,
+  ResponsesInputItem,
+  ResponsesRequestBody,
+} from "@helicone-package/llm-mapper/transform/types/responses";
+
+// Types are imported for internal use; no re-export needed
+// since they're only used within this module.
+
 // === Chat Completions API Types ===
 export type LLMMessage = {
   role?: string;
@@ -19,64 +36,7 @@ export type ChatCompletionsPayload = {
   tools?: unknown;
 };
 
-// === Responses API Types ===
-export type ResponsesInputTextPart = {
-  type: "input_text";
-  text: string;
-};
-
-export type ResponsesInputImagePart = {
-  type: "input_image";
-  image_url?: string;
-  file_id?: string;
-  detail?: "high" | "low" | "auto";
-};
-
-export type ResponsesInputFilePart = {
-  type: "input_file";
-  file_data?: string;
-  file_id?: string;
-  filename?: string;
-};
-
-export type ResponsesInputContentPart =
-  | ResponsesInputTextPart
-  | ResponsesInputImagePart
-  | ResponsesInputFilePart;
-
-export type ResponsesMessageInputItem = {
-  type?: "message";
-  role: "user" | "assistant" | "system" | "developer";
-  content: string | ResponsesInputContentPart[];
-};
-
-export type ResponsesFunctionCallInputItem = {
-  type: "function_call";
-  id?: string;
-  call_id?: string;
-  name: string;
-  arguments: string;
-};
-
-export type ResponsesFunctionCallOutputInputItem = {
-  type: "function_call_output";
-  call_id: string;
-  output: string;
-};
-
-export type ResponsesReasoningItem = {
-  type: "reasoning";
-  id: string;
-  summary: Array<{ type: "summary_text"; text: string }>;
-  encrypted_content?: string;
-};
-
-export type ResponsesInputItem =
-  | ResponsesMessageInputItem
-  | ResponsesFunctionCallInputItem
-  | ResponsesFunctionCallOutputInputItem
-  | ResponsesReasoningItem;
-
+// === Responses API Payload (extends llm-mapper type with internal _type tag) ===
 export type ResponsesPayload = {
   _type: "responses";
   model?: string;
@@ -87,13 +47,6 @@ export type ResponsesPayload = {
 
 // === Union Type ===
 export type ParsedRequestPayload = ChatCompletionsPayload | ResponsesPayload;
-
-// Legacy type alias for backward compatibility
-export type LegacyParsedRequestPayload = {
-  model?: string;
-  messages?: LLMMessage[];
-  tools?: unknown;
-};
 
 const DEFAULT_TOKEN_HEURISTIC = 0.25;
 
@@ -408,7 +361,7 @@ export function middleOutMessagesToFitLimit<T extends LLMMessage>(
   return finalMessages as T[];
 }
 
-export function getTokenHeuristic(model: string | null | undefined): number {
+function getTokenHeuristic(model: string | null | undefined): number {
   if (!model) {
     return DEFAULT_TOKEN_HEURISTIC;
   }
@@ -451,7 +404,7 @@ export function selectFallbackModel(modelField: unknown): string | null {
   return candidates[1] ?? candidates[0];
 }
 
-export function serializeTools(tools: unknown): string {
+function serializeTools(tools: unknown): string {
   if (!tools) {
     return "";
   }
@@ -488,7 +441,7 @@ export function isChatCompletionsPayload(parsed: any): boolean {
 /**
  * Extracts text content from a Responses API input item.
  */
-export function extractTextFromResponsesInputItem(
+function extractTextFromResponsesInputItem(
   item: ResponsesInputItem
 ): string {
   if (!item) return "";
@@ -726,6 +679,14 @@ export function messagesToResponsesInput(
   return result;
 }
 
+/**
+ * Serialize a payload back to JSON, removing the internal _type tag.
+ */
+function serializePayload(payload: ParsedRequestPayload): string {
+  const { _type, ...rest } = payload;
+  return JSON.stringify(rest);
+}
+
 export function parseRequestPayload(
   body: ValidRequestBody
 ): ParsedRequestPayload | null {
@@ -838,7 +799,7 @@ export function getModelTokenLimit(
  * Get the token limit for a model by searching across all providers.
  * This is used when the provider is unknown (e.g., AI Gateway with CUSTOM provider).
  */
-export function getModelTokenLimitAnyProvider(
+function getModelTokenLimitAnyProvider(
   model: string | null | undefined
 ): number | null {
   if (!model) {
@@ -885,7 +846,7 @@ function buildLookupCandidatesWithPrefixStripping(model: string): string[] {
   return Array.from(allCandidates);
 }
 
-export function findModelProviderConfig(
+function findModelProviderConfig(
   model: string,
   providerName: ModelProviderName
 ): ModelProviderConfig | null {
@@ -896,7 +857,7 @@ export function findModelProviderConfig(
   return searchProviderModels(model, providerName);
 }
 
-export function lookupProviderConfig(
+function lookupProviderConfig(
   model: string,
   providerName: ModelProviderName
 ): ModelProviderConfig | null {
@@ -913,7 +874,7 @@ export function lookupProviderConfig(
   return null;
 }
 
-export function searchProviderModels(
+function searchProviderModels(
   model: string,
   providerName: ModelProviderName
 ): ModelProviderConfig | null {
@@ -942,7 +903,7 @@ export function searchProviderModels(
   return null;
 }
 
-export function buildLookupCandidates(model: string): string[] {
+function buildLookupCandidates(model: string): string[] {
   const trimmed = model.trim();
   if (!trimmed) {
     return [];
@@ -973,7 +934,7 @@ export function buildLookupCandidates(model: string): string[] {
   return Array.from(candidates);
 }
 
-export function modelIdentifierMatches(
+function modelIdentifierMatches(
   requestModel: string,
   providerModelId: string
 ): boolean {
@@ -1019,7 +980,7 @@ export function modelIdentifierMatches(
   return false;
 }
 
-export function buildModelIdentifierVariants(identifier: string): string[] {
+function buildModelIdentifierVariants(identifier: string): string[] {
   const trimmed = identifier.trim();
   if (!trimmed) {
     return [];
@@ -1039,7 +1000,7 @@ export function buildModelIdentifierVariants(identifier: string): string[] {
   return Array.from(variants).filter((variant) => variant.length > 0);
 }
 
-export function sanitizeModelIdentifier(identifier: string): string {
+function sanitizeModelIdentifier(identifier: string): string {
   return identifier.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
@@ -1055,54 +1016,6 @@ export function resolvePrimaryModel(
 
   const bodyModel = getPrimaryModel(parsedBody.model);
   return bodyModel ?? headerModel;
-}
-
-/**
- * Truncates and normalizes text content in a Responses API payload.
- */
-function applyTruncateToResponsesPayload(
-  payload: ResponsesPayload
-): ResponsesPayload {
-  const result = { ...payload };
-
-  // Truncate instructions
-  if (result.instructions) {
-    result.instructions = truncateAndNormalizeText(result.instructions);
-  }
-
-  // Truncate input
-  if (typeof result.input === "string") {
-    result.input = truncateAndNormalizeText(result.input);
-  } else if (Array.isArray(result.input)) {
-    result.input = result.input.map((item) => {
-      if (!item.type || item.type === "message") {
-        const messageItem = item as ResponsesMessageInputItem;
-        if (typeof messageItem.content === "string") {
-          return {
-            ...messageItem,
-            content: truncateAndNormalizeText(messageItem.content),
-          };
-        }
-        if (Array.isArray(messageItem.content)) {
-          return {
-            ...messageItem,
-            content: messageItem.content.map((part) => {
-              if (part.type === "input_text") {
-                return {
-                  ...part,
-                  text: truncateAndNormalizeText(part.text),
-                };
-              }
-              return part;
-            }),
-          };
-        }
-      }
-      return item;
-    });
-  }
-
-  return result;
 }
 
 export function applyTruncateStrategy(
@@ -1135,9 +1048,7 @@ export function applyTruncateStrategy(
     }
 
     const truncated = applyTruncateToResponsesPayloadWithLimit(parsedBody, maxChars);
-    // Remove _type before serializing
-    const { _type, ...rest } = truncated;
-    return JSON.stringify(rest);
+    return serializePayload(truncated);
   }
 
   // Chat Completions API
@@ -1165,9 +1076,7 @@ export function applyTruncateStrategy(
     }
   }
 
-  // Remove _type before serializing
-  const { _type, ...rest } = parsedBody;
-  return JSON.stringify(rest);
+  return serializePayload(parsedBody);
 }
 
 /**
@@ -1301,9 +1210,7 @@ export function applyMiddleOutStrategy(
     }
 
     const resultPayload = messagesToResponsesInput(trimmedMessages, parsedBody);
-    // Remove _type before serializing
-    const { _type, ...rest } = resultPayload;
-    return JSON.stringify(rest);
+    return serializePayload(resultPayload);
   }
 
   // Chat Completions API
@@ -1332,14 +1239,13 @@ export function applyMiddleOutStrategy(
     return;
   }
 
-  const finalPayload = {
+  const finalPayload: ChatCompletionsPayload = {
     ...parsedBody,
+    _type: "chat_completions",
     messages: trimmedMessages,
   };
 
-  // Remove _type before serializing
-  const { _type, ...rest } = finalPayload;
-  return JSON.stringify(rest);
+  return serializePayload(finalPayload);
 }
 
 export function applyFallbackStrategy(
@@ -1364,13 +1270,9 @@ export function applyFallbackStrategy(
 
   if (shouldUseFallback) {
     parsedBody.model = fallbackModel;
-    // Remove _type before serializing
-    const { _type, ...rest } = parsedBody;
-    return JSON.stringify(rest);
+    return serializePayload(parsedBody);
   }
 
   parsedBody.model = primaryModel;
-  // Remove _type before serializing
-  const { _type, ...rest } = parsedBody;
-  return JSON.stringify(rest);
+  return serializePayload(parsedBody);
 }
