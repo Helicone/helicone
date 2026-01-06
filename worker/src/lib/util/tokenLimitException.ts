@@ -54,7 +54,6 @@ const MODEL_TOKEN_HEURISTICS: Record<string, number> = {
   "gpt-4o": 0.25,
   "gpt-3.5-turbo": 0.2,
   "gpt-4o-mini": 0.25,
-  "gpt-o3": 0.25,
 };
 
 const NORMALIZATION_PATTERNS: Array<[RegExp, string]> = [
