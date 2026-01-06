@@ -1072,7 +1072,7 @@ function truncateTextToLimit(text: string, maxChars: number): string {
   }
 
   // First normalize the text
-  let normalized = truncateAndNormalizeText(text);
+  const normalized = truncateAndNormalizeText(text);
 
   if (normalized.length <= maxChars) {
     return normalized;
