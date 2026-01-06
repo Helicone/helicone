@@ -8,15 +8,12 @@ import { ValidRequestBody } from "../../RequestBodyBuffer/IRequestBodyBuffer";
 // Import Responses API types from llm-mapper
 import type {
   ResponsesInputTextPart,
-  ResponsesInputImagePart,
-  ResponsesInputFilePart,
   ResponsesInputContentPart,
   ResponsesMessageInputItem,
   ResponsesFunctionCallInputItem,
   ResponsesFunctionCallOutputInputItem,
   ResponsesReasoningItem,
   ResponsesInputItem,
-  ResponsesRequestBody,
 } from "@helicone-package/llm-mapper/transform/types/responses";
 
 // Types are imported for internal use; no re-export needed
@@ -250,18 +247,6 @@ export function middleOutMessagesToFitLimit<T extends LLMMessage>(
       if (typeof clone?.content === "string") {
         const parts = byMessage.get(i) ?? [];
         (clone as any).content = parts.join("");
-      }
-      return clone;
-    });
-  }
-
-  function buildMessagesWithOnlyChunk(chunkIndex: number): T[] {
-    const target = chunks[chunkIndex];
-    return original.map((m, i) => {
-      const clone = { ...(m as any) } as T;
-      if (typeof clone?.content === "string") {
-        (clone as any).content =
-          i === target.messageIndex ? target.content : "";
       }
       return clone;
     });
