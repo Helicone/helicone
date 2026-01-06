@@ -382,10 +382,12 @@ export function getPrimaryModel(modelField: unknown): string | null {
 
 export function selectFallbackModel(modelField: unknown): string | null {
   const candidates = extractModelCandidates(modelField);
-  if (candidates.length === 0) {
+  // A fallback model must be different from the primary model.
+  // If there is fewer than two candidates, there is no valid fallback.
+  if (candidates.length < 2) {
     return null;
   }
-  return candidates[1] ?? candidates[0];
+  return candidates[1];
 }
 
 function serializeTools(tools: unknown): string {
