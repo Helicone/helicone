@@ -12,9 +12,7 @@ UPDATE prompts_2025_versions
 SET environments = ARRAY[environment]
 WHERE environment IS NOT NULL;
 
--- Drop the old environment column
-ALTER TABLE prompts_2025_versions
-DROP COLUMN environment;
+-- Keep old environment column for backwards compatibility (deprecated, not used by new code)
 
 -- Create index for efficient array containment queries (e.g., finding all versions with 'production')
 CREATE INDEX idx_prompts_2025_versions_environments ON prompts_2025_versions USING GIN (environments)

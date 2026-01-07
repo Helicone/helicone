@@ -151,24 +151,6 @@ export const useSetPromptVersionEnvironment = () => {
   );
 };
 
-export const useAddEnvironmentToVersion = () => {
-  const queryClient = useQueryClient();
-
-  return $JAWN_API.useMutation(
-    "post",
-    "/v1/prompt-2025/add/environment",
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["prompts"] });
-        queryClient.invalidateQueries({ queryKey: ["promptsWithVersions"] });
-        queryClient.invalidateQueries({ queryKey: ["promptVersions"] });
-        queryClient.invalidateQueries({ queryKey: ["promptVersionWithBody"] });
-        queryClient.invalidateQueries({ queryKey: ["promptEnvironments"] });
-      },
-    },
-  );
-};
-
 export const useRemoveEnvironmentFromVersion = () => {
   const queryClient = useQueryClient();
 

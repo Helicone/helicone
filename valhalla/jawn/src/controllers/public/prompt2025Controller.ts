@@ -243,30 +243,6 @@ export class Prompt2025Controller extends Controller {
     return result;
   }
 
-  @Post("add/environment")
-  public async addEnvironmentToVersion(
-    @Body()
-    requestBody: {
-      promptId: string;
-      promptVersionId: string;
-      environment: string;
-    },
-    @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<null, string>> {
-    const promptManager = new Prompt2025Manager(request.authParams);
-    const result = await promptManager.addEnvironmentToVersion({
-      promptId: requestBody.promptId,
-      promptVersionId: requestBody.promptVersionId,
-      environment: requestBody.environment,
-    });
-    if (result.error) {
-      this.setStatus(500);
-    } else {
-      this.setStatus(200);
-    }
-    return result;
-  }
-
   @Post("remove/environment")
   public async removeEnvironmentFromVersion(
     @Body()

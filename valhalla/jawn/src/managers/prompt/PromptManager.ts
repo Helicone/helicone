@@ -688,65 +688,6 @@ export class Prompt2025Manager extends BaseManager {
     }
   }
 
-  async addEnvironmentToVersion(params: {
-    promptId: string;
-    promptVersionId: string;
-    environment: string;
-  }): Promise<Result<null, string>> {
-    try {
-      await HELICONE_DB.tx(async (t) => {
-        // Check version exists
-        const versionCheck = await t.oneOrNone<{ id: string }>(
-          `SELECT id FROM prompts_2025_versions
-           WHERE id = $1 AND prompt_id = $2 AND organization = $3 AND soft_delete = false`,
-          [params.promptVersionId, params.promptId, this.authParams.organizationId]
-        );
-
-        if (!versionCheck) {
-          throw new Error("Prompt version not found or does not belong to the specified prompt");
-        }
-
-        // Check if environment already exists on another version
-        const existingCheck = await t.oneOrNone<{ id: string }>(
-          `SELECT id FROM prompts_2025_versions
-           WHERE prompt_id = $1 AND organization = $2 AND id != $3
-           AND environments @> ARRAY[$4]::text[] AND soft_delete = false`,
-          [params.promptId, this.authParams.organizationId, params.promptVersionId, params.environment]
-        );
-
-        if (existingCheck) {
-          throw new Error(`Environment "${params.environment}" is already assigned to another version. Use setPromptVersionEnvironment to move it.`);
-        }
-
-        // Add environment to array
-        await t.none(
-          `UPDATE prompts_2025_versions
-           SET environments = array_append(COALESCE(environments, ARRAY[]::text[]), $3)
-           WHERE id = $4 AND prompt_id = $1 AND organization = $2 AND soft_delete = false
-           AND NOT (COALESCE(environments, ARRAY[]::text[]) @> ARRAY[$3]::text[])`,
-          [params.promptId, this.authParams.organizationId, params.environment, params.promptVersionId]
-        );
-
-        // Update production version ref if adding production
-        if (params.environment === PRODUCTION_ENVIRONMENT) {
-          await t.none(
-            `UPDATE prompts_2025 SET production_version = $1 WHERE id = $2 AND organization = $3 AND soft_delete = false`,
-            [params.promptVersionId, params.promptId, this.authParams.organizationId]
-          );
-        }
-      });
-
-      await this.resetPromptCache({
-        promptId: params.promptId,
-        environment: params.environment,
-      });
-
-      return ok(null);
-    } catch (error: any) {
-      return err(error.message || "Failed to add environment to version");
-    }
-  }
-
   async removeEnvironmentFromVersion(params: {
     promptId: string;
     promptVersionId: string;
