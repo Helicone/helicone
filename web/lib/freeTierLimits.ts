@@ -132,12 +132,9 @@ export const FREE_TIER_CONFIG: FreeTierConfig = {
     },
     properties: {
       main: {
-        getLimit: () => 1,
-        description: (limit) =>
-          `You can have up to ${limit} properties with the free tier`,
+        getLimit: () => Infinity, // Unlimited properties for free tier
+        description: () => `Unlimited properties`,
         upgradeFeatureName: FEATURE_DISPLAY_NAMES.properties,
-        upgradeMessage: (limit, used) =>
-          `You've used ${used}/${limit} properties. Upgrade for unlimited access.`,
       },
     },
     users: {
