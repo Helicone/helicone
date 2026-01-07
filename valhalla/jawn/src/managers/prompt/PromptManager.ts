@@ -714,6 +714,22 @@ export class Prompt2025Manager extends BaseManager {
       return err("Prompt version not found or does not belong to the specified prompt");
     }
 
+    // Check if environment already exists on another version of this prompt
+    const existingCheck = await dbExecute<{ id: string }>(
+      `SELECT id FROM prompts_2025_versions
+       WHERE prompt_id = $1 AND organization = $2 AND id != $3
+       AND environments @> ARRAY[$4]::text[] AND soft_delete = false`,
+      [params.promptId, this.authParams.organizationId, params.promptVersionId, params.environment]
+    );
+
+    if (existingCheck.error) {
+      return err(existingCheck.error);
+    }
+
+    if (existingCheck.data?.[0]) {
+      return err(`Environment "${params.environment}" is already assigned to another version. Use setPromptVersionEnvironment to move it.`);
+    }
+
     // Add environment to the version's environments array (if not already present)
     const updateEnvResult = await dbExecute(
       `UPDATE prompts_2025_versions
@@ -776,6 +792,15 @@ export class Prompt2025Manager extends BaseManager {
 
     if (updateEnvResult.error) {
       return err(updateEnvResult.error);
+    }
+
+    // Clear production_version ref if removing production environment
+    if (params.environment === PRODUCTION_ENVIRONMENT) {
+      await dbExecute(
+        `UPDATE prompts_2025 SET production_version = NULL
+         WHERE id = $1 AND production_version = $2 AND organization = $3 AND soft_delete = false`,
+        [params.promptId, params.promptVersionId, this.authParams.organizationId]
+      );
     }
 
     await this.resetPromptCache({
