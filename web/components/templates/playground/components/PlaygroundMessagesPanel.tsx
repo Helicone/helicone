@@ -79,7 +79,7 @@ const PlaygroundMessagesPanel = ({
 
     const messagesWithIds = messages.map((message: Message, index: number) => ({
       ...message,
-      id: message.id || crypto.randomUUID(),
+      id: message.id || globalThis.crypto.randomUUID(),
     }));
 
     setMappedContent({
