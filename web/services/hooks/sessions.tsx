@@ -13,12 +13,14 @@ const useSessions = ({
   selectedName,
   page = 1,
   pageSize = 50,
+  isLive = false,
 }: {
   timeFilter: TimeFilter;
   sessionIdSearch: string;
   selectedName?: string;
   page?: number;
   pageSize?: number;
+  isLive?: boolean;
 }) => {
   const org = useOrg();
   const filterStore = useFilterAST();
@@ -65,7 +67,7 @@ const useSessions = ({
     refetchOnWindowFocus: false,
     retry: 2,
     refetchIntervalInBackground: false,
-    refetchInterval: false,
+    refetchInterval: isLive ? 2000 : false,
   });
   const properties = useQuery({
     queryKey: ["/v1/property/query", org?.currentOrg?.id],

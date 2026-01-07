@@ -122,12 +122,9 @@ export const FREE_TIER_CONFIG: FreeTierConfig = {
     },
     sessions: {
       main: {
-        getLimit: () => 1,
-        description: (limit) =>
-          `You can have up to ${limit} named sessions with the free tier`,
+        getLimit: () => Infinity, // Unlimited sessions for free tier
+        description: () => `Unlimited sessions`,
         upgradeFeatureName: FEATURE_DISPLAY_NAMES.sessions,
-        upgradeMessage: (limit, used) =>
-          `You've used ${used}/${limit} named sessions. Upgrade for unlimited access.`,
       },
     },
     properties: {
