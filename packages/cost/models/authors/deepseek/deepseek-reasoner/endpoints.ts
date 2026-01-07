@@ -143,6 +143,38 @@ export const endpoints = {
       "*": {},
     },
   },
+  // io.net Intelligence endpoints
+  "deepseek-reasoner:io-intelligence": {
+    provider: "io-intelligence",
+    author: "deepseek",
+    providerModelId: "deepseek-ai/DeepSeek-R1-0528",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000004, // $0.40 per 1M tokens
+        output: 0.00000175, // $1.75 per 1M tokens
+      },
+    ],
+    contextLength: 128_000,
+    maxCompletionTokens: 64_000,
+    supportedParameters: [
+      "frequency_penalty",
+      "logprobs",
+      "max_tokens",
+      "presence_penalty",
+      "response_format",
+      "seed",
+      "stop",
+      "stream",
+      "temperature",
+      "top_logprobs",
+      "top_p",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<
     `${DeepSeekReasonerModelName}:${ModelProviderName}`,

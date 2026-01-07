@@ -11,6 +11,7 @@ import { FireworksProvider } from "./fireworks";
 import { GoogleProvider } from "./google";
 import { GroqProvider } from "./groq";
 import { HeliconeProvider } from "./helicone";
+import { IoIntelligenceProvider } from "./io-intelligence";
 import { MistralProvider } from "./mistral";
 import { NebiusProvider } from "./nebius";
 import { NovitaProvider } from "./novita";
@@ -35,6 +36,7 @@ export const providers = {
   "google-ai-studio": new GoogleProvider(),
   groq: new GroqProvider(),
   helicone: new HeliconeProvider(),
+  "io-intelligence": new IoIntelligenceProvider(),
   mistral: new MistralProvider(),
   nebius: new NebiusProvider(),
   novita: new NovitaProvider(),

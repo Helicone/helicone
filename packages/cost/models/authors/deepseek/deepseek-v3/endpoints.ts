@@ -283,6 +283,40 @@ export const endpoints = {
       "*": {},
     },
   },
+  // io.net Intelligence endpoints
+  "deepseek-v3.2:io-intelligence": {
+    provider: "io-intelligence",
+    author: "deepseek",
+    providerModelId: "deepseek-ai/DeepSeek-V3.2",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000025, // $0.25 per 1M tokens
+        output: 0.00000038, // $0.38 per 1M tokens
+        cacheMultipliers: {
+          cachedInput: 0.5, // $0.125 per 1M tokens (cached)
+        },
+      },
+    ],
+    contextLength: 128_000,
+    maxCompletionTokens: 65_536,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "response_format",
+      "tools",
+      "tool_choice",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${DeepSeekV3ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;
