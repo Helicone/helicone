@@ -9,7 +9,13 @@ import {
   AutoTopoffSettings,
   UpdateAutoTopoffSettingsRequest,
   PaymentMethod,
+  UsageStatsResponse,
+  DailyUsageDataPoint,
 } from "../../controllers/public/stripeController";
+import {
+  calculateGBCost,
+  calculateRequestCost,
+} from "@helicone-package/pricing";
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { Database } from "../../lib/db/database.types";
 import { dbExecute, dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
@@ -27,37 +33,17 @@ import { sendMeteredBatch } from "./sendBatchEvent";
 
 type StripeMeterEvent = Stripe.V2.Billing.MeterEventStreamCreateParams.Event;
 
+// Legacy prices for grandfathered users (per-seat, per-request)
+// New pricing (2025-12-10) uses SettingsManager instead of env vars
 const DEFAULT_PRODUCT_PRICES = {
-  "request-volume": process.env.PRICE_PROD_REQUEST_VOLUME_ID!, //(This is just growth)
-  "pro-users": process.env.PRICE_PROD_PRO_USERS_ID!,
-  prompts: process.env.PRICE_PROD_PROMPTS_ID!,
+  "request-volume": process.env.PRICE_PROD_REQUEST_VOLUME_ID!, // Legacy: per-request billing
+  "pro-users": process.env.PRICE_PROD_PRO_USERS_ID!, // Legacy: $20/seat
+  prompts: process.env.PRICE_PROD_PROMPTS_ID!, // Legacy: $50/mo add-on
   alerts: process.env.PRICE_PROD_ALERTS_ID!,
   experiments: process.env.PRICE_PROD_EXPERIMENTS_FLAT_ID!,
   evals: process.env.PRICE_PROD_EVALS_ID!,
-  team_bundle: process.env.PRICE_PROD_TEAM_BUNDLE_ID!,
+  team_bundle: process.env.PRICE_PROD_TEAM_BUNDLE_ID!, // Legacy: $200/mo
 } as const;
-
-const getMeterId = async (
-  meterName: "stripe:trace-meter-id"
-): Promise<Result<string, string>> => {
-  const result = await dbExecute<{ name: string; settings: any }>(
-    `SELECT * FROM helicone_settings where name = $1`,
-    [meterName]
-  );
-
-  if (result.error) {
-    return err(`Error fetching meter id: ${result.error}`);
-  }
-
-  if (
-    !result.data?.[0]?.settings?.meterId ||
-    typeof result.data?.[0]?.settings?.meterId !== "string"
-  ) {
-    return err("Meter id not found");
-  }
-
-  return ok(result.data[0].settings.meterId);
-};
 
 const getProProductPrices = async (): Promise<
   typeof DEFAULT_PRODUCT_PRICES
@@ -370,19 +356,16 @@ WHERE (${builtFilter.filter})`,
         return err("Error getting or creating stripe customer");
       }
 
-      const orgMemberCount = await this.getOrgMemberCount();
-      if (orgMemberCount.error || !orgMemberCount.data) {
-        return err("Error getting organization member count");
-      }
-
-      const seats = Math.max(orgMemberCount.data, body.seats ?? 1);
-
+      // New pricing (2025-12-10): unlimited seats, no seat count needed
       const session = await this.portalLinkUpgradeToPro(
         origin,
         customerId.data,
-        seats,
         body
       );
+
+      if (session.error) {
+        return err(session.error);
+      }
 
       return ok(session.data?.url!);
     } catch (error: any) {
@@ -442,66 +425,52 @@ WHERE (${builtFilter.filter})`,
   private async portalLinkUpgradeToPro(
     origin: string,
     customerId: string,
-    orgMemberCount: number,
     body: UpgradeToProRequest
   ): Promise<Result<Stripe.Checkout.Session, string>> {
     const proProductPrices = await getProProductPrices();
+
+    // New pricing (2025-12-10): $79/mo flat, prompts included, unlimited seats
+    // Plus metered billing for requests and GB usage
+    const settingsManager = new SettingsManager();
+    const stripeProductSettings =
+      await settingsManager.getSetting("stripe:products");
+    if (!stripeProductSettings?.pro20251210_79Price) {
+      return err("stripe:products pro20251210_79Price is not configured");
+    }
+    if (!stripeProductSettings?.requestVolumePrice_20251210) {
+      return err(
+        "stripe:products requestVolumePrice_20251210 is not configured"
+      );
+    }
+    if (!stripeProductSettings?.gigVolumePrice_20251210) {
+      return err("stripe:products gigVolumePrice_20251210 is not configured");
+    }
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       customer: customerId,
       payment_method_types: ["card"],
       line_items: [
         {
-          price: proProductPrices["request-volume"],
-          // No quantity for usage based pricing
+          price: stripeProductSettings.pro20251210_79Price, // $79/mo flat
+          quantity: 1,
         },
         {
-          price: proProductPrices["pro-users"],
-          quantity: orgMemberCount,
+          price: stripeProductSettings.requestVolumePrice_20251210, // Metered request billing
         },
-        ...(body?.addons?.prompts
-          ? [
-              {
-                price: proProductPrices["prompts"],
-                quantity: 1,
-              },
-            ]
-          : []),
-        ...(body?.addons?.alerts
-          ? [
-              {
-                price: proProductPrices["alerts"],
-                quantity: 1,
-              },
-            ]
-          : []),
-        ...(body?.addons?.experiments
-          ? [
-              {
-                price: proProductPrices["experiments"],
-                quantity: 1,
-              },
-            ]
-          : []),
-        ...(body?.addons?.evals
-          ? [
-              {
-                price: proProductPrices["evals"],
-                quantity: 1,
-              },
-            ]
-          : []),
+        {
+          price: stripeProductSettings.gigVolumePrice_20251210, // Metered GB billing
+        },
       ],
       mode: "subscription",
       metadata: {
         orgId: this.authParams.organizationId,
-        tier: "pro-20250202",
+        tier: "pro-20251210",
       },
       subscription_data: {
         trial_period_days: 7,
         metadata: {
           orgId: this.authParams.organizationId,
-          tier: "pro-20250202",
+          tier: "pro-20251210",
         },
       },
       ui_mode: body.ui_mode ?? "hosted",
@@ -547,18 +516,16 @@ WHERE (${builtFilter.filter})`,
         return err("Error getting or creating stripe customer");
       }
 
-      const orgMemberCount = await this.getOrgMemberCount();
-      if (orgMemberCount.error || !orgMemberCount.data) {
-        return err("Error getting organization member count");
-      }
-
-      const seats = Math.max(orgMemberCount.data, body.seats ?? 1);
+      // New pricing (2025-12-10): unlimited seats, no seat count needed
       const sessionUrl = await this.portalLinkUpgradeToPro(
         origin,
         customerId.data,
-        seats,
         body
       );
+
+      if (sessionUrl.error) {
+        return err(sessionUrl.error);
+      }
 
       // For embedded mode, return the client secret instead of the URL
       if (body.ui_mode === "embedded") {
@@ -577,30 +544,48 @@ WHERE (${builtFilter.filter})`,
     isNewCustomer: boolean,
     uiMode: "embedded" | "hosted"
   ): Promise<Result<Stripe.Checkout.Session, string>> {
-    const proProductPrices = await getProProductPrices();
+    // New pricing (2025-12-10): $799/mo flat, prompts/experiments/evals included
+    // Plus metered billing for requests and GB usage
+    const settingsManager = new SettingsManager();
+    const stripeProductSettings =
+      await settingsManager.getSetting("stripe:products");
+    if (!stripeProductSettings?.team20251210_799Price) {
+      return err("stripe:products team20251210_799Price is not configured");
+    }
+    if (!stripeProductSettings?.requestVolumePrice_20251210) {
+      return err(
+        "stripe:products requestVolumePrice_20251210 is not configured"
+      );
+    }
+    if (!stripeProductSettings?.gigVolumePrice_20251210) {
+      return err("stripe:products gigVolumePrice_20251210 is not configured");
+    }
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       customer: customerId,
       payment_method_types: ["card"],
       line_items: [
         {
-          price: proProductPrices["request-volume"],
+          price: stripeProductSettings.team20251210_799Price, // $799/mo flat
+          quantity: 1,
         },
         {
-          price: proProductPrices["team_bundle"],
-          quantity: 1,
+          price: stripeProductSettings.requestVolumePrice_20251210, // Metered request billing
+        },
+        {
+          price: stripeProductSettings.gigVolumePrice_20251210, // Metered GB billing
         },
       ],
       mode: "subscription",
       metadata: {
         orgId: this.authParams.organizationId,
-        tier: "team-20250130",
+        tier: "team-20251210",
       },
       subscription_data: {
         trial_period_days: isNewCustomer ? 7 : undefined,
         metadata: {
           orgId: this.authParams.organizationId,
-          tier: "team-20250130",
+          tier: "team-20251210",
         },
       },
       ui_mode: uiMode,
@@ -652,6 +637,10 @@ WHERE (${builtFilter.filter})`,
         body.ui_mode ?? "hosted"
       );
 
+      if (session.error) {
+        return err(session.error);
+      }
+
       if (body.ui_mode === "embedded") {
         return ok(session.data?.client_secret!);
       }
@@ -690,6 +679,10 @@ WHERE (${builtFilter.filter})`,
           body.ui_mode ?? "hosted"
         );
 
+        if (session.error) {
+          return err(session.error);
+        }
+
         if (body.ui_mode === "embedded") {
           return ok(session.data?.client_secret!);
         }
@@ -711,6 +704,10 @@ WHERE (${builtFilter.filter})`,
         false,
         body.ui_mode ?? "hosted"
       );
+
+      if (session.error) {
+        return err(session.error);
+      }
 
       if (body.ui_mode === "embedded") {
         return ok(session.data?.client_secret!);
@@ -1255,6 +1252,7 @@ WHERE (${builtFilter.filter})`,
           success_url: successUrl,
           cancel_url: cancelUrl,
           mode: "payment",
+          allow_promotion_codes: false,
           line_items: [
             {
               price_data: {
@@ -1744,6 +1742,132 @@ WHERE (${builtFilter.filter})`,
       return ok(undefined);
     } catch (error) {
       return err(`Error removing payment method: ${error}`);
+    }
+  }
+
+  public async getUsageStats(): Promise<Result<UsageStatsResponse, string>> {
+    try {
+      // Get subscription to find billing period
+      const subscriptionResult = await this.getSubscription();
+      if (!subscriptionResult.data) {
+        return err("No subscription found");
+      }
+
+      const subscription = subscriptionResult.data;
+      const periodStart = new Date(subscription.current_period_start * 1000);
+      const periodEnd = new Date(subscription.current_period_end * 1000);
+      const now = new Date();
+
+      // Calculate days elapsed and total
+      const msPerDay = 24 * 60 * 60 * 1000;
+      const daysElapsed = Math.floor(
+        (now.getTime() - periodStart.getTime()) / msPerDay
+      );
+      const daysTotal = Math.floor(
+        (periodEnd.getTime() - periodStart.getTime()) / msPerDay
+      );
+
+      // Query ClickHouse for daily usage data within billing period
+      const dailyUsageQuery = `
+        SELECT
+          toDate(request_created_at) as date,
+          count(*) as requests,
+          sum(size_bytes) as bytes
+        FROM request_response_rmt
+        WHERE organization_id = {val_0: String}
+          AND request_created_at >= {val_1: DateTime}
+          AND request_created_at < {val_2: DateTime}
+        GROUP BY date
+        ORDER BY date ASC
+      `;
+
+      const dailyResult = await dbQueryClickhouse<{
+        date: string;
+        requests: number;
+        bytes: number;
+      }>(dailyUsageQuery, [
+        this.authParams.organizationId,
+        periodStart,
+        periodEnd,
+      ]);
+
+      if (dailyResult.error) {
+        return err(`Error querying daily usage: ${dailyResult.error}`);
+      }
+
+      // Create a map for quick lookup
+      const dailyMap = new Map<string, { requests: number; bytes: number }>();
+      for (const row of dailyResult.data ?? []) {
+        dailyMap.set(row.date, {
+          requests: Number(row.requests),
+          bytes: Number(row.bytes),
+        });
+      }
+
+      // Build daily data array with all dates in the period (up to today)
+      const dailyData: DailyUsageDataPoint[] = [];
+      let totalRequests = 0;
+      let totalBytes = 0;
+
+      const currentDate = new Date(periodStart);
+      while (currentDate <= now && currentDate < periodEnd) {
+        const dateStr = currentDate.toISOString().split("T")[0];
+        const dayData = dailyMap.get(dateStr) ?? { requests: 0, bytes: 0 };
+
+        dailyData.push({
+          date: dateStr,
+          requests: dayData.requests,
+          bytes: dayData.bytes,
+        });
+
+        totalRequests += dayData.requests;
+        totalBytes += dayData.bytes;
+
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+
+      const totalGB = totalBytes / (1024 * 1024 * 1024);
+
+      // Calculate costs using the pricing package
+      const requestsCostResult = calculateRequestCost(totalRequests);
+      const gbCostResult = calculateGBCost(totalGB);
+
+      // Calculate projected monthly cost based on current usage rate
+      // If no days have elapsed yet, use factor of 1 (current = projected)
+      const projectionFactor =
+        daysElapsed > 0 ? daysTotal / daysElapsed : 1;
+      const projectedRequests = totalRequests * projectionFactor;
+      const projectedGB = totalGB * projectionFactor;
+
+      const projectedRequestsCostResult =
+        calculateRequestCost(projectedRequests);
+      const projectedGBCostResult = calculateGBCost(projectedGB);
+
+      return ok({
+        billingPeriod: {
+          start: periodStart.toISOString(),
+          end: periodEnd.toISOString(),
+          daysElapsed,
+          daysTotal,
+        },
+        usage: {
+          totalRequests,
+          totalBytes,
+          totalGB,
+        },
+        dailyData,
+        estimatedCost: {
+          requestsCost: requestsCostResult.cost,
+          gbCost: gbCostResult.cost,
+          totalCost: requestsCostResult.cost + gbCostResult.cost,
+          projectedMonthlyRequestsCost: projectedRequestsCostResult.cost,
+          projectedMonthlyGBCost: projectedGBCostResult.cost,
+          projectedMonthlyTotalCost:
+            projectedRequestsCostResult.cost + projectedGBCostResult.cost,
+        },
+      });
+    } catch (error) {
+      return err(`Error getting usage stats: ${error}`);
     }
   }
 }

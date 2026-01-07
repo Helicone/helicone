@@ -194,6 +194,7 @@ export const toHeliconeRequest = (context: HandlerContext): HeliconeRequest => {
   );
   const promptAudioTokens = getPromptAudioTokens(modelUsage, legacyUsage);
   const completionAudioTokens = legacyUsage.completionAudioTokens ?? null;
+  const reasoningTokens = getReasoningTokens(modelUsage);
 
   return {
     cost: context.costBreakdown?.totalCost ?? legacyUsage.cost ?? null,
@@ -230,6 +231,7 @@ export const toHeliconeRequest = (context: HandlerContext): HeliconeRequest => {
     prompt_cache_read_tokens: isCacheHit ? 0 : promptCacheReadTokens,
     prompt_audio_tokens: isCacheHit ? 0 : promptAudioTokens,
     completion_audio_tokens: isCacheHit ? 0 : completionAudioTokens,
+    reasoning_tokens: isCacheHit ? 0 : reasoningTokens,
 
     /// NOTE: Unfortunately our codebase is running two prompts systems in parallel.
     // This used to track the legacy feature, but its now the new one.
@@ -286,9 +288,9 @@ export function getCompletionTokens(
       (modelUsage.image?.output ?? 0) +
       (modelUsage.video?.output ?? 0) +
       (modelUsage.file?.output ?? 0);
-    const thinking = modelUsage.thinking ?? 0;
-    if (modelUsage.output > 0 || modalityOutput > 0 || thinking > 0) {
-      return modelUsage.output + modalityOutput + thinking;
+    // Note: reasoning/thinking tokens are now tracked separately and NOT included in completion tokens
+    if (modelUsage.output > 0 || modalityOutput > 0) {
+      return modelUsage.output + modalityOutput;
     }
   }
   return legacyUsage.completionTokens ?? null;
@@ -300,9 +302,16 @@ function getTotalTokens(
 ): number | null {
   const promptTokens = getPromptTokens(modelUsage, legacyUsage);
   const completionTokens = getCompletionTokens(modelUsage, legacyUsage);
+  const reasoningTokens = getReasoningTokens(modelUsage);
 
-  if (promptTokens !== null || completionTokens !== null) {
-    return (promptTokens ?? 0) + (completionTokens ?? 0);
+  if (
+    promptTokens !== null ||
+    completionTokens !== null ||
+    reasoningTokens !== null
+  ) {
+    return (
+      (promptTokens ?? 0) + (completionTokens ?? 0) + (reasoningTokens ?? 0)
+    );
   }
   return legacyUsage.totalTokens ?? null;
 }
@@ -356,4 +365,13 @@ export function getCompletionAudioTokens(
     return modelUsage.audio.output;
   }
   return legacyUsage.completionAudioTokens ?? null;
+}
+
+export function getReasoningTokens(
+  modelUsage: ModelUsage | undefined
+): number | null {
+  if (modelUsage?.thinking !== undefined && modelUsage.thinking > 0) {
+    return modelUsage.thinking;
+  }
+  return null;
 }

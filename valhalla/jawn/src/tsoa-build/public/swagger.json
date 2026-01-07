@@ -3594,6 +3594,130 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"DailyUsageDataPoint": {
+				"properties": {
+					"date": {
+						"type": "string"
+					},
+					"requests": {
+						"type": "number",
+						"format": "double"
+					},
+					"bytes": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"date",
+					"requests",
+					"bytes"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UsageStatsResponse": {
+				"properties": {
+					"billingPeriod": {
+						"properties": {
+							"daysTotal": {
+								"type": "number",
+								"format": "double"
+							},
+							"daysElapsed": {
+								"type": "number",
+								"format": "double"
+							},
+							"end": {
+								"type": "string"
+							},
+							"start": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"daysTotal",
+							"daysElapsed",
+							"end",
+							"start"
+						],
+						"type": "object"
+					},
+					"usage": {
+						"properties": {
+							"totalGB": {
+								"type": "number",
+								"format": "double"
+							},
+							"totalBytes": {
+								"type": "number",
+								"format": "double"
+							},
+							"totalRequests": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"totalGB",
+							"totalBytes",
+							"totalRequests"
+						],
+						"type": "object"
+					},
+					"dailyData": {
+						"items": {
+							"$ref": "#/components/schemas/DailyUsageDataPoint"
+						},
+						"type": "array"
+					},
+					"estimatedCost": {
+						"properties": {
+							"projectedMonthlyTotalCost": {
+								"type": "number",
+								"format": "double"
+							},
+							"projectedMonthlyGBCost": {
+								"type": "number",
+								"format": "double"
+							},
+							"projectedMonthlyRequestsCost": {
+								"type": "number",
+								"format": "double"
+							},
+							"totalCost": {
+								"type": "number",
+								"format": "double"
+							},
+							"gbCost": {
+								"type": "number",
+								"format": "double"
+							},
+							"requestsCost": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"projectedMonthlyTotalCost",
+							"projectedMonthlyGBCost",
+							"projectedMonthlyRequestsCost",
+							"totalCost",
+							"gbCost",
+							"requestsCost"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"billingPeriod",
+					"usage",
+					"dailyData",
+					"estimatedCost"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"IntegrationCreateParams": {
 				"properties": {
 					"integration_name": {
@@ -5189,6 +5313,11 @@
 						"format": "double",
 						"nullable": true
 					},
+					"reasoning_tokens": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
 					"prompt_audio_tokens": {
 						"type": "number",
 						"format": "double",
@@ -5327,6 +5456,7 @@
 					"prompt_cache_write_tokens",
 					"prompt_cache_read_tokens",
 					"completion_tokens",
+					"reasoning_tokens",
 					"prompt_audio_tokens",
 					"completion_audio_tokens",
 					"cost",
@@ -18497,6 +18627,37 @@
 						}
 					}
 				]
+			}
+		},
+		"/v1/stripe/subscription/usage-stats": {
+			"get": {
+				"operationId": "GetUsageStats",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"allOf": [
+										{
+											"$ref": "#/components/schemas/UsageStatsResponse"
+										}
+									],
+									"nullable": true
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
 			}
 		},
 		"/v1/integration": {

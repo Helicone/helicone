@@ -21,23 +21,23 @@ const TeamCard: React.FC = () => {
               <Badge variant="secondary">BEST VALUE</Badge>
             </Row>
             <Row className="items-center gap-0.5">
-              <div className="text-accent-foreground text-3xl font-bold">$200</div>
+              <div className="text-accent-foreground text-3xl font-bold">$799</div>
               <div className="text-accent-foreground text-lg font-semibold">
                 per month
               </div>
             </Row>
             <div className="text-sidebar-foreground text-sm font-normal">
-              For growing companies.
+              For scaling companies.
             </div>
           </Col>
 
           <Col>
             {[
               "Everything in Pro",
-              "Unlimited seats",
-              "Prompt Management",
+              "5 organizations",
               "SOC-2 & HIPAA compliance",
               "Dedicated Slack channel",
+              "Support engineer & SLAs",
             ].map((feature, index) => (
               <div key={index} className="py-1.5 flex items-center gap-2">
                 <div className="w-4 h-4 relative overflow-hidden">

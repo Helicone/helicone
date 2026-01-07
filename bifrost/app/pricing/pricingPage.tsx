@@ -108,13 +108,21 @@ export default function PricingPage() {
                     How is Helicone&apos;s usage-based pricing calculated?
                   </AccordionTrigger>
                   <AccordionContent className="accordion-content-style">
-                    Helicone&apos;s usage-based pricing is calculated based on
-                    the number of requests you make to our API. You can find the
-                    rate per log under &quot;Additional logs&quot; in the table
-                    above.
+                    Helicone&apos;s usage-based pricing has two components:
                     <br />
                     <br />
-                    You can also find your monthly usage in the{" "}
+                    <strong>Request-based pricing:</strong> The first 10,000
+                    requests are free. After that, rates decrease as your usage
+                    grows, starting at $0.0007/request and going as low as
+                    $0.00002/request for high volumes.
+                    <br />
+                    <br />
+                    <strong>Storage-based pricing:</strong> Storage is billed in
+                    tiers starting at $3.25/GB for the first 30 GB, decreasing
+                    to $0.50/GB for volumes over 450 GB.
+                    <br />
+                    <br />
+                    You can find your monthly usage in the{" "}
                     <Link
                       href="https://us.helicone.ai/settings/billing"
                       className="underline hover:text-brand"
@@ -127,17 +135,18 @@ export default function PricingPage() {
 
                 <AccordionItem value="item-3">
                   <AccordionTrigger className="font-medium text-left">
-                    What happens if I exceed my request limit?
+                    What happens if I exceed my limits?
                   </AccordionTrigger>
                   <AccordionContent className="accordion-content-style">
-                    On the Free plan, you can view up to 10,000 requests per
-                    month in Helicone. Don&apos;t worry, we are still logging
-                    all your incoming requests in the background. To access
-                    them, you can upgrade to the Pro plan at any time.
+                    On the Free plan, you get 10,000 free requests and 1 GB of
+                    storage. We continue logging all your requests in the
+                    background. To access them, you can upgrade to the Pro plan
+                    at any time.
                     <br />
                     <br />
-                    If you are on the Pro or Team plan, any usage beyond 10,000
-                    requests per month will be automatically billed.
+                    If you are on the Pro or Team plan, additional usage is
+                    automatically billed at tiered rates that decrease as you
+                    scale - the more you use, the less you pay per unit.
                   </AccordionContent>
                 </AccordionItem>
 

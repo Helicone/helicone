@@ -92,6 +92,34 @@ export interface PaymentMethod {
   exp_year: number;
 }
 
+export interface DailyUsageDataPoint {
+  date: string; // ISO date string YYYY-MM-DD
+  requests: number;
+  bytes: number;
+}
+
+export interface UsageStatsResponse {
+  billingPeriod: {
+    start: string; // ISO date
+    end: string; // ISO date
+    daysElapsed: number;
+    daysTotal: number;
+  };
+  usage: {
+    totalRequests: number;
+    totalBytes: number;
+    totalGB: number;
+  };
+  dailyData: DailyUsageDataPoint[];
+  estimatedCost: {
+    requestsCost: number;
+    gbCost: number;
+    totalCost: number;
+    projectedMonthlyRequestsCost: number;
+    projectedMonthlyGBCost: number;
+    projectedMonthlyTotalCost: number;
+  };
+}
 
 export interface LLMUsage {
   model: string;
@@ -662,5 +690,20 @@ export class StripeController extends Controller {
     }
 
     return { success: true };
+  }
+
+  @Get("/subscription/usage-stats")
+  public async getUsageStats(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<UsageStatsResponse | null> {
+    const stripeManager = new StripeManager(request.authParams);
+    const result = await stripeManager.getUsageStats();
+
+    if (result.error) {
+      this.setStatus(400);
+      throw new Error(result.error);
+    }
+
+    return result.data;
   }
 }

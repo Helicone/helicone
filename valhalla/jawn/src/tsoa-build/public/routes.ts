@@ -1336,6 +1336,27 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "DailyUsageDataPoint": {
+        "dataType": "refObject",
+        "properties": {
+            "date": {"dataType":"string","required":true},
+            "requests": {"dataType":"double","required":true},
+            "bytes": {"dataType":"double","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "UsageStatsResponse": {
+        "dataType": "refObject",
+        "properties": {
+            "billingPeriod": {"dataType":"nestedObjectLiteral","nestedProperties":{"daysTotal":{"dataType":"double","required":true},"daysElapsed":{"dataType":"double","required":true},"end":{"dataType":"string","required":true},"start":{"dataType":"string","required":true}},"required":true},
+            "usage": {"dataType":"nestedObjectLiteral","nestedProperties":{"totalGB":{"dataType":"double","required":true},"totalBytes":{"dataType":"double","required":true},"totalRequests":{"dataType":"double","required":true}},"required":true},
+            "dailyData": {"dataType":"array","array":{"dataType":"refObject","ref":"DailyUsageDataPoint"},"required":true},
+            "estimatedCost": {"dataType":"nestedObjectLiteral","nestedProperties":{"projectedMonthlyTotalCost":{"dataType":"double","required":true},"projectedMonthlyGBCost":{"dataType":"double","required":true},"projectedMonthlyRequestsCost":{"dataType":"double","required":true},"totalCost":{"dataType":"double","required":true},"gbCost":{"dataType":"double","required":true},"requestsCost":{"dataType":"double","required":true}},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "IntegrationCreateParams": {
         "dataType": "refObject",
         "properties": {
@@ -1684,6 +1705,7 @@ const models: TsoaRoute.Models = {
             "prompt_cache_write_tokens": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
             "prompt_cache_read_tokens": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
             "completion_tokens": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
+            "reasoning_tokens": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
             "prompt_audio_tokens": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
             "completion_audio_tokens": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
             "cost": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
@@ -7978,6 +8000,37 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'removePaymentMethod',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsStripeController_getUsageStats: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.get('/v1/stripe/subscription/usage-stats',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(StripeController)),
+            ...(fetchMiddlewares<RequestHandler>(StripeController.prototype.getUsageStats)),
+
+            async function StripeController_getUsageStats(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsStripeController_getUsageStats, request, response });
+
+                const controller = new StripeController();
+
+              await templateService.apiHandler({
+                methodName: 'getUsageStats',
                 controller,
                 response,
                 next,

@@ -1,0 +1,9 @@
+{
+  "name": "@helicone-package/pricing",
+  "types": "./",
+  "sideEffects": false,
+  "version": "1.0.0",
+  "scripts": {
+    "test": "jest"
+  }
+}

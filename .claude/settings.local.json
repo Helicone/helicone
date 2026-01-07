@@ -100,12 +100,11 @@
       "Bash(npx vitest:*)",
       "WebFetch(domain:streamdown.ai)",
       "mcp__ide__getDiagnostics",
-      "Bash(yarn cf-typegen:*)"
+      "Bash(yarn cf-typegen:*)",
+      "WebFetch(domain:docs.stripe.com)"
     ],
     "deny": []
   },
   "enableAllProjectMcpServers": true,
-  "enabledMcpjsonServers": [
-    "playwright"
-  ]
+  "enabledMcpjsonServers": ["playwright"]
 }

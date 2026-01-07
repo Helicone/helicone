@@ -146,7 +146,9 @@ const PromptsPreview = () => {
       org?.currentOrg?.tier === "enterprise" ||
       org?.currentOrg?.tier === "pro-20240913" ||
       org?.currentOrg?.tier === "pro-20250202" ||
-      org?.currentOrg?.tier === "team-20250130",
+      org?.currentOrg?.tier === "pro-20251210" ||
+      org?.currentOrg?.tier === "team-20250130" ||
+      org?.currentOrg?.tier === "team-20251210",
     [org?.currentOrg?.tier],
   );
 
