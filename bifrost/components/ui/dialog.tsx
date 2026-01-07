@@ -23,7 +23,7 @@ const DialogOverlay = React.forwardRef<
   DialogOverlayProps
 >(
   (
-    { className, showOverlay = true, backgroundOpacity = 0.8, ...props },
+    { className, showOverlay = true, backgroundOpacity = 0.8, style, ...props },
     ref
   ) => (
     <DialogPrimitive.Overlay
@@ -31,9 +31,14 @@ const DialogOverlay = React.forwardRef<
       className={cn(
         "fixed inset-0 z-50 data-[state=open]:animate-in data-[state=closed]:animate-out " +
           "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-        showOverlay ? `bg-black/${backgroundOpacity * 100}` : "bg-transparent",
         className
       )}
+      style={{
+        backgroundColor: showOverlay
+          ? `rgba(0, 0, 0, ${backgroundOpacity})`
+          : "transparent",
+        ...style,
+      }}
       {...props}
     />
   )
