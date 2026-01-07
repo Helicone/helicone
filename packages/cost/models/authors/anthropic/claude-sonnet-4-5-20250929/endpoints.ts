@@ -139,7 +139,7 @@ export const endpoints = {
         threshold: 200000,
         input: 0.00000633, // 0.000006 * 1.055
         output: 0.0000237375, // 0.0000225 * 1.055
-      }
+      },
     ],
     contextLength: 1000000,
     maxCompletionTokens: 64000,
@@ -197,5 +197,8 @@ export const endpoints = {
     },
   },
 } satisfies Partial<
-  Record<`${ClaudeSonnet4520250929ModelName}:${ModelProviderName}`, ModelProviderConfig>
+  Record<
+    `${ClaudeSonnet4520250929ModelName}:${ModelProviderName}`,
+    ModelProviderConfig
+  >
 >;
