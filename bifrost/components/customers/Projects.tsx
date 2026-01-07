@@ -187,7 +187,7 @@ export function Projects() {
         </p>
         <Button variant="outline" asChild className="w-fit">
           <Link
-            href="https://forms.gle/WpTEEE6vVdQccprD9"
+            href="https://discord.gg/zsSTcH2qhG"
             target="_blank"
             rel="noopener"
           >
