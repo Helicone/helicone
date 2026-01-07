@@ -20,20 +20,14 @@ export const FREE_TIER_CONFIG: FreeTierConfig = {
   features: {
     prompts: {
       main: {
-        getLimit: () => 3,
-        description: (limit) =>
-          `You can create up to ${limit} prompts with the free tier`,
+        getLimit: () => Infinity, // Unlimited prompts for free tier
+        description: () => `Unlimited prompts`,
         upgradeFeatureName: FEATURE_DISPLAY_NAMES.prompts,
-        upgradeMessage: (limit, used) =>
-          `You've used ${used}/${limit} prompts. Upgrade for unlimited access.`,
       },
       subfeatures: {
         versions: {
-          getLimit: () => 3,
-          description: (limit) =>
-            `You can create up to ${limit} prompt versions with the free tier`,
-          upgradeMessage: (limit, used) =>
-            `You've used ${used}/${limit} prompt versions. Upgrade for unlimited access.`,
+          getLimit: () => Infinity, // Unlimited versions for free tier
+          description: () => `Unlimited prompt versions`,
           upgradeFeatureName: FEATURE_DISPLAY_NAMES.prompts,
         },
         runs: {
@@ -41,7 +35,7 @@ export const FREE_TIER_CONFIG: FreeTierConfig = {
           description: (limit) =>
             `You can perform up to ${limit} prompt runs with the free tier`,
           upgradeMessage: (limit, used) =>
-            `You've used ${used}/${limit} prompt runs. Upgrade to Pro Tier ($50/month addon) for unlimited access.`,
+            `You've used ${used}/${limit} prompt runs. Add credits for unlimited access.`,
           upgradeFeatureName: FEATURE_DISPLAY_NAMES.prompts,
         },
         playground_runs: {
@@ -49,7 +43,7 @@ export const FREE_TIER_CONFIG: FreeTierConfig = {
           description: (limit) =>
             `You can perform up to ${limit} playground runs with the free tier`,
           upgradeMessage: (limit, used) =>
-            `You've used ${used}/${limit} playground runs. Upgrade to Pro Tier ($20/month) for unlimited access.`,
+            `You've used ${used}/${limit} playground runs. Add credits for unlimited access.`,
           upgradeFeatureName: "Playground",
         },
       },
@@ -128,32 +122,23 @@ export const FREE_TIER_CONFIG: FreeTierConfig = {
     },
     sessions: {
       main: {
-        getLimit: () => 1,
-        description: (limit) =>
-          `You can have up to ${limit} named sessions with the free tier`,
+        getLimit: () => Infinity, // Unlimited sessions for free tier
+        description: () => `Unlimited sessions`,
         upgradeFeatureName: FEATURE_DISPLAY_NAMES.sessions,
-        upgradeMessage: (limit, used) =>
-          `You've used ${used}/${limit} named sessions. Upgrade for unlimited access.`,
       },
     },
     properties: {
       main: {
-        getLimit: () => 1,
-        description: (limit) =>
-          `You can have up to ${limit} properties with the free tier`,
+        getLimit: () => Infinity, // Unlimited properties for free tier
+        description: () => `Unlimited properties`,
         upgradeFeatureName: FEATURE_DISPLAY_NAMES.properties,
-        upgradeMessage: (limit, used) =>
-          `You've used ${used}/${limit} properties. Upgrade for unlimited access.`,
       },
     },
     users: {
       main: {
-        getLimit: () => 3,
-        description: (limit) =>
-          `You can view up to ${limit} users with the free tier`,
+        getLimit: () => Infinity, // Unlimited users for free tier
+        description: () => `Unlimited users`,
         upgradeFeatureName: FEATURE_DISPLAY_NAMES.users,
-        upgradeMessage: (limit) =>
-          `You've reached the limit of ${limit} users. Upgrade for unlimited access.`,
       },
     },
   },

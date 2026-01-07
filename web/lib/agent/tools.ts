@@ -91,7 +91,7 @@ export const hqlTools = [
     function: {
       name: "hql-get-schema",
       description:
-        "Gets the schema of the HQL database. This is the schema of the tables and columns that are available to query.",
+        "Gets the schema of the HQL database. This is the schema of the tables and columns that are available to query. IMPORTANT: The 'cost' column contains the calculated cost in USD for each request. Use this column for cost analysis queries.",
       parameters: {
         type: "object",
         properties: {},
@@ -103,7 +103,7 @@ export const hqlTools = [
     function: {
       name: "hql-write-query",
       description:
-        "Writes a Clickhouse query based on the provided schema. Will also ask for confirmation if the user wants to run the query.",
+        "Writes a Clickhouse query based on the provided schema. Will also ask for confirmation if the user wants to run the query. IMPORTANT NOTES: 1) Use 'cost' column for cost in USD (not 'provider_cost'). 2) Use 'request_created_at' for timestamps. 3) Use toDate() for date grouping (e.g., toDate(request_created_at) as day). 4) Common aggregations: SUM(cost) for total cost, COUNT(*) for request count, SUM(prompt_tokens + completion_tokens) for total tokens.",
       parameters: {
         type: "object",
         properties: {

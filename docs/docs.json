@@ -35,6 +35,7 @@
                 "pages": [
                   "gateway/concepts/prompt-caching",
                   "gateway/concepts/reasoning",
+                  "gateway/concepts/image-generation",
                   "gateway/concepts/context-editing",
                   "gateway/web-search",
                   "gateway/concepts/error-handling",
@@ -44,11 +45,16 @@
               {
                 "group": "Integrations",
                 "pages": [
+                  "gateway/integrations/overview",
                   "gateway/integrations/claude-agent-sdk",
                   "gateway/integrations/codex",
+                  "gateway/integrations/dpsy",
+                  "gateway/integrations/llamaindex",
                   "gateway/integrations/langchain",
                   "gateway/integrations/langfuse",
                   "gateway/integrations/langgraph",
+                  "gateway/integrations/litellm",
+                  "gateway/integrations/llamaindex",
                   "gateway/integrations/n8n",
                   "gateway/integrations/semantic-kernel",
                   "gateway/integrations/vercel-ai-sdk",

@@ -11,6 +11,10 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useState, Fragment } from "react";
+import {
+  GB_PRICING_TIERS,
+  REQUEST_PRICING_TIERS,
+} from "@helicone-package/pricing";
 
 interface PricingTier {
   name: string;
@@ -33,15 +37,19 @@ interface FeatureGroup {
   features: Feature[];
 }
 
-const USAGE_PRICING_TIERS = [
-  { min: 0, max: 10_000, rate: 0.0 },
-  { min: 10_000, max: 25_000, rate: 0.0016 },
-  { min: 25_000, max: 50_000, rate: 0.0008 },
-  { min: 50_000, max: 100_000, rate: 0.00035 },
-  { min: 100_000, max: 2_000_000, rate: 0.0003 },
-  { min: 2_000_000, max: 15_000_000, rate: 0.000128 },
-  { min: 15_000_000, max: Infinity, rate: 0.000083 },
-];
+// Derive display data from shared pricing tiers
+const USAGE_PRICING_GB = GB_PRICING_TIERS.map((tier) => ({
+  label: tier.label,
+  rate: `$${tier.ratePerGB.toFixed(2)}/GB`,
+}));
+
+const USAGE_PRICING_REQUESTS = REQUEST_PRICING_TIERS.map((tier) => ({
+  label: tier.label,
+  rate:
+    tier.ratePerLog === 0
+      ? "Free"
+      : `$${tier.ratePerLog.toFixed(8).replace(/0+$/, "")}`,
+}));
 
 const tiers: PricingTier[] = [
   {
@@ -74,12 +82,12 @@ const featureGroups: FeatureGroup[] = [
       {
         name: "Seats",
         hobby: "1",
-        pro: "$20/seat/mo",
+        pro: "Unlimited",
         team: "Unlimited",
         enterprise: "Unlimited",
       },
       {
-        name: "Organization",
+        name: "Organizations",
         hobby: "1",
         pro: "1",
         team: "5",
@@ -91,54 +99,40 @@ const featureGroups: FeatureGroup[] = [
     title: "Monitoring",
     features: [
       {
-        name: "Logs",
-        hobby: "10,000 logs/mo",
-        pro: "10,000 logs/mo",
-        team: "10,000 logs/mo",
+        name: "Requests",
+        hobby: "10,000/mo",
+        pro: "Unlimited",
+        team: "Unlimited",
         enterprise: "Unlimited",
       },
       {
-        name: "Additional logs",
-        hobby: false,
-        pro: "Usage-based",
-        team: "Usage-based",
+        name: "Usage-based pricing",
+        hobby: "10K requests",
+        pro: "Tiered pricing",
+        team: "Tiered pricing",
         enterprise: "Volume discount",
         tooltip: "usage",
       },
       {
-        name: "Multi-modal",
-        hobby: true,
-        pro: true,
-        team: true,
-        enterprise: true,
-      },
-      {
-        name: "Metrics dashboard",
-        hobby: true,
-        pro: true,
-        team: true,
-        enterprise: true,
-      },
-      {
         name: "Sessions",
-        hobby: "1",
-        pro: true,
-        team: true,
-        enterprise: true,
+        hobby: "Unlimited",
+        pro: "Unlimited",
+        team: "Unlimited",
+        enterprise: "Unlimited",
       },
       {
         name: "User analytics",
-        hobby: "3 users",
-        pro: true,
-        team: true,
-        enterprise: true,
+        hobby: "Unlimited",
+        pro: "Unlimited",
+        team: "Unlimited",
+        enterprise: "Unlimited",
       },
       {
         name: "Custom properties",
-        hobby: "1",
-        pro: true,
-        team: true,
-        enterprise: true,
+        hobby: "Unlimited",
+        pro: "Unlimited",
+        team: "Unlimited",
+        enterprise: "Unlimited",
       },
       {
         name: "HQL (Query Language)",
@@ -149,7 +143,7 @@ const featureGroups: FeatureGroup[] = [
       },
       {
         name: "Alerts",
-        hobby: "1",
+        hobby: false,
         pro: true,
         team: true,
         enterprise: true,
@@ -168,61 +162,35 @@ const featureGroups: FeatureGroup[] = [
     features: [
       {
         name: "Playground",
-        hobby: "10 runs",
-        pro: true,
-        team: true,
-        enterprise: true,
+        hobby: "Unlimited",
+        pro: "Unlimited",
+        team: "Unlimited (credits)",
+        enterprise: "Unlimited",
       },
       {
-        name: "Prompt management",
-        hobby: "3 prompts",
-        pro: "Unlimited with $50/mo add-on",
+        name: "Prompts",
+        hobby: "Unlimited",
+        pro: "Unlimited",
         team: "Unlimited",
-        enterprise: true,
-      },
-      {
-        name: "• Collaborative workspace",
-        hobby: false,
-        pro: "Included",
-        team: "Included",
-        enterprise: true,
-      },
-      {
-        name: "• Version history",
-        hobby: "3 versions",
-        pro: "Included",
-        team: "Included",
-        enterprise: true,
-      },
-    ],
-  },
-  {
-    title: "Evaluations",
-    features: [
-      {
-        name: "User feedback",
-        hobby: true,
-        pro: true,
-        team: true,
-        enterprise: true,
+        enterprise: "Unlimited",
       },
       {
         name: "Scores",
-        hobby: true,
-        pro: true,
-        team: true,
-        enterprise: true,
+        hobby: "Unlimited",
+        pro: "Unlimited",
+        team: "Unlimited",
+        enterprise: "Unlimited",
       },
       {
         name: "Datasets",
-        hobby: "1",
-        pro: true,
-        team: true,
-        enterprise: true,
+        hobby: "Unlimited",
+        pro: "Unlimited",
+        team: "Unlimited",
+        enterprise: "Unlimited",
       },
       {
         name: "Webhooks",
-        hobby: "1",
+        hobby: false,
         pro: true,
         team: true,
         enterprise: true,
@@ -232,20 +200,6 @@ const featureGroups: FeatureGroup[] = [
   {
     title: "Gateway",
     features: [
-      {
-        name: "One-line integration",
-        hobby: true,
-        pro: true,
-        team: true,
-        enterprise: true,
-      },
-      {
-        name: "Unified OpenAI SDK (100+ providers)",
-        hobby: true,
-        pro: true,
-        team: true,
-        enterprise: true,
-      },
       {
         name: "Caching",
         hobby: true,
@@ -261,15 +215,8 @@ const featureGroups: FeatureGroup[] = [
         enterprise: true,
       },
       {
-        name: "Automatic fallbacks & routing",
-        hobby: false,
-        pro: true,
-        team: true,
-        enterprise: true,
-      },
-      {
-        name: "LLM security",
-        hobby: false,
+        name: "Automatic fallbacks",
+        hobby: true,
         pro: true,
         team: true,
         enterprise: true,
@@ -281,29 +228,36 @@ const featureGroups: FeatureGroup[] = [
     features: [
       {
         name: "Retention",
-        hobby: "1 month",
-        pro: "3 months",
+        hobby: "7 days",
+        pro: "1 month",
         team: "3 months",
         enterprise: "Forever",
       },
       {
+        name: "Configurable retention",
+        hobby: false,
+        pro: false,
+        team: true,
+        enterprise: true,
+      },
+      {
         name: "Ingestion",
-        hobby: "1,200 logs/min",
-        pro: "6,000 logs/min",
+        hobby: "10 logs/min",
+        pro: "1,000 logs/min",
         team: "15,000 logs/min",
         enterprise: "30,000 logs/min",
       },
       {
         name: "API access",
         hobby: false,
-        pro: "60 calls/min",
+        pro: "10 calls/min",
         team: "60 calls/min",
         enterprise: "1,000 calls/min",
       },
       {
         name: "Data export",
-        hobby: true,
-        pro: true,
+        hobby: false,
+        pro: false,
         team: true,
         enterprise: true,
       },
@@ -337,53 +291,13 @@ const featureGroups: FeatureGroup[] = [
         name: "Dedicated support engineer",
         hobby: false,
         pro: false,
-        team: false,
+        team: true,
         enterprise: true,
       },
       {
         name: "SLAs",
         hobby: false,
         pro: false,
-        team: false,
-        enterprise: true,
-      },
-    ],
-  },
-  {
-    title: "Security",
-    features: [
-      {
-        name: "Data region",
-        hobby: "US/EU",
-        pro: "US/EU",
-        team: "US/EU",
-        enterprise: "US/EU",
-      },
-      {
-        name: "SAML SSO",
-        hobby: false,
-        pro: false,
-        team: false,
-        enterprise: true,
-      },
-      {
-        name: "Data encryption",
-        hobby: false,
-        pro: false,
-        team: false,
-        enterprise: "Optional",
-      },
-      {
-        name: "RBAC",
-        hobby: false,
-        pro: true,
-        team: true,
-        enterprise: true,
-      },
-      {
-        name: "Omit logs",
-        hobby: false,
-        pro: true,
         team: true,
         enterprise: true,
       },
@@ -392,13 +306,6 @@ const featureGroups: FeatureGroup[] = [
   {
     title: "Compliance",
     features: [
-      {
-        name: "GDPR",
-        hobby: false,
-        pro: true,
-        team: true,
-        enterprise: true,
-      },
       {
         name: "HIPAA",
         hobby: false,
@@ -414,6 +321,13 @@ const featureGroups: FeatureGroup[] = [
         enterprise: true,
       },
       {
+        name: "SAML SSO",
+        hobby: false,
+        pro: false,
+        team: false,
+        enterprise: true,
+      },
+      {
         name: "InfoSec reviews",
         hobby: false,
         pro: false,
@@ -422,13 +336,6 @@ const featureGroups: FeatureGroup[] = [
       },
       {
         name: "Customized MSAs",
-        hobby: false,
-        pro: false,
-        team: false,
-        enterprise: true,
-      },
-      {
-        name: "Custom DPAs",
         hobby: false,
         pro: false,
         team: false,
@@ -531,37 +438,73 @@ export default function PricingComparisonTable() {
                           )}
                         </div>
                         {feature.tooltip === "usage" && showUsageTiers && (
-                          <div className="pl-8 pt-4">
-                            <Table className="w-full">
-                              <TableHeader>
-                                <TableRow className="hover:bg-transparent">
-                                  <TableHead className="text-slate-500 font-medium px-0 py-1">
-                                    Logs per month
-                                  </TableHead>
-                                  <TableHead className="text-slate-500 font-medium px-0 py-1 text-right">
-                                    Rate per log
-                                  </TableHead>
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                {USAGE_PRICING_TIERS.map((tier, i) => (
-                                  <TableRow
-                                    key={i}
-                                    className="hover:bg-transparent"
-                                  >
-                                    <TableCell className="px-0 py-1 text-sm text-slate-500">
-                                      {tier.min.toLocaleString()} -{" "}
-                                      {tier.max === Infinity
-                                        ? "∞"
-                                        : tier.max.toLocaleString()}
-                                    </TableCell>
-                                    <TableCell className="px-0 py-1 text-right text-sm text-slate-500">
-                                      ${tier.rate.toFixed(5)}
-                                    </TableCell>
+                          <div className="pl-8 pt-4 space-y-4">
+                            {/* Storage Pricing */}
+                            <div>
+                              <div className="text-slate-600 text-xs font-semibold mb-2">
+                                Storage Pricing
+                              </div>
+                              <Table className="w-full">
+                                <TableHeader>
+                                  <TableRow className="hover:bg-transparent">
+                                    <TableHead className="text-slate-500 font-medium px-0 py-1">
+                                      Usage
+                                    </TableHead>
+                                    <TableHead className="text-slate-500 font-medium px-0 py-1 text-right">
+                                      Rate
+                                    </TableHead>
                                   </TableRow>
-                                ))}
-                              </TableBody>
-                            </Table>
+                                </TableHeader>
+                                <TableBody>
+                                  {USAGE_PRICING_GB.map((tier, i) => (
+                                    <TableRow
+                                      key={i}
+                                      className="hover:bg-transparent"
+                                    >
+                                      <TableCell className="px-0 py-1 text-sm text-slate-500">
+                                        {tier.label}
+                                      </TableCell>
+                                      <TableCell className="px-0 py-1 text-right text-sm text-slate-500">
+                                        {tier.rate}
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </div>
+                            {/* Request Pricing */}
+                            <div>
+                              <div className="text-slate-600 text-xs font-semibold mb-2">
+                                Request Pricing
+                              </div>
+                              <Table className="w-full">
+                                <TableHeader>
+                                  <TableRow className="hover:bg-transparent">
+                                    <TableHead className="text-slate-500 font-medium px-0 py-1">
+                                      Requests
+                                    </TableHead>
+                                    <TableHead className="text-slate-500 font-medium px-0 py-1 text-right">
+                                      Rate
+                                    </TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {USAGE_PRICING_REQUESTS.map((tier, i) => (
+                                    <TableRow
+                                      key={i}
+                                      className="hover:bg-transparent"
+                                    >
+                                      <TableCell className="px-0 py-1 text-sm text-slate-500">
+                                        {tier.label}
+                                      </TableCell>
+                                      <TableCell className="px-0 py-1 text-right text-sm text-slate-500">
+                                        {tier.rate}
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </div>
                           </div>
                         )}
                       </div>

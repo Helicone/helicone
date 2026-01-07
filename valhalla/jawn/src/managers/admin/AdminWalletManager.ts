@@ -4,8 +4,10 @@ import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 import { ENVIRONMENT } from "../../lib/clients/constant";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
-import { WalletState } from "../../types/wallet";
-import { getTotalCacheTokenAdjustment } from "../../utils/cacheTokenAdjustments";
+import {
+  getTotalCacheTokenAdjustment,
+  PTB_BILLING_FILTER,
+} from "../../utils/cacheTokenAdjustments";
 
 // Timeout constants for wallet API calls
 const WALLET_STATE_FETCH_TIMEOUT = 3000; // 3 seconds for batch wallet state fetching
@@ -337,10 +339,13 @@ export class AdminWalletManager extends BaseManager {
     // Apply pagination AFTER sorting to get the page we need
     const totalOrgs = organizations.length;
     const offset = page * pageSize;
-    const paginatedOrganizations = organizations.slice(offset, offset + pageSize);
+    const paginatedOrganizations = organizations.slice(
+      offset,
+      offset + pageSize
+    );
 
     // NOW fetch wallet states ONLY for the paginated organizations
-    const paginatedOrgIds = paginatedOrganizations.map(org => org.orgId);
+    const paginatedOrgIds = paginatedOrganizations.map((org) => org.orgId);
     const walletStateMap = await this.fetchWalletStates(paginatedOrgIds);
 
     // Add wallet states to paginated organizations
@@ -517,7 +522,7 @@ export class AdminWalletManager extends BaseManager {
         WHERE organization_id IN (${orgIds
           .map((orgId) => `'${orgId}'`)
           .join(",")})
-        and is_passthrough_billing = true
+        AND ${PTB_BILLING_FILTER}
         GROUP BY organization_id
         `,
       orgIds

@@ -152,7 +152,7 @@ export async function runGatewayTest(
         if (escrowInfo !== undefined) {
           if (escrowInfo) {
             expect(targetProps.escrowInfo).toBeDefined();
-            expect(targetProps.escrowInfo).toHaveProperty("escrowId");
+            expect(targetProps.escrowInfo).toHaveProperty("escrow");
           } else {
             expect(targetProps.escrowInfo).toBeUndefined();
           }

@@ -10,6 +10,7 @@ export const getColumns = () => {
     "total_tokens",
     "total_requests",
     "avg_latency",
+    "user_ids",
   ];
   return columns.map((property) => {
     return {
@@ -19,7 +20,13 @@ export const getColumns = () => {
         return value;
       },
       cell: ({ row }: any) => {
-        return row.original.metadata[property];
+        const value = row.original.metadata[property];
+        // Format arrays as comma-separated strings
+        if (Array.isArray(value)) {
+          const filtered = value.filter((v: string) => v && v.trim() !== "");
+          return filtered.length > 0 ? filtered.join(", ") : "-";
+        }
+        return value;
       },
     };
   });

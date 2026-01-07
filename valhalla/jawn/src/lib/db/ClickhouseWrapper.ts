@@ -161,9 +161,11 @@ export class ClickhouseClientWrapper {
         parameters
       );
       console.error(err);
+      // Extract error message properly - Error objects don't stringify well
+      const errorMessage = err instanceof Error ? err.message : String(err);
       return {
         data: null,
-        error: JSON.stringify(err),
+        error: errorMessage,
       };
     }
   }
@@ -305,6 +307,7 @@ export interface RequestResponseRMT {
   prompt_cache_read_tokens: number;
   prompt_audio_tokens: number;
   completion_audio_tokens: number;
+  reasoning_tokens: number;
   model: string;
   ai_gateway_body_mapping: string;
   request_id: string;

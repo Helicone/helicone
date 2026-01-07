@@ -19,13 +19,15 @@ import ThemeProvider from "../components/shared/theme/themeContext";
 import Script from "next/script";
 import { PostHogProvider } from "posthog-js/react";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Inter } from "next/font/google";
 import { env } from "next-runtime-env";
 import { FilterProvider } from "@/filterAST/context/filterContext";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { captureAttributionParams } from "@helicone-package/common";
 
-const inter = Inter({ subsets: ["latin"] });
+// Use system font stack for faster builds - Inter is loaded via CSS
+const inter = {
+  className: "font-sans",
+};
 
 declare global {
   interface Window {

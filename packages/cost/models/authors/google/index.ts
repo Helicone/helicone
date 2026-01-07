@@ -11,6 +11,10 @@ import { model as gemini25FlashLiteModel } from "./gemini-2.5-flash-lite/model";
 import { endpoints as gemini25FlashLiteEndpoints } from "./gemini-2.5-flash-lite/endpoints";
 import { model as gemini3ProPreviewModel } from "./gemini-3/model";
 import { endpoints as gemini3ProPreviewEndpoints } from "./gemini-3/endpoints";
+import { model as gemini3FlashPreviewModel } from "./gemini-3-flash-preview/model";
+import { endpoints as gemini3FlashPreviewEndpoints } from "./gemini-3-flash-preview/endpoints";
+import { model as gemini3ProImagePreviewModel } from "./gemini-3-pro-image/model";
+import { endpoints as gemini3ProImagePreviewEndpoints } from "./gemini-3-pro-image/endpoints";
 import { model as gemma29bModel } from "./gemma/model";
 import { endpoints as gemma29bEndpoints } from "./gemma/endpoints";
 import { model as gemma3Model } from "./gemma-3/model";
@@ -22,6 +26,8 @@ export const googleModels = {
   ...gemini25FlashModel,
   ...gemini25FlashLiteModel,
   ...gemini3ProPreviewModel,
+  ...gemini3FlashPreviewModel,
+  ...gemini3ProImagePreviewModel,
   ...gemma29bModel,
   ...gemma3Model,
 } satisfies Record<string, ModelConfig>;
@@ -31,6 +37,8 @@ export const googleEndpointConfig = {
   ...gemini25FlashEndpoints,
   ...gemini25FlashLiteEndpoints,
   ...gemini3ProPreviewEndpoints,
+  ...gemini3FlashPreviewEndpoints,
+  ...gemini3ProImagePreviewEndpoints,
   ...gemma29bEndpoints,
   ...gemma3Endpoints,
 } satisfies Record<string, ModelProviderConfig>;

@@ -244,6 +244,7 @@ type HeliconeMetadata = {
   totalTokens: number | null;
   promptTokens: number | null;
   completionTokens: number | null;
+  reasoningTokens: number | null;
   promptCacheWriteTokens: number | null;
   promptCacheReadTokens: number | null;
   latency: number | null;
@@ -366,6 +367,7 @@ export interface HeliconeRequest {
   prompt_cache_write_tokens: number | null;
   prompt_cache_read_tokens: number | null;
   completion_tokens: number | null;
+  reasoning_tokens: number | null;
   prompt_audio_tokens: number | null;
   completion_audio_tokens: number | null;
   cost: number | null;

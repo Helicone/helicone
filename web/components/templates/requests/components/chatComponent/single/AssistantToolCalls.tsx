@@ -1,18 +1,16 @@
 import AssistantToolCall from "./AssistantToolCall";
 
 import MarkdownEditor from "@/components/shared/markdownEditor";
-import { markdownComponents } from "@/components/shared/prompts/ResponsePanel";
 import { cn } from "@/lib/utils";
 import {
   FunctionCall,
   MappedLLMRequest,
 } from "@helicone-package/llm-mapper/types";
-import dynamic from "next/dynamic";
+import { Streamdown } from "streamdown";
+import type { BundledTheme } from "shiki";
+import { preserveLineBreaksForMarkdown } from "@/lib/textHelpers";
 
-const ReactMarkdown = dynamic(() => import("react-markdown"), {
-  ssr: false,
-  loading: () => <div className="h-4 w-full animate-pulse rounded bg-muted" />,
-});
+const shikiTheme: [BundledTheme, BundledTheme] = ["vitesse-light", "vitesse-dark"];
 
 interface AssistantToolCallsProps {
   content?: string;
@@ -67,12 +65,11 @@ export default function AssistantToolCalls({
         />
       ) : (
         content && (
-          <ReactMarkdown
-            components={markdownComponents}
-            className="w-full whitespace-pre-wrap break-words p-2 text-xs"
-          >
-            {content}
-          </ReactMarkdown>
+          <div className="w-full whitespace-pre-wrap break-words p-2 text-xs">
+            <Streamdown shikiTheme={shikiTheme}>
+              {preserveLineBreaksForMarkdown(content)}
+            </Streamdown>
+          </div>
         )
       )}
       {toolCalls.map((tool, index) => (
@@ -84,6 +81,7 @@ export default function AssistantToolCalls({
           mappedRequest={mappedRequest!}
           messageIndex={messageIndex}
           onChatChange={onChatChange}
+          tools={mappedRequest?.schema.request?.tools}
         />
       ))}
     </div>

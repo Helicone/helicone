@@ -774,7 +774,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "context": 200000,
       "crossRegion": false,
       "maxTokens": 64000,
-      "modelId": "claude-opus-4-5",
+      "modelId": "claude-opus-4-5-20251101",
       "parameters": [
         "include_reasoning",
         "max_tokens",
@@ -810,6 +810,26 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "ptbEnabled": true,
       "regions": [
         "us-east-1",
+      ],
+    },
+    "claude-4.5-opus:helicone": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 64000,
+      "modelId": "pa/claude-opus-4-5-20251101",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
       ],
     },
     "claude-4.5-opus:openrouter": {
@@ -1762,6 +1782,54 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "deepseek-v3.2:baseten": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "deepseek-ai/DeepSeek-V3.2",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "baseten",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "deepseek-v3.2:canopywave": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "deepseek/deepseek-chat-v3.2",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "canopywave",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "deepseek-v3.2:novita": {
       "context": 128000,
       "crossRegion": false,
@@ -2255,6 +2323,136 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "google/gemini-3-flash-preview": {
+    "gemini-3-flash-preview:google-ai-studio": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "gemini-3-flash-preview",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "google-ai-studio",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-3-flash-preview:openrouter": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "google/gemini-3-flash-preview",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-3-flash-preview:vertex": {
+      "context": 1048576,
+      "crossRegion": true,
+      "maxTokens": 65536,
+      "modelId": "gemini-3-flash-preview",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "vertex",
+      "ptbEnabled": true,
+      "regions": [
+        "global",
+      ],
+    },
+  },
+  "google/gemini-3-pro-image": {
+    "gemini-3-pro-image-preview:google-ai-studio": {
+      "context": 65536,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "gemini-3-pro-image-preview",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "google-ai-studio",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-3-pro-image-preview:openrouter": {
+      "context": 65536,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "google/gemini-3-pro-image-preview",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-3-pro-image-preview:vertex": {
+      "context": 65536,
+      "crossRegion": true,
+      "maxTokens": 32768,
+      "modelId": "gemini-3-pro-image-preview",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "vertex",
+      "ptbEnabled": true,
+      "regions": [
+        "global",
+      ],
+    },
+  },
   "google/gemma": {
     "gemma2-9b-it:chutes": {
       "context": 8192,
@@ -2508,6 +2706,28 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "llama-3.3-70b-instruct:nebius": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "meta-llama/Llama-3.3-70B-Instruct",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "repetition_penalty",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "nebius",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -3262,75 +3482,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "openai/gpt-4.1": {
-    "gpt-4.1-mini-2025-04-14:azure": {
-      "context": 1047576,
-      "crossRegion": false,
-      "maxTokens": 32768,
-      "modelId": "gpt-4.1-mini-2025-04-14",
-      "parameters": [
-        "frequency_penalty",
-        "max_tokens",
-        "presence_penalty",
-        "response_format",
-        "seed",
-        "stop",
-        "temperature",
-        "tool_choice",
-        "tools",
-        "top_p",
-      ],
-      "provider": "azure",
-      "ptbEnabled": true,
-      "regions": [
-        "*",
-      ],
-    },
-    "gpt-4.1-mini-2025-04-14:openai": {
-      "context": 1047576,
-      "crossRegion": false,
-      "maxTokens": 32768,
-      "modelId": "gpt-4.1-mini-2025-04-14",
-      "parameters": [
-        "frequency_penalty",
-        "max_tokens",
-        "presence_penalty",
-        "response_format",
-        "seed",
-        "stop",
-        "temperature",
-        "tool_choice",
-        "tools",
-        "top_p",
-      ],
-      "provider": "openai",
-      "ptbEnabled": true,
-      "regions": [
-        "*",
-      ],
-    },
-    "gpt-4.1-mini-2025-04-14:openrouter": {
-      "context": 1047576,
-      "crossRegion": false,
-      "maxTokens": 32768,
-      "modelId": "openai/gpt-4.1-mini-2025-04-14",
-      "parameters": [
-        "frequency_penalty",
-        "max_tokens",
-        "presence_penalty",
-        "response_format",
-        "seed",
-        "stop",
-        "temperature",
-        "tool_choice",
-        "tools",
-        "top_p",
-      ],
-      "provider": "openrouter",
-      "ptbEnabled": true,
-      "regions": [
-        "*",
-      ],
-    },
     "gpt-4.1-mini:azure": {
       "context": 1047576,
       "crossRegion": false,
@@ -3819,6 +3970,96 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "openai/gpt-5": {
+    "gpt-5-2025-08-07:azure": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "azure",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-2025-08-07:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-2025-08-07:novita": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-2025-08-07:openai": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-2025-08-07:openrouter": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "openai/gpt-5-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-5-chat-latest:helicone": {
       "context": 128000,
       "crossRegion": false,
@@ -3926,6 +4167,96 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "gpt-5-mini-2025-08-07:azure": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5-mini-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "azure",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-mini-2025-08-07:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5-mini-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-mini-2025-08-07:novita": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5-mini-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-mini-2025-08-07:openai": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5-mini-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-mini-2025-08-07:openrouter": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "openai/gpt-5-mini-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-5-mini:azure": {
       "context": 400000,
       "crossRegion": false,
@@ -3999,6 +4330,96 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "gpt-5-nano-2025-08-07:azure": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5-nano-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "azure",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-nano-2025-08-07:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5-nano-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-nano-2025-08-07:novita": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5-nano-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-nano-2025-08-07:openai": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5-nano-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-nano-2025-08-07:openrouter": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "openai/gpt-5-nano-2025-08-07",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-5-nano:helicone": {
       "context": 128000,
       "crossRegion": false,
@@ -4050,6 +4471,112 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "gpt-5-pro-2025-10-01:azure": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "gpt-5-pro-2025-10-01",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "azure",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-pro-2025-10-01:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5-pro-2025-10-01",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-pro-2025-10-01:novita": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5-pro-2025-10-01",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-pro-2025-10-01:openai": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "gpt-5-pro-2025-10-01",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-pro-2025-10-01:openrouter": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "openai/gpt-5-pro-2025-10-01",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-pro:azure": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "gpt-5-pro",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "azure",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-5-pro:helicone": {
       "context": 128000,
       "crossRegion": false,
@@ -4060,6 +4587,44 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "stop",
       ],
       "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-pro:openai": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "gpt-5-pro",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5-pro:openrouter": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "openai/gpt-5-pro",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openrouter",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -4163,6 +4728,95 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "crossRegion": false,
       "maxTokens": 100000,
       "modelId": "openai/codex-mini-latest",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.1-2025-11-13:azure": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5.1-2025-11-13",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "azure",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.1-2025-11-13:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5.1-2025-11-13",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.1-2025-11-13:novita": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5.1-2025-11-13",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.1-2025-11-13:openai": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5.1-2025-11-13",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.1-2025-11-13:openrouter": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "openai/gpt-5.1-2025-11-13",
       "parameters": [
         "max_completion_tokens",
         "response_format",
@@ -4324,6 +4978,155 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "stop",
         "tool_choice",
         "tools",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
+  "openai/gpt-5.2": {
+    "gpt-5.2-chat-latest:openai": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "gpt-5.2-chat-latest",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.2-chat-latest:openrouter": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "openai/gpt-5.2-chat-latest",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_completion_tokens",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+        "verbosity",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.2-pro:openai": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5.2-pro",
+      "parameters": [
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "tool_choice",
+        "tools",
+        "verbosity",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.2-pro:openrouter": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "openai/gpt-5.2-pro",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_completion_tokens",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+        "verbosity",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.2:openai": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5.2",
+      "parameters": [
+        "logprobs",
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+        "verbosity",
+      ],
+      "provider": "openai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.2:openrouter": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "openai/gpt-5.2",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_completion_tokens",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+        "verbosity",
       ],
       "provider": "openrouter",
       "ptbEnabled": true,
@@ -5538,6 +6341,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   "anthropic/claude-4.5-opus": [
     "anthropic",
     "bedrock",
+    "helicone",
     "openrouter",
     "vertex",
   ],
@@ -5600,6 +6404,8 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
   ],
   "deepseek/deepseek-v3": [
+    "baseten",
+    "canopywave",
     "deepinfra",
     "deepinfra",
     "deepseek",
@@ -5633,6 +6439,16 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "vertex",
   ],
+  "google/gemini-3-flash-preview": [
+    "google-ai-studio",
+    "openrouter",
+    "vertex",
+  ],
+  "google/gemini-3-pro-image": [
+    "google-ai-studio",
+    "openrouter",
+    "vertex",
+  ],
   "google/gemma": [
     "chutes",
     "openrouter",
@@ -5655,6 +6471,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "groq",
     "groq",
     "groq",
+    "nebius",
     "nebius",
     "novita",
     "novita",
@@ -5693,15 +6510,12 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "azure",
     "azure",
     "azure",
-    "azure",
     "helicone",
     "helicone",
     "helicone",
     "openai",
     "openai",
     "openai",
-    "openai",
-    "openrouter",
     "openrouter",
     "openrouter",
     "openrouter",
@@ -5721,17 +6535,40 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   "openai/gpt-5": [
     "azure",
     "azure",
+    "azure",
+    "azure",
+    "azure",
+    "azure",
+    "azure",
     "helicone",
     "helicone",
     "helicone",
     "helicone",
     "helicone",
     "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
+    "helicone",
+    "novita",
+    "novita",
+    "novita",
+    "novita",
     "openai",
     "openai",
     "openai",
     "openai",
     "openai",
+    "openai",
+    "openai",
+    "openai",
+    "openai",
+    "openai",
+    "openrouter",
+    "openrouter",
+    "openrouter",
+    "openrouter",
+    "openrouter",
     "openrouter",
     "openrouter",
     "openrouter",
@@ -5739,6 +6576,10 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
   ],
   "openai/gpt-5.1": [
+    "azure",
+    "helicone",
+    "novita",
+    "openai",
     "openai",
     "openai",
     "openai",
@@ -5746,6 +6587,15 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openai",
     "openrouter",
     "openrouter",
+    "openrouter",
+    "openrouter",
+    "openrouter",
+    "openrouter",
+  ],
+  "openai/gpt-5.2": [
+    "openai",
+    "openai",
+    "openai",
     "openrouter",
     "openrouter",
     "openrouter",
@@ -5846,12 +6696,9 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "groq": [
       {
-        "audio": 0,
         "input": 2.9e-7,
         "output": 5.9e-7,
-        "request": 0,
         "threshold": 0,
-        "web_search": 0,
       },
     ],
     "nebius": [
@@ -6162,6 +7009,19 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       {
         "cacheMultipliers": {
           "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000005,
+        "output": 0.000025,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
           "write5m": 1.25,
         },
         "input": 0.000005,
@@ -6711,6 +7571,20 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "deepseek/deepseek-v3": {
+    "baseten": [
+      {
+        "input": 3e-7,
+        "output": 4.5e-7,
+        "threshold": 0,
+      },
+    ],
+    "canopywave": [
+      {
+        "input": 2.6e-7,
+        "output": 4e-7,
+        "threshold": 0,
+      },
+    ],
     "deepinfra": [
       {
         "cacheMultipliers": {
@@ -6763,12 +7637,9 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "groq": [
       {
-        "audio": 0,
         "input": 7.5e-7,
         "output": 9.9e-7,
-        "request": 0,
         "threshold": 0,
-        "web_search": 0,
       },
     ],
     "openrouter": [
@@ -6782,7 +7653,10 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "google/gemini-2.5-flash": {
     "google-ai-studio": [
       {
-        "audio": 0.000001,
+        "audio": {
+          "cachedInputMultiplier": 0.1,
+          "input": 0.000001,
+        },
         "cacheMultipliers": {
           "cachedInput": 0.25,
           "write5m": 1,
@@ -6802,7 +7676,10 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "vertex": [
       {
-        "audio": 0.000001,
+        "audio": {
+          "cachedInputMultiplier": 0.1,
+          "input": 0.000001,
+        },
         "cacheMultipliers": {
           "cachedInput": 0.25,
           "write5m": 1,
@@ -6817,7 +7694,10 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "google/gemini-2.5-flash-lite": {
     "google-ai-studio": [
       {
-        "audio": 3e-7,
+        "audio": {
+          "cachedInputMultiplier": 0.0833333,
+          "input": 3e-7,
+        },
         "cacheMultipliers": {
           "cachedInput": 0.25,
           "write5m": 1,
@@ -6837,7 +7717,10 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "vertex": [
       {
-        "audio": 3e-7,
+        "audio": {
+          "cachedInputMultiplier": 0.0833333,
+          "input": 3e-7,
+        },
         "cacheMultipliers": {
           "cachedInput": 0.25,
           "write5m": 1,
@@ -6938,6 +7821,81 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "google/gemini-3-flash-preview": {
+    "google-ai-studio": [
+      {
+        "audio": {
+          "cachedInputMultiplier": 0.1,
+          "input": 0.000001,
+        },
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+        },
+        "input": 5e-7,
+        "output": 0.000003,
+        "threshold": 0,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 5.275e-7,
+        "output": 0.000003165,
+        "threshold": 0,
+      },
+    ],
+    "vertex": [
+      {
+        "audio": {
+          "cachedInputMultiplier": 0.1,
+          "input": 0.000001,
+        },
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+        },
+        "input": 5e-7,
+        "output": 0.000003,
+        "threshold": 0,
+      },
+    ],
+  },
+  "google/gemini-3-pro-image": {
+    "google-ai-studio": [
+      {
+        "input": 0.000002,
+        "output": 0.000012,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000004,
+        "output": 0.000018,
+        "threshold": 200000,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.00000211,
+        "output": 0.00001266,
+        "threshold": 0,
+      },
+      {
+        "input": 0.00000422,
+        "output": 0.00001899,
+        "threshold": 200000,
+      },
+    ],
+    "vertex": [
+      {
+        "input": 0.000002,
+        "output": 0.000012,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000004,
+        "output": 0.000018,
+        "threshold": 200000,
+      },
+    ],
+  },
   "google/gemma": {
     "chutes": [
       {
@@ -6982,12 +7940,9 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "groq": [
       {
-        "audio": 0,
         "input": 1e-8,
         "output": 1e-8,
-        "request": 0,
         "threshold": 0,
-        "web_search": 0,
       },
     ],
     "nebius": [
@@ -7070,15 +8025,12 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "groq": [
       {
-        "audio": 0,
         "cacheMultipliers": {
           "cachedInput": 0.5,
         },
         "input": 0.000001,
         "output": 0.000003,
-        "request": 0,
         "threshold": 0,
-        "web_search": 0,
       },
     ],
     "novita": [
@@ -7100,7 +8052,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "azure": [
       {
         "cacheMultipliers": {
-          "cachedInput": 0.3,
+          "cachedInput": 0.25,
         },
         "input": 1e-7,
         "output": 4e-7,
@@ -7185,6 +8137,48 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "openai/gpt-5": {
     "azure": [
       {
+        "input": 0.000015,
+        "output": 0.00012,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "helicone": [
+      {
+        "input": 0.000015,
+        "output": 0.00012,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "novita": [
+      {
+        "input": 0.000015,
+        "output": 0.00012,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "openai": [
+      {
+        "input": 0.000015,
+        "output": 0.00012,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.00001583,
+        "output": 0.0001266,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+  },
+  "openai/gpt-5.1": {
+    "azure": [
+      {
         "cacheMultipliers": {
           "cachedInput": 0.104,
         },
@@ -7195,6 +8189,17 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
     "helicone": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+        },
+        "input": 0.00000125,
+        "output": 0.00001,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+    "novita": [
       {
         "cacheMultipliers": {
           "cachedInput": 0.1,
@@ -7225,22 +8230,22 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
-  "openai/gpt-5.1": {
+  "openai/gpt-5.2": {
     "openai": [
       {
         "cacheMultipliers": {
-          "cachedInput": 0.25,
+          "cachedInput": 0.1,
         },
-        "input": 0.0000015,
-        "output": 0.000006,
+        "input": 0.00000175,
+        "output": 0.000014,
         "threshold": 0,
         "web_search": 0.01,
       },
     ],
     "openrouter": [
       {
-        "input": 0.00000158,
-        "output": 0.00000633,
+        "input": 0.00000185,
+        "output": 0.00001477,
         "threshold": 0,
         "web_search": 0.01,
       },
@@ -7359,20 +8364,16 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "deepinfra": [
       {
-        "audio": 0,
         "input": 4e-8,
         "output": 1.6e-7,
-        "request": 0,
         "threshold": 0,
         "web_search": 0.01,
       },
     ],
     "groq": [
       {
-        "audio": 0,
         "input": 1e-7,
         "output": 5e-7,
-        "request": 0,
         "threshold": 0,
         "web_search": 0.01,
       },
@@ -7397,7 +8398,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "perplexity/sonar": {
     "perplexity": [
       {
-        "audio": 0,
         "input": 0.000002,
         "output": 0.000008,
         "request": 0,
@@ -7409,7 +8409,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "xai/endpoints.ts": {
     "helicone": [
       {
-        "audio": 0,
         "cacheMultipliers": {
           "cachedInput": 0.25,
         },
@@ -7429,7 +8428,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "xai": [
       {
-        "audio": 0,
         "cacheMultipliers": {
           "cachedInput": 0.25,
         },
@@ -7523,6 +8521,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "providers": [
         "anthropic",
         "bedrock",
+        "helicone",
         "openrouter",
         "vertex",
       ],
@@ -7645,6 +8644,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "deepseek-v3.2",
       "providers": [
+        "baseten",
+        "canopywave",
         "novita",
       ],
     },
@@ -7672,6 +8673,22 @@ exports[`Registry Snapshots verify registry state 1`] = `
     },
     {
       "model": "gemini-2.5-pro",
+      "providers": [
+        "google-ai-studio",
+        "openrouter",
+        "vertex",
+      ],
+    },
+    {
+      "model": "gemini-3-flash-preview",
+      "providers": [
+        "google-ai-studio",
+        "openrouter",
+        "vertex",
+      ],
+    },
+    {
+      "model": "gemini-3-pro-image-preview",
       "providers": [
         "google-ai-studio",
         "openrouter",
@@ -7725,14 +8742,6 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
-      "model": "gpt-4.1-mini-2025-04-14",
-      "providers": [
-        "azure",
-        "openai",
-        "openrouter",
-      ],
-    },
-    {
       "model": "gpt-4.1-nano",
       "providers": [
         "azure",
@@ -7769,6 +8778,16 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "gpt-5-2025-08-07",
+      "providers": [
+        "azure",
+        "helicone",
+        "novita",
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
       "model": "gpt-5-chat-latest",
       "providers": [
         "helicone",
@@ -7794,6 +8813,16 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "gpt-5-mini-2025-08-07",
+      "providers": [
+        "azure",
+        "helicone",
+        "novita",
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
       "model": "gpt-5-nano",
       "providers": [
         "helicone",
@@ -7802,14 +8831,47 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "gpt-5-nano-2025-08-07",
+      "providers": [
+        "azure",
+        "helicone",
+        "novita",
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
       "model": "gpt-5-pro",
       "providers": [
+        "azure",
         "helicone",
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
+      "model": "gpt-5-pro-2025-10-01",
+      "providers": [
+        "azure",
+        "helicone",
+        "novita",
+        "openai",
+        "openrouter",
       ],
     },
     {
       "model": "gpt-5.1",
       "providers": [
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
+      "model": "gpt-5.1-2025-11-13",
+      "providers": [
+        "azure",
+        "helicone",
+        "novita",
         "openai",
         "openrouter",
       ],
@@ -7830,6 +8892,27 @@ exports[`Registry Snapshots verify registry state 1`] = `
     },
     {
       "model": "gpt-5.1-codex-mini",
+      "providers": [
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
+      "model": "gpt-5.2",
+      "providers": [
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
+      "model": "gpt-5.2-chat-latest",
+      "providers": [
+        "openai",
+        "openrouter",
+      ],
+    },
+    {
+      "model": "gpt-5.2-pro",
       "providers": [
         "openai",
         "openrouter",
@@ -7970,6 +9053,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "llama-3.3-70b-instruct",
       "providers": [
+        "nebius",
         "novita",
         "openrouter",
       ],
@@ -8169,11 +9253,11 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "anthropic",
     },
     {
-      "modelCount": 10,
+      "modelCount": 15,
       "provider": "azure",
     },
     {
-      "modelCount": 2,
+      "modelCount": 3,
       "provider": "baseten",
     },
     {
@@ -8181,7 +9265,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "bedrock",
     },
     {
-      "modelCount": 3,
+      "modelCount": 4,
       "provider": "canopywave",
     },
     {
@@ -8205,7 +9289,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "fireworks",
     },
     {
-      "modelCount": 4,
+      "modelCount": 6,
       "provider": "google-ai-studio",
     },
     {
@@ -8213,7 +9297,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "groq",
     },
     {
-      "modelCount": 37,
+      "modelCount": 43,
       "provider": "helicone",
     },
     {
@@ -8221,19 +9305,19 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "mistral",
     },
     {
-      "modelCount": 3,
+      "modelCount": 4,
       "provider": "nebius",
     },
     {
-      "modelCount": 15,
+      "modelCount": 20,
       "provider": "novita",
     },
     {
-      "modelCount": 21,
+      "modelCount": 29,
       "provider": "openai",
     },
     {
-      "modelCount": 55,
+      "modelCount": 65,
       "provider": "openrouter",
     },
     {
@@ -8241,7 +9325,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "perplexity",
     },
     {
-      "modelCount": 16,
+      "modelCount": 18,
       "provider": "vertex",
     },
     {
@@ -8275,26 +9359,35 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "gemini-2.5-flash",
     "gemini-2.5-flash-lite",
     "gemini-2.5-pro",
+    "gemini-3-flash-preview",
+    "gemini-3-pro-image-preview",
     "gemini-3-pro-preview",
     "gemma-3-12b-it",
     "gemma2-9b-it",
     "glm-4.6",
     "gpt-4.1",
     "gpt-4.1-mini",
-    "gpt-4.1-mini-2025-04-14",
     "gpt-4.1-nano",
     "gpt-4o",
     "gpt-4o-mini",
     "gpt-5",
+    "gpt-5-2025-08-07",
     "gpt-5-chat-latest",
     "gpt-5-codex",
     "gpt-5-mini",
+    "gpt-5-mini-2025-08-07",
     "gpt-5-nano",
+    "gpt-5-nano-2025-08-07",
     "gpt-5-pro",
+    "gpt-5-pro-2025-10-01",
     "gpt-5.1",
+    "gpt-5.1-2025-11-13",
     "gpt-5.1-chat-latest",
     "gpt-5.1-codex",
     "gpt-5.1-codex-mini",
+    "gpt-5.2",
+    "gpt-5.2-chat-latest",
+    "gpt-5.2-pro",
     "gpt-oss-120b",
     "gpt-oss-20b",
     "grok-3",
@@ -8351,9 +9444,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 243,
-  "totalModelProviderConfigs": 243,
-  "totalModelsWithPtb": 91,
+  "totalEndpoints": 285,
+  "totalModelProviderConfigs": 285,
+  "totalModelsWithPtb": 100,
   "totalProviders": 21,
 }
 `;

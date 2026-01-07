@@ -33,6 +33,7 @@ export interface SessionResult {
   completion_tokens: number;
   total_tokens: number;
   avg_latency: number;
+  user_ids: string[];
 }
 
 export interface SessionsAggregateMetrics {
@@ -355,7 +356,7 @@ export class SessionManager {
 
     // Step 1 get all the properties given this filter
     const query = `
-    SELECT 
+    SELECT
       min(request_response_rmt.request_created_at) + INTERVAL ${timezoneDifference} MINUTE AS created_at,
       max(request_response_rmt.request_created_at) + INTERVAL ${timezoneDifference} MINUTE AS latest_request_created_at,
       properties['Helicone-Session-Id'] as session_id,
@@ -365,7 +366,8 @@ export class SessionManager {
       count(*) AS total_requests,
       sum(request_response_rmt.prompt_tokens) AS prompt_tokens,
       sum(request_response_rmt.completion_tokens) AS completion_tokens,
-      sum(request_response_rmt.prompt_tokens) + sum(request_response_rmt.completion_tokens) AS total_tokens
+      sum(request_response_rmt.prompt_tokens) + sum(request_response_rmt.completion_tokens) AS total_tokens,
+      groupUniqArray(request_response_rmt.user_id) AS user_ids
     FROM request_response_rmt
     WHERE (
         has(properties, 'Helicone-Session-Id')

@@ -9,49 +9,6 @@ interface JsonObject { [key: string]: JsonValue; }
 
 
 export interface paths {
-  "/v1/webhooks": {
-    get: operations["GetWebhooks"];
-    post: operations["NewWebhook"];
-  };
-  "/v1/webhooks/{webhookId}": {
-    delete: operations["DeleteWebhook"];
-  };
-  "/v1/webhooks/{webhookId}/test": {
-    post: operations["TestWebhook"];
-  };
-  "/v1/public/waitlist/feature": {
-    post: operations["AddToWaitlist"];
-  };
-  "/v1/public/waitlist/feature/status": {
-    get: operations["IsOnWaitlist"];
-  };
-  "/v1/public/waitlist/feature/count": {
-    get: operations["GetWaitlistCount"];
-  };
-  "/v1/public/waitlist/feature/share": {
-    post: operations["TrackShare"];
-  };
-  "/v1/vault/add": {
-    post: operations["AddKey"];
-  };
-  "/v1/vault/keys": {
-    get: operations["GetKeys"];
-  };
-  "/v1/vault/key/{providerKeyId}": {
-    get: operations["GetKeyById"];
-  };
-  "/v1/vault/update/{id}": {
-    patch: operations["UpdateKey"];
-  };
-  "/v1/user/metrics-overview/query": {
-    post: operations["GetUserMetricsOverview"];
-  };
-  "/v1/user/metrics/query": {
-    post: operations["GetUserMetrics"];
-  };
-  "/v1/user/query": {
-    post: operations["GetUsers"];
-  };
   "/v1/api-keys/provider-key/{providerKeyId}": {
     get: operations["GetProviderKey"];
     delete: operations["DeleteProviderKey"];
@@ -160,33 +117,6 @@ export interface paths {
   };
   "/v1/prompt-2025/query/total-versions": {
     post: operations["GetPrompt2025TotalVersions"];
-  };
-  "/v1/request/count/query": {
-    post: operations["GetRequestCount"];
-  };
-  "/v1/request/query": {
-    post: operations["GetRequests"];
-  };
-  "/v1/request/query-clickhouse": {
-    post: operations["GetRequestsClickhouse"];
-  };
-  "/v1/request/{requestId}": {
-    get: operations["GetRequestById"];
-  };
-  "/v1/request/query-ids": {
-    post: operations["GetRequestsByIds"];
-  };
-  "/v1/request/{requestId}/feedback": {
-    post: operations["FeedbackRequest"];
-  };
-  "/v1/request/{requestId}/property": {
-    put: operations["PutProperty"];
-  };
-  "/v1/request/{requestId}/assets/{assetId}": {
-    post: operations["GetRequestAssetById"];
-  };
-  "/v1/request/{requestId}/score": {
-    post: operations["AddScores"];
   };
   "/v1/prompt/has-prompts": {
     get: operations["HasPrompts"];
@@ -374,6 +304,9 @@ export interface paths {
   "/v1/stripe/payment-methods/{paymentMethodId}": {
     delete: operations["RemovePaymentMethod"];
   };
+  "/v1/stripe/subscription/usage-stats": {
+    get: operations["GetUsageStats"];
+  };
   "/v1/integration": {
     get: operations["GetIntegrations"];
     post: operations["CreateIntegration"];
@@ -394,6 +327,82 @@ export interface paths {
   "/v1/integration/{integrationId}/stripe/test-meter-event": {
     post: operations["TestStripeMeterEvent"];
   };
+  "/v1/request/count/query": {
+    post: operations["GetRequestCount"];
+  };
+  "/v1/request/query": {
+    post: operations["GetRequests"];
+  };
+  "/v1/request/query-clickhouse": {
+    post: operations["GetRequestsClickhouse"];
+  };
+  "/v1/request/{requestId}": {
+    get: operations["GetRequestById"];
+  };
+  "/v1/request/query-ids": {
+    post: operations["GetRequestsByIds"];
+  };
+  "/v1/request/{requestId}/feedback": {
+    post: operations["FeedbackRequest"];
+  };
+  "/v1/request/{requestId}/property": {
+    put: operations["PutProperty"];
+  };
+  "/v1/request/{requestId}/assets/{assetId}": {
+    post: operations["GetRequestAssetById"];
+  };
+  "/v1/request/{requestId}/score": {
+    post: operations["AddScores"];
+  };
+  "/v1/wrapped/2025": {
+    get: operations["GetWrapped2025Stats"];
+  };
+  "/v1/wrapped/2025/check": {
+    get: operations["CheckHasWrapped2025Data"];
+  };
+  "/v1/webhooks": {
+    get: operations["GetWebhooks"];
+    post: operations["NewWebhook"];
+  };
+  "/v1/webhooks/{webhookId}": {
+    delete: operations["DeleteWebhook"];
+  };
+  "/v1/webhooks/{webhookId}/test": {
+    post: operations["TestWebhook"];
+  };
+  "/v1/public/waitlist/feature": {
+    post: operations["AddToWaitlist"];
+  };
+  "/v1/public/waitlist/feature/status": {
+    get: operations["IsOnWaitlist"];
+  };
+  "/v1/public/waitlist/feature/count": {
+    get: operations["GetWaitlistCount"];
+  };
+  "/v1/public/waitlist/feature/share": {
+    post: operations["TrackShare"];
+  };
+  "/v1/vault/add": {
+    post: operations["AddKey"];
+  };
+  "/v1/vault/keys": {
+    get: operations["GetKeys"];
+  };
+  "/v1/vault/key/{providerKeyId}": {
+    get: operations["GetKeyById"];
+  };
+  "/v1/vault/update/{id}": {
+    patch: operations["UpdateKey"];
+  };
+  "/v1/user/metrics-overview/query": {
+    post: operations["GetUserMetricsOverview"];
+  };
+  "/v1/user/metrics/query": {
+    post: operations["GetUserMetrics"];
+  };
+  "/v1/user/query": {
+    post: operations["GetUsers"];
+  };
   "/v1/trace/custom/v1/log": {
     post: operations["LogCustomTraceLegacy"];
   };
@@ -411,6 +420,48 @@ export interface paths {
   };
   "/v1/test/gateway-request": {
     post: operations["SendTestRequest"];
+  };
+  "/v1/public/stats/model-usage": {
+    /**
+     * @description Get model usage statistics for the AI Gateway.
+     * Returns time series data and a leaderboard of top models by total tokens.
+     */
+    get: operations["GetModelUsage"];
+  };
+  "/v1/public/stats/market-share": {
+    /**
+     * @description Get market share statistics by model author for the AI Gateway.
+     * Returns time series data (100% stacked) and a leaderboard of top 9 authors + others.
+     */
+    get: operations["GetMarketShare"];
+  };
+  "/v1/public/stats/provider-usage": {
+    /**
+     * @description Get provider usage statistics for the AI Gateway.
+     * Returns time series data and a leaderboard of top 9 providers + others.
+     */
+    get: operations["GetProviderUsage"];
+  };
+  "/v1/public/stats/authors/{author}": {
+    /**
+     * @description Get statistics for a specific model author.
+     * Returns time series data and a leaderboard of top models by that author.
+     */
+    get: operations["GetAuthorStats"];
+  };
+  "/v1/public/stats/providers/{provider}": {
+    /**
+     * @description Get statistics for a specific inference provider.
+     * Returns time series data and a leaderboard of top models on that provider.
+     */
+    get: operations["GetProviderStats"];
+  };
+  "/v1/public/stats/models/{model}": {
+    /**
+     * @description Get usage statistics for a specific model.
+     * Returns time series data showing token usage over time.
+     */
+    get: operations["GetModelStats"];
   };
   "/v1/session/query": {
     post: operations["GetSessions"];
@@ -736,357 +787,6 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
-    ResultSuccess_unknown_: {
-      data: unknown;
-      /** @enum {number|null} */
-      error: null;
-    };
-    ResultError_unknown_: {
-      /** @enum {number|null} */
-      data: null;
-      error: unknown;
-    };
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.any_": {
-      [key: string]: unknown;
-    };
-    WebhookData: {
-      destination: string;
-      config: components["schemas"]["Record_string.any_"];
-      includeData?: boolean;
-    };
-    "ResultSuccess__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array_": {
-      data: {
-          hmac_key: string;
-          config: string;
-          version: string;
-          destination: string;
-          created_at: string;
-          id: string;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    ResultError_string_: {
-      /** @enum {number|null} */
-      data: null;
-      error: string;
-    };
-    "Result__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array.string_": components["schemas"]["ResultSuccess__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_null_: {
-      /** @enum {number|null} */
-      data: null;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__success-boolean--message-string__": {
-      data: {
-        message: string;
-        success: boolean;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__success-boolean--message-string_.string_": components["schemas"]["ResultSuccess__success-boolean--message-string__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array__": {
-      data: {
-        sharedPlatforms?: string[];
-        alreadyOnList?: boolean;
-        /** Format: double */
-        position?: number;
-        success: boolean;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array_.string_": components["schemas"]["ResultSuccess__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__isOnWaitlist-boolean__": {
-      data: {
-        isOnWaitlist: boolean;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__isOnWaitlist-boolean_.string_": components["schemas"]["ResultSuccess__isOnWaitlist-boolean__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__count-number__": {
-      data: {
-        /** Format: double */
-        count: number;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__count-number_.string_": components["schemas"]["ResultSuccess__count-number__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__success-boolean--newPosition_63_-number--message-string__": {
-      data: {
-        message: string;
-        /** Format: double */
-        newPosition?: number;
-        success: boolean;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__success-boolean--newPosition_63_-number--message-string_.string_": components["schemas"]["ResultSuccess__success-boolean--newPosition_63_-number--message-string__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__id-string__": {
-      data: {
-        id: string;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__id-string_.string_": components["schemas"]["ResultSuccess__id-string__"] | components["schemas"]["ResultError_string_"];
-    AddVaultKeyParams: {
-      key: string;
-      provider: string;
-      name?: string;
-    };
-    DecryptedProviderKey: {
-      cuid?: string | null;
-      provider_secret_key: string | null;
-      provider_key_name: string | null;
-      provider_name: string | null;
-      provider_key: string | null;
-      org_id: string | null;
-      id: string | null;
-    };
-    "ResultSuccess_DecryptedProviderKey-Array_": {
-      data: components["schemas"]["DecryptedProviderKey"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_DecryptedProviderKey-Array.string_": components["schemas"]["ResultSuccess_DecryptedProviderKey-Array_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_DecryptedProviderKey_: {
-      data: components["schemas"]["DecryptedProviderKey"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_DecryptedProviderKey.string_": components["schemas"]["ResultSuccess_DecryptedProviderKey_"] | components["schemas"]["ResultError_string_"];
-    HistogramRow: {
-      range_start: string;
-      range_end: string;
-      /** Format: double */
-      value: number;
-    };
-    "ResultSuccess__request_count-HistogramRow-Array--user_cost-HistogramRow-Array__": {
-      data: {
-        user_cost: components["schemas"]["HistogramRow"][];
-        request_count: components["schemas"]["HistogramRow"][];
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__request_count-HistogramRow-Array--user_cost-HistogramRow-Array_.string_": components["schemas"]["ResultSuccess__request_count-HistogramRow-Array--user_cost-HistogramRow-Array__"] | components["schemas"]["ResultError_string_"];
-    /** @description Make all properties in T optional */
-    Partial_TextOperators_: {
-      "not-equals"?: string;
-      equals?: string;
-      like?: string;
-      ilike?: string;
-      contains?: string;
-      "not-contains"?: string;
-    };
-    /** @description Make all properties in T optional */
-    Partial_NumberOperators_: {
-      /** Format: double */
-      "not-equals"?: number;
-      /** Format: double */
-      equals?: number;
-      /** Format: double */
-      gte?: number;
-      /** Format: double */
-      lte?: number;
-      /** Format: double */
-      lt?: number;
-      /** Format: double */
-      gt?: number;
-    };
-    /** @description Make all properties in T optional */
-    Partial_TimestampOperatorsTyped_: {
-      /** Format: date-time */
-      equals?: string;
-      /** Format: date-time */
-      gte?: string;
-      /** Format: date-time */
-      lte?: string;
-      /** Format: date-time */
-      lt?: string;
-      /** Format: date-time */
-      gt?: string;
-    };
-    /** @description Make all properties in T optional */
-    Partial_UserViewToOperators_: {
-      user_user_id?: components["schemas"]["Partial_TextOperators_"];
-      user_active_for?: components["schemas"]["Partial_NumberOperators_"];
-      user_first_active?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
-      user_last_active?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
-      user_total_requests?: components["schemas"]["Partial_NumberOperators_"];
-      user_average_requests_per_day_active?: components["schemas"]["Partial_NumberOperators_"];
-      user_average_tokens_per_request?: components["schemas"]["Partial_NumberOperators_"];
-      user_total_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      user_total_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      user_cost?: components["schemas"]["Partial_NumberOperators_"];
-    };
-    /** @description Make all properties in T optional */
-    Partial_BooleanOperators_: {
-      equals?: boolean;
-    };
-    /** @description Make all properties in T optional */
-    Partial_VectorOperators_: {
-      contains?: string;
-    };
-    /** @description Make all properties in T optional */
-    Partial_RequestResponseRMTToOperators_: {
-      country_code?: components["schemas"]["Partial_TextOperators_"];
-      latency?: components["schemas"]["Partial_NumberOperators_"];
-      cost?: components["schemas"]["Partial_NumberOperators_"];
-      provider?: components["schemas"]["Partial_TextOperators_"];
-      time_to_first_token?: components["schemas"]["Partial_NumberOperators_"];
-      status?: components["schemas"]["Partial_NumberOperators_"];
-      request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
-      response_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
-      model?: components["schemas"]["Partial_TextOperators_"];
-      user_id?: components["schemas"]["Partial_TextOperators_"];
-      organization_id?: components["schemas"]["Partial_TextOperators_"];
-      node_id?: components["schemas"]["Partial_TextOperators_"];
-      job_id?: components["schemas"]["Partial_TextOperators_"];
-      threat?: components["schemas"]["Partial_BooleanOperators_"];
-      request_id?: components["schemas"]["Partial_TextOperators_"];
-      prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      prompt_cache_read_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      prompt_cache_write_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      total_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      target_url?: components["schemas"]["Partial_TextOperators_"];
-      property_key?: {
-        equals: string;
-      };
-      properties?: {
-        [key: string]: components["schemas"]["Partial_TextOperators_"];
-      };
-      search_properties?: {
-        [key: string]: components["schemas"]["Partial_TextOperators_"];
-      };
-      scores?: {
-        [key: string]: components["schemas"]["Partial_TextOperators_"];
-      };
-      scores_column?: components["schemas"]["Partial_TextOperators_"];
-      request_body?: components["schemas"]["Partial_VectorOperators_"];
-      response_body?: components["schemas"]["Partial_VectorOperators_"];
-      cache_enabled?: components["schemas"]["Partial_BooleanOperators_"];
-      cache_reference_id?: components["schemas"]["Partial_TextOperators_"];
-      cached?: components["schemas"]["Partial_BooleanOperators_"];
-      assets?: components["schemas"]["Partial_TextOperators_"];
-      "helicone-score-feedback"?: components["schemas"]["Partial_BooleanOperators_"];
-      prompt_id?: components["schemas"]["Partial_TextOperators_"];
-      prompt_version?: components["schemas"]["Partial_TextOperators_"];
-      request_referrer?: components["schemas"]["Partial_TextOperators_"];
-      is_passthrough_billing?: components["schemas"]["Partial_BooleanOperators_"];
-    };
-    /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.users_view-or-request_response_rmt_": {
-      users_view?: components["schemas"]["Partial_UserViewToOperators_"];
-      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
-    };
-    "FilterLeafSubset_users_view-or-request_response_rmt_": components["schemas"]["Pick_FilterLeaf.users_view-or-request_response_rmt_"];
-    UserFilterNode: components["schemas"]["FilterLeafSubset_users_view-or-request_response_rmt_"] | components["schemas"]["UserFilterBranch"] | "all";
-    UserFilterBranch: {
-      right: components["schemas"]["UserFilterNode"];
-      /** @enum {string} */
-      operator: "or" | "and";
-      left: components["schemas"]["UserFilterNode"];
-    };
-    /** @enum {string} */
-    PSize: "p50" | "p75" | "p95" | "p99" | "p99.9";
-    UserMetricsResult: {
-      id: string;
-      user_id: string;
-      /** Format: double */
-      active_for: number;
-      first_active: string;
-      last_active: string;
-      /** Format: double */
-      total_requests: number;
-      /** Format: double */
-      average_requests_per_day_active: number;
-      /** Format: double */
-      average_tokens_per_request: number;
-      /** Format: double */
-      total_completion_tokens: number;
-      /** Format: double */
-      total_prompt_tokens: number;
-      /** Format: double */
-      cost: number;
-    };
-    "ResultSuccess__users-UserMetricsResult-Array--count-number--hasUsers-boolean__": {
-      data: {
-        hasUsers: boolean;
-        /** Format: double */
-        count: number;
-        users: components["schemas"]["UserMetricsResult"][];
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__users-UserMetricsResult-Array--count-number--hasUsers-boolean_.string_": components["schemas"]["ResultSuccess__users-UserMetricsResult-Array--count-number--hasUsers-boolean__"] | components["schemas"]["ResultError_string_"];
-    /** @enum {string} */
-    SortDirection: "asc" | "desc";
-    SortLeafUsers: {
-      id?: components["schemas"]["SortDirection"];
-      user_id?: components["schemas"]["SortDirection"];
-      active_for?: components["schemas"]["SortDirection"];
-      first_active?: components["schemas"]["SortDirection"];
-      last_active?: components["schemas"]["SortDirection"];
-      total_requests?: components["schemas"]["SortDirection"];
-      average_requests_per_day_active?: components["schemas"]["SortDirection"];
-      average_tokens_per_request?: components["schemas"]["SortDirection"];
-      total_prompt_tokens?: components["schemas"]["SortDirection"];
-      total_completion_tokens?: components["schemas"]["SortDirection"];
-      cost?: components["schemas"]["SortDirection"];
-      rate_limited_count?: components["schemas"]["SortDirection"];
-    };
-    UserMetricsQueryParams: {
-      filter: components["schemas"]["UserFilterNode"];
-      /** Format: double */
-      offset: number;
-      /** Format: double */
-      limit: number;
-      timeFilter?: {
-        /** Format: double */
-        endTimeUnixSeconds: number;
-        /** Format: double */
-        startTimeUnixSeconds: number;
-      };
-      /** Format: double */
-      timeZoneDifferenceMinutes?: number;
-      sort?: components["schemas"]["SortLeafUsers"];
-    };
-    "ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array_": {
-      data: {
-          /** Format: double */
-          cost: number;
-          user_id: string;
-          /** Format: double */
-          completion_tokens: number;
-          /** Format: double */
-          prompt_tokens: number;
-          /** Format: double */
-          count: number;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array.string_": components["schemas"]["ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array_"] | components["schemas"]["ResultError_string_"];
-    UserQueryParams: {
-      userIds?: string[];
-      timeFilter?: {
-        /** Format: double */
-        endTimeUnixSeconds: number;
-        /** Format: double */
-        startTimeUnixSeconds: number;
-      };
-    };
     /** @description Construct a type with a set of properties K of type T */
     "Record_string.string_": {
       [key: string]: string;
@@ -1098,6 +798,19 @@ export interface components {
       providerSecretKey?: string;
       providerKey: string;
       providerName: string;
+    };
+    DecryptedProviderKey: {
+      cuid?: string | null;
+      provider_secret_key: string | null;
+      provider_key_name: string | null;
+      provider_name: string | null;
+      provider_key: string | null;
+      org_id: string | null;
+      id: string | null;
+    };
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.any_": {
+      [key: string]: unknown;
     };
     ProviderKeyRow: {
       id: string;
@@ -1116,6 +829,11 @@ export interface components {
       };
       /** @enum {number|null} */
       error: null;
+    };
+    ResultError_string_: {
+      /** @enum {number|null} */
+      data: null;
+      error: string;
     };
     "Result__id-string--providerName-string_.string_": components["schemas"]["ResultSuccess__id-string--providerName-string__"] | components["schemas"]["ResultError_string_"];
     UpdateProviderKeyRequest: {
@@ -1180,6 +898,13 @@ export interface components {
       name?: string;
       last_mile_config?: unknown;
     };
+    ResultSuccess_null_: {
+      /** @enum {number|null} */
+      data: null;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
     EvaluatorExperiment: {
       experiment_name: string;
       experiment_created_at: string;
@@ -1434,6 +1159,14 @@ export interface components {
       };
       functions?: unknown[];
     };
+    "ResultSuccess__id-string__": {
+      data: {
+        id: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__id-string_.string_": components["schemas"]["ResultSuccess__id-string__"] | components["schemas"]["ResultError_string_"];
     ResultSuccess_number_: {
       /** Format: double */
       data: number;
@@ -1484,404 +1217,6 @@ export interface components {
       error: null;
     };
     "Result_PromptVersionCounts.string_": components["schemas"]["ResultSuccess_PromptVersionCounts_"] | components["schemas"]["ResultError_string_"];
-    /** @description Make all properties in T optional */
-    Partial_ResponseTableToOperators_: {
-      body_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      body_model?: components["schemas"]["Partial_TextOperators_"];
-      body_completion?: components["schemas"]["Partial_TextOperators_"];
-      status?: components["schemas"]["Partial_NumberOperators_"];
-      model?: components["schemas"]["Partial_TextOperators_"];
-    };
-    /** @description Make all properties in T optional */
-    Partial_TimestampOperators_: {
-      equals?: string;
-      gte?: string;
-      lte?: string;
-      lt?: string;
-      gt?: string;
-    };
-    /** @description Make all properties in T optional */
-    Partial_RequestTableToOperators_: {
-      prompt?: components["schemas"]["Partial_TextOperators_"];
-      created_at?: components["schemas"]["Partial_TimestampOperators_"];
-      user_id?: components["schemas"]["Partial_TextOperators_"];
-      auth_hash?: components["schemas"]["Partial_TextOperators_"];
-      org_id?: components["schemas"]["Partial_TextOperators_"];
-      id?: components["schemas"]["Partial_TextOperators_"];
-      node_id?: components["schemas"]["Partial_TextOperators_"];
-      model?: components["schemas"]["Partial_TextOperators_"];
-      modelOverride?: components["schemas"]["Partial_TextOperators_"];
-      path?: components["schemas"]["Partial_TextOperators_"];
-      country_code?: components["schemas"]["Partial_TextOperators_"];
-      prompt_id?: components["schemas"]["Partial_TextOperators_"];
-    };
-    /** @description Make all properties in T optional */
-    Partial_FeedbackTableToOperators_: {
-      id?: components["schemas"]["Partial_NumberOperators_"];
-      created_at?: components["schemas"]["Partial_TimestampOperators_"];
-      rating?: components["schemas"]["Partial_BooleanOperators_"];
-      response_id?: components["schemas"]["Partial_TextOperators_"];
-    };
-    /** @description Make all properties in T optional */
-    Partial_SessionsRequestResponseRMTToOperators_: {
-      session_session_id?: components["schemas"]["Partial_TextOperators_"];
-      session_session_name?: components["schemas"]["Partial_TextOperators_"];
-      session_total_cost?: components["schemas"]["Partial_NumberOperators_"];
-      session_total_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      session_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      session_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      session_total_requests?: components["schemas"]["Partial_NumberOperators_"];
-      session_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
-      session_latest_request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
-      session_tag?: components["schemas"]["Partial_TextOperators_"];
-    };
-    /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": {
-      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
-      response?: components["schemas"]["Partial_ResponseTableToOperators_"];
-      request?: components["schemas"]["Partial_RequestTableToOperators_"];
-      feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
-      sessions_request_response_rmt?: components["schemas"]["Partial_SessionsRequestResponseRMTToOperators_"];
-      properties?: {
-        [key: string]: components["schemas"]["Partial_TextOperators_"];
-      };
-      values?: {
-        [key: string]: components["schemas"]["Partial_TextOperators_"];
-      };
-    };
-    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"];
-    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"] | components["schemas"]["RequestFilterBranch"] | "all";
-    RequestFilterBranch: {
-      right: components["schemas"]["RequestFilterNode"];
-      /** @enum {string} */
-      operator: "or" | "and";
-      left: components["schemas"]["RequestFilterNode"];
-    };
-    SortLeafRequest: {
-      /** @enum {boolean} */
-      random?: true;
-      created_at?: components["schemas"]["SortDirection"];
-      cache_created_at?: components["schemas"]["SortDirection"];
-      latency?: components["schemas"]["SortDirection"];
-      last_active?: components["schemas"]["SortDirection"];
-      total_tokens?: components["schemas"]["SortDirection"];
-      completion_tokens?: components["schemas"]["SortDirection"];
-      prompt_tokens?: components["schemas"]["SortDirection"];
-      user_id?: components["schemas"]["SortDirection"];
-      body_model?: components["schemas"]["SortDirection"];
-      is_cached?: components["schemas"]["SortDirection"];
-      request_prompt?: components["schemas"]["SortDirection"];
-      response_text?: components["schemas"]["SortDirection"];
-      properties?: {
-        [key: string]: components["schemas"]["SortDirection"];
-      };
-      values?: {
-        [key: string]: components["schemas"]["SortDirection"];
-      };
-      cost?: components["schemas"]["SortDirection"];
-      time_to_first_token?: components["schemas"]["SortDirection"];
-    };
-    RequestQueryParams: {
-      filter: components["schemas"]["RequestFilterNode"];
-      /** Format: double */
-      offset?: number;
-      /** Format: double */
-      limit?: number;
-      sort?: components["schemas"]["SortLeafRequest"];
-      isCached?: boolean;
-      includeInputs?: boolean;
-      isPartOfExperiment?: boolean;
-      isScored?: boolean;
-    };
-    /** @enum {string} */
-    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "BEDROCK" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "CHUTES" | "LLAMA" | "NVIDIA" | "VERCEL" | "CEREBRAS" | "BASETEN" | "CANOPYWAVE";
-    /** @enum {string} */
-    ModelProviderName: "baseten" | "anthropic" | "azure" | "bedrock" | "canopywave" | "cerebras" | "chutes" | "deepinfra" | "deepseek" | "fireworks" | "google-ai-studio" | "groq" | "helicone" | "mistral" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
-    Provider: components["schemas"]["ProviderName"] | components["schemas"]["ModelProviderName"] | "CUSTOM";
-    /** @enum {string} */
-    LlmType: "chat" | "completion";
-    FunctionCall: {
-      id?: string;
-      name: string;
-      arguments: components["schemas"]["Record_string.any_"];
-    };
-    Message: {
-      ending_event_id?: string;
-      trigger_event_id?: string;
-      start_timestamp?: string;
-      annotations?: {
-          content?: string;
-          title: string;
-          url: string;
-          /** @enum {string} */
-          type: "url_citation";
-        }[];
-      reasoning?: string;
-      deleted?: boolean;
-      contentArray?: components["schemas"]["Message"][];
-      /** Format: double */
-      idx?: number;
-      detail?: string;
-      filename?: string;
-      file_id?: string;
-      file_data?: string;
-      /** @enum {string} */
-      type?: "input_image" | "input_text" | "input_file";
-      audio_data?: string;
-      image_url?: string;
-      timestamp?: string;
-      tool_call_id?: string;
-      tool_calls?: components["schemas"]["FunctionCall"][];
-      mime_type?: string;
-      content?: string;
-      name?: string;
-      instruction?: string;
-      role?: string | ("user" | "assistant" | "system" | "developer");
-      id?: string;
-      /** @enum {string} */
-      _type: "functionCall" | "function" | "image" | "file" | "message" | "autoInput" | "contentArray" | "audio";
-    };
-    Tool: {
-      name: string;
-      description: string;
-      parameters?: components["schemas"]["Record_string.any_"];
-    };
-    HeliconeEventTool: {
-      /** @enum {string} */
-      _type: "tool";
-      toolName: string;
-      input: unknown;
-      [key: string]: unknown;
-    };
-    HeliconeEventVectorDB: {
-      /** @enum {string} */
-      _type: "vector_db";
-      /** @enum {string} */
-      operation: "search" | "insert" | "delete" | "update";
-      text?: string;
-      vector?: number[];
-      /** Format: double */
-      topK?: number;
-      filter?: Record<string, never>;
-      databaseName?: string;
-      [key: string]: unknown;
-    };
-    HeliconeEventData: {
-      /** @enum {string} */
-      _type: "data";
-      name: string;
-      meta?: components["schemas"]["Record_string.any_"];
-      [key: string]: unknown;
-    };
-    LLMRequestBody: {
-      llm_type?: components["schemas"]["LlmType"];
-      provider?: string;
-      model?: string;
-      messages?: components["schemas"]["Message"][] | null;
-      prompt?: string | null;
-      instructions?: string | null;
-      /** Format: double */
-      max_tokens?: number | null;
-      /** Format: double */
-      temperature?: number | null;
-      /** Format: double */
-      top_p?: number | null;
-      /** Format: double */
-      seed?: number | null;
-      stream?: boolean | null;
-      /** Format: double */
-      presence_penalty?: number | null;
-      /** Format: double */
-      frequency_penalty?: number | null;
-      stop?: (string[] | string) | null;
-      /** @enum {string|null} */
-      reasoning_effort?: "minimal" | "low" | "medium" | "high" | null;
-      /** @enum {string|null} */
-      verbosity?: "low" | "medium" | "high" | null;
-      tools?: components["schemas"]["Tool"][];
-      parallel_tool_calls?: boolean | null;
-      tool_choice?: {
-        name?: string;
-        /** @enum {string} */
-        type: "none" | "auto" | "any" | "tool";
-      };
-      response_format?: {
-        json_schema?: unknown;
-        type: string;
-      };
-      toolDetails?: components["schemas"]["HeliconeEventTool"];
-      vectorDBDetails?: components["schemas"]["HeliconeEventVectorDB"];
-      dataDetails?: components["schemas"]["HeliconeEventData"];
-      input?: string | string[];
-      /** Format: double */
-      n?: number | null;
-      size?: string;
-      quality?: string;
-    };
-    Response: {
-      contentArray?: components["schemas"]["Response"][];
-      detail?: string;
-      filename?: string;
-      file_id?: string;
-      file_data?: string;
-      /** Format: double */
-      idx?: number;
-      audio_data?: string;
-      image_url?: string;
-      timestamp?: string;
-      tool_call_id?: string;
-      tool_calls?: components["schemas"]["FunctionCall"][];
-      text?: string;
-      /** @enum {string} */
-      type: "input_image" | "input_text" | "input_file";
-      name?: string;
-      /** @enum {string} */
-      role: "user" | "assistant" | "system" | "developer";
-      id?: string;
-      /** @enum {string} */
-      _type: "functionCall" | "function" | "image" | "text" | "file" | "contentArray";
-    };
-    LLMResponseBody: {
-      dataDetailsResponse?: {
-        name: string;
-        /** @enum {string} */
-        _type: "data";
-        metadata: {
-          timestamp: string;
-          [key: string]: unknown;
-        };
-        message: string;
-        status: string;
-        [key: string]: unknown;
-      };
-      vectorDBDetailsResponse?: {
-        /** @enum {string} */
-        _type: "vector_db";
-        metadata: {
-          timestamp: string;
-          destination_parsed?: boolean;
-          destination?: string;
-        };
-        /** Format: double */
-        actualSimilarity?: number;
-        /** Format: double */
-        similarityThreshold?: number;
-        message: string;
-        status: string;
-      };
-      toolDetailsResponse?: {
-        toolName: string;
-        /** @enum {string} */
-        _type: "tool";
-        metadata: {
-          timestamp: string;
-        };
-        tips: string[];
-        message: string;
-        status: string;
-      };
-      error?: {
-        heliconeMessage: unknown;
-      };
-      model?: string | null;
-      instructions?: string | null;
-      responses?: components["schemas"]["Response"][] | null;
-      messages?: components["schemas"]["Message"][] | null;
-    };
-    LlmSchema: {
-      request: components["schemas"]["LLMRequestBody"];
-      response?: components["schemas"]["LLMResponseBody"] | null;
-    };
-    HeliconeRequest: {
-      response_id: string | null;
-      response_created_at: string | null;
-      response_body?: unknown;
-      /** Format: double */
-      response_status: number;
-      response_model: string | null;
-      request_id: string;
-      request_created_at: string;
-      request_body: unknown;
-      request_path: string;
-      request_user_id: string | null;
-      request_properties: components["schemas"]["Record_string.string_"] | null;
-      request_model: string | null;
-      model_override: string | null;
-      helicone_user: string | null;
-      provider: components["schemas"]["Provider"];
-      /** Format: double */
-      delay_ms: number | null;
-      /** Format: double */
-      time_to_first_token: number | null;
-      /** Format: double */
-      total_tokens: number | null;
-      /** Format: double */
-      prompt_tokens: number | null;
-      /** Format: double */
-      prompt_cache_write_tokens: number | null;
-      /** Format: double */
-      prompt_cache_read_tokens: number | null;
-      /** Format: double */
-      completion_tokens: number | null;
-      /** Format: double */
-      prompt_audio_tokens: number | null;
-      /** Format: double */
-      completion_audio_tokens: number | null;
-      /** Format: double */
-      cost: number | null;
-      prompt_id: string | null;
-      prompt_version: string | null;
-      feedback_created_at?: string | null;
-      feedback_id?: string | null;
-      feedback_rating?: boolean | null;
-      signed_body_url?: string | null;
-      llmSchema: components["schemas"]["LlmSchema"] | null;
-      country_code: string | null;
-      asset_ids: string[] | null;
-      asset_urls: components["schemas"]["Record_string.string_"] | null;
-      scores: components["schemas"]["Record_string.number_"] | null;
-      /** Format: double */
-      costUSD?: number | null;
-      properties: components["schemas"]["Record_string.string_"];
-      assets: string[];
-      target_url: string;
-      model: string;
-      cache_reference_id: string | null;
-      cache_enabled: boolean;
-      updated_at?: string;
-      request_referrer?: string | null;
-      ai_gateway_body_mapping: string | null;
-      storage_location?: string;
-    };
-    "ResultSuccess_HeliconeRequest-Array_": {
-      data: components["schemas"]["HeliconeRequest"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_HeliconeRequest-Array.string_": components["schemas"]["ResultSuccess_HeliconeRequest-Array_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_HeliconeRequest_: {
-      data: components["schemas"]["HeliconeRequest"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_HeliconeRequest.string_": components["schemas"]["ResultSuccess_HeliconeRequest_"] | components["schemas"]["ResultError_string_"];
-    HeliconeRequestAsset: {
-      assetUrl: string;
-    };
-    ResultSuccess_HeliconeRequestAsset_: {
-      data: components["schemas"]["HeliconeRequestAsset"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_HeliconeRequestAsset.string_": components["schemas"]["ResultSuccess_HeliconeRequestAsset_"] | components["schemas"]["ResultError_string_"];
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.number-or-boolean-or-undefined_": {
-      [key: string]: number | boolean;
-    };
-    Scores: components["schemas"]["Record_string.number-or-boolean-or-undefined_"];
-    ScoreRequest: {
-      scores: components["schemas"]["Scores"];
-    };
     "ResultSuccess__hasPrompts-boolean__": {
       data: {
         hasPrompts: boolean;
@@ -1906,6 +1241,15 @@ export interface components {
       error: null;
     };
     "Result_PromptsResult-Array.string_": components["schemas"]["ResultSuccess_PromptsResult-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description Make all properties in T optional */
+    Partial_TextOperators_: {
+      "not-equals"?: string;
+      equals?: string;
+      like?: string;
+      ilike?: string;
+      contains?: string;
+      "not-contains"?: string;
+    };
     /** @description Make all properties in T optional */
     Partial_PromptToOperators_: {
       id?: components["schemas"]["Partial_TextOperators_"];
@@ -2041,6 +1385,21 @@ export interface components {
       error: null;
     };
     "Result_PromptVersionResult-Array.string_": components["schemas"]["ResultSuccess_PromptVersionResult-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description Make all properties in T optional */
+    Partial_NumberOperators_: {
+      /** Format: double */
+      "not-equals"?: number;
+      /** Format: double */
+      equals?: number;
+      /** Format: double */
+      gte?: number;
+      /** Format: double */
+      lte?: number;
+      /** Format: double */
+      lt?: number;
+      /** Format: double */
+      gt?: number;
+    };
     /** @description Make all properties in T optional */
     Partial_PromptVersionsToOperators_: {
       minor_version?: components["schemas"]["Partial_NumberOperators_"];
@@ -2309,6 +1668,46 @@ Json: JsonObject;
     CreateSetupSessionRequest: {
       returnUrl?: string;
     };
+    DailyUsageDataPoint: {
+      date: string;
+      /** Format: double */
+      requests: number;
+      /** Format: double */
+      bytes: number;
+    };
+    UsageStatsResponse: {
+      billingPeriod: {
+        /** Format: double */
+        daysTotal: number;
+        /** Format: double */
+        daysElapsed: number;
+        end: string;
+        start: string;
+      };
+      usage: {
+        /** Format: double */
+        totalGB: number;
+        /** Format: double */
+        totalBytes: number;
+        /** Format: double */
+        totalRequests: number;
+      };
+      dailyData: components["schemas"]["DailyUsageDataPoint"][];
+      estimatedCost: {
+        /** Format: double */
+        projectedMonthlyTotalCost: number;
+        /** Format: double */
+        projectedMonthlyGBCost: number;
+        /** Format: double */
+        projectedMonthlyRequestsCost: number;
+        /** Format: double */
+        totalCost: number;
+        /** Format: double */
+        gbCost: number;
+        /** Format: double */
+        requestsCost: number;
+      };
+    };
     IntegrationCreateParams: {
       integration_name: string;
       settings?: components["schemas"]["Json"];
@@ -2349,6 +1748,764 @@ Json: JsonObject;
     TestStripeMeterEventRequest: {
       event_name: string;
       customer_id: string;
+    };
+    /** @description Make all properties in T optional */
+    Partial_ResponseTableToOperators_: {
+      body_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      body_model?: components["schemas"]["Partial_TextOperators_"];
+      body_completion?: components["schemas"]["Partial_TextOperators_"];
+      status?: components["schemas"]["Partial_NumberOperators_"];
+      model?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_TimestampOperators_: {
+      equals?: string;
+      gte?: string;
+      lte?: string;
+      lt?: string;
+      gt?: string;
+    };
+    /** @description Make all properties in T optional */
+    Partial_RequestTableToOperators_: {
+      prompt?: components["schemas"]["Partial_TextOperators_"];
+      created_at?: components["schemas"]["Partial_TimestampOperators_"];
+      user_id?: components["schemas"]["Partial_TextOperators_"];
+      auth_hash?: components["schemas"]["Partial_TextOperators_"];
+      org_id?: components["schemas"]["Partial_TextOperators_"];
+      id?: components["schemas"]["Partial_TextOperators_"];
+      node_id?: components["schemas"]["Partial_TextOperators_"];
+      model?: components["schemas"]["Partial_TextOperators_"];
+      modelOverride?: components["schemas"]["Partial_TextOperators_"];
+      path?: components["schemas"]["Partial_TextOperators_"];
+      country_code?: components["schemas"]["Partial_TextOperators_"];
+      prompt_id?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_BooleanOperators_: {
+      equals?: boolean;
+    };
+    /** @description Make all properties in T optional */
+    Partial_FeedbackTableToOperators_: {
+      id?: components["schemas"]["Partial_NumberOperators_"];
+      created_at?: components["schemas"]["Partial_TimestampOperators_"];
+      rating?: components["schemas"]["Partial_BooleanOperators_"];
+      response_id?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_TimestampOperatorsTyped_: {
+      /** Format: date-time */
+      equals?: string;
+      /** Format: date-time */
+      gte?: string;
+      /** Format: date-time */
+      lte?: string;
+      /** Format: date-time */
+      lt?: string;
+      /** Format: date-time */
+      gt?: string;
+    };
+    /** @description Make all properties in T optional */
+    Partial_VectorOperators_: {
+      contains?: string;
+    };
+    /** @description Make all properties in T optional */
+    Partial_RequestResponseRMTToOperators_: {
+      country_code?: components["schemas"]["Partial_TextOperators_"];
+      latency?: components["schemas"]["Partial_NumberOperators_"];
+      cost?: components["schemas"]["Partial_NumberOperators_"];
+      provider?: components["schemas"]["Partial_TextOperators_"];
+      time_to_first_token?: components["schemas"]["Partial_NumberOperators_"];
+      status?: components["schemas"]["Partial_NumberOperators_"];
+      request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      response_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      model?: components["schemas"]["Partial_TextOperators_"];
+      user_id?: components["schemas"]["Partial_TextOperators_"];
+      organization_id?: components["schemas"]["Partial_TextOperators_"];
+      node_id?: components["schemas"]["Partial_TextOperators_"];
+      job_id?: components["schemas"]["Partial_TextOperators_"];
+      threat?: components["schemas"]["Partial_BooleanOperators_"];
+      request_id?: components["schemas"]["Partial_TextOperators_"];
+      prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      prompt_cache_read_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      prompt_cache_write_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      total_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      target_url?: components["schemas"]["Partial_TextOperators_"];
+      property_key?: {
+        equals: string;
+      };
+      properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      search_properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      scores?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      scores_column?: components["schemas"]["Partial_TextOperators_"];
+      request_body?: components["schemas"]["Partial_VectorOperators_"];
+      response_body?: components["schemas"]["Partial_VectorOperators_"];
+      cache_enabled?: components["schemas"]["Partial_BooleanOperators_"];
+      cache_reference_id?: components["schemas"]["Partial_TextOperators_"];
+      cached?: components["schemas"]["Partial_BooleanOperators_"];
+      assets?: components["schemas"]["Partial_TextOperators_"];
+      "helicone-score-feedback"?: components["schemas"]["Partial_BooleanOperators_"];
+      prompt_id?: components["schemas"]["Partial_TextOperators_"];
+      prompt_version?: components["schemas"]["Partial_TextOperators_"];
+      request_referrer?: components["schemas"]["Partial_TextOperators_"];
+      is_passthrough_billing?: components["schemas"]["Partial_BooleanOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_SessionsRequestResponseRMTToOperators_: {
+      session_session_id?: components["schemas"]["Partial_TextOperators_"];
+      session_session_name?: components["schemas"]["Partial_TextOperators_"];
+      session_total_cost?: components["schemas"]["Partial_NumberOperators_"];
+      session_total_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      session_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      session_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      session_total_requests?: components["schemas"]["Partial_NumberOperators_"];
+      session_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      session_latest_request_created_at?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      session_tag?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": {
+      values?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+      response?: components["schemas"]["Partial_ResponseTableToOperators_"];
+      request?: components["schemas"]["Partial_RequestTableToOperators_"];
+      feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
+      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
+      sessions_request_response_rmt?: components["schemas"]["Partial_SessionsRequestResponseRMTToOperators_"];
+      properties?: {
+        [key: string]: components["schemas"]["Partial_TextOperators_"];
+      };
+    };
+    "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"];
+    RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"] | components["schemas"]["RequestFilterBranch"] | "all";
+    RequestFilterBranch: {
+      right: components["schemas"]["RequestFilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      left: components["schemas"]["RequestFilterNode"];
+    };
+    /** @enum {string} */
+    SortDirection: "asc" | "desc";
+    SortLeafRequest: {
+      /** @enum {boolean} */
+      random?: true;
+      created_at?: components["schemas"]["SortDirection"];
+      cache_created_at?: components["schemas"]["SortDirection"];
+      latency?: components["schemas"]["SortDirection"];
+      last_active?: components["schemas"]["SortDirection"];
+      total_tokens?: components["schemas"]["SortDirection"];
+      completion_tokens?: components["schemas"]["SortDirection"];
+      prompt_tokens?: components["schemas"]["SortDirection"];
+      user_id?: components["schemas"]["SortDirection"];
+      body_model?: components["schemas"]["SortDirection"];
+      is_cached?: components["schemas"]["SortDirection"];
+      request_prompt?: components["schemas"]["SortDirection"];
+      response_text?: components["schemas"]["SortDirection"];
+      properties?: {
+        [key: string]: components["schemas"]["SortDirection"];
+      };
+      values?: {
+        [key: string]: components["schemas"]["SortDirection"];
+      };
+      cost?: components["schemas"]["SortDirection"];
+      time_to_first_token?: components["schemas"]["SortDirection"];
+    };
+    RequestQueryParams: {
+      filter: components["schemas"]["RequestFilterNode"];
+      /** Format: double */
+      offset?: number;
+      /** Format: double */
+      limit?: number;
+      sort?: components["schemas"]["SortLeafRequest"];
+      isCached?: boolean;
+      includeInputs?: boolean;
+      isPartOfExperiment?: boolean;
+      isScored?: boolean;
+    };
+    /** @enum {string} */
+    ProviderName: "OPENAI" | "ANTHROPIC" | "AZURE" | "LOCAL" | "HELICONE" | "AMDBARTEK" | "ANYSCALE" | "CLOUDFLARE" | "2YFV" | "TOGETHER" | "LEMONFOX" | "FIREWORKS" | "PERPLEXITY" | "GOOGLE" | "OPENROUTER" | "WISDOMINANUTSHELL" | "GROQ" | "COHERE" | "MISTRAL" | "DEEPINFRA" | "QSTASH" | "FIRECRAWL" | "AWS" | "BEDROCK" | "DEEPSEEK" | "X" | "AVIAN" | "NEBIUS" | "NOVITA" | "OPENPIPE" | "CHUTES" | "LLAMA" | "NVIDIA" | "VERCEL" | "CEREBRAS" | "BASETEN" | "CANOPYWAVE";
+    /** @enum {string} */
+    ModelProviderName: "baseten" | "anthropic" | "azure" | "bedrock" | "canopywave" | "cerebras" | "chutes" | "deepinfra" | "deepseek" | "fireworks" | "google-ai-studio" | "groq" | "helicone" | "mistral" | "nebius" | "novita" | "openai" | "openrouter" | "perplexity" | "vertex" | "xai";
+    Provider: components["schemas"]["ProviderName"] | components["schemas"]["ModelProviderName"] | "CUSTOM";
+    /** @enum {string} */
+    LlmType: "chat" | "completion";
+    FunctionCall: {
+      id?: string;
+      name: string;
+      arguments: components["schemas"]["Record_string.any_"];
+    };
+    Message: {
+      ending_event_id?: string;
+      trigger_event_id?: string;
+      start_timestamp?: string;
+      annotations?: {
+          content?: string;
+          title: string;
+          url: string;
+          /** @enum {string} */
+          type: "url_citation";
+        }[];
+      reasoning?: string;
+      deleted?: boolean;
+      contentArray?: components["schemas"]["Message"][];
+      /** Format: double */
+      idx?: number;
+      detail?: string;
+      filename?: string;
+      file_id?: string;
+      file_data?: string;
+      /** @enum {string} */
+      type?: "input_image" | "input_text" | "input_file";
+      audio_data?: string;
+      image_url?: string;
+      timestamp?: string;
+      tool_call_id?: string;
+      tool_calls?: components["schemas"]["FunctionCall"][];
+      mime_type?: string;
+      content?: string;
+      name?: string;
+      instruction?: string;
+      role?: string | ("user" | "assistant" | "system" | "developer");
+      id?: string;
+      /** @enum {string} */
+      _type: "functionCall" | "function" | "image" | "file" | "message" | "autoInput" | "contentArray" | "audio";
+    };
+    Tool: {
+      name: string;
+      description: string;
+      parameters?: components["schemas"]["Record_string.any_"];
+    };
+    HeliconeEventTool: {
+      /** @enum {string} */
+      _type: "tool";
+      toolName: string;
+      input: unknown;
+      [key: string]: unknown;
+    };
+    HeliconeEventVectorDB: {
+      /** @enum {string} */
+      _type: "vector_db";
+      /** @enum {string} */
+      operation: "search" | "insert" | "delete" | "update";
+      text?: string;
+      vector?: number[];
+      /** Format: double */
+      topK?: number;
+      filter?: Record<string, never>;
+      databaseName?: string;
+      [key: string]: unknown;
+    };
+    HeliconeEventData: {
+      /** @enum {string} */
+      _type: "data";
+      name: string;
+      meta?: components["schemas"]["Record_string.any_"];
+      [key: string]: unknown;
+    };
+    LLMRequestBody: {
+      llm_type?: components["schemas"]["LlmType"];
+      provider?: string;
+      model?: string;
+      messages?: components["schemas"]["Message"][] | null;
+      prompt?: string | null;
+      instructions?: string | null;
+      /** Format: double */
+      max_tokens?: number | null;
+      /** Format: double */
+      temperature?: number | null;
+      /** Format: double */
+      top_p?: number | null;
+      /** Format: double */
+      seed?: number | null;
+      stream?: boolean | null;
+      /** Format: double */
+      presence_penalty?: number | null;
+      /** Format: double */
+      frequency_penalty?: number | null;
+      stop?: (string[] | string) | null;
+      /** @enum {string|null} */
+      reasoning_effort?: "minimal" | "low" | "medium" | "high" | null;
+      /** @enum {string|null} */
+      verbosity?: "low" | "medium" | "high" | null;
+      tools?: components["schemas"]["Tool"][];
+      parallel_tool_calls?: boolean | null;
+      tool_choice?: {
+        name?: string;
+        /** @enum {string} */
+        type: "none" | "auto" | "any" | "tool";
+      };
+      response_format?: {
+        json_schema?: unknown;
+        type: string;
+      };
+      toolDetails?: components["schemas"]["HeliconeEventTool"];
+      vectorDBDetails?: components["schemas"]["HeliconeEventVectorDB"];
+      dataDetails?: components["schemas"]["HeliconeEventData"];
+      input?: string | string[];
+      /** Format: double */
+      n?: number | null;
+      size?: string;
+      quality?: string;
+    };
+    Response: {
+      contentArray?: components["schemas"]["Response"][];
+      detail?: string;
+      filename?: string;
+      file_id?: string;
+      file_data?: string;
+      /** Format: double */
+      idx?: number;
+      audio_data?: string;
+      image_url?: string;
+      timestamp?: string;
+      tool_call_id?: string;
+      tool_calls?: components["schemas"]["FunctionCall"][];
+      text?: string;
+      /** @enum {string} */
+      type: "input_image" | "input_text" | "input_file";
+      name?: string;
+      /** @enum {string} */
+      role: "user" | "assistant" | "system" | "developer";
+      id?: string;
+      /** @enum {string} */
+      _type: "functionCall" | "function" | "image" | "text" | "file" | "contentArray";
+    };
+    LLMResponseBody: {
+      dataDetailsResponse?: {
+        name: string;
+        /** @enum {string} */
+        _type: "data";
+        metadata: {
+          timestamp: string;
+          [key: string]: unknown;
+        };
+        message: string;
+        status: string;
+        [key: string]: unknown;
+      };
+      vectorDBDetailsResponse?: {
+        /** @enum {string} */
+        _type: "vector_db";
+        metadata: {
+          timestamp: string;
+          destination_parsed?: boolean;
+          destination?: string;
+        };
+        /** Format: double */
+        actualSimilarity?: number;
+        /** Format: double */
+        similarityThreshold?: number;
+        message: string;
+        status: string;
+      };
+      toolDetailsResponse?: {
+        toolName: string;
+        /** @enum {string} */
+        _type: "tool";
+        metadata: {
+          timestamp: string;
+        };
+        tips: string[];
+        message: string;
+        status: string;
+      };
+      error?: {
+        heliconeMessage: unknown;
+      };
+      model?: string | null;
+      instructions?: string | null;
+      responses?: components["schemas"]["Response"][] | null;
+      messages?: components["schemas"]["Message"][] | null;
+    };
+    LlmSchema: {
+      request: components["schemas"]["LLMRequestBody"];
+      response?: components["schemas"]["LLMResponseBody"] | null;
+    };
+    HeliconeRequest: {
+      response_id: string | null;
+      response_created_at: string | null;
+      response_body?: unknown;
+      /** Format: double */
+      response_status: number;
+      response_model: string | null;
+      request_id: string;
+      request_created_at: string;
+      request_body: unknown;
+      request_path: string;
+      request_user_id: string | null;
+      request_properties: components["schemas"]["Record_string.string_"] | null;
+      request_model: string | null;
+      model_override: string | null;
+      helicone_user: string | null;
+      provider: components["schemas"]["Provider"];
+      /** Format: double */
+      delay_ms: number | null;
+      /** Format: double */
+      time_to_first_token: number | null;
+      /** Format: double */
+      total_tokens: number | null;
+      /** Format: double */
+      prompt_tokens: number | null;
+      /** Format: double */
+      prompt_cache_write_tokens: number | null;
+      /** Format: double */
+      prompt_cache_read_tokens: number | null;
+      /** Format: double */
+      completion_tokens: number | null;
+      /** Format: double */
+      reasoning_tokens: number | null;
+      /** Format: double */
+      prompt_audio_tokens: number | null;
+      /** Format: double */
+      completion_audio_tokens: number | null;
+      /** Format: double */
+      cost: number | null;
+      prompt_id: string | null;
+      prompt_version: string | null;
+      feedback_created_at?: string | null;
+      feedback_id?: string | null;
+      feedback_rating?: boolean | null;
+      signed_body_url?: string | null;
+      llmSchema: components["schemas"]["LlmSchema"] | null;
+      country_code: string | null;
+      asset_ids: string[] | null;
+      asset_urls: components["schemas"]["Record_string.string_"] | null;
+      scores: components["schemas"]["Record_string.number_"] | null;
+      /** Format: double */
+      costUSD?: number | null;
+      properties: components["schemas"]["Record_string.string_"];
+      assets: string[];
+      target_url: string;
+      model: string;
+      cache_reference_id: string | null;
+      cache_enabled: boolean;
+      updated_at?: string;
+      request_referrer?: string | null;
+      ai_gateway_body_mapping: string | null;
+      storage_location?: string;
+    };
+    "ResultSuccess_HeliconeRequest-Array_": {
+      data: components["schemas"]["HeliconeRequest"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HeliconeRequest-Array.string_": components["schemas"]["ResultSuccess_HeliconeRequest-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_HeliconeRequest_: {
+      data: components["schemas"]["HeliconeRequest"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HeliconeRequest.string_": components["schemas"]["ResultSuccess_HeliconeRequest_"] | components["schemas"]["ResultError_string_"];
+    HeliconeRequestAsset: {
+      assetUrl: string;
+    };
+    ResultSuccess_HeliconeRequestAsset_: {
+      data: components["schemas"]["HeliconeRequestAsset"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HeliconeRequestAsset.string_": components["schemas"]["ResultSuccess_HeliconeRequestAsset_"] | components["schemas"]["ResultError_string_"];
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.number-or-boolean-or-undefined_": {
+      [key: string]: number | boolean;
+    };
+    Scores: components["schemas"]["Record_string.number-or-boolean-or-undefined_"];
+    ScoreRequest: {
+      scores: components["schemas"]["Scores"];
+    };
+    ConversationMessage: {
+      role: string;
+      content: string;
+    };
+    MostExpensiveRequest: {
+      requestId: string;
+      /** Format: double */
+      cost: number;
+      model: string;
+      provider: string;
+      createdAt: string;
+      /** Format: double */
+      promptTokens: number;
+      /** Format: double */
+      completionTokens: number;
+      conversation: {
+        /** Format: double */
+        totalWords: number;
+        /** Format: double */
+        turnCount: number;
+        messages: components["schemas"]["ConversationMessage"][];
+      } | null;
+    };
+    WrappedStats: {
+      /** Format: double */
+      totalRequests: number;
+      topProviders: {
+          /** Format: double */
+          count: number;
+          provider: string;
+        }[];
+      topModels: {
+          /** Format: double */
+          count: number;
+          model: string;
+        }[];
+      totalTokens: {
+        /** Format: double */
+        total: number;
+        /** Format: double */
+        cacheRead: number;
+        /** Format: double */
+        cacheWrite: number;
+        /** Format: double */
+        completion: number;
+        /** Format: double */
+        prompt: number;
+      };
+      mostExpensiveRequest: components["schemas"]["MostExpensiveRequest"] | null;
+    };
+    ResultSuccess_WrappedStats_: {
+      data: components["schemas"]["WrappedStats"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_WrappedStats.string_": components["schemas"]["ResultSuccess_WrappedStats_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__hasData-boolean__": {
+      data: {
+        hasData: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__hasData-boolean_.string_": components["schemas"]["ResultSuccess__hasData-boolean__"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_unknown_: {
+      data: unknown;
+      /** @enum {number|null} */
+      error: null;
+    };
+    ResultError_unknown_: {
+      /** @enum {number|null} */
+      data: null;
+      error: unknown;
+    };
+    WebhookData: {
+      destination: string;
+      config: components["schemas"]["Record_string.any_"];
+      includeData?: boolean;
+    };
+    "ResultSuccess__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array_": {
+      data: {
+          hmac_key: string;
+          config: string;
+          version: string;
+          destination: string;
+          created_at: string;
+          id: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array.string_": components["schemas"]["ResultSuccess__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__success-boolean--message-string__": {
+      data: {
+        message: string;
+        success: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__success-boolean--message-string_.string_": components["schemas"]["ResultSuccess__success-boolean--message-string__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array__": {
+      data: {
+        sharedPlatforms?: string[];
+        alreadyOnList?: boolean;
+        /** Format: double */
+        position?: number;
+        success: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array_.string_": components["schemas"]["ResultSuccess__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__isOnWaitlist-boolean__": {
+      data: {
+        isOnWaitlist: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__isOnWaitlist-boolean_.string_": components["schemas"]["ResultSuccess__isOnWaitlist-boolean__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__count-number__": {
+      data: {
+        /** Format: double */
+        count: number;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__count-number_.string_": components["schemas"]["ResultSuccess__count-number__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__success-boolean--newPosition_63_-number--message-string__": {
+      data: {
+        message: string;
+        /** Format: double */
+        newPosition?: number;
+        success: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__success-boolean--newPosition_63_-number--message-string_.string_": components["schemas"]["ResultSuccess__success-boolean--newPosition_63_-number--message-string__"] | components["schemas"]["ResultError_string_"];
+    AddVaultKeyParams: {
+      key: string;
+      provider: string;
+      name?: string;
+    };
+    "ResultSuccess_DecryptedProviderKey-Array_": {
+      data: components["schemas"]["DecryptedProviderKey"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_DecryptedProviderKey-Array.string_": components["schemas"]["ResultSuccess_DecryptedProviderKey-Array_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_DecryptedProviderKey_: {
+      data: components["schemas"]["DecryptedProviderKey"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_DecryptedProviderKey.string_": components["schemas"]["ResultSuccess_DecryptedProviderKey_"] | components["schemas"]["ResultError_string_"];
+    HistogramRow: {
+      range_start: string;
+      range_end: string;
+      /** Format: double */
+      value: number;
+    };
+    "ResultSuccess__request_count-HistogramRow-Array--user_cost-HistogramRow-Array__": {
+      data: {
+        user_cost: components["schemas"]["HistogramRow"][];
+        request_count: components["schemas"]["HistogramRow"][];
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__request_count-HistogramRow-Array--user_cost-HistogramRow-Array_.string_": components["schemas"]["ResultSuccess__request_count-HistogramRow-Array--user_cost-HistogramRow-Array__"] | components["schemas"]["ResultError_string_"];
+    /** @description Make all properties in T optional */
+    Partial_UserViewToOperators_: {
+      user_user_id?: components["schemas"]["Partial_TextOperators_"];
+      user_active_for?: components["schemas"]["Partial_NumberOperators_"];
+      user_first_active?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      user_last_active?: components["schemas"]["Partial_TimestampOperatorsTyped_"];
+      user_total_requests?: components["schemas"]["Partial_NumberOperators_"];
+      user_average_requests_per_day_active?: components["schemas"]["Partial_NumberOperators_"];
+      user_average_tokens_per_request?: components["schemas"]["Partial_NumberOperators_"];
+      user_total_completion_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      user_total_prompt_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      user_cost?: components["schemas"]["Partial_NumberOperators_"];
+    };
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_FilterLeaf.users_view-or-request_response_rmt_": {
+      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
+      users_view?: components["schemas"]["Partial_UserViewToOperators_"];
+    };
+    "FilterLeafSubset_users_view-or-request_response_rmt_": components["schemas"]["Pick_FilterLeaf.users_view-or-request_response_rmt_"];
+    UserFilterNode: components["schemas"]["FilterLeafSubset_users_view-or-request_response_rmt_"] | components["schemas"]["UserFilterBranch"] | "all";
+    UserFilterBranch: {
+      right: components["schemas"]["UserFilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      left: components["schemas"]["UserFilterNode"];
+    };
+    /** @enum {string} */
+    PSize: "p50" | "p75" | "p95" | "p99" | "p99.9";
+    UserMetricsResult: {
+      id: string;
+      user_id: string;
+      /** Format: double */
+      active_for: number;
+      first_active: string;
+      last_active: string;
+      /** Format: double */
+      total_requests: number;
+      /** Format: double */
+      average_requests_per_day_active: number;
+      /** Format: double */
+      average_tokens_per_request: number;
+      /** Format: double */
+      total_completion_tokens: number;
+      /** Format: double */
+      total_prompt_tokens: number;
+      /** Format: double */
+      cost: number;
+    };
+    "ResultSuccess__users-UserMetricsResult-Array--count-number--hasUsers-boolean__": {
+      data: {
+        hasUsers: boolean;
+        /** Format: double */
+        count: number;
+        users: components["schemas"]["UserMetricsResult"][];
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__users-UserMetricsResult-Array--count-number--hasUsers-boolean_.string_": components["schemas"]["ResultSuccess__users-UserMetricsResult-Array--count-number--hasUsers-boolean__"] | components["schemas"]["ResultError_string_"];
+    SortLeafUsers: {
+      id?: components["schemas"]["SortDirection"];
+      user_id?: components["schemas"]["SortDirection"];
+      active_for?: components["schemas"]["SortDirection"];
+      first_active?: components["schemas"]["SortDirection"];
+      last_active?: components["schemas"]["SortDirection"];
+      total_requests?: components["schemas"]["SortDirection"];
+      average_requests_per_day_active?: components["schemas"]["SortDirection"];
+      average_tokens_per_request?: components["schemas"]["SortDirection"];
+      total_prompt_tokens?: components["schemas"]["SortDirection"];
+      total_completion_tokens?: components["schemas"]["SortDirection"];
+      cost?: components["schemas"]["SortDirection"];
+      rate_limited_count?: components["schemas"]["SortDirection"];
+    };
+    UserMetricsQueryParams: {
+      filter: components["schemas"]["UserFilterNode"];
+      /** Format: double */
+      offset: number;
+      /** Format: double */
+      limit: number;
+      timeFilter?: {
+        /** Format: double */
+        endTimeUnixSeconds: number;
+        /** Format: double */
+        startTimeUnixSeconds: number;
+      };
+      /** Format: double */
+      timeZoneDifferenceMinutes?: number;
+      sort?: components["schemas"]["SortLeafUsers"];
+    };
+    "ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array_": {
+      data: {
+          /** Format: double */
+          cost: number;
+          user_id: string;
+          /** Format: double */
+          completion_tokens: number;
+          /** Format: double */
+          prompt_tokens: number;
+          /** Format: double */
+          count: number;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array.string_": components["schemas"]["ResultSuccess__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array_"] | components["schemas"]["ResultError_string_"];
+    UserQueryParams: {
+      userIds?: string[];
+      timeFilter?: {
+        /** Format: double */
+        endTimeUnixSeconds: number;
+        /** Format: double */
+        startTimeUnixSeconds: number;
+      };
     };
     ValidationError: {
       field: string;
@@ -2451,6 +2608,142 @@ Json: JsonObject;
     SendTestRequestRequest: {
       apiKey: string;
     };
+    ModelTokens: {
+      model: string;
+      /** Format: double */
+      totalTokens: number;
+    };
+    ModelUsageTimeSeriesDataPoint: {
+      time: string;
+      models: components["schemas"]["ModelTokens"][];
+    };
+    ModelUsageLeaderboardEntry: {
+      /** Format: double */
+      rank: number;
+      model: string;
+      author: string;
+      /** Format: double */
+      totalTokens: number;
+      /** Format: double */
+      percentChange: number | null;
+    };
+    ModelUsageResponse: {
+      timeSeries: components["schemas"]["ModelUsageTimeSeriesDataPoint"][];
+      leaderboard: components["schemas"]["ModelUsageLeaderboardEntry"][];
+    };
+    ResultSuccess_ModelUsageResponse_: {
+      data: components["schemas"]["ModelUsageResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ModelUsageResponse.string_": components["schemas"]["ResultSuccess_ModelUsageResponse_"] | components["schemas"]["ResultError_string_"];
+    /** @enum {string} */
+    StatsTimeFrame: "24h" | "7d" | "30d" | "3m" | "1y";
+    AuthorTokens: {
+      author: string;
+      /** Format: double */
+      totalTokens: number;
+      /** Format: double */
+      percentage: number;
+    };
+    MarketShareTimeSeriesDataPoint: {
+      time: string;
+      authors: components["schemas"]["AuthorTokens"][];
+    };
+    MarketShareLeaderboardEntry: {
+      /** Format: double */
+      rank: number;
+      author: string;
+      /** Format: double */
+      totalTokens: number;
+      /** Format: double */
+      marketShare: number;
+      /** Format: double */
+      rankChange: number | null;
+      /** Format: double */
+      marketShareChange: number | null;
+    };
+    MarketShareResponse: {
+      timeSeries: components["schemas"]["MarketShareTimeSeriesDataPoint"][];
+      leaderboard: components["schemas"]["MarketShareLeaderboardEntry"][];
+    };
+    ResultSuccess_MarketShareResponse_: {
+      data: components["schemas"]["MarketShareResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_MarketShareResponse.string_": components["schemas"]["ResultSuccess_MarketShareResponse_"] | components["schemas"]["ResultError_string_"];
+    ProviderTokens: {
+      provider: string;
+      /** Format: double */
+      totalTokens: number;
+    };
+    ProviderUsageTimeSeriesDataPoint: {
+      time: string;
+      providers: components["schemas"]["ProviderTokens"][];
+    };
+    ProviderUsageLeaderboardEntry: {
+      /** Format: double */
+      rank: number;
+      provider: string;
+      /** Format: double */
+      totalTokens: number;
+      /** Format: double */
+      percentChange: number | null;
+    };
+    ProviderUsageResponse: {
+      timeSeries: components["schemas"]["ProviderUsageTimeSeriesDataPoint"][];
+      leaderboard: components["schemas"]["ProviderUsageLeaderboardEntry"][];
+    };
+    ResultSuccess_ProviderUsageResponse_: {
+      data: components["schemas"]["ProviderUsageResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ProviderUsageResponse.string_": components["schemas"]["ResultSuccess_ProviderUsageResponse_"] | components["schemas"]["ResultError_string_"];
+    AuthorStatsResponse: {
+      author: string;
+      /** Format: double */
+      totalTokens: number;
+      timeSeries: components["schemas"]["ModelUsageTimeSeriesDataPoint"][];
+      leaderboard: components["schemas"]["ModelUsageLeaderboardEntry"][];
+    };
+    ResultSuccess_AuthorStatsResponse_: {
+      data: components["schemas"]["AuthorStatsResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_AuthorStatsResponse.string_": components["schemas"]["ResultSuccess_AuthorStatsResponse_"] | components["schemas"]["ResultError_string_"];
+    ProviderStatsResponse: {
+      provider: string;
+      /** Format: double */
+      totalTokens: number;
+      timeSeries: components["schemas"]["ModelUsageTimeSeriesDataPoint"][];
+      leaderboard: components["schemas"]["ModelUsageLeaderboardEntry"][];
+    };
+    ResultSuccess_ProviderStatsResponse_: {
+      data: components["schemas"]["ProviderStatsResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ProviderStatsResponse.string_": components["schemas"]["ResultSuccess_ProviderStatsResponse_"] | components["schemas"]["ResultError_string_"];
+    ModelStatsTimeSeriesDataPoint: {
+      time: string;
+      /** Format: double */
+      totalTokens: number;
+    };
+    ModelStatsResponse: {
+      model: string;
+      /** Format: double */
+      totalTokens: number;
+      timeSeries: components["schemas"]["ModelStatsTimeSeriesDataPoint"][];
+    };
+    ResultSuccess_ModelStatsResponse_: {
+      data: components["schemas"]["ModelStatsResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ModelStatsResponse.string_": components["schemas"]["ResultSuccess_ModelStatsResponse_"] | components["schemas"]["ResultError_string_"];
     SessionResult: {
       created_at: string;
       latest_request_created_at: string;
@@ -3273,6 +3566,18 @@ Json: JsonObject;
       /** Format: double */
       tpd?: number;
     };
+    /**
+     * @description Per-modality pricing configuration.
+     * Supports input, cached input (as multiplier), and output rates.
+     */
+    ModalityPricing: {
+      /** Format: double */
+      input?: number;
+      /** Format: double */
+      cachedInputMultiplier?: number;
+      /** Format: double */
+      output?: number;
+    };
     ModelPricing: {
       /** Format: double */
       threshold: number;
@@ -3280,8 +3585,6 @@ Json: JsonObject;
       input: number;
       /** Format: double */
       output: number;
-      /** Format: double */
-      image?: number;
       cacheMultipliers?: {
         /** Format: double */
         write1h?: number;
@@ -3296,10 +3599,10 @@ Json: JsonObject;
       thinking?: number;
       /** Format: double */
       request?: number;
-      /** Format: double */
-      audio?: number;
-      /** Format: double */
-      video?: number;
+      image?: components["schemas"]["ModalityPricing"];
+      audio?: components["schemas"]["ModalityPricing"];
+      video?: components["schemas"]["ModalityPricing"];
+      file?: components["schemas"]["ModalityPricing"];
       /** Format: double */
       web_search?: number;
     };
@@ -3391,21 +3694,27 @@ Json: JsonObject;
       /** Format: double */
       priority?: number;
     };
+    SimplifiedModalityPricing: {
+      /** Format: double */
+      input?: number;
+      /** Format: double */
+      cachedInput?: number;
+      /** Format: double */
+      output?: number;
+    };
     SimplifiedPricing: {
       /** Format: double */
       prompt: number;
       /** Format: double */
       completion: number;
-      /** Format: double */
-      audio?: number;
+      audio?: components["schemas"]["SimplifiedModalityPricing"];
       /** Format: double */
       thinking?: number;
       /** Format: double */
       web_search?: number;
-      /** Format: double */
-      image?: number;
-      /** Format: double */
-      video?: number;
+      image?: components["schemas"]["SimplifiedModalityPricing"];
+      video?: components["schemas"]["SimplifiedModalityPricing"];
+      file?: components["schemas"]["SimplifiedModalityPricing"];
       /** Format: double */
       cacheRead?: number;
       /** Format: double */
@@ -4244,243 +4553,6 @@ export type external = Record<string, never>;
 
 export interface operations {
 
-  GetWebhooks: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array.string_"];
-        };
-      };
-    };
-  };
-  NewWebhook: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["WebhookData"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_unknown_"];
-        };
-      };
-    };
-  };
-  DeleteWebhook: {
-    parameters: {
-      path: {
-        webhookId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  TestWebhook: {
-    parameters: {
-      path: {
-        webhookId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__success-boolean--message-string_.string_"];
-        };
-      };
-    };
-  };
-  AddToWaitlist: {
-    requestBody: {
-      content: {
-        "application/json": {
-          feature: string;
-          email: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array_.string_"];
-        };
-      };
-    };
-  };
-  IsOnWaitlist: {
-    parameters: {
-      query: {
-        email: string;
-        feature: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__isOnWaitlist-boolean_.string_"];
-        };
-      };
-    };
-  };
-  GetWaitlistCount: {
-    parameters: {
-      query: {
-        feature: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__count-number_.string_"];
-        };
-      };
-    };
-  };
-  TrackShare: {
-    requestBody: {
-      content: {
-        "application/json": {
-          /** @enum {string} */
-          platform: "twitter" | "linkedin";
-          feature: string;
-          email: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__success-boolean--newPosition_63_-number--message-string_.string_"];
-        };
-      };
-    };
-  };
-  AddKey: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["AddVaultKeyParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__id-string_.string_"];
-        };
-      };
-    };
-  };
-  GetKeys: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_DecryptedProviderKey-Array.string_"];
-        };
-      };
-    };
-  };
-  GetKeyById: {
-    parameters: {
-      path: {
-        providerKeyId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_DecryptedProviderKey.string_"];
-        };
-      };
-    };
-  };
-  UpdateKey: {
-    parameters: {
-      path: {
-        id: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          active?: boolean;
-          name?: string;
-          key?: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  GetUserMetricsOverview: {
-    requestBody: {
-      content: {
-        "application/json": {
-          useInterquartile: boolean;
-          pSize: components["schemas"]["PSize"];
-          filter: components["schemas"]["UserFilterNode"];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__request_count-HistogramRow-Array--user_cost-HistogramRow-Array_.string_"];
-        };
-      };
-    };
-  };
-  GetUserMetrics: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UserMetricsQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__users-UserMetricsResult-Array--count-number--hasUsers-boolean_.string_"];
-        };
-      };
-    };
-  };
-  GetUsers: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UserQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array.string_"];
-        };
-      };
-    };
-  };
   GetProviderKey: {
     parameters: {
       path: {
@@ -5193,167 +5265,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_PromptVersionCounts.string_"];
-        };
-      };
-    };
-  };
-  GetRequestCount: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["RequestQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_number.string_"];
-        };
-      };
-    };
-  };
-  GetRequests: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["RequestQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
-        };
-      };
-    };
-  };
-  GetRequestsClickhouse: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["RequestQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
-        };
-      };
-    };
-  };
-  GetRequestById: {
-    parameters: {
-      query?: {
-        includeBody?: boolean;
-      };
-      path: {
-        requestId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_HeliconeRequest.string_"];
-        };
-      };
-    };
-  };
-  GetRequestsByIds: {
-    requestBody: {
-      content: {
-        "application/json": {
-          requestIds: string[];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
-        };
-      };
-    };
-  };
-  FeedbackRequest: {
-    parameters: {
-      path: {
-        requestId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          rating: boolean;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  PutProperty: {
-    parameters: {
-      path: {
-        requestId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          value: string;
-          key: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  GetRequestAssetById: {
-    parameters: {
-      path: {
-        requestId: string;
-        assetId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_HeliconeRequestAsset.string_"];
-        };
-      };
-    };
-  };
-  AddScores: {
-    parameters: {
-      path: {
-        requestId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ScoreRequest"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };
@@ -6445,6 +6356,16 @@ export interface operations {
       };
     };
   };
+  GetUsageStats: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["UsageStatsResponse"] | null;
+        };
+      };
+    };
+  };
   GetIntegrations: {
     responses: {
       /** @description Ok */
@@ -6560,6 +6481,424 @@ export interface operations {
       };
     };
   };
+  GetRequestCount: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RequestQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_number.string_"];
+        };
+      };
+    };
+  };
+  GetRequests: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RequestQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
+        };
+      };
+    };
+  };
+  GetRequestsClickhouse: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RequestQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
+        };
+      };
+    };
+  };
+  GetRequestById: {
+    parameters: {
+      query?: {
+        includeBody?: boolean;
+      };
+      path: {
+        requestId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HeliconeRequest.string_"];
+        };
+      };
+    };
+  };
+  GetRequestsByIds: {
+    requestBody: {
+      content: {
+        "application/json": {
+          requestIds: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HeliconeRequest-Array.string_"];
+        };
+      };
+    };
+  };
+  FeedbackRequest: {
+    parameters: {
+      path: {
+        requestId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          rating: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  PutProperty: {
+    parameters: {
+      path: {
+        requestId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          value: string;
+          key: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetRequestAssetById: {
+    parameters: {
+      path: {
+        requestId: string;
+        assetId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HeliconeRequestAsset.string_"];
+        };
+      };
+    };
+  };
+  AddScores: {
+    parameters: {
+      path: {
+        requestId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ScoreRequest"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetWrapped2025Stats: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_WrappedStats.string_"];
+        };
+      };
+    };
+  };
+  CheckHasWrapped2025Data: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__hasData-boolean_.string_"];
+        };
+      };
+    };
+  };
+  GetWebhooks: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string--created_at-string--destination-string--version-string--config-string--hmac_key-string_-Array.string_"];
+        };
+      };
+    };
+  };
+  NewWebhook: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["WebhookData"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_unknown_"];
+        };
+      };
+    };
+  };
+  DeleteWebhook: {
+    parameters: {
+      path: {
+        webhookId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  TestWebhook: {
+    parameters: {
+      path: {
+        webhookId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__success-boolean--message-string_.string_"];
+        };
+      };
+    };
+  };
+  AddToWaitlist: {
+    requestBody: {
+      content: {
+        "application/json": {
+          feature: string;
+          email: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array_.string_"];
+        };
+      };
+    };
+  };
+  IsOnWaitlist: {
+    parameters: {
+      query: {
+        email: string;
+        feature: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__isOnWaitlist-boolean_.string_"];
+        };
+      };
+    };
+  };
+  GetWaitlistCount: {
+    parameters: {
+      query: {
+        feature: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__count-number_.string_"];
+        };
+      };
+    };
+  };
+  TrackShare: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @enum {string} */
+          platform: "twitter" | "linkedin";
+          feature: string;
+          email: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__success-boolean--newPosition_63_-number--message-string_.string_"];
+        };
+      };
+    };
+  };
+  AddKey: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AddVaultKeyParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string_.string_"];
+        };
+      };
+    };
+  };
+  GetKeys: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_DecryptedProviderKey-Array.string_"];
+        };
+      };
+    };
+  };
+  GetKeyById: {
+    parameters: {
+      path: {
+        providerKeyId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_DecryptedProviderKey.string_"];
+        };
+      };
+    };
+  };
+  UpdateKey: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          active?: boolean;
+          name?: string;
+          key?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetUserMetricsOverview: {
+    requestBody: {
+      content: {
+        "application/json": {
+          useInterquartile: boolean;
+          pSize: components["schemas"]["PSize"];
+          filter: components["schemas"]["UserFilterNode"];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__request_count-HistogramRow-Array--user_cost-HistogramRow-Array_.string_"];
+        };
+      };
+    };
+  };
+  GetUserMetrics: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserMetricsQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__users-UserMetricsResult-Array--count-number--hasUsers-boolean_.string_"];
+        };
+      };
+    };
+  };
+  GetUsers: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__count-number--prompt_tokens-number--completion_tokens-number--user_id-string--cost-number_-Array.string_"];
+        };
+      };
+    };
+  };
   LogCustomTraceLegacy: {
     requestBody: {
       content: {
@@ -6638,6 +6977,138 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["SendTestRequestResponse"];
+        };
+      };
+    };
+  };
+  /**
+   * @description Get model usage statistics for the AI Gateway.
+   * Returns time series data and a leaderboard of top models by total tokens.
+   */
+  GetModelUsage: {
+    parameters: {
+      query?: {
+        /** @description Time range: "24h", "7d", "30d", "3m", or "1y" */
+        timeframe?: components["schemas"]["StatsTimeFrame"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ModelUsageResponse.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * @description Get market share statistics by model author for the AI Gateway.
+   * Returns time series data (100% stacked) and a leaderboard of top 9 authors + others.
+   */
+  GetMarketShare: {
+    parameters: {
+      query?: {
+        /** @description Time range: "24h", "7d", "30d", "3m", or "1y" */
+        timeframe?: components["schemas"]["StatsTimeFrame"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_MarketShareResponse.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * @description Get provider usage statistics for the AI Gateway.
+   * Returns time series data and a leaderboard of top 9 providers + others.
+   */
+  GetProviderUsage: {
+    parameters: {
+      query?: {
+        /** @description Time range: "24h", "7d", "30d", "3m", or "1y" */
+        timeframe?: components["schemas"]["StatsTimeFrame"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ProviderUsageResponse.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * @description Get statistics for a specific model author.
+   * Returns time series data and a leaderboard of top models by that author.
+   */
+  GetAuthorStats: {
+    parameters: {
+      query?: {
+        /** @description Time range: "24h", "7d", "30d", "3m", or "1y" */
+        timeframe?: components["schemas"]["StatsTimeFrame"];
+      };
+      path: {
+        /** @description The author identifier (e.g., "openai", "anthropic") */
+        author: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_AuthorStatsResponse.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * @description Get statistics for a specific inference provider.
+   * Returns time series data and a leaderboard of top models on that provider.
+   */
+  GetProviderStats: {
+    parameters: {
+      query?: {
+        /** @description Time range: "24h", "7d", "30d", "3m", or "1y" */
+        timeframe?: components["schemas"]["StatsTimeFrame"];
+      };
+      path: {
+        /** @description The provider identifier (e.g., "openai", "anthropic") */
+        provider: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ProviderStatsResponse.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * @description Get usage statistics for a specific model.
+   * Returns time series data showing token usage over time.
+   */
+  GetModelStats: {
+    parameters: {
+      query?: {
+        /** @description Time range: "24h", "7d", "30d", "3m", or "1y" */
+        timeframe?: components["schemas"]["StatsTimeFrame"];
+      };
+      path: {
+        /** @description The model identifier (e.g., "gpt-4", "claude-3-opus") */
+        model: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ModelStatsResponse.string_"];
         };
       };
     };
@@ -6848,7 +7319,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["ResultError_string_"] | components["schemas"]["ResultSuccess_unknown-Array_"] | components["schemas"]["ResultSuccess_string_"] | {
+          "application/json": components["schemas"]["ResultError_string_"] | components["schemas"]["ResultSuccess_string_"] | components["schemas"]["ResultSuccess_unknown-Array_"] | {
             error: unknown;
             data: {
               ok: boolean;
@@ -6880,7 +7351,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["ResultError_string_"] | components["schemas"]["ResultSuccess_unknown-Array_"] | components["schemas"]["ResultSuccess_string_"] | {
+          "application/json": components["schemas"]["ResultError_string_"] | components["schemas"]["ResultSuccess_string_"] | components["schemas"]["ResultSuccess_unknown-Array_"] | {
             error: unknown;
             data: {
               ok: boolean;
@@ -7555,7 +8026,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_string_"];
+          "application/json": components["schemas"]["ResultError_string_"] | components["schemas"]["ResultSuccess_unknown_"];
         };
       };
     };

@@ -99,6 +99,7 @@ export class AttemptBuilder {
     const providerDataResult = registry.getModelProviderEntriesByModel(
       modelSpec.modelName
     );
+
     // Filter out providers that require explicit routing (e.g., helicone)
     // and globally ignored providers
     const providerData = (providerDataResult.data || []).filter(
@@ -123,7 +124,7 @@ export class AttemptBuilder {
 
     const attemptArrays = await Promise.all(
       providerData.map(async (data) => {
-        const byokAttempts = await this.buildByokAttempts(
+        const byokAttempts = this.buildByokAttempts(
           modelSpec,
           data,
           orgId,
@@ -132,13 +133,13 @@ export class AttemptBuilder {
         );
 
         // Always build PTB attempts (feature flag removed)
-        const ptbAttempts = await this.buildPtbAttempts(
+        const ptbAttempts = this.buildPtbAttempts(
           modelSpec,
           data,
           bodyMapping,
           plugins
         );
-        return [...byokAttempts, ...ptbAttempts];
+        return [...(await byokAttempts), ...(await ptbAttempts)];
       })
     );
 
@@ -171,22 +172,18 @@ export class AttemptBuilder {
 
     const providerData = providerDataResult.data;
 
-    // Get BYOK attempts
-    const byokAttempts = await this.buildByokAttempts(
-      modelSpec,
-      providerData,
-      orgId,
-      bodyMapping,
-      plugins
-    );
+    // Build BYOK and PTB attempts in parallel since they're independent
+    const [byokAttempts, ptbAttempts] = await Promise.all([
+      this.buildByokAttempts(
+        modelSpec,
+        providerData,
+        orgId,
+        bodyMapping,
+        plugins
+      ),
+      this.buildPtbAttempts(modelSpec, providerData, bodyMapping, plugins),
+    ]);
 
-    // Always build PTB attempts (feature flag removed)
-    const ptbAttempts = await this.buildPtbAttempts(
-      modelSpec,
-      providerData,
-      bodyMapping,
-      plugins
-    );
     return [...byokAttempts, ...ptbAttempts];
   }
 

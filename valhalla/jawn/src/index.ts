@@ -17,11 +17,11 @@ import {
 } from "./lib/clients/kafkaConsumers/constant";
 import { webSocketProxyForwarder } from "./lib/proxy/WebSocketProxyForwarder";
 import { RequestWrapper } from "./lib/requestWrapper/requestWrapper";
-import { tokenRouter } from "./lib/routers/tokenRouter";
 import { DelayedOperationService } from "./lib/shared/delayedOperationService";
 import { runLoopsOnce, runMainLoops } from "./mainLoops";
 import { authFromRequest, authMiddleware } from "./middleware/auth";
 import { IS_RATE_LIMIT_ENABLED, limiter } from "./middleware/ratelimitter";
+import { unauthorizedCacheMiddleware } from "./middleware/unauthorizedCache";
 import { RegisterRoutes as registerPrivateTSOARoutes } from "./tsoa-build/private/routes";
 import { RegisterRoutes as registerPublicTSOARoutes } from "./tsoa-build/public/routes";
 import * as publicSwaggerDoc from "./tsoa-build/public/swagger.json";
@@ -180,16 +180,14 @@ unAuthenticatedRouter.use(
   swaggerUi.setup(publicSwaggerDoc as any)
 );
 
-unAuthenticatedRouter.use(tokenRouter);
-
 unAuthenticatedRouter.use("/download/swagger.json", (req, res) => {
   res.json(publicSwaggerDoc as any);
 });
 
-// v1APIRouter.use(
-//   "/v1/public/dataisbeautiful",
-//   unauthorizedCacheMiddleware("/v1/public/dataisbeautiful")
-// );
+v1APIRouter.use(
+  "/v1/public/stats",
+  unauthorizedCacheMiddleware("stats", 4 * 60 * 60 * 1000)
+);
 
 v1APIRouter.use(authMiddleware);
 

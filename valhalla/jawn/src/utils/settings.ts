@@ -26,6 +26,10 @@ export interface SqsSettings {
 
 export interface StripeProductSettings {
   cloudGatewayTokenUsageProduct: string;
+  requestVolumePrice_20251210?: string; // Metered request-based billing
+  gigVolumePrice_20251210?: string; // Metered GB-based billing
+  pro20251210_79Price?: string; // $79/mo flat Pro
+  team20251210_799Price?: string; // $799/mo flat Team
 }
 
 export interface SettingsType {

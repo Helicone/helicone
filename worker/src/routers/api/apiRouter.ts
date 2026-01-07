@@ -101,9 +101,11 @@ function getAPIRouterV1(
       }
 
       try {
-        const { removeFromCache } = await import("../../lib/util/cache/secureCache");
+        const { removeFromCache } = await import(
+          "../../lib/util/cache/secureCache"
+        );
         const cacheKeysToDelete: string[] = [];
-        
+
         if (data.versionId) {
           const promptBodyCacheKey = `prompt_body_${data.promptId}_${data.versionId}_${orgId}`;
           cacheKeysToDelete.push(promptBodyCacheKey);
@@ -118,30 +120,34 @@ function getAPIRouterV1(
         }
 
         await Promise.all(
-          cacheKeysToDelete.map(key => 
-            removeFromCache(key, env)
-          )
+          cacheKeysToDelete.map((key) => removeFromCache(key, env))
         );
 
-        return new Response(JSON.stringify({ 
-          success: true, 
-          deletedKeys: cacheKeysToDelete 
-        }), { 
-          status: 200,
-          headers: { "Content-Type": "application/json" }
-        });
+        return new Response(
+          JSON.stringify({
+            success: true,
+            deletedKeys: cacheKeysToDelete,
+          }),
+          {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
       } catch (error) {
         console.error("Error resetting prompt cache:", error);
-        return new Response(JSON.stringify({ 
-          success: false, 
-          error: error instanceof Error ? error.message : "Unknown error" 
-        }), { 
-          status: 500,
-          headers: { "Content-Type": "application/json" }
-        });
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: error instanceof Error ? error.message : "Unknown error",
+          }),
+          {
+            status: 500,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
       }
     }
-  )
+  );
 
   router.post(
     "/mock-set-provider-keys/:orgId",

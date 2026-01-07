@@ -127,6 +127,18 @@ export interface ReasoningDetail {
 }
 
 /**
+ * Image content part for image outputs in assistant messages.
+ * Used when models generate images as part of their response.
+ */
+export interface HeliconeContentPartImage {
+  type: "image_url";
+  image_url: {
+    url: string;
+    detail?: "auto" | "low" | "high";
+  };
+}
+
+/**
  * OpenAI message with optional cache control support
  */
 type HeliconeMessageParam<T> = Omit<T, 'content'> & {
@@ -134,6 +146,8 @@ type HeliconeMessageParam<T> = Omit<T, 'content'> & {
   cache_control?: CacheControl;
   reasoning?: string;
   reasoning_details?: ReasoningDetail[];
+  /** Image outputs from models that support image generation (e.g., Google Gemini) */
+  images?: HeliconeContentPartImage[];
 };
 
 export type HeliconeChatCompletionMessageParam = 
@@ -144,19 +158,54 @@ export type HeliconeChatCompletionMessageParam =
   | HeliconeMessageParam<ChatCompletionToolMessageParam>
   | HeliconeMessageParam<ChatCompletionFunctionMessageParam>
 
+export interface HeliconeImageGenerationConfig {
+  aspect_ratio: string; // e.g "16:9"
+  image_size: string; // e.g "2K"
+}
+
+/**
+ * Additional configuration options for Helicone chat completions.
+ * These parameters extend the standard OpenAI chat completion parameters
+ * with provider-specific options that may not be available in all models.
+ */
+export type HeliconeChatCompletionExtraConfig = {
+  /**
+   * Limits the number of highest probability vocabulary tokens to consider for generation.
+   * Only supported by certain providers (e.g., Anthropic, Google).
+   * Will be ignored by providers that don't support this parameter.
+   * 
+   * @example
+   * ```typescript
+   * const response = await openai.chat.completions.create({
+   *   model: "claude-3-sonnet-20240229",
+   *   top_k: 40,
+   *   messages: [{ role: "user", content: "Hello!" }]
+   * } as HeliconeChatCreateParams);
+   * ```
+   */
+  top_k?: number;
+
+  /**
+   * Configuration for image generation.
+   * Only supported by certain providers (e.g., Google).
+   * Will be ignored by providers that don't support this parameter.
+   */
+  image_generation?: HeliconeImageGenerationConfig;
+}
+
 /**
  * Non-streaming completion params with optional messages
  */
 type ChatCompletionCreateParamsNonStreamingPartialMessages = Omit<ChatCompletionCreateParamsNonStreaming, 'messages'> & { 
   messages?: HeliconeChatCompletionMessageParam[] 
-};
+} & HeliconeChatCompletionExtraConfig;
 
 /**
  * Streaming completion params with optional messages
  */
 type ChatCompletionCreateParamsStreamingPartialMessages = Omit<ChatCompletionCreateParamsStreaming, 'messages'> & { 
   messages?: HeliconeChatCompletionMessageParam[] 
-};
+} & HeliconeChatCompletionExtraConfig;
 
 /**
  * Parameters for using Helicone prompt templates.
@@ -188,11 +237,26 @@ export type HeliconePromptParams = {
   inputs?: Record<string, any>;
 };
 
+/**
+ * Reasoning options for controlling thinking/reasoning behavior.
+ */
 export interface HeliconeReasoningOptions {
   reasoning_options?: {
-    budget_tokens: number;
-  }
-};
+    /**
+     * Token budget for thinking.
+     * - For Google Gemini 2.5: Maps to thinkingConfig.thinkingBudget
+     * - Use -1 for dynamic thinking
+     */
+    budget_tokens?: number;
+
+    /**
+     * Thinking level for Google Gemini 3+ models.
+     * - "low" for faster, less detailed reasoning
+     * - "high" for more detailed reasoning
+     */
+    thinking_level?: "low" | "high";
+  };
+}
 
 /**
  * Configuration for context editing strategies.
@@ -270,11 +334,30 @@ export interface HeliconeContextEditingOptions {
  *   prompt_id: "123",
  *   model: "gpt-4o",
  *   
- *   // Optional: only for reasoning models
+ *   // Optional: reasoning configuration for reasoning models
  *   reasoning_options: {
  *     // For Anthropic models
  *     budget_tokens: 1000,
+ *     // For Google models
+ *     thinking_level: "high",
  *   },
+ *   
+ *   // Optional: context editing for Anthropic models
+ *   context_editing: {
+ *     enabled: true,
+ *     clear_tool_uses: {
+ *       trigger: 100000,
+ *       keep: 3,
+ *     },
+ *     clear_thinking: {
+ *       keep: 1,
+ *     },
+ *   },
+ *   
+ *   // Optional: image generation config for Google models
+ *   aspect_ratio: "16:9",
+ *   image_size: "2K",
+ *   
  *   messages: [
  *     // Message-level cache control (string content)
  *     {

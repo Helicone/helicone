@@ -66,6 +66,15 @@ export class HeliconeProvider extends BaseProvider {
       });
     }
 
+    // Convert responses API format to chat completions format first
+    // GPT models (gpt-* and Helicone's pa/gt-*) support Responses API natively
+    // Other models (o1, o3, claude, etc.) need conversion to chat completions
+    if (context.bodyMapping === "RESPONSES" &&
+        !endpoint.providerModelId.includes("gpt") &&
+        !endpoint.providerModelId.includes("/gt")) {
+      updatedBody = context.toChatCompletions(updatedBody);
+    }
+
     if (isAnthropicModel) {
       const anthropicBody = context.toAnthropic(
         updatedBody,
@@ -77,12 +86,6 @@ export class HeliconeProvider extends BaseProvider {
       }
 
       return JSON.stringify(anthropicBody);
-    }
-
-    // TODO: when anthropic models are supported with Responses API
-    // move this converstion BEFORE toAnthropic
-    if (context.bodyMapping === "RESPONSES") {
-      updatedBody = context.toChatCompletions(updatedBody);
     }
 
     // Standard format - just pass through with correct model

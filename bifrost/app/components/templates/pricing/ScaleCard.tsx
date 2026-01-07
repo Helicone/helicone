@@ -19,25 +19,22 @@ const ScaleCard: React.FC = () => {
               <Badge variant="default">POPULAR</Badge>
             </Row>
             <Row className="items-center gap-0.5">
-              <div className="text-brand text-3xl font-bold">$20</div>
-              <Row className="py-1 items-center gap-1">
-                <div className="text-brand text-lg font-bold">/seat</div>
-                <div className="text-accent-foreground text-lg font-semibold">
-                  per month
-                </div>
-              </Row>
+              <div className="text-brand text-3xl font-bold">$79</div>
+              <div className="text-accent-foreground text-lg font-semibold">
+                per month
+              </div>
             </Row>
             <div className="text-sidebar-foreground text-sm font-normal">
-              Starter plan for teams.
+              For growing teams.
             </div>
           </Col>
 
           <Col>
             {[
               "Everything in Hobby",
-              "Scale beyond 10k requests",
-              "Core observability features",
-              "Standard support",
+              "Unlimited seats",
+              "Unlimited requests",
+              "Tiered usage-based billing",
             ].map((feature, index) => (
               <div key={index} className="py-1.5 flex items-center gap-2">
                 <div className="w-4 h-4 relative overflow-hidden">

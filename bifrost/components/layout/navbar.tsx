@@ -12,7 +12,6 @@ import {
 import { cn } from "@/lib/utils";
 import {
   X,
-  Briefcase,
   Mail,
   BookHeart,
   ChevronRight,
@@ -24,6 +23,7 @@ import {
   GitMerge,
   HandCoins,
   TrendingUp,
+  BarChart3,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -288,6 +288,15 @@ const mainComponents: LinkItem[] = [
     description: "Browse and compare AI models",
     icon: <Scale className="size-5 navbar-icon-style" />,
   },
+  // {
+  //   title: "Stats",
+  //   link: {
+  //     href: "/stats",
+  //     isExternal: false,
+  //   },
+  //   description: "View AI Gateway usage statistics",
+  //   icon: <BarChart3 className="size-5 navbar-icon-style" />,
+  // },
 ];
 
 const additionalComponents: LinkItem[] = [
@@ -299,15 +308,6 @@ const additionalComponents: LinkItem[] = [
     },
     description: "Get in touch with us",
     icon: <Mail className="size-5 navbar-icon-style" />,
-  },
-  {
-    title: "Careers",
-    link: {
-      href: "https://app.dover.com/jobs/helicone",
-      isExternal: true,
-    },
-    description: "Join our team",
-    icon: <Briefcase className="size-5 navbar-icon-style" />,
   },
   {
     title: "GitHub",
@@ -402,6 +402,15 @@ const NavBar = (props: NavBarProps) => {
                 </Link>
               </NavigationMenuItem>
 
+              {/* Stats */}
+              <NavigationMenuItem>
+                <Link href="/stats" legacyBehavior passHref>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    Stats
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+
               {/* Resources */}
               <NavigationMenuItem>
                 <NavigationMenuTrigger>Resources</NavigationMenuTrigger>
@@ -470,18 +479,6 @@ const NavBar = (props: NavBarProps) => {
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
-              {/* Careers */}
-              <NavigationMenuItem>
-                <Link
-                  href="https://app.dover.com/jobs/helicone"
-                  legacyBehavior
-                  passHref
-                >
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    Careers
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
 
