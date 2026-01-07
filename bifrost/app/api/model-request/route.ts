@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const SLACK_CHANNEL_ID = "C0A1JK43BFE";
-
 // Simple in-memory rate limiting
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
 const MAX_REQUESTS_PER_WINDOW = 3;
@@ -148,7 +146,6 @@ export async function POST(request: NextRequest) {
     }
 
     const slackPayload = {
-      channel: SLACK_CHANNEL_ID,
       blocks,
       text: `${envPrefix}New model/provider request: Model: ${sanitizedModel || "N/A"}, Provider: ${sanitizedProvider || "N/A"}`,
     };
