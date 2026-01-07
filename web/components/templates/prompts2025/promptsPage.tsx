@@ -379,7 +379,7 @@ const PromptsPage = (props: PromptsPageProps) => {
         const promptVersions = prompt.versions.map((version) => {
           return `
           Version: ${version.major_version}.${version.minor_version} (ID: ${version.id})
-          Environment: ${version.environment}
+          Environments: ${version.environments?.join(", ") || "none"}
           Commit Message: ${version.commit_message}\n
           `;
         });

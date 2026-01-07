@@ -87,9 +87,9 @@ export class Prompt2025Manager extends BaseManager {
 
   async getPromptEnvironments(): Promise<Result<string[], string>> {
     const result = await dbExecute<{ environment: string }>(
-      `SELECT DISTINCT environment 
-       FROM prompts_2025_versions 
-       WHERE organization = $1 AND soft_delete = false AND environment IS NOT NULL
+      `SELECT DISTINCT unnest(environments) as environment
+       FROM prompts_2025_versions
+       WHERE organization = $1 AND soft_delete = false AND environments IS NOT NULL
        ORDER BY environment`,
       [this.authParams.organizationId]
     );
@@ -296,7 +296,8 @@ export class Prompt2025Manager extends BaseManager {
         versions.minor_version,
         versions.commit_message,
         versions.created_at,
-        versions.model
+        versions.model,
+        versions.environments
       FROM prompts_2025 AS prompts
       INNER JOIN prompts_2025_versions AS versions
       ON prompts.production_version = versions.id
@@ -330,7 +331,7 @@ export class Prompt2025Manager extends BaseManager {
   }): Promise<Result<Prompt2025Version[], string>> {
     const result = await dbExecute<Prompt2025Version>(
       `
-      SELECT 
+      SELECT
         id,
         prompt_id,
         major_version,
@@ -338,7 +339,7 @@ export class Prompt2025Manager extends BaseManager {
         commit_message,
         created_at,
         model,
-        environment
+        environments
       FROM prompts_2025_versions
       WHERE prompt_id = $1
       AND organization = $2 AND soft_delete is false
@@ -362,7 +363,7 @@ export class Prompt2025Manager extends BaseManager {
   }): Promise<Result<Prompt2025Version, string>> {
     const result = await dbExecute<Prompt2025Version>(
       `
-      SELECT 
+      SELECT
         id,
         prompt_id,
         major_version,
@@ -370,9 +371,10 @@ export class Prompt2025Manager extends BaseManager {
         commit_message,
         created_at,
         model,
-        environment
+        environments
       FROM prompts_2025_versions
-      WHERE prompt_id = $1 AND environment = $2 AND organization = $3 AND soft_delete is false
+      WHERE prompt_id = $1 AND environments @> ARRAY[$2]::text[] AND organization = $3 AND soft_delete is false
+      LIMIT 1
       `,
       [params.promptId, params.environment, this.authParams.organizationId]
     );
@@ -401,7 +403,7 @@ export class Prompt2025Manager extends BaseManager {
   }): Promise<Result<Prompt2025Version, string>> {
     const result = await dbExecute<Prompt2025Version>(
       `
-      SELECT 
+      SELECT
         id,
         prompt_id,
         major_version,
@@ -409,7 +411,7 @@ export class Prompt2025Manager extends BaseManager {
         commit_message,
         created_at,
         model,
-        environment
+        environments
       FROM prompts_2025_versions
       WHERE id = $1
       AND organization = $2 AND soft_delete is false
@@ -636,7 +638,7 @@ export class Prompt2025Manager extends BaseManager {
     environment: string;
   }): Promise<Result<null, string>> {
     const versionCheck = await dbExecute<{ id: string }>(
-      `SELECT id FROM prompts_2025_versions 
+      `SELECT id FROM prompts_2025_versions
       WHERE id = $1 AND prompt_id = $2 AND organization = $3 AND soft_delete is false`,
       [params.promptVersionId, params.promptId, this.authParams.organizationId]
     );
@@ -661,20 +663,114 @@ export class Prompt2025Manager extends BaseManager {
       }
     }
 
+    // Remove this environment from all other versions of this prompt (one version per environment)
+    // Then add the environment to the target version's environments array
     const updateEnvResult = await dbExecute(
       `
       BEGIN;
-      
-      UPDATE prompts_2025_versions 
-      SET environment = NULL 
-      WHERE prompt_id = $1 AND organization = $2 AND environment = $3 AND soft_delete = false;
-      
-      UPDATE prompts_2025_versions 
-      SET environment = $3 
-      WHERE id = $4 AND prompt_id = $1 AND organization = $2 AND soft_delete = false;
-      
+
+      UPDATE prompts_2025_versions
+      SET environments = array_remove(COALESCE(environments, ARRAY[]::text[]), $3)
+      WHERE prompt_id = $1 AND organization = $2 AND soft_delete = false;
+
+      UPDATE prompts_2025_versions
+      SET environments = array_append(COALESCE(environments, ARRAY[]::text[]), $3)
+      WHERE id = $4 AND prompt_id = $1 AND organization = $2 AND soft_delete = false
+      AND NOT (COALESCE(environments, ARRAY[]::text[]) @> ARRAY[$3]::text[]);
+
       COMMIT;
       `,
+      [params.promptId, this.authParams.organizationId, params.environment, params.promptVersionId]
+    );
+
+    if (updateEnvResult.error) {
+      return err(updateEnvResult.error);
+    }
+
+    await this.resetPromptCache({
+      promptId: params.promptId,
+      environment: params.environment,
+    });
+
+    return ok(null);
+  }
+
+  async addEnvironmentToVersion(params: {
+    promptId: string;
+    promptVersionId: string;
+    environment: string;
+  }): Promise<Result<null, string>> {
+    const versionCheck = await dbExecute<{ id: string }>(
+      `SELECT id FROM prompts_2025_versions
+      WHERE id = $1 AND prompt_id = $2 AND organization = $3 AND soft_delete is false`,
+      [params.promptVersionId, params.promptId, this.authParams.organizationId]
+    );
+
+    if (versionCheck.error) {
+      return err(versionCheck.error);
+    }
+
+    if (!versionCheck.data?.[0]) {
+      return err("Prompt version not found or does not belong to the specified prompt");
+    }
+
+    // Add environment to the version's environments array (if not already present)
+    const updateEnvResult = await dbExecute(
+      `UPDATE prompts_2025_versions
+       SET environments = array_append(COALESCE(environments, ARRAY[]::text[]), $3)
+       WHERE id = $4 AND prompt_id = $1 AND organization = $2 AND soft_delete = false
+       AND NOT (COALESCE(environments, ARRAY[]::text[]) @> ARRAY[$3]::text[])`,
+      [params.promptId, this.authParams.organizationId, params.environment, params.promptVersionId]
+    );
+
+    if (updateEnvResult.error) {
+      return err(updateEnvResult.error);
+    }
+
+    // Update production version ref if adding production
+    if (params.environment === PRODUCTION_ENVIRONMENT) {
+      const result = await dbExecute<null>(
+        `UPDATE prompts_2025 SET production_version = $1 WHERE id = $2 AND organization = $3 AND soft_delete is false`,
+        [params.promptVersionId, params.promptId, this.authParams.organizationId]
+      );
+
+      if (result.error) {
+        return err(result.error);
+      }
+    }
+
+    await this.resetPromptCache({
+      promptId: params.promptId,
+      environment: params.environment,
+    });
+
+    return ok(null);
+  }
+
+  async removeEnvironmentFromVersion(params: {
+    promptId: string;
+    promptVersionId: string;
+    environment: string;
+  }): Promise<Result<null, string>> {
+    const versionCheck = await dbExecute<{ id: string }>(
+      `SELECT id FROM prompts_2025_versions
+      WHERE id = $1 AND prompt_id = $2 AND organization = $3 AND soft_delete is false`,
+      [params.promptVersionId, params.promptId, this.authParams.organizationId]
+    );
+
+    if (versionCheck.error) {
+      return err(versionCheck.error);
+    }
+
+    if (!versionCheck.data?.[0]) {
+      return err("Prompt version not found or does not belong to the specified prompt");
+    }
+
+    // Remove environment from the version's environments array
+    const updateEnvResult = await dbExecute(
+      `UPDATE prompts_2025_versions
+       SET environments = array_remove(COALESCE(environments, ARRAY[]::text[]), $3)
+       WHERE id = $4 AND prompt_id = $1 AND organization = $2 AND soft_delete = false`,
       [params.promptId, this.authParams.organizationId, params.environment, params.promptVersionId]
     );
 

@@ -128,9 +128,9 @@ const PromptVersionCard = ({
             <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20">
               {versionDisplay}
             </span>
-            {version.environment && (
-              <EnvironmentPill environment={version.environment} />
-            )}
+            {version.environments?.map((env) => (
+              <EnvironmentPill key={env} environment={env} />
+            ))}
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-1 transition-opacity">
@@ -205,7 +205,7 @@ const PromptVersionCard = ({
                 </DialogDescription>
               </DialogHeader>
 
-              {version.environment === "production" && (
+              {version.environments?.includes("production") && (
                 <div className="flex items-start gap-3 rounded-lg border border-orange-200 bg-orange-50 p-4 dark:border-orange-800 dark:bg-orange-950/20">
                   <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-orange-600 dark:text-orange-400" />
                   <div className="flex flex-col gap-1">
