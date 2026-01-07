@@ -207,7 +207,12 @@ export class PromptManager {
     const { instructions: _instructions, ...paramsWithoutInstructions } = params;
 
     // Only convert input to messages if there's actual input
-    const hasInput = params.input !== undefined && params.input !== null && params.input !== "";
+    const hasInput =
+      typeof params.input === "string"
+        ? params.input !== ""
+        : Array.isArray(params.input)
+        ? params.input.length > 0
+        : params.input !== undefined && params.input !== null;
     const paramsToConvert: ResponsesRequestBody = {
       ...paramsWithoutInstructions,
       // If no input, use empty array so no user messages are added
