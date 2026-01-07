@@ -1200,7 +1200,7 @@ export default function AdminWallet() {
                       </TableRow>,
                       selectedOrg === org.orgId && walletDetails && (
                         <TableRow key={`${org.orgId}-details`}>
-                          <TableCell colSpan={9} className="bg-muted/30 p-6">
+                          <TableCell colSpan={12} className="bg-muted/30 p-6">
                             {walletLoading ? (
                               <div className="flex h-32 items-center justify-center">
                                 <Loader2 size={20} className="animate-spin" />
@@ -2295,7 +2295,7 @@ export default function AdminWallet() {
                   {/* Loading indicator for next page */}
                   {isFetchingNextPage && (
                     <TableRow>
-                      <TableCell colSpan={9} className="py-4 text-center">
+                      <TableCell colSpan={12} className="py-4 text-center">
                         <Loader2
                           size={20}
                           className="inline-block animate-spin text-muted-foreground"
@@ -2305,7 +2305,7 @@ export default function AdminWallet() {
                   )}
                   {/* Intersection observer target */}
                   <tr ref={observerTarget} style={{ height: "1px" }}>
-                    <td colSpan={9} />
+                    <td colSpan={12} />
                   </tr>
                 </TableBody>
               </table>
