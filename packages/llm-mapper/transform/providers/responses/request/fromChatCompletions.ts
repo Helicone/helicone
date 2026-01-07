@@ -58,7 +58,7 @@ function convertMessageToResponsesInput(
     // First, add the reasoning item if present
     if ("reasoning" in msg && msg.reasoning) {
       items.push({
-        id: `reasoning_${Date.now()}`,
+        id: `reasoning_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         type: "reasoning",
         summary: [{ type: "summary_text", text: msg.reasoning }],
       } as ResponsesReasoningItem);
