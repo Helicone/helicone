@@ -208,8 +208,8 @@ export class AutoTopoffManager {
         return err("Organization does not have a Stripe customer ID");
       }
 
-      // Create idempotency key based on org and timestamp
-      const idempotencyKey = `${orgId}-autotopoff-${Date.now()}`;
+      // Create idempotency key based on org and UUID
+      const idempotencyKey = `${orgId}-autotopoff-${crypto.randomUUID()}`;
 
       // Calculate fees (same as manual purchases)
       const creditsCents = settings.topoffAmountCents;

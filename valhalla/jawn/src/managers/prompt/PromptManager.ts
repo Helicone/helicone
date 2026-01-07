@@ -24,6 +24,7 @@ import { buildFilterPostgres } from "@helicone-package/filters/filters";
 import { Result, err, ok, resultMap } from "../../packages/common/result";
 import { BaseManager } from "../BaseManager";
 import { RequestManager } from "../request/RequestManager";
+import { randomUUID } from "crypto";
 
 import { S3Client } from "../../lib/shared/db/s3Client";
 import type { OpenAIChatRequest } from "@helicone-package/llm-mapper/mappers/openai/chat-v2";
@@ -827,7 +828,7 @@ export class PromptManager extends BaseManager {
         promptFromRequest: true,
       },
       prompt: requestResult.data.request_body,
-      userDefinedId: `prompt-from-request-${requestId}-${Date.now()}`,
+      userDefinedId: `prompt-from-request-${requestId}-${randomUUID()}`,
       createdAt: requestResult.data.request_created_at ?? undefined,
     });
 

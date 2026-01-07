@@ -147,7 +147,7 @@ export class BedrockStreamProcessor implements IBodyProcessor {
       }
 
       const processedBody = {
-        id: messageId || `bedrock-${Date.now()}`,
+        id: messageId || crypto.randomUUID(),
         object: "chat.completion",
         created: Math.floor(Date.now() / 1000),
         model: calculateModel(requestModel, model, modelOverride) || model || requestModel || "unknown",
