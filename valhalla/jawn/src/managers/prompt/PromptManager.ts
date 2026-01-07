@@ -19,6 +19,7 @@ import {
 } from "../../controllers/public/prompt2025Controller";
 import { Prompt2025, Prompt2025Version } from "@helicone-package/prompts/types";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
+import { HELICONE_DB } from "../../lib/shared/db/pgpClient";
 import { FilterNode } from "@helicone-package/filters/filterDefs";
 import { buildFilterPostgres } from "@helicone-package/filters/filters";
 import { Result, err, ok, resultMap } from "../../packages/common/result";
@@ -637,62 +638,54 @@ export class Prompt2025Manager extends BaseManager {
     promptVersionId: string;
     environment: string;
   }): Promise<Result<null, string>> {
-    const versionCheck = await dbExecute<{ id: string }>(
-      `SELECT id FROM prompts_2025_versions
-      WHERE id = $1 AND prompt_id = $2 AND organization = $3 AND soft_delete is false`,
-      [params.promptVersionId, params.promptId, this.authParams.organizationId]
-    );
+    try {
+      await HELICONE_DB.tx(async (t) => {
+        // Check version exists and belongs to this prompt/org
+        const versionCheck = await t.oneOrNone<{ id: string }>(
+          `SELECT id FROM prompts_2025_versions
+           WHERE id = $1 AND prompt_id = $2 AND organization = $3 AND soft_delete = false`,
+          [params.promptVersionId, params.promptId, this.authParams.organizationId]
+        );
 
-    if (versionCheck.error) {
-      return err(versionCheck.error);
+        if (!versionCheck) {
+          throw new Error("Prompt version not found or does not belong to the specified prompt");
+        }
+
+        // Update production version ref
+        if (params.environment === PRODUCTION_ENVIRONMENT) {
+          await t.none(
+            `UPDATE prompts_2025 SET production_version = $1 WHERE id = $2 AND organization = $3 AND soft_delete = false`,
+            [params.promptVersionId, params.promptId, this.authParams.organizationId]
+          );
+        }
+
+        // Remove this environment from all other versions of this prompt
+        await t.none(
+          `UPDATE prompts_2025_versions
+           SET environments = array_remove(COALESCE(environments, ARRAY[]::text[]), $3)
+           WHERE prompt_id = $1 AND organization = $2 AND soft_delete = false`,
+          [params.promptId, this.authParams.organizationId, params.environment]
+        );
+
+        // Add the environment to the target version
+        await t.none(
+          `UPDATE prompts_2025_versions
+           SET environments = array_append(COALESCE(environments, ARRAY[]::text[]), $3)
+           WHERE id = $4 AND prompt_id = $1 AND organization = $2 AND soft_delete = false
+           AND NOT (COALESCE(environments, ARRAY[]::text[]) @> ARRAY[$3]::text[])`,
+          [params.promptId, this.authParams.organizationId, params.environment, params.promptVersionId]
+        );
+      });
+
+      await this.resetPromptCache({
+        promptId: params.promptId,
+        environment: params.environment,
+      });
+
+      return ok(null);
+    } catch (error: any) {
+      return err(error.message || "Failed to set environment on version");
     }
-
-    if (!versionCheck.data?.[0]) {
-      return err("Prompt version not found or does not belong to the specified prompt");
-    }
-
-    // Update production version ref
-    if (params.environment === PRODUCTION_ENVIRONMENT) {
-      const result = await dbExecute<null>(
-        `UPDATE prompts_2025 SET production_version = $1 WHERE id = $2 AND organization = $3 AND soft_delete is false`,
-        [params.promptVersionId, params.promptId, this.authParams.organizationId]
-      );
-
-      if (result.error) {
-        return err(result.error);
-      }
-    }
-
-    // Remove this environment from all other versions of this prompt (one version per environment)
-    // Then add the environment to the target version's environments array
-    const updateEnvResult = await dbExecute(
-      `
-      BEGIN;
-
-      UPDATE prompts_2025_versions
-      SET environments = array_remove(COALESCE(environments, ARRAY[]::text[]), $3)
-      WHERE prompt_id = $1 AND organization = $2 AND soft_delete = false;
-
-      UPDATE prompts_2025_versions
-      SET environments = array_append(COALESCE(environments, ARRAY[]::text[]), $3)
-      WHERE id = $4 AND prompt_id = $1 AND organization = $2 AND soft_delete = false
-      AND NOT (COALESCE(environments, ARRAY[]::text[]) @> ARRAY[$3]::text[]);
-
-      COMMIT;
-      `,
-      [params.promptId, this.authParams.organizationId, params.environment, params.promptVersionId]
-    );
-
-    if (updateEnvResult.error) {
-      return err(updateEnvResult.error);
-    }
-
-    await this.resetPromptCache({
-      promptId: params.promptId,
-      environment: params.environment,
-    });
-
-    return ok(null);
   }
 
   async addEnvironmentToVersion(params: {
@@ -700,67 +693,58 @@ export class Prompt2025Manager extends BaseManager {
     promptVersionId: string;
     environment: string;
   }): Promise<Result<null, string>> {
-    const versionCheck = await dbExecute<{ id: string }>(
-      `SELECT id FROM prompts_2025_versions
-      WHERE id = $1 AND prompt_id = $2 AND organization = $3 AND soft_delete is false`,
-      [params.promptVersionId, params.promptId, this.authParams.organizationId]
-    );
+    try {
+      await HELICONE_DB.tx(async (t) => {
+        // Check version exists
+        const versionCheck = await t.oneOrNone<{ id: string }>(
+          `SELECT id FROM prompts_2025_versions
+           WHERE id = $1 AND prompt_id = $2 AND organization = $3 AND soft_delete = false`,
+          [params.promptVersionId, params.promptId, this.authParams.organizationId]
+        );
 
-    if (versionCheck.error) {
-      return err(versionCheck.error);
+        if (!versionCheck) {
+          throw new Error("Prompt version not found or does not belong to the specified prompt");
+        }
+
+        // Check if environment already exists on another version
+        const existingCheck = await t.oneOrNone<{ id: string }>(
+          `SELECT id FROM prompts_2025_versions
+           WHERE prompt_id = $1 AND organization = $2 AND id != $3
+           AND environments @> ARRAY[$4]::text[] AND soft_delete = false`,
+          [params.promptId, this.authParams.organizationId, params.promptVersionId, params.environment]
+        );
+
+        if (existingCheck) {
+          throw new Error(`Environment "${params.environment}" is already assigned to another version. Use setPromptVersionEnvironment to move it.`);
+        }
+
+        // Add environment to array
+        await t.none(
+          `UPDATE prompts_2025_versions
+           SET environments = array_append(COALESCE(environments, ARRAY[]::text[]), $3)
+           WHERE id = $4 AND prompt_id = $1 AND organization = $2 AND soft_delete = false
+           AND NOT (COALESCE(environments, ARRAY[]::text[]) @> ARRAY[$3]::text[])`,
+          [params.promptId, this.authParams.organizationId, params.environment, params.promptVersionId]
+        );
+
+        // Update production version ref if adding production
+        if (params.environment === PRODUCTION_ENVIRONMENT) {
+          await t.none(
+            `UPDATE prompts_2025 SET production_version = $1 WHERE id = $2 AND organization = $3 AND soft_delete = false`,
+            [params.promptVersionId, params.promptId, this.authParams.organizationId]
+          );
+        }
+      });
+
+      await this.resetPromptCache({
+        promptId: params.promptId,
+        environment: params.environment,
+      });
+
+      return ok(null);
+    } catch (error: any) {
+      return err(error.message || "Failed to add environment to version");
     }
-
-    if (!versionCheck.data?.[0]) {
-      return err("Prompt version not found or does not belong to the specified prompt");
-    }
-
-    // Check if environment already exists on another version of this prompt
-    const existingCheck = await dbExecute<{ id: string }>(
-      `SELECT id FROM prompts_2025_versions
-       WHERE prompt_id = $1 AND organization = $2 AND id != $3
-       AND environments @> ARRAY[$4]::text[] AND soft_delete = false`,
-      [params.promptId, this.authParams.organizationId, params.promptVersionId, params.environment]
-    );
-
-    if (existingCheck.error) {
-      return err(existingCheck.error);
-    }
-
-    if (existingCheck.data?.[0]) {
-      return err(`Environment "${params.environment}" is already assigned to another version. Use setPromptVersionEnvironment to move it.`);
-    }
-
-    // Add environment to the version's environments array (if not already present)
-    const updateEnvResult = await dbExecute(
-      `UPDATE prompts_2025_versions
-       SET environments = array_append(COALESCE(environments, ARRAY[]::text[]), $3)
-       WHERE id = $4 AND prompt_id = $1 AND organization = $2 AND soft_delete = false
-       AND NOT (COALESCE(environments, ARRAY[]::text[]) @> ARRAY[$3]::text[])`,
-      [params.promptId, this.authParams.organizationId, params.environment, params.promptVersionId]
-    );
-
-    if (updateEnvResult.error) {
-      return err(updateEnvResult.error);
-    }
-
-    // Update production version ref if adding production
-    if (params.environment === PRODUCTION_ENVIRONMENT) {
-      const result = await dbExecute<null>(
-        `UPDATE prompts_2025 SET production_version = $1 WHERE id = $2 AND organization = $3 AND soft_delete is false`,
-        [params.promptVersionId, params.promptId, this.authParams.organizationId]
-      );
-
-      if (result.error) {
-        return err(result.error);
-      }
-    }
-
-    await this.resetPromptCache({
-      promptId: params.promptId,
-      environment: params.environment,
-    });
-
-    return ok(null);
   }
 
   async removeEnvironmentFromVersion(params: {
@@ -768,47 +752,46 @@ export class Prompt2025Manager extends BaseManager {
     promptVersionId: string;
     environment: string;
   }): Promise<Result<null, string>> {
-    const versionCheck = await dbExecute<{ id: string }>(
-      `SELECT id FROM prompts_2025_versions
-      WHERE id = $1 AND prompt_id = $2 AND organization = $3 AND soft_delete is false`,
-      [params.promptVersionId, params.promptId, this.authParams.organizationId]
-    );
+    try {
+      await HELICONE_DB.tx(async (t) => {
+        // Check version exists
+        const versionCheck = await t.oneOrNone<{ id: string }>(
+          `SELECT id FROM prompts_2025_versions
+           WHERE id = $1 AND prompt_id = $2 AND organization = $3 AND soft_delete = false`,
+          [params.promptVersionId, params.promptId, this.authParams.organizationId]
+        );
 
-    if (versionCheck.error) {
-      return err(versionCheck.error);
+        if (!versionCheck) {
+          throw new Error("Prompt version not found or does not belong to the specified prompt");
+        }
+
+        // Remove environment from array
+        await t.none(
+          `UPDATE prompts_2025_versions
+           SET environments = array_remove(COALESCE(environments, ARRAY[]::text[]), $3)
+           WHERE id = $4 AND prompt_id = $1 AND organization = $2 AND soft_delete = false`,
+          [params.promptId, this.authParams.organizationId, params.environment, params.promptVersionId]
+        );
+
+        // Clear production_version ref if removing production
+        if (params.environment === PRODUCTION_ENVIRONMENT) {
+          await t.none(
+            `UPDATE prompts_2025 SET production_version = NULL
+             WHERE id = $1 AND production_version = $2 AND organization = $3 AND soft_delete = false`,
+            [params.promptId, params.promptVersionId, this.authParams.organizationId]
+          );
+        }
+      });
+
+      await this.resetPromptCache({
+        promptId: params.promptId,
+        environment: params.environment,
+      });
+
+      return ok(null);
+    } catch (error: any) {
+      return err(error.message || "Failed to remove environment from version");
     }
-
-    if (!versionCheck.data?.[0]) {
-      return err("Prompt version not found or does not belong to the specified prompt");
-    }
-
-    // Remove environment from the version's environments array
-    const updateEnvResult = await dbExecute(
-      `UPDATE prompts_2025_versions
-       SET environments = array_remove(COALESCE(environments, ARRAY[]::text[]), $3)
-       WHERE id = $4 AND prompt_id = $1 AND organization = $2 AND soft_delete = false`,
-      [params.promptId, this.authParams.organizationId, params.environment, params.promptVersionId]
-    );
-
-    if (updateEnvResult.error) {
-      return err(updateEnvResult.error);
-    }
-
-    // Clear production_version ref if removing production environment
-    if (params.environment === PRODUCTION_ENVIRONMENT) {
-      await dbExecute(
-        `UPDATE prompts_2025 SET production_version = NULL
-         WHERE id = $1 AND production_version = $2 AND organization = $3 AND soft_delete = false`,
-        [params.promptId, params.promptVersionId, this.authParams.organizationId]
-      );
-    }
-
-    await this.resetPromptCache({
-      promptId: params.promptId,
-      environment: params.environment,
-    });
-
-    return ok(null);
   }
 
   async deletePrompt(params: {

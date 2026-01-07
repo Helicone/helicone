@@ -14,6 +14,7 @@ import {
   useGetPromptsWithVersions,
   useGetPromptVersions,
   useSetPromptVersionEnvironment,
+  useRemoveEnvironmentFromVersion,
   useGetPromptTags,
   useDeletePrompt,
   useDeletePromptVersion,
@@ -113,6 +114,7 @@ const PromptsPage = (props: PromptsPageProps) => {
   };
 
   const setEnvironment = useSetPromptVersionEnvironment();
+  const removeEnvironment = useRemoveEnvironmentFromVersion();
   const deletePrompt = useDeletePrompt();
   const deletePromptVersion = useDeletePromptVersion();
   const renamePrompt = useRenamePrompt();
@@ -193,7 +195,7 @@ const PromptsPage = (props: PromptsPageProps) => {
     }
   };
 
-  const handleSetPromptVersionEnvironment = async (
+  const handleSetEnvironment = async (
     promptId: string,
     promptVersionId: string,
     environment: string,
@@ -213,7 +215,31 @@ const PromptsPage = (props: PromptsPageProps) => {
         "Error setting environment",
       );
     } else {
-      setNotification("Environment set successfully", "success");
+      setNotification(`Environment "${environment}" set`, "success");
+    }
+  };
+
+  const handleRemoveEnvironment = async (
+    promptId: string,
+    promptVersionId: string,
+    environment: string,
+  ) => {
+    const result = await removeEnvironment.mutateAsync({
+      body: {
+        promptId,
+        promptVersionId,
+        environment,
+      },
+    });
+
+    if (result.error) {
+      setNotification("Error removing environment", "error");
+      logger.error(
+        { error: result.error, promptId, promptVersionId, environment },
+        "Error removing environment",
+      );
+    } else {
+      setNotification(`Environment "${environment}" removed`, "success");
     }
   };
 
@@ -522,7 +548,8 @@ const PromptsPage = (props: PromptsPageProps) => {
             <PromptDetails
               onRenamePrompt={handleRenamePrompt}
               onUpdatePromptTags={handleUpdatePromptTags}
-              onSetEnvironment={handleSetPromptVersionEnvironment}
+              onSetEnvironment={handleSetEnvironment}
+              onRemoveEnvironment={handleRemoveEnvironment}
               onOpenPromptVersion={handleOpenPromptVersion}
               onDeletePrompt={handleDeletePrompt}
               onDeletePromptVersion={handleDeletePromptVersion}
