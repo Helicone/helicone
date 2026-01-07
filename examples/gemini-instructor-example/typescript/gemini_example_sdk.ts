@@ -1,12 +1,12 @@
 import { GoogleGenAI } from "@google/genai";
 
 const genAI = new GoogleGenAI({
-  apiKey: "AIzaSyCnLPrWw8WrfjTotsIJp5VaTxha97mrW18",
+  apiKey: "<GOOGLE_API_KEY>",
   vertexai: true,
   httpOptions: {
     baseUrl: "https://gateway.helicone.ai",
     headers: {
-      "Helicone-Auth": "Bearer sk-helicone-xykmybq-tx2u5ba-wkawkuy-jmjkqji",
+      "Helicone-Auth": "Bearer <HELICONE_API_KEY>",
       "Helicone-Target-URL": "https://generativelanguage.googleapis.com",
     },
   },
