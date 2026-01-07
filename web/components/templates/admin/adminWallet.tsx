@@ -972,6 +972,9 @@ export default function AdminWallet() {
                         <SortIcon column="total_spend" />
                       </div>
                     </TableHead>
+                    <TableHead>Cache Adj</TableHead>
+                    <TableHead>Invoiced</TableHead>
+                    <TableHead>Uninvoiced</TableHead>
                     <TableHead
                       className="cursor-pointer select-none hover:bg-muted/50"
                       onClick={() => handleSort("total_payments")}
@@ -1066,6 +1069,32 @@ export default function AdminWallet() {
                         {/* Spent (CH) */}
                         <TableCell className="whitespace-nowrap">
                           {formatCurrency(org.clickhouseTotalSpend)}
+                        </TableCell>
+                        {/* Cache Adjustment */}
+                        <TableCell className="whitespace-nowrap">
+                          {org.cacheAdjustment > 0 ? (
+                            <span className="text-purple-600">
+                              +{formatCurrency(org.cacheAdjustment)}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground">$0.00</span>
+                          )}
+                        </TableCell>
+                        {/* Invoiced */}
+                        <TableCell className="whitespace-nowrap">
+                          {formatCurrency(org.totalInvoiced)}
+                        </TableCell>
+                        {/* Uninvoiced */}
+                        <TableCell className="whitespace-nowrap">
+                          <span
+                            className={
+                              org.uninvoicedBalance > 0
+                                ? "font-medium text-orange-500"
+                                : ""
+                            }
+                          >
+                            {formatCurrency(org.uninvoicedBalance)}
+                          </span>
                         </TableCell>
                         {/* Net Balance */}
                         <TableCell className="whitespace-nowrap">

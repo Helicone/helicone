@@ -48,6 +48,11 @@ interface DashboardData {
     walletTotalDebits?: number;
     walletDisallowedModelCount?: number;
     walletProcessedEventsCount?: number;
+    // Invoice data
+    totalInvoiced: number;
+    uninvoicedBalance: number;
+    // Cache token adjustment (hardcoded corrections for missing data)
+    cacheAdjustment: number;
   }>;
   summary: {
     totalOrgsWithCredits: number;

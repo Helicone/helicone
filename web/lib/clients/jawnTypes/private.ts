@@ -16490,6 +16490,10 @@ Json: JsonObject;
     DashboardData: {
       organizations: ({
           /** Format: double */
+          uninvoicedBalance: number;
+          /** Format: double */
+          totalInvoiced: number;
+          /** Format: double */
           walletProcessedEventsCount?: number;
           /** Format: double */
           walletDisallowedModelCount?: number;

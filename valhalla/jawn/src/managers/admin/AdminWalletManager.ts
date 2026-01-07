@@ -32,6 +32,11 @@ interface DashboardData {
     walletTotalDebits?: number;
     walletDisallowedModelCount?: number;
     walletProcessedEventsCount?: number;
+    // Invoice data
+    totalInvoiced: number;
+    uninvoicedBalance: number;
+    // Cache token adjustment (hardcoded corrections for missing data)
+    cacheAdjustment: number;
   }>;
   summary: {
     totalOrgsWithCredits: number;
@@ -42,6 +47,35 @@ interface DashboardData {
 }
 
 export class AdminWalletManager extends BaseManager {
+  /**
+   * Fetches invoice totals for all organizations in bulk
+   */
+  async fetchInvoiceTotals(): Promise<Map<string, number>> {
+    const result = await dbExecute<{
+      organization_id: string;
+      total_invoiced_cents: string;
+    }>(
+      `SELECT
+         organization_id,
+         COALESCE(SUM(amount_cents), 0) as total_invoiced_cents
+       FROM ptb_invoices
+       GROUP BY organization_id`,
+      []
+    );
+
+    const invoiceMap = new Map<string, number>();
+    if (!result.error && result.data) {
+      result.data.forEach((row) => {
+        // Convert cents to dollars
+        invoiceMap.set(
+          row.organization_id,
+          parseInt(row.total_invoiced_cents, 10) / 100
+        );
+      });
+    }
+    return invoiceMap;
+  }
+
   /**
    * Fetches wallet state for a single organization
    */
@@ -188,16 +222,20 @@ export class AdminWalletManager extends BaseManager {
     page: number = 0,
     pageSize: number = 100
   ): Promise<Result<DashboardData, string>> {
-    const clickhouseSpendResult = await clickhouseDb.dbQuery<{
-      organization_id: string;
-      total_cost: number;
-    }>(
-      `
+    // Fetch ClickHouse spend and invoice totals in parallel
+    const [clickhouseSpendResult, invoiceTotalsMap] = await Promise.all([
+      clickhouseDb.dbQuery<{
+        organization_id: string;
+        total_cost: number;
+      }>(
+        `
         SELECT organization_id, spend as total_cost
         FROM organization_ptb_spend_mv FINAL
       `,
-      []
-    );
+        []
+      ),
+      this.fetchInvoiceTotals(),
+    ]);
 
     if (clickhouseSpendResult.error || !clickhouseSpendResult.data) {
       return err(
@@ -310,13 +348,15 @@ export class AdminWalletManager extends BaseManager {
     const organizations = allOrgsResult.data.map((org) => {
       const baseSpend = spendMap.get(org.org_id) || 0;
       const cacheAdjustment = getTotalCacheTokenAdjustment(org.org_id);
+      const clickhouseTotalSpend = baseSpend + cacheAdjustment;
+      const totalInvoiced = invoiceTotalsMap.get(org.org_id) || 0;
       return {
         orgId: org.org_id,
         orgName: org.org_name || "Unknown",
         stripeCustomerId: org.stripe_customer_id || "",
         totalPayments: org.total_amount_received / 100,
         paymentsCount: org.payments_count,
-        clickhouseTotalSpend: baseSpend + cacheAdjustment,
+        clickhouseTotalSpend,
         lastPaymentDate: org.last_payment_date
           ? Number(org.last_payment_date) * 1000
           : null,
@@ -324,6 +364,9 @@ export class AdminWalletManager extends BaseManager {
         ownerEmail: org.owner_email || "Unknown",
         allowNegativeBalance: org.allow_negative_balance,
         creditLimit: org.credit_limit ? Number(org.credit_limit) / 100 : 0,
+        totalInvoiced,
+        uninvoicedBalance: clickhouseTotalSpend - totalInvoiced,
+        cacheAdjustment,
       };
     });
 
@@ -539,14 +582,19 @@ export class AdminWalletManager extends BaseManager {
       });
     }
 
-    // Fetch wallet states for all organizations in parallel
-    const walletStateMap = await this.fetchWalletStates(orgIds);
+    // Fetch wallet states and invoice totals for all organizations in parallel
+    const [walletStateMap, invoiceTotalsMap] = await Promise.all([
+      this.fetchWalletStates(orgIds),
+      this.fetchInvoiceTotals(),
+    ]);
 
     // Combine the data
     const organizations = orgsResult.data.map((org) => {
       const walletState = walletStateMap.get(org.org_id) || {};
       const baseSpend = clickhouseSpendMap.get(org.org_id) || 0;
       const cacheAdjustment = getTotalCacheTokenAdjustment(org.org_id);
+      const clickhouseTotalSpend = baseSpend + cacheAdjustment;
+      const totalInvoiced = invoiceTotalsMap.get(org.org_id) || 0;
 
       return {
         orgId: org.org_id,
@@ -554,7 +602,7 @@ export class AdminWalletManager extends BaseManager {
         stripeCustomerId: org.stripe_customer_id || "",
         totalPayments: org.total_amount_received / 100, // Convert cents to dollars
         paymentsCount: org.payments_count,
-        clickhouseTotalSpend: baseSpend + cacheAdjustment,
+        clickhouseTotalSpend,
         lastPaymentDate: org.last_payment_date
           ? Number(org.last_payment_date) * 1000
           : null, // Convert seconds to milliseconds
@@ -568,6 +616,9 @@ export class AdminWalletManager extends BaseManager {
         walletTotalDebits: walletState.totalDebits,
         walletDisallowedModelCount: walletState.disallowedModelCount,
         walletProcessedEventsCount: walletState.processedEventsCount,
+        totalInvoiced,
+        uninvoicedBalance: clickhouseTotalSpend - totalInvoiced,
+        cacheAdjustment,
       };
     });
 
