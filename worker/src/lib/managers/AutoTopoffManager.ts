@@ -3,6 +3,7 @@ import { Database } from "../../../supabase/database.types";
 import { Result, err, ok } from "../util/results";
 import Stripe from "stripe";
 import { getAndStoreInCache, removeFromCache } from "../util/cache/secureCache";
+import { randomUUID } from "crypto";
 
 // Constants
 const CACHE_TTL_MS = 60 * 1000; // 1 minutes cache for auto-topoff settings
@@ -209,7 +210,7 @@ export class AutoTopoffManager {
       }
 
       // Create idempotency key based on org and UUID
-      const idempotencyKey = `${orgId}-autotopoff-${crypto.randomUUID()}`;
+      const idempotencyKey = `${orgId}-autotopoff-${randomUUID()}`;
 
       // Calculate fees (same as manual purchases)
       const creditsCents = settings.topoffAmountCents;
