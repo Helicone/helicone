@@ -46,7 +46,7 @@ export interface Prompt2025Version {
   major_version: number;
   minor_version: number;
   commit_message: string;
-  environment?: string;
+  environments?: string[];
 
   created_at: string;
 

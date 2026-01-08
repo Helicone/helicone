@@ -1234,11 +1234,9 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
                     majorVersion={promptVersionData.promptVersion.major_version}
                     minorVersion={promptVersionData.promptVersion.minor_version}
                   />
-                  {promptVersionData.promptVersion.environment && (
-                    <EnvironmentPill
-                      environment={promptVersionData.promptVersion.environment}
-                    />
-                  )}
+                  {promptVersionData.promptVersion.environments?.map((env) => (
+                    <EnvironmentPill key={env} environment={env} />
+                  ))}
                 </div>
               </>
             )}

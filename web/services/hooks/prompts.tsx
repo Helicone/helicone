@@ -151,6 +151,24 @@ export const useSetPromptVersionEnvironment = () => {
   );
 };
 
+export const useRemoveEnvironmentFromVersion = () => {
+  const queryClient = useQueryClient();
+
+  return $JAWN_API.useMutation(
+    "post",
+    "/v1/prompt-2025/remove/environment",
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["prompts"] });
+        queryClient.invalidateQueries({ queryKey: ["promptsWithVersions"] });
+        queryClient.invalidateQueries({ queryKey: ["promptVersions"] });
+        queryClient.invalidateQueries({ queryKey: ["promptVersionWithBody"] });
+        queryClient.invalidateQueries({ queryKey: ["promptEnvironments"] });
+      },
+    },
+  );
+};
+
 export const useDeletePrompt = () => {
   const queryClient = useQueryClient();
 
