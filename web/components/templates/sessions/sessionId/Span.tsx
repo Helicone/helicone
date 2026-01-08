@@ -544,8 +544,8 @@ export const TraceSpan = ({
       className="relative flex h-full select-none flex-col"
       id="sessions-trace-span"
     >
-      <div ref={chartContainerRef} className="relative">
-        <ScrollArea>
+      <div ref={chartContainerRef} className="relative flex-1 overflow-hidden">
+        <ScrollArea className="h-full">
           <ResponsiveContainer
             width="100%"
             height={Math.max(300, spanData.length * BAR_SIZE)}
