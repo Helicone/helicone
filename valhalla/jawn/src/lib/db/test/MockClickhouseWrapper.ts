@@ -1,6 +1,7 @@
 import { Result } from "../../../packages/common/result";
 import { ClickhouseDB, RequestResponseRMT } from "../ClickhouseWrapper";
 import { CLICKHOUSE_ERRORS, mockRequestResponseData } from "./clickhouseMockData";
+import { randomUUID } from "crypto";
 
 interface ClickhouseEnv {
   CLICKHOUSE_HOST: string;
@@ -166,7 +167,7 @@ export class MockClickhouseClientWrapper {
     this.mockData.set(table, [...existingData, ...values]);
     
     return { 
-      data: `mock-query-id-${Date.now()}`, 
+      data: `mock-query-id-${randomUUID()}`, 
       error: null 
     };
   }

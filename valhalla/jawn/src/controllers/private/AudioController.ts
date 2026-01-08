@@ -5,6 +5,7 @@ import * as os from "os";
 import * as path from "path";
 import { Writable } from "stream";
 import { Body, Controller, Post, Route, Security, Tags } from "tsoa";
+import { randomUUID } from "crypto";
 // We won't directly use Result in the method signature for TSOA compatibility
 // import { Result } from "../../lib/shared/result";
 
@@ -68,9 +69,7 @@ export class AudioController extends Controller {
 
       // Declare and assign tempInputPath inside try block
       const tempDir = os.tmpdir();
-      const tempFilename = `helicone-audio-input-${Date.now()}-${Math.random()
-        .toString(36)
-        .substring(2, 15)}`;
+      const tempFilename = `helicone-audio-input-${randomUUID()}`;
       const tempInputPath = path.join(tempDir, tempFilename); // Now const string
       pathToClean = tempInputPath; // Assign for cleanup
       await fs.writeFile(tempInputPath, inputBuffer);
