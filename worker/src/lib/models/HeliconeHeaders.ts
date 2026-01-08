@@ -19,6 +19,19 @@ export enum HeliconeTokenLimitExceptionHandler {
   Fallback = "fallback",
 }
 
+// Typed record ensures all enum values are mapped - TypeScript will error if a new value is added to the enum
+const TOKEN_LIMIT_HANDLER_MAP: Record<
+  HeliconeTokenLimitExceptionHandler,
+  HeliconeTokenLimitExceptionHandler
+> = {
+  [HeliconeTokenLimitExceptionHandler.Truncate]:
+    HeliconeTokenLimitExceptionHandler.Truncate,
+  [HeliconeTokenLimitExceptionHandler.MiddleOut]:
+    HeliconeTokenLimitExceptionHandler.MiddleOut,
+  [HeliconeTokenLimitExceptionHandler.Fallback]:
+    HeliconeTokenLimitExceptionHandler.Fallback,
+};
+
 export interface IHeliconeHeaders {
   heliconeAuth: Nullable<string>;
   heliconeAuthV2: Nullable<{
@@ -366,8 +379,8 @@ export class HeliconeHeaders implements IHeliconeHeaders {
         cacheControl: this.headers.get("Helicone-Cache-Control") ?? null,
         cacheIgnoreKeys: this.headers.get("Helicone-Cache-Ignore-Keys")
           ? JSON.parse(
-              `[${this.headers.get("Helicone-Cache-Ignore-Keys") ?? ""}]`
-            )
+            `[${this.headers.get("Helicone-Cache-Ignore-Keys") ?? ""}]`
+          )
           : null,
       },
       promptName: this.headers.get("Helicone-Prompt-Name") ?? null,
@@ -423,16 +436,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     }
 
     const normalized = handler.toLowerCase();
-    switch (normalized) {
-      case HeliconeTokenLimitExceptionHandler.Truncate:
-        return HeliconeTokenLimitExceptionHandler.Truncate;
-      case HeliconeTokenLimitExceptionHandler.MiddleOut:
-        return HeliconeTokenLimitExceptionHandler.MiddleOut;
-      case HeliconeTokenLimitExceptionHandler.Fallback:
-        return HeliconeTokenLimitExceptionHandler.Fallback;
-      default:
-        return null;
-    }
+    return TOKEN_LIMIT_HANDLER_MAP[normalized as HeliconeTokenLimitExceptionHandler] ?? null;
   }
 
   private getRetryHeaders(): IHeliconeHeaders["retryHeaders"] {
