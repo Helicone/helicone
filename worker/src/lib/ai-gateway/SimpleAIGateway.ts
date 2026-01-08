@@ -653,7 +653,8 @@ export class SimpleAIGateway {
       // Output now is in Chat Completions format
       const nativelySupportsResponsesAPI =
         provider === "openai" ||
-        (provider === "helicone" && providerModelId.includes("gpt"));
+        (provider === "helicone" &&
+          (providerModelId.includes("gpt") || providerModelId.includes("/gt")));
       if (bodyMapping === "RESPONSES" && !nativelySupportsResponsesAPI) {
         if (isStream) {
           finalMappedResponse =
