@@ -1,16 +1,16 @@
 import { Layout } from "@/app/components/Layout";
 import { H1, H2, H4, P, Lead, Small } from "@/components/ui/typography";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import Link from "next/link";
-import { CheckCircle, Calendar, Code, Zap } from "lucide-react";
+import { Calendar, Code, Zap } from "lucide-react";
+import AgentCourseForm from "./AgentCourseForm";
+import Image from "next/image";
 
 export default function AgentCoursePage() {
+
   return (
     <Layout>
       <main className="bg-white text-foreground">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          {/* Hero Section */}
           <div className="text-center space-y-6 mb-16">
             <H1 className="text-center">
               From Engineer to AI Engineer in 7 days
@@ -22,25 +22,11 @@ export default function AgentCoursePage() {
 
             <div className="text-center space-y-4">
               <div className="max-w-lg mx-auto">
-                <form className="flex flex-col gap-4">
-                  <input
-                    type="email"
-                    placeholder="Your email (you@example.com)"
-                    className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
-                  />
-                  <Button
-                    size="landing_page"
-                    variant="landing_primary"
-                    type="submit"
-                  >
-                    REGISTER TODAY
-                  </Button>
-                </form>
+                <AgentCourseForm source="hero-section" />
               </div>
             </div>
           </div>
 
-          {/* Course Overview */}
           <section id="course-overview" className="space-y-12 mb-16">
             <div className="text-center">
               <H2>What You&apos;ll Build</H2>
@@ -97,7 +83,6 @@ export default function AgentCoursePage() {
             </div>
           </section>
 
-          {/* Daily Curriculum */}
           <section className="space-y-8 mb-16">
             <div className="text-center">
               <H2>7-Day Curriculum</H2>
@@ -113,44 +98,44 @@ export default function AgentCoursePage() {
                   day: 1,
                   title: "Setup & LLM Requests",
                   description:
-                    "Agents vs workflows fundamentals, TypeScript setup, first LLM request",
+                    "Agents vs workflows fundamentals, TypeScript setup, first LLM request"
                 },
                 {
                   day: 2,
                   title: "The Agent Loop",
                   description:
-                    "Core agent architecture (Think → Act → Observe), GitHub API integration",
+                    "Core agent architecture (Think → Act → Observe), GitHub API integration"
                 },
                 {
                   day: 3,
                   title: "Tool Calling & Actions",
                   description:
-                    "OpenAI function calling, tool definitions and execution, content generation",
+                    "OpenAI function calling, tool definitions and execution, content generation"
                 },
                 {
                   day: 4,
                   title: "Memory & Context Management",
                   description:
-                    "Conversation history, context window management, token optimization",
+                    "Conversation history, context window management, token optimization"
                 },
                 {
                   day: 5,
                   title: "Connecting to MCP Servers",
                   description:
-                    "Model Context Protocol, external tool integration, social media posting",
+                    "Model Context Protocol, external tool integration, social media posting"
                 },
                 {
                   day: 6,
                   title: "Monitoring & Observability",
                   description:
-                    "Performance metrics, cost tracking, debugging with Helicone",
+                    "Performance metrics, cost tracking, debugging with Helicone"
                 },
                 {
                   day: 7,
                   title: "Production Deployment",
                   description:
-                    "Vercel deployment, cron scheduling, environment configuration",
-                },
+                    "Vercel deployment, cron scheduling, environment configuration"
+                }
               ].map((lesson) => (
                 <Card key={lesson.day} className="border-l-4 border-l-brand">
                   <CardContent className="p-6">
@@ -175,74 +160,112 @@ export default function AgentCoursePage() {
             </div>
           </section>
 
-          {/* Why This Approach
-          <section className="space-y-8 mb-16">
+          <section className="space-y-12 mb-16">
             <div className="text-center">
-              <H2>Agents vs Workflows: A Hybrid Approach</H2>
-              <P className="text-muted-foreground mt-4 max-w-3xl mx-auto">
-                Most "agents" today aren't agents at all—they're workflows.
-                Learn the difference and when to use each.
-              </P>
+              <H2>Why Learn from Helicone?</H2>
+              <Lead className="text-muted-foreground mt-4 max-w-3xl mx-auto">
+                We&apos;ve spent years building the infrastructure that powers production AI agents at scale. Now we&apos;re sharing what we&apos;ve learned.
+              </Lead>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8">
-              <Card>
-                <CardHeader>
-                  <H4>Workflows</H4>
+            <div className="bg-gradient-to-br from-[#f2f9fc] to-white rounded-2xl p-8 md:p-12">
+              <div className="grid md:grid-cols-3 gap-8 mb-12">
+                <div className="text-center">
+                  <div className="text-4xl font-bold text-brand mb-2">4.9B+</div>
                   <P className="text-muted-foreground">
-                    Follow predetermined paths
+                    Requests Processed
                   </P>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-start gap-2">
-                    <CheckCircle size={16} className="text-green-600 mt-0.5" />
-                    <Small>Predictable and reliable</Small>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle size={16} className="text-green-600 mt-0.5" />
-                    <Small>Easier to debug</Small>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle size={16} className="text-green-600 mt-0.5" />
-                    <Small>Lower cost</Small>
-                  </div>
-                  <P className="text-muted-foreground text-sm mt-3">
-                    Best for: Known steps, reliability over flexibility, cost
-                    optimization
+                </div>
+                <div className="text-center">
+                  <div className="text-4xl font-bold text-brand mb-2">1.1T</div>
+                  <P className="text-muted-foreground">
+                    Tokens Per Month
                   </P>
-                </CardContent>
-              </Card>
+                </div>
+                <div className="text-center">
+                  <div className="text-4xl font-bold text-brand mb-2">28.6M</div>
+                  <P className="text-muted-foreground">
+                    Users Tracked
+                  </P>
+                </div>
+              </div>
 
-              <Card>
-                <CardHeader>
-                  <H4>Agents</H4>
-                  <P className="text-muted-foreground">
-                    Make dynamic decisions
-                  </P>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-start gap-2">
-                    <CheckCircle size={16} className="text-green-600 mt-0.5" />
-                    <Small>Flexible and adaptive</Small>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle size={16} className="text-green-600 mt-0.5" />
-                    <Small>Handles novel situations</Small>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle size={16} className="text-green-600 mt-0.5" />
-                    <Small>Self-correcting</Small>
-                  </div>
-                  <P className="text-muted-foreground text-sm mt-3">
-                    Best for: Variable user intent, complex reasoning,
-                    self-correction
-                  </P>
-                </CardContent>
-              </Card>
+              <div className="space-y-8">
+                <Card className="border-l-4 border-l-brand bg-white">
+                  <CardContent className="p-6">
+                    <div className="flex flex-col gap-6">
+                      <blockquote className="text-lg md:text-xl text-muted-foreground italic">
+                        &ldquo;Helicone is{" "}
+                        <span className="text-foreground font-semibold not-italic">
+                          essential for debugging our complex agentic flows
+                        </span>{" "}
+                        for AI code reviews. Can&apos;t imagine building without it.&rdquo;
+                      </blockquote>
+                      <div className="flex items-center gap-4">
+                        <Image
+                          src="/static/home/logos/soohoon.webp"
+                          alt="Soohoon Choi"
+                          width={48}
+                          height={48}
+                          className="w-12 h-12 rounded-full"
+                        />
+                        <div>
+                          <P className="font-semibold">Soohoon Choi</P>
+                          <Small className="text-muted-foreground">
+                            CTO, Greptile
+                          </Small>
+                        </div>
+                        <Image
+                          src="/static/greptile.webp"
+                          alt="Greptile"
+                          width={96}
+                          height={24}
+                          className="w-24 ml-auto"
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-l-4 border-l-brand bg-white">
+                  <CardContent className="p-6">
+                    <div className="flex flex-col gap-6">
+                      <blockquote className="text-lg md:text-xl text-muted-foreground italic">
+                        &ldquo;The{" "}
+                        <span className="text-foreground font-semibold not-italic">
+                          most impactful one-line change
+                        </span>{" "}
+                        I&apos;ve seen applied to our codebase.&rdquo;
+                      </blockquote>
+                      <div className="flex items-center gap-4">
+                        <Image
+                          src="/static/home/nishantshukla.webp"
+                          alt="Nishant Shukla"
+                          width={48}
+                          height={48}
+                          className="w-12 h-12 rounded-full"
+                        />
+                        <div>
+                          <P className="font-semibold">Nishant Shukla</P>
+                          <Small className="text-muted-foreground">
+                            Sr. Director of AI, QA Wolf
+                          </Small>
+                        </div>
+                        <Image
+                          src="/static/qawolf.webp"
+                          alt="QA Wolf"
+                          width={96}
+                          height={24}
+                          className="w-24 ml-auto"
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
-          </section> */}
+          </section>
 
-          {/* Final CTA */}
           <section className="text-center bg-gray-50 rounded-xl p-8">
             <H2>Ready to Build Your First AI Agent?</H2>
             <P className="text-muted-foreground mt-4 mb-8">
@@ -251,25 +274,8 @@ export default function AgentCoursePage() {
             </P>
 
             <div className="max-w-lg mx-auto">
-              <form className="flex flex-col gap-4">
-                <input
-                  type="email"
-                  placeholder="Your email (you@example.com)"
-                  className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
-                />
-                <Button
-                  size="landing_page"
-                  variant="landing_primary"
-                  type="submit"
-                >
-                  START BUILDING TODAY
-                </Button>
-              </form>
+              <AgentCourseForm source="bottom-cta" />
             </div>
-
-            <Small className="block mt-6 text-muted-foreground">
-              Powered by Helicone
-            </Small>
           </section>
         </div>
       </main>
