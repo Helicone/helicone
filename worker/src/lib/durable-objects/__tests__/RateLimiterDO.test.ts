@@ -41,12 +41,9 @@ class MockRateLimiter {
     const unitCount = req.unit === "cents" ? req.cost || 0 : 1;
 
     // Check if adding this request would exceed the quota
-    // For checkOnly mode, we only check if current usage is already over the quota
-    // For update mode, we check if adding this request would exceed the quota
     // Using > (not >=) because at exactly the quota, the user should still have access
-    const wouldExceed = req.checkOnly
-      ? currentUsage >= req.quota
-      : currentUsage + unitCount > req.quota;
+    // Both checkOnly and update modes use the same logic: would this request exceed?
+    const wouldExceed = currentUsage + unitCount > req.quota;
 
     const remaining = Math.max(0, req.quota - currentUsage);
 
@@ -137,25 +134,8 @@ describe("RateLimiterDO Logic", () => {
     });
 
     it("should allow requests when at exactly the limit", () => {
-      // Set up 10 existing requests (exactly at quota)
+      // Set up 9 existing requests (one under quota)
       const now = Date.now();
-      rateLimiter.setEntries(
-        "global",
-        Array.from({ length: 10 }, (_, i) => ({
-          timestamp: now - i * 1000,
-          unitCount: 1,
-        }))
-      );
-
-      // Check-only mode: should return ok because we're at limit, not over
-      const checkResult = rateLimiter.processRateLimit({
-        ...baseRequest,
-        checkOnly: true,
-      });
-      expect(checkResult.status).toBe("rate_limited");
-
-      // Clear and set up 9 existing requests
-      rateLimiter.clear();
       rateLimiter.setEntries(
         "global",
         Array.from({ length: 9 }, (_, i) => ({
@@ -164,11 +144,23 @@ describe("RateLimiterDO Logic", () => {
         }))
       );
 
-      // Update mode with 9 existing: adding 1 more makes it 10, which equals quota
-      // 10 > 10 is false, so we should allow it
+      // With 9 existing, adding 1 would make 10 which equals quota
+      // 10 > 10 is false, so should allow
+      const checkResult = rateLimiter.processRateLimit({
+        ...baseRequest,
+        checkOnly: true,
+      });
+      expect(checkResult.status).toBe("ok");
+
+      // Actually add the request
       const updateResult = rateLimiter.processRateLimit(baseRequest);
       expect(updateResult.status).toBe("ok");
       expect(updateResult.currentUsage).toBe(10);
+
+      // Now at exactly 10, trying to add another would make 11 > 10
+      const overLimitResult = rateLimiter.processRateLimit(baseRequest);
+      expect(overLimitResult.status).toBe("rate_limited");
+      expect(overLimitResult.currentUsage).toBe(10); // Should not increase
     });
 
     it("should rate limit when over the limit", () => {
@@ -350,10 +342,10 @@ describe("RateLimiterDO Logic", () => {
       expect(secondResult.currentUsage).toBe(5);
     });
 
-    it("should return rate_limited when at or over quota in checkOnly mode", () => {
+    it("should return rate_limited when request would exceed quota in checkOnly mode", () => {
       const now = Date.now();
 
-      // Test at exactly quota
+      // With 10 existing, adding 1 would make 11 > 10 quota
       rateLimiter.setEntries(
         "global",
         Array.from({ length: 10 }, (_, i) => ({
@@ -365,7 +357,7 @@ describe("RateLimiterDO Logic", () => {
       const result = rateLimiter.processRateLimit(baseRequest);
       expect(result.status).toBe("rate_limited");
 
-      // Test over quota
+      // With 11 existing (already over), adding 1 would make 12 > 10
       rateLimiter.clear();
       rateLimiter.setEntries(
         "global",

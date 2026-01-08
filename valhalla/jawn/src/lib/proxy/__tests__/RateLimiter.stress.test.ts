@@ -55,21 +55,23 @@ describe("RateLimiter Stress Tests", () => {
       cost: 0,
     };
 
-    it("should correctly limit after exactly quota requests", async () => {
+    it("should correctly limit after exceeding quota requests", async () => {
       // Make exactly 100 requests (at quota)
       for (let i = 0; i < 100; i++) {
-        const checkResult = await checkRateLimit(baseProps);
-        // First 100 should be ok (0 to 99 current, adding 1 stays <= 100)
-        if (i < 100) {
-          expect(checkResult.status).toBe("ok");
-        }
         await updateRateLimitCounter(baseProps);
       }
 
-      // After 100 updates, checking should show we're at the limit
-      // The 101st request check should show rate_limited
+      // After 100 updates, we're exactly at quota (100 = 100)
+      // With our fix using >, 100 > 100 is false, so still "ok"
+      const atLimitCheck = await checkRateLimit(baseProps);
+      expect(atLimitCheck.status).toBe("ok");
+      expect(atLimitCheck.remaining).toBe(0);
+
+      // Add one more to exceed the quota
+      await updateRateLimitCounter(baseProps);
+
+      // Now 101 > 100, so rate_limited
       const finalCheck = await checkRateLimit(baseProps);
-      // 100 recorded > 100 quota, so rate_limited
       expect(finalCheck.status).toBe("rate_limited");
     });
 
@@ -159,14 +161,18 @@ describe("RateLimiter Stress Tests", () => {
         await updateRateLimitCounter(baseProps);
       }
 
-      // Should be exactly at limit
+      // Should be exactly at limit (8500 cents = $85)
+      // With our fix using >, 8500 > 8500 is false, so status is "ok"
       const result = await checkRateLimit(baseProps);
-      // 8500 > 8500 is false, so should be ok
       expect(result.remaining).toBe(0);
-      expect(result.status).toBe("rate_limited"); // 8500 >= 8500 in checkOnly mode
+      expect(result.status).toBe("ok");
 
-      // Wait, with our fix: checkOnly uses currentUsage >= quota
-      // 8500 >= 8500 is true, so rate_limited
+      // Add one more cent to exceed
+      await updateRateLimitCounter(baseProps);
+
+      // Now 8501 > 8500, so rate_limited
+      const afterResult = await checkRateLimit(baseProps);
+      expect(afterResult.status).toBe("rate_limited");
     });
   });
 
