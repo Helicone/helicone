@@ -109,7 +109,8 @@ export async function checkRateLimit(
     (timestamps[firstRelevantIndex].timestamp + timeWindowMillis - now) / 1000
   );
 
-  if (currentQuota >= quota) {
+  // Use > (not >=) because at exactly the quota, the user should still have access
+  if (currentQuota > quota) {
     return { status: "rate_limited", limit: quota, remaining, reset };
   }
 
