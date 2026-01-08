@@ -26,6 +26,7 @@ export interface IHeliconeHeaders {
     streamForceFormat: boolean;
     increaseTimeout: boolean;
     streamUsage: boolean;
+    includeCost: boolean;
   };
   retryHeaders: Nullable<{
     enabled: boolean;
@@ -98,6 +99,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     streamForceFormat: boolean;
     increaseTimeout: boolean;
     streamUsage: boolean;
+    includeCost: boolean;
   };
   retryHeaders: Nullable<{
     enabled: boolean;
@@ -430,10 +432,12 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     const streamForceFormat = this.headers.get("helicone-stream-force-format");
     const increaseTimeout = this.headers.get("helicone-increase-timeout");
     const streamUsage = this.headers.get("helicone-stream-usage");
+    const includeCost = this.headers.get("helicone-include-cost");
     return {
       streamForceFormat: streamForceFormat === "true",
       increaseTimeout: increaseTimeout === "true",
       streamUsage: streamUsage === "true",
+      includeCost: includeCost === "true",
     };
   }
 
