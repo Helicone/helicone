@@ -13,6 +13,7 @@ import {
   HeliconeChatCompletionContentPart,
   HeliconeChatCompletionMessageParam,
 } from "@helicone-package/prompts/types";
+import { randomUUID } from "crypto";
 
 /**
  * Maps Chat Completions role to Responses API role
@@ -58,7 +59,7 @@ function convertMessageToResponsesInput(
     // First, add the reasoning item if present
     if ("reasoning" in msg && msg.reasoning) {
       items.push({
-        id: globalThis.crypto.randomUUID(),
+        id: randomUUID(),
         type: "reasoning",
         summary: [{ type: "summary_text", text: msg.reasoning }],
       } as ResponsesReasoningItem);
@@ -66,7 +67,7 @@ function convertMessageToResponsesInput(
     if ("reasoning_details" in msg && msg.reasoning_details) {
       for (const detail of msg.reasoning_details) {
         items.push({
-          id: globalThis.crypto.randomUUID(),
+          id: randomUUID(),
           type: "reasoning",
           summary: [{ type: "summary_text", text: detail.thinking }],
           encrypted_content: detail.signature || undefined,
@@ -104,7 +105,7 @@ function convertMessageToResponsesInput(
   if (msg.role === "assistant") {
     if ("reasoning" in msg && msg.reasoning) {
       items.push({
-        id: globalThis.crypto.randomUUID(),
+        id: randomUUID(),
         type: "reasoning",
         summary: [{ type: "summary_text", text: msg.reasoning }],
       } as ResponsesReasoningItem);
@@ -112,7 +113,7 @@ function convertMessageToResponsesInput(
     if ("reasoning_details" in msg && msg.reasoning_details) {
       for (const detail of msg.reasoning_details) {
         items.push({
-          id: globalThis.crypto.randomUUID(),
+          id: randomUUID(),
           type: "reasoning",
           summary: [{ type: "summary_text", text: detail.thinking }],
           encrypted_content: detail.signature || undefined,
