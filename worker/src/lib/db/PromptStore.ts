@@ -53,7 +53,7 @@ export class PromptStore {
       .from("prompts_2025_versions")
       .select("id")
       .eq("prompt_id", promptId)
-      .eq("environment", environment)
+      .contains("environments", [environment])
       .eq("organization", orgId)
       .eq("soft_delete", false)
       .single();

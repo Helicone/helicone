@@ -249,6 +249,9 @@ export interface paths {
   "/v1/prompt-2025/update/environment": {
     post: operations["SetPromptVersionEnvironment"];
   };
+  "/v1/prompt-2025/remove/environment": {
+    post: operations["RemoveEnvironmentFromVersion"];
+  };
   "/v1/prompt-2025/count": {
     get: operations["GetPrompt2025Count"];
   };
@@ -1622,7 +1625,7 @@ Json: JsonObject;
       /** Format: double */
       minor_version: number;
       commit_message: string;
-      environment?: string;
+      environments?: string[];
       created_at: string;
       s3_url?: string;
     };
@@ -18102,6 +18105,25 @@ export interface operations {
     };
   };
   SetPromptVersionEnvironment: {
+    requestBody: {
+      content: {
+        "application/json": {
+          environment: string;
+          promptVersionId: string;
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  RemoveEnvironmentFromVersion: {
     requestBody: {
       content: {
         "application/json": {
