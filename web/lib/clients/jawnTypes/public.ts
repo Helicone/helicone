@@ -2761,6 +2761,7 @@ Json: JsonObject;
       total_tokens: number;
       /** Format: double */
       avg_latency: number;
+      user_ids: string[];
     };
     "ResultSuccess_SessionResult-Array_": {
       data: components["schemas"]["SessionResult"][];
