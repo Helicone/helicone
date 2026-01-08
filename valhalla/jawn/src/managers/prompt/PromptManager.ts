@@ -693,6 +693,11 @@ export class Prompt2025Manager extends BaseManager {
     promptVersionId: string;
     environment: string;
   }): Promise<Result<null, string>> {
+    // Prevent removing production environment - it can only be moved to another version
+    if (params.environment === PRODUCTION_ENVIRONMENT) {
+      return err("Cannot remove production environment. Use 'Set as Production' on another version to move it.");
+    }
+
     try {
       await HELICONE_DB.tx(async (t) => {
         // Check version exists
@@ -713,15 +718,6 @@ export class Prompt2025Manager extends BaseManager {
            WHERE id = $4 AND prompt_id = $1 AND organization = $2 AND soft_delete = false`,
           [params.promptId, this.authParams.organizationId, params.environment, params.promptVersionId]
         );
-
-        // Clear production_version ref if removing production
-        if (params.environment === PRODUCTION_ENVIRONMENT) {
-          await t.none(
-            `UPDATE prompts_2025 SET production_version = NULL
-             WHERE id = $1 AND production_version = $2 AND organization = $3 AND soft_delete = false`,
-            [params.promptId, params.promptVersionId, this.authParams.organizationId]
-          );
-        }
       });
 
       await this.resetPromptCache({
