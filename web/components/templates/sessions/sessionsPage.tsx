@@ -84,7 +84,7 @@ export type TSessions = {
     completion_tokens: number;
     total_tokens: number;
     avg_latency: number;
-    user_ids?: string[];
+    user_ids: string[];
   };
 };
 
