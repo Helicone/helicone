@@ -4,6 +4,7 @@ import "../setup";
 import { runGatewayTest } from "./test-framework";
 import { createOpenAIMockResponse } from "../test-utils";
 import { setSupabaseTestCase } from "../setup";
+import { randomUUID } from "crypto";
 
 const ORG_ID = "test-org-id";
 const OPENAI_EXPECTATIONS = {
@@ -24,7 +25,7 @@ describe("AI Gateway wallet disputes", () => {
       const storage = (wallet as any).ctx.storage;
       storage.sql.exec("DELETE FROM disputes");
       storage.sql.exec("DELETE FROM escrows");
-      await wallet.setCredits(1_000_000, `test-credits-${Date.now()}`);
+      await wallet.setCredits(1_000_000, `test-credits-${randomUUID()}`);
     });
   });
 

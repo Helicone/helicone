@@ -4,6 +4,7 @@
 
 import axios, { AxiosResponse } from "axios";
 import { WORKER_API_URL } from "./constants";
+import { randomUUID } from "crypto";
 
 // Admin access key from worker/wrangler.toml (local development only)
 // This matches HELICONE_MANUAL_ACCESS_KEY in the worker config
@@ -38,7 +39,7 @@ export async function addCreditsToWallet(
     orgId,
     amount,
     reason = "E2E test credits",
-    referenceId = `e2e-test-${Date.now()}`,
+    referenceId = `e2e-test-${randomUUID()}`,
     adminUserId = "e2e-test-admin",
   } = options;
 
@@ -71,7 +72,7 @@ export async function deductCreditsFromWallet(
     orgId,
     amount,
     reason = "E2E test debit",
-    referenceId = `e2e-test-${Date.now()}`,
+    referenceId = `e2e-test-${randomUUID()}`,
     adminUserId = "e2e-test-admin",
   } = options;
 
@@ -155,6 +156,6 @@ export async function resetWalletCredits(
     orgId,
     amount: currentBalance,
     reason: "E2E test - reset wallet to 0",
-    referenceId: `e2e-reset-${Date.now()}`,
+    referenceId: `e2e-reset-${randomUUID()}`,
   });
 }

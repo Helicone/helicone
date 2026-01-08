@@ -3,6 +3,7 @@ import {
 } from "../../../utils/modelMapper";
 import { PromiseGenericResult, ok, err } from "../../../packages/common/result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
+import { randomUUID } from "crypto";
 
 export class BedrockStreamProcessor implements IBodyProcessor {
   public async parse(
@@ -147,7 +148,7 @@ export class BedrockStreamProcessor implements IBodyProcessor {
       }
 
       const processedBody = {
-        id: messageId || `bedrock-${Date.now()}`,
+        id: messageId || randomUUID(),
         object: "chat.completion",
         created: Math.floor(Date.now() / 1000),
         model: calculateModel(requestModel, model, modelOverride) || model || requestModel || "unknown",
