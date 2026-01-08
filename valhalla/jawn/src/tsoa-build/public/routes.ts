@@ -2494,6 +2494,7 @@ const models: TsoaRoute.Models = {
             "completion_tokens": {"dataType":"double","required":true},
             "total_tokens": {"dataType":"double","required":true},
             "avg_latency": {"dataType":"double","required":true},
+            "user_ids": {"dataType":"array","array":{"dataType":"string"},"required":true},
         },
         "additionalProperties": false,
     },

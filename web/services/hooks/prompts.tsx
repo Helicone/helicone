@@ -76,7 +76,10 @@ export const useGetPromptEnvironments = () => {
     queryFn: async () => {
       const result = await $JAWN_API.GET("/v1/prompt-2025/environments", {});
       if (result.error || !result.data?.data) {
-        logger.error({ error: result.error }, "Error fetching prompt environments");
+        logger.error(
+          { error: result.error },
+          "Error fetching prompt environments",
+        );
         return [];
       }
       return result.data.data;
@@ -136,37 +139,29 @@ export const useGetPromptInputs = (
 export const useSetPromptVersionEnvironment = () => {
   const queryClient = useQueryClient();
 
-  return $JAWN_API.useMutation(
-    "post",
-    "/v1/prompt-2025/update/environment",
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["prompts"] });
-        queryClient.invalidateQueries({ queryKey: ["promptsWithVersions"] });
-        queryClient.invalidateQueries({ queryKey: ["promptVersions"] });
-        queryClient.invalidateQueries({ queryKey: ["promptVersionWithBody"] });
-        queryClient.invalidateQueries({ queryKey: ["promptEnvironments"] });
-      },
+  return $JAWN_API.useMutation("post", "/v1/prompt-2025/update/environment", {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["prompts"] });
+      queryClient.invalidateQueries({ queryKey: ["promptsWithVersions"] });
+      queryClient.invalidateQueries({ queryKey: ["promptVersions"] });
+      queryClient.invalidateQueries({ queryKey: ["promptVersionWithBody"] });
+      queryClient.invalidateQueries({ queryKey: ["promptEnvironments"] });
     },
-  );
+  });
 };
 
 export const useRemoveEnvironmentFromVersion = () => {
   const queryClient = useQueryClient();
 
-  return $JAWN_API.useMutation(
-    "post",
-    "/v1/prompt-2025/remove/environment",
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["prompts"] });
-        queryClient.invalidateQueries({ queryKey: ["promptsWithVersions"] });
-        queryClient.invalidateQueries({ queryKey: ["promptVersions"] });
-        queryClient.invalidateQueries({ queryKey: ["promptVersionWithBody"] });
-        queryClient.invalidateQueries({ queryKey: ["promptEnvironments"] });
-      },
+  return $JAWN_API.useMutation("post", "/v1/prompt-2025/remove/environment", {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["prompts"] });
+      queryClient.invalidateQueries({ queryKey: ["promptsWithVersions"] });
+      queryClient.invalidateQueries({ queryKey: ["promptVersions"] });
+      queryClient.invalidateQueries({ queryKey: ["promptVersionWithBody"] });
+      queryClient.invalidateQueries({ queryKey: ["promptEnvironments"] });
     },
-  );
+  });
 };
 
 export const useDeletePrompt = () => {
@@ -200,7 +195,10 @@ export const useDeletePromptVersion = () => {
   );
 };
 
-export const useGetPromptVersion = (promptVersionId?: string, withBody: boolean = true) => {
+export const useGetPromptVersion = (
+  promptVersionId?: string,
+  withBody: boolean = true,
+) => {
   return useQuery<{
     promptVersion: Prompt2025Version;
     promptBody?: OpenAIChatRequest;
@@ -217,7 +215,10 @@ export const useGetPromptVersion = (promptVersionId?: string, withBody: boolean 
       });
 
       if (result.error || !result.data?.data) {
-        logger.error({ error: result.error }, "Error fetching prompt version with body");
+        logger.error(
+          { error: result.error },
+          "Error fetching prompt version with body",
+        );
         return {
           promptVersion: {} as Prompt2025Version,
           promptBody: undefined,
@@ -255,7 +256,10 @@ export const useGetPromptVersion = (promptVersionId?: string, withBody: boolean 
           if (s3Response.ok) {
             promptBody = (await s3Response.json()) as OpenAIChatRequest;
           } else {
-            logger.error({ status: s3Response.status }, "Failed to fetch from S3 URL");
+            logger.error(
+              { status: s3Response.status },
+              "Failed to fetch from S3 URL",
+            );
           }
         } catch (error) {
           logger.error({ error }, "Error fetching prompt body from S3");
@@ -292,7 +296,10 @@ export const useGetPromptVersions = (
       );
 
       if (versionsResult.error || !versionsResult.data?.data) {
-        logger.error({ error: versionsResult.error }, "Error fetching prompt versions");
+        logger.error(
+          { error: versionsResult.error },
+          "Error fetching prompt versions",
+        );
         return [];
       }
 
@@ -370,7 +377,10 @@ export const useGetPromptsWithVersions = (
             productionVersionResult.error ||
             !productionVersionResult.data?.data
           ) {
-            logger.error({ promptId: prompt.id, error: versionsResult.error }, "Error fetching versions for prompt");
+            logger.error(
+              { promptId: prompt.id, error: versionsResult.error },
+              "Error fetching versions for prompt",
+            );
             return {
               prompt,
               totalVersions: 0,
@@ -403,7 +413,10 @@ export const useGetPromptsWithVersions = (
         {},
       );
       if (totalPromptsResult.error || !totalPromptsResult.data?.data) {
-        logger.error({ error: totalPromptsResult.error }, "Error fetching total prompts");
+        logger.error(
+          { error: totalPromptsResult.error },
+          "Error fetching total prompts",
+        );
         return {
           prompts: [],
           totalCount: 0,

@@ -124,8 +124,8 @@ const PromptVersionCard = ({
           <span className="truncate text-sm text-foreground">
             {version.commit_message}
           </span>
-          <div className="flex shrink-0 items-center gap-2">
-            <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20">
+          <div className="flex min-w-0 max-w-[300px] items-center gap-2 overflow-x-auto">
+            <span className="inline-flex shrink-0 items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20">
               {versionDisplay}
             </span>
             {version.environments?.map((env) => (

@@ -28,7 +28,7 @@ const EnvironmentPill = ({
     >
       {environment}
       {environment === "production" && <Crown className="ml-1 h-3 w-3" />}
-      {onRemove && (
+      {onRemove && environment !== "production" && (
         <button
           type="button"
           onClick={(e) => {
