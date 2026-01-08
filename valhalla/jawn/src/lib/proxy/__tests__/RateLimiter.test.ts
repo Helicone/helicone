@@ -68,7 +68,7 @@ describe("RateLimiter", () => {
         expect(result.limit).toBe(10);
       });
 
-      it("should allow requests when at exactly the limit", async () => {
+      it("should rate limit when at exactly the limit", async () => {
         // Exactly 10 requests in the last minute
         const timestamps = Array.from({ length: 10 }, (_, i) => ({
           timestamp: Date.now() - i * 1000,
@@ -78,9 +78,8 @@ describe("RateLimiter", () => {
 
         const result = await checkRateLimit(baseProps);
 
-        // At exactly the limit, we should still allow access
-        // (The user has used their quota but hasn't exceeded it)
-        expect(result.status).toBe("ok");
+        // At exactly the limit (10 >= 10), should be rate_limited
+        expect(result.status).toBe("rate_limited");
         expect(result.remaining).toBe(0);
       });
 
@@ -153,7 +152,7 @@ describe("RateLimiter", () => {
         expect(result.remaining).toBe(2300); // 8500 - 6200 = 2300 cents = $23
       });
 
-      it("should allow requests when spending is exactly at limit", async () => {
+      it("should rate limit when spending is exactly at limit", async () => {
         // Exactly $85 spent (8500 cents)
         const timestamps = [
           { timestamp: Date.now() - 1000, unit: 5000 }, // $50
@@ -163,8 +162,8 @@ describe("RateLimiter", () => {
 
         const result = await checkRateLimit(baseProps);
 
-        // At exactly the limit, we should still allow access
-        expect(result.status).toBe("ok");
+        // At exactly the limit (8500 >= 8500), should be rate_limited
+        expect(result.status).toBe("rate_limited");
         expect(result.remaining).toBe(0);
       });
 

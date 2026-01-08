@@ -55,24 +55,16 @@ describe("RateLimiter Stress Tests", () => {
       cost: 0,
     };
 
-    it("should correctly limit after exceeding quota requests", async () => {
+    it("should correctly limit after reaching quota requests", async () => {
       // Make exactly 100 requests (at quota)
       for (let i = 0; i < 100; i++) {
         await updateRateLimitCounter(baseProps);
       }
 
-      // After 100 updates, we're exactly at quota (100 = 100)
-      // With our fix using >, 100 > 100 is false, so still "ok"
-      const atLimitCheck = await checkRateLimit(baseProps);
-      expect(atLimitCheck.status).toBe("ok");
-      expect(atLimitCheck.remaining).toBe(0);
-
-      // Add one more to exceed the quota
-      await updateRateLimitCounter(baseProps);
-
-      // Now 101 > 100, so rate_limited
-      const finalCheck = await checkRateLimit(baseProps);
-      expect(finalCheck.status).toBe("rate_limited");
+      // At exactly quota (100 >= 100), should be rate_limited
+      const result = await checkRateLimit(baseProps);
+      expect(result.status).toBe("rate_limited");
+      expect(result.remaining).toBe(0);
     });
 
     it("should handle burst of concurrent check requests", async () => {
@@ -161,18 +153,10 @@ describe("RateLimiter Stress Tests", () => {
         await updateRateLimitCounter(baseProps);
       }
 
-      // Should be exactly at limit (8500 cents = $85)
-      // With our fix using >, 8500 > 8500 is false, so status is "ok"
+      // At exactly quota (8500 >= 8500), should be rate_limited
       const result = await checkRateLimit(baseProps);
       expect(result.remaining).toBe(0);
-      expect(result.status).toBe("ok");
-
-      // Add one more cent to exceed
-      await updateRateLimitCounter(baseProps);
-
-      // Now 8501 > 8500, so rate_limited
-      const afterResult = await checkRateLimit(baseProps);
-      expect(afterResult.status).toBe("rate_limited");
+      expect(result.status).toBe("rate_limited");
     });
   });
 
@@ -251,12 +235,16 @@ describe("RateLimiter Stress Tests", () => {
         await updateRateLimitCounter(props);
       }
 
-      // Should be at limit
+      // At exactly quota (10 >= 10), should be rate_limited
       let result = await checkRateLimit(props);
       expect(result.status).toBe("rate_limited");
+      expect(result.remaining).toBe(0);
 
       // Advance time by 61 seconds (past the window)
       jest.advanceTimersByTime(61000);
+
+      // Clear mock store to simulate Redis TTL expiration
+      mockStore.clear();
 
       // Should be reset now
       result = await checkRateLimit(props);
@@ -281,22 +269,28 @@ describe("RateLimiter Stress Tests", () => {
       };
 
       // Make 5 requests over 50 seconds
+      // Request 1 at t=0, Request 2 at t=10, ..., Request 5 at t=40
+      // After loop, time is at t=50
       for (let i = 0; i < 5; i++) {
         await updateRateLimitCounter(props);
         jest.advanceTimersByTime(10000); // 10 seconds between each
       }
 
-      // All 5 requests are still in the window
+      // At exactly quota (5 >= 5), should be rate_limited
       let result = await checkRateLimit(props);
       expect(result.status).toBe("rate_limited");
+      expect(result.remaining).toBe(0);
 
-      // Advance 20 more seconds - now the first request falls out
+      // Advance 20 more seconds (now at t=70)
+      // Request 1 at t=0 is now 70s ago - outside 60s window
+      // Request 2 at t=10 is now 60s ago - at boundary, outside (not < 60)
       jest.advanceTimersByTime(20000);
 
       result = await checkRateLimit(props);
-      // 4 requests remain in window (requests 2-5 from 40s, 30s, 20s, 10s ago)
+      // 3 requests remain in window (requests 3-5 from t=20,30,40)
+      // remaining = 5 - 3 = 2
       expect(result.status).toBe("ok");
-      expect(result.remaining).toBe(1);
+      expect(result.remaining).toBe(2);
     });
   });
 
