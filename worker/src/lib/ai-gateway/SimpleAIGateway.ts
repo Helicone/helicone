@@ -103,6 +103,12 @@ export class SimpleAIGateway {
   }
 
   async handle(): Promise<Response> {
+    // Step 0: Apply token limit exception handler if configured
+    // This must run BEFORE parsing to allow body modification (e.g., model fallback)
+    // We use "CUSTOM" as the provider since the actual provider is determined per-model
+    // The handler will still work for fallback strategy (proceeds when tokenLimit is null)
+    await this.requestWrapper.applyTokenLimitExceptionHandler("CUSTOM");
+
     // Step 1: Parse and prepare request
     const bodyMapping: BodyMappingType =
       this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping;

@@ -163,6 +163,15 @@ export class HeliconeProxyRequestMapper {
       body = await this.request.unsafeGetBodyText();
     }
 
+    // Apply token limit exception handler
+    await this.request.applyTokenLimitExceptionHandler(this.provider);
+    // Re-fetch body after potential modification
+    try {
+      body = await this.request.safelyGetBody();
+    } catch (e) {
+      body = await this.request.unsafeGetBodyText();
+    }
+
     return {
       data: {
         heliconePromptTemplate: await this.getHeliconeTemplate(),

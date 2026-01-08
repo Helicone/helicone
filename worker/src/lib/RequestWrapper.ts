@@ -10,7 +10,20 @@ import {
   checkLimits,
   checkLimitsSingle,
 } from "./managers/UsageLimitManager.ts";
-import { HeliconeHeaders } from "./models/HeliconeHeaders";
+import {
+  HeliconeHeaders,
+  HeliconeTokenLimitExceptionHandler,
+} from "./models/HeliconeHeaders";
+import {
+  applyFallbackStrategy,
+  applyMiddleOutStrategy,
+  applyTruncateStrategy,
+  estimateTokenCount,
+  getModelTokenLimit,
+  parseRequestPayload,
+  resolvePrimaryModel,
+} from "./util/tokenLimitException";
+import { Provider } from "@helicone-package/llm-mapper/types";
 import { getAndStoreInCache } from "./util/cache/secureCache";
 import { Result, err, map, mapPostgrestErr, ok } from "./util/results";
 import { parseJSXObject } from "@helicone/prompts";
@@ -305,6 +318,98 @@ export class RequestWrapper {
 
     if (Object.keys(overrides).length > 0) {
       await this.requestBodyBuffer.setBodyOverride(overrides);
+    }
+  }
+
+  async applyTokenLimitExceptionHandler(provider: Provider): Promise<void> {
+    const handler = this.heliconeHeaders.tokenLimitExceptionHandler;
+    if (!handler) {
+      return;
+    }
+
+    const bodyText = await this.requestBodyBuffer.unsafeGetRawText();
+    const parsedBody = parseRequestPayload(bodyText);
+    if (!parsedBody) {
+      return;
+    }
+
+    const primaryModel = resolvePrimaryModel(
+      parsedBody,
+      this.heliconeHeaders.modelOverride
+    );
+
+    if (!primaryModel) {
+      return;
+    }
+
+    const estimatedTokens = estimateTokenCount(parsedBody, primaryModel);
+    const modelContextLimit = getModelTokenLimit(provider, primaryModel);
+
+    // Extract requested completion/output limit (provider-agnostic best-effort)
+    const anyBody = parsedBody as any;
+    const completionCandidates: Array<unknown> = [
+      anyBody?.max_completion_tokens,
+      anyBody?.max_tokens,
+      anyBody?.max_output_tokens,
+      anyBody?.maxOutputTokens,
+      anyBody?.response?.max_tokens,
+      anyBody?.response?.max_output_tokens,
+      anyBody?.response?.maxOutputTokens,
+      anyBody?.generation_config?.max_output_tokens,
+      anyBody?.generation_config?.maxOutputTokens,
+      anyBody?.generationConfig?.max_output_tokens,
+      anyBody?.generationConfig?.maxOutputTokens,
+    ];
+    const requestedCompletionTokens = (() => {
+      for (const val of completionCandidates) {
+        if (typeof val === "number" && Number.isFinite(val) && val > 0) {
+          return Math.floor(val);
+        }
+      }
+      return 0;
+    })();
+    const tokenLimit =
+      modelContextLimit === null
+        ? null
+        : Math.max(
+            0,
+            modelContextLimit -
+              (requestedCompletionTokens || modelContextLimit * 0.1)
+          );
+
+    // For Fallback strategy, we proceed even if tokenLimit is null (model not in registry)
+    // because we can still switch to the fallback model based on the model list
+    const shouldSkip =
+      estimatedTokens === null ||
+      (handler === HeliconeTokenLimitExceptionHandler.Fallback
+        ? false // Never skip for Fallback - always try to apply it
+        : tokenLimit === null ||
+          estimatedTokens <= tokenLimit);
+
+    if (shouldSkip) {
+      return;
+    }
+
+    let modifiedBody: ValidRequestBody | undefined;
+    switch (handler) {
+      case HeliconeTokenLimitExceptionHandler.Truncate:
+        modifiedBody = applyTruncateStrategy(parsedBody, primaryModel, tokenLimit);
+        break;
+      case HeliconeTokenLimitExceptionHandler.MiddleOut:
+        modifiedBody = applyMiddleOutStrategy(parsedBody, primaryModel, tokenLimit);
+        break;
+      case HeliconeTokenLimitExceptionHandler.Fallback:
+        modifiedBody = applyFallbackStrategy(
+          parsedBody,
+          primaryModel,
+          estimatedTokens,
+          tokenLimit // Can be null if model not in registry
+        );
+        break;
+    }
+
+    if (typeof modifiedBody === "string") {
+      await this.requestBodyBuffer.tempSetBody(modifiedBody);
     }
   }
 
