@@ -827,7 +827,7 @@ export class PromptManager extends BaseManager {
         promptFromRequest: true,
       },
       prompt: requestResult.data.request_body,
-      userDefinedId: `prompt-from-request-${requestId}-${randomUUID()}`,
+      userDefinedId: `prompt-from-request-${requestId}-${Date.now()}`,
       createdAt: requestResult.data.request_created_at ?? undefined,
     });
 
