@@ -150,6 +150,111 @@ export class StripeManager extends BaseManager {
     }
   }
 
+  /**
+   * Get usage stats for a billing period from ClickHouse
+   */
+  public async getBillingPeriodUsage(
+    orgId: string,
+    periodStart: Date
+  ): Promise<
+    Result<{ requests: number; storageBytes: number; storageMb: number }, string>
+  > {
+    try {
+      const result = await dbQueryClickhouse<{
+        requests: string;
+        total_bytes: string;
+      }>(
+        `
+        SELECT
+          count(*) as requests,
+          sum(size_bytes) as total_bytes
+        FROM request_response_rmt
+        WHERE organization_id = {val_0: String}
+          AND request_created_at >= {val_1: DateTime64(3)}
+        `,
+        [orgId, periodStart]
+      );
+
+      if (result.error) {
+        return err(`ClickHouse query failed: ${result.error}`);
+      }
+
+      const data = result.data?.[0];
+      const requests = parseInt(data?.requests ?? "0", 10);
+      const storageBytes = parseInt(data?.total_bytes ?? "0", 10);
+      const storageMb = Math.round(storageBytes / (1024 * 1024));
+
+      return ok({ requests, storageBytes, storageMb });
+    } catch (error) {
+      return err(`Error getting billing period usage: ${error}`);
+    }
+  }
+
+  /**
+   * Send backdated metered usage events to Stripe
+   * Used during instant migration to backfill usage for the current billing period
+   */
+  public async sendBackdatedUsageEvents(
+    stripeCustomerId: string,
+    timestamp: Date,
+    requests: number,
+    storageBytes: number
+  ): Promise<Result<{ requestsEvent: string; storageEvent: string }, string>> {
+    try {
+      const events: StripeMeterEvent[] = [];
+      const uniqueId = Date.now();
+
+      // Add requests event if there are any
+      if (requests > 0) {
+        events.push({
+          identifier: `migration_requests_${stripeCustomerId}_${uniqueId}`,
+          event_name: "requests_sum",
+          timestamp: timestamp.toISOString(),
+          payload: {
+            stripe_customer_id: stripeCustomerId,
+            value: requests.toString(),
+          },
+        });
+      }
+
+      // Add storage event if there are any bytes
+      if (storageBytes > 0) {
+        events.push({
+          identifier: `migration_bytes_${stripeCustomerId}_${uniqueId}`,
+          event_name: "bytes_sum",
+          timestamp: timestamp.toISOString(),
+          payload: {
+            stripe_customer_id: stripeCustomerId,
+            value: storageBytes.toString(),
+          },
+        });
+      }
+
+      if (events.length === 0) {
+        return ok({
+          requestsEvent: "skipped (0 requests)",
+          storageEvent: "skipped (0 bytes)",
+        });
+      }
+
+      // Send the events
+      const meterEventSession =
+        await this.stripe.v2.billing.meterEventSession.create();
+      await sendMeteredBatch(events, meterEventSession.authentication_token);
+
+      return ok({
+        requestsEvent:
+          requests > 0 ? `sent ${requests} requests` : "skipped (0 requests)",
+        storageEvent:
+          storageBytes > 0
+            ? `sent ${storageBytes} bytes`
+            : "skipped (0 bytes)",
+      });
+    } catch (error) {
+      return err(`Error sending backdated usage events: ${error}`);
+    }
+  }
+
   public async getCostForEvals(): Promise<Result<number, string>> {
     const subscriptionResult = await this.getSubscription();
     const proProductPrices = await getProProductPrices();
@@ -1158,6 +1263,134 @@ WHERE (${builtFilter.filter})`,
     }
   }
 
+  /**
+   * Internal helper to migrate a subscription to new pricing.
+   * Handles both pro and team tier migrations.
+   */
+  private async migrateToNewPricing(
+    tierType: "pro" | "team"
+  ): Promise<
+    Result<{ previousTier: string; newTier: string; subscriptionId: string }, string>
+  > {
+    const validTiers =
+      tierType === "pro"
+        ? ["pro-20240913", "pro-20250202", "growth", "pro-20251210"]
+        : ["team-20250130", "team-20251210"];
+    const newTier = tierType === "pro" ? "pro-20251210" : "team-20251210";
+    const basePriceKey =
+      tierType === "pro" ? "pro20251210_79Price" : "team20251210_799Price";
+
+    try {
+      const org = await this.getOrganization();
+      if (org.error || !org.data) {
+        return err(`Failed to get organization: ${org.error}`);
+      }
+
+      const currentTier = org.data.tier;
+      if (!validTiers.includes(currentTier ?? "")) {
+        return err(
+          `Organization is not on a valid ${tierType} tier. Current tier: ${currentTier}`
+        );
+      }
+
+      const subscriptionResult = await this.getSubscription();
+      if (!subscriptionResult.data) {
+        return err("No existing subscription found");
+      }
+      const subscription = subscriptionResult.data;
+
+      const settingsManager = new SettingsManager();
+      const stripeProductSettings =
+        await settingsManager.getSetting("stripe:products");
+
+      const basePrice = stripeProductSettings?.[basePriceKey];
+      if (!basePrice) {
+        return err(`stripe:products ${basePriceKey} is not configured`);
+      }
+      if (!stripeProductSettings?.requestVolumePrice_20251210) {
+        return err(
+          "stripe:products requestVolumePrice_20251210 is not configured"
+        );
+      }
+      if (!stripeProductSettings?.gigVolumePrice_20251210) {
+        return err("stripe:products gigVolumePrice_20251210 is not configured");
+      }
+
+      const itemsToUpdate: Stripe.SubscriptionUpdateParams.Item[] = [
+        ...subscription.items.data.map((item) => ({
+          id: item.id,
+          deleted: true as const,
+        })),
+        { price: basePrice, quantity: 1 },
+        { price: stripeProductSettings.requestVolumePrice_20251210 },
+        { price: stripeProductSettings.gigVolumePrice_20251210 },
+      ];
+
+      const updatedSubscription = await this.stripe.subscriptions.update(
+        subscription.id,
+        {
+          items: itemsToUpdate,
+          metadata: {
+            orgId: this.authParams.organizationId,
+            tier: newTier,
+          },
+          proration_behavior: "none",
+        }
+      );
+
+      const updateResult = await dbExecute(
+        `UPDATE organization
+         SET tier = $1,
+             stripe_subscription_item_id = $2,
+             stripe_metadata = $3
+         WHERE id = $4`,
+        [
+          newTier,
+          updatedSubscription.items.data[0].id,
+          JSON.stringify({
+            addons: {
+              alerts: true,
+              prompts: true,
+              experiments: true,
+              evals: true,
+            },
+          }),
+          this.authParams.organizationId,
+        ]
+      );
+
+      if (updateResult.error) {
+        return err(`Error updating organization: ${updateResult.error}`);
+      }
+
+      return ok({
+        previousTier: currentTier ?? "unknown",
+        newTier,
+        subscriptionId: subscription.id,
+      });
+    } catch (error: any) {
+      return err(`Error migrating to new ${tierType} pricing: ${error.message}`);
+    }
+  }
+
+  /**
+   * Migrate from legacy pro tiers (pro-20240913, pro-20250202) to new pricing (pro-20251210)
+   */
+  public async migrateToNewProPricing(): Promise<
+    Result<{ previousTier: string; newTier: string; subscriptionId: string }, string>
+  > {
+    return this.migrateToNewPricing("pro");
+  }
+
+  /**
+   * Migrate from legacy team tier (team-20250130) to new pricing (team-20251210)
+   */
+  public async migrateToNewTeamPricing(): Promise<
+    Result<{ previousTier: string; newTier: string; subscriptionId: string }, string>
+  > {
+    return this.migrateToNewPricing("team");
+  }
+
   public async getOrganization(): Promise<
     Result<Database["public"]["Tables"]["organization"]["Row"], string>
   > {
@@ -1678,10 +1911,6 @@ WHERE (${builtFilter.filter})`,
   ): Promise<Result<string, string>> {
     try {
       const customerIdResult = await this.getOrCreateStripeCustomer();
-      const userEmail = await dbExecute<{ email: string }>(
-        `SELECT email FROM auth.users where id = $1 LIMIT 1`,
-        [this.authParams.userId]
-      );
 
       if (customerIdResult.error || !customerIdResult.data) {
         return err(
@@ -1834,8 +2063,7 @@ WHERE (${builtFilter.filter})`,
 
       // Calculate projected monthly cost based on current usage rate
       // If no days have elapsed yet, use factor of 1 (current = projected)
-      const projectionFactor =
-        daysElapsed > 0 ? daysTotal / daysElapsed : 1;
+      const projectionFactor = daysElapsed > 0 ? daysTotal / daysElapsed : 1;
       const projectedRequests = totalRequests * projectionFactor;
       const projectedGB = totalGB * projectionFactor;
 

@@ -172,7 +172,10 @@ const SessionsPage = (props: SessionsPageProps) => {
 
   const sessionsWithId = useMemo(() => {
     return sessions.map((session, index) => ({
-      metadata: session,
+      metadata: {
+        ...session,
+        user_ids: session.user_ids ?? [],
+      },
       id: index.toString(),
     }));
   }, [sessions]);
