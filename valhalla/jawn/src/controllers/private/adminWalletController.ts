@@ -122,6 +122,7 @@ export class AdminWalletController extends Controller {
         validatedPageSize
       );
     }
+
     return adminWalletManager.getDashboardWithPostgresSort(
       search || "",
       tokenUsageProductId,

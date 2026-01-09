@@ -21,6 +21,7 @@ import { Setting, SettingsManager } from "../../utils/settings";
 import type { SettingName } from "../../utils/settings";
 import Stripe from "stripe";
 import { AdminManager } from "../../managers/admin/AdminManager";
+import { PricingAnalyticsManager, OrganizationSegment } from "../../managers/admin/PricingAnalyticsManager";
 import {
   ModelWithProvider,
   clickhouseModelFilter,
@@ -2558,5 +2559,84 @@ export class AdminController extends Controller {
       return err(result.error.message || String(result.error));
     }
     return ok(null);
+  }
+
+  @Get("/pricing-analytics/segments")
+  public async getPricingSegments(
+    @Request() request: JawnAuthenticatedRequest,
+    @Query() bustCache?: boolean
+  ): Promise<Result<OrganizationSegment[], string>> {
+    try {
+      console.log("[AdminController] getPricingSegments called", { bustCache });
+      await authCheckThrow(request.authParams.userId);
+      console.log("[AdminController] Auth check passed");
+
+      const pricingAnalyticsManager = new PricingAnalyticsManager(
+        request.authParams
+      );
+
+      const result = await pricingAnalyticsManager.getSegments(bustCache);
+      console.log("[AdminController] getSegments result:", result.error ? `Error: ${result.error}` : `Success: ${result.data?.length} segments`);
+      return result;
+    } catch (error) {
+      console.error("[AdminController] Error in getPricingSegments:", error);
+      return err(`Controller error: ${error}`);
+    }
+  }
+
+  @Get("/pricing-analytics/cohorts")
+  public async getPricingCohorts(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<
+    Result<
+      {
+        high_inference_low_seats: Array<any>;
+        low_inference_high_seats: Array<any>;
+        ptb_customers: Array<any>;
+        byok_customers: Array<any>;
+        free_power_users: Array<any>;
+      },
+      string
+    >
+  > {
+    await authCheckThrow(request.authParams.userId);
+
+    const pricingAnalyticsManager = new PricingAnalyticsManager(
+      request.authParams
+    );
+
+    return await pricingAnalyticsManager.getCohorts();
+  }
+
+  @Get("/pricing-analytics/revenue-summary")
+  public async getRevenueSummary(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<
+    Result<
+      {
+        mrr_by_tier: {
+          free: number;
+          pro: number;
+          team: number;
+          enterprise: number;
+        };
+        total_mrr: number;
+        addon_adoption: {
+          prompts: number;
+          experiments: number;
+          evals: number;
+        };
+        gross_margin: number;
+      },
+      string
+    >
+  > {
+    await authCheckThrow(request.authParams.userId);
+
+    const pricingAnalyticsManager = new PricingAnalyticsManager(
+      request.authParams
+    );
+
+    return await pricingAnalyticsManager.getRevenueSummary();
   }
 }
