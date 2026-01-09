@@ -11,6 +11,7 @@ export const models = {
     created: "2024-05-13T00:00:00.000Z",
     modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
+    stripeModelId: "gpt-4o",
   },
   "gpt-4o-mini": {
     name: "OpenAI GPT-4o-mini",
@@ -22,6 +23,7 @@ export const models = {
     created: "2024-07-18T00:00:00.000Z",
     modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
+    stripeModelId: "gpt-4o-mini",
   },
   "chatgpt-4o-latest": {
     name: "OpenAI ChatGPT-4o",

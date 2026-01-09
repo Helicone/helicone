@@ -11,6 +11,7 @@ export const models = {
     created: "2025-01-01T00:00:00.000Z",
     modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
+    stripeModelId: "gpt-5",
   },
   "gpt-5-mini": {
     name: "OpenAI GPT-5 Mini",
@@ -22,6 +23,7 @@ export const models = {
     created: "2025-01-01T00:00:00.000Z",
     modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
+    stripeModelId: "gpt-5-mini",
   },
   "gpt-5-nano": {
     name: "OpenAI GPT-5 Nano",
@@ -33,6 +35,7 @@ export const models = {
     created: "2025-01-01T00:00:00.000Z",
     modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
+    stripeModelId: "gpt-5-nano",
   },
   "gpt-5-chat-latest": {
     name: "OpenAI GPT-5 Chat Latest",
