@@ -12,11 +12,17 @@ export const endpoints = {
         threshold: 0,
         input: 0.000002, // $2/1M tokens (same as Gemini 3 Pro)
         output: 0.000012, // $12/1M tokens (same as Gemini 3 Pro)
+        image: {
+          output: 0.00012, // $120/1M tokens for image output ($0.134 per 1K/2K image)
+        },
       },
       {
         threshold: 200000,
         input: 0.000004, // $4/1M tokens (over 200K context)
         output: 0.000018, // $18/1M tokens (over 200K context)
+        image: {
+          output: 0.00012, // $120/1M tokens for image output
+        },
       },
     ],
     contextLength: 65_536,
@@ -49,11 +55,17 @@ export const endpoints = {
         threshold: 0,
         input: 0.000002, // $2/1M tokens
         output: 0.000012, // $12/1M tokens
+        image: {
+          output: 0.00012, // $120/1M tokens for image output ($0.134 per 1K/2K image)
+        },
       },
       {
         threshold: 200000,
         input: 0.000004, // $4/1M tokens (over 200K context)
         output: 0.000018, // $18/1M tokens (over 200K context)
+        image: {
+          output: 0.00012, // $120/1M tokens for image output
+        },
       },
     ],
     contextLength: 65_536,
@@ -83,11 +95,17 @@ export const endpoints = {
         threshold: 0,
         input: 0.00000211, // $2.11/1M - $2.00/1M * 1.055
         output: 0.00001266, // $12.66/1M - $12.00/1M * 1.055
+        image: {
+          output: 0.0001266, // $126.60/1M - $120/1M * 1.055 for image output
+        },
       },
       {
         threshold: 200000,
         input: 0.00000422, // $4.22/1M - $4.00/1M * 1.055 (over 200K context)
         output: 0.00001899, // $18.99/1M - $18.00/1M * 1.055 (over 200K context)
+        image: {
+          output: 0.0001266, // $126.60/1M - $120/1M * 1.055 for image output
+        },
       },
     ],
     contextLength: 65_536,
