@@ -310,6 +310,7 @@ export class DBWrapper {
         tier: string;
         id: string;
         percentLog: number;
+        freeLimitExceeded: boolean;
       },
       string
     >
@@ -323,6 +324,7 @@ export class DBWrapper {
         tier: string;
         id: string;
         percentLog: number;
+        freeLimitExceeded: boolean;
       },
       string
     >(
@@ -342,6 +344,7 @@ export class DBWrapper {
           tier: data?.tier ?? "free",
           id: data?.id ?? "",
           percentLog: data?.percent_to_log ?? 100_000,
+          freeLimitExceeded: data?.free_limit_exceeded ?? false,
         });
       },
       43200 // 12 hours

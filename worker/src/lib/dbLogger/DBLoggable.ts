@@ -695,7 +695,15 @@ export class DBLoggable {
     const { body: rawResponseBody, endTime: responseEndTime } =
       await this.response.getResponseBody();
 
-    if (S3_ENABLED === "true") {
+    // Skip S3 storage if:
+    // 1. Free tier limit exceeded
+    // 2. Omit request/response headers are set
+    const skipS3Storage =
+      org.data.freeLimitExceeded === true ||
+      requestHeaders?.omitHeaders?.omitRequest === true ||
+      requestHeaders?.omitHeaders?.omitResponse === true;
+
+    if (S3_ENABLED === "true" && !skipS3Storage) {
       try {
         const providerResponse = rawResponseBody.join("");
         let openAIResponse: string | undefined;
