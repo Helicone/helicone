@@ -72,6 +72,74 @@ describe("normalizeAIGatewayResponse", () => {
       expect(parsed.usage.total_tokens).toBe(30);
     });
 
+    /**
+     * REGRESSION TEST for Helicone provider with pa/gt-* models
+     *
+     * Bug: When bodyMapping === "RESPONSES" and provider === "helicone" with providerModelId
+     * containing "/gt" (like "pa/gt-4.1-m"), the response was being double-converted because
+     * the nativelySupportsResponsesAPI check only looked for "gpt" in the model ID.
+     *
+     * Fix: Added || providerModelId.includes("/gt") to the nativelySupportsResponsesAPI check
+     *
+     * This test simulates Helicone returning a response ALREADY in Responses API format
+     * for a gpt-4.1-mini model (providerModelId: "pa/gt-4.1-m"), and verifies the output
+     * field remains intact (not overwritten by double-conversion).
+     */
+    it("should not double-normalize Helicone pa/gt-* model responses with RESPONSES body mapping", async () => {
+      // Simulate Helicone returning a response ALREADY in Responses API format for gpt-4.1-mini
+      const heliconeResponseInResponsesFormat = {
+        id: "resp-456",
+        object: "response",
+        created: 1677652288,
+        model: "pa/gt-4.1-m",
+        output: [
+          {
+            id: "msg_abc123",
+            type: "message",
+            status: "completed",
+            role: "assistant",
+            content: [
+              {
+                type: "output_text",
+                text: "Periwinkle — a lovely shade of blue-purple!",
+                annotations: [],
+              },
+            ],
+          },
+        ],
+        usage: {
+          input_tokens: 12,
+          output_tokens: 10,
+          total_tokens: 22,
+          modality_tokens: {},
+        },
+      };
+
+      const result = await normalizeAIGatewayResponse({
+        responseText: JSON.stringify(heliconeResponseInResponsesFormat),
+        isStream: false,
+        provider: "helicone",
+        providerModelId: "pa/gt-4.1-m",
+        responseFormat: "OPENAI",
+        bodyMapping: "RESPONSES",
+      });
+
+      const parsed = JSON.parse(result);
+
+      // CRITICAL: Should preserve the 'output' field and its content
+      // This was the bug - double conversion would make output empty []
+      expect(parsed.output).toBeDefined();
+      expect(parsed.output).not.toBeNull();
+      expect(parsed.output.length).toBeGreaterThan(0);
+      expect(parsed.output[0].type).toBe("message");
+      expect(parsed.output[0].content).toBeDefined();
+      expect(parsed.output[0].content[0].type).toBe("output_text");
+      expect(parsed.output[0].content[0].text).toBe("Periwinkle — a lovely shade of blue-purple!");
+
+      // Should remain in Responses API format
+      expect(parsed.object).toBe("response");
+    });
+
     it("should normalize Anthropic responses with RESPONSES body mapping", async () => {
       const anthropicResponse = {
         id: "msg_123",
