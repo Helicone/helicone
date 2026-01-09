@@ -663,7 +663,9 @@ export default function RequestsPage(props: RequestsPageV2Props) {
         ),
       );
       drawerRef.current?.expand(); // Expand the drawer
-      drawerRef.current?.resize(drawerSize);
+      // Use a minimum size of 33 when opening from URL to ensure visibility
+      const sizeToUse = drawerSize > 0 ? drawerSize : 33;
+      drawerRef.current?.resize(sizeToUse);
     }
   }, [initialRequest, selectedData, drawerSize]);
 
