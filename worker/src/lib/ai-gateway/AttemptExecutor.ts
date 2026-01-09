@@ -394,7 +394,22 @@ export class AttemptExecutor {
         : null;
 
       const providerStartTime = Date.now();
-      const response = await forwarder(urlResult.data, escrowInfo);
+
+      // Retry logic for PTB Helicone provider 502 errors
+      let response!: Response;
+      const maxRetries =
+        endpoint.provider === "helicone" && endpoint.ptbEnabled ? 2 : 0;
+
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        response = await forwarder(urlResult.data, escrowInfo);
+
+        // Only retry on 502 for Helicone PTB requests (no delay between retries)
+        if (response.status === 502 && attempt < maxRetries) {
+          continue;
+        }
+        break;
+      }
+
       const providerLatency = Date.now() - providerStartTime;
 
       metrics.markProviderEnd(response.status);
