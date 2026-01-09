@@ -24,6 +24,7 @@ import {
   HandCoins,
   TrendingUp,
   BarChart3,
+  Bot,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -257,6 +258,15 @@ const toolsComponents: LinkItem[] = [
     },
     description: "Calculate and compare API costs",
     icon: <HandCoins className="size-5 navbar-icon-style" />,
+  },
+  {
+    title: "Agent Email Course",
+    link: {
+      href: "/agent-course",
+      isExternal: false,
+    },
+    description: "From Engineer to AI Engineer in 7 days",
+    icon: <Bot className="size-5 navbar-icon-style" />,
   },
 ];
 
