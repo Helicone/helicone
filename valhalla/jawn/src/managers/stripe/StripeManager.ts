@@ -1264,48 +1264,48 @@ WHERE (${builtFilter.filter})`,
   }
 
   /**
-   * Migrate from legacy pro tiers (pro-20240913, pro-20250202) to new pricing (pro-20251210)
-   * This updates the existing subscription by removing old items and adding new pricing items.
+   * Internal helper to migrate a subscription to new pricing.
+   * Handles both pro and team tier migrations.
    */
-  public async migrateToNewProPricing(): Promise<
-    Result<
-      {
-        previousTier: string;
-        newTier: string;
-        subscriptionId: string;
-      },
-      string
-    >
+  private async migrateToNewPricing(
+    tierType: "pro" | "team"
+  ): Promise<
+    Result<{ previousTier: string; newTier: string; subscriptionId: string }, string>
   > {
+    const validTiers =
+      tierType === "pro"
+        ? ["pro-20240913", "pro-20250202", "growth", "pro-20251210"]
+        : ["team-20250130", "team-20251210"];
+    const newTier = tierType === "pro" ? "pro-20251210" : "team-20251210";
+    const basePriceKey =
+      tierType === "pro" ? "pro20251210_79Price" : "team20251210_799Price";
+
     try {
-      // 1. Get current organization and validate tier
       const org = await this.getOrganization();
       if (org.error || !org.data) {
         return err(`Failed to get organization: ${org.error}`);
       }
 
       const currentTier = org.data.tier;
-      // Allow both legacy tiers and new tier (for reapply)
-      const validTiers = ["pro-20240913", "pro-20250202", "growth", "pro-20251210"];
       if (!validTiers.includes(currentTier ?? "")) {
         return err(
-          `Organization is not on a valid pro tier. Current tier: ${currentTier}`
+          `Organization is not on a valid ${tierType} tier. Current tier: ${currentTier}`
         );
       }
 
-      // 2. Get current subscription
       const subscriptionResult = await this.getSubscription();
       if (!subscriptionResult.data) {
         return err("No existing subscription found");
       }
       const subscription = subscriptionResult.data;
 
-      // 3. Get new pricing products from settings
       const settingsManager = new SettingsManager();
       const stripeProductSettings =
         await settingsManager.getSetting("stripe:products");
-      if (!stripeProductSettings?.pro20251210_79Price) {
-        return err("stripe:products pro20251210_79Price is not configured");
+
+      const basePrice = stripeProductSettings?.[basePriceKey];
+      if (!basePrice) {
+        return err(`stripe:products ${basePriceKey} is not configured`);
       }
       if (!stripeProductSettings?.requestVolumePrice_20251210) {
         return err(
@@ -1316,40 +1316,28 @@ WHERE (${builtFilter.filter})`,
         return err("stripe:products gigVolumePrice_20251210 is not configured");
       }
 
-      // 4. Build the items array: remove all existing items and add new ones
       const itemsToUpdate: Stripe.SubscriptionUpdateParams.Item[] = [
-        // Mark all existing items for deletion
         ...subscription.items.data.map((item) => ({
           id: item.id,
           deleted: true as const,
         })),
-        // Add new pricing items
-        {
-          price: stripeProductSettings.pro20251210_79Price, // $79/mo flat
-          quantity: 1,
-        },
-        {
-          price: stripeProductSettings.requestVolumePrice_20251210, // Metered request billing
-        },
-        {
-          price: stripeProductSettings.gigVolumePrice_20251210, // Metered GB billing
-        },
+        { price: basePrice, quantity: 1 },
+        { price: stripeProductSettings.requestVolumePrice_20251210 },
+        { price: stripeProductSettings.gigVolumePrice_20251210 },
       ];
 
-      // 5. Update subscription with new items (no proration for migrations)
       const updatedSubscription = await this.stripe.subscriptions.update(
         subscription.id,
         {
           items: itemsToUpdate,
           metadata: {
             orgId: this.authParams.organizationId,
-            tier: "pro-20251210",
+            tier: newTier,
           },
           proration_behavior: "none",
         }
       );
 
-      // 6. Update organization in database
       const updateResult = await dbExecute(
         `UPDATE organization
          SET tier = $1,
@@ -1357,7 +1345,7 @@ WHERE (${builtFilter.filter})`,
              stripe_metadata = $3
          WHERE id = $4`,
         [
-          "pro-20251210",
+          newTier,
           updatedSubscription.items.data[0].id,
           JSON.stringify({
             addons: {
@@ -1377,133 +1365,30 @@ WHERE (${builtFilter.filter})`,
 
       return ok({
         previousTier: currentTier ?? "unknown",
-        newTier: "pro-20251210",
+        newTier,
         subscriptionId: subscription.id,
       });
     } catch (error: any) {
-      return err(`Error migrating to new pro pricing: ${error.message}`);
+      return err(`Error migrating to new ${tierType} pricing: ${error.message}`);
     }
   }
 
   /**
+   * Migrate from legacy pro tiers (pro-20240913, pro-20250202) to new pricing (pro-20251210)
+   */
+  public async migrateToNewProPricing(): Promise<
+    Result<{ previousTier: string; newTier: string; subscriptionId: string }, string>
+  > {
+    return this.migrateToNewPricing("pro");
+  }
+
+  /**
    * Migrate from legacy team tier (team-20250130) to new pricing (team-20251210)
-   * This updates the existing subscription by removing old items and adding new pricing items.
    */
   public async migrateToNewTeamPricing(): Promise<
-    Result<
-      {
-        previousTier: string;
-        newTier: string;
-        subscriptionId: string;
-      },
-      string
-    >
+    Result<{ previousTier: string; newTier: string; subscriptionId: string }, string>
   > {
-    try {
-      // 1. Get current organization and validate tier
-      const org = await this.getOrganization();
-      if (org.error || !org.data) {
-        return err(`Failed to get organization: ${org.error}`);
-      }
-
-      const currentTier = org.data.tier;
-      // Allow both legacy tier and new tier (for reapply)
-      if (currentTier !== "team-20250130" && currentTier !== "team-20251210") {
-        return err(
-          `Organization is not on a valid team tier. Current tier: ${currentTier}`
-        );
-      }
-
-      // 2. Get current subscription
-      const subscriptionResult = await this.getSubscription();
-      if (!subscriptionResult.data) {
-        return err("No existing subscription found");
-      }
-      const subscription = subscriptionResult.data;
-
-      // 3. Get new pricing products from settings
-      const settingsManager = new SettingsManager();
-      const stripeProductSettings =
-        await settingsManager.getSetting("stripe:products");
-      if (!stripeProductSettings?.team20251210_799Price) {
-        return err("stripe:products team20251210_799Price is not configured");
-      }
-      if (!stripeProductSettings?.requestVolumePrice_20251210) {
-        return err(
-          "stripe:products requestVolumePrice_20251210 is not configured"
-        );
-      }
-      if (!stripeProductSettings?.gigVolumePrice_20251210) {
-        return err("stripe:products gigVolumePrice_20251210 is not configured");
-      }
-
-      // 4. Build the items array: remove all existing items and add new ones
-      const itemsToUpdate: Stripe.SubscriptionUpdateParams.Item[] = [
-        // Mark all existing items for deletion
-        ...subscription.items.data.map((item) => ({
-          id: item.id,
-          deleted: true as const,
-        })),
-        // Add new pricing items
-        {
-          price: stripeProductSettings.team20251210_799Price, // $799/mo flat
-          quantity: 1,
-        },
-        {
-          price: stripeProductSettings.requestVolumePrice_20251210, // Metered request billing
-        },
-        {
-          price: stripeProductSettings.gigVolumePrice_20251210, // Metered GB billing
-        },
-      ];
-
-      // 5. Update subscription with new items (no proration for migrations)
-      const updatedSubscription = await this.stripe.subscriptions.update(
-        subscription.id,
-        {
-          items: itemsToUpdate,
-          metadata: {
-            orgId: this.authParams.organizationId,
-            tier: "team-20251210",
-          },
-          proration_behavior: "none",
-        }
-      );
-
-      // 6. Update organization in database
-      const updateResult = await dbExecute(
-        `UPDATE organization
-         SET tier = $1,
-             stripe_subscription_item_id = $2,
-             stripe_metadata = $3
-         WHERE id = $4`,
-        [
-          "team-20251210",
-          updatedSubscription.items.data[0].id,
-          JSON.stringify({
-            addons: {
-              alerts: true,
-              prompts: true,
-              experiments: true,
-              evals: true,
-            },
-          }),
-          this.authParams.organizationId,
-        ]
-      );
-
-      if (updateResult.error) {
-        return err(`Error updating organization: ${updateResult.error}`);
-      }
-
-      return ok({
-        previousTier: currentTier ?? "unknown",
-        newTier: "team-20251210",
-        subscriptionId: subscription.id,
-      });
-    } catch (error: any) {
-      return err(`Error migrating to new team pricing: ${error.message}`);
-    }
+    return this.migrateToNewPricing("team");
   }
 
   public async getOrganization(): Promise<
@@ -2026,10 +1911,6 @@ WHERE (${builtFilter.filter})`,
   ): Promise<Result<string, string>> {
     try {
       const customerIdResult = await this.getOrCreateStripeCustomer();
-      const userEmail = await dbExecute<{ email: string }>(
-        `SELECT email FROM auth.users where id = $1 LIMIT 1`,
-        [this.authParams.userId]
-      );
 
       if (customerIdResult.error || !customerIdResult.data) {
         return err(

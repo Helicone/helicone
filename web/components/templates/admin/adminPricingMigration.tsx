@@ -79,6 +79,7 @@ const LEGACY_TIERS = [
 const PAGE_SIZE = 50;
 
 type MigrationStatus = "idle" | "migrating" | "success" | "error";
+type TabType = "pending" | "completed";
 
 interface MigrationState {
   [orgId: string]: {
@@ -134,6 +135,138 @@ const isCancelledOrMissing = (status: string | null | undefined) => {
   return status === "canceled" || status === "not_found";
 };
 
+function buildSubscriptionIdMap(
+  orgs: Array<{ id: string; stripe_subscription_id?: string | null }> | undefined
+): Map<string, string | null | undefined> {
+  const subMap = new Map<string, string | null | undefined>();
+  orgs?.forEach((org) => subMap.set(org.id, org.stripe_subscription_id));
+  return subMap;
+}
+
+interface BatchActionBarProps {
+  tab: TabType;
+  selectedIds: Set<string>;
+  batchProcessing: {
+    isRunning: boolean;
+    currentIndex: number;
+    totalCount: number;
+    migrationType: "instant" | "scheduled";
+    tab: TabType;
+    results: { orgId: string; success: boolean; error?: string }[];
+  } | null;
+  openStripeOnBatch: boolean;
+  setOpenStripeOnBatch: (value: boolean) => void;
+  onStop: () => void;
+  onClear: () => void;
+  onRunBatch: (migrationType: "instant" | "scheduled") => void;
+  isReapply?: boolean;
+}
+
+function BatchActionBar({
+  tab,
+  selectedIds,
+  batchProcessing,
+  openStripeOnBatch,
+  setOpenStripeOnBatch,
+  onStop,
+  onClear,
+  onRunBatch,
+  isReapply = false,
+}: BatchActionBarProps) {
+  const isThisTab = batchProcessing?.tab === tab;
+  const isProcessing = isThisTab && batchProcessing?.isRunning;
+  const hasFinished = isThisTab && !batchProcessing?.isRunning;
+
+  if (selectedIds.size === 0 && !isThisTab) return null;
+
+  return (
+    <div className="mb-4 rounded-lg border bg-muted/50 p-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <span className="text-sm font-medium">
+            {isThisTab && batchProcessing ? (
+              <>
+                Processing {batchProcessing.currentIndex + 1} of{" "}
+                {batchProcessing.totalCount}
+                {!batchProcessing.isRunning && " (stopped)"}
+              </>
+            ) : (
+              <>{selectedIds.size} selected</>
+            )}
+          </span>
+          {isThisTab && batchProcessing && (
+            <div className="flex items-center gap-2">
+              <Progress
+                value={
+                  ((batchProcessing.currentIndex +
+                    (batchProcessing.isRunning ? 0 : 1)) /
+                    batchProcessing.totalCount) *
+                  100
+                }
+                className="w-32"
+              />
+              <span className="text-xs text-muted-foreground">
+                {batchProcessing.results.filter((r) => r.success).length}{" "}
+                success,{" "}
+                {batchProcessing.results.filter((r) => !r.success).length}{" "}
+                failed
+              </span>
+            </div>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          {isProcessing ? (
+            <Button variant="destructive" size="sm" onClick={onStop}>
+              <StopCircle size={14} className="mr-1" />
+              Stop
+            </Button>
+          ) : hasFinished ? (
+            <Button variant="outline" size="sm" onClick={onClear}>
+              Clear
+            </Button>
+          ) : (
+            <>
+              <div className="mr-2 flex items-center gap-2">
+                <Checkbox
+                  id={`openStripe${tab}`}
+                  checked={openStripeOnBatch}
+                  onCheckedChange={(checked) =>
+                    setOpenStripeOnBatch(checked === true)
+                  }
+                />
+                <label
+                  htmlFor={`openStripe${tab}`}
+                  className="cursor-pointer text-xs text-muted-foreground"
+                >
+                  Open Stripe
+                </label>
+              </div>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => onRunBatch("instant")}
+                disabled={selectedIds.size === 0}
+              >
+                <Play size={14} className="mr-1" />
+                {isReapply ? "Reapply Now" : "Now"} ({selectedIds.size})
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onRunBatch("scheduled")}
+                disabled={selectedIds.size === 0}
+              >
+                <Calendar size={14} className="mr-1" />
+                Schedule ({selectedIds.size})
+              </Button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminPricingMigration() {
   const org = useOrg();
   const queryClient = useQueryClient();
@@ -175,7 +308,7 @@ export default function AdminPricingMigration() {
     currentIndex: number;
     totalCount: number;
     migrationType: "instant" | "scheduled";
-    tab: "pending" | "completed";
+    tab: TabType;
     orgIds: string[];
     results: { orgId: string; success: boolean; error?: string }[];
   } | null>(null);
@@ -807,129 +940,24 @@ export default function AdminPricingMigration() {
                 </div>
               ) : (
                 <>
-                  {/* Batch Action Bar for Pending */}
-                  {(selectedPendingIds.size > 0 ||
-                    (batchProcessing?.tab === "pending" &&
-                      batchProcessing)) && (
-                    <div className="mb-4 rounded-lg border bg-muted/50 p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <span className="text-sm font-medium">
-                            {batchProcessing?.tab === "pending" &&
-                            batchProcessing ? (
-                              <>
-                                Processing {batchProcessing.currentIndex + 1} of{" "}
-                                {batchProcessing.totalCount}
-                                {!batchProcessing.isRunning && " (stopped)"}
-                              </>
-                            ) : (
-                              <>{selectedPendingIds.size} selected</>
-                            )}
-                          </span>
-                          {batchProcessing?.tab === "pending" &&
-                            batchProcessing && (
-                              <div className="flex items-center gap-2">
-                                <Progress
-                                  value={
-                                    ((batchProcessing.currentIndex +
-                                      (batchProcessing.isRunning ? 0 : 1)) /
-                                      batchProcessing.totalCount) *
-                                    100
-                                  }
-                                  className="w-32"
-                                />
-                                <span className="text-xs text-muted-foreground">
-                                  {batchProcessing.results.filter((r) => r.success).length} success,{" "}
-                                  {batchProcessing.results.filter((r) => !r.success).length} failed
-                                </span>
-                              </div>
-                            )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {batchProcessing?.isRunning &&
-                          batchProcessing?.tab === "pending" ? (
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={stopBatchMigration}
-                            >
-                              <StopCircle size={14} className="mr-1" />
-                              Stop
-                            </Button>
-                          ) : batchProcessing?.tab === "pending" &&
-                            !batchProcessing?.isRunning ? (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={clearBatchResults}
-                            >
-                              Clear
-                            </Button>
-                          ) : (
-                            <>
-                              <div className="flex items-center gap-2 mr-2">
-                                <Checkbox
-                                  id="openStripePending"
-                                  checked={openStripeOnBatch}
-                                  onCheckedChange={(checked) =>
-                                    setOpenStripeOnBatch(checked === true)
-                                  }
-                                />
-                                <label
-                                  htmlFor="openStripePending"
-                                  className="text-xs text-muted-foreground cursor-pointer"
-                                >
-                                  Open Stripe
-                                </label>
-                              </div>
-                              <Button
-                                variant="default"
-                                size="sm"
-                                onClick={() => {
-                                  const subMap = new Map<string, string | null | undefined>();
-                                  pendingQuery.data?.organizations?.forEach((org) => {
-                                    subMap.set(org.id, org.stripe_subscription_id);
-                                  });
-                                  runBatchMigration(
-                                    Array.from(selectedPendingIds),
-                                    "instant",
-                                    "pending",
-                                    openStripeOnBatch,
-                                    subMap
-                                  );
-                                }}
-                                disabled={selectedPendingIds.size === 0}
-                              >
-                                <Play size={14} className="mr-1" />
-                                Now ({selectedPendingIds.size})
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  const subMap = new Map<string, string | null | undefined>();
-                                  pendingQuery.data?.organizations?.forEach((org) => {
-                                    subMap.set(org.id, org.stripe_subscription_id);
-                                  });
-                                  runBatchMigration(
-                                    Array.from(selectedPendingIds),
-                                    "scheduled",
-                                    "pending",
-                                    openStripeOnBatch,
-                                    subMap
-                                  );
-                                }}
-                                disabled={selectedPendingIds.size === 0}
-                              >
-                                <Calendar size={14} className="mr-1" />
-                                Schedule ({selectedPendingIds.size})
-                              </Button>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                  <BatchActionBar
+                    tab="pending"
+                    selectedIds={selectedPendingIds}
+                    batchProcessing={batchProcessing}
+                    openStripeOnBatch={openStripeOnBatch}
+                    setOpenStripeOnBatch={setOpenStripeOnBatch}
+                    onStop={stopBatchMigration}
+                    onClear={clearBatchResults}
+                    onRunBatch={(migrationType) => {
+                      runBatchMigration(
+                        Array.from(selectedPendingIds),
+                        migrationType,
+                        "pending",
+                        openStripeOnBatch,
+                        buildSubscriptionIdMap(pendingQuery.data?.organizations)
+                      );
+                    }}
+                  />
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -1194,129 +1222,25 @@ export default function AdminPricingMigration() {
                 </div>
               ) : (
                 <>
-                  {/* Batch Action Bar for Completed */}
-                  {(selectedCompletedIds.size > 0 ||
-                    (batchProcessing?.tab === "completed" &&
-                      batchProcessing)) && (
-                    <div className="mb-4 rounded-lg border bg-muted/50 p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <span className="text-sm font-medium">
-                            {batchProcessing?.tab === "completed" &&
-                            batchProcessing ? (
-                              <>
-                                Processing {batchProcessing.currentIndex + 1} of{" "}
-                                {batchProcessing.totalCount}
-                                {!batchProcessing.isRunning && " (stopped)"}
-                              </>
-                            ) : (
-                              <>{selectedCompletedIds.size} selected</>
-                            )}
-                          </span>
-                          {batchProcessing?.tab === "completed" &&
-                            batchProcessing && (
-                              <div className="flex items-center gap-2">
-                                <Progress
-                                  value={
-                                    ((batchProcessing.currentIndex +
-                                      (batchProcessing.isRunning ? 0 : 1)) /
-                                      batchProcessing.totalCount) *
-                                    100
-                                  }
-                                  className="w-32"
-                                />
-                                <span className="text-xs text-muted-foreground">
-                                  {batchProcessing.results.filter((r) => r.success).length} success,{" "}
-                                  {batchProcessing.results.filter((r) => !r.success).length} failed
-                                </span>
-                              </div>
-                            )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {batchProcessing?.isRunning &&
-                          batchProcessing?.tab === "completed" ? (
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={stopBatchMigration}
-                            >
-                              <StopCircle size={14} className="mr-1" />
-                              Stop
-                            </Button>
-                          ) : batchProcessing?.tab === "completed" &&
-                            !batchProcessing?.isRunning ? (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={clearBatchResults}
-                            >
-                              Clear
-                            </Button>
-                          ) : (
-                            <>
-                              <div className="flex items-center gap-2 mr-2">
-                                <Checkbox
-                                  id="openStripeCompleted"
-                                  checked={openStripeOnBatch}
-                                  onCheckedChange={(checked) =>
-                                    setOpenStripeOnBatch(checked === true)
-                                  }
-                                />
-                                <label
-                                  htmlFor="openStripeCompleted"
-                                  className="text-xs text-muted-foreground cursor-pointer"
-                                >
-                                  Open Stripe
-                                </label>
-                              </div>
-                              <Button
-                                variant="default"
-                                size="sm"
-                                onClick={() => {
-                                  const subMap = new Map<string, string | null | undefined>();
-                                  completedQuery.data?.organizations?.forEach((org) => {
-                                    subMap.set(org.id, org.stripe_subscription_id);
-                                  });
-                                  runBatchMigration(
-                                    Array.from(selectedCompletedIds),
-                                    "instant",
-                                    "completed",
-                                    openStripeOnBatch,
-                                    subMap
-                                  );
-                                }}
-                                disabled={selectedCompletedIds.size === 0}
-                              >
-                                <Play size={14} className="mr-1" />
-                                Reapply Now ({selectedCompletedIds.size})
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  const subMap = new Map<string, string | null | undefined>();
-                                  completedQuery.data?.organizations?.forEach((org) => {
-                                    subMap.set(org.id, org.stripe_subscription_id);
-                                  });
-                                  runBatchMigration(
-                                    Array.from(selectedCompletedIds),
-                                    "scheduled",
-                                    "completed",
-                                    openStripeOnBatch,
-                                    subMap
-                                  );
-                                }}
-                                disabled={selectedCompletedIds.size === 0}
-                              >
-                                <Calendar size={14} className="mr-1" />
-                                Schedule ({selectedCompletedIds.size})
-                              </Button>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                  <BatchActionBar
+                    tab="completed"
+                    selectedIds={selectedCompletedIds}
+                    batchProcessing={batchProcessing}
+                    openStripeOnBatch={openStripeOnBatch}
+                    setOpenStripeOnBatch={setOpenStripeOnBatch}
+                    onStop={stopBatchMigration}
+                    onClear={clearBatchResults}
+                    onRunBatch={(migrationType) => {
+                      runBatchMigration(
+                        Array.from(selectedCompletedIds),
+                        migrationType,
+                        "completed",
+                        openStripeOnBatch,
+                        buildSubscriptionIdMap(completedQuery.data?.organizations)
+                      );
+                    }}
+                    isReapply
+                  />
                   <Table>
                     <TableHeader>
                       <TableRow>
