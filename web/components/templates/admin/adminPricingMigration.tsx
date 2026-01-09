@@ -61,7 +61,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Filter,
-  Square,
   StopCircle,
   Play,
   Calendar,
@@ -316,84 +315,6 @@ export default function AdminPricingMigration() {
         [orgId]: {
           status: "error",
           error: error instanceof Error ? error.message : "Schedule failed",
-        },
-      }));
-    },
-  });
-
-  // Legacy migration mutation (kept for backward compatibility)
-  const migrateMutation = useMutation({
-    mutationFn: async (orgId: string) => {
-      const jawn = getJawnClient(org?.currentOrg?.id);
-      const { data, error } = await jawn.POST(
-        "/v1/admin/pricing-migration/migrate/{orgId}",
-        {
-          params: { path: { orgId } },
-        },
-      );
-      if (error) throw new Error(String(error));
-      return data;
-    },
-    onMutate: (orgId) => {
-      setMigrationStates((prev) => ({
-        ...prev,
-        [orgId]: { status: "migrating" },
-      }));
-    },
-    onSuccess: (_, orgId) => {
-      setMigrationStates((prev) => ({
-        ...prev,
-        [orgId]: { status: "success" },
-      }));
-      queryClient.invalidateQueries({
-        queryKey: ["admin", "pricing-migration"],
-      });
-    },
-    onError: (error, orgId) => {
-      setMigrationStates((prev) => ({
-        ...prev,
-        [orgId]: {
-          status: "error",
-          error: error instanceof Error ? error.message : "Migration failed",
-        },
-      }));
-    },
-  });
-
-  // Reapply mutation
-  const reapplyMutation = useMutation({
-    mutationFn: async (orgId: string) => {
-      const jawn = getJawnClient(org?.currentOrg?.id);
-      const { data, error } = await jawn.POST(
-        "/v1/admin/pricing-migration/reapply/{orgId}",
-        {
-          params: { path: { orgId } },
-        },
-      );
-      if (error) throw new Error(String(error));
-      return data;
-    },
-    onMutate: (orgId) => {
-      setMigrationStates((prev) => ({
-        ...prev,
-        [orgId]: { status: "migrating" },
-      }));
-    },
-    onSuccess: (_, orgId) => {
-      setMigrationStates((prev) => ({
-        ...prev,
-        [orgId]: { status: "success" },
-      }));
-      queryClient.invalidateQueries({
-        queryKey: ["admin", "pricing-migration"],
-      });
-    },
-    onError: (error, orgId) => {
-      setMigrationStates((prev) => ({
-        ...prev,
-        [orgId]: {
-          status: "error",
-          error: error instanceof Error ? error.message : "Reapply failed",
         },
       }));
     },
