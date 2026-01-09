@@ -48564,153 +48564,6 @@
 					}
 				]
 			},
-			"ResultSuccess__previousTier-string--newTier-string--subscriptionId-string--usage_58__requests-number--storageBytes-number--storageMb-number--source-clickhouse-or-override_--backfillResult_58__requestsEvent-string--storageEvent-string___": {
-				"properties": {
-					"data": {
-						"properties": {
-							"backfillResult": {
-								"properties": {
-									"storageEvent": {
-										"type": "string"
-									},
-									"requestsEvent": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"storageEvent",
-									"requestsEvent"
-								],
-								"type": "object"
-							},
-							"usage": {
-								"properties": {
-									"source": {
-										"type": "string",
-										"enum": [
-											"clickhouse",
-											"override"
-										]
-									},
-									"storageMb": {
-										"type": "number",
-										"format": "double"
-									},
-									"storageBytes": {
-										"type": "number",
-										"format": "double"
-									},
-									"requests": {
-										"type": "number",
-										"format": "double"
-									}
-								},
-								"required": [
-									"source",
-									"storageMb",
-									"storageBytes",
-									"requests"
-								],
-								"type": "object"
-							},
-							"subscriptionId": {
-								"type": "string"
-							},
-							"newTier": {
-								"type": "string"
-							},
-							"previousTier": {
-								"type": "string"
-							}
-						},
-						"required": [
-							"backfillResult",
-							"usage",
-							"subscriptionId",
-							"newTier",
-							"previousTier"
-						],
-						"type": "object"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result__previousTier-string--newTier-string--subscriptionId-string--usage_58__requests-number--storageBytes-number--storageMb-number--source-clickhouse-or-override_--backfillResult_58__requestsEvent-string--storageEvent-string__.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess__previousTier-string--newTier-string--subscriptionId-string--usage_58__requests-number--storageBytes-number--storageMb-number--source-clickhouse-or-override_--backfillResult_58__requestsEvent-string--storageEvent-string___"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
-			"ResultSuccess__previousTier-string--newTier-string--subscriptionId-string--scheduleId-string--scheduledFor-string__": {
-				"properties": {
-					"data": {
-						"properties": {
-							"scheduledFor": {
-								"type": "string"
-							},
-							"scheduleId": {
-								"type": "string"
-							},
-							"subscriptionId": {
-								"type": "string"
-							},
-							"newTier": {
-								"type": "string"
-							},
-							"previousTier": {
-								"type": "string"
-							}
-						},
-						"required": [
-							"scheduledFor",
-							"scheduleId",
-							"subscriptionId",
-							"newTier",
-							"previousTier"
-						],
-						"type": "object"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result__previousTier-string--newTier-string--subscriptionId-string--scheduleId-string--scheduledFor-string_.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess__previousTier-string--newTier-string--subscriptionId-string--scheduleId-string--scheduledFor-string__"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
-			},
 			"ResultSuccess__id-string--name-string--tier-string--stripe_customer_id-string-or-null--stripe_subscription_id-string-or-null--subscription_status-string-or-null--owner_email-string-or-null--created_at-string__": {
 				"properties": {
 					"data": {
@@ -60458,7 +60311,7 @@
 			}
 		},
 		"/v1/admin/pricing-migration/pending": {
-			"post": {
+			"get": {
 				"operationId": "GetPendingMigrations",
 				"responses": {
 					"200": {
@@ -60467,11 +60320,12 @@
 							"application/json": {
 								"schema": {
 									"properties": {
-										"hasMore": {
-											"type": "boolean"
-										},
 										"summary": {
 											"properties": {
+												"cancelled": {
+													"type": "number",
+													"format": "double"
+												},
 												"byTier": {
 													"$ref": "#/components/schemas/Record_string.number_"
 												},
@@ -60481,6 +60335,7 @@
 												}
 											},
 											"required": [
+												"cancelled",
 												"byTier",
 												"total"
 											],
@@ -60544,7 +60399,6 @@
 										}
 									},
 									"required": [
-										"hasMore",
 										"summary",
 										"organizations"
 									],
@@ -60554,7 +60408,7 @@
 						}
 					}
 				},
-				"description": "Get all organizations that need to be migrated to new pricing\nSupports pagination, search, and tier filtering",
+				"description": "Get all organizations that need to be migrated to new pricing",
 				"tags": [
 					"Admin"
 				],
@@ -60563,36 +60417,7 @@
 						"api_key": []
 					}
 				],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"tierFilter": {
-										"items": {
-											"type": "string"
-										},
-										"type": "array"
-									},
-									"search": {
-										"type": "string"
-									},
-									"offset": {
-										"type": "number",
-										"format": "double"
-									},
-									"limit": {
-										"type": "number",
-										"format": "double"
-									}
-								},
-								"type": "object"
-							}
-						}
-					}
-				}
+				"parameters": []
 			}
 		},
 		"/v1/admin/pricing-migration/migrate/{orgId}": {
@@ -60610,99 +60435,7 @@
 						}
 					}
 				},
-				"description": "Migrate a single organization to new pricing (legacy - use migrate-instant or migrate-scheduled instead)",
-				"tags": [
-					"Admin"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "orgId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
-		"/v1/admin/pricing-migration/migrate-instant/{orgId}": {
-			"post": {
-				"operationId": "MigrateInstant",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result__previousTier-string--newTier-string--subscriptionId-string--usage_58__requests-number--storageBytes-number--storageMb-number--source-clickhouse-or-override_--backfillResult_58__requestsEvent-string--storageEvent-string__.string_"
-								}
-							}
-						}
-					}
-				},
-				"description": "Migrate instantly with usage backfill\nUpdates subscription immediately and backfills metered usage events for current billing period",
-				"tags": [
-					"Admin"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "orgId",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"storageBytesOverride": {
-										"type": "number",
-										"format": "double"
-									},
-									"requestsOverride": {
-										"type": "number",
-										"format": "double"
-									}
-								},
-								"type": "object"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/v1/admin/pricing-migration/migrate-scheduled/{orgId}": {
-			"post": {
-				"operationId": "MigrateScheduled",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result__previousTier-string--newTier-string--subscriptionId-string--scheduleId-string--scheduledFor-string_.string_"
-								}
-							}
-						}
-					}
-				},
-				"description": "Schedule migration for next billing period\nUses Stripe subscription schedules to defer the pricing change",
+				"description": "Migrate a single organization to new pricing",
 				"tags": [
 					"Admin"
 				],
@@ -60901,7 +60634,7 @@
 						}
 					}
 				},
-				"description": "Add metered usage for an organization (for testing/fixing billing)\nUses Stripe Billing Meter events",
+				"description": "Add metered usage for an organization (for testing/fixing billing)",
 				"tags": [
 					"Admin"
 				],

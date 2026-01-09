@@ -18330,6 +18330,92 @@
 				"parameters": []
 			}
 		},
+		"/v1/stripe/subscription/migrate-to-new-pricing": {
+			"post": {
+				"operationId": "MigrateToNewPricing",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"subscriptionId": {
+											"type": "string"
+										},
+										"newTier": {
+											"type": "string"
+										},
+										"previousTier": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"subscriptionId",
+										"newTier",
+										"previousTier"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"description": "Migrate from legacy pro pricing (pro-20240913, pro-20250202) to new pricing (pro-20251210).\nThis will:\n1. Remove all existing subscription items\n2. Add new pricing items ($79/mo flat + metered request/GB billing)\n3. Update the organization's tier in the database",
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/stripe/subscription/migrate-to-new-team-pricing": {
+			"post": {
+				"operationId": "MigrateToNewTeamPricing",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"subscriptionId": {
+											"type": "string"
+										},
+										"newTier": {
+											"type": "string"
+										},
+										"previousTier": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"subscriptionId",
+										"newTier",
+										"previousTier"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"description": "Migrate from legacy team pricing (team-20250130) to new pricing (team-20251210).\nThis will:\n1. Remove all existing subscription items\n2. Add new pricing items ($799/mo flat + metered request/GB billing)\n3. Update the organization's tier in the database",
+				"tags": [
+					"Stripe"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/v1/stripe/payment-intents/search": {
 			"get": {
 				"operationId": "SearchPaymentIntents",

@@ -466,6 +466,66 @@ export class StripeController extends Controller {
     return result.data;
   }
 
+  /**
+   * Migrate from legacy pro pricing (pro-20240913, pro-20250202) to new pricing (pro-20251210).
+   * This will:
+   * 1. Remove all existing subscription items
+   * 2. Add new pricing items ($79/mo flat + metered request/GB billing)
+   * 3. Update the organization's tier in the database
+   */
+  @Post("/subscription/migrate-to-new-pricing")
+  public async migrateToNewPricing(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<{
+    previousTier: string;
+    newTier: string;
+    subscriptionId: string;
+  }> {
+    const stripeManager = new StripeManager(request.authParams);
+    const result = await stripeManager.migrateToNewProPricing();
+
+    if (isError(result)) {
+      console.error(
+        "Error migrating to new pricing",
+        JSON.stringify(result.error)
+      );
+      this.setStatus(400);
+      throw new Error(result.error);
+    }
+
+    return result.data;
+  }
+
+  /**
+   * Migrate from legacy team pricing (team-20250130) to new pricing (team-20251210).
+   * This will:
+   * 1. Remove all existing subscription items
+   * 2. Add new pricing items ($799/mo flat + metered request/GB billing)
+   * 3. Update the organization's tier in the database
+   */
+  @Post("/subscription/migrate-to-new-team-pricing")
+  public async migrateToNewTeamPricing(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<{
+    previousTier: string;
+    newTier: string;
+    subscriptionId: string;
+  }> {
+    const stripeManager = new StripeManager(request.authParams);
+    const result = await stripeManager.migrateToNewTeamPricing();
+
+    if (isError(result)) {
+      console.error(
+        "Error migrating to new team pricing",
+        JSON.stringify(result.error)
+      );
+      this.setStatus(400);
+      throw new Error(result.error);
+    }
+
+    return result.data;
+  }
+
   @Get("/payment-intents/search")
   public async searchPaymentIntents(
     @Request() request: JawnAuthenticatedRequest,

@@ -408,7 +408,9 @@ export class AdminController extends Controller {
     }
 
     // Build IN clause with individual parameters for safety
-    const orgIdParams = orgIds.map((_, index) => `{val_${index + 2}:String}`).join(", ");
+    const orgIdParams = orgIds
+      .map((_, index) => `{val_${index + 2}:String}`)
+      .join(", ");
 
     const orgs = await clickhouseDb.dbQuery<{
       organization_id: string;
@@ -487,10 +489,13 @@ export class AdminController extends Controller {
       return [];
     }
     // Step 3: Fetch organization data over time
-    const orgIdsForTimeSeries = orgs.data?.map((org) => org.organization_id).slice(0, 30) ?? [];
+    const orgIdsForTimeSeries =
+      orgs.data?.map((org) => org.organization_id).slice(0, 30) ?? [];
 
     // Build IN clause with individual parameters
-    const timeSeriesOrgParams = orgIdsForTimeSeries.map((_, index) => `{val_${index + 2}:String}`).join(", ");
+    const timeSeriesOrgParams = orgIdsForTimeSeries
+      .map((_, index) => `{val_${index + 2}:String}`)
+      .join(", ");
 
     const orgsOverTime = await clickhouseDb.dbQuery<{
       count: number;
@@ -1134,7 +1139,8 @@ export class AdminController extends Controller {
     ]);
 
     // Remove match_score from results before returning
-    const organizations = orgResult.data?.map(({ match_score, ...org }) => org) ?? [];
+    const organizations =
+      orgResult.data?.map(({ match_score, ...org }) => org) ?? [];
     const total = parseInt(countResult.data?.[0]?.total ?? "0", 10);
     const hasMore = offset + limit < total;
 
@@ -1249,11 +1255,13 @@ export class AdminController extends Controller {
         created_at: string;
         last_sign_in_at: string | null;
         name: string | null;
-        organizations: {
-          id: string;
-          name: string | null;
-          role: string | null;
-        }[] | null;
+        organizations:
+          | {
+              id: string;
+              name: string | null;
+              role: string | null;
+            }[]
+          | null;
         is_admin: boolean;
         match_score: number;
       }>(userQuery, [sanitizedQuery, safeLimit, safeOffset]),
@@ -2041,7 +2049,9 @@ export class AdminController extends Controller {
 
     // Step 3: Get time series data for each organization with the appropriate grouping
     // Build IN clause with individual parameters
-    const orgIdsParams = orgIds.map((_, index) => `{val_${index}:String}`).join(", ");
+    const orgIdsParams = orgIds
+      .map((_, index) => `{val_${index}:String}`)
+      .join(", ");
 
     const timeSeriesQuery =
       groupBy === "10 minute" || groupBy === "6 hour"
@@ -2558,5 +2568,845 @@ export class AdminController extends Controller {
       return err(result.error.message || String(result.error));
     }
     return ok(null);
+  }
+
+  // ==================== PRICING MIGRATION ENDPOINTS ====================
+
+  /**
+   * Get all organizations that need to be migrated to new pricing
+   * Supports pagination, search, and tier filtering
+   */
+  @Post("/pricing-migration/pending")
+  public async getPendingMigrations(
+    @Request() request: JawnAuthenticatedRequest,
+    @Body()
+    body: {
+      limit?: number;
+      offset?: number;
+      search?: string;
+      tierFilter?: string[];
+    }
+  ): Promise<{
+    organizations: Array<{
+      id: string;
+      name: string;
+      tier: string;
+      owner_email: string | null;
+      stripe_customer_id: string | null;
+      stripe_subscription_id: string | null;
+      subscription_status: string | null;
+      stripe_status: string | null;
+      created_at: string;
+      member_count: number;
+    }>;
+    summary: {
+      total: number;
+      byTier: Record<string, number>;
+    };
+    hasMore: boolean;
+  }> {
+    await authCheckThrow(request.authParams.userId);
+
+    const limit = body.limit ?? 20;
+    const offset = body.offset ?? 0;
+    const search = body.search?.trim().toLowerCase() ?? "";
+
+    const allLegacyTiers = [
+      "pro-20240913",
+      "pro-20250202",
+      "growth",
+      "team-20250130",
+    ];
+
+    // Use tier filter if provided, otherwise use all legacy tiers
+    const tiersToQuery =
+      body.tierFilter && body.tierFilter.length > 0
+        ? body.tierFilter.filter((t) => allLegacyTiers.includes(t))
+        : allLegacyTiers;
+
+    // Build the search condition
+    let searchCondition = "";
+    const params: any[] = [tiersToQuery];
+    let paramIndex = 2;
+
+    if (search) {
+      searchCondition = `
+        AND (
+          LOWER(o.id::text) LIKE $${paramIndex}
+          OR LOWER(o.name) LIKE $${paramIndex}
+          OR LOWER(u.email) LIKE $${paramIndex}
+        )
+      `;
+      params.push(`%${search}%`);
+      paramIndex++;
+    }
+
+    // Get total count for pagination (without Stripe status check)
+    const countResult = await dbExecute<{ total: string }>(
+      `
+      SELECT COUNT(*) as total
+      FROM organization o
+      LEFT JOIN auth.users u ON o.owner = u.id
+      WHERE o.tier = ANY($1::text[])
+        AND o.subscription_status = 'active'
+        ${searchCondition}
+      `,
+      params
+    );
+
+    const total = parseInt(countResult.data?.[0]?.total ?? "0", 10);
+
+    // Get summary by tier (without search filter to show overall distribution)
+    const summaryResult = await dbExecute<{ tier: string; count: string }>(
+      `
+      SELECT o.tier, COUNT(*) as count
+      FROM organization o
+      WHERE o.tier = ANY($1::text[])
+        AND o.subscription_status = 'active'
+      GROUP BY o.tier
+      `,
+      [allLegacyTiers]
+    );
+
+    const byTier: Record<string, number> = {};
+    for (const row of summaryResult.data ?? []) {
+      byTier[row.tier] = parseInt(row.count, 10);
+    }
+
+    // Get paginated results
+    const result = await dbExecute<{
+      id: string;
+      name: string;
+      tier: string;
+      owner_email: string | null;
+      stripe_customer_id: string | null;
+      stripe_subscription_id: string | null;
+      subscription_status: string | null;
+      created_at: string;
+      member_count: string;
+    }>(
+      `
+      SELECT
+        o.id,
+        o.name,
+        o.tier,
+        u.email as owner_email,
+        o.stripe_customer_id,
+        o.stripe_subscription_id,
+        o.subscription_status,
+        o.created_at,
+        (SELECT COUNT(*) FROM organization_member WHERE organization = o.id) as member_count
+      FROM organization o
+      LEFT JOIN auth.users u ON o.owner = u.id
+      WHERE o.tier = ANY($1::text[])
+        AND o.subscription_status = 'active'
+        ${searchCondition}
+      ORDER BY o.tier, o.created_at
+      LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+      `,
+      [...params, limit, offset]
+    );
+
+    // Check actual Stripe status only for paginated results (reduces API calls)
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+    const orgsWithStripeStatus = await Promise.all(
+      (result.data ?? []).map(async (org) => {
+        let stripe_status: string | null = null;
+        if (org.stripe_subscription_id) {
+          try {
+            const subscription = await stripe.subscriptions.retrieve(
+              org.stripe_subscription_id
+            );
+            stripe_status = subscription.status;
+          } catch (e) {
+            // Subscription might not exist
+            stripe_status = "not_found";
+          }
+        }
+        return {
+          ...org,
+          member_count: parseInt(org.member_count, 10),
+          stripe_status,
+        };
+      })
+    );
+
+    return {
+      organizations: orgsWithStripeStatus,
+      summary: {
+        total,
+        byTier,
+      },
+      hasMore: offset + limit < total,
+    };
+  }
+
+  /**
+   * Migrate a single organization to new pricing (legacy - use migrate-instant or migrate-scheduled instead)
+   */
+  @Post("/pricing-migration/migrate/{orgId}")
+  public async migrateOrganization(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string
+  ): Promise<
+    Result<
+      {
+        previousTier: string;
+        newTier: string;
+        subscriptionId: string;
+      },
+      string
+    >
+  > {
+    await authCheckThrow(request.authParams.userId);
+
+    // Get the organization to determine which migration to use
+    const orgResult = await dbExecute<{ tier: string }>(
+      `SELECT tier FROM organization WHERE id = $1`,
+      [orgId]
+    );
+
+    if (!orgResult.data?.[0]) {
+      return err("Organization not found");
+    }
+
+    const tier = orgResult.data[0].tier;
+
+    // Import StripeManager dynamically to avoid circular dependencies
+    const { StripeManager } = await import(
+      "../../managers/stripe/StripeManager"
+    );
+
+    // Create a StripeManager with the target org's context
+    const stripeManager = new StripeManager({
+      organizationId: orgId,
+      userId: request.authParams.userId,
+    });
+
+    // Determine which migration to run based on current tier
+    if (tier === "team-20250130") {
+      return stripeManager.migrateToNewTeamPricing();
+    } else if (["pro-20240913", "pro-20250202", "growth"].includes(tier)) {
+      return stripeManager.migrateToNewProPricing();
+    } else {
+      return err(`Unknown tier for migration: ${tier}`);
+    }
+  }
+
+  /**
+   * Migrate instantly with usage backfill
+   * Updates subscription immediately and backfills metered usage events for current billing period
+   */
+  @Post("/pricing-migration/migrate-instant/{orgId}")
+  public async migrateInstant(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string,
+    @Body()
+    body: {
+      requestsOverride?: number;
+      storageBytesOverride?: number;
+    }
+  ): Promise<
+    Result<
+      {
+        previousTier: string;
+        newTier: string;
+        subscriptionId: string;
+        usage: {
+          requests: number;
+          storageBytes: number;
+          storageMb: number;
+          source: "clickhouse" | "override";
+        };
+        backfillResult: {
+          requestsEvent: string;
+          storageEvent: string;
+        };
+      },
+      string
+    >
+  > {
+    await authCheckThrow(request.authParams.userId);
+
+    // Get org details
+    const orgResult = await dbExecute<{
+      tier: string;
+      stripe_customer_id: string | null;
+      stripe_subscription_id: string | null;
+    }>(
+      `SELECT tier, stripe_customer_id, stripe_subscription_id FROM organization WHERE id = $1`,
+      [orgId]
+    );
+
+    if (!orgResult.data?.[0]) {
+      return err("Organization not found");
+    }
+
+    const { tier, stripe_customer_id, stripe_subscription_id } =
+      orgResult.data[0];
+
+    if (!stripe_customer_id) {
+      return err("Organization has no Stripe customer ID");
+    }
+    if (!stripe_subscription_id) {
+      return err("Organization has no Stripe subscription");
+    }
+
+    // Import StripeManager
+    const { StripeManager } = await import(
+      "../../managers/stripe/StripeManager"
+    );
+
+    const stripeManager = new StripeManager({
+      organizationId: orgId,
+      userId: request.authParams.userId,
+    });
+
+    // Get subscription to find billing period start
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+    const subscription = await stripe.subscriptions.retrieve(
+      stripe_subscription_id
+    );
+    const billingPeriodStart = new Date(
+      subscription.current_period_start * 1000
+    );
+
+    // Get usage - either from overrides or query ClickHouse
+    let usage: { requests: number; storageBytes: number; storageMb: number };
+    let usageSource: "clickhouse" | "override";
+
+    if (
+      body.requestsOverride !== undefined ||
+      body.storageBytesOverride !== undefined
+    ) {
+      // Use overrides if provided
+      usage = {
+        requests: body.requestsOverride ?? 0,
+        storageBytes: body.storageBytesOverride ?? 0,
+        storageMb: Math.round((body.storageBytesOverride ?? 0) / (1024 * 1024)),
+      };
+      usageSource = "override";
+    } else {
+      // Query ClickHouse for actual usage
+      const usageResult = await stripeManager.getBillingPeriodUsage(
+        orgId,
+        billingPeriodStart
+      );
+      if (usageResult.error) {
+        return err(`Failed to get usage: ${usageResult.error}`);
+      }
+      usage = usageResult.data!;
+      usageSource = "clickhouse";
+    }
+
+    // Run the migration (or reapply for orgs already on new tiers)
+    let migrationResult;
+    if (tier === "team-20250130" || tier === "team-20251210") {
+      migrationResult = await stripeManager.migrateToNewTeamPricing();
+    } else if (
+      ["pro-20240913", "pro-20250202", "growth", "pro-20251210"].includes(tier)
+    ) {
+      migrationResult = await stripeManager.migrateToNewProPricing();
+    } else {
+      return err(`Unknown tier for migration: ${tier}`);
+    }
+
+    if (migrationResult.error) {
+      return err(`Migration failed: ${migrationResult.error}`);
+    }
+
+    // Wait for Stripe to process the subscription update before sending meter events
+    await new Promise((resolve) => setTimeout(resolve, 10_000));
+
+    // Send usage events with current timestamp (Stripe meters work better with recent timestamps)
+    const eventTimestamp = new Date();
+    console.log(`Sending usage events for ${orgId}:`, {
+      stripe_customer_id,
+      timestamp: eventTimestamp.toISOString(),
+      requests: usage.requests,
+      storageBytes: usage.storageBytes,
+    });
+
+    const backfillResult = await stripeManager.sendBackdatedUsageEvents(
+      stripe_customer_id,
+      eventTimestamp,
+      usage.requests,
+      usage.storageBytes
+    );
+
+    console.log(`Backfill result for ${orgId}:`, backfillResult);
+
+    if (backfillResult.error) {
+      // Migration succeeded but backfill failed - log but don't fail
+      console.error(`Backfill failed for ${orgId}: ${backfillResult.error}`);
+      return ok({
+        ...migrationResult.data!,
+        usage: { ...usage, source: usageSource },
+        backfillResult: {
+          requestsEvent: `FAILED: ${backfillResult.error}`,
+          storageEvent: `FAILED: ${backfillResult.error}`,
+        },
+      });
+    }
+
+    return ok({
+      ...migrationResult.data!,
+      usage: { ...usage, source: usageSource },
+      backfillResult: backfillResult.data!,
+    });
+  }
+
+  /**
+   * Schedule migration for next billing period
+   * Uses Stripe subscription schedules to defer the pricing change
+   */
+  @Post("/pricing-migration/migrate-scheduled/{orgId}")
+  public async migrateScheduled(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string
+  ): Promise<
+    Result<
+      {
+        previousTier: string;
+        newTier: string;
+        subscriptionId: string;
+        scheduleId: string;
+        scheduledFor: string;
+      },
+      string
+    >
+  > {
+    await authCheckThrow(request.authParams.userId);
+
+    // Get org details
+    const orgResult = await dbExecute<{
+      tier: string;
+      stripe_subscription_id: string | null;
+    }>(`SELECT tier, stripe_subscription_id FROM organization WHERE id = $1`, [
+      orgId,
+    ]);
+
+    if (!orgResult.data?.[0]) {
+      return err("Organization not found");
+    }
+
+    const { tier, stripe_subscription_id } = orgResult.data[0];
+
+    if (!stripe_subscription_id) {
+      return err("Organization has no Stripe subscription");
+    }
+
+    const validLegacyTiers = [
+      "pro-20240913",
+      "pro-20250202",
+      "growth",
+      "team-20250130",
+    ];
+    if (!validLegacyTiers.includes(tier)) {
+      return err(`Organization is not on a legacy tier. Current tier: ${tier}`);
+    }
+
+    // Determine target tier and price
+    const isTeam = tier === "team-20250130";
+    const newTier = isTeam ? "team-20251210" : "pro-20251210";
+
+    // Get pricing from settings
+    const settingsManager = new SettingsManager();
+    const stripeProductSettings =
+      await settingsManager.getSetting("stripe:products");
+
+    const basePriceId = isTeam
+      ? stripeProductSettings?.team20251210_799Price
+      : stripeProductSettings?.pro20251210_79Price;
+
+    if (!basePriceId) {
+      return err(`stripe:products ${newTier} price is not configured`);
+    }
+    if (!stripeProductSettings?.requestVolumePrice_20251210) {
+      return err(
+        "stripe:products requestVolumePrice_20251210 is not configured"
+      );
+    }
+    if (!stripeProductSettings?.gigVolumePrice_20251210) {
+      return err("stripe:products gigVolumePrice_20251210 is not configured");
+    }
+
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+    // Get current subscription
+    const subscription = await stripe.subscriptions.retrieve(
+      stripe_subscription_id
+    );
+
+    // Create a subscription schedule from the existing subscription
+    const schedule = await stripe.subscriptionSchedules.create({
+      from_subscription: stripe_subscription_id,
+    });
+
+    // Update the schedule with two phases:
+    // Phase 1: Current items until period end
+    // Phase 2: New pricing items starting at period end
+    const updatedSchedule = await stripe.subscriptionSchedules.update(
+      schedule.id,
+      {
+        phases: [
+          {
+            // Phase 1: Keep current items until period end
+            items: subscription.items.data.map((item) => ({
+              price: item.price.id,
+              quantity: item.quantity,
+            })),
+            start_date: subscription.current_period_start,
+            end_date: subscription.current_period_end,
+          },
+          {
+            // Phase 2: New pricing starting at next billing period
+            items: [
+              { price: basePriceId, quantity: 1 },
+              { price: stripeProductSettings.requestVolumePrice_20251210 },
+              { price: stripeProductSettings.gigVolumePrice_20251210 },
+            ],
+            start_date: subscription.current_period_end,
+            proration_behavior: "none",
+            metadata: {
+              orgId: orgId,
+              tier: newTier,
+              scheduledMigration: "true",
+            },
+          },
+        ],
+        metadata: {
+          orgId: orgId,
+          migrationType: "scheduled",
+          previousTier: tier,
+          newTier: newTier,
+        },
+      }
+    );
+
+    // Update org metadata to track scheduled migration
+    await dbExecute(
+      `UPDATE organization
+       SET stripe_metadata = COALESCE(stripe_metadata, '{}'::jsonb) || $1::jsonb
+       WHERE id = $2`,
+      [
+        JSON.stringify({
+          scheduledMigration: {
+            scheduleId: schedule.id,
+            scheduledFor: new Date(
+              subscription.current_period_end * 1000
+            ).toISOString(),
+            newTier: newTier,
+          },
+        }),
+        orgId,
+      ]
+    );
+
+    return ok({
+      previousTier: tier,
+      newTier: newTier,
+      subscriptionId: stripe_subscription_id,
+      scheduleId: schedule.id,
+      scheduledFor: new Date(
+        subscription.current_period_end * 1000
+      ).toISOString(),
+    });
+  }
+
+  /**
+   * Get migration history/status
+   */
+  @Get("/pricing-migration/completed")
+  public async getCompletedMigrations(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<{
+    organizations: Array<{
+      id: string;
+      name: string;
+      tier: string;
+      owner_email: string | null;
+      stripe_customer_id: string | null;
+      stripe_subscription_id: string | null;
+      subscription_status: string | null;
+    }>;
+    summary: {
+      total: number;
+      byTier: Record<string, number>;
+    };
+  }> {
+    await authCheckThrow(request.authParams.userId);
+
+    const newTiers = ["pro-20251210", "team-20251210"];
+
+    const result = await dbExecute<{
+      id: string;
+      name: string;
+      tier: string;
+      owner_email: string | null;
+      stripe_customer_id: string | null;
+      stripe_subscription_id: string | null;
+      subscription_status: string | null;
+    }>(
+      `
+      SELECT
+        o.id,
+        o.name,
+        o.tier,
+        u.email as owner_email,
+        o.stripe_customer_id,
+        o.stripe_subscription_id,
+        o.subscription_status
+      FROM organization o
+      LEFT JOIN auth.users u ON o.owner = u.id
+      WHERE o.tier = ANY($1::text[])
+        AND o.subscription_status = 'active'
+      ORDER BY o.tier, o.name
+      `,
+      [newTiers]
+    );
+
+    const organizations = result.data ?? [];
+
+    // Calculate summary
+    const byTier: Record<string, number> = {};
+    for (const org of organizations) {
+      byTier[org.tier] = (byTier[org.tier] || 0) + 1;
+    }
+
+    return {
+      organizations,
+      summary: {
+        total: organizations.length,
+        byTier,
+      },
+    };
+  }
+
+  /**
+   * Reapply migration for an already migrated organization (for fixing issues)
+   */
+  @Post("/pricing-migration/reapply/{orgId}")
+  public async reapplyMigration(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string
+  ): Promise<
+    Result<
+      {
+        previousTier: string;
+        newTier: string;
+        subscriptionId: string;
+      },
+      string
+    >
+  > {
+    await authCheckThrow(request.authParams.userId);
+
+    // Get the organization
+    const orgResult = await dbExecute<{ tier: string }>(
+      `SELECT tier FROM organization WHERE id = $1`,
+      [orgId]
+    );
+
+    if (!orgResult.data?.[0]) {
+      return err("Organization not found");
+    }
+
+    const tier = orgResult.data[0].tier;
+
+    // Import StripeManager dynamically
+    const { StripeManager } = await import(
+      "../../managers/stripe/StripeManager"
+    );
+
+    const stripeManager = new StripeManager({
+      organizationId: orgId,
+      userId: request.authParams.userId,
+    });
+
+    // Reapply based on current tier
+    if (tier === "team-20251210") {
+      return stripeManager.migrateToNewTeamPricing();
+    } else if (tier === "pro-20251210") {
+      return stripeManager.migrateToNewProPricing();
+    } else {
+      return err(`Organization is not on new pricing tier: ${tier}`);
+    }
+  }
+
+  /**
+   * Get organization details for admin view
+   */
+  @Get("/pricing-migration/org/{orgId}")
+  public async getOrgDetails(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string
+  ): Promise<
+    Result<
+      {
+        id: string;
+        name: string;
+        tier: string;
+        stripe_customer_id: string | null;
+        stripe_subscription_id: string | null;
+        subscription_status: string | null;
+        owner_email: string | null;
+        created_at: string;
+      },
+      string
+    >
+  > {
+    await authCheckThrow(request.authParams.userId);
+
+    const result = await dbExecute<{
+      id: string;
+      name: string;
+      tier: string;
+      stripe_customer_id: string | null;
+      stripe_subscription_id: string | null;
+      subscription_status: string | null;
+      owner_email: string | null;
+      created_at: string;
+    }>(
+      `
+      SELECT
+        o.id,
+        o.name,
+        o.tier,
+        o.stripe_customer_id,
+        o.stripe_subscription_id,
+        o.subscription_status,
+        u.email as owner_email,
+        o.created_at
+      FROM organization o
+      LEFT JOIN auth.users u ON o.owner = u.id
+      WHERE o.id = $1
+      `,
+      [orgId]
+    );
+
+    if (!result.data?.[0]) {
+      return err("Organization not found");
+    }
+
+    return ok(result.data[0]);
+  }
+
+  /**
+   * Add metered usage for an organization (for testing/fixing billing)
+   * Uses Stripe Billing Meter events
+   */
+  @Post("/pricing-migration/add-usage/{orgId}")
+  public async addMeteredUsage(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string,
+    @Body()
+    body: {
+      usageType: "requests" | "storage_gb";
+      quantity: number;
+      timestamp?: string;
+    }
+  ): Promise<Result<{ message: string }, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    // Get org's stripe customer ID
+    const orgResult = await dbExecute<{
+      stripe_customer_id: string | null;
+    }>(`SELECT stripe_customer_id FROM organization WHERE id = $1`, [orgId]);
+
+    if (!orgResult.data?.[0]) {
+      return err("Organization not found");
+    }
+
+    const { stripe_customer_id } = orgResult.data[0];
+
+    if (!stripe_customer_id) {
+      return err("Organization does not have a Stripe customer ID");
+    }
+
+    // Import StripeManager to use meter events
+    const { StripeManager } = await import(
+      "../../managers/stripe/StripeManager"
+    );
+
+    const stripeManager = new StripeManager({
+      organizationId: orgId,
+      userId: request.authParams.userId,
+    });
+
+    // Determine the event name and value based on usage type
+    const eventName =
+      body.usageType === "requests" ? "requests_sum" : "bytes_sum";
+    const value =
+      body.usageType === "requests"
+        ? body.quantity
+        : body.quantity * 1024 * 1024 * 1024; // Convert GB to bytes
+
+    const timestamp = body.timestamp ? new Date(body.timestamp) : new Date();
+
+    // Send meter event
+    const result = await stripeManager.trackStripeMeter([
+      {
+        identifier: `admin_usage_${orgId}_${body.usageType}_${Date.now()}`,
+        event_name: eventName,
+        timestamp: timestamp.toISOString(),
+        payload: {
+          stripe_customer_id: stripe_customer_id,
+          value: value.toString(),
+        },
+      },
+    ]);
+
+    if (result.error) {
+      return err(`Failed to send meter event: ${result.error}`);
+    }
+
+    return ok({
+      message: `Added ${body.quantity} ${body.usageType} usage for org ${orgId}`,
+    });
+  }
+
+  /**
+   * Switch an organization to free tier (for cancelled subscriptions)
+   */
+  @Post("/pricing-migration/switch-to-free/{orgId}")
+  public async switchToFree(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string
+  ): Promise<Result<{ message: string; previousTier: string }, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    // Get current org info
+    const orgResult = await dbExecute<{ tier: string }>(
+      `SELECT tier FROM organization WHERE id = $1`,
+      [orgId]
+    );
+
+    if (!orgResult.data?.[0]) {
+      return err("Organization not found");
+    }
+
+    const previousTier = orgResult.data[0].tier;
+
+    // Update org to free tier
+    const updateResult = await dbExecute(
+      `
+      UPDATE organization
+      SET tier = 'free',
+          subscription_status = NULL,
+          stripe_subscription_id = NULL
+      WHERE id = $1
+      `,
+      [orgId]
+    );
+
+    if (updateResult.error) {
+      return err(`Failed to update organization: ${updateResult.error}`);
+    }
+
+    return ok({
+      message: `Switched org ${orgId} from ${previousTier} to free`,
+      previousTier,
+    });
   }
 }
