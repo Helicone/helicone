@@ -96,11 +96,12 @@ export async function checkRateLimit(
     timeWindowMillis
   );
 
-  const relevantTimestamps = timestamps.slice(firstRelevantIndex);
-
-  if (relevantTimestamps.length === 0) {
+  // If no timestamps are within the window, allow the request
+  if (firstRelevantIndex === -1) {
     return { status: "ok", limit: quota, remaining: quota };
   }
+
+  const relevantTimestamps = timestamps.slice(firstRelevantIndex);
   const currentQuota = relevantTimestamps.reduce((acc, x) => acc + x.unit, 0);
 
   const remaining = Math.max(0, quota - currentQuota);

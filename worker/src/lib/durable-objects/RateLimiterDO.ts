@@ -79,7 +79,9 @@ export class RateLimiterDO extends DurableObject {
       const unitCount = req.unit === "cents" ? req.cost || 0 : 1;
 
       // Check if adding this request would exceed the quota
-      const wouldExceed = currentUsage + unitCount >= req.quota;
+      // Using > (not >=) because at exactly the quota, the user should still have access
+      // Both checkOnly and update modes use the same logic: would this request exceed?
+      const wouldExceed = currentUsage + unitCount > req.quota;
       const remaining = Math.max(0, req.quota - currentUsage);
 
       // If not check-only and not rate limited, record the usage
