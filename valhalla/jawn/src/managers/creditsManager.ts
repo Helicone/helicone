@@ -254,21 +254,27 @@ export class CreditsManager extends BaseManager {
             // Only set if there's a 5m or 1h write multiplier (Anthropic)
             cacheWritePer1M:
               cacheMultipliers?.write5m || cacheMultipliers?.write1h
-                ? p.input * (cacheMultipliers.write5m ?? cacheMultipliers.write1h ?? 1.25) * 1_000_000
+                ? p.input *
+                  (cacheMultipliers.write5m ??
+                    cacheMultipliers.write1h ??
+                    1.25) *
+                  1_000_000
                 : undefined,
           };
         }
 
         const baseCost = parseFloat(row.cost);
         // Cache adjustments are keyed by "model:clickhouseProvider"
-        const adjustment = cacheAdjustments.get(
-          `${row.model}:${row.provider}`
-        );
+        const adjustment = cacheAdjustments.get(`${row.model}:${row.provider}`);
         const cacheAdjustmentUsd = adjustment?.amountUsd || 0;
         const missingCacheWriteTokens = adjustment?.missingTokens || 0;
         const subtotal = baseCost + cacheAdjustmentUsd;
         // Apply discounts from org config
-        const discountPercent = findDiscount(discounts, row.model, row.provider);
+        const discountPercent = findDiscount(
+          discounts,
+          row.model,
+          row.provider
+        );
         const total = subtotal * (1 - discountPercent / 100);
 
         return {

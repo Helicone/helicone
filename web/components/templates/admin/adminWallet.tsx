@@ -972,6 +972,9 @@ export default function AdminWallet() {
                         <SortIcon column="total_spend" />
                       </div>
                     </TableHead>
+                    <TableHead>Cache Adj</TableHead>
+                    <TableHead>Invoiced</TableHead>
+                    <TableHead>Uninvoiced</TableHead>
                     <TableHead
                       className="cursor-pointer select-none hover:bg-muted/50"
                       onClick={() => handleSort("total_payments")}
@@ -1066,6 +1069,32 @@ export default function AdminWallet() {
                         {/* Spent (CH) */}
                         <TableCell className="whitespace-nowrap">
                           {formatCurrency(org.clickhouseTotalSpend)}
+                        </TableCell>
+                        {/* Cache Adjustment */}
+                        <TableCell className="whitespace-nowrap">
+                          {org.cacheAdjustment > 0 ? (
+                            <span className="text-purple-600">
+                              +{formatCurrency(org.cacheAdjustment)}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground">$0.00</span>
+                          )}
+                        </TableCell>
+                        {/* Invoiced */}
+                        <TableCell className="whitespace-nowrap">
+                          {formatCurrency(org.totalInvoiced)}
+                        </TableCell>
+                        {/* Uninvoiced */}
+                        <TableCell className="whitespace-nowrap">
+                          <span
+                            className={
+                              org.uninvoicedBalance > 0
+                                ? "font-medium text-orange-500"
+                                : ""
+                            }
+                          >
+                            {formatCurrency(org.uninvoicedBalance)}
+                          </span>
                         </TableCell>
                         {/* Net Balance */}
                         <TableCell className="whitespace-nowrap">
@@ -1171,7 +1200,7 @@ export default function AdminWallet() {
                       </TableRow>,
                       selectedOrg === org.orgId && walletDetails && (
                         <TableRow key={`${org.orgId}-details`}>
-                          <TableCell colSpan={9} className="bg-muted/30 p-6">
+                          <TableCell colSpan={12} className="bg-muted/30 p-6">
                             {walletLoading ? (
                               <div className="flex h-32 items-center justify-center">
                                 <Loader2 size={20} className="animate-spin" />
@@ -2266,7 +2295,7 @@ export default function AdminWallet() {
                   {/* Loading indicator for next page */}
                   {isFetchingNextPage && (
                     <TableRow>
-                      <TableCell colSpan={9} className="py-4 text-center">
+                      <TableCell colSpan={12} className="py-4 text-center">
                         <Loader2
                           size={20}
                           className="inline-block animate-spin text-muted-foreground"
@@ -2276,7 +2305,7 @@ export default function AdminWallet() {
                   )}
                   {/* Intersection observer target */}
                   <tr ref={observerTarget} style={{ height: "1px" }}>
-                    <td colSpan={9} />
+                    <td colSpan={12} />
                   </tr>
                 </TableBody>
               </table>

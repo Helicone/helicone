@@ -48981,6 +48981,14 @@
 					"organizations": {
 						"items": {
 							"properties": {
+								"uninvoicedBalance": {
+									"type": "number",
+									"format": "double"
+								},
+								"totalInvoiced": {
+									"type": "number",
+									"format": "double"
+								},
 								"walletProcessedEventsCount": {
 									"type": "number",
 									"format": "double"
@@ -49046,6 +49054,8 @@
 								}
 							},
 							"required": [
+								"uninvoicedBalance",
+								"totalInvoiced",
 								"creditLimit",
 								"allowNegativeBalance",
 								"ownerEmail",
