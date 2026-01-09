@@ -14,19 +14,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { InvoiceSheet } from "./InvoiceSheet";
 import { Badge } from "@/components/ui/badge";
-import { CalendarIcon, ArrowRight, Sparkles } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { BillingUsageChart } from "./BillingUsageChart";
-import { useState } from "react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 /**
  * Shared hook for Pro subscription management
@@ -260,7 +249,6 @@ export const ProPlanCard = () => {
  */
 export const LegacyProPlanCard = () => {
   const org = useOrg();
-  const [showMigrationDialog, setShowMigrationDialog] = useState(false);
   const {
     subscription,
     manageSubscriptionPaymentLink,
@@ -269,20 +257,6 @@ export const LegacyProPlanCard = () => {
     isSubscriptionEnding,
     getBillingCycleDates,
   } = useProSubscription();
-
-  const migrateToNewPricing = useMutation({
-    mutationFn: async () => {
-      const jawn = getJawnClient(org?.currentOrg?.id);
-      const result = await jawn.POST(
-        "/v1/stripe/subscription/migrate-to-new-pricing",
-      );
-      return result;
-    },
-    onSuccess: () => {
-      // Refresh the page to show the new billing page
-      window.location.reload();
-    },
-  });
 
   const hasPromptsAddon =
     (org?.currentOrg?.stripe_metadata as { addons?: { prompts?: boolean } })
@@ -349,85 +323,7 @@ export const LegacyProPlanCard = () => {
               )}
             </div>
 
-            {/* Migration Banner */}
-            <div className="rounded-lg border border-sky-200 bg-sky-50 p-4">
-              <div className="flex items-start gap-3">
-                <Sparkles className="h-5 w-5 text-sky-600 mt-0.5" />
-                <div className="flex-1">
-                  <h3 className="text-sm font-semibold text-sky-900">
-                    New Simplified Pricing Available
-                  </h3>
-                  <p className="mt-1 text-sm text-sky-700">
-                    Upgrade to our new $79/month plan with unlimited seats, prompts included,
-                    and usage-based storage billing.
-                  </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="mt-3 border-sky-300 text-sky-700 hover:bg-sky-100"
-                    onClick={() => setShowMigrationDialog(true)}
-                    disabled={migrateToNewPricing.isPending}
-                  >
-                    {migrateToNewPricing.isPending ? (
-                      "Migrating..."
-                    ) : (
-                      <>
-                        Migrate to New Pricing
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </div>
           </div>
-
-          {/* Migration Confirmation Dialog */}
-          <AlertDialog open={showMigrationDialog} onOpenChange={setShowMigrationDialog}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Migrate to New Pricing</AlertDialogTitle>
-                <AlertDialogDescription className="space-y-3">
-                  <p>
-                    You&apos;re about to migrate from the legacy Pro plan to our new simplified pricing:
-                  </p>
-                  <div className="rounded-md bg-muted p-3 text-sm">
-                    <div className="font-medium mb-2">New Plan Benefits:</div>
-                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                      <li><strong>$79/month flat</strong> (instead of $20/seat)</li>
-                      <li><strong>Unlimited seats</strong> included</li>
-                      <li><strong>Prompts included</strong> (no $50/mo add-on)</li>
-                      <li>Usage-based storage billing (starts at $3.25/GB)</li>
-                      <li>Tiered request pricing (10K free, then tiered rates)</li>
-                    </ul>
-                  </div>
-                  <p className="text-muted-foreground">
-                    Your subscription will be updated immediately with prorations applied
-                    for the current billing period.
-                  </p>
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={async () => {
-                    try {
-                      await migrateToNewPricing.mutateAsync();
-                    } catch (error) {
-                      logger.error(
-                        { error: error instanceof Error ? error.message : String(error) },
-                        "Failed to migrate to new pricing",
-                      );
-                    }
-                  }}
-                  disabled={migrateToNewPricing.isPending}
-                  className="bg-sky-600 hover:bg-sky-700"
-                >
-                  {migrateToNewPricing.isPending ? "Migrating..." : "Confirm Migration"}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
 
           <Col className="gap-2">
             {isSubscriptionEnding ? (

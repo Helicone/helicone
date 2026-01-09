@@ -287,26 +287,6 @@ export interface paths {
   "/v1/stripe/subscription/migrate-to-pro": {
     post: operations["MigrateToPro"];
   };
-  "/v1/stripe/subscription/migrate-to-new-pricing": {
-    /**
-     * @description Migrate from legacy pro pricing (pro-20240913, pro-20250202) to new pricing (pro-20251210).
-     * This will:
-     * 1. Remove all existing subscription items
-     * 2. Add new pricing items ($79/mo flat + metered request/GB billing)
-     * 3. Update the organization's tier in the database
-     */
-    post: operations["MigrateToNewPricing"];
-  };
-  "/v1/stripe/subscription/migrate-to-new-team-pricing": {
-    /**
-     * @description Migrate from legacy team pricing (team-20250130) to new pricing (team-20251210).
-     * This will:
-     * 1. Remove all existing subscription items
-     * 2. Add new pricing items ($799/mo flat + metered request/GB billing)
-     * 3. Update the organization's tier in the database
-     */
-    post: operations["MigrateToNewTeamPricing"];
-  };
   "/v1/stripe/payment-intents/search": {
     get: operations["SearchPaymentIntents"];
   };
@@ -6268,48 +6248,6 @@ export interface operations {
       200: {
         content: {
           "application/json": unknown;
-        };
-      };
-    };
-  };
-  /**
-   * @description Migrate from legacy pro pricing (pro-20240913, pro-20250202) to new pricing (pro-20251210).
-   * This will:
-   * 1. Remove all existing subscription items
-   * 2. Add new pricing items ($79/mo flat + metered request/GB billing)
-   * 3. Update the organization's tier in the database
-   */
-  MigrateToNewPricing: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": {
-            subscriptionId: string;
-            newTier: string;
-            previousTier: string;
-          };
-        };
-      };
-    };
-  };
-  /**
-   * @description Migrate from legacy team pricing (team-20250130) to new pricing (team-20251210).
-   * This will:
-   * 1. Remove all existing subscription items
-   * 2. Add new pricing items ($799/mo flat + metered request/GB billing)
-   * 3. Update the organization's tier in the database
-   */
-  MigrateToNewTeamPricing: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": {
-            subscriptionId: string;
-            newTier: string;
-            previousTier: string;
-          };
         };
       };
     };
