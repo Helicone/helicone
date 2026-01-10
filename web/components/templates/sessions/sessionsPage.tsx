@@ -486,7 +486,7 @@ const SessionsPage = (props: SessionsPageProps) => {
             count={aggregateMetrics?.count || 0}
             onPageChange={(n) => handlePageChange(n)}
             onPageSizeChange={(n) => setCurrentPageSize(n)}
-            pageSizeOptions={[25, 50, 100, 250, 500]}
+            pageSizeOptions={[50, 100, 250]}
           />
         </TabsContent>
         <TabsContent value="metrics">

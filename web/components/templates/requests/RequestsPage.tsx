@@ -155,12 +155,12 @@ export default function RequestsPage(props: RequestsPageV2Props) {
 
   const cacheFilter: FilterNode = isCached
     ? {
-        request_response_rmt: {
-          cache_enabled: {
-            equals: true,
-          },
+      request_response_rmt: {
+        cache_enabled: {
+          equals: true,
         },
-      }
+      },
+    }
     : "all";
 
   // filter when custom is not selected
@@ -362,7 +362,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   const isRefetching = shouldShowMockData ? false : realIsRefetching;
   const requests = shouldShowMockData ? mockRequests : realRequests;
   const properties = shouldShowMockData ? mockProperties : realProperties;
-  const refetch = shouldShowMockData ? () => {} : realRefetch;
+  const refetch = shouldShowMockData ? () => { } : realRefetch;
   const filterMap = shouldShowMockData ? (mockFilterMap as any) : realFilterMap;
 
   // Moved activeColumns state management here
@@ -806,10 +806,10 @@ export default function RequestsPage(props: RequestsPageV2Props) {
               timeFilter={
                 !userId
                   ? {
-                      currentTimeFilter: timeRange,
-                      defaultValue: "1m",
-                      onTimeSelectHandler: onTimeSelectHandler,
-                    }
+                    currentTimeFilter: timeRange,
+                    defaultValue: "1m",
+                    onTimeSelectHandler: onTimeSelectHandler,
+                  }
                   : undefined
               }
               onRowSelect={onRowSelectHandler}
@@ -902,12 +902,15 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       {/* Table Footer */}
       <TableFooter
         currentPage={page}
-        pageSize={pageSize}
+        pageSize={currentPageSize}
         isCountLoading={isCountLoading}
         count={count || 0}
         onPageChange={(n) => handlePageChange(n)}
-        onPageSizeChange={(n) => setCurrentPageSize(n)}
-        pageSizeOptions={[25, 50, 100, 250, 500]}
+        onPageSizeChange={(n) => {
+          setCurrentPageSize(n);
+          setPage(1); // Reset to page 1 when page size changes
+        }}
+        pageSizeOptions={[50, 100, 250]}
       />
 
       {/* Floating Elements */}
