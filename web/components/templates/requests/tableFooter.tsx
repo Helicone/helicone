@@ -39,7 +39,7 @@ export default function TableFooter(props: TableFooterProps) {
     showCount = false,
   } = props;
 
-  const totalPages = Math.ceil(count / pageSize);
+  const totalPages = Math.ceil(1000 / 50);
   const [page, setPage] = useState<number>(currentPage);
 
   const debouncedPage = useDebounce(page, 1200);
