@@ -52,6 +52,52 @@ describe("Google Reasoning/Thinking Support", () => {
       });
     });
 
+    it("should default to 'low' reasoning_effort when not specified for Gemini 3 models", () => {
+      const openAIRequest: HeliconeChatCreateParams = {
+        model: "gemini-3-pro-preview",
+        messages: [{ role: "user", content: "What is 2+2?" }],
+        // No reasoning_effort specified - should default to "low" ONLY for Gemini 3+
+      };
+
+      const googleRequest = toGoogle(openAIRequest);
+
+      // Default "low" effort maps to "low" thinkingLevel for Google
+      expect(googleRequest.generationConfig?.thinkingConfig).toEqual({
+        includeThoughts: true,
+        thinkingLevel: "low",
+      });
+    });
+
+    it("should disable thinking by default for Gemini 2.5 models when reasoning_effort not specified", () => {
+      const openAIRequest: HeliconeChatCreateParams = {
+        model: "gemini-2.5-flash",
+        messages: [{ role: "user", content: "Test" }],
+        // No reasoning_effort specified - Gemini 2.5 requires explicit opt-in
+      };
+
+      const googleRequest = toGoogle(openAIRequest);
+
+      // Gemini 2.5 models don't get thinking enabled by default
+      expect(googleRequest.generationConfig?.thinkingConfig).toEqual({
+        thinkingBudget: 0,
+      });
+    });
+
+    it("should disable thinking by default for Gemini 1.5 and older models", () => {
+      const openAIRequest: HeliconeChatCreateParams = {
+        model: "gemini-1.5-pro",
+        messages: [{ role: "user", content: "Hello" }],
+        // No reasoning_effort specified - should disable thinking for older models
+      };
+
+      const googleRequest = toGoogle(openAIRequest);
+
+      // Older models don't get thinking enabled by default
+      expect(googleRequest.generationConfig?.thinkingConfig).toEqual({
+        thinkingBudget: 0,
+      });
+    });
+
     it("should use thinkingBudget=-1 for reasoning_effort on Gemini 2.5 models", () => {
       const openAIRequest: HeliconeChatCreateParams = {
         model: "gemini-2.5-flash",
