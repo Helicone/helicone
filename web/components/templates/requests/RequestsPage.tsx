@@ -910,7 +910,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
           setCurrentPageSize(n);
           setPage(1); // Reset to page 1 when page size changes
         }}
-        pageSizeOptions={[50, 100, 250]}
+        pageSizeOptions={[25, 50, 100, 250, 500]}
       />
 
       {/* Floating Elements */}

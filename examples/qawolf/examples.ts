@@ -551,7 +551,7 @@ export default PromptsPage;
                 count={count || 0}
                 onPageChange={(n) => handlePageChange(n)}
                 onPageSizeChange={(n) => setCurrentPageSize(n)}
-                pageSizeOptions={[50, 100, 250]}
+                pageSizeOptions={[25, 50, 100, 250, 500]}
               />
             </div>
           </div>

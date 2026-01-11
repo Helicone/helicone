@@ -351,7 +351,7 @@ const UsersPageV2 = (props: UsersPageV2Props) => {
             count={userMetrics.data?.count || 0}
             onPageChange={(n) => setCurrentPage(n.toString())}
             onPageSizeChange={(n) => setPageSize(n.toString())}
-           pageSizeOptions={[50, 100, 250]}
+           pageSizeOptions={[25, 50, 100, 250, 500]}
           />
         </TabsContent>
         <TabsContent value="metrics" className="h-full">
