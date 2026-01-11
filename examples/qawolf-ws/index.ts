@@ -4,6 +4,7 @@ import * as readline from "readline";
 import { inspect } from "util";
 import { resample } from "wave-resampler";
 import WebSocket from "ws";
+import { randomUUID } from "crypto";
 
 /**
  * OpenAI Realtime API Audio Format Requirements:
@@ -34,7 +35,7 @@ const ws = new WebSocket(url, {
     "Helicone-Auth": "Bearer " + process.env.HELICONE_API_KEY,
     // + Any Helicone properties here:
     "Helicone-Session-Name": "QAWOLF-Live-Updates",
-    "Helicone-Session-Id": `session_${Date.now()}`,
+    "Helicone-Session-Id": `session_${randomUUID()}`,
     "Helicone-Session-Path": "/realtime-session",
     "Helicone-User-Id": "qawolf",
   },
@@ -263,7 +264,7 @@ ws.on("open", function open() {
   /* -------------------------------------------------------------------------- */
   /*               Simulate bug with Socket.IO socket.emit format               */
   /* -------------------------------------------------------------------------- */
-  const callId = "simulated_call_" + Date.now();
+  const callId = "simulated_call_" + randomUUID();
   // Original requested format: socket.emit("conversation.item.create", {...})
   console.log("Simulating socket.emit with the following payload:");
   console.log(`socket.emit("conversation.item.create", {
@@ -279,7 +280,7 @@ ws.on("open", function open() {
     JSON.stringify({
       type: "conversation.item.create",
       item: {
-        id: `item_${Date.now()}`,
+        id: randomUUID(),
         call_id: callId,
         output: "success",
         type: "function_call_output",
@@ -354,7 +355,7 @@ ws.on("message", function incoming(message: WebSocket.RawData) {
 function handleFunctionCall(functionCall: any) {
   const { name, arguments: args } = functionCall;
   const parsedArgs = JSON.parse(args);
-  const functionItemId = `item_function_${Date.now()}_${messageCounter++}`;
+  const functionItemId = randomUUID();
   lastItemId = functionItemId;
 
   let response;
@@ -475,7 +476,7 @@ function startCliLoop() {
     if (input.toLowerCase() === "delete") {
       if (lastItemId) {
         const deleteMessage = {
-          event_id: `event_${Date.now()}`,
+          event_id: randomUUID(),
           type: "conversation.item.delete",
           item_id: lastItemId,
         };
@@ -494,7 +495,7 @@ function startCliLoop() {
       console.log("Starting delete-list test sequence...");
 
       // Create and delete first message
-      const msgId1 = `msg_${Date.now()}_${messageCounter++}`;
+      const msgId1 = randomUUID();
       ws.send(
         JSON.stringify({
           type: "conversation.item.create",
@@ -510,7 +511,7 @@ function startCliLoop() {
 
       ws.send(
         JSON.stringify({
-          event_id: `event_${Date.now()}`,
+          event_id: randomUUID(),
           type: "conversation.item.delete",
           item_id: msgId1,
         })
@@ -518,7 +519,7 @@ function startCliLoop() {
       console.log("Deleted message 1:", msgId1);
 
       // Create and delete second message
-      const msgId2 = `msg_${Date.now()}_${messageCounter++}`;
+      const msgId2 = randomUUID();
       ws.send(
         JSON.stringify({
           type: "conversation.item.create",
@@ -534,7 +535,7 @@ function startCliLoop() {
 
       ws.send(
         JSON.stringify({
-          event_id: `event_${Date.now()}`,
+          event_id: randomUUID(),
           type: "conversation.item.delete",
           item_id: msgId2,
         })
@@ -542,7 +543,7 @@ function startCliLoop() {
       console.log("Deleted message 2:", msgId2);
 
       // Create and delete third message
-      const msgId3 = `msg_${Date.now()}_${messageCounter++}`;
+      const msgId3 = randomUUID();
       ws.send(
         JSON.stringify({
           type: "conversation.item.create",
@@ -558,7 +559,7 @@ function startCliLoop() {
 
       ws.send(
         JSON.stringify({
-          event_id: `event_${Date.now()}`,
+          event_id: randomUUID(),
           type: "conversation.item.delete",
           item_id: msgId3,
         })
@@ -572,7 +573,7 @@ function startCliLoop() {
     // Otherwise, send the message as text
     try {
       // Generate a unique message ID
-      const messageId = `msg_${Date.now()}_${messageCounter++}`;
+      const messageId = randomUUID();
       lastItemId = messageId;
 
       // Create a text message item

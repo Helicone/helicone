@@ -4,6 +4,7 @@ import "../setup";
 import { runGatewayTest } from "./test-framework";
 import { setSupabaseTestCase } from "../setup";
 import { clearProviderKeysInMemoryCache } from "../../src/lib/util/cache/inMemoryCache";
+import { randomUUID } from "crypto";
 
 describe("BYOK and PTB Priority Tests", () => {
   // Helper to set up credits for PTB tests
@@ -14,7 +15,7 @@ describe("BYOK and PTB Priority Tests", () => {
 
     // @ts-ignore
     await runInDurableObject(walletStub, async (wallet: any) => {
-      await wallet.setCredits(10_000_000, `test-credits-${Date.now()}`);
+      await wallet.setCredits(10_000_000, `test-credits-${randomUUID()}`);
     });
   }
 

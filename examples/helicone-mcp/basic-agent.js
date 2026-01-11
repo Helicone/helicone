@@ -3,6 +3,7 @@ import { query } from "@anthropic-ai/claude-agent-sdk";
 import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+import { randomUUID } from "crypto";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -82,7 +83,7 @@ async function main() {
     console.log("\n📝 Example 2: Request with session tracking");
     console.log("-".repeat(40));
 
-    const sessionId = `basic-demo-${Date.now()}`;
+    const sessionId = `basic-demo-${randomUUID()}`;
     const queryResult2 = await query({
       prompt: `Use the use_ai_gateway tool to ask Claude Sonnet: "Explain LLM observability in 2 sentences"
 

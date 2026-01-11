@@ -96,7 +96,8 @@ export const getTimeInterval = ({
 }): TimeIncrement => {
   const diff = end.getTime() - start.getTime();
 
-  if (diff < 1000 * 60 * 60 * 2) {
+  if (diff < 1000 * 60 * 60 * 6) {
+    // Use minute granularity for ranges up to 6 hours
     return "min";
   } else if (diff < 1000 * 60 * 60 * 24 * 3) {
     // Use hourly granularity for ranges up to 3 days

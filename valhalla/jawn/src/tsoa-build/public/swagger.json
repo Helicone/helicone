@@ -1650,8 +1650,11 @@
 					"commit_message": {
 						"type": "string"
 					},
-					"environment": {
-						"type": "string"
+					"environments": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
 					},
 					"created_at": {
 						"type": "string"
@@ -7704,6 +7707,12 @@
 					"avg_latency": {
 						"type": "number",
 						"format": "double"
+					},
+					"user_ids": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
 					}
 				},
 				"required": [
@@ -7716,7 +7725,8 @@
 					"prompt_tokens",
 					"completion_tokens",
 					"total_tokens",
-					"avg_latency"
+					"avg_latency",
+					"user_ids"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -15453,6 +15463,58 @@
 		"/v1/prompt-2025/update/environment": {
 			"post": {
 				"operationId": "SetPromptVersionEnvironment",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"environment": {
+										"type": "string"
+									},
+									"promptVersionId": {
+										"type": "string"
+									},
+									"promptId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"environment",
+									"promptVersionId",
+									"promptId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt-2025/remove/environment": {
+			"post": {
+				"operationId": "RemoveEnvironmentFromVersion",
 				"responses": {
 					"200": {
 						"description": "Ok",

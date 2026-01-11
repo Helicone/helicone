@@ -4,6 +4,7 @@ import "../setup";
 import { runGatewayTest } from "./test-framework";
 import { setSupabaseTestCase } from "../setup";
 import { clearProviderKeysInMemoryCache } from "../../src/lib/util/cache/inMemoryCache";
+import { randomUUID } from "crypto";
 
 describe("PTB request validation", () => {
   beforeEach(() => {
@@ -70,7 +71,7 @@ describe("PTB request validation", () => {
 
     // @ts-ignore
     await runInDurableObject(walletStub, async (wallet: any) => {
-      await wallet.setCredits(1_000_000, `test-credits-${Date.now()}`);
+      await wallet.setCredits(1_000_000, `test-credits-${randomUUID()}`);
     });
 
     await runGatewayTest({
@@ -226,7 +227,7 @@ describe("PTB request validation", () => {
 
       // @ts-ignore
       await runInDurableObject(walletStub, async (wallet: any) => {
-        await wallet.setCredits(1_000_000, `test-credits-${Date.now()}`);
+        await wallet.setCredits(1_000_000, `test-credits-${randomUUID()}`);
       });
 
       await runGatewayTest({
@@ -264,7 +265,7 @@ describe("PTB request validation", () => {
 
       // @ts-ignore
       await runInDurableObject(walletStub, async (wallet: any) => {
-        await wallet.setCredits(1_000_000, `test-credits-${Date.now()}`);
+        await wallet.setCredits(1_000_000, `test-credits-${randomUUID()}`);
       });
 
       await runGatewayTest({
@@ -305,7 +306,7 @@ describe("PTB request validation", () => {
 
       // @ts-ignore
       await runInDurableObject(walletStub, async (wallet: any) => {
-        await wallet.setCredits(1_000_000, `test-credits-${Date.now()}`);
+        await wallet.setCredits(1_000_000, `test-credits-${randomUUID()}`);
       });
 
       await runGatewayTest({
@@ -344,7 +345,7 @@ describe("PTB request validation", () => {
 
       // @ts-ignore
       await runInDurableObject(walletStub, async (wallet: any) => {
-        await wallet.setCredits(1_000_000, `test-credits-${Date.now()}`);
+        await wallet.setCredits(1_000_000, `test-credits-${randomUUID()}`);
       });
 
       await runGatewayTest({

@@ -11,6 +11,7 @@ import {
   Database,
   ChevronLeft,
   User,
+  ArrowRightLeft,
 } from "lucide-react";
 import { useRouter } from "next/router";
 import {
@@ -62,6 +63,11 @@ const navigation = [
         name: "Helix Threads",
         href: "/admin/helix-threads",
         icon: MessageCircle,
+      },
+      {
+        name: "Pricing Migration",
+        href: "/admin/pricing-migration",
+        icon: ArrowRightLeft,
       },
     ],
   },
