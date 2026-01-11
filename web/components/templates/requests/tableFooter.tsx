@@ -38,12 +38,17 @@ export default function TableFooter(props: TableFooterProps) {
     pageSizeOptions,
     showCount = false,
   } = props;
-
-  const totalPages = Math.ceil(count / pageSize);
+  // Total pages = Math.ceil(count / pageSize)
+  const [totalPages, setTotalPages] = useState<number>(
+    Math.ceil(count / pageSize)
+  ); 
   const [page, setPage] = useState<number>(currentPage);
 
   const debouncedPage = useDebounce(page, 1200);
-
+  // Recalculate totalPages when count or pageSize changes
+  useEffect(() => {
+    setTotalPages(Math.ceil(count / pageSize));
+  }, [count, pageSize]);
   useEffect(() => {
     if (debouncedPage !== currentPage) {
       onPageChange(debouncedPage);
