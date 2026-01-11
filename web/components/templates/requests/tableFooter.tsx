@@ -44,6 +44,10 @@ export default function TableFooter(props: TableFooterProps) {
   ); 
   const [page, setPage] = useState<number>(currentPage);
 
+  useEffect(() => {
+    setPage(currentPage);
+  }, [currentPage]);
+
   const debouncedPage = useDebounce(page, 1200);
   // Recalculate totalPages when count or pageSize changes
   useEffect(() => {
