@@ -2,6 +2,8 @@ As AI systems evolve from single-question chatbots into autonomous agents, one o
 
 Giving an LLM access to well-designed tools (or functions) ensures it can do more than just generating text. **Tools enable agents to actually do things**: analyze code, fetch data, summarize changes, call APIs, interact with databases, spin up workflows, etc.
 
+-- *For a comprehensive overview of building and managing AI agents, see our [full guide to improving AI agents](/blog/full-guide-to-improving-ai-agents) and learn about [AI agent monitoring best practices](/blog/ai-agent-monitoring-tutorial).*
+
 ## What is Tool Calling?
 
 In traditional software, we write explicit conditional logic that always produces the same output under the same conditions.
@@ -111,11 +113,13 @@ If the agent picked the wrong tool or passed malformed JSON, the failure can be 
 
 That's why observing the **entire flow** is critical, and why engineers building agents rely on **LLM observability**.
 
+-- For deeper insights into observability strategies, check out our [complete guide to debugging LLM applications](/blog/complete-guide-to-debugging-llm-applications) and [LLM observability best practices](/blog/llm-observability).
+
 ### Sessions: Grouping Complex Workflows
 
 Observability platforms let you bundle information to make it easier to trace.
 
-For example, through using Helicone's **Sessions**, you can group all related requests - LLM calls, tool calls, state transitions - into a single unit so you can inspect the entire trace within the same place. This is similar to bundled logs in traditional software engineering.
+For example, through using [Helicone's **Sessions**](/docs/features/sessions), you can group all related requests - LLM calls, tool calls, state transitions - into a single unit so you can inspect the entire trace within the same place. This is similar to bundled logs in traditional software engineering.
 
 A *session* is defined by 3 headers:
 
@@ -152,7 +156,7 @@ By adding these headers to your requests, you're **grouping all calls in a singl
 
 This gives you **end-to-end visibility into what otherwise would be a black box**, helping with debugging, optimization, and iterative improvement.
 
-## Sessions & Tools
+### Sessions & Tools
 
 When setting up your agent loop, you attach session headers to every request so both LLM calls and tool invocations are bundled together. That ensures:
 
@@ -168,7 +172,7 @@ This will allow you to:
 - **Understand performance**: Which part of your agent is slow? Was it the LLM? A tool? Data retrieval?
 - **Optimize intelligently**: By seeing the full trace, you can identify bottlenecks and iterate with confidence.
 
-### Conclusion
+## Getting Started
 
 Tool calling is a foundational capability for agents. But in order to keep dynamic systems reliable, make sure to:
 
@@ -176,5 +180,10 @@ Tool calling is a foundational capability for agents. But in order to keep dynam
 - Enable rigorous parameter validation
 - Design graceful error handling
 - Trace your agentic workflow using sessions from request start to final output
+
+Ready to implement tool calling with observability?
+- Start with our [quick start guide](/docs/quick-start)
+- Explore our [AI agents cookbook](/docs/guides/cookbooks/ai-agents) for practical examples,
+- Learn about integration options in our [tools documentation](/docs/tools).
 
 
