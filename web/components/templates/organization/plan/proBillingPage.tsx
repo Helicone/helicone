@@ -322,6 +322,7 @@ export const LegacyProPlanCard = () => {
                 </p>
               )}
             </div>
+
           </div>
 
           <Col className="gap-2">
