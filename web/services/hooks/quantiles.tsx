@@ -1,10 +1,20 @@
-import { useQuery } from "@tanstack/react-query";
-import { Result } from "@/packages/common/result";
 import { TimeIncrement } from "../../lib/timeCalculations/fetchTimeData";
-import { Quantiles } from "../../lib/api/metrics/quantilesCalc";
 import { FilterNode } from "@helicone-package/filters/filterDefs";
 import { getPropertyFiltersV2 } from "@helicone-package/filters/frontendFilterDefs";
 import { useGetPropertiesV2 } from "./propertiesV2";
+import { $JAWN_API } from "@/lib/clients/jawn";
+
+// Type assertion for FilterNode compatibility with generated types
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type JawnFilterNode = any;
+
+export interface Quantiles {
+  time: Date;
+  p75: number;
+  p90: number;
+  p95: number;
+  p99: number;
+}
 
 const useQuantiles = (data: {
   filters: FilterNode;
@@ -16,47 +26,45 @@ const useQuantiles = (data: {
   timeZoneDifference: number;
   metric: string;
 }) => {
-  const { isLoading: isPropertiesLoading, propertyFilters } =
+  const { isLoading: isPropertiesLoading } =
     useGetPropertiesV2(getPropertyFiltersV2);
 
   const {
-    data: quantiles,
+    data: quantilesData,
     isLoading,
     refetch,
-  } = useQuery({
-    queryKey: [
-      "quantiles",
-      data.timeFilter,
-      data.metric,
-      data.filters,
-      data.dbIncrement,
-      data.timeZoneDifference,
-    ],
-    queryFn: async (query) => {
-      const timeFilter = query.queryKey[1];
-      const metric = query.queryKey[2];
-      const uiFilters = query.queryKey[3] as FilterNode;
-      const dbIncrement = query.queryKey[4];
-      const timeZoneDifference = query.queryKey[5];
-
-      return await fetch("/api/metrics/quantiles", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+  } = $JAWN_API.useQuery(
+    "post",
+    "/v1/metrics/quantiles",
+    {
+      body: {
+        filter: data.filters as JawnFilterNode,
+        timeFilter: {
+          start: data.timeFilter.start.toISOString(),
+          end: data.timeFilter.end.toISOString(),
         },
-        body: JSON.stringify({
-          data: {
-            timeFilter: timeFilter,
-            userFilter: uiFilters,
-            dbIncrement: dbIncrement,
-            timeZoneDifference: timeZoneDifference,
-            metric: metric,
-          },
-        }),
-      }).then((res) => res.json() as Promise<Result<Quantiles[], string>>);
+        dbIncrement: data.dbIncrement,
+        timeZoneDifference: data.timeZoneDifference,
+        metric: data.metric,
+      },
     },
-    refetchOnWindowFocus: false,
-  });
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  // Transform the response to match expected format
+  const quantiles = quantilesData?.data
+    ? {
+        data: quantilesData.data.map((d) => ({
+          ...d,
+          time: new Date(d.time),
+        })),
+        error: null,
+      }
+    : quantilesData?.error
+      ? { data: null, error: quantilesData.error }
+      : undefined;
 
   const isQuantilesLoading = isPropertiesLoading || isLoading;
 

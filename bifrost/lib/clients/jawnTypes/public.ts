@@ -616,6 +616,9 @@ export interface paths {
   "/v1/metrics/country": {
     post: operations["GetCountryMetrics"];
   };
+  "/v1/metrics/quantiles": {
+    post: operations["GetQuantiles"];
+  };
   "/v1/public/security": {
     post: operations["GetSecurity"];
   };
@@ -4107,6 +4110,35 @@ Json: JsonObject;
         end: string;
         start: string;
       };
+    };
+    Quantiles: {
+      /** Format: date-time */
+      time: string;
+      /** Format: double */
+      p75: number;
+      /** Format: double */
+      p90: number;
+      /** Format: double */
+      p95: number;
+      /** Format: double */
+      p99: number;
+    };
+    "ResultSuccess_Quantiles-Array_": {
+      data: components["schemas"]["Quantiles"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Quantiles-Array.string_": components["schemas"]["ResultSuccess_Quantiles-Array_"] | components["schemas"]["ResultError_string_"];
+    QuantilesBody: {
+      filter: components["schemas"]["FilterNode"];
+      timeFilter: {
+        end: string;
+        start: string;
+      };
+      dbIncrement?: components["schemas"]["TimeIncrement"];
+      /** Format: double */
+      timeZoneDifference: number;
+      metric: string;
     };
     "ResultSuccess__unsafe-boolean__": {
       data: {
@@ -8132,6 +8164,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_CountryData-Array.string_"];
+        };
+      };
+    };
+  };
+  GetQuantiles: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QuantilesBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Quantiles-Array.string_"];
         };
       };
     };

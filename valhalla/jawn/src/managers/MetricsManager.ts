@@ -679,9 +679,9 @@ export class MetricsManager extends BaseManager {
   ): Promise<Result<number, string>> {
     const cacheKey = `requestCount:${this.authParams.organizationId}:${JSON.stringify(filter)}:${isCached}`;
 
-    return cacheResultCustom(
+    return cacheResultCustom<number, string>(
       cacheKey,
-      async () => {
+      async (): Promise<Result<number, string>> => {
         const builtFilter = await buildFilterWithAuthClickHouse({
           org_id: this.authParams.organizationId,
           argsAcc: [],
@@ -696,16 +696,16 @@ export class MetricsManager extends BaseManager {
         ${isCached ? "AND cache_enabled = 1" : ""}
         `;
 
-        const { data, error } = await dbQueryClickhouse<{ count: number }>(
+        const result = await dbQueryClickhouse<{ count: number }>(
           query,
           builtFilter.argsAcc
         );
 
-        if (error !== null) {
-          return { data: null, error: error };
+        if (result.error !== null) {
+          return { data: null, error: result.error };
         }
 
-        return { data: data[0].count, error: null };
+        return { data: result.data![0].count, error: null };
       },
       requestCountCache
     );

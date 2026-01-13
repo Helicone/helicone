@@ -1,34 +1,45 @@
-import { useQuery } from "@tanstack/react-query";
 import { TimeFilter } from "@/types/timeFilter";
-import { Result } from "@/packages/common/result";
-import { ModelMetric } from "../../lib/api/models/models";
 import { FilterNode } from "@helicone-package/filters/filterDefs";
+import { $JAWN_API } from "@/lib/clients/jawn";
+
+// Type assertion for FilterNode compatibility with generated types
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type JawnFilterNode = any;
+
+export interface ModelMetric {
+  model: string;
+  total_requests: number;
+  total_completion_tokens: number;
+  total_prompt_token: number;
+  total_tokens: number;
+  cost: number;
+}
 
 const useModels = (
   timeFilter: TimeFilter,
   limit: number,
-  userFilters?: FilterNode,
+  userFilters?: FilterNode
 ) => {
-  const { data: models, isLoading } = useQuery({
-    queryKey: ["modelMetrics", timeFilter, userFilters],
-    queryFn: async (query) => {
-      return await fetch("/api/models", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+  const { data, isLoading } = $JAWN_API.useQuery(
+    "post",
+    "/v1/metrics/models",
+    {
+      body: {
+        filter: (userFilters ?? {}) as JawnFilterNode,
+        offset: 0,
+        limit,
+        timeFilter: {
+          start: timeFilter.start.toISOString(),
+          end: timeFilter.end.toISOString(),
         },
-        body: JSON.stringify({
-          filter: userFilters ?? {},
-          offset: 0,
-          limit,
-          timeFilter,
-        }),
-      }).then((res) => res.json() as Promise<Result<ModelMetric[], string>>);
+      },
     },
-    refetchOnWindowFocus: false,
-  });
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
 
-  return { models, isLoading };
+  return { models: data, isLoading };
 };
 
 export { useModels };

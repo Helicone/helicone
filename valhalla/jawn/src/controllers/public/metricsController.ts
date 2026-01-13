@@ -64,6 +64,17 @@ export interface CountryMetricsBody {
   };
 }
 
+export interface QuantilesBody {
+  filter: FilterNode;
+  timeFilter: {
+    start: string;
+    end: string;
+  };
+  dbIncrement?: TimeIncrement;
+  timeZoneDifference: number;
+  metric: string;
+}
+
 @Route("v1/metrics")
 @Tags("Metrics")
 @Security("api_key")
@@ -409,6 +420,29 @@ export class MetricsController extends Controller {
       },
       requestBody.offset,
       requestBody.limit
+    );
+    if (result.error) {
+      this.setStatus(500);
+    }
+    return result;
+  }
+
+  // ============== QUANTILES ==============
+
+  @Post("/quantiles")
+  public async getQuantiles(
+    @Body() requestBody: QuantilesBody,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<Quantiles[], string>> {
+    const metricsManager = new MetricsManager(request.authParams);
+    const result = await metricsManager.getQuantiles(
+      {
+        timeFilter: requestBody.timeFilter,
+        userFilter: requestBody.filter,
+        dbIncrement: requestBody.dbIncrement ?? "hour",
+        timeZoneDifference: requestBody.timeZoneDifference,
+      },
+      requestBody.metric
     );
     if (result.error) {
       this.setStatus(500);
