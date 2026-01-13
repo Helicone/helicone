@@ -14,7 +14,7 @@ export interface CountryData {
 const useCountries = (
   timeFilter: TimeFilter,
   limit: number,
-  userFilters: FilterNode
+  userFilters: FilterNode,
 ) => {
   const { data, isLoading, refetch } = $JAWN_API.useQuery(
     "post",
@@ -32,7 +32,7 @@ const useCountries = (
     },
     {
       refetchOnWindowFocus: false,
-    }
+    },
   );
 
   return { countries: data, isLoading, refetch };

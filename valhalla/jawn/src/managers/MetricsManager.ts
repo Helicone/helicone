@@ -122,7 +122,7 @@ function buildFill(
   endDate: Date,
   dbIncrement: TimeIncrement,
   timeZoneDifference: number,
-  argsAcc: any[]
+  argsAcc: any[],
 ): {
   fill: string;
   argsAcc: any[];
@@ -131,16 +131,16 @@ function buildFill(
   const startDateVal = buildDateTrunc(
     dbIncrement,
     timeZoneDifference,
-    clickhouseParam(i, startDate)
+    clickhouseParam(i, startDate),
   );
   const endDateVal = buildDateTrunc(
     dbIncrement,
     timeZoneDifference,
-    clickhouseParam(i + 1, endDate)
+    clickhouseParam(i + 1, endDate),
   );
 
   const fill = `WITH FILL FROM ${startDateVal} to ${endDateVal} + INTERVAL 1 ${convertDbIncrement(
-    dbIncrement
+    dbIncrement,
   )} STEP INTERVAL 1 ${convertDbIncrement(dbIncrement)}`;
   return { fill, argsAcc: [...argsAcc, startDate, endDate] };
 }
@@ -148,7 +148,7 @@ function buildFill(
 function buildDateTrunc(
   dbIncrement: TimeIncrement,
   timeZoneDifference: number,
-  column: string
+  column: string,
 ): string {
   const minutes = Math.abs(timeZoneDifference);
   const operator = timeZoneDifference >= 0 ? "-" : "+";
@@ -169,7 +169,7 @@ export class MetricsManager extends BaseManager {
       timeZoneDifference,
     }: MetricsDataOverTimeRequest,
     countColumn: string,
-    groupByColumns: string[] = []
+    groupByColumns: string[] = [],
   ): Promise<
     Result<
       (T & {
@@ -224,12 +224,12 @@ export class MetricsManager extends BaseManager {
       endDate,
       dbIncrement,
       timeZoneDifference,
-      builtFilterArgsAcc
+      builtFilterArgsAcc,
     );
     const dateTrunc = buildDateTrunc(
       dbIncrement,
       timeZoneDifference,
-      "request_created_at"
+      "request_created_at",
     );
     const query = `
     -- getXOverTime
@@ -255,9 +255,9 @@ export class MetricsManager extends BaseManager {
             .utc(r.created_at_trunc, "YYYY-MM-DD HH:mm:ss")
             .toDate()
             .getTime() +
-            timeZoneDifference * 60 * 1000
+            timeZoneDifference * 60 * 1000,
         ),
-      }))
+      })),
     );
   }
 
@@ -265,7 +265,7 @@ export class MetricsManager extends BaseManager {
 
   async getTotalRequests(
     filter: FilterNode,
-    timeFilter: TimeFilter
+    timeFilter: TimeFilter,
   ): Promise<Result<number, string>> {
     const { filter: filterString, argsAcc } =
       await buildFilterWithAuthClickHouse({
@@ -291,13 +291,13 @@ export class MetricsManager extends BaseManager {
 
     return resultMap(
       await dbQueryClickhouse<{ count: number }>(query, argsAcc),
-      (d) => +d[0].count
+      (d) => +d[0].count,
     );
   }
 
   async getTotalCost(
     filter: FilterNode,
-    timeFilter: TimeFilter
+    timeFilter: TimeFilter,
   ): Promise<Result<number, string>> {
     const { filter: filterString, argsAcc } =
       await buildFilterWithAuthClickHouse({
@@ -327,7 +327,7 @@ export class MetricsManager extends BaseManager {
 
   async getAverageLatency(
     filter: FilterNode,
-    timeFilter: TimeFilter
+    timeFilter: TimeFilter,
   ): Promise<Result<number, string>> {
     const { filter: filterString, argsAcc } =
       await buildFilterWithAuthClickHouse({
@@ -358,14 +358,14 @@ export class MetricsManager extends BaseManager {
 
     const res = await dbQueryClickhouse<{ average_latency: number }>(
       query,
-      argsAcc
+      argsAcc,
     );
     return resultMap(res, (d) => +d[0].average_latency);
   }
 
   async getAverageTimeToFirstToken(
     filter: FilterNode,
-    timeFilter: TimeFilter
+    timeFilter: TimeFilter,
   ): Promise<Result<number, string>> {
     const { filter: filterString, argsAcc } =
       await buildFilterWithAuthClickHouse({
@@ -394,16 +394,15 @@ export class MetricsManager extends BaseManager {
     FROM total_count
   `;
 
-    const res = await dbQueryClickhouse<{ average_time_to_first_token: number }>(
-      query,
-      argsAcc
-    );
+    const res = await dbQueryClickhouse<{
+      average_time_to_first_token: number;
+    }>(query, argsAcc);
     return resultMap(res, (d) => +d[0].average_time_to_first_token);
   }
 
   async getAverageTokensPerRequest(
     filter: FilterNode,
-    timeFilter: TimeFilter
+    timeFilter: TimeFilter,
   ): Promise<Result<TokensPerRequest, string>> {
     const { filter: filterString, argsAcc } =
       await buildFilterWithAuthClickHouse({
@@ -448,16 +447,18 @@ export class MetricsManager extends BaseManager {
     }>(query, argsAcc);
 
     return resultMap(res, (d) => ({
-      average_prompt_tokens_per_response: +d[0].average_prompt_tokens_per_response,
+      average_prompt_tokens_per_response:
+        +d[0].average_prompt_tokens_per_response,
       average_completion_tokens_per_response:
         +d[0].average_completion_tokens_per_response,
-      average_total_tokens_per_response: +d[0].average_total_tokens_per_response,
+      average_total_tokens_per_response:
+        +d[0].average_total_tokens_per_response,
     }));
   }
 
   async getTotalThreats(
     filter: FilterNode,
-    timeFilter: TimeFilter
+    timeFilter: TimeFilter,
   ): Promise<Result<number, string>> {
     const { filter: filterString, argsAcc } =
       await buildFilterWithAuthClickHouse({
@@ -484,7 +485,7 @@ export class MetricsManager extends BaseManager {
 
   async getActiveUsers(
     filter: FilterNode,
-    timeFilter: TimeFilter
+    timeFilter: TimeFilter,
   ): Promise<Result<number, string>> {
     const { filter: filterString, argsAcc } =
       await buildFilterWithAuthClickHouse({
@@ -513,7 +514,7 @@ export class MetricsManager extends BaseManager {
 
   async getRequestsOverTime(
     data: MetricsDataOverTimeRequest,
-    groupByColumns: string[] = []
+    groupByColumns: string[] = [],
   ): Promise<Result<RequestsOverTime[], string>> {
     const res = await this.getXOverTime<{
       count: number;
@@ -524,12 +525,12 @@ export class MetricsManager extends BaseManager {
         time: new Date(d.created_at_trunc),
         count: Number(d.count),
         status: Number(d.status),
-      }))
+      })),
     );
   }
 
   async getCostOverTime(
-    data: MetricsDataOverTimeRequest
+    data: MetricsDataOverTimeRequest,
   ): Promise<Result<CostOverTime[], string>> {
     const res = await this.getXOverTime<{
       cost: number;
@@ -538,12 +539,12 @@ export class MetricsManager extends BaseManager {
       resData.map((d) => ({
         time: new Date(d.created_at_trunc),
         cost: Number(d.cost),
-      }))
+      })),
     );
   }
 
   async getTokensOverTime(
-    data: MetricsDataOverTimeRequest
+    data: MetricsDataOverTimeRequest,
   ): Promise<Result<TokensOverTime[], string>> {
     const res = await this.getXOverTime<{
       prompt_tokens: number;
@@ -551,19 +552,19 @@ export class MetricsManager extends BaseManager {
     }>(
       data,
       `sum(request_response_rmt.prompt_tokens) AS prompt_tokens,
-       sum(request_response_rmt.completion_tokens) AS completion_tokens`
+       sum(request_response_rmt.completion_tokens) AS completion_tokens`,
     );
     return resultMap(res, (resData) =>
       resData.map((d) => ({
         time: new Date(d.created_at_trunc),
         prompt_tokens: Number(d.prompt_tokens),
         completion_tokens: Number(d.completion_tokens),
-      }))
+      })),
     );
   }
 
   async getLatencyOverTime(
-    data: MetricsDataOverTimeRequest
+    data: MetricsDataOverTimeRequest,
   ): Promise<Result<LatencyOverTime[], string>> {
     // Filter out batch models from latency calculations
     const batchModelFilter: FilterNode = {
@@ -584,18 +585,18 @@ export class MetricsManager extends BaseManager {
       latency: number;
     }>(
       { ...data, userFilter: combinedFilter },
-      "avg(request_response_rmt.latency) as latency"
+      "avg(request_response_rmt.latency) as latency",
     );
     return resultMap(res, (resData) =>
       resData.map((d) => ({
         time: new Date(d.created_at_trunc),
         duration: Number(d.latency),
-      }))
+      })),
     );
   }
 
   async getTimeToFirstTokenOverTime(
-    data: MetricsDataOverTimeRequest
+    data: MetricsDataOverTimeRequest,
   ): Promise<Result<TimeToFirstTokenOverTime[], string>> {
     const res = await this.getXOverTime<{
       ttft: number;
@@ -604,12 +605,12 @@ export class MetricsManager extends BaseManager {
       resData.map((d) => ({
         time: new Date(d.created_at_trunc),
         ttft: Number(d.ttft),
-      }))
+      })),
     );
   }
 
   async getUsersOverTime(
-    data: MetricsDataOverTimeRequest
+    data: MetricsDataOverTimeRequest,
   ): Promise<Result<UsersOverTime[], string>> {
     const res = await this.getXOverTime<{
       users: number;
@@ -618,12 +619,12 @@ export class MetricsManager extends BaseManager {
       resData.map((d) => ({
         time: new Date(d.created_at_trunc),
         count: Number(d.users),
-      }))
+      })),
     );
   }
 
   async getThreatsOverTime(
-    data: MetricsDataOverTimeRequest
+    data: MetricsDataOverTimeRequest,
   ): Promise<Result<ThreatsOverTime[], string>> {
     const res = await this.getXOverTime<{
       threats: number;
@@ -632,12 +633,12 @@ export class MetricsManager extends BaseManager {
       resData.map((d) => ({
         time: new Date(d.created_at_trunc),
         count: Number(d.threats),
-      }))
+      })),
     );
   }
 
   async getErrorsOverTime(
-    data: MetricsDataOverTimeRequest
+    data: MetricsDataOverTimeRequest,
   ): Promise<Result<ErrorOverTime[], string>> {
     // Filter for non-200 status codes
     const errorFilter: FilterNode = {
@@ -659,12 +660,12 @@ export class MetricsManager extends BaseManager {
       resData.map((d) => ({
         time: new Date(d.created_at_trunc),
         count: Number(d.count),
-      }))
+      })),
     );
   }
 
   async getRequestStatusOverTime(
-    data: MetricsDataOverTimeRequest
+    data: MetricsDataOverTimeRequest,
   ): Promise<Result<RequestsOverTime[], string>> {
     return this.getRequestsOverTime(data, [
       "request_response_rmt.status as status",
@@ -675,7 +676,7 @@ export class MetricsManager extends BaseManager {
 
   async getRequestCount(
     filter: FilterNode,
-    isCached: boolean = false
+    isCached: boolean = false,
   ): Promise<Result<number, string>> {
     const cacheKey = `requestCount:${this.authParams.organizationId}:${JSON.stringify(filter)}:${isCached}`;
 
@@ -698,7 +699,7 @@ export class MetricsManager extends BaseManager {
 
         const result = await dbQueryClickhouse<{ count: number }>(
           query,
-          builtFilter.argsAcc
+          builtFilter.argsAcc,
         );
 
         if (result.error !== null) {
@@ -707,7 +708,7 @@ export class MetricsManager extends BaseManager {
 
         return { data: result.data![0].count, error: null };
       },
-      requestCountCache
+      requestCountCache,
     );
   }
 
@@ -717,7 +718,7 @@ export class MetricsManager extends BaseManager {
     filter: FilterNode,
     timeFilter: TimeFilter,
     offset: number,
-    limit: number
+    limit: number,
   ): Promise<Result<ModelMetric[], string>> {
     if (isNaN(offset) || isNaN(limit)) {
       return { data: null, error: "Invalid offset or limit" };
@@ -781,7 +782,7 @@ export class MetricsManager extends BaseManager {
     filter: FilterNode,
     timeFilter: TimeFilter,
     offset: number,
-    limit: number
+    limit: number,
   ): Promise<Result<CountryData[], string>> {
     if (isNaN(offset) || isNaN(limit)) {
       return { data: null, error: "Invalid offset or limit" };
@@ -838,7 +839,7 @@ export class MetricsManager extends BaseManager {
 
   async getQuantiles(
     data: MetricsDataOverTimeRequest,
-    metric: string
+    metric: string,
   ): Promise<Result<Quantiles[], string>> {
     let query;
 
@@ -870,7 +871,7 @@ export class MetricsManager extends BaseManager {
         p90: Number(d.P90),
         p95: Number(d.P95),
         p99: Number(d.P99),
-      }))
+      })),
     );
   }
 }

@@ -84,7 +84,7 @@ export class MetricsController extends Controller {
   @Post("/totalRequests")
   public async getTotalRequests(
     @Body() requestBody: MetricsFilterBody,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<number, string>> {
     const metricsManager = new MetricsManager(request.authParams);
     const result = await metricsManager.getTotalRequests(requestBody.filter, {
@@ -100,7 +100,7 @@ export class MetricsController extends Controller {
   @Post("/totalCost")
   public async getTotalCost(
     @Body() requestBody: MetricsFilterBody,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<number, string>> {
     const metricsManager = new MetricsManager(request.authParams);
     const result = await metricsManager.getTotalCost(requestBody.filter, {
@@ -116,7 +116,7 @@ export class MetricsController extends Controller {
   @Post("/averageLatency")
   public async getAverageLatency(
     @Body() requestBody: MetricsFilterBody,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<number, string>> {
     const metricsManager = new MetricsManager(request.authParams);
     const result = await metricsManager.getAverageLatency(requestBody.filter, {
@@ -132,7 +132,7 @@ export class MetricsController extends Controller {
   @Post("/averageTimeToFirstToken")
   public async getAverageTimeToFirstToken(
     @Body() requestBody: MetricsFilterBody,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<number, string>> {
     const metricsManager = new MetricsManager(request.authParams);
     const result = await metricsManager.getAverageTimeToFirstToken(
@@ -140,7 +140,7 @@ export class MetricsController extends Controller {
       {
         start: new Date(requestBody.timeFilter.start),
         end: new Date(requestBody.timeFilter.end),
-      }
+      },
     );
     if (result.error) {
       this.setStatus(500);
@@ -151,7 +151,7 @@ export class MetricsController extends Controller {
   @Post("/averageTokensPerRequest")
   public async getAverageTokensPerRequest(
     @Body() requestBody: MetricsFilterBody,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<TokensPerRequest, string>> {
     const metricsManager = new MetricsManager(request.authParams);
     const result = await metricsManager.getAverageTokensPerRequest(
@@ -159,7 +159,7 @@ export class MetricsController extends Controller {
       {
         start: new Date(requestBody.timeFilter.start),
         end: new Date(requestBody.timeFilter.end),
-      }
+      },
     );
     if (result.error) {
       this.setStatus(500);
@@ -170,7 +170,7 @@ export class MetricsController extends Controller {
   @Post("/totalThreats")
   public async getTotalThreats(
     @Body() requestBody: MetricsFilterBody,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<number, string>> {
     const metricsManager = new MetricsManager(request.authParams);
     const result = await metricsManager.getTotalThreats(requestBody.filter, {
@@ -186,7 +186,7 @@ export class MetricsController extends Controller {
   @Post("/activeUsers")
   public async getActiveUsers(
     @Body() requestBody: MetricsFilterBody,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<number, string>> {
     const metricsManager = new MetricsManager(request.authParams);
     const result = await metricsManager.getActiveUsers(requestBody.filter, {
@@ -204,7 +204,7 @@ export class MetricsController extends Controller {
   @Post("/requestOverTime")
   public async getRequestsOverTime(
     @Body() requestBody: MetricsOverTimeBody,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<RequestsOverTime[], string>> {
     const metricsManager = new MetricsManager(request.authParams);
     const result = await metricsManager.getRequestsOverTime({
@@ -222,7 +222,7 @@ export class MetricsController extends Controller {
   @Post("/costOverTime")
   public async getCostOverTime(
     @Body() requestBody: MetricsOverTimeBody,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<CostOverTime[], string>> {
     const metricsManager = new MetricsManager(request.authParams);
     const result = await metricsManager.getCostOverTime({
@@ -240,7 +240,7 @@ export class MetricsController extends Controller {
   @Post("/tokensOverTime")
   public async getTokensOverTime(
     @Body() requestBody: MetricsOverTimeBody,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<TokensOverTime[], string>> {
     const metricsManager = new MetricsManager(request.authParams);
     const result = await metricsManager.getTokensOverTime({
@@ -258,7 +258,7 @@ export class MetricsController extends Controller {
   @Post("/latencyOverTime")
   public async getLatencyOverTime(
     @Body() requestBody: MetricsOverTimeBody,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<LatencyOverTime[], string>> {
     const metricsManager = new MetricsManager(request.authParams);
     const result = await metricsManager.getLatencyOverTime({
@@ -276,7 +276,7 @@ export class MetricsController extends Controller {
   @Post("/timeToFirstToken")
   public async getTimeToFirstTokenOverTime(
     @Body() requestBody: MetricsOverTimeBody,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<TimeToFirstTokenOverTime[], string>> {
     const metricsManager = new MetricsManager(request.authParams);
     const result = await metricsManager.getTimeToFirstTokenOverTime({
@@ -294,7 +294,7 @@ export class MetricsController extends Controller {
   @Post("/usersOverTime")
   public async getUsersOverTime(
     @Body() requestBody: MetricsOverTimeBody,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<UsersOverTime[], string>> {
     const metricsManager = new MetricsManager(request.authParams);
     const result = await metricsManager.getUsersOverTime({
@@ -312,7 +312,7 @@ export class MetricsController extends Controller {
   @Post("/threatsOverTime")
   public async getThreatsOverTime(
     @Body() requestBody: MetricsOverTimeBody,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<ThreatsOverTime[], string>> {
     const metricsManager = new MetricsManager(request.authParams);
     const result = await metricsManager.getThreatsOverTime({
@@ -330,7 +330,7 @@ export class MetricsController extends Controller {
   @Post("/errorOverTime")
   public async getErrorsOverTime(
     @Body() requestBody: MetricsOverTimeBody,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<ErrorOverTime[], string>> {
     const metricsManager = new MetricsManager(request.authParams);
     const result = await metricsManager.getErrorsOverTime({
@@ -348,7 +348,7 @@ export class MetricsController extends Controller {
   @Post("/requestStatusOverTime")
   public async getRequestStatusOverTime(
     @Body() requestBody: MetricsOverTimeBody,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<RequestsOverTime[], string>> {
     const metricsManager = new MetricsManager(request.authParams);
     const result = await metricsManager.getRequestStatusOverTime({
@@ -368,12 +368,12 @@ export class MetricsController extends Controller {
   @Post("/requestCount")
   public async getRequestCount(
     @Body() requestBody: RequestCountBody,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<number, string>> {
     const metricsManager = new MetricsManager(request.authParams);
     const result = await metricsManager.getRequestCount(
       requestBody.filter,
-      requestBody.isCached ?? false
+      requestBody.isCached ?? false,
     );
     if (result.error) {
       this.setStatus(500);
@@ -386,7 +386,7 @@ export class MetricsController extends Controller {
   @Post("/models")
   public async getModelMetrics(
     @Body() requestBody: ModelMetricsBody,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<ModelMetric[], string>> {
     const metricsManager = new MetricsManager(request.authParams);
     const result = await metricsManager.getModelMetrics(
@@ -396,7 +396,7 @@ export class MetricsController extends Controller {
         end: new Date(requestBody.timeFilter.end),
       },
       requestBody.offset,
-      requestBody.limit
+      requestBody.limit,
     );
     if (result.error) {
       this.setStatus(500);
@@ -409,7 +409,7 @@ export class MetricsController extends Controller {
   @Post("/country")
   public async getCountryMetrics(
     @Body() requestBody: CountryMetricsBody,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<CountryData[], string>> {
     const metricsManager = new MetricsManager(request.authParams);
     const result = await metricsManager.getCountryMetrics(
@@ -419,7 +419,7 @@ export class MetricsController extends Controller {
         end: new Date(requestBody.timeFilter.end),
       },
       requestBody.offset,
-      requestBody.limit
+      requestBody.limit,
     );
     if (result.error) {
       this.setStatus(500);
@@ -432,7 +432,7 @@ export class MetricsController extends Controller {
   @Post("/quantiles")
   public async getQuantiles(
     @Body() requestBody: QuantilesBody,
-    @Request() request: JawnAuthenticatedRequest
+    @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<Quantiles[], string>> {
     const metricsManager = new MetricsManager(request.authParams);
     const result = await metricsManager.getQuantiles(
@@ -442,7 +442,7 @@ export class MetricsController extends Controller {
         dbIncrement: requestBody.dbIncrement ?? "hour",
         timeZoneDifference: requestBody.timeZoneDifference,
       },
-      requestBody.metric
+      requestBody.metric,
     );
     if (result.error) {
       this.setStatus(500);

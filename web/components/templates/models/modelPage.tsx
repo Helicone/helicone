@@ -26,7 +26,7 @@ const ModelPage = (props: ModelPageProps) => {
   };
 
   const [interval, setInterval] = useState<TimeInterval>(
-    getInterval() as TimeInterval
+    getInterval() as TimeInterval,
   );
 
   const [timeFilter, setTimeFilter] = useState<{
@@ -53,7 +53,7 @@ const ModelPage = (props: ModelPageProps) => {
     },
     {
       refetchOnWindowFocus: false,
-    }
+    },
   );
 
   return (

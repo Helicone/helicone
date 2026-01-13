@@ -50,7 +50,7 @@ const useQuantiles = (data: {
     },
     {
       refetchOnWindowFocus: false,
-    }
+    },
   );
 
   // Transform the response to match expected format

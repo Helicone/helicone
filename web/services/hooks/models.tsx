@@ -18,7 +18,7 @@ export interface ModelMetric {
 const useModels = (
   timeFilter: TimeFilter,
   limit: number,
-  userFilters?: FilterNode
+  userFilters?: FilterNode,
 ) => {
   const { data, isLoading } = $JAWN_API.useQuery(
     "post",
@@ -36,7 +36,7 @@ const useModels = (
     },
     {
       refetchOnWindowFocus: false,
-    }
+    },
   );
 
   return { models: data, isLoading };
