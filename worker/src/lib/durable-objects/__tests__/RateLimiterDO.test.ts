@@ -4,16 +4,20 @@
  * These tests verify the Durable Object rate limiter logic for both
  * request-based and cost-based (cents) limiting.
  *
- * Note: These are unit tests that test the logic directly.
- * For integration testing with actual Durable Objects, see the stress test suite.
+ * The tests use the same calculateRateLimit function as the actual
+ * RateLimiterDO, ensuring tests always reflect real behavior.
  */
 
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { RateLimitRequest, RateLimitResponse } from "../RateLimiterDO";
+import { calculateRateLimit } from "../RateLimiterLogic";
 
 /**
- * Mock implementation of the rate limiter logic for testing.
- * This mirrors the actual RateLimiterDO.processRateLimit logic
- * but can be tested without Cloudflare Workers infrastructure.
+ * Mock storage layer for testing.
+ *
+ * This mock handles only the storage operations (maintaining entries in memory).
+ * The actual rate limiting logic is imported from RateLimiterLogic.ts,
+ * which is the same logic used by the real RateLimiterDO.
  */
 class MockRateLimiter {
   private entries: Map<string, { timestamp: number; unitCount: number }[]> =
@@ -40,42 +44,37 @@ class MockRateLimiter {
     // Calculate the unit count for this request
     const unitCount = req.unit === "cents" ? req.cost || 0 : 1;
 
-    // Check if adding this request would exceed the quota
-    // Using > (not >=) because at exactly the quota, the user should still have access
-    // Both checkOnly and update modes use the same logic: would this request exceed?
-    const wouldExceed = currentUsage + unitCount > req.quota;
+    // Get oldest timestamp for reset calculation
+    const oldestTimestamp =
+      segmentEntries.length > 0
+        ? Math.min(...segmentEntries.map((e) => e.timestamp))
+        : undefined;
 
-    const remaining = Math.max(0, req.quota - currentUsage);
+    // Use the SAME logic as RateLimiterDO
+    const result = calculateRateLimit({
+      currentUsage,
+      unitCount,
+      quota: req.quota,
+      oldestTimestamp,
+      timeWindowMs: req.timeWindow * 1000,
+      now,
+      checkOnly: req.checkOnly ?? false,
+    });
 
     // If not check-only and not rate limited, record the usage
-    if (!req.checkOnly && !wouldExceed) {
+    if (!req.checkOnly && !result.wouldExceed) {
       segmentEntries.push({ timestamp: now, unitCount });
+      this.entries.set(req.segmentKey, segmentEntries);
+    } else {
       this.entries.set(req.segmentKey, segmentEntries);
     }
 
-    // Calculate reset time
-    let reset: number | undefined;
-    if (segmentEntries.length > 0) {
-      const oldestTimestamp = Math.min(
-        ...segmentEntries.map((e) => e.timestamp)
-      );
-      reset = Math.ceil((oldestTimestamp + req.timeWindow * 1000 - now) / 1000);
-      reset = Math.max(0, reset);
-    }
-
-    const finalRemaining = wouldExceed
-      ? remaining
-      : Math.max(0, remaining - unitCount);
-    const finalCurrentUsage = wouldExceed
-      ? currentUsage
-      : currentUsage + unitCount;
-
     return {
-      status: wouldExceed ? "rate_limited" : "ok",
+      status: result.wouldExceed ? "rate_limited" : "ok",
       limit: req.quota,
-      remaining: finalRemaining,
-      reset,
-      currentUsage: finalCurrentUsage,
+      remaining: result.finalRemaining,
+      reset: result.reset,
+      currentUsage: result.finalCurrentUsage,
     };
   }
 
@@ -98,12 +97,12 @@ describe("RateLimiterDO Logic", () => {
 
   beforeEach(() => {
     rateLimiter = new MockRateLimiter();
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date("2024-01-15T12:00:00Z"));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2024-01-15T12:00:00Z"));
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   describe("request-based limiting", () => {
@@ -133,7 +132,7 @@ describe("RateLimiterDO Logic", () => {
       expect(result.remaining).toBe(4); // 10 - 6 = 4
     });
 
-    it("should allow requests when at exactly the limit", () => {
+    it("should rate limit when at exactly the limit", () => {
       // Set up 9 existing requests (one under quota)
       const now = Date.now();
       rateLimiter.setEntries(
@@ -145,22 +144,10 @@ describe("RateLimiterDO Logic", () => {
       );
 
       // With 9 existing, adding 1 would make 10 which equals quota
-      // 10 > 10 is false, so should allow
-      const checkResult = rateLimiter.processRateLimit({
-        ...baseRequest,
-        checkOnly: true,
-      });
-      expect(checkResult.status).toBe("ok");
-
-      // Actually add the request
-      const updateResult = rateLimiter.processRateLimit(baseRequest);
-      expect(updateResult.status).toBe("ok");
-      expect(updateResult.currentUsage).toBe(10);
-
-      // Now at exactly 10, trying to add another would make 11 > 10
-      const overLimitResult = rateLimiter.processRateLimit(baseRequest);
-      expect(overLimitResult.status).toBe("rate_limited");
-      expect(overLimitResult.currentUsage).toBe(10); // Should not increase
+      // 10 >= 10 is true, so should be rate limited
+      const result = rateLimiter.processRateLimit(baseRequest);
+      expect(result.status).toBe("rate_limited");
+      expect(result.currentUsage).toBe(9); // Should not increase
     });
 
     it("should rate limit when over the limit", () => {
@@ -176,7 +163,7 @@ describe("RateLimiterDO Logic", () => {
 
       const result = rateLimiter.processRateLimit(baseRequest);
 
-      // 10 existing + 1 new = 11, which is > 10 quota
+      // 10 existing + 1 new = 11, which is >= 10 quota
       expect(result.status).toBe("rate_limited");
       expect(result.currentUsage).toBe(10); // Should not increase
       expect(result.remaining).toBe(0);
@@ -237,7 +224,7 @@ describe("RateLimiterDO Logic", () => {
       expect(result.remaining).toBe(2200); // 8500 - 6300 = 2200
     });
 
-    it("should allow requests when spending is exactly at limit", () => {
+    it("should rate limit when spending is exactly at limit", () => {
       // Set up exactly $84 existing spend
       const now = Date.now();
       rateLimiter.setEntries("global", [
@@ -251,9 +238,9 @@ describe("RateLimiterDO Logic", () => {
         cost: 100, // $1
       });
 
-      // 8400 + 100 = 8500, which is NOT > 8500, so allowed
-      expect(result.status).toBe("ok");
-      expect(result.currentUsage).toBe(8500);
+      // 8400 + 100 = 8500, which is >= 8500, so rate limited
+      expect(result.status).toBe("rate_limited");
+      expect(result.currentUsage).toBe(8400); // Should not increase
     });
 
     it("should rate limit when spending exceeds limit", () => {
@@ -270,7 +257,7 @@ describe("RateLimiterDO Logic", () => {
         cost: 1, // $0.01
       });
 
-      // 8500 + 1 = 8501 > 8500 quota
+      // 8500 + 1 = 8501 >= 8500 quota
       expect(result.status).toBe("rate_limited");
       expect(result.currentUsage).toBe(8500);
       expect(result.remaining).toBe(0);
@@ -345,10 +332,10 @@ describe("RateLimiterDO Logic", () => {
     it("should return rate_limited when request would exceed quota in checkOnly mode", () => {
       const now = Date.now();
 
-      // With 10 existing, adding 1 would make 11 > 10 quota
+      // With 9 existing, adding 1 would make 10 >= 10 quota
       rateLimiter.setEntries(
         "global",
-        Array.from({ length: 10 }, (_, i) => ({
+        Array.from({ length: 9 }, (_, i) => ({
           timestamp: now - i * 1000,
           unitCount: 1,
         }))
@@ -357,11 +344,11 @@ describe("RateLimiterDO Logic", () => {
       const result = rateLimiter.processRateLimit(baseRequest);
       expect(result.status).toBe("rate_limited");
 
-      // With 11 existing (already over), adding 1 would make 12 > 10
+      // With 10 existing, adding 1 would make 11 >= 10
       rateLimiter.clear();
       rateLimiter.setEntries(
         "global",
-        Array.from({ length: 11 }, (_, i) => ({
+        Array.from({ length: 10 }, (_, i) => ({
           timestamp: now - i * 1000,
           unitCount: 1,
         }))
@@ -375,7 +362,7 @@ describe("RateLimiterDO Logic", () => {
       const now = Date.now();
       rateLimiter.setEntries(
         "global",
-        Array.from({ length: 9 }, (_, i) => ({
+        Array.from({ length: 8 }, (_, i) => ({
           timestamp: now - i * 1000,
           unitCount: 1,
         }))
@@ -383,7 +370,7 @@ describe("RateLimiterDO Logic", () => {
 
       const result = rateLimiter.processRateLimit(baseRequest);
       expect(result.status).toBe("ok");
-      expect(result.remaining).toBe(1);
+      expect(result.remaining).toBe(2);
     });
   });
 
@@ -399,7 +386,7 @@ describe("RateLimiterDO Logic", () => {
 
       const result = rateLimiter.processRateLimit(request);
 
-      // 0 + 1 > 0, so rate limited
+      // 0 + 1 >= 0, so rate limited
       expect(result.status).toBe("rate_limited");
     });
 
@@ -448,7 +435,7 @@ describe("RateLimiterDO Logic", () => {
       );
       rateLimiter.setEntries(
         "user=bob",
-        Array.from({ length: 9 }, (_, i) => ({
+        Array.from({ length: 8 }, (_, i) => ({
           timestamp: now - i * 1000,
           unitCount: 1,
         }))
@@ -473,7 +460,7 @@ describe("RateLimiterDO Logic", () => {
       expect(aliceResult.status).toBe("ok");
       expect(aliceResult.remaining).toBe(5);
       expect(bobResult.status).toBe("ok");
-      expect(bobResult.remaining).toBe(1);
+      expect(bobResult.remaining).toBe(2);
     });
 
     it("should calculate correct reset time", () => {
@@ -482,7 +469,7 @@ describe("RateLimiterDO Logic", () => {
 
       rateLimiter.setEntries("global", [
         { timestamp: oldestTimestamp, unitCount: 5 },
-        { timestamp: now - 10000, unitCount: 5 }, // 10 seconds ago
+        { timestamp: now - 10000, unitCount: 4 }, // 10 seconds ago
       ]);
 
       const result = rateLimiter.processRateLimit({
@@ -510,17 +497,17 @@ describe("RateLimiterDO Logic", () => {
         checkOnly: false,
       };
 
-      // Simulate 5 rapid requests
-      for (let i = 0; i < 5; i++) {
+      // Simulate 4 rapid requests (under quota)
+      for (let i = 0; i < 4; i++) {
         const result = rateLimiter.processRateLimit(request);
         expect(result.status).toBe("ok");
         expect(result.currentUsage).toBe(i + 1);
       }
 
-      // 6th request should be rate limited
+      // 5th request would hit exactly quota (4 + 1 = 5 >= 5), so rate limited
       const limitedResult = rateLimiter.processRateLimit(request);
       expect(limitedResult.status).toBe("rate_limited");
-      expect(limitedResult.currentUsage).toBe(5);
+      expect(limitedResult.currentUsage).toBe(4);
     });
 
     it("should handle check-then-update pattern correctly", () => {

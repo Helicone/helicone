@@ -1,4 +1,5 @@
 import { DurableObject } from "cloudflare:workers";
+import { calculateRateLimit } from "./RateLimiterLogic";
 
 export interface RateLimitRequest {
   segmentKey: string;
@@ -78,14 +79,32 @@ export class RateLimiterDO extends DurableObject {
       // Calculate the unit count for this request
       const unitCount = req.unit === "cents" ? req.cost || 0 : 1;
 
-      // Check if adding this request would exceed the quota
-      // Using > (not >=) because at exactly the quota, the user should still have access
-      // Both checkOnly and update modes use the same logic: would this request exceed?
-      const wouldExceed = currentUsage + unitCount > req.quota;
-      const remaining = Math.max(0, req.quota - currentUsage);
+      // Get the oldest entry timestamp for reset calculation
+      const oldestEntry = this.sql
+        .exec(
+          `SELECT MIN(timestamp) as oldest
+         FROM rate_limit_entries
+         WHERE segment_key = ? AND timestamp >= ?`,
+          req.segmentKey,
+          windowStartMs
+        )
+        .one();
+
+      // Use the shared rate limiting logic
+      const result = calculateRateLimit({
+        currentUsage,
+        unitCount,
+        quota: req.quota,
+        oldestTimestamp: oldestEntry?.oldest
+          ? Number(oldestEntry.oldest)
+          : undefined,
+        timeWindowMs: req.timeWindow * 1000,
+        now,
+        checkOnly: req.checkOnly ?? false,
+      });
 
       // If not check-only and not rate limited, record the usage
-      if (!req.checkOnly && !wouldExceed) {
+      if (!req.checkOnly && !result.wouldExceed) {
         this.sql.exec(
           "INSERT INTO rate_limit_entries (segment_key, timestamp, unit_count) VALUES (?, ?, ?)",
           req.segmentKey,
@@ -94,39 +113,12 @@ export class RateLimiterDO extends DurableObject {
         );
       }
 
-      // Get the oldest entry timestamp for reset calculation
-      const oldestEntry = this.sql
-        .exec(
-          `SELECT MIN(timestamp) as oldest 
-         FROM rate_limit_entries 
-         WHERE segment_key = ? AND timestamp >= ?`,
-          req.segmentKey,
-          windowStartMs
-        )
-        .one();
-
-      // Calculate reset time (when the oldest entry will fall out of the window)
-      let reset: number | undefined;
-      if (oldestEntry?.oldest) {
-        reset = Math.ceil(
-          (Number(oldestEntry.oldest) + req.timeWindow * 1000 - now) / 1000
-        );
-        reset = Math.max(0, reset);
-      }
-
-      const finalRemaining = wouldExceed
-        ? remaining
-        : Math.max(0, remaining - unitCount);
-      const finalCurrentUsage = wouldExceed
-        ? currentUsage
-        : currentUsage + unitCount;
-
       return {
-        status: wouldExceed ? "rate_limited" : "ok",
+        status: result.wouldExceed ? "rate_limited" : "ok",
         limit: req.quota,
-        remaining: finalRemaining,
-        reset,
-        currentUsage: finalCurrentUsage,
+        remaining: result.finalRemaining,
+        reset: result.reset,
+        currentUsage: result.finalCurrentUsage,
       };
     });
   }

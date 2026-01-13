@@ -132,6 +132,22 @@ className="bg-background text-foreground border-border"
 /clickhouse/           # Analytics DB setup
 ```
 
+## Deprecated Components
+
+### Jawn Gateway (DEPRECATED)
+
+The proxy gateway at `/valhalla/jawn/src/controllers/public/proxyController.ts` (`/v1/gateway/:provider/*`) is **deprecated**. Do NOT add new features, tests, or improvements to this gateway.
+
+**Use the Cloudflare Worker gateway instead:**
+- Production gateway code: `/worker/src/routers/`
+- User endpoints: `oai.helicone.ai`, `anthropic.helicone.ai`, `gateway.helicone.ai`
+
+The Jawn gateway exists only for backwards compatibility and local development fallback. All rate limiting, caching, and proxy features should be implemented in the Worker, not Jawn.
+
+**Related deprecated files (do not modify):**
+- `/valhalla/jawn/src/lib/proxy/` - Proxy utilities
+- `/valhalla/jawn/src/lib/proxy/RateLimiter.ts` - Legacy rate limiter
+
 ## Development Workflow
 
 1. Start infrastructure with Docker: `./helicone-compose.sh helicone up`

@@ -1,3 +1,24 @@
+/**
+ * @deprecated - JAWN GATEWAY IS DEPRECATED
+ *
+ * This proxy gateway (/v1/gateway/:provider/*) is deprecated and should NOT be
+ * modified or extended. It exists only for backwards compatibility.
+ *
+ * The primary production gateway is the Cloudflare Worker at /worker.
+ * All new proxy/gateway features should be implemented there.
+ *
+ * Users should use:
+ * - oai.helicone.ai (OpenAI proxy)
+ * - anthropic.helicone.ai (Anthropic proxy)
+ * - gateway.helicone.ai (Generic gateway with Helicone-Target-Url header)
+ *
+ * This Jawn gateway is primarily used for:
+ * - Local development fallback
+ * - Legacy integrations
+ *
+ * DO NOT add new features, tests, or improvements to this gateway.
+ * See: /worker/src/routers/ for the production gateway implementation.
+ */
 import express, {
   Request as ExpressRequest,
   Response as ExpressResponse,
