@@ -7861,11 +7861,17 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "google/gemini-3-pro-image": {
     "google-ai-studio": [
       {
+        "image": {
+          "output": 0.00012,
+        },
         "input": 0.000002,
         "output": 0.000012,
         "threshold": 0,
       },
       {
+        "image": {
+          "output": 0.00012,
+        },
         "input": 0.000004,
         "output": 0.000018,
         "threshold": 200000,
@@ -7873,11 +7879,17 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "openrouter": [
       {
+        "image": {
+          "output": 0.0001266,
+        },
         "input": 0.00000211,
         "output": 0.00001266,
         "threshold": 0,
       },
       {
+        "image": {
+          "output": 0.0001266,
+        },
         "input": 0.00000422,
         "output": 0.00001899,
         "threshold": 200000,
@@ -7885,11 +7897,17 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
     "vertex": [
       {
+        "image": {
+          "output": 0.00012,
+        },
         "input": 0.000002,
         "output": 0.000012,
         "threshold": 0,
       },
       {
+        "image": {
+          "output": 0.00012,
+        },
         "input": 0.000004,
         "output": 0.000018,
         "threshold": 200000,
