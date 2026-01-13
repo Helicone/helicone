@@ -149,7 +149,10 @@ export const useGetRequestsWithBodies = (
             try {
               const contentResponse = await fetch(request.signed_body_url);
               if (!contentResponse.ok) {
-                logger.error({ status: contentResponse.status }, "Error fetching request body");
+                logger.error(
+                  { status: contentResponse.status },
+                  "Error fetching request body",
+                );
                 return request;
               }
 
@@ -212,28 +215,22 @@ const useGetRequestCount = (
   isLive = false,
   isCached = false,
 ) => {
-  return useQuery({
-    queryKey: ["requestsCount", filter, isCached],
-    queryFn: async (query) => {
-      const [_, filter, isLive, isCached] = query.queryKey as [
-        string,
-        FilterNode,
-        boolean,
-        boolean,
-      ];
-      const processedFilter = processFilter(filter);
-      return await fetch("/api/request/count", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ filter: processedFilter, isCached }),
-      }).then((res) => res.json() as Promise<Result<number, string>>);
+  const processedFilter = processFilter(filter);
+  return $JAWN_API.useQuery(
+    "post",
+    "/v1/metrics/requestCount",
+    {
+      body: {
+        filter: processedFilter as any,
+        isCached,
+      },
     },
-    refetchOnWindowFocus: false,
-    refetchInterval: isLive ? 2_000 : false,
-    gcTime: 5 * 60 * 1000,
-  });
+    {
+      refetchOnWindowFocus: false,
+      refetchInterval: isLive ? 2_000 : false,
+      gcTime: 5 * 60 * 1000,
+    },
+  );
 };
 
 const useGetRequests = (
@@ -350,7 +347,10 @@ const getRequestBodiesBySession = async (sessions: TSessions[]) => {
         try {
           const contentResponse = await fetch(request.signed_body_url);
           if (!contentResponse.ok) {
-            logger.error({ status: contentResponse.status }, "Error fetching request body");
+            logger.error(
+              { status: contentResponse.status },
+              "Error fetching request body",
+            );
             return request;
           }
 
@@ -378,7 +378,10 @@ const getRequestBodiesBySession = async (sessions: TSessions[]) => {
       }),
     );
   } catch (error) {
-    logger.error({ error }, "Error fetching requests by session IDs with bodies");
+    logger.error(
+      { error },
+      "Error fetching requests by session IDs with bodies",
+    );
     throw error;
   }
 };
