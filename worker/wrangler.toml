@@ -8,6 +8,7 @@ keep_vars = true
 durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
 	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
+	{ name = "TOKEN_BUCKET_RATE_LIMITER", class_name = "TokenBucketRateLimiterDO" },
 	{ name = "WALLET", class_name = "Wallet" },
 	{ name = "REQUEST_BODY_BUFFER", class_name = "RequestBodyBufferContainer" },
 ]
@@ -180,6 +181,7 @@ routes = [
 durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
 	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
+	{ name = "TOKEN_BUCKET_RATE_LIMITER", class_name = "TokenBucketRateLimiterDO" },
 	{ name = "WALLET", class_name = "Wallet" },
 	{ name = "REQUEST_BODY_BUFFER", class_name = "RequestBodyBufferContainer" },
 ]
@@ -266,6 +268,7 @@ kv_namespaces = [
 durable_objects.bindings = [
 	{ name = "RATE_LIMITER", class_name = "InMemoryRateLimiter" },
 	{ name = "RATE_LIMITER_SQL", class_name = "RateLimiterDO" },
+	{ name = "TOKEN_BUCKET_RATE_LIMITER", class_name = "TokenBucketRateLimiterDO" },
 	{ name = "WALLET", class_name = "Wallet" },
 	{ name = "REQUEST_BODY_BUFFER", class_name = "RequestBodyBufferContainer" },
 ]
@@ -328,3 +331,7 @@ new_sqlite_classes = ["Wallet"]
 [[migrations]]
 tag = "v9"
 new_sqlite_classes = ["RequestBodyBufferContainer"]
+
+[[migrations]]
+tag = "v10"
+new_classes = ["TokenBucketRateLimiterDO"]

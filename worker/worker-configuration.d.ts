@@ -85,6 +85,7 @@ declare namespace Cloudflare {
 		QUEUE_PROVIDER: string;
 		RATE_LIMITER: DurableObjectNamespace<import("./src/index").InMemoryRateLimiter>;
 		RATE_LIMITER_SQL: DurableObjectNamespace<import("./src/index").RateLimiterDO>;
+		TOKEN_BUCKET_RATE_LIMITER: DurableObjectNamespace<import("./src/index").TokenBucketRateLimiterDO>;
 		WALLET: DurableObjectNamespace<import("./src/index").Wallet>;
 		REQUEST_BODY_BUFFER: DurableObjectNamespace<import("./src/index").RequestBodyBufferContainer>;
 		FALLBACK_QUEUE: Queue;

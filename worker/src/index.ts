@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { Database } from "../supabase/database.types";
 import { InMemoryRateLimiter } from "./lib/clients/InMemoryRateLimiter";
 import { RateLimiterDO } from "./lib/durable-objects/RateLimiterDO";
+import { TokenBucketRateLimiterDO } from "./lib/durable-objects/TokenBucketRateLimiterDO";
 import { Wallet } from "./lib/durable-objects/Wallet";
 import { AlertStore } from "./lib/db/AlertStore";
 import { ClickhouseClientWrapper } from "./lib/db/ClickhouseWrapper";
@@ -568,4 +569,4 @@ function handleError(e: unknown): Response {
     }
   );
 }
-export { InMemoryRateLimiter, RateLimiterDO, Wallet };
+export { InMemoryRateLimiter, RateLimiterDO, TokenBucketRateLimiterDO, Wallet };
