@@ -559,6 +559,63 @@ export interface paths {
   "/v1/public/compare/models": {
     post: operations["GetModelComparison"];
   };
+  "/v1/metrics/totalRequests": {
+    post: operations["GetTotalRequests"];
+  };
+  "/v1/metrics/totalCost": {
+    post: operations["GetTotalCost"];
+  };
+  "/v1/metrics/averageLatency": {
+    post: operations["GetAverageLatency"];
+  };
+  "/v1/metrics/averageTimeToFirstToken": {
+    post: operations["GetAverageTimeToFirstToken"];
+  };
+  "/v1/metrics/averageTokensPerRequest": {
+    post: operations["GetAverageTokensPerRequest"];
+  };
+  "/v1/metrics/totalThreats": {
+    post: operations["GetTotalThreats"];
+  };
+  "/v1/metrics/activeUsers": {
+    post: operations["GetActiveUsers"];
+  };
+  "/v1/metrics/requestOverTime": {
+    post: operations["GetRequestsOverTime"];
+  };
+  "/v1/metrics/costOverTime": {
+    post: operations["GetCostOverTime"];
+  };
+  "/v1/metrics/tokensOverTime": {
+    post: operations["GetTokensOverTime"];
+  };
+  "/v1/metrics/latencyOverTime": {
+    post: operations["GetLatencyOverTime"];
+  };
+  "/v1/metrics/timeToFirstToken": {
+    post: operations["GetTimeToFirstTokenOverTime"];
+  };
+  "/v1/metrics/usersOverTime": {
+    post: operations["GetUsersOverTime"];
+  };
+  "/v1/metrics/threatsOverTime": {
+    post: operations["GetThreatsOverTime"];
+  };
+  "/v1/metrics/errorOverTime": {
+    post: operations["GetErrorsOverTime"];
+  };
+  "/v1/metrics/requestStatusOverTime": {
+    post: operations["GetRequestStatusOverTime"];
+  };
+  "/v1/metrics/requestCount": {
+    post: operations["GetRequestCount"];
+  };
+  "/v1/metrics/models": {
+    post: operations["GetModelMetrics"];
+  };
+  "/v1/metrics/country": {
+    post: operations["GetCountryMetrics"];
+  };
   "/v1/public/security": {
     post: operations["GetSecurity"];
   };
@@ -3864,6 +3921,193 @@ Json: JsonObject;
       names: string[];
       parent: string;
     };
+    MetricsFilterBody: {
+      filter: components["schemas"]["FilterNode"];
+      timeFilter: {
+        end: string;
+        start: string;
+      };
+    };
+    TokensPerRequest: {
+      /** Format: double */
+      average_prompt_tokens_per_response: number;
+      /** Format: double */
+      average_completion_tokens_per_response: number;
+      /** Format: double */
+      average_total_tokens_per_response: number;
+    };
+    ResultSuccess_TokensPerRequest_: {
+      data: components["schemas"]["TokensPerRequest"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_TokensPerRequest.string_": components["schemas"]["ResultSuccess_TokensPerRequest_"] | components["schemas"]["ResultError_string_"];
+    RequestsOverTime: {
+      /** Format: date-time */
+      time: string;
+      /** Format: double */
+      count: number;
+      /** Format: double */
+      status?: number;
+    };
+    "ResultSuccess_RequestsOverTime-Array_": {
+      data: components["schemas"]["RequestsOverTime"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_RequestsOverTime-Array.string_": components["schemas"]["ResultSuccess_RequestsOverTime-Array_"] | components["schemas"]["ResultError_string_"];
+    MetricsOverTimeBody: {
+      timeFilter: {
+        end: string;
+        start: string;
+      };
+      filter: components["schemas"]["FilterNode"];
+      dbIncrement?: components["schemas"]["TimeIncrement"];
+      /** Format: double */
+      timeZoneDifference: number;
+    };
+    CostOverTime: {
+      /** Format: date-time */
+      time: string;
+      /** Format: double */
+      cost: number;
+    };
+    "ResultSuccess_CostOverTime-Array_": {
+      data: components["schemas"]["CostOverTime"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_CostOverTime-Array.string_": components["schemas"]["ResultSuccess_CostOverTime-Array_"] | components["schemas"]["ResultError_string_"];
+    TokensOverTime: {
+      /** Format: date-time */
+      time: string;
+      /** Format: double */
+      prompt_tokens: number;
+      /** Format: double */
+      completion_tokens: number;
+    };
+    "ResultSuccess_TokensOverTime-Array_": {
+      data: components["schemas"]["TokensOverTime"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_TokensOverTime-Array.string_": components["schemas"]["ResultSuccess_TokensOverTime-Array_"] | components["schemas"]["ResultError_string_"];
+    LatencyOverTime: {
+      /** Format: date-time */
+      time: string;
+      /** Format: double */
+      duration: number;
+    };
+    "ResultSuccess_LatencyOverTime-Array_": {
+      data: components["schemas"]["LatencyOverTime"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_LatencyOverTime-Array.string_": components["schemas"]["ResultSuccess_LatencyOverTime-Array_"] | components["schemas"]["ResultError_string_"];
+    TimeToFirstTokenOverTime: {
+      /** Format: date-time */
+      time: string;
+      /** Format: double */
+      ttft: number;
+    };
+    "ResultSuccess_TimeToFirstTokenOverTime-Array_": {
+      data: components["schemas"]["TimeToFirstTokenOverTime"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_TimeToFirstTokenOverTime-Array.string_": components["schemas"]["ResultSuccess_TimeToFirstTokenOverTime-Array_"] | components["schemas"]["ResultError_string_"];
+    UsersOverTime: {
+      /** Format: date-time */
+      time: string;
+      /** Format: double */
+      count: number;
+    };
+    "ResultSuccess_UsersOverTime-Array_": {
+      data: components["schemas"]["UsersOverTime"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_UsersOverTime-Array.string_": components["schemas"]["ResultSuccess_UsersOverTime-Array_"] | components["schemas"]["ResultError_string_"];
+    ThreatsOverTime: {
+      /** Format: date-time */
+      time: string;
+      /** Format: double */
+      count: number;
+    };
+    "ResultSuccess_ThreatsOverTime-Array_": {
+      data: components["schemas"]["ThreatsOverTime"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ThreatsOverTime-Array.string_": components["schemas"]["ResultSuccess_ThreatsOverTime-Array_"] | components["schemas"]["ResultError_string_"];
+    ErrorOverTime: {
+      /** Format: date-time */
+      time: string;
+      /** Format: double */
+      count: number;
+    };
+    "ResultSuccess_ErrorOverTime-Array_": {
+      data: components["schemas"]["ErrorOverTime"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ErrorOverTime-Array.string_": components["schemas"]["ResultSuccess_ErrorOverTime-Array_"] | components["schemas"]["ResultError_string_"];
+    RequestCountBody: {
+      filter: components["schemas"]["FilterNode"];
+      isCached?: boolean;
+    };
+    ModelMetric: {
+      model: string;
+      /** Format: double */
+      total_requests: number;
+      /** Format: double */
+      total_completion_tokens: number;
+      /** Format: double */
+      total_prompt_token: number;
+      /** Format: double */
+      total_tokens: number;
+      /** Format: double */
+      cost: number;
+    };
+    "ResultSuccess_ModelMetric-Array_": {
+      data: components["schemas"]["ModelMetric"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ModelMetric-Array.string_": components["schemas"]["ResultSuccess_ModelMetric-Array_"] | components["schemas"]["ResultError_string_"];
+    ModelMetricsBody: {
+      filter: components["schemas"]["FilterNode"];
+      /** Format: double */
+      offset: number;
+      /** Format: double */
+      limit: number;
+      timeFilter: {
+        end: string;
+        start: string;
+      };
+    };
+    CountryData: {
+      country: string;
+      /** Format: double */
+      total_requests: number;
+    };
+    "ResultSuccess_CountryData-Array_": {
+      data: components["schemas"]["CountryData"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_CountryData-Array.string_": components["schemas"]["ResultSuccess_CountryData-Array_"] | components["schemas"]["ResultError_string_"];
+    CountryMetricsBody: {
+      filter: components["schemas"]["FilterNode"];
+      /** Format: double */
+      offset: number;
+      /** Format: double */
+      limit: number;
+      timeFilter: {
+        end: string;
+        start: string;
+      };
+    };
     "ResultSuccess__unsafe-boolean__": {
       data: {
         unsafe: boolean;
@@ -6507,7 +6751,7 @@ export interface operations {
   GetRequestCount: {
     requestBody: {
       content: {
-        "application/json": components["schemas"]["RequestQueryParams"];
+        "application/json": components["schemas"]["RequestCountBody"];
       };
     };
     responses: {
@@ -7618,6 +7862,276 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_Model-Array.string_"];
+        };
+      };
+    };
+  };
+  GetTotalRequests: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MetricsFilterBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_number.string_"];
+        };
+      };
+    };
+  };
+  GetTotalCost: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MetricsFilterBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_number.string_"];
+        };
+      };
+    };
+  };
+  GetAverageLatency: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MetricsFilterBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_number.string_"];
+        };
+      };
+    };
+  };
+  GetAverageTimeToFirstToken: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MetricsFilterBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_number.string_"];
+        };
+      };
+    };
+  };
+  GetAverageTokensPerRequest: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MetricsFilterBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_TokensPerRequest.string_"];
+        };
+      };
+    };
+  };
+  GetTotalThreats: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MetricsFilterBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_number.string_"];
+        };
+      };
+    };
+  };
+  GetActiveUsers: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MetricsFilterBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_number.string_"];
+        };
+      };
+    };
+  };
+  GetRequestsOverTime: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MetricsOverTimeBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_RequestsOverTime-Array.string_"];
+        };
+      };
+    };
+  };
+  GetCostOverTime: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MetricsOverTimeBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_CostOverTime-Array.string_"];
+        };
+      };
+    };
+  };
+  GetTokensOverTime: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MetricsOverTimeBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_TokensOverTime-Array.string_"];
+        };
+      };
+    };
+  };
+  GetLatencyOverTime: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MetricsOverTimeBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_LatencyOverTime-Array.string_"];
+        };
+      };
+    };
+  };
+  GetTimeToFirstTokenOverTime: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MetricsOverTimeBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_TimeToFirstTokenOverTime-Array.string_"];
+        };
+      };
+    };
+  };
+  GetUsersOverTime: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MetricsOverTimeBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_UsersOverTime-Array.string_"];
+        };
+      };
+    };
+  };
+  GetThreatsOverTime: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MetricsOverTimeBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ThreatsOverTime-Array.string_"];
+        };
+      };
+    };
+  };
+  GetErrorsOverTime: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MetricsOverTimeBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ErrorOverTime-Array.string_"];
+        };
+      };
+    };
+  };
+  GetRequestStatusOverTime: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MetricsOverTimeBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_RequestsOverTime-Array.string_"];
+        };
+      };
+    };
+  };
+  GetModelMetrics: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ModelMetricsBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ModelMetric-Array.string_"];
+        };
+      };
+    };
+  };
+  GetCountryMetrics: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CountryMetricsBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_CountryData-Array.string_"];
         };
       };
     };
