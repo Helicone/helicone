@@ -1,0 +1,180 @@
+As AI systems evolve from single-question chatbots into autonomous agents, one of the biggest enablers underneath the surface is **tool calling**.
+
+Giving an LLM access to well-designed tools (or functions) ensures it can do more than just generating text. **Tools enable agents to actually do things**: analyze code, fetch data, summarize changes, call APIs, interact with databases, spin up workflows, etc.
+
+## What is Tool Calling?
+
+In traditional software, we write explicit conditional logic that always produces the same output under the same conditions.
+
+```js
+if (condition) doThingA();
+else doThingB();
+```
+
+Instead, **AI systems' output is dynamic and unpredictable.** The same condition may output different responses. For example, the same commit message may be summarized differently by different models.
+
+Because the logic is implicit, we must describe tools in detail and let the model **decide when and how to use them**. Instead of hard-coding conditions, the LLM picks the tools based on descriptions we provide.
+
+Every tool has a `name`, `description`, and `parameters`. The parameters are a JSON schema that describes the input and output of the tool.
+
+A typical tool definition looks like this:
+
+```ts
+{
+  name: "generate_changelog",
+  description: "Turn commits into a changelog announcement. Use this when summarizing recent changes.",
+  parameters: { ...JSON schema... },
+  execute: (args: Parameters<typeof generateChangelog>) => string
+}
+```
+
+This schema tells the agent:
+
+- **What** the tool does,
+- **When** it should be used,
+- **What** structured inputs it expects, and
+- **How** to execute it.
+
+When the agent needs to act, the model:
+1. **Chooses a tool** or decides to generate text directly,
+2. **Emits a JSON** structure with arguments,
+3. **Runs the function**, and
+4. The **result gets fed back** into the LLM for final content generation.
+
+### Design Principles
+
+When you architect tools for your agent, there are a few principles that help make your agent more reliable:
+
+1. **Single responsibility**: Each tool should do *one job*. That makes it easier for the LLM to pick the right one.
+
+2. **Descriptive, contextual names**: The model decides based on text. Names like `generate_changelog` are more meaningful than `tool1`.
+
+3. **Rich descriptions that include *when* to use them**: This helps guide the model's decision-making process.
+
+4. **Strict parameter schemas**: A well-defined JSON schema is both validation and a key part of how the LLM knows what to *output*.
+
+5. **Graceful error handling**: Return structured errors that the model can parse and adapt to, instead of handling errors with uncaught exceptions.
+
+## Tool Calling in Practice
+
+Here is an example of a tool `generate_changelog`.
+
+```ts
+import type { ChatCompletionTool } from "openai/resources/chat/completions";
+
+export const tools: ChatCompletionTool[] = [
+  {
+    type: "function",
+    function: {
+      name: "generate_changelog",
+      description:
+        "Turn commits into a changelog announcement. Use this when summarizing recent changes.",
+      parameters: {
+        type: "object",
+        properties: {
+          commits: {
+            type: "array",
+            description: "List of codebase commits"
+          },
+          readme_excerpt: {
+            type: "string",
+            description: "The codebase's README describing what the codebase does in general terms"
+          },
+        },
+        required: ["commits", "readme_excerpt"]
+      },
+      execute: generateChangelog
+    }
+  }
+];
+
+// The actual function implementation, right now just a string for simplicity
+export async function generateChangelog(commits: Commit[], readme_excerpt: string) {
+    return `This is a changelog announcement about ${commits[0]}, considering this ${readme_excerpt} as context.`;
+}
+```
+
+This tool would be used in a workflow like this:
+
+1. Your code *sends* the prompt and tool definitions to the LLM
+2. The LLM *chooses* a tool and returns structured JSON
+3. Your code *executes* the function
+4. You *pass* the result back to the LLM for final content.
+
+This two-phase interaction (tool selection + generation) gives your agent both flexibility and structure.
+
+## How To Ensure The Agent Picks The Right Tool?
+
+Once your agent engine starts calling tools at its discretion, your workflow starts growing in complexity. You no longer control the workflow of your application.
+
+If the agent picked the wrong tool or passed malformed JSON, the failure can be buried deep in a chain of calls, which is often filled with retries and hard to spot.
+
+That's why observing the **entire flow** is critical, and why engineers building agents rely on **LLM observability**.
+
+### Sessions: Grouping Complex Workflows
+
+Observability platforms let you bundle information to make it easier to trace.
+
+For example, through using Helicone's **Sessions**, you can group all related requests - LLM calls, tool calls, state transitions - into a single unit so you can inspect the entire trace within the same place. This is similar to bundled logs in traditional software engineering.
+
+A *session* is defined by 3 headers:
+
+- `Id`: A unique session ID
+- `Path`: A session path structure
+- `Name`: A human-friendly session name
+
+```js
+{
+const response = await client.chat.completions.create(
+  {
+    messages: [{ role: "user", content: "Hello" }],
+    model: "gpt-4o-mini"
+  },
+  {
+    headers: {
+      "Helicone-Session-Id": sessionId,
+      "Helicone-Session-Path": "/greeting",
+      "Helicone-Session-Name": "User Conversation"
+    }
+  }
+);
+}
+```
+
+By adding these headers to your requests, you're **grouping all calls in a single dashboard** as one session so you can see:
+
+- Every model call the agent made
+- Every tool execution associated with that run
+- Tokens used per step
+- Sequence and dependency
+- Costs per session rather than per individual call
+- Any errors that occurred at specific steps
+
+This gives you **end-to-end visibility into what otherwise would be a black box**, helping with debugging, optimization, and iterative improvement.
+
+## Sessions & Tools
+
+When setting up your agent loop, you attach session headers to every request so both LLM calls and tool invocations are bundled together. That ensures:
+
+- The decision step **(tool selection)** is logged
+- The execution step **(actual function)** is logged
+- The final generation step is **logged**
+- They all link back together in a **coherent trace**
+
+This will allow you to:
+
+- **Reproduce bugs reliably**: Agents can make non-deterministic decisions. Sessions let you replay the exact sequence.
+- **Analyze costs holistically**: Instead of billing by isolated calls, you get unit economics for the *entire workflow*.
+- **Understand performance**: Which part of your agent is slow? Was it the LLM? A tool? Data retrieval?
+- **Optimize intelligently**: By seeing the full trace, you can identify bottlenecks and iterate with confidence.
+
+### Conclusion
+
+Tool calling is a foundational capability for agents. But in order to keep dynamic systems reliable, make sure to:
+
+- Set up thoughtful tool schemas and descriptions
+- Enable rigorous parameter validation
+- Design graceful error handling
+- Trace your agentic workflow using sessions from request start to final output
+
+
