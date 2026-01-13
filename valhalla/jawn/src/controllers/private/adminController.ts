@@ -2598,6 +2598,15 @@ export class AdminController extends Controller {
       stripe_status: string | null;
       created_at: string;
       member_count: number;
+      trial_end: number | null;
+      subscription_items: Array<{
+        product_name: string | null;
+        price_id: string;
+        unit_amount: number | null;
+        recurring_interval: string | null;
+      }>;
+      next_invoice_date: number | null;
+      next_invoice_amount: number | null;
     }>;
     summary: {
       total: number;
@@ -2712,12 +2721,53 @@ export class AdminController extends Controller {
     const orgsWithStripeStatus = await Promise.all(
       (result.data ?? []).map(async (org) => {
         let stripe_status: string | null = null;
+        let trial_end: number | null = null;
+        let subscription_items: Array<{
+          product_name: string | null;
+          price_id: string;
+          unit_amount: number | null;
+          recurring_interval: string | null;
+        }> = [];
+        let next_invoice_date: number | null = null;
+        let next_invoice_amount: number | null = null;
+
         if (org.stripe_subscription_id) {
           try {
             const subscription = await stripe.subscriptions.retrieve(
-              org.stripe_subscription_id
+              org.stripe_subscription_id,
+              { expand: ["items.data.price.product"] }
             );
             stripe_status = subscription.status;
+            trial_end = subscription.trial_end;
+
+            // Extract subscription items with product info
+            subscription_items = subscription.items.data.map((item) => {
+              const product = item.price.product;
+              const productName =
+                typeof product === "object" && product !== null && "name" in product
+                  ? (product as { name: string }).name
+                  : null;
+
+              return {
+                product_name: productName,
+                price_id: item.price.id,
+                unit_amount: item.price.unit_amount,
+                recurring_interval: item.price.recurring?.interval ?? null,
+              };
+            });
+
+            // Get upcoming invoice
+            if (org.stripe_customer_id) {
+              try {
+                const upcomingInvoice = await stripe.invoices.retrieveUpcoming({
+                  customer: org.stripe_customer_id,
+                });
+                next_invoice_date = upcomingInvoice.next_payment_attempt;
+                next_invoice_amount = upcomingInvoice.amount_due;
+              } catch (e) {
+                // No upcoming invoice (e.g., cancelled subscription)
+              }
+            }
           } catch (e) {
             // Subscription might not exist
             stripe_status = "not_found";
@@ -2727,6 +2777,10 @@ export class AdminController extends Controller {
           ...org,
           member_count: parseInt(org.member_count, 10),
           stripe_status,
+          trial_end,
+          subscription_items,
+          next_invoice_date,
+          next_invoice_amount,
         };
       })
     );
@@ -2805,6 +2859,7 @@ export class AdminController extends Controller {
     body: {
       requestsOverride?: number;
       storageBytesOverride?: number;
+      targetTier?: "pro" | "team";
     }
   ): Promise<
     Result<
@@ -2900,8 +2955,14 @@ export class AdminController extends Controller {
     }
 
     // Run the migration (or reapply for orgs already on new tiers)
+    // If targetTier is specified, use that; otherwise infer from current tier
+    // skipTierValidation=true when targetTier is specified to allow cross-tier upgrades (e.g., pro -> team)
     let migrationResult;
-    if (tier === "team-20250130" || tier === "team-20251210") {
+    if (body.targetTier === "team") {
+      migrationResult = await stripeManager.migrateToNewTeamPricing(true);
+    } else if (body.targetTier === "pro") {
+      migrationResult = await stripeManager.migrateToNewProPricing();
+    } else if (tier === "team-20250130" || tier === "team-20251210") {
       migrationResult = await stripeManager.migrateToNewTeamPricing();
     } else if (
       ["pro-20240913", "pro-20250202", "growth", "pro-20251210"].includes(tier)
@@ -3129,6 +3190,17 @@ export class AdminController extends Controller {
       stripe_customer_id: string | null;
       stripe_subscription_id: string | null;
       subscription_status: string | null;
+      created_at: string;
+      stripe_status: string | null;
+      trial_end: number | null;
+      subscription_items: Array<{
+        product_name: string | null;
+        price_id: string;
+        unit_amount: number | null;
+        recurring_interval: string | null;
+      }>;
+      next_invoice_date: number | null;
+      next_invoice_amount: number | null;
     }>;
     summary: {
       total: number;
@@ -3147,6 +3219,7 @@ export class AdminController extends Controller {
       stripe_customer_id: string | null;
       stripe_subscription_id: string | null;
       subscription_status: string | null;
+      created_at: string;
     }>(
       `
       SELECT
@@ -3156,7 +3229,8 @@ export class AdminController extends Controller {
         u.email as owner_email,
         o.stripe_customer_id,
         o.stripe_subscription_id,
-        o.subscription_status
+        o.subscription_status,
+        o.created_at
       FROM organization o
       LEFT JOIN auth.users u ON o.owner = u.id
       WHERE o.tier = ANY($1::text[])
@@ -3166,18 +3240,83 @@ export class AdminController extends Controller {
       [newTiers]
     );
 
-    const organizations = result.data ?? [];
+    // Fetch Stripe status for each org to get trial info and subscription items
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+    const orgsWithStripeStatus = await Promise.all(
+      (result.data ?? []).map(async (org) => {
+        let stripe_status: string | null = null;
+        let trial_end: number | null = null;
+        let subscription_items: Array<{
+          product_name: string | null;
+          price_id: string;
+          unit_amount: number | null;
+          recurring_interval: string | null;
+        }> = [];
+        let next_invoice_date: number | null = null;
+        let next_invoice_amount: number | null = null;
+
+        if (org.stripe_subscription_id) {
+          try {
+            const subscription = await stripe.subscriptions.retrieve(
+              org.stripe_subscription_id,
+              { expand: ["items.data.price.product"] }
+            );
+            stripe_status = subscription.status;
+            trial_end = subscription.trial_end;
+
+            // Extract subscription items with product info
+            subscription_items = subscription.items.data.map((item) => {
+              const product = item.price.product;
+              const productName =
+                typeof product === "object" && product !== null && "name" in product
+                  ? (product as { name: string }).name
+                  : null;
+
+              return {
+                product_name: productName,
+                price_id: item.price.id,
+                unit_amount: item.price.unit_amount,
+                recurring_interval: item.price.recurring?.interval ?? null,
+              };
+            });
+
+            // Get upcoming invoice
+            if (org.stripe_customer_id) {
+              try {
+                const upcomingInvoice = await stripe.invoices.retrieveUpcoming({
+                  customer: org.stripe_customer_id,
+                });
+                next_invoice_date = upcomingInvoice.next_payment_attempt;
+                next_invoice_amount = upcomingInvoice.amount_due;
+              } catch (e) {
+                // No upcoming invoice (e.g., cancelled subscription)
+              }
+            }
+          } catch (e) {
+            stripe_status = "not_found";
+          }
+        }
+        return {
+          ...org,
+          stripe_status,
+          trial_end,
+          subscription_items,
+          next_invoice_date,
+          next_invoice_amount,
+        };
+      })
+    );
 
     // Calculate summary
     const byTier: Record<string, number> = {};
-    for (const org of organizations) {
+    for (const org of orgsWithStripeStatus) {
       byTier[org.tier] = (byTier[org.tier] || 0) + 1;
     }
 
     return {
-      organizations,
+      organizations: orgsWithStripeStatus,
       summary: {
-        total: organizations.length,
+        total: orgsWithStripeStatus.length,
         byTier,
       },
     };
@@ -3408,5 +3547,424 @@ export class AdminController extends Controller {
       message: `Switched org ${orgId} from ${previousTier} to free`,
       previousTier,
     });
+  }
+
+  /**
+   * Cancel a Stripe subscription for an organization (for unpaid/problematic subscriptions)
+   */
+  @Post("/pricing-migration/cancel-subscription/{orgId}")
+  public async cancelSubscription(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string
+  ): Promise<Result<{ message: string; subscriptionId: string }, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    // Get org's subscription ID
+    const orgResult = await dbExecute<{
+      stripe_subscription_id: string | null;
+      tier: string;
+    }>(
+      `SELECT stripe_subscription_id, tier FROM organization WHERE id = $1`,
+      [orgId]
+    );
+
+    if (!orgResult.data?.[0]) {
+      return err("Organization not found");
+    }
+
+    const { stripe_subscription_id, tier } = orgResult.data[0];
+
+    if (!stripe_subscription_id) {
+      return err("Organization does not have a Stripe subscription");
+    }
+
+    // Cancel the subscription in Stripe
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+    try {
+      await stripe.subscriptions.cancel(stripe_subscription_id);
+    } catch (e) {
+      return err(
+        `Failed to cancel subscription: ${e instanceof Error ? e.message : "Unknown error"}`
+      );
+    }
+
+    // Update org in database
+    await dbExecute(
+      `
+      UPDATE organization
+      SET subscription_status = 'canceled'
+      WHERE id = $1
+      `,
+      [orgId]
+    );
+
+    return ok({
+      message: `Cancelled subscription for org ${orgId} (tier: ${tier})`,
+      subscriptionId: stripe_subscription_id,
+    });
+  }
+
+  /**
+   * Audit Stripe subscriptions vs organization table
+   * Finds active Stripe subscriptions that don't match our database state
+   */
+  @Post("/pricing-migration/audit")
+  public async auditSubscriptions(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<{
+    mismatches: Array<{
+      subscriptionId: string;
+      customerId: string;
+      customerEmail: string | null;
+      stripeStatus: string;
+      orgId: string | null;
+      orgName: string | null;
+      orgTier: string | null;
+      orgSubscriptionStatus: string | null;
+      orgHasCustomerId: boolean;
+      orgHasSubscriptionId: boolean;
+      issue: string;
+      userOrgs: Array<{ id: string; name: string; tier: string }>;
+      isInAuthUsers: boolean;
+    }>;
+    summary: {
+      totalActiveSubscriptions: number;
+      totalMismatches: number;
+      filteredOutEuUsers: number;
+      byIssue: Record<string, number>;
+    };
+  }> {
+    await authCheckThrow(request.authParams.userId);
+
+    try {
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+      // Fetch all active/trialing subscriptions from Stripe
+      const subscriptions: Stripe.Subscription[] = [];
+      let hasMore = true;
+      let startingAfter: string | undefined;
+
+      while (hasMore) {
+        const response = await stripe.subscriptions.list({
+          status: "all",
+          limit: 100,
+          starting_after: startingAfter,
+          expand: ["data.customer"],
+        });
+
+        // Filter to only active-ish subscriptions
+        const activeSubscriptions = response.data.filter((sub) =>
+          ["active", "trialing", "past_due", "unpaid"].includes(sub.status)
+        );
+        subscriptions.push(...activeSubscriptions);
+
+        hasMore = response.has_more;
+        if (response.data.length > 0) {
+          startingAfter = response.data[response.data.length - 1].id;
+        }
+      }
+
+      // Get all organizations with their stripe info
+      const orgsResult = await dbExecute<{
+        id: string;
+        name: string;
+        tier: string;
+        stripe_customer_id: string | null;
+        stripe_subscription_id: string | null;
+        subscription_status: string | null;
+      }>(
+        `SELECT id, name, tier, stripe_customer_id, stripe_subscription_id, subscription_status FROM organization`
+      );
+
+      const orgsBySubscriptionId = new Map<
+        string,
+        {
+          id: string;
+          name: string;
+          tier: string;
+          subscription_status: string | null;
+        }
+      >();
+      const orgsByCustomerId = new Map<
+        string,
+        {
+          id: string;
+          name: string;
+          tier: string;
+          stripe_subscription_id: string | null;
+          subscription_status: string | null;
+        }
+      >();
+
+      for (const org of orgsResult.data ?? []) {
+        if (org.stripe_subscription_id) {
+          orgsBySubscriptionId.set(org.stripe_subscription_id, {
+            id: org.id,
+            name: org.name,
+            tier: org.tier,
+            subscription_status: org.subscription_status,
+          });
+        }
+        if (org.stripe_customer_id) {
+          orgsByCustomerId.set(org.stripe_customer_id, {
+            id: org.id,
+            name: org.name,
+            tier: org.tier,
+            stripe_subscription_id: org.stripe_subscription_id,
+            subscription_status: org.subscription_status,
+          });
+        }
+      }
+
+      const mismatches: Array<{
+        subscriptionId: string;
+        customerId: string;
+        customerEmail: string | null;
+        stripeStatus: string;
+        orgId: string | null;
+        orgName: string | null;
+        orgTier: string | null;
+        orgSubscriptionStatus: string | null;
+        orgHasCustomerId: boolean;
+        orgHasSubscriptionId: boolean;
+        issue: string;
+        userOrgs: Array<{ id: string; name: string; tier: string }>;
+        isInAuthUsers: boolean;
+      }> = [];
+
+      const byIssue: Record<string, number> = {};
+      let filteredOutEuUsers = 0;
+
+      // Get all auth.users emails for cross-reference
+      const authUsersResult = await dbExecute<{ email: string }>(
+        `SELECT email FROM auth.users WHERE email IS NOT NULL`
+      );
+      const authUserEmails = new Set(
+        (authUsersResult.data ?? []).map((u) => u.email.toLowerCase())
+      );
+
+      // Get user-org memberships by email
+      const userOrgsResult = await dbExecute<{
+        email: string;
+        org_id: string;
+        org_name: string;
+        org_tier: string;
+      }>(
+        `SELECT
+          au.email,
+          o.id as org_id,
+          o.name as org_name,
+          o.tier as org_tier
+        FROM auth.users au
+        JOIN organization_member om ON om.member = au.id
+        JOIN organization o ON o.id = om.organization
+        WHERE au.email IS NOT NULL`
+      );
+
+      // Build a map of email -> orgs
+      const emailToOrgs = new Map<string, Array<{ id: string; name: string; tier: string }>>();
+      for (const row of userOrgsResult.data ?? []) {
+        const email = row.email.toLowerCase();
+        if (!emailToOrgs.has(email)) {
+          emailToOrgs.set(email, []);
+        }
+        emailToOrgs.get(email)!.push({
+          id: row.org_id,
+          name: row.org_name,
+          tier: row.org_tier,
+        });
+      }
+
+      // Legacy $0 price IDs to filter out
+      const legacyPriceIds = new Set([
+        "price_1N329XFeVmeixR9wsIsim9Yn",
+      ]);
+
+      for (const sub of subscriptions) {
+        // Skip subscriptions with legacy $0 price IDs
+        const hasLegacyPrice = sub.items.data.some((item) =>
+          legacyPriceIds.has(item.price.id)
+        );
+        if (hasLegacyPrice) {
+          filteredOutEuUsers++; // Reusing this counter for all filtered subs
+          continue;
+        }
+
+        const customerId =
+          typeof sub.customer === "string" ? sub.customer : sub.customer?.id;
+        const customerEmail =
+          typeof sub.customer === "object" && sub.customer !== null
+            ? (sub.customer as Stripe.Customer).email
+            : null;
+
+        // Check if this email exists in auth.users
+        const emailLower = customerEmail?.toLowerCase() ?? "";
+        const isInAuthUsers = emailLower ? authUserEmails.has(emailLower) : false;
+        const userOrgs = emailLower ? (emailToOrgs.get(emailLower) ?? []) : [];
+
+        const orgBySubId = orgsBySubscriptionId.get(sub.id);
+        const orgByCustomerId = customerId
+          ? orgsByCustomerId.get(customerId)
+          : undefined;
+
+        let issue: string | null = null;
+
+        if (!orgBySubId && !orgByCustomerId) {
+          // Subscription exists in Stripe but no org has this subscription or customer
+          // Skip if user is not in auth.users (likely EU region)
+          if (!isInAuthUsers) {
+            filteredOutEuUsers++;
+            continue;
+          }
+          issue = "No matching org found";
+        } else if (!orgBySubId && orgByCustomerId) {
+          // Org has the customer ID but different/no subscription ID
+          if (!orgByCustomerId.stripe_subscription_id) {
+            issue = "Org has customer but no subscription_id set";
+          } else if (orgByCustomerId.stripe_subscription_id !== sub.id) {
+            issue = `Org has different subscription_id: ${orgByCustomerId.stripe_subscription_id}`;
+          }
+        } else if (orgBySubId) {
+          // Check if org tier is free but has active subscription
+          if (orgBySubId.tier === "free" && ["active", "trialing"].includes(sub.status)) {
+            issue = "Org is free tier but has active Stripe subscription";
+          }
+          // Check if org subscription_status doesn't match
+          else if (
+            orgBySubId.subscription_status !== "active" &&
+            ["active", "trialing"].includes(sub.status)
+          ) {
+            issue = `Org subscription_status is '${orgBySubId.subscription_status}' but Stripe is '${sub.status}'`;
+          }
+        }
+
+        if (issue) {
+          byIssue[issue] = (byIssue[issue] || 0) + 1;
+
+          // Check if org has the stripe IDs set
+          const orgHasCustomerId = orgBySubId
+            ? !!orgsByCustomerId.get(customerId ?? "")
+            : !!orgByCustomerId;
+          const orgHasSubscriptionId = !!orgBySubId ||
+            (!!orgByCustomerId && orgByCustomerId.stripe_subscription_id === sub.id);
+
+          mismatches.push({
+            subscriptionId: sub.id,
+            customerId: customerId ?? "unknown",
+            customerEmail,
+            stripeStatus: sub.status,
+            orgId: orgBySubId?.id ?? orgByCustomerId?.id ?? null,
+            orgName: orgBySubId?.name ?? orgByCustomerId?.name ?? null,
+            orgTier: orgBySubId?.tier ?? orgByCustomerId?.tier ?? null,
+            orgSubscriptionStatus:
+              orgBySubId?.subscription_status ??
+              orgByCustomerId?.subscription_status ??
+              null,
+            orgHasCustomerId,
+            orgHasSubscriptionId,
+            issue,
+            userOrgs,
+            isInAuthUsers,
+          });
+        }
+      }
+
+      return {
+        mismatches,
+        summary: {
+          totalActiveSubscriptions: subscriptions.length,
+          totalMismatches: mismatches.length,
+          filteredOutEuUsers,
+          byIssue,
+        },
+      };
+    } catch (e) {
+      console.error("Audit subscriptions error:", e);
+      throw e;
+    }
+  }
+
+  /**
+   * Fix org tier based on Stripe subscription
+   * Sets the org to pro-20251210 or team-20251210 based on the subscription products
+   */
+  @Post("/pricing-migration/fix-tier/{orgId}")
+  public async fixOrgTier(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string,
+    @Body() body: { subscriptionId: string }
+  ): Promise<Result<{ message: string; newTier: string }, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    try {
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+      // Get the subscription to determine what tier it should be
+      const subscription = await stripe.subscriptions.retrieve(body.subscriptionId, {
+        expand: ["items.data.price.product"],
+      });
+
+      // Determine tier from product names
+      let newTier = "pro-20251210"; // default
+      for (const item of subscription.items.data) {
+        const product = item.price.product;
+        if (typeof product === "object" && product !== null && "name" in product) {
+          const productName = (product as { name: string }).name.toLowerCase();
+          if (productName.includes("team")) {
+            newTier = "team-20251210";
+            break;
+          }
+        }
+      }
+
+      // Update the org
+      await dbExecute(
+        `
+        UPDATE organization
+        SET tier = $1, subscription_status = 'active'
+        WHERE id = $2
+        `,
+        [newTier, orgId]
+      );
+
+      return ok({
+        message: `Updated org ${orgId} to tier ${newTier}`,
+        newTier,
+      });
+    } catch (e) {
+      console.error("Fix tier error:", e);
+      return err(e instanceof Error ? e.message : "Failed to fix tier");
+    }
+  }
+
+  /**
+   * Fix org Stripe metadata - updates customer_id and subscription_id
+   */
+  @Post("/pricing-migration/fix-metadata/{orgId}")
+  public async fixOrgMetadata(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() orgId: string,
+    @Body() body: { customerId: string; subscriptionId: string }
+  ): Promise<Result<{ message: string }, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    try {
+      // Update the org with the stripe IDs
+      await dbExecute(
+        `
+        UPDATE organization
+        SET stripe_customer_id = $1, stripe_subscription_id = $2
+        WHERE id = $3
+        `,
+        [body.customerId, body.subscriptionId, orgId]
+      );
+
+      return ok({
+        message: `Updated org ${orgId} with customer ${body.customerId} and subscription ${body.subscriptionId}`,
+      });
+    } catch (e) {
+      console.error("Fix metadata error:", e);
+      return err(e instanceof Error ? e.message : "Failed to fix metadata");
+    }
   }
 }

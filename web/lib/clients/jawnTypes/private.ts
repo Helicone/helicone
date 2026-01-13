@@ -697,6 +697,28 @@ export interface paths {
     /** @description Switch an organization to free tier (for cancelled subscriptions) */
     post: operations["SwitchToFree"];
   };
+  "/v1/admin/pricing-migration/cancel-subscription/{orgId}": {
+    /** @description Cancel a Stripe subscription for an organization (for unpaid/problematic subscriptions) */
+    post: operations["CancelSubscription"];
+  };
+  "/v1/admin/pricing-migration/audit": {
+    /**
+     * @description Audit Stripe subscriptions vs organization table
+     * Finds active Stripe subscriptions that don't match our database state
+     */
+    post: operations["AuditSubscriptions"];
+  };
+  "/v1/admin/pricing-migration/fix-tier/{orgId}": {
+    /**
+     * @description Fix org tier based on Stripe subscription
+     * Sets the org to pro-20251210 or team-20251210 based on the subscription products
+     */
+    post: operations["FixOrgTier"];
+  };
+  "/v1/admin/pricing-migration/fix-metadata/{orgId}": {
+    /** @description Fix org Stripe metadata - updates customer_id and subscription_id */
+    post: operations["FixOrgMetadata"];
+  };
   "/v1/credits/balance": {
     get: operations["GetCreditsBalance"];
   };
@@ -16497,6 +16519,24 @@ Json: JsonObject;
       error: null;
     };
     "Result__message-string--previousTier-string_.string_": components["schemas"]["ResultSuccess__message-string--previousTier-string__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__message-string--subscriptionId-string__": {
+      data: {
+        subscriptionId: string;
+        message: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__message-string--subscriptionId-string_.string_": components["schemas"]["ResultSuccess__message-string--subscriptionId-string__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__message-string--newTier-string__": {
+      data: {
+        newTier: string;
+        message: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__message-string--newTier-string_.string_": components["schemas"]["ResultSuccess__message-string--newTier-string__"] | components["schemas"]["ResultError_string_"];
     CreditBalanceResponse: {
       /** Format: double */
       totalCreditsPurchased: number;
@@ -17358,12 +17398,18 @@ export interface operations {
       };
     };
   };
+  /** @description Cancel a Stripe subscription for an organization (for unpaid/problematic subscriptions) */
   CancelSubscription: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
     responses: {
       /** @description Ok */
       200: {
         content: {
-          "application/json": null;
+          "application/json": components["schemas"]["Result__message-string--subscriptionId-string_.string_"];
         };
       };
     };
@@ -20726,6 +20772,19 @@ export interface operations {
             };
             organizations: ({
                 /** Format: double */
+                next_invoice_amount: number | null;
+                /** Format: double */
+                next_invoice_date: number | null;
+                subscription_items: ({
+                    recurring_interval: string | null;
+                    /** Format: double */
+                    unit_amount: number | null;
+                    price_id: string;
+                    product_name: string | null;
+                  })[];
+                /** Format: double */
+                trial_end: number | null;
+                /** Format: double */
                 member_count: number;
                 created_at: string;
                 stripe_status: string | null;
@@ -20771,6 +20830,8 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
+          /** @enum {string} */
+          targetTier?: "pro" | "team";
           /** Format: double */
           storageBytesOverride?: number;
           /** Format: double */
@@ -20819,6 +20880,21 @@ export interface operations {
               total: number;
             };
             organizations: ({
+                /** Format: double */
+                next_invoice_amount: number | null;
+                /** Format: double */
+                next_invoice_date: number | null;
+                subscription_items: ({
+                    recurring_interval: string | null;
+                    /** Format: double */
+                    unit_amount: number | null;
+                    price_id: string;
+                    product_name: string | null;
+                  })[];
+                /** Format: double */
+                trial_end: number | null;
+                stripe_status: string | null;
+                created_at: string;
                 subscription_status: string | null;
                 stripe_subscription_id: string | null;
                 stripe_customer_id: string | null;
@@ -20906,6 +20982,99 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result__message-string--previousTier-string_.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * @description Audit Stripe subscriptions vs organization table
+   * Finds active Stripe subscriptions that don't match our database state
+   */
+  AuditSubscriptions: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            summary: {
+              byIssue: components["schemas"]["Record_string.number_"];
+              /** Format: double */
+              filteredOutEuUsers: number;
+              /** Format: double */
+              totalMismatches: number;
+              /** Format: double */
+              totalActiveSubscriptions: number;
+            };
+            mismatches: ({
+                isInAuthUsers: boolean;
+                userOrgs: {
+                    tier: string;
+                    name: string;
+                    id: string;
+                  }[];
+                issue: string;
+                orgHasSubscriptionId: boolean;
+                orgHasCustomerId: boolean;
+                orgSubscriptionStatus: string | null;
+                orgTier: string | null;
+                orgName: string | null;
+                orgId: string | null;
+                stripeStatus: string;
+                customerEmail: string | null;
+                customerId: string;
+                subscriptionId: string;
+              })[];
+          };
+        };
+      };
+    };
+  };
+  /**
+   * @description Fix org tier based on Stripe subscription
+   * Sets the org to pro-20251210 or team-20251210 based on the subscription products
+   */
+  FixOrgTier: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          subscriptionId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__message-string--newTier-string_.string_"];
+        };
+      };
+    };
+  };
+  /** @description Fix org Stripe metadata - updates customer_id and subscription_id */
+  FixOrgMetadata: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          subscriptionId: string;
+          customerId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__message-string_.string_"];
         };
       };
     };
