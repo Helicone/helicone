@@ -2,6 +2,7 @@ import {
   RateLimitOptions,
   RateLimitResponse,
 } from "./clients/DurableObjectRateLimiterClient";
+import { RateLimitHeaders } from "./rate-limit/tokenBucketClient";
 
 export interface BuildParams {
   body: BodyInit | null;
@@ -35,6 +36,14 @@ export class ResponseBuilder {
 
     Object.entries(headers).forEach(([key, value]) => {
       this.setHeader(key, value);
+    });
+  }
+
+  addTokenBucketRateLimitHeaders(headers: RateLimitHeaders): void {
+    Object.entries(headers).forEach(([key, value]) => {
+      if (value) {
+        this.setHeader(key, value);
+      }
     });
   }
 

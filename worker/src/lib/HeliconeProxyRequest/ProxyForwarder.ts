@@ -5,6 +5,7 @@ import {
   checkRateLimit as checkRateLimitDO,
   updateRateLimitCounter as updateRateLimitCounterDO,
 } from "../clients/DurableObjectRateLimiterClient";
+import { checkTokenBucketRateLimit } from "../rate-limit/tokenBucketClient";
 
 import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
 import { checkPromptSecurity } from "../clients/PromptSecurityClient";
@@ -174,6 +175,45 @@ export async function proxyForwarder(
           } catch (error) {
             console.error("Error checking rate limit", error);
           }
+        }
+      }
+    }
+  }
+
+  // Token Bucket Rate Limiting (via Helicone-RateLimit-Policy header)
+  const rateLimitPolicyHeader =
+    proxyRequest.requestWrapper.heliconeHeaders.rateLimitPolicy;
+  if (rateLimitPolicyHeader && !rateLimited) {
+    const { data: auth, error: authError } = await request.auth();
+    if (authError === null) {
+      const db = new DBWrapper(env, auth);
+      const { data: orgData, error: orgError } = await db.getAuthParams();
+      if (orgError === null && orgData?.organizationId) {
+        try {
+          const tokenBucketResult = await checkTokenBucketRateLimit({
+            policyHeader: rateLimitPolicyHeader,
+            organizationId: orgData.organizationId,
+            userId: proxyRequest.userId,
+            heliconeProperties: proxyRequest.heliconeProperties,
+            rateLimiterDO: env.TOKEN_BUCKET_RATE_LIMITER,
+            config: {
+              failureMode: "fail-open", // Preserve availability on errors
+            },
+          });
+
+          responseBuilder.addTokenBucketRateLimitHeaders(
+            tokenBucketResult.headers
+          );
+
+          if (!tokenBucketResult.allowed) {
+            rateLimited = true;
+            request.injectCustomProperty(
+              "Helicone-Rate-Limit-Status",
+              "token_bucket_rate_limited"
+            );
+          }
+        } catch (error) {
+          console.error("Error checking token bucket rate limit", error);
         }
       }
     }
