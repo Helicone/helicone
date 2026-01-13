@@ -171,9 +171,11 @@ export function createPropertySourceFromHeaders(
  */
 function sanitizeSegmentValue(value: string): string {
   // Remove colons (used as key separator), control characters, and trim
+  // eslint-disable-next-line no-control-regex
+  const controlCharsRegex = /[\u0000-\u001f\u007f]/g;
   return value
     .replace(/:/g, "_")
-    .replace(/[\x00-\x1f\x7f]/g, "")
+    .replace(controlCharsRegex, "")
     .trim()
     .slice(0, 256); // Limit length to prevent abuse
 }
@@ -183,9 +185,7 @@ function sanitizeSegmentValue(value: string): string {
  */
 function sanitizeKeyPart(value: string): string {
   // Only allow alphanumeric, underscore, hyphen
-  return value
-    .replace(/[^a-zA-Z0-9_-]/g, "_")
-    .slice(0, 128);
+  return value.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 128);
 }
 
 /**

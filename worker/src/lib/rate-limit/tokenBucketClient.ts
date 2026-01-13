@@ -12,7 +12,10 @@
  * - Returns formatted rate limit response headers
  */
 
-import { TokenBucketRateLimiterDO, TokenBucketResponse } from "../durable-objects/TokenBucketRateLimiterDO";
+import {
+  TokenBucketRateLimiterDO,
+  TokenBucketResponse,
+} from "../durable-objects/TokenBucketRateLimiterDO";
 import {
   parseRateLimitPolicy,
   ParsedRateLimitPolicy,
@@ -22,7 +25,6 @@ import {
   extractSegmentIdentifier,
   buildDurableObjectKey,
   createPropertySourceFromHeaders,
-  SegmentExtractionError,
 } from "./segmentExtractor";
 import { Result, err, ok } from "../util/results";
 
@@ -126,7 +128,10 @@ export async function checkTokenBucketRateLimit(params: {
     params.userId
   );
 
-  const segmentResult = extractSegmentIdentifier(policy.segment, propertySource);
+  const segmentResult = extractSegmentIdentifier(
+    policy.segment,
+    propertySource
+  );
 
   if (segmentResult.error) {
     console.error(
@@ -214,7 +219,10 @@ export async function checkTokenBucketRateLimitOnly(params: {
     params.userId
   );
 
-  const segmentResult = extractSegmentIdentifier(policy.segment, propertySource);
+  const segmentResult = extractSegmentIdentifier(
+    policy.segment,
+    propertySource
+  );
   if (segmentResult.error) {
     return createErrorResult(
       segmentResult.error.message,
@@ -289,7 +297,10 @@ export async function recordTokenBucketUsage(params: {
     params.userId
   );
 
-  const segmentResult = extractSegmentIdentifier(policy.segment, propertySource);
+  const segmentResult = extractSegmentIdentifier(
+    policy.segment,
+    propertySource
+  );
   if (segmentResult.error) {
     console.error(
       `[TokenBucket] Cannot record usage: ${segmentResult.error.message}`
@@ -345,7 +356,7 @@ function determineCost(
   }
 
   return err(
-    'Cost-based rate limiting (u=cents) requires cost to be provided via Helicone-RateLimit-Cost-Cents header or computed from the request'
+    "Cost-based rate limiting (u=cents) requires cost to be provided via Helicone-RateLimit-Cost-Cents header or computed from the request"
   );
 }
 

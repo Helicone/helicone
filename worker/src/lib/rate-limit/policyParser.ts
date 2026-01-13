@@ -211,7 +211,9 @@ export function buildPolicyString(policy: ParsedRateLimitPolicy): string {
  * Validate a policy without parsing
  * Returns true if the policy string is valid
  */
-export function isValidPolicy(policyString: string | null | undefined): boolean {
+export function isValidPolicy(
+  policyString: string | null | undefined
+): boolean {
   const result = parseRateLimitPolicy(policyString);
   return result.error === null;
 }
