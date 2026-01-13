@@ -56,16 +56,23 @@ const ModelPage = (props: ModelPageProps) => {
     },
   );
 
+  // Transform data to include id field required by ThemedTable
+  const tableData =
+    data?.data?.map((d) => ({
+      ...d,
+      id: d.model,
+    })) || [];
+
   return (
     <>
       <AuthHeader title={"Models"} />
       <ThemedTable
         id="modelMetrics"
-        defaultData={data?.data || []}
+        defaultData={tableData}
         defaultColumns={INITIAL_COLUMNS}
         skeletonLoading={isLoading}
         dataLoading={false}
-        exportData={data?.data || []}
+        exportData={tableData}
         onRowSelect={(row) => {}}
         timeFilter={{
           currentTimeFilter: timeFilter,

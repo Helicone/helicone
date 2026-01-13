@@ -837,10 +837,27 @@ export class MetricsManager extends BaseManager {
 
   // ============== QUANTILES ==============
 
+  // Allowlist of valid metrics to prevent SQL injection
+  private static readonly ALLOWED_QUANTILE_METRICS = [
+    "latency",
+    "prompt_tokens",
+    "completion_tokens",
+    "total_tokens",
+  ] as const;
+
   async getQuantiles(
     data: MetricsDataOverTimeRequest,
     metric: string,
   ): Promise<Result<Quantiles[], string>> {
+    // Validate metric against allowlist to prevent SQL injection
+    if (
+      !MetricsManager.ALLOWED_QUANTILE_METRICS.includes(
+        metric as (typeof MetricsManager.ALLOWED_QUANTILE_METRICS)[number],
+      )
+    ) {
+      return { data: null, error: "Invalid metric" };
+    }
+
     let query;
 
     switch (metric) {
@@ -851,6 +868,7 @@ export class MetricsManager extends BaseManager {
         quantile(0.99)(completion_tokens + prompt_tokens) as P99`;
         break;
       default:
+        // Safe to interpolate now - metric is validated against allowlist
         query = `quantile(0.75)(${metric}) as P75,
         quantile(0.90)(${metric}) as P90,
         quantile(0.95)(${metric}) as P95,
