@@ -328,7 +328,7 @@ export class DBWrapper {
       },
       string
     >(
-      `org-${authParams.data.organizationId}`,
+      `org-v2-${authParams.data.organizationId}`,
       this.secureCacheEnv,
       async () => {
         const { data, error } = await this.supabaseClient
