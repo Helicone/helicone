@@ -3,6 +3,8 @@
  * Combines all models and endpoints from subdirectories
  */
 
+import { model as gemini20FlashExpModel } from "./gemini-2.0-flash-exp/model";
+import { endpoints as gemini20FlashExpEndpoints } from "./gemini-2.0-flash-exp/endpoints";
 import { model as gemini25ProModel } from "./gemini-2.5-pro/model";
 import { endpoints as gemini25ProEndpoints } from "./gemini-2.5-pro/endpoints";
 import { model as gemini25FlashModel } from "./gemini-2.5-flash/model";
@@ -22,6 +24,7 @@ import { endpoints as gemma3Endpoints } from "./gemma-3/endpoints";
 import { ModelConfig, ModelProviderConfig } from "../../types";
 
 export const googleModels = {
+  ...gemini20FlashExpModel,
   ...gemini25ProModel,
   ...gemini25FlashModel,
   ...gemini25FlashLiteModel,
@@ -33,6 +36,7 @@ export const googleModels = {
 } satisfies Record<string, ModelConfig>;
 
 export const googleEndpointConfig = {
+  ...gemini20FlashExpEndpoints,
   ...gemini25ProEndpoints,
   ...gemini25FlashEndpoints,
   ...gemini25FlashLiteEndpoints,
