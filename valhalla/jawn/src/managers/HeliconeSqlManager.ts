@@ -21,6 +21,16 @@ import { Traced, withActiveSpan } from "../lib/decorators/tracing";
 export const CLICKHOUSE_TABLES = ["request_response_rmt"];
 const MAX_LIMIT = 300000;
 const parser = new Parser();
+
+// Body columns that can be used with getBody() function
+const BODY_COLUMNS = ["request_body", "response_body"] as const;
+type BodyColumnName = (typeof BODY_COLUMNS)[number];
+
+interface GetBodyInfo {
+  columnName: BodyColumnName;
+  alias: string | null;
+  originalIndex: number;
+}
 interface ClickHouseTableRow {
   name: string;
   type: string;
@@ -115,6 +125,131 @@ function normalizeAst(ast: AST | AST[]): AST[] {
   }
 
   return [ast];
+}
+
+/**
+ * Process getBody() function calls in the AST.
+ * Transforms: SELECT getBody(request_body) FROM ...
+ * Into: SELECT request_body, storage_location, cache_reference_id FROM ...
+ *
+ * Returns metadata about which columns need S3 enrichment.
+ */
+function processGetBodyFunctions(ast: AST): {
+  modifiedAst: AST;
+  getBodyColumns: GetBodyInfo[];
+} {
+  if (ast.type !== "select") {
+    return { modifiedAst: ast, getBodyColumns: [] };
+  }
+
+  const getBodyColumns: GetBodyInfo[] = [];
+  const columns = ast.columns as any;
+
+  // Handle SELECT * case or non-array columns
+  if (!Array.isArray(columns)) {
+    return { modifiedAst: ast, getBodyColumns: [] };
+  }
+
+  // Track which metadata columns we need to add
+  let needsStorageLocation = false;
+  let needsCacheReferenceId = false;
+  let needsRequestId = false;
+
+  // Check existing columns and detect getBody() calls
+  const existingColumnNames = new Set<string>();
+
+  for (let i = 0; i < columns.length; i++) {
+    const col = columns[i];
+
+    // Track existing column names
+    if (col.expr?.type === "column_ref" && col.expr?.column?.expr?.value) {
+      existingColumnNames.add(col.expr.column.expr.value);
+    }
+
+    // Detect getBody() function calls
+    if (col.expr?.type === "function") {
+      const funcName = col.expr?.name?.name?.[0]?.value?.toLowerCase();
+
+      if (funcName === "getbody") {
+        // Get the argument (body column name)
+        const argValue = col.expr?.args?.value?.[0];
+        const bodyColumnName = argValue?.column?.expr?.value || argValue?.column;
+
+        if (!bodyColumnName || !BODY_COLUMNS.includes(bodyColumnName as BodyColumnName)) {
+          // Invalid argument - will be caught at execution time
+          continue;
+        }
+
+        // Record this getBody() call
+        getBodyColumns.push({
+          columnName: bodyColumnName as BodyColumnName,
+          alias: col.as,
+          originalIndex: i,
+        });
+
+        // Replace getBody(column) with just column
+        columns[i] = {
+          expr: {
+            type: "column_ref",
+            table: null,
+            column: {
+              expr: {
+                type: "default",
+                value: bodyColumnName,
+              },
+            },
+            collate: null,
+          },
+          as: col.as,
+        } as any;
+
+        // Mark that we need metadata columns
+        needsStorageLocation = true;
+        needsCacheReferenceId = true;
+        needsRequestId = true;
+      }
+    }
+  }
+
+  // Re-check existing columns after transformation
+  existingColumnNames.clear();
+  for (const col of columns) {
+    if (col.expr?.type === "column_ref" && col.expr?.column?.expr?.value) {
+      existingColumnNames.add(col.expr.column.expr.value);
+    }
+  }
+
+  // Add required metadata columns if not present
+  const addColumnIfMissing = (columnName: string) => {
+    if (!existingColumnNames.has(columnName)) {
+      columns.push({
+        expr: {
+          type: "column_ref",
+          table: null,
+          column: {
+            expr: {
+              type: "default",
+              value: columnName,
+            },
+          },
+          collate: null,
+        },
+        as: null,
+      } as any);
+    }
+  };
+
+  if (needsStorageLocation) {
+    addColumnIfMissing("storage_location");
+  }
+  if (needsCacheReferenceId) {
+    addColumnIfMissing("cache_reference_id");
+  }
+  if (needsRequestId) {
+    addColumnIfMissing("request_id");
+  }
+
+  return { modifiedAst: ast, getBodyColumns };
 }
 
 export class HeliconeSqlManager {
@@ -223,11 +358,15 @@ export class HeliconeSqlManager {
       
       // Always get first statement to prevent SQL injection
       const normalizedAst = normalizeAst(ast)[0];
-      
+
+      // Process getBody() function calls before adding limit
+      const { modifiedAst, getBodyColumns } = processGetBodyFunctions(normalizedAst);
+      withActiveSpan()?.setTag("getBody.columns_count", getBodyColumns.length);
+
       // Add limit to prevent excessive data retrieval
       let limitedAst;
       try {
-        limitedAst = addLimit(normalizedAst, limit);
+        limitedAst = addLimit(modifiedAst, limit);
       } catch (limitError) {
         withActiveSpan()?.setTag("error.type", "SYNTAX_ERROR");
         withActiveSpan()?.setTag("error.phase", "limit_application");
@@ -271,10 +410,10 @@ export class HeliconeSqlManager {
         return hqlError(errorCode, errorString);
       }
 
-      // Enrich results with S3 bodies if request_body or response_body columns are present
+      // Enrich results with S3 bodies only if getBody() was used
       const rows = result.data ?? [];
       const enrichmentStart = Date.now();
-      const enrichedRows = await this.enrichResultsWithS3Bodies(rows);
+      const enrichedRows = await this.enrichResultsWithS3Bodies(rows, getBodyColumns);
       const enrichmentTime = Date.now() - enrichmentStart;
       
       const responseSize = Buffer.byteLength(JSON.stringify(enrichedRows), "utf8");
@@ -403,31 +542,103 @@ export class HeliconeSqlManager {
   }
 
   private async enrichResultsWithS3Bodies(
-    rows: Record<string, any>[]
+    rows: Record<string, any>[],
+    getBodyColumns: GetBodyInfo[]
   ): Promise<Record<string, any>[]> {
-    // Early return for edge cases
-    if (!rows || rows.length === 0) {
+    // Early return if no getBody() columns were requested
+    if (getBodyColumns.length === 0 || !rows || rows.length === 0) {
       return rows;
     }
 
-    // Check if rows have request_id field
-    if (!rows[0].hasOwnProperty('request_id')) {
+    // Check if rows have required fields for S3 enrichment
+    if (!rows[0].hasOwnProperty("request_id")) {
       return rows;
     }
+
+    // Track which body columns need S3 fetching
+    const bodyColumnsToFetch = new Set(
+      getBodyColumns.map((col) => col.columnName)
+    );
 
     // Process rows in batches for better performance
     const BATCH_SIZE = 10;
     const enrichedRows: Record<string, any>[] = [];
-    
+
     for (let i = 0; i < rows.length; i += BATCH_SIZE) {
       const batch = rows.slice(i, i + BATCH_SIZE);
       const enrichedBatch = await Promise.all(
-        batch.map(row => this.fetchRowBodiesFromS3(row))
+        batch.map((row) =>
+          this.enrichRowWithBodies(row, bodyColumnsToFetch)
+        )
       );
       enrichedRows.push(...enrichedBatch);
     }
-    
+
     return enrichedRows;
+  }
+
+  private async enrichRowWithBodies(
+    row: Record<string, any>,
+    bodyColumnsToFetch: Set<BodyColumnName>
+  ): Promise<Record<string, any>> {
+    const enrichedRow = { ...row };
+
+    // Check storage_location to determine where to fetch body from
+    const storageLocation = row.storage_location;
+
+    if (storageLocation === "s3") {
+      // Fetch from S3
+      const bodyData = await this.fetchBodiesFromS3(row);
+      if (bodyData) {
+        if (bodyColumnsToFetch.has("request_body")) {
+          enrichedRow.request_body = bodyData.request || null;
+        }
+        if (bodyColumnsToFetch.has("response_body")) {
+          enrichedRow.response_body = bodyData.response || null;
+        }
+      } else {
+        // S3 fetch failed, set to null
+        for (const col of bodyColumnsToFetch) {
+          enrichedRow[col] = null;
+        }
+      }
+    }
+    // If storage_location is 'clickhouse' or anything else, use the value already in the row
+
+    // Remove metadata columns that were added for enrichment
+    delete enrichedRow.storage_location;
+    delete enrichedRow.cache_reference_id;
+
+    return enrichedRow;
+  }
+
+  private async fetchBodiesFromS3(
+    row: Record<string, any>
+  ): Promise<{ request: any; response: any } | null> {
+    try {
+      const requestId = row.request_id;
+      const requestIdForS3 = this.getRequestIdForS3(
+        requestId,
+        row.cache_reference_id
+      );
+
+      // Get signed URL for the request/response body
+      const signedUrlResult =
+        await this.s3Client.getRequestResponseBodySignedUrl(
+          this.authParams.organizationId,
+          requestIdForS3
+        );
+
+      if (signedUrlResult.error || !signedUrlResult.data) {
+        return null;
+      }
+
+      // Fetch and parse the body data from S3
+      return await this.fetchBodyFromS3Url(signedUrlResult.data);
+    } catch (error) {
+      console.error(`Failed to fetch bodies from S3:`, error);
+      return null;
+    }
   }
 
   private getRequestIdForS3(requestId: string, cacheReferenceId?: string): string {
@@ -438,65 +649,21 @@ export class HeliconeSqlManager {
     return requestId;
   }
 
-  private async fetchRowBodiesFromS3(
-    row: Record<string, any>
-  ): Promise<Record<string, any>> {
-    try {
-      const requestId = row.request_id;
-      const requestIdForS3 = this.getRequestIdForS3(requestId, row.cache_reference_id);
-      
-      // Get signed URL for the request/response body
-      const signedUrlResult = await this.s3Client.getRequestResponseBodySignedUrl(
-        this.authParams.organizationId,
-        requestIdForS3
-      );
-      
-      if (signedUrlResult.error || !signedUrlResult.data) {
-        return this.createRowWithNullBodies(row);
-      }
-      
-      // Fetch and parse the body data from S3
-      const bodyData = await this.fetchBodyFromS3Url(signedUrlResult.data);
-      
-      if (!bodyData) {
-        console.error(`Failed to fetch S3 content for request ${requestId}`);
-        return this.createRowWithNullBodies(row);
-      }
-      
-      return {
-        ...row,
-        request_body: bodyData.request || null,
-        response_body: bodyData.response || null,
-      };
-    } catch (error) {
-      console.error(`Failed to enrich row with S3 bodies:`, error);
-      return this.createRowWithNullBodies(row);
-    }
-  }
-
   private async fetchBodyFromS3Url(
     signedUrl: string
   ): Promise<{ request: any; response: any } | null> {
     try {
       const response = await fetch(signedUrl);
-      
+
       if (!response.ok) {
         return null;
       }
-      
+
       return await response.json();
     } catch (error) {
       console.error(`Failed to fetch from S3 URL:`, error);
       return null;
     }
-  }
-
-  private createRowWithNullBodies(row: Record<string, any>): Record<string, any> {
-    return {
-      ...row,
-      request_body: null,
-      response_body: null,
-    };
   }
 
   @Traced(
