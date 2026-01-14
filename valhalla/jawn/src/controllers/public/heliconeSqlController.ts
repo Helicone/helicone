@@ -93,6 +93,12 @@ function formatHqlError(error: HqlError | string | undefined): string {
   return `${codePrefix}${message}`;
 }
 
+// Formatter for TracedController decorator - matches expected type signature
+function formatTracedError(error: { statusCode?: number; code?: string; message: string }): string {
+  const codePrefix = error.code ? `[${error.code}] ` : '';
+  return `${codePrefix}${error.message}`;
+}
+
 @Route("v1/helicone-sql")
 @Tags("HeliconeSql")
 export class HeliconeSqlController extends Controller {
@@ -113,7 +119,7 @@ export class HeliconeSqlController extends Controller {
         "span.kind": "server",
       };
     },
-    formatError: formatHqlError,
+    formatError: formatTracedError,
     successStatus: 200,
   })
   public async getClickHouseSchema(
@@ -145,7 +151,7 @@ export class HeliconeSqlController extends Controller {
         "sql.length": requestBody.sql?.length || 0,
       };
     },
-    formatError: formatHqlError,
+    formatError: formatTracedError,
     successStatus: 200,
   })
   public async executeSql(
@@ -194,7 +200,7 @@ export class HeliconeSqlController extends Controller {
         "sql.length": requestBody.sql?.length || 0,
       };
     },
-    formatError: formatHqlError,
+    formatError: formatTracedError,
     successStatus: 200,
   })
   public async downloadCsv(
