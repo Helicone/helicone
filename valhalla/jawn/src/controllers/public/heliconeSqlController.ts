@@ -78,8 +78,16 @@ export type ExecuteSqlResponse = {
 };
 
 // Helper function to convert HqlError to string for API responses
-function formatHqlError(error: HqlError): string {
-  // Include error code in the response for frontend parsing
+function formatHqlError(error: HqlError | string | undefined): string {
+  // Handle string errors (raw error messages)
+  if (typeof error === 'string') {
+    return error;
+  }
+  // Handle undefined/null errors
+  if (!error) {
+    return 'An unexpected error occurred';
+  }
+  // Handle HqlError objects
   const codePrefix = error.code ? `[${error.code}] ` : '';
   const message = error.details ? `${error.message}: ${error.details}` : error.message;
   return `${codePrefix}${message}`;

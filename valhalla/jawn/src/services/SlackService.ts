@@ -52,6 +52,12 @@ export class SlackService {
   }
 
   public async initialize(): Promise<void> {
+    // Check if Slack bot is disabled via environment variable
+    if (process.env.DISABLE_SLACK_BOT === "true") {
+      console.log("Slack bot disabled via DISABLE_SLACK_BOT environment variable");
+      return;
+    }
+
     // Load configuration
     this.config.botToken = await GET_KEY("key:slack_bot_token");
     this.config.appToken = await GET_KEY("key:slack_app_token");
