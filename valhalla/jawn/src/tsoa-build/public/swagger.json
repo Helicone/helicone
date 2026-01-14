@@ -7704,6 +7704,12 @@
 					"avg_latency": {
 						"type": "number",
 						"format": "double"
+					},
+					"user_ids": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
 					}
 				},
 				"required": [
@@ -7716,7 +7722,8 @@
 					"prompt_tokens",
 					"completion_tokens",
 					"total_tokens",
-					"avg_latency"
+					"avg_latency",
+					"user_ids"
 				],
 				"type": "object",
 				"additionalProperties": false
