@@ -8902,6 +8902,12 @@
 					{
 						"properties": {},
 						"type": "object"
+					},
+					{
+						"type": "string",
+						"enum": [
+							"all"
+						]
 					}
 				]
 			},

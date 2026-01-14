@@ -126,6 +126,9 @@ export interface paths {
   "/v1/organization": {
     get: operations["GetOrganizations"];
   };
+  "/v1/organization/models": {
+    get: operations["GetModels"];
+  };
   "/v1/organization/{organizationId}": {
     get: operations["GetOrganization"];
   };
@@ -179,9 +182,6 @@ export interface paths {
   };
   "/v1/organization/update_onboarding": {
     post: operations["UpdateOnboardingStatus"];
-  };
-  "/v1/organization/models": {
-    get: operations["GetModels"];
   };
   "/v1/evaluator": {
     post: operations["CreateEvaluator"];
@@ -1119,6 +1119,14 @@ Json: JsonObject;
       error: null;
     };
     "Result__40_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-and-_role-string__41_-Array.string_": components["schemas"]["ResultSuccess__40_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-and-_role-string__41_-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__model-string_-Array_": {
+      data: {
+          model: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__model-string_-Array.string_": components["schemas"]["ResultSuccess__model-string_-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess_Database-at-public_91_Tables_93_-at-organization_91_Row_93__": {
       data: {
         tier: string | null;
@@ -1344,14 +1352,6 @@ Json: JsonObject;
       };
     };
     OnboardingStatus: components["schemas"]["Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--hasCompletedQuickstart-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___"];
-    "ResultSuccess__model-string_-Array_": {
-      data: {
-          model: string;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__model-string_-Array.string_": components["schemas"]["ResultSuccess__model-string_-Array_"] | components["schemas"]["ResultError_string_"];
     EvaluatorResult: {
       id: string;
       created_at: string;
@@ -17525,6 +17525,16 @@ export interface operations {
       };
     };
   };
+  GetModels: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__model-string_-Array.string_"];
+        };
+      };
+    };
+  };
   GetOrganization: {
     parameters: {
       path: {
@@ -17830,16 +17840,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  GetModels: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__model-string_-Array.string_"];
         };
       };
     };
