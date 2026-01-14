@@ -1,7 +1,7 @@
 /**
- * Unit tests for Token Bucket Algorithm
+ * Unit tests for Bucket Algorithm
  *
- * Tests the core token bucket rate limiting algorithm:
+ * Tests the core bucket rate limiting algorithm:
  * - Token consumption
  * - Lazy refill calculations
  * - Policy change handling
@@ -10,10 +10,10 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-describe("TokenBucket Algorithm", () => {
+describe("Bucket Algorithm", () => {
   /**
-   * Pure function implementation of token bucket for testing
-   * This mirrors the algorithm in TokenBucketRateLimiterDO
+   * Pure function implementation of bucket for testing
+   * This mirrors the algorithm in BucketRateLimiterDO
    */
   interface BucketState {
     tokens: number;

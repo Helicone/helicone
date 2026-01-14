@@ -1,4 +1,4 @@
-import { RateLimitHeaders } from "./rate-limit/tokenBucketClient";
+import { RateLimitHeaders } from "./rate-limit/bucketClient";
 
 export interface BuildParams {
   body: BodyInit | null;

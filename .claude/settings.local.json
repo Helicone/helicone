@@ -103,7 +103,8 @@
       "Bash(yarn cf-typegen:*)",
       "WebFetch(domain:docs.stripe.com)",
       "Bash(npx tsoa:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(git mv:*)"
     ],
     "deny": []
   },

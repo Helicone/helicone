@@ -1,18 +1,18 @@
 /**
  * Rate Limiting Module
  *
- * Provides token bucket rate limiting for the Helicone AI Gateway.
+ * Provides bucket rate limiting for the Helicone AI Gateway.
  *
  * Usage:
  * ```typescript
- * import { checkTokenBucketRateLimit } from './rate-limit';
+ * import { checkBucketRateLimit } from './rate-limit';
  *
- * const result = await checkTokenBucketRateLimit({
+ * const result = await checkBucketRateLimit({
  *   policyHeader: request.headers.get('Helicone-RateLimit-Policy'),
  *   organizationId: orgData.organizationId,
  *   userId: proxyRequest.userId,
  *   heliconeProperties: proxyRequest.heliconeProperties,
- *   rateLimiterDO: env.TOKEN_BUCKET_RATE_LIMITER,
+ *   rateLimiterDO: env.BUCKET_RATE_LIMITER,
  * });
  *
  * if (!result.allowed) {
@@ -42,13 +42,13 @@ export {
   type HeliconePropertySource,
 } from "./segmentExtractor";
 
-// Token bucket client
+// Bucket client
 export {
-  checkTokenBucketRateLimit,
-  checkTokenBucketRateLimitOnly,
-  recordTokenBucketUsage,
+  checkBucketRateLimit,
+  checkBucketRateLimitOnly,
+  recordBucketUsage,
   buildRateLimitResponseHeaders,
   type RateLimitCheckResult,
   type RateLimitHeaders,
-  type TokenBucketClientConfig,
-} from "./tokenBucketClient";
+  type BucketClientConfig,
+} from "./bucketClient";

@@ -1,7 +1,7 @@
 import { DurableObject } from "cloudflare:workers";
 
 /**
- * Token Bucket Rate Limiter Durable Object
+ * Bucket Rate Limiter Durable Object
  *
  * Implements a token bucket algorithm for rate limiting with the following properties:
  * - capacity: Maximum tokens (quota from policy)
@@ -45,7 +45,7 @@ import { DurableObject } from "cloudflare:workers";
  *   - `tb:org123:prop:organization:org789:cents`
  */
 
-export interface TokenBucketRequest {
+export interface BucketRequest {
   /** Maximum tokens (requests or cents) */
   capacity: number;
   /** Time window in seconds (min 60) */
@@ -60,7 +60,7 @@ export interface TokenBucketRequest {
   checkOnly?: boolean;
 }
 
-export interface TokenBucketResponse {
+export interface BucketResponse {
   /** Whether the request is allowed */
   allowed: boolean;
   /** Current limit (capacity) */
@@ -73,7 +73,7 @@ export interface TokenBucketResponse {
   policy: string;
 }
 
-interface TokenBucketState {
+interface BucketState {
   /** Current token count */
   tokens: number;
   /** Timestamp of last refill in ms */
@@ -90,7 +90,7 @@ interface TokenBucketState {
 
 const STORAGE_KEY = "bucket_state";
 
-export class TokenBucketRateLimiterDO extends DurableObject {
+export class BucketRateLimiterDO extends DurableObject {
   private state: DurableObjectState;
 
   constructor(state: DurableObjectState, env: Env) {
@@ -109,12 +109,11 @@ export class TokenBucketRateLimiterDO extends DurableObject {
    * 5. Persist state
    * 6. Return result with rate limit info
    */
-  async consume(req: TokenBucketRequest): Promise<TokenBucketResponse> {
+  async consume(req: BucketRequest): Promise<BucketResponse> {
     // Validate inputs
     const validationError = this.validateRequest(req);
     if (validationError) {
-      console.error(`[TokenBucket] Validation error: ${validationError}`);
-      // Fail open on validation errors - allow the request but log
+      // Fail open on validation errors - allow the request
       return {
         allowed: true,
         limit: req.capacity,
@@ -127,63 +126,46 @@ export class TokenBucketRateLimiterDO extends DurableObject {
     const now = Date.now();
     const policyHash = this.hashPolicy(req.policyString);
 
-    console.log(
-      `[TokenBucketDO] consume called - capacity: ${req.capacity}, window: ${req.windowSeconds}s, ` +
-        `unit: ${req.unit}, cost: ${req.cost}, checkOnly: ${req.checkOnly}`
-    );
-
     // Use blockConcurrencyWhile for atomic read-modify-write
     return await this.state.blockConcurrencyWhile(async () => {
       // Load existing state or initialize
       let bucketState = await this.loadState();
 
-      console.log(
-        `[TokenBucketDO] Loaded state - tokens: ${bucketState?.tokens}, lastRefillMs: ${bucketState?.lastRefillMs}`
-      );
-
       // Handle policy changes or initialize new bucket
       if (!bucketState || bucketState.policyHash !== policyHash) {
-        bucketState = this.handlePolicyChange(bucketState, req, policyHash, now);
+        bucketState = this.handlePolicyChange(
+          bucketState,
+          req,
+          policyHash,
+          now
+        );
       }
 
       // Compute lazy refill
-      const tokensBeforeRefill = bucketState.tokens;
       bucketState = this.refill(bucketState, req, now);
-      console.log(
-        `[TokenBucketDO] After refill - tokens: ${bucketState.tokens} (was ${tokensBeforeRefill})`
-      );
 
       // Check if we have enough tokens
       // For cents-based checkOnly (pre-request): just check if tokens > 0 (any budget left)
       // For everything else: check tokens >= cost
       const cost = this.normalizeCost(req.cost);
-      const hasCapacity = (req.unit === "cents" && req.checkOnly)
-        ? bucketState.tokens > 0  // Any budget remaining?
-        : bucketState.tokens >= cost;
-
-      console.log(
-        `[TokenBucketDO] Capacity check - tokens: ${bucketState.tokens}, cost: ${cost}, hasCapacity: ${hasCapacity}, checkOnly: ${req.checkOnly}, unit: ${req.unit}`
-      );
+      const hasCapacity =
+        req.unit === "cents" && req.checkOnly
+          ? bucketState.tokens > 0 // Any budget remaining?
+          : bucketState.tokens >= cost;
 
       // Deduct tokens based on unit type (see header comment for full explanation):
       // - "request": Only deduct if allowed (preemptive, prevents race conditions)
       // - "cents": Always deduct actual cost (post-request, cost unknown upfront)
-      const shouldDeduct = !req.checkOnly && (hasCapacity || req.unit === "cents");
+      const shouldDeduct =
+        !req.checkOnly && (hasCapacity || req.unit === "cents");
 
       if (shouldDeduct) {
-        const tokensBefore = bucketState.tokens;
         // For cents: allow negative (overspend by one request is acceptable)
         // For request: clamp to 0 (should never go negative since we check first)
-        bucketState.tokens = req.unit === "cents"
-          ? bucketState.tokens - cost
-          : Math.max(0, bucketState.tokens - cost);
-        console.log(
-          `[TokenBucketDO] Deducted tokens - was: ${tokensBefore}, now: ${bucketState.tokens}, deducted: ${cost}, hadCapacity: ${hasCapacity}`
-        );
-      } else if (req.checkOnly) {
-        console.log(`[TokenBucketDO] Check-only mode, not deducting tokens`);
-      } else {
-        console.log(`[TokenBucketDO] Request denied (unit=${req.unit}), preserving ${bucketState.tokens} tokens for refill`);
+        bucketState.tokens =
+          req.unit === "cents"
+            ? bucketState.tokens - cost
+            : Math.max(0, bucketState.tokens - cost);
       }
 
       // Calculate remaining (after potential deduction)
@@ -198,10 +180,6 @@ export class TokenBucketRateLimiterDO extends DurableObject {
       // Persist state
       await this.saveState(bucketState);
 
-      console.log(
-        `[TokenBucketDO] Result - allowed: ${hasCapacity}, remaining: ${remaining}, resetSeconds: ${resetSeconds}`
-      );
-
       return {
         allowed: hasCapacity,
         limit: req.capacity,
@@ -215,7 +193,7 @@ export class TokenBucketRateLimiterDO extends DurableObject {
   /**
    * Get current bucket state (for debugging/monitoring)
    */
-  async getState(): Promise<TokenBucketState | null> {
+  async getState(): Promise<BucketState | null> {
     return await this.loadState();
   }
 
@@ -228,12 +206,12 @@ export class TokenBucketRateLimiterDO extends DurableObject {
 
   // --- Private methods ---
 
-  private async loadState(): Promise<TokenBucketState | null> {
-    const state = await this.state.storage.get<TokenBucketState>(STORAGE_KEY);
+  private async loadState(): Promise<BucketState | null> {
+    const state = await this.state.storage.get<BucketState>(STORAGE_KEY);
     return state ?? null;
   }
 
-  private async saveState(state: TokenBucketState): Promise<void> {
+  private async saveState(state: BucketState): Promise<void> {
     await this.state.storage.put(STORAGE_KEY, state);
   }
 
@@ -243,14 +221,13 @@ export class TokenBucketRateLimiterDO extends DurableObject {
    * - If new bucket, initialize with full capacity
    */
   private handlePolicyChange(
-    existing: TokenBucketState | null,
-    req: TokenBucketRequest,
+    existing: BucketState | null,
+    req: BucketRequest,
     policyHash: string,
     now: number
-  ): TokenBucketState {
+  ): BucketState {
     if (!existing) {
       // New bucket: start with full capacity
-      console.log(`[TokenBucket] Initializing new bucket with capacity ${req.capacity}`);
       return {
         tokens: req.capacity,
         lastRefillMs: now,
@@ -262,10 +239,6 @@ export class TokenBucketRateLimiterDO extends DurableObject {
     }
 
     // Policy changed: preserve tokens but clamp to new capacity
-    console.log(
-      `[TokenBucket] Policy changed. Old: ${existing.capacity}/${existing.windowSeconds}s, New: ${req.capacity}/${req.windowSeconds}s`
-    );
-
     return {
       tokens: Math.min(existing.tokens, req.capacity),
       lastRefillMs: now,
@@ -282,10 +255,10 @@ export class TokenBucketRateLimiterDO extends DurableObject {
    * Formula: tokens = min(capacity, tokens + elapsedSeconds * refillRate)
    */
   private refill(
-    state: TokenBucketState,
-    req: TokenBucketRequest,
+    state: BucketState,
+    req: BucketRequest,
     now: number
-  ): TokenBucketState {
+  ): BucketState {
     const elapsedMs = now - state.lastRefillMs;
     if (elapsedMs <= 0) {
       return state;
@@ -318,7 +291,7 @@ export class TokenBucketRateLimiterDO extends DurableObject {
   /**
    * Validate request parameters
    */
-  private validateRequest(req: TokenBucketRequest): string | null {
+  private validateRequest(req: BucketRequest): string | null {
     if (typeof req.capacity !== "number" || req.capacity <= 0) {
       return "capacity must be a positive number";
     }

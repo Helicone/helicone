@@ -1,8 +1,8 @@
 /**
- * Token Bucket Rate Limiter Client
+ * Bucket Rate Limiter Client
  *
  * Provides the interface for the worker to interact with the
- * TokenBucketRateLimiterDO for rate limiting decisions.
+ * BucketRateLimiterDO for rate limiting decisions.
  *
  * Features:
  * - Parses policy from request headers
@@ -14,22 +14,22 @@
  * Flow differs by unit type:
  *
  * REQUEST-based (unit="request"):
- *   1. checkTokenBucketRateLimit() → checks AND deducts in one call
+ *   1. checkBucketRateLimit() → checks AND deducts in one call
  *   2. Request proceeds or is denied
  *   3. No post-request action needed
  *
  * COST-based (unit="cents"):
- *   1. checkTokenBucketRateLimit() → checkOnly=true, verifies capacity exists
+ *   1. checkBucketRateLimit() → checkOnly=true, verifies capacity exists
  *   2. Request proceeds (cost unknown until LLM responds)
- *   3. recordTokenBucketUsage() → deducts actual cost post-request
+ *   3. recordBucketUsage() → deducts actual cost post-request
  *
- * See TokenBucketRateLimiterDO header comment for detailed rationale.
+ * See BucketRateLimiterDO header comment for detailed rationale.
  */
 
 import {
-  TokenBucketRateLimiterDO,
-  TokenBucketResponse,
-} from "../durable-objects/TokenBucketRateLimiterDO";
+  BucketRateLimiterDO,
+  BucketResponse,
+} from "../durable-objects/BucketRateLimiterDO";
 import {
   parseRateLimitPolicy,
   ParsedRateLimitPolicy,
@@ -68,7 +68,7 @@ export interface RateLimitHeaders {
 /**
  * Configuration for the rate limiter client
  */
-export interface TokenBucketClientConfig {
+export interface BucketClientConfig {
   /**
    * Behavior when rate limiter encounters an error:
    * - "fail-open": Allow the request (default, preserves availability)
@@ -82,7 +82,7 @@ export interface TokenBucketClientConfig {
   defaultCostCents: number;
 }
 
-const DEFAULT_CONFIG: TokenBucketClientConfig = {
+const DEFAULT_CONFIG: BucketClientConfig = {
   failureMode: "fail-open",
   defaultCostCents: 0, // Reject cost-based policies without explicit cost
 };
@@ -93,7 +93,7 @@ const DEFAULT_CONFIG: TokenBucketClientConfig = {
  * @param params - Rate limit check parameters
  * @returns Rate limit check result
  */
-export async function checkTokenBucketRateLimit(params: {
+export async function checkBucketRateLimit(params: {
   /** The Helicone-RateLimit-Policy header value */
   policyHeader: string | null | undefined;
   /** Organization ID for bucket isolation */
@@ -102,12 +102,12 @@ export async function checkTokenBucketRateLimit(params: {
   userId: string | undefined;
   /** Properties from Helicone-Property-* headers */
   heliconeProperties: Record<string, string>;
-  /** DO namespace for the token bucket rate limiter */
-  rateLimiterDO: DurableObjectNamespace<TokenBucketRateLimiterDO>;
+  /** DO namespace for the bucket rate limiter */
+  rateLimiterDO: DurableObjectNamespace<BucketRateLimiterDO>;
   /** Cost in cents (for u=cents policies) */
   costCents?: number;
   /** Optional configuration overrides */
-  config?: Partial<TokenBucketClientConfig>;
+  config?: Partial<BucketClientConfig>;
 }): Promise<RateLimitCheckResult> {
   const config = { ...DEFAULT_CONFIG, ...params.config };
 
@@ -115,9 +115,6 @@ export async function checkTokenBucketRateLimit(params: {
   const policyResult = parseRateLimitPolicy(params.policyHeader);
 
   if (policyResult.error) {
-    console.error(
-      `[TokenBucket] Policy parsing error: ${policyResult.error.message}`
-    );
     return createErrorResult(
       `Invalid rate limit policy: ${policyResult.error.message}`,
       config.failureMode
@@ -148,9 +145,6 @@ export async function checkTokenBucketRateLimit(params: {
   );
 
   if (segmentResult.error) {
-    console.error(
-      `[TokenBucket] Segment extraction error: ${segmentResult.error.message}`
-    );
     return createErrorResult(
       segmentResult.error.message,
       config.failureMode,
@@ -167,20 +161,17 @@ export async function checkTokenBucketRateLimit(params: {
     params.costCents === undefined &&
     config.defaultCostCents <= 0;
 
-  console.log(
-    `[TokenBucket] CHECK - unit: ${policy.unit}, quota: ${policy.quota}, window: ${policy.windowSeconds}s, ` +
-      `explicitCost: ${params.costCents}, isCentsWithoutCost: ${isCentsWithoutCost}`
+  // Determine cost (use check-only mode for cents without explicit cost)
+  const cost = determineCost(
+    policy,
+    params.costCents,
+    config,
+    isCentsWithoutCost
   );
 
-  // Determine cost (use check-only mode for cents without explicit cost)
-  const cost = determineCost(policy, params.costCents, config, isCentsWithoutCost);
-
   if (cost.error) {
-    console.error(`[TokenBucket] Cost determination error: ${cost.error}`);
     return createErrorResult(cost.error, config.failureMode, policy);
   }
-
-  console.log(`[TokenBucket] CHECK - determined cost: ${cost.data}, checkOnly: ${isCentsWithoutCost}`);
 
   // Build DO key
   const doKey = buildDurableObjectKey(
@@ -188,8 +179,6 @@ export async function checkTokenBucketRateLimit(params: {
     segment,
     policy.unit
   );
-
-  console.log(`[TokenBucket] CHECK - DO key: ${doKey}`);
 
   // Call the Durable Object
   try {
@@ -203,20 +192,14 @@ export async function checkTokenBucketRateLimit(params: {
       cost: cost.data!,
       policyString: policy.policyString,
       // For cents without explicit cost: check-only (don't consume tokens yet)
-      // Actual consumption happens post-request via recordTokenBucketUsage
+      // Actual consumption happens post-request via recordBucketUsage
       checkOnly: isCentsWithoutCost,
     });
-
-    console.log(
-      `[TokenBucket] CHECK RESULT - allowed: ${response.allowed}, remaining: ${response.remaining}, ` +
-        `limit: ${response.limit}, resetSeconds: ${response.resetSeconds}`
-    );
 
     return createSuccessResult(response, policy);
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown DO error";
-    console.error(`[TokenBucket] DO error: ${errorMessage}`);
 
     return createErrorResult(
       `Rate limiter error: ${errorMessage}`,
@@ -229,14 +212,14 @@ export async function checkTokenBucketRateLimit(params: {
 /**
  * Check rate limit without consuming tokens (for pre-check scenarios)
  */
-export async function checkTokenBucketRateLimitOnly(params: {
+export async function checkBucketRateLimitOnly(params: {
   policyHeader: string | null | undefined;
   organizationId: string;
   userId: string | undefined;
   heliconeProperties: Record<string, string>;
-  rateLimiterDO: DurableObjectNamespace<TokenBucketRateLimiterDO>;
+  rateLimiterDO: DurableObjectNamespace<BucketRateLimiterDO>;
   costCents?: number;
-  config?: Partial<TokenBucketClientConfig>;
+  config?: Partial<BucketClientConfig>;
 }): Promise<RateLimitCheckResult> {
   const config = { ...DEFAULT_CONFIG, ...params.config };
 
@@ -297,7 +280,6 @@ export async function checkTokenBucketRateLimitOnly(params: {
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown DO error";
-    console.error(`[TokenBucket] DO error (check only): ${errorMessage}`);
     return createErrorResult(
       `Rate limiter error: ${errorMessage}`,
       config.failureMode,
@@ -309,21 +291,16 @@ export async function checkTokenBucketRateLimitOnly(params: {
 /**
  * Update rate limit counter after successful request (for post-request cost recording)
  */
-export async function recordTokenBucketUsage(params: {
+export async function recordBucketUsage(params: {
   policyHeader: string | null | undefined;
   organizationId: string;
   userId: string | undefined;
   heliconeProperties: Record<string, string>;
-  rateLimiterDO: DurableObjectNamespace<TokenBucketRateLimiterDO>;
+  rateLimiterDO: DurableObjectNamespace<BucketRateLimiterDO>;
   costCents: number;
 }): Promise<void> {
-  console.log(
-    `[TokenBucket] RECORD USAGE called - policyHeader: ${params.policyHeader}, costCents: ${params.costCents}`
-  );
-
   const policyResult = parseRateLimitPolicy(params.policyHeader);
   if (policyResult.error || !policyResult.data) {
-    console.log(`[TokenBucket] RECORD USAGE - no valid policy, skipping`);
     return;
   }
 
@@ -331,15 +308,8 @@ export async function recordTokenBucketUsage(params: {
 
   // Only record for cents-based policies
   if (policy.unit !== "cents") {
-    console.log(
-      `[TokenBucket] RECORD USAGE - unit is ${policy.unit}, not cents, skipping`
-    );
     return;
   }
-
-  console.log(
-    `[TokenBucket] RECORD USAGE - recording ${params.costCents} cents for policy ${policy.quota};w=${policy.windowSeconds};u=cents`
-  );
 
   const propertySource = createPropertySourceFromHeaders(
     params.heliconeProperties,
@@ -351,9 +321,6 @@ export async function recordTokenBucketUsage(params: {
     propertySource
   );
   if (segmentResult.error) {
-    console.error(
-      `[TokenBucket] Cannot record usage: ${segmentResult.error.message}`
-    );
     return;
   }
 
@@ -364,14 +331,12 @@ export async function recordTokenBucketUsage(params: {
     policy.unit
   );
 
-  console.log(`[TokenBucket] RECORD USAGE - DO key: ${doKey}`);
-
   try {
     const doId = params.rateLimiterDO.idFromName(doKey);
     const doStub = params.rateLimiterDO.get(doId);
 
     // Consume the actual cost
-    const response = await doStub.consume({
+    await doStub.consume({
       capacity: policy.quota,
       windowSeconds: policy.windowSeconds,
       unit: policy.unit,
@@ -379,14 +344,8 @@ export async function recordTokenBucketUsage(params: {
       policyString: policy.policyString,
       checkOnly: false,
     });
-
-    console.log(
-      `[TokenBucket] RECORD USAGE RESULT - allowed: ${response.allowed}, remaining: ${response.remaining}, consumed: ${params.costCents} cents`
-    );
-  } catch (error) {
-    console.error(
-      `[TokenBucket] Failed to record usage: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
+  } catch {
+    // Silently fail - usage recording is best-effort
   }
 }
 
@@ -395,7 +354,7 @@ export async function recordTokenBucketUsage(params: {
 function determineCost(
   policy: ParsedRateLimitPolicy,
   explicitCost: number | undefined,
-  config: TokenBucketClientConfig,
+  config: BucketClientConfig,
   isCheckOnly: boolean = false
 ): Result<number, string> {
   if (policy.unit === "request") {
@@ -427,7 +386,7 @@ function determineCost(
 }
 
 function createSuccessResult(
-  response: TokenBucketResponse,
+  response: BucketResponse,
   policy: ParsedRateLimitPolicy
 ): RateLimitCheckResult {
   const headers: RateLimitHeaders = {

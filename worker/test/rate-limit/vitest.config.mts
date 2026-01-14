@@ -13,14 +13,16 @@ export default defineWorkersConfig({
             WORKER_TYPE: "AI_GATEWAY_API",
           },
           durableObjects: {
-            TOKEN_BUCKET_RATE_LIMITER: {
-              className: "TokenBucketRateLimiterDO",
+            BUCKET_RATE_LIMITER: {
+              className: "BucketRateLimiterDO",
             },
           },
         },
       },
     },
-    setupFiles: ["./../setup.ts"],
+    setupFiles: [
+      new URL("../setup.ts", import.meta.url).pathname,
+    ],
   },
   resolve: {
     alias: {

@@ -62,7 +62,8 @@ export function parseRateLimitPolicy(
   // Format: [quota];w=[window];u=[unit];s=[segment]
   // Only quota and w are required; u and s are optional
   // Quota supports decimals (e.g., "0.5;w=60;u=cents" for half a cent)
-  const regex = /^(\d+(?:\.\d+)?);w=(\d+)(?:;u=(request|cents))?(?:;s=([\w-]+))?$/i;
+  const regex =
+    /^(\d+(?:\.\d+)?);w=(\d+)(?:;u=(request|cents))?(?:;s=([\w-]+))?$/i;
   const match = trimmed.match(regex);
 
   if (!match) {
