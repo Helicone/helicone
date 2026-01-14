@@ -32,7 +32,7 @@ export const endpoints = {
       rpm: 10,
       tpm: 4_000_000,
     },
-    ptbEnabled: true,
+    ptbEnabled: false,
     responseFormat: "GOOGLE",
     endpointConfigs: {
       "*": {},
@@ -65,7 +65,7 @@ export const endpoints = {
       "top_p",
     ],
     responseFormat: "GOOGLE",
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       global: {
         providerModelId: "gemini-2.0-flash-exp",
@@ -97,7 +97,7 @@ export const endpoints = {
       "temperature",
       "top_p",
     ],
-    ptbEnabled: true,
+    ptbEnabled: false,
     endpointConfigs: {
       "*": {},
     },

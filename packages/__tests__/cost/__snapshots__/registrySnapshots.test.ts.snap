@@ -2054,7 +2054,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "google-ai-studio",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -2073,7 +2073,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "openrouter",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -2092,7 +2092,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "vertex",
-      "ptbEnabled": true,
+      "ptbEnabled": false,
       "regions": [
         "global",
       ],
@@ -9487,7 +9487,6 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "deepseek-v3.1-terminus",
     "deepseek-v3.2",
     "ernie-4.5-21b-a3b-thinking",
-    "gemini-2.0-flash-exp",
     "gemini-2.5-flash",
     "gemini-2.5-flash-lite",
     "gemini-2.5-pro",
@@ -9578,7 +9577,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
   "totalArchivedConfigs": 0,
   "totalEndpoints": 288,
   "totalModelProviderConfigs": 288,
-  "totalModelsWithPtb": 101,
+  "totalModelsWithPtb": 100,
   "totalProviders": 21,
 }
 `;
