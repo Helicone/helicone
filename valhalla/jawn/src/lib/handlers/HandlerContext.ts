@@ -16,7 +16,7 @@ export class HandlerContext extends SetOnce {
   public legacyUsage: Usage;
   public usage?: ModelUsage;
   public costBreakdown?: CostBreakdown;
-  public storageLocation?: "s3" | "clickhouse";
+  public storageLocation?: "s3" | "clickhouse" | "not_stored_exceeded_free";
   public sizeBytes?: number;
   public rawLog: RawLog;
   public processedLog: ProcessedLog;
@@ -139,6 +139,9 @@ export type HeliconeMeta = {
   gatewayModel?: string; // registry format
   providerModelId?: string; // provider format
   aiGatewayBodyMapping?: BodyMappingType; // body mapping type
+
+  // Free tier limit
+  freeLimitExceeded?: boolean;
 };
 
 export type KafkaMessageContents = {

@@ -807,6 +807,7 @@ export class DBLoggable {
           this.request.attempt?.endpoint.providerModelId ?? undefined,
         stripeCustomerId: requestHeaders.stripeCustomerId ?? undefined,
         aiGatewayBodyMapping: aiGatewayBodyMapping ?? undefined,
+        freeLimitExceeded: org.data.freeLimitExceeded ?? undefined,
       },
       log: {
         request: {

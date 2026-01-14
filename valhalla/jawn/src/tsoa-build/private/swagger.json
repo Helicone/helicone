@@ -7046,6 +7046,9 @@
 			},
 			"HeliconeMeta": {
 				"properties": {
+					"freeLimitExceeded": {
+						"type": "boolean"
+					},
 					"aiGatewayBodyMapping": {
 						"$ref": "#/components/schemas/BodyMappingType"
 					},

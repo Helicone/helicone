@@ -32,6 +32,9 @@ export type HeliconeMeta = {
   gatewayModel?: string; // registry format
   providerModelId?: string; // provider format
   aiGatewayBodyMapping?: BodyMappingType; // body mapping type
+
+  // Free tier limit
+  freeLimitExceeded?: boolean;
 };
 export type MessageData = {
   id: string;

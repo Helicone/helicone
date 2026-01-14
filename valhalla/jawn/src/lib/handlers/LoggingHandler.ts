@@ -171,9 +171,16 @@ export class LoggingHandler extends AbstractLogHandler {
       });
 
       context.sizeBytes = size ?? 0;
-      // if we know size is def less than 10mb use clickhouse otherwise just stick to s3
-      context.storageLocation =
-        size && size <= S3_MIN_SIZE_THRESHOLD ? "clickhouse" : "s3";
+      // Determine storage location:
+      // 1. If free tier limit exceeded, bodies were not stored
+      // 2. If size is small enough, use clickhouse
+      // 3. Otherwise use s3
+      if (context.message.heliconeMeta.freeLimitExceeded) {
+        context.storageLocation = "not_stored_exceeded_free";
+      } else {
+        context.storageLocation =
+          size && size <= S3_MIN_SIZE_THRESHOLD ? "clickhouse" : "s3";
+      }
 
       const requestMapped = this.mapRequest(context);
       const responseMapped = this.mapResponse(context);
@@ -634,6 +641,13 @@ export class LoggingHandler extends AbstractLogHandler {
     responseText: string;
   } {
     try {
+      // If free tier limit exceeded, bodies were not stored
+      if (context.storageLocation === "not_stored_exceeded_free") {
+        return {
+          requestText: "",
+          responseText: "",
+        };
+      }
       if (context.storageLocation === "clickhouse") {
         return {
           requestText: JSON.stringify(context.processedLog.request.body),
