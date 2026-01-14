@@ -349,7 +349,7 @@ export class DBWrapper {
             false,
         });
       },
-      43200 // 12 hours
+      600 // 10 minutes - shorter TTL so freeLimitExceeded flag updates quickly after upgrade
     );
   }
 
