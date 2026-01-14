@@ -13,6 +13,7 @@ import {
   useRequestRenderModeStore,
 } from "@/store/requestRenderModeStore";
 import { useMemo } from "react";
+import { AlertTriangle } from "lucide-react";
 import { LuChevronsLeftRight } from "react-icons/lu";
 import { Assistant } from "./components/assistant/Assistant";
 import Chat from "./components/Chat";
@@ -24,6 +25,7 @@ import Json from "./components/Json";
 import { Realtime } from "./components/Realtime";
 import { Tool } from "./components/tool/Tool";
 import { VectorDB } from "./components/vector-db/VectorDB";
+import Link from "next/link";
 
 export default function RenderHeliconeRequest({
   heliconeRequest,
@@ -79,6 +81,10 @@ export function RenderMappedRequest({
   const { mode, toggleMode, setMode } = useRequestRenderModeStore();
   const isShiftPressed = useShiftKeyPress();
 
+  // Check if bodies were not stored due to free tier limit
+  const bodiesNotStored =
+    mappedRequest.heliconeMetadata.storageLocation === "not_stored_exceeded_free";
+
   // Check if request had an error first
   const hasError =
     !(
@@ -86,6 +92,35 @@ export function RenderMappedRequest({
       mappedRequest.heliconeMetadata.status.code < 300
     ) ||
     (mappedRequest.schema.response as any)?.error === "HTML response detected:";
+
+  // Show message when bodies weren't stored due to free tier limit
+  if (bodiesNotStored) {
+    return (
+      <div
+        className={`relative h-full w-full ${className} rounded-lg border border-border bg-sidebar-background`}
+      >
+        <div className="flex h-full flex-col items-center justify-center gap-4 p-8 text-center">
+          <div className="rounded-full bg-destructive/10 p-4">
+            <AlertTriangle className="h-8 w-8 text-destructive" />
+          </div>
+          <div className="flex flex-col gap-2">
+            <h3 className="text-lg font-semibold text-foreground">
+              Request/Response Bodies Not Stored
+            </h3>
+            <p className="max-w-md text-sm text-muted-foreground">
+              This request exceeded your free tier limit of 10,000 requests per
+              month. Only metadata (status, latency, tokens, cost) was recorded.
+            </p>
+          </div>
+          <Link href="/settings/billing">
+            <Button variant="default" size="sm">
+              Upgrade to Pro
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   // Use switch statement for rendering different types
   return (

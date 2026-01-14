@@ -696,10 +696,10 @@ export class DBLoggable {
       await this.response.getResponseBody();
 
     // Skip S3 storage if:
-    // 1. Free tier limit exceeded
+    // 1. Free tier AND limit exceeded (both conditions must be true)
     // 2. Omit request/response headers are set
     const skipS3Storage =
-      org.data.freeLimitExceeded === true ||
+      (org.data.tier === "free" && org.data.freeLimitExceeded === true) ||
       requestHeaders?.omitHeaders?.omitRequest === true ||
       requestHeaders?.omitHeaders?.omitResponse === true;
 
@@ -807,7 +807,11 @@ export class DBLoggable {
           this.request.attempt?.endpoint.providerModelId ?? undefined,
         stripeCustomerId: requestHeaders.stripeCustomerId ?? undefined,
         aiGatewayBodyMapping: aiGatewayBodyMapping ?? undefined,
-        freeLimitExceeded: org.data.freeLimitExceeded ?? undefined,
+        // Only mark as exceeded if tier is free AND limit is exceeded
+        freeLimitExceeded:
+          org.data.tier === "free" && org.data.freeLimitExceeded
+            ? true
+            : undefined,
       },
       log: {
         request: {
