@@ -128,7 +128,16 @@ export async function proxyForwarder(
     }
   }
 
-  let finalRateLimitOptions = proxyRequest.rateLimitOptions;
+  // Check if using new token bucket rate limiter (via Helicone-RateLimit-Policy header)
+  // If so, skip the old sliding window rate limiter to avoid conflicts
+  const rateLimitPolicyHeader =
+    proxyRequest.requestWrapper.heliconeHeaders.rateLimitPolicy;
+  const useTokenBucketRateLimiter = !!rateLimitPolicyHeader;
+
+  // Old sliding window rate limiter (only run if NOT using token bucket)
+  let finalRateLimitOptions = useTokenBucketRateLimiter
+    ? null
+    : proxyRequest.rateLimitOptions;
   if (finalRateLimitOptions || proxyRequest.isRateLimitedKey) {
     const { data: auth, error: authError } = await request.auth();
     if (authError === null) {
@@ -181,9 +190,7 @@ export async function proxyForwarder(
   }
 
   // Token Bucket Rate Limiting (via Helicone-RateLimit-Policy header)
-  const rateLimitPolicyHeader =
-    proxyRequest.requestWrapper.heliconeHeaders.rateLimitPolicy;
-  if (rateLimitPolicyHeader && !rateLimited) {
+  if (useTokenBucketRateLimiter && !rateLimited) {
     const { data: auth, error: authError } = await request.auth();
     if (authError === null) {
       const db = new DBWrapper(env, auth);
@@ -277,7 +284,8 @@ export async function proxyForwarder(
             response.status,
             undefined,
             undefined,
-            undefined
+            undefined,
+            useTokenBucketRateLimiter
           )
         );
 
@@ -348,7 +356,8 @@ export async function proxyForwarder(
           moderationRes.response?.status ?? 500,
           undefined,
           undefined,
-          undefined
+          undefined,
+          useTokenBucketRateLimiter
         )
       );
 
@@ -444,7 +453,8 @@ export async function proxyForwarder(
         response.status,
         undefined,
         undefined,
-        undefined
+        undefined,
+        useTokenBucketRateLimiter
       )
     );
   }
@@ -490,7 +500,8 @@ async function log(
   statusCode: number,
   S3_ENABLED?: Env["S3_ENABLED"],
   cachedResponse?: Response,
-  cacheSettings?: CacheSettings
+  cacheSettings?: CacheSettings,
+  useTokenBucketRateLimiter?: boolean
 ) {
   const { data: auth, error: authError } = await request.auth();
 
@@ -512,7 +523,10 @@ async function log(
     return;
   }
 
-  const finalRateLimitOptions = proxyRequest.rateLimitOptions;
+  // Skip old sliding window rate limiter counter update when using token bucket
+  const finalRateLimitOptions = useTokenBucketRateLimiter
+    ? null
+    : proxyRequest.rateLimitOptions;
 
   // Start logging in parallel with response processing
   const logPromise = loggable.log(
