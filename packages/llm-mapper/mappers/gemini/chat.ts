@@ -235,22 +235,84 @@ export const mapGeminiPro: MapperFn<any, any> = ({
 
   const firstContent = response[0]?.candidates?.[0]?.content;
 
-  const responseMessages: Message | undefined =
-    combinedContent || functionCall
-      ? {
-          role: firstContent?.role ?? "model",
-          content: combinedContent || undefined,
-          tool_calls: functionCall
-            ? [
-                {
-                  name: functionCall.name,
-                  arguments: JSON.parse(JSON.stringify(functionCall.args)),
-                },
-              ]
-            : undefined,
-          _type: functionCall ? "functionCall" : "message",
-        }
-      : undefined;
+  // Extract image parts from response
+  const imageParts: Message[] = [];
+  response.forEach((resp: any) => {
+    if (!resp || !Array.isArray(resp.candidates)) return;
+    resp.candidates.forEach((candidate: any) => {
+      if (!candidate) return;
+      const contents = Array.isArray(candidate.content)
+        ? candidate.content
+        : [candidate.content].filter(Boolean);
+      contents.forEach((content: any) => {
+        if (!content) return;
+        const parts = Array.isArray(content.parts)
+          ? content.parts
+          : [content.parts].filter(Boolean);
+        parts.forEach((part: any) => {
+          if (part?.inlineData?.data) {
+            const mimeType = part.inlineData.mimeType || "image/png";
+            imageParts.push({
+              _type: "image",
+              role: content.role || "model",
+              mime_type: mimeType,
+              image_url: `data:${mimeType};base64,${part.inlineData.data}`,
+            });
+          }
+        });
+      });
+    });
+  });
+
+  // Build response messages based on what we have
+  let responseMessages: Message | undefined;
+  if (functionCall) {
+    // Function call response
+    responseMessages = {
+      role: firstContent?.role ?? "model",
+      content: combinedContent || undefined,
+      tool_calls: [
+        {
+          name: functionCall.name,
+          arguments: JSON.parse(JSON.stringify(functionCall.args)),
+        },
+      ],
+      _type: "functionCall",
+    };
+  } else if (imageParts.length > 0 && combinedContent) {
+    // Mixed text + image response - use contentArray
+    const contentArray: Message[] = [
+      {
+        _type: "message",
+        role: firstContent?.role ?? "model",
+        content: combinedContent,
+      },
+      ...imageParts,
+    ];
+    responseMessages = {
+      _type: "contentArray",
+      role: firstContent?.role ?? "model",
+      contentArray,
+    };
+  } else if (imageParts.length > 0) {
+    // Image only response
+    if (imageParts.length === 1) {
+      responseMessages = imageParts[0];
+    } else {
+      responseMessages = {
+        _type: "contentArray",
+        role: firstContent?.role ?? "model",
+        contentArray: imageParts,
+      };
+    }
+  } else if (combinedContent) {
+    // Text only response
+    responseMessages = {
+      role: firstContent?.role ?? "model",
+      content: combinedContent,
+      _type: "message",
+    };
+  }
 
   const error = response.find((item: any) => item?.error)?.error;
 

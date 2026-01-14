@@ -13,6 +13,7 @@ export const endpoints = {
         input: 0.000002, // $2/1M tokens (same as Gemini 3 Pro)
         output: 0.000012, // $12/1M tokens (same as Gemini 3 Pro)
         image: {
+          input: 0.000002, // $2/1M tokens for image input (same as text, $0.0011 per 560-token image)
           output: 0.00012, // $120/1M tokens for image output ($0.134 per 1K/2K image)
         },
       },
@@ -21,6 +22,7 @@ export const endpoints = {
         input: 0.000004, // $4/1M tokens (over 200K context)
         output: 0.000018, // $18/1M tokens (over 200K context)
         image: {
+          input: 0.000004, // $4/1M tokens for image input (over 200K context)
           output: 0.00012, // $120/1M tokens for image output
         },
       },
@@ -56,6 +58,7 @@ export const endpoints = {
         input: 0.000002, // $2/1M tokens
         output: 0.000012, // $12/1M tokens
         image: {
+          input: 0.000002, // $2/1M tokens for image input (same as text)
           output: 0.00012, // $120/1M tokens for image output ($0.134 per 1K/2K image)
         },
       },
@@ -64,6 +67,7 @@ export const endpoints = {
         input: 0.000004, // $4/1M tokens (over 200K context)
         output: 0.000018, // $18/1M tokens (over 200K context)
         image: {
+          input: 0.000004, // $4/1M tokens for image input (over 200K context)
           output: 0.00012, // $120/1M tokens for image output
         },
       },
@@ -96,6 +100,7 @@ export const endpoints = {
         input: 0.00000211, // $2.11/1M - $2.00/1M * 1.055
         output: 0.00001266, // $12.66/1M - $12.00/1M * 1.055
         image: {
+          input: 0.00000211, // $2.11/1M for image input (same as text with markup)
           output: 0.0001266, // $126.60/1M - $120/1M * 1.055 for image output
         },
       },
@@ -104,6 +109,7 @@ export const endpoints = {
         input: 0.00000422, // $4.22/1M - $4.00/1M * 1.055 (over 200K context)
         output: 0.00001899, // $18.99/1M - $18.00/1M * 1.055 (over 200K context)
         image: {
+          input: 0.00000422, // $4.22/1M for image input (over 200K context with markup)
           output: 0.0001266, // $126.60/1M - $120/1M * 1.055 for image output
         },
       },

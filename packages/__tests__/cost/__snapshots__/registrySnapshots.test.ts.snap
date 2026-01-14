@@ -2039,6 +2039,65 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "google/gemini-2.0-flash-exp": {
+    "gemini-2.0-flash-exp:google-ai-studio": {
+      "context": 1000000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "gemini-2.0-flash-exp",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "google-ai-studio",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-2.0-flash-exp:openrouter": {
+      "context": 1000000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "google/gemini-2.0-flash-exp:free",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-2.0-flash-exp:vertex": {
+      "context": 1000000,
+      "crossRegion": true,
+      "maxTokens": 8192,
+      "modelId": "gemini-2.0-flash-exp",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "vertex",
+      "ptbEnabled": true,
+      "regions": [
+        "global",
+      ],
+    },
+  },
   "google/gemini-2.5-flash": {
     "gemini-2.5-flash:google-ai-studio": {
       "context": 1048576,
@@ -6419,6 +6478,11 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "groq",
     "openrouter",
   ],
+  "google/gemini-2.0-flash-exp": [
+    "google-ai-studio",
+    "openrouter",
+    "vertex",
+  ],
   "google/gemini-2.5-flash": [
     "google-ai-studio",
     "openrouter",
@@ -7650,6 +7714,41 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "google/gemini-2.0-flash-exp": {
+    "google-ai-studio": [
+      {
+        "image": {
+          "input": 0,
+          "output": 0.00012,
+        },
+        "input": 0,
+        "output": 0,
+        "threshold": 0,
+      },
+    ],
+    "openrouter": [
+      {
+        "image": {
+          "input": 0,
+          "output": 0.0001266,
+        },
+        "input": 0,
+        "output": 0,
+        "threshold": 0,
+      },
+    ],
+    "vertex": [
+      {
+        "image": {
+          "input": 0,
+          "output": 0.00012,
+        },
+        "input": 0,
+        "output": 0,
+        "threshold": 0,
+      },
+    ],
+  },
   "google/gemini-2.5-flash": {
     "google-ai-studio": [
       {
@@ -7862,6 +7961,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "google-ai-studio": [
       {
         "image": {
+          "input": 0.000002,
           "output": 0.00012,
         },
         "input": 0.000002,
@@ -7870,6 +7970,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
       {
         "image": {
+          "input": 0.000004,
           "output": 0.00012,
         },
         "input": 0.000004,
@@ -7880,6 +7981,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "openrouter": [
       {
         "image": {
+          "input": 0.00000211,
           "output": 0.0001266,
         },
         "input": 0.00000211,
@@ -7888,6 +7990,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
       {
         "image": {
+          "input": 0.00000422,
           "output": 0.0001266,
         },
         "input": 0.00000422,
@@ -7898,6 +8001,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     "vertex": [
       {
         "image": {
+          "input": 0.000002,
           "output": 0.00012,
         },
         "input": 0.000002,
@@ -7906,6 +8010,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
       {
         "image": {
+          "input": 0.000004,
           "output": 0.00012,
         },
         "input": 0.000004,
@@ -8674,6 +8779,14 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "gemini-2.0-flash-exp",
+      "providers": [
+        "google-ai-studio",
+        "openrouter",
+        "vertex",
+      ],
+    },
+    {
       "model": "gemini-2.5-flash",
       "providers": [
         "google-ai-studio",
@@ -9307,7 +9420,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "fireworks",
     },
     {
-      "modelCount": 6,
+      "modelCount": 7,
       "provider": "google-ai-studio",
     },
     {
@@ -9335,7 +9448,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "openai",
     },
     {
-      "modelCount": 65,
+      "modelCount": 66,
       "provider": "openrouter",
     },
     {
@@ -9343,7 +9456,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "perplexity",
     },
     {
-      "modelCount": 18,
+      "modelCount": 19,
       "provider": "vertex",
     },
     {
@@ -9374,6 +9487,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "deepseek-v3.1-terminus",
     "deepseek-v3.2",
     "ernie-4.5-21b-a3b-thinking",
+    "gemini-2.0-flash-exp",
     "gemini-2.5-flash",
     "gemini-2.5-flash-lite",
     "gemini-2.5-pro",
@@ -9462,9 +9576,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 285,
-  "totalModelProviderConfigs": 285,
-  "totalModelsWithPtb": 100,
+  "totalEndpoints": 288,
+  "totalModelProviderConfigs": 288,
+  "totalModelsWithPtb": 101,
   "totalProviders": 21,
 }
 `;
