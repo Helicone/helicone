@@ -6,26 +6,60 @@ This document captures the complete setup process for running Helicone locally a
 
 Before starting, ensure you have:
 - Docker installed and running
-- Node.js and Yarn
 - Homebrew (macOS)
+- NVM (Node Version Manager)
+
+### Node.js Setup
+
+```bash
+# Install NVM if not already installed
+# https://github.com/nvm-sh/nvm
+
+# Install and use Node 22
+nvm install 22
+nvm use 22
+```
 
 ## Infrastructure Setup
 
-### 1. Start Core Infrastructure
+### 1. Start Supabase
 
 ```bash
-# Start Supabase, ClickHouse, MinIO via Docker
-./helicone-compose.sh helicone up
+# Start Supabase (excluding unnecessary services for local dev)
+npx supabase start -x realtime,storage-api,imgproxy,mailpit,edge-runtime,logflare,vector,supavisor
 ```
 
-This starts:
+### 2. Start Docker Services (MinIO & ClickHouse)
+
+```bash
+# Start MinIO (object storage) and ClickHouse (analytics)
+docker compose up minio minio-setup clickhouse -d
+```
+
+### 3. Run ClickHouse Migrations
+
+```bash
+# Set up Python virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# Install dependencies
+python3 -m pip install tabulate yarl
+
+# Run ClickHouse migrations
+python3 clickhouse/ch_hcone.py --upgrade --skip-confirmation --no-password
+```
+
+### 4. Seed Data
+
+The seed file at `supabase/seeds/0_seed.sql` creates test users and organizations. This is typically applied automatically when Supabase starts.
+
+### Infrastructure Summary
+
+After these steps, you'll have running:
 - **Supabase** (PostgreSQL) - Application data
 - **ClickHouse** - Analytics/time-series data
 - **MinIO** - Object storage
-
-### 2. Apply Database Migrations
-
-Migrations are applied automatically or can be run manually. The seed file at `supabase/seeds/0_seed.sql` creates test users and organizations.
 
 ## Services
 
