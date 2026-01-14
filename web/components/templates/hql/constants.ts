@@ -105,17 +105,6 @@ GROUP BY status
 ORDER BY count DESC`,
   },
   {
-    name: "Latency Percentiles",
-    description: "P50, P90, P99 latency stats",
-    category: "analytics",
-    sql: `SELECT
-  quantile(0.5)(latency) as p50_ms,
-  quantile(0.9)(latency) as p90_ms,
-  quantile(0.99)(latency) as p99_ms,
-  AVG(latency) as avg_ms
-FROM request_response_rmt`,
-  },
-  {
     name: "Cost by Provider",
     description: "Total cost grouped by provider",
     category: "analytics",
@@ -156,6 +145,20 @@ FROM request_response_rmt
 WHERE latency > 5000
 ORDER BY latency DESC
 LIMIT 100`,
+  },
+  {
+    name: "Request Bodies",
+    description: "Fetch request and response bodies from S3",
+    category: "debugging",
+    sql: `SELECT
+  request_id,
+  model,
+  status,
+  getBody(request_body) as request,
+  getBody(response_body) as response
+FROM request_response_rmt
+WHERE status = 200
+LIMIT 10`,
   },
 ];
 
