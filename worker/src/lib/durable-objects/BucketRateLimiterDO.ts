@@ -278,14 +278,15 @@ export class BucketRateLimiterDO extends DurableObject {
   /**
    * Normalize cost to handle edge cases:
    * - Negative or NaN: treat as 0
-   * - Very large: clamp to reasonable max
+   * - Very large: clamp to reasonable max ($10,000 per request)
    */
   private normalizeCost(cost: number): number {
     if (typeof cost !== "number" || isNaN(cost) || cost < 0) {
       return 0;
     }
-    // Clamp to prevent overflow (max 1 billion)
-    return Math.min(cost, 1_000_000_000);
+    // Clamp to reasonable max: 1,000,000 cents = $10,000 per request
+    // LLM requests rarely exceed a few dollars; this catches bugs/abuse
+    return Math.min(cost, 1_000_000);
   }
 
   /**
