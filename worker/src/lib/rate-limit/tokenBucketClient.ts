@@ -10,6 +10,20 @@
  * - Calls the appropriate Durable Object
  * - Handles errors with configurable fail-open/fail-closed behavior
  * - Returns formatted rate limit response headers
+ *
+ * Flow differs by unit type:
+ *
+ * REQUEST-based (unit="request"):
+ *   1. checkTokenBucketRateLimit() → checks AND deducts in one call
+ *   2. Request proceeds or is denied
+ *   3. No post-request action needed
+ *
+ * COST-based (unit="cents"):
+ *   1. checkTokenBucketRateLimit() → checkOnly=true, verifies capacity exists
+ *   2. Request proceeds (cost unknown until LLM responds)
+ *   3. recordTokenBucketUsage() → deducts actual cost post-request
+ *
+ * See TokenBucketRateLimiterDO header comment for detailed rationale.
  */
 
 import {
@@ -146,13 +160,27 @@ export async function checkTokenBucketRateLimit(params: {
 
   const segment = segmentResult.data!;
 
-  // Determine cost
-  const cost = determineCost(policy, params.costCents, config);
+  // For cents-based policies without explicit cost, we do a check-only
+  // to see if there's capacity. Actual cost is recorded post-request.
+  const isCentsWithoutCost =
+    policy.unit === "cents" &&
+    params.costCents === undefined &&
+    config.defaultCostCents <= 0;
+
+  console.log(
+    `[TokenBucket] CHECK - unit: ${policy.unit}, quota: ${policy.quota}, window: ${policy.windowSeconds}s, ` +
+      `explicitCost: ${params.costCents}, isCentsWithoutCost: ${isCentsWithoutCost}`
+  );
+
+  // Determine cost (use check-only mode for cents without explicit cost)
+  const cost = determineCost(policy, params.costCents, config, isCentsWithoutCost);
 
   if (cost.error) {
     console.error(`[TokenBucket] Cost determination error: ${cost.error}`);
     return createErrorResult(cost.error, config.failureMode, policy);
   }
+
+  console.log(`[TokenBucket] CHECK - determined cost: ${cost.data}, checkOnly: ${isCentsWithoutCost}`);
 
   // Build DO key
   const doKey = buildDurableObjectKey(
@@ -160,6 +188,8 @@ export async function checkTokenBucketRateLimit(params: {
     segment,
     policy.unit
   );
+
+  console.log(`[TokenBucket] CHECK - DO key: ${doKey}`);
 
   // Call the Durable Object
   try {
@@ -172,8 +202,15 @@ export async function checkTokenBucketRateLimit(params: {
       unit: policy.unit,
       cost: cost.data!,
       policyString: policy.policyString,
-      checkOnly: false, // Actually consume tokens
+      // For cents without explicit cost: check-only (don't consume tokens yet)
+      // Actual consumption happens post-request via recordTokenBucketUsage
+      checkOnly: isCentsWithoutCost,
     });
+
+    console.log(
+      `[TokenBucket] CHECK RESULT - allowed: ${response.allowed}, remaining: ${response.remaining}, ` +
+        `limit: ${response.limit}, resetSeconds: ${response.resetSeconds}`
+    );
 
     return createSuccessResult(response, policy);
   } catch (error) {
@@ -280,8 +317,13 @@ export async function recordTokenBucketUsage(params: {
   rateLimiterDO: DurableObjectNamespace<TokenBucketRateLimiterDO>;
   costCents: number;
 }): Promise<void> {
+  console.log(
+    `[TokenBucket] RECORD USAGE called - policyHeader: ${params.policyHeader}, costCents: ${params.costCents}`
+  );
+
   const policyResult = parseRateLimitPolicy(params.policyHeader);
   if (policyResult.error || !policyResult.data) {
+    console.log(`[TokenBucket] RECORD USAGE - no valid policy, skipping`);
     return;
   }
 
@@ -289,8 +331,15 @@ export async function recordTokenBucketUsage(params: {
 
   // Only record for cents-based policies
   if (policy.unit !== "cents") {
+    console.log(
+      `[TokenBucket] RECORD USAGE - unit is ${policy.unit}, not cents, skipping`
+    );
     return;
   }
+
+  console.log(
+    `[TokenBucket] RECORD USAGE - recording ${params.costCents} cents for policy ${policy.quota};w=${policy.windowSeconds};u=cents`
+  );
 
   const propertySource = createPropertySourceFromHeaders(
     params.heliconeProperties,
@@ -315,12 +364,14 @@ export async function recordTokenBucketUsage(params: {
     policy.unit
   );
 
+  console.log(`[TokenBucket] RECORD USAGE - DO key: ${doKey}`);
+
   try {
     const doId = params.rateLimiterDO.idFromName(doKey);
     const doStub = params.rateLimiterDO.get(doId);
 
     // Consume the actual cost
-    await doStub.consume({
+    const response = await doStub.consume({
       capacity: policy.quota,
       windowSeconds: policy.windowSeconds,
       unit: policy.unit,
@@ -328,6 +379,10 @@ export async function recordTokenBucketUsage(params: {
       policyString: policy.policyString,
       checkOnly: false,
     });
+
+    console.log(
+      `[TokenBucket] RECORD USAGE RESULT - allowed: ${response.allowed}, remaining: ${response.remaining}, consumed: ${params.costCents} cents`
+    );
   } catch (error) {
     console.error(
       `[TokenBucket] Failed to record usage: ${error instanceof Error ? error.message : "Unknown error"}`
@@ -340,7 +395,8 @@ export async function recordTokenBucketUsage(params: {
 function determineCost(
   policy: ParsedRateLimitPolicy,
   explicitCost: number | undefined,
-  config: TokenBucketClientConfig
+  config: TokenBucketClientConfig,
+  isCheckOnly: boolean = false
 ): Result<number, string> {
   if (policy.unit === "request") {
     return ok(1);
@@ -353,6 +409,16 @@ function determineCost(
 
   if (config.defaultCostCents > 0) {
     return ok(config.defaultCostCents);
+  }
+
+  // For check-only mode (pre-request check for cents-based policies):
+  // We use cost=0 which makes the DO check if tokens > 0 (any budget left).
+  // This is simpler and more correct because:
+  // - We don't know actual cost until after the request
+  // - Overspending by one request is inevitable and acceptable
+  // - Post-request recording can push tokens negative, blocking future requests
+  if (isCheckOnly) {
+    return ok(0);
   }
 
   return err(

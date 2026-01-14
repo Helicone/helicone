@@ -2,10 +2,9 @@
 import { Provider } from "@helicone-package/llm-mapper/types";
 import { createClient } from "@supabase/supabase-js";
 import {
-  checkRateLimit as checkRateLimitDO,
-  updateRateLimitCounter as updateRateLimitCounterDO,
-} from "../clients/DurableObjectRateLimiterClient";
-import { checkTokenBucketRateLimit } from "../rate-limit/tokenBucketClient";
+  checkTokenBucketRateLimit,
+  recordTokenBucketUsage,
+} from "../rate-limit/tokenBucketClient";
 
 import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
 import { checkPromptSecurity } from "../clients/PromptSecurityClient";
@@ -128,69 +127,49 @@ export async function proxyForwarder(
     }
   }
 
-  // Check if using new token bucket rate limiter (via Helicone-RateLimit-Policy header)
-  // If so, skip the old sliding window rate limiter to avoid conflicts
+  // Token Bucket Rate Limiting
+  // Supports both:
+  // 1. Header-based: Helicone-RateLimit-Policy header
+  // 2. DB-configured: API keys with rate limits in database (isRateLimitedKey)
   const rateLimitPolicyHeader =
     proxyRequest.requestWrapper.heliconeHeaders.rateLimitPolicy;
-  const useTokenBucketRateLimiter = !!rateLimitPolicyHeader;
+  let effectivePolicyHeader: string | null = rateLimitPolicyHeader;
+  let useTokenBucketRateLimiter = !!rateLimitPolicyHeader;
 
-  // Old sliding window rate limiter (only run if NOT using token bucket)
-  let finalRateLimitOptions = useTokenBucketRateLimiter
-    ? null
-    : proxyRequest.rateLimitOptions;
-  if (finalRateLimitOptions || proxyRequest.isRateLimitedKey) {
+  console.log(
+    `[RateLimit] Initial - headerPolicy: ${rateLimitPolicyHeader}, isRateLimitedKey: ${proxyRequest.isRateLimitedKey}`
+  );
+
+  // If no header policy but key has DB-configured rate limits, build policy from DB
+  if (!rateLimitPolicyHeader && proxyRequest.isRateLimitedKey) {
     const { data: auth, error: authError } = await request.auth();
     if (authError === null) {
       const db = new DBWrapper(env, auth);
-      const { data: orgData, error: orgError } = await db.getAuthParams();
-      if (orgError === null && orgData?.organizationId) {
-        if (!finalRateLimitOptions && proxyRequest.isRateLimitedKey) {
-          const rateLimitManager = new RateLimitManager();
-          const result = await rateLimitManager.getRateLimitOptionsForKey(
-            db,
-            proxyRequest.userId,
-            proxyRequest.heliconeProperties
-          );
+      const rateLimitManager = new RateLimitManager();
+      const result = await rateLimitManager.getRateLimitOptionsForKey(
+        db,
+        proxyRequest.userId,
+        proxyRequest.heliconeProperties
+      );
 
-          if (!result.error && result.data) {
-            finalRateLimitOptions = result.data;
-          } else if (result.error) {
-            console.error(`[RateLimit] Manager error: ${result.error}`);
-          }
-        }
-
-        if (finalRateLimitOptions) {
-          try {
-            const rateLimitCheckResult = await checkRateLimitDO({
-              organizationId: orgData.organizationId,
-              heliconeProperties: proxyRequest.heliconeProperties,
-              rateLimiterDO: env.RATE_LIMITER_SQL,
-              rateLimitOptions: finalRateLimitOptions,
-              userId: proxyRequest.userId,
-              cost: 1,
-            });
-            responseBuilder.addRateLimitHeaders(
-              rateLimitCheckResult,
-              finalRateLimitOptions
-            );
-
-            if (rateLimitCheckResult.status === "rate_limited") {
-              rateLimited = true;
-              request.injectCustomProperty(
-                "Helicone-Rate-Limit-Status",
-                rateLimitCheckResult.status
-              );
-            }
-          } catch (error) {
-            console.error("Error checking rate limit", error);
-          }
-        }
+      if (!result.error && result.data) {
+        // Convert DB policy to header format for token bucket
+        const opts = result.data;
+        effectivePolicyHeader = `${opts.quota};w=${opts.time_window}${opts.unit ? `;u=${opts.unit}` : ""}${opts.segment ? `;s=${opts.segment}` : ""}`;
+        useTokenBucketRateLimiter = true;
+        console.log(`[RateLimit] Built policy from DB: ${effectivePolicyHeader}`);
+      } else if (result.error) {
+        console.error(`[RateLimit] Manager error: ${result.error}`);
       }
     }
   }
 
-  // Token Bucket Rate Limiting (via Helicone-RateLimit-Policy header)
-  if (useTokenBucketRateLimiter && !rateLimited) {
+  console.log(
+    `[RateLimit] Effective - policy: ${effectivePolicyHeader}, useTokenBucket: ${useTokenBucketRateLimiter}`
+  );
+
+  // Apply token bucket rate limiting if we have a policy
+  if (useTokenBucketRateLimiter && effectivePolicyHeader && !rateLimited) {
     const { data: auth, error: authError } = await request.auth();
     if (authError === null) {
       const db = new DBWrapper(env, auth);
@@ -198,7 +177,7 @@ export async function proxyForwarder(
       if (orgError === null && orgData?.organizationId) {
         try {
           const tokenBucketResult = await checkTokenBucketRateLimit({
-            policyHeader: rateLimitPolicyHeader,
+            policyHeader: effectivePolicyHeader,
             organizationId: orgData.organizationId,
             userId: proxyRequest.userId,
             heliconeProperties: proxyRequest.heliconeProperties,
@@ -285,7 +264,7 @@ export async function proxyForwarder(
             undefined,
             undefined,
             undefined,
-            useTokenBucketRateLimiter
+            effectivePolicyHeader
           )
         );
 
@@ -357,7 +336,7 @@ export async function proxyForwarder(
           undefined,
           undefined,
           undefined,
-          useTokenBucketRateLimiter
+          effectivePolicyHeader
         )
       );
 
@@ -454,7 +433,7 @@ export async function proxyForwarder(
         undefined,
         undefined,
         undefined,
-        useTokenBucketRateLimiter
+        effectivePolicyHeader
       )
     );
   }
@@ -501,7 +480,7 @@ async function log(
   S3_ENABLED?: Env["S3_ENABLED"],
   cachedResponse?: Response,
   cacheSettings?: CacheSettings,
-  useTokenBucketRateLimiter?: boolean
+  rateLimitPolicyHeader?: string | null
 ) {
   const { data: auth, error: authError } = await request.auth();
 
@@ -522,11 +501,6 @@ async function log(
     );
     return;
   }
-
-  // Skip old sliding window rate limiter counter update when using token bucket
-  const finalRateLimitOptions = useTokenBucketRateLimiter
-    ? null
-    : proxyRequest.rateLimitOptions;
 
   // Start logging in parallel with response processing
   const logPromise = loggable.log(
@@ -702,27 +676,48 @@ async function log(
       }
 
       // Update rate limit counters if not a cached response
+      console.log(
+        `[RateLimit] Post-request - rateLimited: ${rateLimited}, cachedResponse: ${cachedResponse !== undefined && cachedResponse !== null}, ` +
+          `cost (USD): ${cost}, rateLimitPolicyHeader: ${rateLimitPolicyHeader}`
+      );
+
       if (
         (!rateLimited && cachedResponse === undefined) ||
         (!rateLimited && cachedResponse === null)
       ) {
+        const costInCents = (cost ?? 0) * 100;
+
+        console.log(
+          `[RateLimit] Recording usage - costInCents: ${costInCents}, policyHeader: ${rateLimitPolicyHeader}`
+        );
+
+        // Update token bucket rate limiter (for cost-based policies)
         if (
+          rateLimitPolicyHeader &&
           proxyRequest &&
-          finalRateLimitOptions &&
           !orgError &&
           orgData?.organizationId
         ) {
-          const costInCents = (cost ?? 0) * 100;
-          await updateRateLimitCounterDO({
-            organizationId: orgData?.organizationId,
+          console.log(
+            `[RateLimit] Calling recordTokenBucketUsage with costCents: ${costInCents}`
+          );
+          await recordTokenBucketUsage({
+            policyHeader: rateLimitPolicyHeader,
+            organizationId: orgData.organizationId,
+            userId: proxyRequest.userId,
             heliconeProperties:
               proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
-            rateLimiterDO: env.RATE_LIMITER_SQL,
-            rateLimitOptions: finalRateLimitOptions,
-            userId: proxyRequest.userId,
-            cost: costInCents,
+            rateLimiterDO: env.TOKEN_BUCKET_RATE_LIMITER,
+            costCents: costInCents,
           });
+        } else {
+          console.log(
+            `[RateLimit] NOT calling recordTokenBucketUsage - policyHeader: ${rateLimitPolicyHeader}, ` +
+              `proxyRequest: ${!!proxyRequest}, orgError: ${orgError}, orgId: ${orgData?.organizationId}`
+          );
         }
+      } else {
+        console.log(`[RateLimit] Skipping usage recording - rateLimited or cached`);
       }
     })
     .catch((error) => {

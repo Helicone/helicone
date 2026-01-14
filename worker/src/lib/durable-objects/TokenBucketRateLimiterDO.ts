@@ -14,6 +14,29 @@ import { DurableObject } from "cloudflare:workers";
  * - State is stored as a single JSON object for efficiency
  * - Policy changes are detected and handled gracefully
  *
+ * Deduction strategy (why we use different approaches for different unit types):
+ *
+ * For REQUEST-based limits (unit="request"):
+ * - Cost is KNOWN upfront (always 1 request)
+ * - We use PREEMPTIVE deduction: check + deduct atomically before allowing
+ * - If denied, we DON'T deduct (preserves accumulated tokens for refill)
+ * - This prevents over-usage via race conditions
+ *
+ * For COST-based limits (unit="cents"):
+ * - Cost is UNKNOWN until after the request completes (depends on tokens used)
+ * - Pre-check: checkOnly=true, just checks if tokens > 0 (any budget left?)
+ * - Post-request: deducts actual cost, ALLOWS NEGATIVE tokens
+ * - Next pre-check: if tokens <= 0, deny until refill brings it positive
+ * - Overspending by one request is inevitable and acceptable
+ * - Simpler than trying to guess minimum costs upfront
+ *
+ * Why not always post-request? Race condition:
+ *   tokens=1, Request A checks (pass), Request B checks (pass),
+ *   both proceed, both deduct → overdraft. Preemptive avoids this.
+ *
+ * Why not always preemptive? Unknown cost:
+ *   For cents-based, we don't know cost until LLM responds with token usage.
+ *
  * Keying strategy (handled by client):
  * - Format: `tb:<ownerId>:<segmentType>:<segmentValue>:<unit>`
  * - Examples:
@@ -104,10 +127,19 @@ export class TokenBucketRateLimiterDO extends DurableObject {
     const now = Date.now();
     const policyHash = this.hashPolicy(req.policyString);
 
+    console.log(
+      `[TokenBucketDO] consume called - capacity: ${req.capacity}, window: ${req.windowSeconds}s, ` +
+        `unit: ${req.unit}, cost: ${req.cost}, checkOnly: ${req.checkOnly}`
+    );
+
     // Use blockConcurrencyWhile for atomic read-modify-write
     return await this.state.blockConcurrencyWhile(async () => {
       // Load existing state or initialize
       let bucketState = await this.loadState();
+
+      console.log(
+        `[TokenBucketDO] Loaded state - tokens: ${bucketState?.tokens}, lastRefillMs: ${bucketState?.lastRefillMs}`
+      );
 
       // Handle policy changes or initialize new bucket
       if (!bucketState || bucketState.policyHash !== policyHash) {
@@ -115,15 +147,43 @@ export class TokenBucketRateLimiterDO extends DurableObject {
       }
 
       // Compute lazy refill
+      const tokensBeforeRefill = bucketState.tokens;
       bucketState = this.refill(bucketState, req, now);
+      console.log(
+        `[TokenBucketDO] After refill - tokens: ${bucketState.tokens} (was ${tokensBeforeRefill})`
+      );
 
       // Check if we have enough tokens
+      // For cents-based checkOnly (pre-request): just check if tokens > 0 (any budget left)
+      // For everything else: check tokens >= cost
       const cost = this.normalizeCost(req.cost);
-      const hasCapacity = bucketState.tokens >= cost;
+      const hasCapacity = (req.unit === "cents" && req.checkOnly)
+        ? bucketState.tokens > 0  // Any budget remaining?
+        : bucketState.tokens >= cost;
 
-      // Deduct tokens if allowed and not check-only
-      if (hasCapacity && !req.checkOnly) {
-        bucketState.tokens = Math.max(0, bucketState.tokens - cost);
+      console.log(
+        `[TokenBucketDO] Capacity check - tokens: ${bucketState.tokens}, cost: ${cost}, hasCapacity: ${hasCapacity}, checkOnly: ${req.checkOnly}, unit: ${req.unit}`
+      );
+
+      // Deduct tokens based on unit type (see header comment for full explanation):
+      // - "request": Only deduct if allowed (preemptive, prevents race conditions)
+      // - "cents": Always deduct actual cost (post-request, cost unknown upfront)
+      const shouldDeduct = !req.checkOnly && (hasCapacity || req.unit === "cents");
+
+      if (shouldDeduct) {
+        const tokensBefore = bucketState.tokens;
+        // For cents: allow negative (overspend by one request is acceptable)
+        // For request: clamp to 0 (should never go negative since we check first)
+        bucketState.tokens = req.unit === "cents"
+          ? bucketState.tokens - cost
+          : Math.max(0, bucketState.tokens - cost);
+        console.log(
+          `[TokenBucketDO] Deducted tokens - was: ${tokensBefore}, now: ${bucketState.tokens}, deducted: ${cost}, hadCapacity: ${hasCapacity}`
+        );
+      } else if (req.checkOnly) {
+        console.log(`[TokenBucketDO] Check-only mode, not deducting tokens`);
+      } else {
+        console.log(`[TokenBucketDO] Request denied (unit=${req.unit}), preserving ${bucketState.tokens} tokens for refill`);
       }
 
       // Calculate remaining (after potential deduction)
@@ -137,6 +197,10 @@ export class TokenBucketRateLimiterDO extends DurableObject {
 
       // Persist state
       await this.saveState(bucketState);
+
+      console.log(
+        `[TokenBucketDO] Result - allowed: ${hasCapacity}, remaining: ${remaining}, resetSeconds: ${resetSeconds}`
+      );
 
       return {
         allowed: hasCapacity,

@@ -6,7 +6,8 @@
  *
  * Examples:
  *   - "1000;w=3600" -> 1000 requests per hour, global
- *   - "5000;w=86400;u=cents" -> 5000 cents per day, global
+ *   - "5000;w=86400;u=cents" -> 5000 cents ($50) per day, global
+ *   - "0.5;w=60;u=cents" -> 0.5 cents per minute (for testing small budgets)
  *   - "100;w=60;s=user" -> 100 requests per minute, per user
  *   - "10000;w=3600;s=organization" -> 10000 requests per hour, per organization property
  *
@@ -60,7 +61,8 @@ export function parseRateLimitPolicy(
   // Parse the policy string using regex
   // Format: [quota];w=[window];u=[unit];s=[segment]
   // Only quota and w are required; u and s are optional
-  const regex = /^(\d+);w=(\d+)(?:;u=(request|cents))?(?:;s=([\w-]+))?$/i;
+  // Quota supports decimals (e.g., "0.5;w=60;u=cents" for half a cent)
+  const regex = /^(\d+(?:\.\d+)?);w=(\d+)(?:;u=(request|cents))?(?:;s=([\w-]+))?$/i;
   const match = trimmed.match(regex);
 
   if (!match) {
@@ -74,12 +76,12 @@ export function parseRateLimitPolicy(
 
   const [, quotaStr, windowStr, unitStr, segmentStr] = match;
 
-  // Parse quota
-  const quota = parseInt(quotaStr, 10);
+  // Parse quota (supports decimals for cents-based policies)
+  const quota = parseFloat(quotaStr);
   if (isNaN(quota) || quota <= 0) {
     return err({
       field: "quota",
-      message: "Quota must be a positive integer",
+      message: "Quota must be a positive number",
       value: quotaStr,
     });
   }

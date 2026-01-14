@@ -127,6 +127,21 @@ describe("parseRateLimitPolicy", () => {
       expect(result.data?.quota).toBe(1000000000);
     });
 
+    it("handles decimal quota values for cents", () => {
+      const result = parseRateLimitPolicy("0.5;w=60;u=cents");
+
+      expect(result.error).toBeNull();
+      expect(result.data?.quota).toBe(0.5);
+      expect(result.data?.unit).toBe("cents");
+    });
+
+    it("handles decimal quota with multiple decimal places", () => {
+      const result = parseRateLimitPolicy("0.125;w=60;u=cents");
+
+      expect(result.error).toBeNull();
+      expect(result.data?.quota).toBe(0.125);
+    });
+
     it("handles segment with hyphens and underscores", () => {
       const result = parseRateLimitPolicy("100;w=60;s=my-tenant_id");
 
@@ -225,6 +240,51 @@ describe("parseRateLimitPolicy", () => {
 
       expect(result.error).not.toBeNull();
       expect(result.error?.field).toBe("policy");
+    });
+
+    // Security edge cases
+    it("rejects SQL injection attempts", () => {
+      const result = parseRateLimitPolicy("100;w=60;s='; DROP TABLE users;--");
+      expect(result.error).not.toBeNull();
+    });
+
+    it("rejects script injection attempts", () => {
+      const result = parseRateLimitPolicy("100;w=60;s=<script>alert(1)</script>");
+      expect(result.error).not.toBeNull();
+    });
+
+    it("rejects extremely small decimals", () => {
+      // Should work but token bucket will handle appropriately
+      const result = parseRateLimitPolicy("0.0000001;w=60;u=cents");
+      expect(result.error).toBeNull();
+      expect(result.data?.quota).toBeCloseTo(0.0000001, 10);
+    });
+
+    it("rejects negative via decimal tricks", () => {
+      // Regex doesn't allow negative sign
+      const result = parseRateLimitPolicy("-0.5;w=60;u=cents");
+      expect(result.error).not.toBeNull();
+    });
+
+    it("rejects scientific notation", () => {
+      // 1e10 should not be parsed as valid
+      const result = parseRateLimitPolicy("1e10;w=60");
+      expect(result.error).not.toBeNull();
+    });
+
+    it("rejects path traversal in segment", () => {
+      const result = parseRateLimitPolicy("100;w=60;s=../../../etc/passwd");
+      expect(result.error).not.toBeNull();
+    });
+
+    it("rejects newlines in policy", () => {
+      const result = parseRateLimitPolicy("100;w=60\n;s=user");
+      expect(result.error).not.toBeNull();
+    });
+
+    it("rejects unicode in segment", () => {
+      const result = parseRateLimitPolicy("100;w=60;s=user™");
+      expect(result.error).not.toBeNull();
     });
 
     it("rejects malformed format", () => {

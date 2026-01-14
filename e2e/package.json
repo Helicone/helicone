@@ -8,7 +8,8 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:gateway": "jest tests/gateway",
-    "test:integration": "jest --testPathPattern=integration"
+    "test:integration": "jest --testPathPattern=integration",
+    "test:rate-limit": "jest tests/on-push/rate-limit"
   },
   "dependencies": {
     "axios": "^1.6.7",

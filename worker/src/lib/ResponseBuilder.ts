@@ -1,7 +1,3 @@
-import {
-  RateLimitOptions,
-  RateLimitResponse,
-} from "./clients/DurableObjectRateLimiterClient";
 import { RateLimitHeaders } from "./rate-limit/tokenBucketClient";
 
 export interface BuildParams {
@@ -16,27 +12,6 @@ export class ResponseBuilder {
   setHeader(key: string, value: string): ResponseBuilder {
     this.headers.set(key, value);
     return this;
-  }
-
-  addRateLimitHeaders(
-    rateLimitCheckResult: RateLimitResponse,
-    rateLimitOptions: RateLimitOptions
-  ): void {
-    const policy = `${rateLimitOptions.quota};w=${rateLimitOptions.time_window};u=${rateLimitOptions.unit}`;
-    const headers: { [key: string]: string } = {
-      "Helicone-RateLimit-Limit": rateLimitCheckResult.limit.toString(),
-      "Helicone-RateLimit-Remaining": rateLimitCheckResult.remaining.toString(),
-      "Helicone-RateLimit-Policy": policy,
-    };
-
-    if (rateLimitCheckResult.reset !== undefined) {
-      headers["Helicone-RateLimit-Reset"] =
-        rateLimitCheckResult.reset.toString();
-    }
-
-    Object.entries(headers).forEach(([key, value]) => {
-      this.setHeader(key, value);
-    });
   }
 
   addTokenBucketRateLimitHeaders(headers: RateLimitHeaders): void {
