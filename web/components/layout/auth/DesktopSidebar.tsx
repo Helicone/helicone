@@ -288,6 +288,33 @@ const DesktopSidebar = ({
             >
               {/* Navigation items */}
               <div className="flex flex-col">
+                {/* Free Limit Warning - Show at top when exceeded */}
+                {orgContext?.currentOrg?.free_limit_exceeded &&
+                  orgContext?.currentOrg?.tier === "free" &&
+                  !isCollapsed && (
+                    <div className="mx-2 mb-2 mt-2 rounded-lg border border-destructive/50 bg-destructive/10 p-3">
+                      <div className="flex items-center gap-2 text-destructive">
+                        <AlertTriangle size={16} />
+                        <span className="text-sm font-medium">
+                          Free limit reached
+                        </span>
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Request/response bodies are no longer being stored.
+                        Upgrade to continue logging full data.
+                      </p>
+                      <Link href="/settings/billing">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mt-2 w-full"
+                        >
+                          Upgrade Now
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
+
                 {/* Wrapped 2025 Button - Only show if org has data */}
                 {hasWrappedData && (
                   <div className="px-2 pt-2">
@@ -362,33 +389,6 @@ const DesktopSidebar = ({
                     )}
                   </nav>
                 </div>
-
-                {/* Free Limit Warning */}
-                {orgContext?.currentOrg?.free_limit_exceeded &&
-                  orgContext?.currentOrg?.tier === "free" &&
-                  !isCollapsed && (
-                    <div className="mx-2 mb-2 mt-2 rounded-lg border border-destructive/50 bg-destructive/10 p-3">
-                      <div className="flex items-center gap-2 text-destructive">
-                        <AlertTriangle size={16} />
-                        <span className="text-sm font-medium">
-                          Free limit reached
-                        </span>
-                      </div>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Request/response bodies are no longer being stored.
-                        Upgrade to continue logging full data.
-                      </p>
-                      <Link href="/settings/billing">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="mt-2 w-full"
-                        >
-                          Upgrade Now
-                        </Button>
-                      </Link>
-                    </div>
-                  )}
 
                 {/* InfoBox */}
                 {canShowInfoBox &&
