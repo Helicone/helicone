@@ -1,3 +1,5 @@
+import { CallToAction } from "@/components/blog/CallToAction";
+
 As AI systems evolve from single-question chatbots into autonomous agents, one of the biggest enablers underneath the surface is **tool calling**.
 
 Giving an LLM access to well-designed tools (or functions) ensures it can do more than just generating text. **Tools enable agents to actually do things**: analyze code, fetch data, summarize changes, call APIs, interact with databases, spin up workflows, etc.
@@ -105,6 +107,15 @@ This tool would be used in a workflow like this:
 
 This two-phase interaction (tool selection + generation) gives your agent both flexibility and structure.
 
+<CallToAction
+  title="Ready to Build Production AI Agents?"
+  description="Join our 7-day email course and learn to build, monitor, and deploy AI agents with proper tool calling, observability, and real-world best practices."
+  primaryButtonText="Start the Course"
+  primaryButtonLink="/agent-course"
+  secondaryButtonText="View Curriculum"
+  secondaryButtonLink="/agent-course#course-overview"
+/>
+
 ## How To Ensure The Agent Picks The Right Tool?
 
 Once your agent engine starts calling tools at its discretion, your workflow starts growing in complexity. You no longer control the workflow of your application.
@@ -113,7 +124,7 @@ If the agent picked the wrong tool or passed malformed JSON, the failure can be 
 
 That's why observing the **entire flow** is critical, and why engineers building agents rely on **LLM observability**.
 
--- For deeper insights into observability strategies, check out our [complete guide to debugging LLM applications](/blog/complete-guide-to-debugging-llm-applications) and [LLM observability best practices](/blog/llm-observability).
+*-- For deeper insights into observability strategies, check out our [complete guide to debugging LLM applications](/blog/complete-guide-to-debugging-llm-applications) and [LLM observability best practices](/blog/llm-observability).*
 
 ### Sessions: Grouping Complex Workflows
 
@@ -181,9 +192,7 @@ Tool calling is a foundational capability for agents. But in order to keep dynam
 - Design graceful error handling
 - Trace your agentic workflow using sessions from request start to final output
 
-Ready to implement tool calling with observability?
-- Start with our [quick start guide](/docs/quick-start)
-- Explore our [AI agents cookbook](/docs/guides/cookbooks/ai-agents) for practical examples,
-- Learn about integration options in our [tools documentation](/docs/tools).
+Want to master these concepts hands-on?
 
+Our [7-day AI agent email course](/agent-course) walks you through building a production-ready agent with proper tool calling, observability, and deployment - complete with working code examples and best practices.
 
