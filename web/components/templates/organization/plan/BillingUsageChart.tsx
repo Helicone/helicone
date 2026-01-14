@@ -224,12 +224,6 @@ export const BillingUsageChart = () => {
 
   const chartData = [...actualData, ...projectedData];
 
-  const progressPercent = Math.min(
-    (usageStats.billingPeriod.daysElapsed / usageStats.billingPeriod.daysTotal) *
-      100,
-    100
-  );
-
   return (
     <div className="space-y-6">
       {/* Section Header */}
@@ -267,20 +261,6 @@ export const BillingUsageChart = () => {
           <p className="text-sm text-muted-foreground">
             {usageStats.usage.totalGB.toFixed(2)} GB storage
           </p>
-        </div>
-      </div>
-
-      {/* Progress Bar */}
-      <div className="space-y-2">
-        <div className="flex justify-between text-sm text-muted-foreground">
-          <span>Billing period progress</span>
-          <span>{Math.round(progressPercent)}%</span>
-        </div>
-        <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-          <div
-            className="h-full bg-sky-500 transition-all"
-            style={{ width: `${progressPercent}%` }}
-          />
         </div>
       </div>
 

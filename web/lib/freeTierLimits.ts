@@ -122,32 +122,23 @@ export const FREE_TIER_CONFIG: FreeTierConfig = {
     },
     sessions: {
       main: {
-        getLimit: () => 1,
-        description: (limit) =>
-          `You can have up to ${limit} named sessions with the free tier`,
+        getLimit: () => Infinity, // Unlimited sessions for free tier
+        description: () => `Unlimited sessions`,
         upgradeFeatureName: FEATURE_DISPLAY_NAMES.sessions,
-        upgradeMessage: (limit, used) =>
-          `You've used ${used}/${limit} named sessions. Upgrade for unlimited access.`,
       },
     },
     properties: {
       main: {
-        getLimit: () => 1,
-        description: (limit) =>
-          `You can have up to ${limit} properties with the free tier`,
+        getLimit: () => Infinity, // Unlimited properties for free tier
+        description: () => `Unlimited properties`,
         upgradeFeatureName: FEATURE_DISPLAY_NAMES.properties,
-        upgradeMessage: (limit, used) =>
-          `You've used ${used}/${limit} properties. Upgrade for unlimited access.`,
       },
     },
     users: {
       main: {
-        getLimit: () => 3,
-        description: (limit) =>
-          `You can view up to ${limit} users with the free tier`,
+        getLimit: () => Infinity, // Unlimited users for free tier
+        description: () => `Unlimited users`,
         upgradeFeatureName: FEATURE_DISPLAY_NAMES.users,
-        upgradeMessage: (limit) =>
-          `You've reached the limit of ${limit} users. Upgrade for unlimited access.`,
       },
     },
   },

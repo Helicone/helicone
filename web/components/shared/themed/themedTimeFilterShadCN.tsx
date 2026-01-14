@@ -145,8 +145,9 @@ export function ThemedTimeFilterShadCN({
   };
 
   const formatDateDisplay = (from: Date, to: Date) => {
-    if (isLive && !hasCustomTimeFilter) {
-      if (from.toDateString() === to.toDateString()) {
+    // When live mode is on, always show "Now" as the end time
+    if (isLive) {
+      if (from.toDateString() === new Date().toDateString()) {
         return `${format(from, "LLL d, yyyy")} ${format(from, "HH:mm")} - Now`;
       } else {
         return `${format(from, "LLL d, yyyy HH:mm")} - Now`;

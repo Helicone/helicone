@@ -273,7 +273,7 @@ function mapReasoningEffortToThinkingLevel(
  *
  * IMPORTANT: For Google models, reasoning_effort is REQUIRED to enable thinking.
  * budget_tokens alone does NOT enable thinking - it only sets the budget when
- * reasoning_effort is also provided.
+ * reasoning_effort is also provided. We have set up "low" as default for Gemini 3+ models.
  *
  * Supports:
  * - reasoning_effort: "low" | "medium" | "high" -> thinkingLevel (for Gemini 3+)
@@ -281,13 +281,13 @@ function mapReasoningEffortToThinkingLevel(
  * - reasoning_options.budget_tokens -> thinkingBudget (only when reasoning_effort is set)
  * - reasoning_options.thinking_level -> thinkingLevel (overrides reasoning_effort)
  *
- * If no reasoning_effort is provided, thinking is disabled (thinkingBudget: 0).
+ * If no reasoning_effort is provided, it defaults to "low".
  */
 function buildThinkingConfig(
   body: HeliconeChatCreateParams,
   _maxOutputTokens?: number
-): GeminiThinkingConfig {
-  const reasoningEffort = body.reasoning_effort;
+): GeminiThinkingConfig | undefined {
+  const model = body.model || "";
   const reasoningOptions = body.reasoning_options as
     | GoogleReasoningOptions
     | undefined;
@@ -305,8 +305,13 @@ function buildThinkingConfig(
     return thinkingConfig;
   }
 
-  // reasoning_effort is required to enable thinking for Google models
-  // budget_tokens alone does NOT enable thinking
+  // Determine if this is a Gemini 3+ model
+  const isGemini3Plus = /gemini-3/.test(model.toLowerCase());
+
+  // Default to "low" for Gemini 3+ models, otherwise require explicit reasoning_effort
+  const reasoningEffort = body.reasoning_effort ?? (isGemini3Plus ? "low" : undefined);
+
+  // If no reasoning_effort and not a reasoning model, disable thinking
   if (!reasoningEffort) {
     return {
       thinkingBudget: 0,
@@ -317,7 +322,6 @@ function buildThinkingConfig(
     includeThoughts: true,
   };
 
-  const model = body.model || "";
   const modelSupportsThinkingLevel = supportsThinkingLevel(model);
 
   // Handle reasoning_effort

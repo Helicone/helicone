@@ -1,6 +1,7 @@
 import FoldedHeader from "@/components/shared/FoldedHeader";
 import { FreeTierLimitBanner } from "@/components/shared/FreeTierLimitBanner";
 import { EmptyStateCard } from "@/components/shared/helicone/EmptyStateCard";
+import LivePill from "@/components/shared/LivePill";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -83,6 +84,7 @@ export type TSessions = {
     completion_tokens: number;
     total_tokens: number;
     avg_latency: number;
+    user_ids: string[];
   };
 };
 
@@ -112,9 +114,13 @@ const SessionsPage = (props: SessionsPageProps) => {
   );
   const [page, setPage] = useState<number>(props.currentPage);
 
-  const [timeFilter, setTimeFilter] = useState<TimeFilter>({
-    start: getTimeIntervalAgo("1m"),
-    end: new Date(),
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>(() => {
+    const now = new Date();
+    const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
+    return {
+      start: threeDaysAgo,
+      end: now,
+    };
   });
 
   const [sessionIdSearch] = useURLParams<string | undefined>(
@@ -126,6 +132,7 @@ const SessionsPage = (props: SessionsPageProps) => {
   const [sessionNameSearch, setSessionNameSearch] = useState<
     string | undefined
   >(undefined);
+  const [isLive, setIsLive] = useLocalStorage("isLive-SessionsPage", false);
 
   const debouncedSessionNameSearch = useDebounce(sessionNameSearch, 500);
 
@@ -147,12 +154,13 @@ const SessionsPage = (props: SessionsPageProps) => {
     props.selectedName,
   );
 
-  const { sessions, isLoading, hasSessions } = useSessions({
+  const { sessions, isLoading, hasSessions, refetch, isRefetching } = useSessions({
     timeFilter,
     sessionIdSearch: debouncedSessionIdSearch ?? "",
     selectedName,
     page: page,
     pageSize: currentPageSize,
+    isLive,
   });
 
   const { aggregateMetrics, isLoading: isCountLoading } =
@@ -164,7 +172,10 @@ const SessionsPage = (props: SessionsPageProps) => {
 
   const sessionsWithId = useMemo(() => {
     return sessions.map((session, index) => ({
-      metadata: session,
+      metadata: {
+        ...session,
+        user_ids: session.user_ids ?? [],
+      },
       id: index.toString(),
     }));
   }, [sessions]);
@@ -376,8 +387,9 @@ const SessionsPage = (props: SessionsPageProps) => {
                 timeFilterOptions={[]}
                 onSelect={onTimeSelectHandler}
                 isFetching={isSessionsLoading}
-                defaultValue={"1m"}
+                defaultValue={"7d"}
                 custom={true}
+                isLive={isLive}
               />
 
               <FilterASTButton />
@@ -385,6 +397,14 @@ const SessionsPage = (props: SessionsPageProps) => {
           }
           rightSection={
             <section className="flex flex-row items-center gap-2">
+              <LivePill
+                isLive={isLive}
+                setIsLive={setIsLive}
+                isDataLoading={isLoading}
+                isRefetching={isRefetching}
+                refetch={refetch}
+              />
+
               <div className="flex flex-row items-center gap-2 rounded-lg bg-sky-200">
                 {selectedIds.length > 0 && (
                   <Tooltip>

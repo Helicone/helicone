@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import LazyLoadComponent from "@/components/shared/LazyLoadComponent";
 import { cn, ISLAND_WIDTH } from "@/lib/utils";
 
+const AgentCourse = dynamic(() => import("@/components/home/AgentCourse"));
 const AiGateway = dynamic(() => import("@/components/home/AiGateway"));
 const BigDashboard = dynamic(() => import("@/components/home/BigDashboard"));
 const Companies = dynamic(() => import("@/components/home/Companies"));
@@ -24,26 +25,7 @@ const LoadingSection = ({ height = "h-96" }: { height?: string }) => (
   ></div>
 );
 
-export default async function Home() {
-  const response = await fetch(
-    "https://api.helicone.ai/v1/public/dataisbeautiful/total-values",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      next: { revalidate: 3600 },
-    }
-  );
-
-  const totalValuesData = response.ok
-    ? ((await response.json()).data as {
-        total_requests?: number;
-        total_tokens?: number;
-        total_cost?: number;
-      })
-    : undefined;
-
+export default function Home() {
   return (
     <Layout>
       <main className="bg-white text-landing-description">
@@ -60,6 +42,9 @@ export default async function Home() {
             <Quote2 />
           </LazyLoadComponent>
           <LazyLoadComponent fallback={<LoadingSection />}>
+            <AgentCourse />
+          </LazyLoadComponent>
+          <LazyLoadComponent fallback={<LoadingSection />}>
             <AiGateway />
           </LazyLoadComponent>
           <LazyLoadComponent fallback={<LoadingSection />}>
@@ -72,7 +57,7 @@ export default async function Home() {
             <BigDashboard />
           </LazyLoadComponent>
           <LazyLoadComponent fallback={<LoadingSection height="h-48" />}>
-            <Stats totalValuesData={totalValuesData} />
+            <Stats />
           </LazyLoadComponent>
           <LazyLoadComponent fallback={<LoadingSection />}>
             <OpenSource />

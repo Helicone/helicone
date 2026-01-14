@@ -1,39 +1,41 @@
-import { useQuery } from "@tanstack/react-query";
 import { TimeFilter } from "@/types/timeFilter";
-import { Result } from "@/packages/common/result";
-import { CountryData } from "../lib/country";
 import { FilterNode } from "@helicone-package/filters/filterDefs";
+import { $JAWN_API } from "@/lib/clients/jawn";
+
+// Type assertion for FilterNode compatibility with generated types
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type JawnFilterNode = any;
+
+export interface CountryData {
+  country: string;
+  total_requests: number;
+}
 
 const useCountries = (
   timeFilter: TimeFilter,
   limit: number,
   userFilters: FilterNode,
 ) => {
-  const {
-    data: countries,
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ["countries", timeFilter, limit, userFilters],
-    queryFn: async (query) => {
-      const [, timeFilter, limit, userFilters] = query.queryKey;
-      return await fetch("/api/country", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+  const { data, isLoading, refetch } = $JAWN_API.useQuery(
+    "post",
+    "/v1/metrics/country",
+    {
+      body: {
+        filter: (userFilters ?? {}) as JawnFilterNode,
+        offset: 0,
+        limit,
+        timeFilter: {
+          start: timeFilter.start.toISOString(),
+          end: timeFilter.end.toISOString(),
         },
-        body: JSON.stringify({
-          filter: userFilters ?? {},
-          offset: 0,
-          limit,
-          timeFilter,
-        }),
-      }).then((res) => res.json() as Promise<Result<CountryData[], string>>);
+      },
     },
-    refetchOnWindowFocus: false,
-  });
+    {
+      refetchOnWindowFocus: false,
+    },
+  );
 
-  return { countries, isLoading, refetch };
+  return { countries: data, isLoading, refetch };
 };
 
 export { useCountries };

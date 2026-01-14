@@ -8,6 +8,7 @@ import { anthropicTestConfig } from "../providers/anthropic.test-config";
 import { setSupabaseTestCase } from "../setup";
 import { openaiTestConfig } from "../providers/openai.test-config";
 import { groqTestConfig } from "../providers/groq.test-config";
+import { randomUUID } from "crypto";
 
 const TEST_HELICONE_API_KEY = "sk-helicone-aaa1234-bbb1234-ccc1234-ddd1234";
 
@@ -109,7 +110,7 @@ async function seedDurableObject(testCase: TestCase) {
     await runInDurableObject(walletStub, async (walletStub) => {
       await walletStub.setCredits(
         testCase.currentCredits ?? 0,
-        `test-credits-${Date.now()}`
+        `test-credits-${randomUUID()}`
       );
     });
   }

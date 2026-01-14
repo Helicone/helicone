@@ -1,14 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { ModelMetric } from "../../../lib/api/models/models";
+import { ModelMetric } from "../../../services/hooks/models";
 import {
   TimeInterval,
   getTimeIntervalAgo,
 } from "../../../lib/timeCalculations/time";
-import { Result } from "@/packages/common/result";
 import AuthHeader from "../../shared/authHeader";
 import ThemedTable from "../../shared/themed/table/themedTableOld";
 import { INITIAL_COLUMNS } from "./initialColumns";
+import { $JAWN_API } from "@/lib/clients/jawn";
 
 import useSearchParams from "../../shared/utils/useSearchParams";
 
@@ -38,35 +37,42 @@ const ModelPage = (props: ModelPageProps) => {
     end: new Date(),
   });
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["modelMetrics", timeFilter],
-    queryFn: async (query) => {
-      return await fetch("/api/models", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+  const { data, isLoading } = $JAWN_API.useQuery(
+    "post",
+    "/v1/metrics/models",
+    {
+      body: {
+        filter: {},
+        offset: 0,
+        limit: 100,
+        timeFilter: {
+          start: timeFilter.start.toISOString(),
+          end: timeFilter.end.toISOString(),
         },
-        body: JSON.stringify({
-          filter: {},
-          offset: 0,
-          limit: 100,
-          timeFilter,
-        }),
-      }).then((res) => res.json() as Promise<Result<ModelMetric[], string>>);
+      },
     },
-    refetchOnWindowFocus: false,
-  });
+    {
+      refetchOnWindowFocus: false,
+    },
+  );
+
+  // Transform data to include id field required by ThemedTable
+  const tableData =
+    data?.data?.map((d) => ({
+      ...d,
+      id: d.model,
+    })) || [];
 
   return (
     <>
       <AuthHeader title={"Models"} />
       <ThemedTable
         id="modelMetrics"
-        defaultData={data?.data || []}
+        defaultData={tableData}
         defaultColumns={INITIAL_COLUMNS}
         skeletonLoading={isLoading}
         dataLoading={false}
-        exportData={data?.data || []}
+        exportData={tableData}
         onRowSelect={(row) => {}}
         timeFilter={{
           currentTimeFilter: timeFilter,

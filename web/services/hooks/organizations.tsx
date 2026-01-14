@@ -13,9 +13,9 @@ import {
   $JAWN_API_WITH_ORG,
   getJawnClient,
 } from "../../lib/clients/jawn";
-import type { paths } from "../../lib/clients/jawnTypes/private";
 import { ORG_ID_COOKIE_KEY } from "../../lib/constants";
 import { OnboardingState } from "./useOrgOnboarding";
+import { getAttributionForPostHog } from "@helicone-package/common";
 
 const useGetOrgMembers = (orgId: string) => {
   const { data, isLoading, refetch } = $JAWN_API.useQuery(
@@ -133,10 +133,17 @@ const identifyUserOrg = (
   user: HeliconeUser,
 ) => {
   if (user) {
+    // Identify user
     posthog.identify(user.id, {
       name: user.user_metadata?.name,
       email: user.email,
     });
+
+    // Set attribution as $set_once (first-touch - won't overwrite existing values)
+    const attributionProps = getAttributionForPostHog({ omitUndefined: true });
+    if (Object.keys(attributionProps).length > 0) {
+      posthog.setPersonProperties({}, attributionProps);
+    }
   }
 
   const orgOnboardingStatus = org.onboarding_status as unknown as OnboardingState;

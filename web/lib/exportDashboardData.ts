@@ -1,15 +1,49 @@
 import * as XLSX from "xlsx";
 import { Result } from "@/packages/common/result";
-import { CostOverTime } from "@/pages/api/metrics/costOverTime";
-import { ErrorOverTime } from "@/pages/api/metrics/errorOverTime";
 import { RequestsOverTime } from "@/lib/timeCalculations/fetchTimeData";
-import { TokensOverTime } from "@/pages/api/metrics/TokensOverTimeType";
-import { LatencyOverTime } from "@/lib/api/metrics/getLatencyOverTime";
-import { ThreatsOverTime } from "@/lib/api/metrics/getThreatsOverTime";
-import { TimeToFirstToken } from "@/lib/api/metrics/getTimeToFirstToken";
-import { UsersOverTime } from "@/lib/api/metrics/getUsersOverTime";
-import { UnPromise } from "@/lib/tsxHelpers";
-import { getTokensPerRequest } from "@/lib/api/metrics/averageTokensPerRequest";
+
+// Types for dashboard export - defined locally to avoid dependency on legacy API files
+export interface CostOverTime {
+  cost: number;
+  time: Date;
+}
+
+export interface ErrorOverTime {
+  count: number;
+  time: Date;
+}
+
+export interface TokensOverTime {
+  prompt_tokens: number;
+  completion_tokens: number;
+  time: Date;
+}
+
+export interface LatencyOverTime {
+  duration: number;
+  time: Date;
+}
+
+export interface ThreatsOverTime {
+  count: number;
+  time: Date;
+}
+
+export interface TimeToFirstToken {
+  ttft: number;
+  time: Date;
+}
+
+export interface UsersOverTime {
+  count: number;
+  time: Date;
+}
+
+export interface TokensPerRequest {
+  average_prompt_tokens_per_response: number;
+  average_completion_tokens_per_response: number;
+  average_total_tokens_per_response: number;
+}
 
 export interface DashboardExportData {
   metrics: {
@@ -17,7 +51,7 @@ export interface DashboardExportData {
     totalRequests: { data: Result<number, string> | undefined };
     averageLatency: { data: Result<number, string> | undefined };
     averageTokensPerRequest: {
-      data: UnPromise<ReturnType<typeof getTokensPerRequest>> | undefined;
+      data: Result<TokensPerRequest, string> | undefined;
     };
     activeUsers: { data: Result<number, string> | undefined };
     averageTimeToFirstToken: { data: Result<number, string> | undefined };
