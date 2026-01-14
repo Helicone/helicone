@@ -170,7 +170,7 @@ const UserIdPage = (props: UserIdPageProps) => {
                       height={"200px"}
                     >
                       <ThemedLineChart
-                        data={requestOverTime}
+                        data={requestOverTime ?? []}
                         index="date"
                         categories={["requests"]}
                         colors={["chart1"]}
@@ -184,7 +184,7 @@ const UserIdPage = (props: UserIdPageProps) => {
                       height={"200px"}
                     >
                       <ThemedLineChart
-                        data={costOverTime}
+                        data={costOverTime ?? []}
                         index="date"
                         categories={["cost"]}
                         colors={["chart2"]}
