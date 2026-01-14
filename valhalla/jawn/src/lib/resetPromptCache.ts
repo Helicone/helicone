@@ -42,6 +42,10 @@ async function resetPromptCacheDev(
   { orgId, promptId, versionId, environment }: ResetPromptCacheParams,
   retries = MAX_RETRIES
 ) {
+  if (!process.env.HELICONE_WORKER_API) {
+    console.log("Skipping cache reset - HELICONE_WORKER_API not configured");
+    return;
+  }
   try {
     const res = await fetch(
       `${process.env.HELICONE_WORKER_API}/reset-prompt-cache/${orgId}`,

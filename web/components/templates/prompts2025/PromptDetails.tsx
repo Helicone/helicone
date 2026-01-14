@@ -58,6 +58,11 @@ interface PromptDetailsProps {
     promptVersionId: string,
     environment: string,
   ) => void;
+  onRemoveEnvironment: (
+    promptId: string,
+    promptVersionId: string,
+    environment: string,
+  ) => void;
   onOpenPromptVersion: (promptVersionId: string) => void;
   onDeletePrompt: (promptId: string) => void;
   onDeletePromptVersion: (promptVersionId: string) => void;
@@ -70,6 +75,7 @@ const PromptDetails = ({
   onRenamePrompt,
   onUpdatePromptTags,
   onSetEnvironment,
+  onRemoveEnvironment,
   onOpenPromptVersion,
   onDeletePrompt,
   onDeletePromptVersion,
@@ -541,6 +547,7 @@ const PromptDetails = ({
         <PromptVersionHistory
           promptWithVersions={promptWithVersions}
           onSetEnvironment={onSetEnvironment}
+          onRemoveEnvironment={onRemoveEnvironment}
           onOpenPromptVersion={onOpenPromptVersion}
           onDeletePromptVersion={onDeletePromptVersion}
         />

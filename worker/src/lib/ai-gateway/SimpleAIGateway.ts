@@ -103,6 +103,12 @@ export class SimpleAIGateway {
   }
 
   async handle(): Promise<Response> {
+    // Step 0: Apply token limit exception handler if configured
+    // This must run BEFORE parsing to allow body modification (e.g., model fallback)
+    // We use "CUSTOM" as the provider since the actual provider is determined per-model
+    // The handler will still work for fallback strategy (proceeds when tokenLimit is null)
+    await this.requestWrapper.applyTokenLimitExceptionHandler("CUSTOM");
+
     // Step 1: Parse and prepare request
     const bodyMapping: BodyMappingType =
       this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping;
@@ -133,16 +139,14 @@ export class SimpleAIGateway {
     };
 
     let finalBody = parsedBody;
-    // TODO: add prompt merging support for Responses API format
     if (this.hasPromptFields(parsedBody) && bodyMapping !== "NO_MAPPING") {
-      if (bodyMapping === "RESPONSES") {
-        return new Response(
-          "Helicone Prompts is not supported for Responses API format on the AI Gateway",
-          { status: 400 }
-        );
-      }
       this.metrics.markPromptRequestStart();
-      const expandResult = await this.expandPrompt(parsedBody);
+      let expandResult: Result<{ body: any }, Response>;
+      if (bodyMapping === "RESPONSES") {
+        expandResult = await this.expandPromptForResponses(parsedBody);
+      } else {
+        expandResult = await this.expandPrompt(parsedBody);
+      }
       if (isErr(expandResult)) {
         return expandResult.error;
       }
@@ -469,6 +473,59 @@ export class SimpleAIGateway {
     );
 
     const expandedResult = await promptManager.getMergedPromptBody(
+      parsedBody,
+      this.orgId
+    );
+
+    if (isErr(expandedResult)) {
+      return err(
+        new Response(JSON.stringify({ error: expandedResult.error }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        })
+      );
+    }
+
+    if (expandedResult.data.errors && expandedResult.data.errors.length > 0) {
+      const errorMessage = expandedResult.data.errors
+        .map(
+          (error) =>
+            `Variable '${error.variable}' is '${error.expected}' but got '${error.value}'`
+        )
+        .join("\n");
+
+      return err(
+        new Response(JSON.stringify({ error: errorMessage }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        })
+      );
+    }
+
+    // Update request wrapper with prompt settings
+    this.requestWrapper.setPrompt2025Settings({
+      promptId: parsedBody.prompt_id,
+      promptVersionId: expandedResult.data.promptVersionId,
+      inputs: parsedBody.inputs,
+      environment: parsedBody.environment,
+    });
+
+    return ok({ body: expandedResult.data.body });
+  }
+
+  private async expandPromptForResponses(
+    parsedBody: any
+  ): Promise<Result<{ body: any }, Response>> {
+    const promptManager = new PromptManager(
+      new HeliconePromptManager({
+        apiKey: this.apiKey,
+        baseUrl: this.env.VALHALLA_URL,
+      }),
+      new PromptStore(this.supabaseClient),
+      this.env
+    );
+
+    const expandedResult = await promptManager.getMergedPromptBodyForResponses(
       parsedBody,
       this.orgId
     );

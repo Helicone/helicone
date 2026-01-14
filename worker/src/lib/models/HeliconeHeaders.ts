@@ -13,6 +13,24 @@ export type HeliconeFallback = {
 };
 
 export type HeliconeBearerKeyType = "standard" | "rate-limited";
+export enum HeliconeTokenLimitExceptionHandler {
+  Truncate = "truncate",
+  MiddleOut = "middle-out",
+  Fallback = "fallback",
+}
+
+// Typed record ensures all enum values are mapped - TypeScript will error if a new value is added to the enum
+const TOKEN_LIMIT_HANDLER_MAP: Record<
+  HeliconeTokenLimitExceptionHandler,
+  HeliconeTokenLimitExceptionHandler
+> = {
+  [HeliconeTokenLimitExceptionHandler.Truncate]:
+    HeliconeTokenLimitExceptionHandler.Truncate,
+  [HeliconeTokenLimitExceptionHandler.MiddleOut]:
+    HeliconeTokenLimitExceptionHandler.MiddleOut,
+  [HeliconeTokenLimitExceptionHandler.Fallback]:
+    HeliconeTokenLimitExceptionHandler.Fallback,
+};
 
 export interface IHeliconeHeaders {
   heliconeAuth: Nullable<string>;
@@ -59,6 +77,7 @@ export interface IHeliconeHeaders {
     omitResponse: boolean;
     omitRequest: boolean;
   };
+  tokenLimitExceptionHandler: Nullable<HeliconeTokenLimitExceptionHandler>;
   sessionHeaders: {
     sessionId: Nullable<string>;
     path: Nullable<string>;
@@ -126,6 +145,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   promptName: Nullable<string>;
   userId: Nullable<string>;
   omitHeaders: { omitResponse: boolean; omitRequest: boolean };
+  tokenLimitExceptionHandler: Nullable<HeliconeTokenLimitExceptionHandler>;
   sessionHeaders: {
     sessionId: Nullable<string>;
     path: Nullable<string>;
@@ -179,6 +199,8 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     };
     this.promptName = heliconeHeaders.promptName;
     this.omitHeaders = heliconeHeaders.omitHeaders;
+    this.tokenLimitExceptionHandler =
+      heliconeHeaders.tokenLimitExceptionHandler;
     this.sessionHeaders = heliconeHeaders.sessionHeaders;
     this.userId = heliconeHeaders.userId;
     this.heliconeProperties = this.getHeliconeProperties(heliconeHeaders);
@@ -357,8 +379,8 @@ export class HeliconeHeaders implements IHeliconeHeaders {
         cacheControl: this.headers.get("Helicone-Cache-Control") ?? null,
         cacheIgnoreKeys: this.headers.get("Helicone-Cache-Ignore-Keys")
           ? JSON.parse(
-              `[${this.headers.get("Helicone-Cache-Ignore-Keys") ?? ""}]`
-            )
+            `[${this.headers.get("Helicone-Cache-Ignore-Keys") ?? ""}]`
+          )
           : null,
       },
       promptName: this.headers.get("Helicone-Prompt-Name") ?? null,
@@ -367,6 +389,7 @@ export class HeliconeHeaders implements IHeliconeHeaders {
         omitResponse: this.headers.get("Helicone-Omit-Response") === "true",
         omitRequest: this.headers.get("Helicone-Omit-Request") === "true",
       },
+      tokenLimitExceptionHandler: this.getTokenLimitExceptionHandler(),
       sessionHeaders: {
         sessionId: this.headers.get("Helicone-Session-Id") ?? null,
         path: this.headers.get("Helicone-Session-Path") ?? null,
@@ -404,6 +427,16 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       heliconeManualAccessKey:
         this.headers.get("Helicone-Manual-Access-Key") ?? null,
     };
+  }
+
+  private getTokenLimitExceptionHandler(): Nullable<HeliconeTokenLimitExceptionHandler> {
+    const handler = this.headers.get("Helicone-Token-Limit-Exception-Handler");
+    if (!handler) {
+      return null;
+    }
+
+    const normalized = handler.toLowerCase();
+    return TOKEN_LIMIT_HANDLER_MAP[normalized as HeliconeTokenLimitExceptionHandler] ?? null;
   }
 
   private getRetryHeaders(): IHeliconeHeaders["retryHeaders"] {

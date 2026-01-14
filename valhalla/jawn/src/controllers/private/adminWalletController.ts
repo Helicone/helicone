@@ -18,6 +18,7 @@ import { ENVIRONMENT } from "../../lib/clients/constant";
 import { SettingsManager } from "../../utils/settings";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { AdminWalletManager } from "../../managers/admin/AdminWalletManager";
+import { randomUUID } from "crypto";
 import { AdminWalletAnalyticsManager } from "../../managers/admin/AdminWalletAnalyticsManager";
 import { WalletState } from "../../types/wallet";
 import { WalletManager } from "../../managers/wallet/WalletManager";
@@ -280,7 +281,7 @@ export class AdminWalletController extends Controller {
 
     try {
       // Create a unique reference ID for this manual modification
-      const referenceId = `admin-manual-${Date.now()}-${request.authParams.userId}`;
+      const referenceId = `admin-manual-${randomUUID()}-${request.authParams.userId}`;
 
       // Convert amount to cents for the API
       const amountInCents = Math.round(amount * 100);

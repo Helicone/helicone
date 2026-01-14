@@ -1650,8 +1650,11 @@
 					"commit_message": {
 						"type": "string"
 					},
-					"environment": {
-						"type": "string"
+					"environments": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
 					},
 					"created_at": {
 						"type": "string"
@@ -11075,6 +11078,857 @@
 				],
 				"type": "object"
 			},
+			"MetricsFilterBody": {
+				"properties": {
+					"filter": {
+						"$ref": "#/components/schemas/FilterNode"
+					},
+					"timeFilter": {
+						"properties": {
+							"end": {
+								"type": "string"
+							},
+							"start": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"end",
+							"start"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"filter",
+					"timeFilter"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TokensPerRequest": {
+				"properties": {
+					"average_prompt_tokens_per_response": {
+						"type": "number",
+						"format": "double"
+					},
+					"average_completion_tokens_per_response": {
+						"type": "number",
+						"format": "double"
+					},
+					"average_total_tokens_per_response": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"average_prompt_tokens_per_response",
+					"average_completion_tokens_per_response",
+					"average_total_tokens_per_response"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_TokensPerRequest_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/TokensPerRequest"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_TokensPerRequest.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_TokensPerRequest_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"RequestsOverTime": {
+				"properties": {
+					"time": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"count": {
+						"type": "number",
+						"format": "double"
+					},
+					"status": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"time",
+					"count"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_RequestsOverTime-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/RequestsOverTime"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_RequestsOverTime-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_RequestsOverTime-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"MetricsOverTimeBody": {
+				"properties": {
+					"timeFilter": {
+						"properties": {
+							"end": {
+								"type": "string"
+							},
+							"start": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"end",
+							"start"
+						],
+						"type": "object"
+					},
+					"filter": {
+						"$ref": "#/components/schemas/FilterNode"
+					},
+					"dbIncrement": {
+						"$ref": "#/components/schemas/TimeIncrement"
+					},
+					"timeZoneDifference": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"timeFilter",
+					"filter",
+					"timeZoneDifference"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CostOverTime": {
+				"properties": {
+					"time": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"cost": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"time",
+					"cost"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_CostOverTime-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/CostOverTime"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_CostOverTime-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_CostOverTime-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"TokensOverTime": {
+				"properties": {
+					"time": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"prompt_tokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"completion_tokens": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"time",
+					"prompt_tokens",
+					"completion_tokens"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_TokensOverTime-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/TokensOverTime"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_TokensOverTime-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_TokensOverTime-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"LatencyOverTime": {
+				"properties": {
+					"time": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"duration": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"time",
+					"duration"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_LatencyOverTime-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/LatencyOverTime"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_LatencyOverTime-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_LatencyOverTime-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"TimeToFirstTokenOverTime": {
+				"properties": {
+					"time": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"ttft": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"time",
+					"ttft"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_TimeToFirstTokenOverTime-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/TimeToFirstTokenOverTime"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_TimeToFirstTokenOverTime-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_TimeToFirstTokenOverTime-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"UsersOverTime": {
+				"properties": {
+					"time": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"count": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"time",
+					"count"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_UsersOverTime-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/UsersOverTime"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_UsersOverTime-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_UsersOverTime-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ThreatsOverTime": {
+				"properties": {
+					"time": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"count": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"time",
+					"count"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_ThreatsOverTime-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/ThreatsOverTime"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ThreatsOverTime-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ThreatsOverTime-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ErrorOverTime": {
+				"properties": {
+					"time": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"count": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"time",
+					"count"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_ErrorOverTime-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/ErrorOverTime"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ErrorOverTime-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ErrorOverTime-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"RequestCountBody": {
+				"properties": {
+					"filter": {
+						"$ref": "#/components/schemas/FilterNode"
+					},
+					"isCached": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"filter"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ModelMetric": {
+				"properties": {
+					"model": {
+						"type": "string"
+					},
+					"total_requests": {
+						"type": "number",
+						"format": "double"
+					},
+					"total_completion_tokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"total_prompt_token": {
+						"type": "number",
+						"format": "double"
+					},
+					"total_tokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"cost": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"model",
+					"total_requests",
+					"total_completion_tokens",
+					"total_prompt_token",
+					"total_tokens",
+					"cost"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_ModelMetric-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/ModelMetric"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ModelMetric-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ModelMetric-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ModelMetricsBody": {
+				"properties": {
+					"filter": {
+						"$ref": "#/components/schemas/FilterNode"
+					},
+					"offset": {
+						"type": "number",
+						"format": "double"
+					},
+					"limit": {
+						"type": "number",
+						"format": "double"
+					},
+					"timeFilter": {
+						"properties": {
+							"end": {
+								"type": "string"
+							},
+							"start": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"end",
+							"start"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"filter",
+					"offset",
+					"limit",
+					"timeFilter"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CountryData": {
+				"properties": {
+					"country": {
+						"type": "string"
+					},
+					"total_requests": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"country",
+					"total_requests"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_CountryData-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/CountryData"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_CountryData-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_CountryData-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"CountryMetricsBody": {
+				"properties": {
+					"filter": {
+						"$ref": "#/components/schemas/FilterNode"
+					},
+					"offset": {
+						"type": "number",
+						"format": "double"
+					},
+					"limit": {
+						"type": "number",
+						"format": "double"
+					},
+					"timeFilter": {
+						"properties": {
+							"end": {
+								"type": "string"
+							},
+							"start": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"end",
+							"start"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"filter",
+					"offset",
+					"limit",
+					"timeFilter"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Quantiles": {
+				"properties": {
+					"time": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"p75": {
+						"type": "number",
+						"format": "double"
+					},
+					"p90": {
+						"type": "number",
+						"format": "double"
+					},
+					"p95": {
+						"type": "number",
+						"format": "double"
+					},
+					"p99": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"time",
+					"p75",
+					"p90",
+					"p95",
+					"p99"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_Quantiles-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/Quantiles"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_Quantiles-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Quantiles-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"QuantilesBody": {
+				"properties": {
+					"filter": {
+						"$ref": "#/components/schemas/FilterNode"
+					},
+					"timeFilter": {
+						"properties": {
+							"end": {
+								"type": "string"
+							},
+							"start": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"end",
+							"start"
+						],
+						"type": "object"
+					},
+					"dbIncrement": {
+						"$ref": "#/components/schemas/TimeIncrement"
+					},
+					"timeZoneDifference": {
+						"type": "number",
+						"format": "double"
+					},
+					"metric": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"filter",
+					"timeFilter",
+					"timeZoneDifference",
+					"metric"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"ResultSuccess__unsafe-boolean__": {
 				"properties": {
 					"data": {
@@ -15460,6 +16314,58 @@
 		"/v1/prompt-2025/update/environment": {
 			"post": {
 				"operationId": "SetPromptVersionEnvironment",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"environment": {
+										"type": "string"
+									},
+									"promptVersionId": {
+										"type": "string"
+									},
+									"promptId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"environment",
+									"promptVersionId",
+									"promptId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt-2025/remove/environment": {
+			"post": {
+				"operationId": "RemoveEnvironmentFromVersion",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -21713,6 +22619,726 @@
 									"$ref": "#/components/schemas/ModelsToCompare"
 								},
 								"type": "array"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/metrics/totalRequests": {
+			"post": {
+				"operationId": "GetTotalRequests",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_number.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Metrics"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MetricsFilterBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/metrics/totalCost": {
+			"post": {
+				"operationId": "GetTotalCost",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_number.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Metrics"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MetricsFilterBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/metrics/averageLatency": {
+			"post": {
+				"operationId": "GetAverageLatency",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_number.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Metrics"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MetricsFilterBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/metrics/averageTimeToFirstToken": {
+			"post": {
+				"operationId": "GetAverageTimeToFirstToken",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_number.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Metrics"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MetricsFilterBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/metrics/averageTokensPerRequest": {
+			"post": {
+				"operationId": "GetAverageTokensPerRequest",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_TokensPerRequest.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Metrics"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MetricsFilterBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/metrics/totalThreats": {
+			"post": {
+				"operationId": "GetTotalThreats",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_number.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Metrics"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MetricsFilterBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/metrics/activeUsers": {
+			"post": {
+				"operationId": "GetActiveUsers",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_number.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Metrics"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MetricsFilterBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/metrics/requestOverTime": {
+			"post": {
+				"operationId": "GetRequestsOverTime",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_RequestsOverTime-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Metrics"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MetricsOverTimeBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/metrics/costOverTime": {
+			"post": {
+				"operationId": "GetCostOverTime",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_CostOverTime-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Metrics"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MetricsOverTimeBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/metrics/tokensOverTime": {
+			"post": {
+				"operationId": "GetTokensOverTime",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_TokensOverTime-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Metrics"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MetricsOverTimeBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/metrics/latencyOverTime": {
+			"post": {
+				"operationId": "GetLatencyOverTime",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_LatencyOverTime-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Metrics"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MetricsOverTimeBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/metrics/timeToFirstToken": {
+			"post": {
+				"operationId": "GetTimeToFirstTokenOverTime",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_TimeToFirstTokenOverTime-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Metrics"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MetricsOverTimeBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/metrics/usersOverTime": {
+			"post": {
+				"operationId": "GetUsersOverTime",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_UsersOverTime-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Metrics"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MetricsOverTimeBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/metrics/threatsOverTime": {
+			"post": {
+				"operationId": "GetThreatsOverTime",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ThreatsOverTime-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Metrics"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MetricsOverTimeBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/metrics/errorOverTime": {
+			"post": {
+				"operationId": "GetErrorsOverTime",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ErrorOverTime-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Metrics"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MetricsOverTimeBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/metrics/requestStatusOverTime": {
+			"post": {
+				"operationId": "GetRequestStatusOverTime",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_RequestsOverTime-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Metrics"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MetricsOverTimeBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/metrics/requestCount": {
+			"post": {
+				"operationId": "GetRequestCount",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_number.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Metrics"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RequestCountBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/metrics/models": {
+			"post": {
+				"operationId": "GetModelMetrics",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ModelMetric-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Metrics"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ModelMetricsBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/metrics/country": {
+			"post": {
+				"operationId": "GetCountryMetrics",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_CountryData-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Metrics"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CountryMetricsBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/metrics/quantiles": {
+			"post": {
+				"operationId": "GetQuantiles",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Quantiles-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Metrics"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/QuantilesBody"
 							}
 						}
 					}

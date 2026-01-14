@@ -20,11 +20,16 @@ export const Home = () => {
 export default Home;
 
 export const getServerSideProps = async (
-  _context: GetServerSidePropsContext,
+  context: GetServerSidePropsContext,
 ) => {
+  // Preserve query params (UTM, gclid, etc.) through the redirect
+  const queryString = context.resolvedUrl.includes("?")
+    ? context.resolvedUrl.substring(context.resolvedUrl.indexOf("?"))
+    : "";
+
   return {
     redirect: {
-      destination: "/signin",
+      destination: `/signin${queryString}`,
       permanent: false,
     },
   };

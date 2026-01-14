@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import LazyLoadComponent from "@/components/shared/LazyLoadComponent";
 import { cn, ISLAND_WIDTH } from "@/lib/utils";
 
+const AgentCourse = dynamic(() => import("@/components/home/AgentCourse"));
 const AiGateway = dynamic(() => import("@/components/home/AiGateway"));
 const BigDashboard = dynamic(() => import("@/components/home/BigDashboard"));
 const Companies = dynamic(() => import("@/components/home/Companies"));
@@ -39,6 +40,9 @@ export default function Home() {
           </LazyLoadComponent>
           <LazyLoadComponent fallback={<LoadingSection />}>
             <Quote2 />
+          </LazyLoadComponent>
+          <LazyLoadComponent fallback={<LoadingSection />}>
+            <AgentCourse />
           </LazyLoadComponent>
           <LazyLoadComponent fallback={<LoadingSection />}>
             <AiGateway />

@@ -249,6 +249,9 @@ export interface paths {
   "/v1/prompt-2025/update/environment": {
     post: operations["SetPromptVersionEnvironment"];
   };
+  "/v1/prompt-2025/remove/environment": {
+    post: operations["RemoveEnvironmentFromVersion"];
+  };
   "/v1/prompt-2025/count": {
     get: operations["GetPrompt2025Count"];
   };
@@ -645,6 +648,54 @@ export interface paths {
     delete: operations["DeleteAdminSavedQuery"];
     /** @description Update a saved query for admin (stored under admin org ID) */
     patch: operations["UpdateAdminSavedQuery"];
+  };
+  "/v1/admin/pricing-migration/pending": {
+    /**
+     * @description Get all organizations that need to be migrated to new pricing
+     * Supports pagination, search, and tier filtering
+     */
+    post: operations["GetPendingMigrations"];
+  };
+  "/v1/admin/pricing-migration/migrate/{orgId}": {
+    /** @description Migrate a single organization to new pricing (legacy - use migrate-instant or migrate-scheduled instead) */
+    post: operations["MigrateOrganization"];
+  };
+  "/v1/admin/pricing-migration/migrate-instant/{orgId}": {
+    /**
+     * @description Migrate instantly with usage backfill
+     * Updates subscription immediately and backfills metered usage events for current billing period
+     */
+    post: operations["MigrateInstant"];
+  };
+  "/v1/admin/pricing-migration/migrate-scheduled/{orgId}": {
+    /**
+     * @description Schedule migration for next billing period
+     * Uses Stripe subscription schedules to defer the pricing change
+     */
+    post: operations["MigrateScheduled"];
+  };
+  "/v1/admin/pricing-migration/completed": {
+    /** @description Get migration history/status */
+    get: operations["GetCompletedMigrations"];
+  };
+  "/v1/admin/pricing-migration/reapply/{orgId}": {
+    /** @description Reapply migration for an already migrated organization (for fixing issues) */
+    post: operations["ReapplyMigration"];
+  };
+  "/v1/admin/pricing-migration/org/{orgId}": {
+    /** @description Get organization details for admin view */
+    get: operations["GetOrgDetails"];
+  };
+  "/v1/admin/pricing-migration/add-usage/{orgId}": {
+    /**
+     * @description Add metered usage for an organization (for testing/fixing billing)
+     * Uses Stripe Billing Meter events
+     */
+    post: operations["AddMeteredUsage"];
+  };
+  "/v1/admin/pricing-migration/switch-to-free/{orgId}": {
+    /** @description Switch an organization to free tier (for cancelled subscriptions) */
+    post: operations["SwitchToFree"];
   };
   "/v1/credits/balance": {
     get: operations["GetCreditsBalance"];
@@ -1622,7 +1673,7 @@ Json: JsonObject;
       /** Format: double */
       minor_version: number;
       commit_message: string;
-      environment?: string;
+      environments?: string[];
       created_at: string;
       s3_url?: string;
     };
@@ -16369,6 +16420,84 @@ Json: JsonObject;
       error: null;
     };
     "Result__rows-Record_string.any_-Array--elapsedMilliseconds-number--size-number--rowCount-number_.string_": components["schemas"]["ResultSuccess__rows-Record_string.any_-Array--elapsedMilliseconds-number--size-number--rowCount-number__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__previousTier-string--newTier-string--subscriptionId-string__": {
+      data: {
+        subscriptionId: string;
+        newTier: string;
+        previousTier: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__previousTier-string--newTier-string--subscriptionId-string_.string_": components["schemas"]["ResultSuccess__previousTier-string--newTier-string--subscriptionId-string__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__previousTier-string--newTier-string--subscriptionId-string--usage_58__requests-number--storageBytes-number--storageMb-number--source-clickhouse-or-override_--backfillResult_58__requestsEvent-string--storageEvent-string___": {
+      data: {
+        backfillResult: {
+          storageEvent: string;
+          requestsEvent: string;
+        };
+        usage: {
+          /** @enum {string} */
+          source: "clickhouse" | "override";
+          /** Format: double */
+          storageMb: number;
+          /** Format: double */
+          storageBytes: number;
+          /** Format: double */
+          requests: number;
+        };
+        subscriptionId: string;
+        newTier: string;
+        previousTier: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__previousTier-string--newTier-string--subscriptionId-string--usage_58__requests-number--storageBytes-number--storageMb-number--source-clickhouse-or-override_--backfillResult_58__requestsEvent-string--storageEvent-string__.string_": components["schemas"]["ResultSuccess__previousTier-string--newTier-string--subscriptionId-string--usage_58__requests-number--storageBytes-number--storageMb-number--source-clickhouse-or-override_--backfillResult_58__requestsEvent-string--storageEvent-string___"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__previousTier-string--newTier-string--subscriptionId-string--scheduleId-string--scheduledFor-string__": {
+      data: {
+        scheduledFor: string;
+        scheduleId: string;
+        subscriptionId: string;
+        newTier: string;
+        previousTier: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__previousTier-string--newTier-string--subscriptionId-string--scheduleId-string--scheduledFor-string_.string_": components["schemas"]["ResultSuccess__previousTier-string--newTier-string--subscriptionId-string--scheduleId-string--scheduledFor-string__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__id-string--name-string--tier-string--stripe_customer_id-string-or-null--stripe_subscription_id-string-or-null--subscription_status-string-or-null--owner_email-string-or-null--created_at-string__": {
+      data: {
+        created_at: string;
+        owner_email: string | null;
+        subscription_status: string | null;
+        stripe_subscription_id: string | null;
+        stripe_customer_id: string | null;
+        tier: string;
+        name: string;
+        id: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__id-string--name-string--tier-string--stripe_customer_id-string-or-null--stripe_subscription_id-string-or-null--subscription_status-string-or-null--owner_email-string-or-null--created_at-string_.string_": components["schemas"]["ResultSuccess__id-string--name-string--tier-string--stripe_customer_id-string-or-null--stripe_subscription_id-string-or-null--subscription_status-string-or-null--owner_email-string-or-null--created_at-string__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__message-string__": {
+      data: {
+        message: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__message-string_.string_": components["schemas"]["ResultSuccess__message-string__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__message-string--previousTier-string__": {
+      data: {
+        previousTier: string;
+        message: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__message-string--previousTier-string_.string_": components["schemas"]["ResultSuccess__message-string--previousTier-string__"] | components["schemas"]["ResultError_string_"];
     CreditBalanceResponse: {
       /** Format: double */
       totalCreditsPurchased: number;
@@ -18103,6 +18232,25 @@ export interface operations {
     };
   };
   SetPromptVersionEnvironment: {
+    requestBody: {
+      content: {
+        "application/json": {
+          environment: string;
+          promptVersionId: string;
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  RemoveEnvironmentFromVersion: {
     requestBody: {
       content: {
         "application/json": {
@@ -20545,6 +20693,220 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_HqlSavedQuery.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * @description Get all organizations that need to be migrated to new pricing
+   * Supports pagination, search, and tier filtering
+   */
+  GetPendingMigrations: {
+    requestBody: {
+      content: {
+        "application/json": {
+          tierFilter?: string[];
+          search?: string;
+          /** Format: double */
+          offset?: number;
+          /** Format: double */
+          limit?: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            hasMore: boolean;
+            summary: {
+              byTier: components["schemas"]["Record_string.number_"];
+              /** Format: double */
+              total: number;
+            };
+            organizations: ({
+                /** Format: double */
+                member_count: number;
+                created_at: string;
+                stripe_status: string | null;
+                subscription_status: string | null;
+                stripe_subscription_id: string | null;
+                stripe_customer_id: string | null;
+                owner_email: string | null;
+                tier: string;
+                name: string;
+                id: string;
+              })[];
+          };
+        };
+      };
+    };
+  };
+  /** @description Migrate a single organization to new pricing (legacy - use migrate-instant or migrate-scheduled instead) */
+  MigrateOrganization: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__previousTier-string--newTier-string--subscriptionId-string_.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * @description Migrate instantly with usage backfill
+   * Updates subscription immediately and backfills metered usage events for current billing period
+   */
+  MigrateInstant: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          storageBytesOverride?: number;
+          /** Format: double */
+          requestsOverride?: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__previousTier-string--newTier-string--subscriptionId-string--usage_58__requests-number--storageBytes-number--storageMb-number--source-clickhouse-or-override_--backfillResult_58__requestsEvent-string--storageEvent-string__.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * @description Schedule migration for next billing period
+   * Uses Stripe subscription schedules to defer the pricing change
+   */
+  MigrateScheduled: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__previousTier-string--newTier-string--subscriptionId-string--scheduleId-string--scheduledFor-string_.string_"];
+        };
+      };
+    };
+  };
+  /** @description Get migration history/status */
+  GetCompletedMigrations: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": {
+            summary: {
+              byTier: components["schemas"]["Record_string.number_"];
+              /** Format: double */
+              total: number;
+            };
+            organizations: ({
+                subscription_status: string | null;
+                stripe_subscription_id: string | null;
+                stripe_customer_id: string | null;
+                owner_email: string | null;
+                tier: string;
+                name: string;
+                id: string;
+              })[];
+          };
+        };
+      };
+    };
+  };
+  /** @description Reapply migration for an already migrated organization (for fixing issues) */
+  ReapplyMigration: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__previousTier-string--newTier-string--subscriptionId-string_.string_"];
+        };
+      };
+    };
+  };
+  /** @description Get organization details for admin view */
+  GetOrgDetails: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string--name-string--tier-string--stripe_customer_id-string-or-null--stripe_subscription_id-string-or-null--subscription_status-string-or-null--owner_email-string-or-null--created_at-string_.string_"];
+        };
+      };
+    };
+  };
+  /**
+   * @description Add metered usage for an organization (for testing/fixing billing)
+   * Uses Stripe Billing Meter events
+   */
+  AddMeteredUsage: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          timestamp?: string;
+          /** Format: double */
+          quantity: number;
+          /** @enum {string} */
+          usageType: "requests" | "storage_gb";
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__message-string_.string_"];
+        };
+      };
+    };
+  };
+  /** @description Switch an organization to free tier (for cancelled subscriptions) */
+  SwitchToFree: {
+    parameters: {
+      path: {
+        orgId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__message-string--previousTier-string_.string_"];
         };
       };
     };

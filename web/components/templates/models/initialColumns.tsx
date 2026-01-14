@@ -1,5 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { ModelMetric } from "../../../lib/api/models/models";
+import { ModelMetric } from "../../../services/hooks/models";
 import ModelPill from "../requests/modelPill";
 
 export const INITIAL_COLUMNS: ColumnDef<ModelMetric>[] = [

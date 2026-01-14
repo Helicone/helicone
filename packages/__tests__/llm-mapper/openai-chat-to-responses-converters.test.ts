@@ -352,4 +352,203 @@ describe("OpenAI Chat -> Responses converters", () => {
       }
     });
   });
+
+  describe("fromChatCompletions (request mapping)", () => {
+    // Import here to ensure test file picks it up
+    const { fromChatCompletions } = require("../../llm-mapper/transform/providers/responses/request/fromChatCompletions");
+
+    it("maps system message to developer role and user message to input array", () => {
+      const chatParams = {
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: "You are helpful" },
+          { role: "user", content: "Hello" },
+        ],
+      };
+
+      const res = fromChatCompletions(chatParams);
+      expect(res.model).toBe("gpt-4o-mini");
+      // System messages become developer role in input array (mimics Chat Completions structure)
+      expect(res.instructions).toBeUndefined();
+      expect(Array.isArray(res.input)).toBe(true);
+      expect((res.input as any[]).length).toBe(2);
+      expect((res.input as any[])[0]).toMatchObject({ type: "message", role: "developer", content: "You are helpful" });
+      expect((res.input as any[])[1]).toMatchObject({ type: "message", role: "user", content: "Hello" });
+    });
+
+    it("maps multiple messages to input array with system as developer", () => {
+      const chatParams = {
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: "You are helpful" },
+          { role: "user", content: "Hello" },
+          { role: "assistant", content: "Hi there!" },
+          { role: "user", content: "How are you?" },
+        ],
+      };
+
+      const res = fromChatCompletions(chatParams);
+      // System messages become developer role (no instructions extraction)
+      expect(res.instructions).toBeUndefined();
+      expect(Array.isArray(res.input)).toBe(true);
+      expect((res.input as any[]).length).toBe(4);
+      expect((res.input as any[])[0]).toMatchObject({ type: "message", role: "developer", content: "You are helpful" });
+      expect((res.input as any[])[1]).toMatchObject({ type: "message", role: "user", content: "Hello" });
+      expect((res.input as any[])[2]).toMatchObject({ type: "message", role: "assistant", content: "Hi there!" });
+      expect((res.input as any[])[3]).toMatchObject({ type: "message", role: "user", content: "How are you?" });
+    });
+
+    it("maps tool_calls to function_call items", () => {
+      const chatParams = {
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "user", content: "What is 2+2?" },
+          {
+            role: "assistant",
+            content: null,
+            tool_calls: [
+              {
+                id: "call_123",
+                type: "function",
+                function: { name: "calculate", arguments: "{\"x\":2}" },
+              },
+            ],
+          },
+        ],
+      };
+
+      const res = fromChatCompletions(chatParams);
+      expect(Array.isArray(res.input)).toBe(true);
+      const funcCall = (res.input as any[]).find((i: any) => i.type === "function_call");
+      expect(funcCall).toBeDefined();
+      expect(funcCall).toMatchObject({
+        type: "function_call",
+        call_id: "call_123",
+        name: "calculate",
+        arguments: "{\"x\":2}",
+      });
+    });
+
+    it("maps tool messages to function_call_output items", () => {
+      const chatParams = {
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "user", content: "What is 2+2?" },
+          {
+            role: "tool",
+            tool_call_id: "call_123",
+            content: "4",
+          },
+        ],
+      };
+
+      const res = fromChatCompletions(chatParams);
+      expect(Array.isArray(res.input)).toBe(true);
+      const funcOutput = (res.input as any[]).find((i: any) => i.type === "function_call_output");
+      expect(funcOutput).toBeDefined();
+      expect(funcOutput).toMatchObject({
+        type: "function_call_output",
+        call_id: "call_123",
+        output: "4",
+      });
+    });
+
+    it("maps Chat tools (nested) to Responses tools (flattened)", () => {
+      const chatParams = {
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: "Hello" }],
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "calculate",
+              description: "do math",
+              parameters: { type: "object", properties: {}, required: [] },
+            },
+          },
+        ],
+      };
+
+      const res = fromChatCompletions(chatParams);
+      expect(Array.isArray(res.tools)).toBe(true);
+      expect(res.tools?.[0]).toMatchObject({
+        type: "function",
+        name: "calculate",
+        description: "do math",
+        parameters: { type: "object", properties: {}, required: [] },
+      });
+    });
+
+    it("maps content array with text parts to input_text", () => {
+      const chatParams = {
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: "Describe this image" },
+              { type: "image_url", image_url: { url: "https://example.com/img.jpg", detail: "high" } },
+            ],
+          },
+        ],
+      };
+
+      const res = fromChatCompletions(chatParams);
+      expect(Array.isArray(res.input)).toBe(true);
+      const msg = (res.input as any[])[0];
+      expect(msg.type).toBe("message");
+      expect(msg.role).toBe("user");
+      expect(Array.isArray(msg.content)).toBe(true);
+      expect(msg.content[0]).toMatchObject({ type: "input_text", text: "Describe this image" });
+      expect(msg.content[1]).toMatchObject({ type: "input_image", image_url: "https://example.com/img.jpg", detail: "high" });
+    });
+
+    it("preserves Responses-specific fields from original request", () => {
+      const chatParams = {
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: "Hello" }],
+      };
+      const originalResponsesBody = {
+        reasoning: { effort: "high" as const },
+        metadata: { key: "value" },
+        store: true,
+        truncation: "auto" as const,
+      };
+
+      const res = fromChatCompletions(chatParams, originalResponsesBody);
+      expect(res.reasoning).toEqual({ effort: "high" });
+      expect(res.metadata).toEqual({ key: "value" });
+      expect(res.store).toBe(true);
+      expect(res.truncation).toBe("auto");
+    });
+
+    it("round-trips: toChatCompletions then fromChatCompletions preserves structure", () => {
+      const original: ResponsesRequestBody = {
+        model: "gpt-4o-mini",
+        instructions: "You are helpful",
+        input: [
+          { type: "message", role: "user", content: "Hello" },
+          { type: "message", role: "assistant", content: "Hi there!" },
+        ],
+        temperature: 0.7,
+        max_output_tokens: 1000,
+      };
+
+      const chat = toChatCompletions(original);
+      const roundTripped = fromChatCompletions(chat, original);
+
+      expect(roundTripped.model).toBe(original.model);
+      // Instructions are preserved from originalResponsesBody parameter
+      expect(roundTripped.instructions).toBe(original.instructions);
+      expect(roundTripped.temperature).toBe(original.temperature);
+      expect(roundTripped.max_output_tokens).toBe(original.max_output_tokens);
+      // Input structure includes system message converted to developer role
+      // Original: instructions + 2 input messages -> Chat: 3 messages -> Responses: 3 input items
+      expect(Array.isArray(roundTripped.input)).toBe(true);
+      expect((roundTripped.input as any[]).length).toBe(3);
+      expect((roundTripped.input as any[])[0]).toMatchObject({ type: "message", role: "developer", content: "You are helpful" });
+      expect((roundTripped.input as any[])[1]).toMatchObject({ type: "message", role: "user", content: "Hello" });
+      expect((roundTripped.input as any[])[2]).toMatchObject({ type: "message", role: "assistant", content: "Hi there!" });
+    });
+  });
 });

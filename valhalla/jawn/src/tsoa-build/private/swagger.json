@@ -3545,8 +3545,11 @@
 					"commit_message": {
 						"type": "string"
 					},
-					"environment": {
-						"type": "string"
+					"environments": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
 					},
 					"created_at": {
 						"type": "string"
@@ -48518,6 +48521,349 @@
 					}
 				]
 			},
+			"ResultSuccess__previousTier-string--newTier-string--subscriptionId-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"subscriptionId": {
+								"type": "string"
+							},
+							"newTier": {
+								"type": "string"
+							},
+							"previousTier": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"subscriptionId",
+							"newTier",
+							"previousTier"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__previousTier-string--newTier-string--subscriptionId-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__previousTier-string--newTier-string--subscriptionId-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__previousTier-string--newTier-string--subscriptionId-string--usage_58__requests-number--storageBytes-number--storageMb-number--source-clickhouse-or-override_--backfillResult_58__requestsEvent-string--storageEvent-string___": {
+				"properties": {
+					"data": {
+						"properties": {
+							"backfillResult": {
+								"properties": {
+									"storageEvent": {
+										"type": "string"
+									},
+									"requestsEvent": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"storageEvent",
+									"requestsEvent"
+								],
+								"type": "object"
+							},
+							"usage": {
+								"properties": {
+									"source": {
+										"type": "string",
+										"enum": [
+											"clickhouse",
+											"override"
+										]
+									},
+									"storageMb": {
+										"type": "number",
+										"format": "double"
+									},
+									"storageBytes": {
+										"type": "number",
+										"format": "double"
+									},
+									"requests": {
+										"type": "number",
+										"format": "double"
+									}
+								},
+								"required": [
+									"source",
+									"storageMb",
+									"storageBytes",
+									"requests"
+								],
+								"type": "object"
+							},
+							"subscriptionId": {
+								"type": "string"
+							},
+							"newTier": {
+								"type": "string"
+							},
+							"previousTier": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"backfillResult",
+							"usage",
+							"subscriptionId",
+							"newTier",
+							"previousTier"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__previousTier-string--newTier-string--subscriptionId-string--usage_58__requests-number--storageBytes-number--storageMb-number--source-clickhouse-or-override_--backfillResult_58__requestsEvent-string--storageEvent-string__.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__previousTier-string--newTier-string--subscriptionId-string--usage_58__requests-number--storageBytes-number--storageMb-number--source-clickhouse-or-override_--backfillResult_58__requestsEvent-string--storageEvent-string___"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__previousTier-string--newTier-string--subscriptionId-string--scheduleId-string--scheduledFor-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"scheduledFor": {
+								"type": "string"
+							},
+							"scheduleId": {
+								"type": "string"
+							},
+							"subscriptionId": {
+								"type": "string"
+							},
+							"newTier": {
+								"type": "string"
+							},
+							"previousTier": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"scheduledFor",
+							"scheduleId",
+							"subscriptionId",
+							"newTier",
+							"previousTier"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__previousTier-string--newTier-string--subscriptionId-string--scheduleId-string--scheduledFor-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__previousTier-string--newTier-string--subscriptionId-string--scheduleId-string--scheduledFor-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__id-string--name-string--tier-string--stripe_customer_id-string-or-null--stripe_subscription_id-string-or-null--subscription_status-string-or-null--owner_email-string-or-null--created_at-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"created_at": {
+								"type": "string"
+							},
+							"owner_email": {
+								"type": "string",
+								"nullable": true
+							},
+							"subscription_status": {
+								"type": "string",
+								"nullable": true
+							},
+							"stripe_subscription_id": {
+								"type": "string",
+								"nullable": true
+							},
+							"stripe_customer_id": {
+								"type": "string",
+								"nullable": true
+							},
+							"tier": {
+								"type": "string"
+							},
+							"name": {
+								"type": "string"
+							},
+							"id": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"created_at",
+							"owner_email",
+							"subscription_status",
+							"stripe_subscription_id",
+							"stripe_customer_id",
+							"tier",
+							"name",
+							"id"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__id-string--name-string--tier-string--stripe_customer_id-string-or-null--stripe_subscription_id-string-or-null--subscription_status-string-or-null--owner_email-string-or-null--created_at-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__id-string--name-string--tier-string--stripe_customer_id-string-or-null--stripe_subscription_id-string-or-null--subscription_status-string-or-null--owner_email-string-or-null--created_at-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__message-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"message": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"message"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__message-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__message-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__message-string--previousTier-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"previousTier": {
+								"type": "string"
+							},
+							"message": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"previousTier",
+							"message"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__message-string--previousTier-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__message-string--previousTier-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"CreditBalanceResponse": {
 				"properties": {
 					"totalCreditsPurchased": {
@@ -53490,6 +53836,58 @@
 		"/v1/prompt-2025/update/environment": {
 			"post": {
 				"operationId": "SetPromptVersionEnvironment",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"environment": {
+										"type": "string"
+									},
+									"promptVersionId": {
+										"type": "string"
+									},
+									"promptId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"environment",
+									"promptVersionId",
+									"promptId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt-2025/remove/environment": {
+			"post": {
+				"operationId": "RemoveEnvironmentFromVersion",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -59968,6 +60366,537 @@
 					{
 						"in": "path",
 						"name": "queryId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/pricing-migration/pending": {
+			"post": {
+				"operationId": "GetPendingMigrations",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"hasMore": {
+											"type": "boolean"
+										},
+										"summary": {
+											"properties": {
+												"byTier": {
+													"$ref": "#/components/schemas/Record_string.number_"
+												},
+												"total": {
+													"type": "number",
+													"format": "double"
+												}
+											},
+											"required": [
+												"byTier",
+												"total"
+											],
+											"type": "object"
+										},
+										"organizations": {
+											"items": {
+												"properties": {
+													"member_count": {
+														"type": "number",
+														"format": "double"
+													},
+													"created_at": {
+														"type": "string"
+													},
+													"stripe_status": {
+														"type": "string",
+														"nullable": true
+													},
+													"subscription_status": {
+														"type": "string",
+														"nullable": true
+													},
+													"stripe_subscription_id": {
+														"type": "string",
+														"nullable": true
+													},
+													"stripe_customer_id": {
+														"type": "string",
+														"nullable": true
+													},
+													"owner_email": {
+														"type": "string",
+														"nullable": true
+													},
+													"tier": {
+														"type": "string"
+													},
+													"name": {
+														"type": "string"
+													},
+													"id": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"member_count",
+													"created_at",
+													"stripe_status",
+													"subscription_status",
+													"stripe_subscription_id",
+													"stripe_customer_id",
+													"owner_email",
+													"tier",
+													"name",
+													"id"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"hasMore",
+										"summary",
+										"organizations"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get all organizations that need to be migrated to new pricing\nSupports pagination, search, and tier filtering",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"tierFilter": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
+									"search": {
+										"type": "string"
+									},
+									"offset": {
+										"type": "number",
+										"format": "double"
+									},
+									"limit": {
+										"type": "number",
+										"format": "double"
+									}
+								},
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/pricing-migration/migrate/{orgId}": {
+			"post": {
+				"operationId": "MigrateOrganization",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__previousTier-string--newTier-string--subscriptionId-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Migrate a single organization to new pricing (legacy - use migrate-instant or migrate-scheduled instead)",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/pricing-migration/migrate-instant/{orgId}": {
+			"post": {
+				"operationId": "MigrateInstant",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__previousTier-string--newTier-string--subscriptionId-string--usage_58__requests-number--storageBytes-number--storageMb-number--source-clickhouse-or-override_--backfillResult_58__requestsEvent-string--storageEvent-string__.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Migrate instantly with usage backfill\nUpdates subscription immediately and backfills metered usage events for current billing period",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"storageBytesOverride": {
+										"type": "number",
+										"format": "double"
+									},
+									"requestsOverride": {
+										"type": "number",
+										"format": "double"
+									}
+								},
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/pricing-migration/migrate-scheduled/{orgId}": {
+			"post": {
+				"operationId": "MigrateScheduled",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__previousTier-string--newTier-string--subscriptionId-string--scheduleId-string--scheduledFor-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Schedule migration for next billing period\nUses Stripe subscription schedules to defer the pricing change",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/pricing-migration/completed": {
+			"get": {
+				"operationId": "GetCompletedMigrations",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"summary": {
+											"properties": {
+												"byTier": {
+													"$ref": "#/components/schemas/Record_string.number_"
+												},
+												"total": {
+													"type": "number",
+													"format": "double"
+												}
+											},
+											"required": [
+												"byTier",
+												"total"
+											],
+											"type": "object"
+										},
+										"organizations": {
+											"items": {
+												"properties": {
+													"subscription_status": {
+														"type": "string",
+														"nullable": true
+													},
+													"stripe_subscription_id": {
+														"type": "string",
+														"nullable": true
+													},
+													"stripe_customer_id": {
+														"type": "string",
+														"nullable": true
+													},
+													"owner_email": {
+														"type": "string",
+														"nullable": true
+													},
+													"tier": {
+														"type": "string"
+													},
+													"name": {
+														"type": "string"
+													},
+													"id": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"subscription_status",
+													"stripe_subscription_id",
+													"stripe_customer_id",
+													"owner_email",
+													"tier",
+													"name",
+													"id"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"summary",
+										"organizations"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get migration history/status",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/admin/pricing-migration/reapply/{orgId}": {
+			"post": {
+				"operationId": "ReapplyMigration",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__previousTier-string--newTier-string--subscriptionId-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Reapply migration for an already migrated organization (for fixing issues)",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/pricing-migration/org/{orgId}": {
+			"get": {
+				"operationId": "GetOrgDetails",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__id-string--name-string--tier-string--stripe_customer_id-string-or-null--stripe_subscription_id-string-or-null--subscription_status-string-or-null--owner_email-string-or-null--created_at-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get organization details for admin view",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/pricing-migration/add-usage/{orgId}": {
+			"post": {
+				"operationId": "AddMeteredUsage",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__message-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Add metered usage for an organization (for testing/fixing billing)\nUses Stripe Billing Meter events",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"timestamp": {
+										"type": "string"
+									},
+									"quantity": {
+										"type": "number",
+										"format": "double"
+									},
+									"usageType": {
+										"type": "string",
+										"enum": [
+											"requests",
+											"storage_gb"
+										]
+									}
+								},
+								"required": [
+									"quantity",
+									"usageType"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/pricing-migration/switch-to-free/{orgId}": {
+			"post": {
+				"operationId": "SwitchToFree",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__message-string--previousTier-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Switch an organization to free tier (for cancelled subscriptions)",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
 						"required": true,
 						"schema": {
 							"type": "string"

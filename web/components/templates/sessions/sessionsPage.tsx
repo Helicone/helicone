@@ -84,7 +84,7 @@ export type TSessions = {
     completion_tokens: number;
     total_tokens: number;
     avg_latency: number;
-    user_ids?: string[];
+    user_ids: string[];
   };
 };
 
@@ -172,7 +172,10 @@ const SessionsPage = (props: SessionsPageProps) => {
 
   const sessionsWithId = useMemo(() => {
     return sessions.map((session, index) => ({
-      metadata: session,
+      metadata: {
+        ...session,
+        user_ids: session.user_ids ?? [],
+      },
       id: index.toString(),
     }));
   }, [sessions]);
