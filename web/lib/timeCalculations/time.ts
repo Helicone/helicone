@@ -16,9 +16,12 @@ export function getTimeIntervalAgo(interval: TimeInterval): Date {
     case "1h":
       return new Date(now.setHours(now.getHours() - 1));
     case "all":
-      return new Date(0);
+      // Use 1 year ago instead of epoch (1970) to avoid full table scans
+      // on large organizations with millions of requests
+      return new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
     default:
-      return new Date(0);
+      // Default to 1 month ago for safety
+      return new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   }
 }
 

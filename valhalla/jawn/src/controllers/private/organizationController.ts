@@ -91,6 +91,54 @@ export class OrganizationController extends Controller {
     return ok(result.data!);
   }
 
+  // NOTE: This endpoint MUST be defined BEFORE /{organizationId} to avoid route matching issues
+  @Get("/models")
+  public async getModels(@Request() request: JawnAuthenticatedRequest): Promise<
+    Result<
+      {
+        model: string;
+      }[],
+      string
+    >
+  > {
+    const result = await cacheResultCustom(
+      "v1/organization/models" + JSON.stringify(request.authParams),
+      async () => {
+        // Use 90 days instead of full table scan to improve performance
+        // for large organizations with millions of requests
+        const result = await dbQueryClickhouse<{
+          model: string;
+          count: number;
+        }>(
+          `
+          SELECT
+          model,
+          count() as count
+          FROM request_response_rmt
+          WHERE organization_id = {val_0: UUID}
+            AND request_created_at >= now() - INTERVAL 90 DAY
+          GROUP BY model
+          ORDER BY count() DESC
+          LIMIT 100
+          `,
+          [request.authParams.organizationId]
+        );
+        return ok(result);
+      },
+      kvCache
+    );
+
+    if (result.error || !result.data) {
+      this.setStatus(500);
+      return err(
+        JSON.stringify(result.error) || "Failed to fetch models"
+      );
+    } else {
+      this.setStatus(200);
+      return ok(result.data.data?.map((r) => ({ model: r.model })) ?? []);
+    }
+  }
+
   @Get("/{organizationId}")
   public async getOrganization(
     @Path() organizationId: string,
@@ -596,49 +644,6 @@ export class OrganizationController extends Controller {
     } else {
       this.setStatus(201);
       return ok(null);
-    }
-  }
-
-  @Get("/models")
-  public async getModels(@Request() request: JawnAuthenticatedRequest): Promise<
-    Result<
-      {
-        model: string;
-      }[],
-      string
-    >
-  > {
-    const result = await cacheResultCustom(
-      "v1/organization/models" + JSON.stringify(request.authParams),
-      async () => {
-        const result = await dbQueryClickhouse<{
-          model: string;
-          count: number;
-        }>(
-          `
-          SELECT
-          model,
-          count() as count
-          FROM request_response_rmt
-          WHERE organization_id = {val_0: UUID}
-          GROUP BY model
-          ORDER BY count() DESC
-          `,
-          [request.authParams.organizationId]
-        );
-        return ok(result);
-      },
-      kvCache
-    );
-
-    if (result.error || !result.data) {
-      this.setStatus(500);
-      return err(
-        JSON.stringify(result.error) || "Failed to fetch models"
-      );
-    } else {
-      this.setStatus(200);
-      return ok(result.data.data?.map((r) => ({ model: r.model })) ?? []);
     }
   }
 }

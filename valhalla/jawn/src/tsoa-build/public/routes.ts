@@ -2867,7 +2867,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "FilterNode": {
         "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"ref":"FilterLeaf"},{"ref":"FilterBranch"},{"dataType":"nestedObjectLiteral","nestedProperties":{}}],"validators":{}},
+        "type": {"dataType":"union","subSchemas":[{"ref":"FilterLeaf"},{"ref":"FilterBranch"},{"dataType":"enum","enums":["all"]},{"dataType":"nestedObjectLiteral","nestedProperties":{}}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "FilterBranch": {

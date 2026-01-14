@@ -3173,7 +3173,7 @@ Json: JsonObject;
     };
     SingleKey_TablesAndViews_: components["schemas"]["Partial_TablesAndViews_"];
     FilterLeaf: components["schemas"]["SingleKey_TablesAndViews_"];
-    FilterNode: components["schemas"]["FilterLeaf"] | components["schemas"]["FilterBranch"] | Record<string, never>;
+    FilterNode: components["schemas"]["FilterLeaf"] | components["schemas"]["FilterBranch"] | Record<string, never> | "all";
     FilterBranch: {
       left: components["schemas"]["FilterNode"];
       /** @enum {string} */
