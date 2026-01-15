@@ -274,6 +274,46 @@ export class InAppThreadsManager extends BaseManager {
     }
   }
 
+  async reopenThread(sessionId: string): Promise<Result<InAppThread, string>> {
+    try {
+      // Update the thread to set escalated back to true
+      const updateResult = await dbExecute<InAppThread>(
+        `UPDATE in_app_threads
+         SET escalated = true, updated_at = NOW()
+         WHERE id = $1 AND org_id = $2
+         RETURNING *`,
+        [sessionId, this.authParams.organizationId]
+      );
+
+      if (updateResult.error) {
+        return err(`Failed to reopen thread: ${updateResult.error}`);
+      }
+
+      if (!updateResult.data?.[0]) {
+        return err("Thread not found");
+      }
+
+      // Post to Slack if thread has a Slack thread
+      const thread = updateResult.data[0];
+      const slackThreadTs = thread.metadata?.slack_thread_ts;
+      if (slackThreadTs) {
+        try {
+          const slackService = SlackService.getInstance();
+          await slackService.postThreadMessage(
+            slackThreadTs,
+            `🔄 User reopened this thread.`
+          );
+        } catch (slackError) {
+          console.error("Failed to post reopen status to Slack:", slackError);
+        }
+      }
+
+      return ok(updateResult.data[0]);
+    } catch (error) {
+      return err(`Unexpected error: ${error}`);
+    }
+  }
+
   async getAllThreads(): Promise<Result<ThreadSummary[], string>> {
     try {
       const threadsResult = await dbExecute<any>(

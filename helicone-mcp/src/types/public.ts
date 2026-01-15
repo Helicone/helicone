@@ -838,6 +838,9 @@ export interface paths {
   "/v1/agent/thread/create-and-escalate": {
     post: operations["CreateAndEscalateThread"];
   };
+  "/v1/agent/thread/{sessionId}/reopen": {
+    post: operations["ReopenThread"];
+  };
   "/v1/agent/threads": {
     get: operations["GetAllThreads"];
   };
@@ -9287,6 +9290,21 @@ export interface operations {
     };
   };
   CreateAndEscalateThread: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_InAppThread.string_"];
+        };
+      };
+    };
+  };
+  ReopenThread: {
+    parameters: {
+      path: {
+        sessionId: string;
+      };
+    };
     responses: {
       /** @description Ok */
       200: {
