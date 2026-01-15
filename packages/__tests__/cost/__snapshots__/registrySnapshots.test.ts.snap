@@ -6499,6 +6499,36 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "glm-4.7:io-intelligence": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "zai-org/GLM-4.7",
+      "parameters": [
+        "frequency_penalty",
+        "functions",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "reasoning",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "io-intelligence",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
   },
 }
 `;
@@ -6888,6 +6918,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   ],
   "zai/glm-4": [
     "canopywave",
+    "io-intelligence",
     "io-intelligence",
     "novita",
   ],
@@ -8775,8 +8806,8 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "cacheMultipliers": {
           "cachedInput": 0.5,
         },
-        "input": 3.5e-7,
-        "output": 0.0000015,
+        "input": 3e-7,
+        "output": 0.0000014,
         "threshold": 0,
       },
     ],
@@ -9065,6 +9096,12 @@ exports[`Registry Snapshots verify registry state 1`] = `
         "canopywave",
         "io-intelligence",
         "novita",
+      ],
+    },
+    {
+      "model": "glm-4.7",
+      "providers": [
+        "io-intelligence",
       ],
     },
     {
@@ -9648,7 +9685,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "helicone",
     },
     {
-      "modelCount": 6,
+      "modelCount": 7,
       "provider": "io-intelligence",
     },
     {
