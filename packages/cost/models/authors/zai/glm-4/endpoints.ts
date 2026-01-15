@@ -121,6 +121,47 @@ export const endpoints = {
       "*": {},
     },
   },
+  "glm-4.7:io-intelligence": {
+    providerModelId: "zai-org/GLM-4.7",
+    provider: "io-intelligence",
+    author: "zai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000003, // $0.30 per 1M tokens
+        output: 0.0000014, // $1.40 per 1M tokens
+        cacheMultipliers: {
+          cachedInput: 0.5, // $0.15 per 1M tokens (cached)
+        },
+      },
+    ],
+    quantization: "fp16",
+    contextLength: 200_000,
+    maxCompletionTokens: 131_072,
+    supportedParameters: [
+      "functions",
+      "structured_outputs",
+      "reasoning",
+      "tool_choice",
+      "tools",
+      "response_format",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "top_k",
+      "min_p",
+      "repetition_penalty",
+      "logit_bias",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<
     `${ZaiModelName}:${ModelProviderName}` | ZaiModelName,

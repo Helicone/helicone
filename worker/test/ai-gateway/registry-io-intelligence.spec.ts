@@ -125,6 +125,25 @@ describe("io.net Intelligence Registry Tests", () => {
           },
         }));
     });
+
+    describe("glm-4.7", () => {
+      it("should handle io-intelligence provider", () =>
+        runGatewayTest({
+          model: "glm-4.7/io-intelligence",
+          expected: {
+            providers: [
+              {
+                url: "https://api.intelligence.io.solutions/api/v1/chat/completions",
+                response: "success",
+                model: "zai-org/GLM-4.7",
+                data: createOpenAIMockResponse("zai-org/GLM-4.7"),
+                expects: ioIntelligenceAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
   });
 
   describe("BYOK Tests - Llama Models via io.net Intelligence", () => {
