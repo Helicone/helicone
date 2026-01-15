@@ -89,6 +89,9 @@ export class ClickhouseClientWrapper {
         // See https://clickhouse.com/docs/en/interfaces/http/#response-buffering
         clickhouse_settings: {
           wait_end_of_query: 1,
+          // Safety limits to prevent runaway queries on large organizations
+          max_execution_time: 60, // 60 second timeout (generous for complex queries)
+          max_memory_usage: "10000000000", // 10GB memory limit
         },
       });
       const raw = (await queryResult.json()) as unknown;
@@ -100,9 +103,11 @@ export class ClickhouseClientWrapper {
     } catch (err) {
       console.error("Error executing Clickhouse query: ", query, parameters);
       console.error(err);
+      // Extract error message properly - Error objects don't stringify well
+      const errorMessage = err instanceof Error ? err.message : String(err);
       return {
         data: null,
-        error: JSON.stringify(err),
+        error: errorMessage,
       };
     }
   }

@@ -8902,6 +8902,12 @@
 					{
 						"properties": {},
 						"type": "object"
+					},
+					{
+						"type": "string",
+						"enum": [
+							"all"
+						]
 					}
 				]
 			},
@@ -14379,6 +14385,11 @@
 						"type": "number",
 						"format": "double"
 					},
+					"subtotalCents": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
 					"notes": {
 						"type": "string",
 						"nullable": true
@@ -14395,6 +14406,7 @@
 					"startDate",
 					"endDate",
 					"amountCents",
+					"subtotalCents",
 					"notes",
 					"createdAt"
 				],
@@ -26172,6 +26184,41 @@
 					}
 				],
 				"parameters": []
+			}
+		},
+		"/v1/agent/thread/{sessionId}/reopen": {
+			"post": {
+				"operationId": "ReopenThread",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_InAppThread.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Agent"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "sessionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/v1/agent/threads": {

@@ -79,7 +79,7 @@ export default function TableFooter(props: TableFooterProps) {
           variant="outline"
           size="icon"
           className="hidden h-7 w-7 sm:inline-flex"
-          disabled={!isCountLoading && currentPage <= 1}
+          disabled={isCountLoading || currentPage <= 1}
           onClick={() => setPage(1)}
         >
           <ChevronFirst className="h-3 w-3" />
@@ -88,7 +88,7 @@ export default function TableFooter(props: TableFooterProps) {
           variant="outline"
           size="icon"
           className="h-7 w-7"
-          disabled={!isCountLoading && currentPage <= 1}
+          disabled={isCountLoading || currentPage <= 1}
           onClick={() => setPage(currentPage - 1)}
         >
           <ChevronLeft className="h-3 w-3" />
@@ -130,7 +130,7 @@ export default function TableFooter(props: TableFooterProps) {
           variant="outline"
           size="icon"
           className="h-7 w-7"
-          disabled={!isCountLoading && currentPage >= totalPages}
+          disabled={isCountLoading || currentPage >= totalPages}
           onClick={() => setPage(currentPage + 1)}
         >
           <ChevronRight className="h-3 w-3" />
@@ -139,7 +139,7 @@ export default function TableFooter(props: TableFooterProps) {
           variant="outline"
           size="icon"
           className="hidden h-7 w-7 sm:inline-flex"
-          disabled={!isCountLoading && currentPage >= totalPages}
+          disabled={isCountLoading || currentPage >= totalPages}
           onClick={() => setPage(totalPages)}
         >
           <ChevronLast className="h-3 w-3" />

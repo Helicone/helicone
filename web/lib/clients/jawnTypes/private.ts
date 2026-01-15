@@ -126,6 +126,9 @@ export interface paths {
   "/v1/organization": {
     get: operations["GetOrganizations"];
   };
+  "/v1/organization/models": {
+    get: operations["GetModels"];
+  };
   "/v1/organization/{organizationId}": {
     get: operations["GetOrganization"];
   };
@@ -179,9 +182,6 @@ export interface paths {
   };
   "/v1/organization/update_onboarding": {
     post: operations["UpdateOnboardingStatus"];
-  };
-  "/v1/organization/models": {
-    get: operations["GetModels"];
   };
   "/v1/evaluator": {
     post: operations["CreateEvaluator"];
@@ -629,8 +629,17 @@ export interface paths {
     /** @description Backfill costs in Clickhouse with updated cost package data. */
     post: operations["BackfillCosts"];
   };
+  "/v1/admin/helix-threads": {
+    get: operations["ListHelixThreads"];
+  };
   "/v1/admin/helix-thread/{sessionId}": {
     get: operations["GetHelixThread"];
+  };
+  "/v1/admin/helix-thread/{sessionId}/reply": {
+    post: operations["ReplyToHelixThread"];
+  };
+  "/v1/admin/helix-thread/{sessionId}/resolve": {
+    post: operations["ResolveHelixThread"];
   };
   "/v1/admin/hql-enriched": {
     post: operations["ExecuteEnrichedHql"];
@@ -1119,6 +1128,14 @@ Json: JsonObject;
       error: null;
     };
     "Result__40_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-and-_role-string__41_-Array.string_": components["schemas"]["ResultSuccess__40_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-and-_role-string__41_-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__model-string_-Array_": {
+      data: {
+          model: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__model-string_-Array.string_": components["schemas"]["ResultSuccess__model-string_-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess_Database-at-public_91_Tables_93_-at-organization_91_Row_93__": {
       data: {
         tier: string | null;
@@ -1344,14 +1361,6 @@ Json: JsonObject;
       };
     };
     OnboardingStatus: components["schemas"]["Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--hasCompletedQuickstart-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___"];
-    "ResultSuccess__model-string_-Array_": {
-      data: {
-          model: string;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__model-string_-Array.string_": components["schemas"]["ResultSuccess__model-string_-Array_"] | components["schemas"]["ResultError_string_"];
     EvaluatorResult: {
       id: string;
       created_at: string;
@@ -16386,6 +16395,52 @@ Json: JsonObject;
       modelRow: components["schemas"]["ModelRow"];
       provider: string;
     };
+    HelixThreadSummary: {
+      id: string;
+      user_id: string;
+      org_id: string;
+      /** Format: date-time */
+      created_at: string;
+      /** Format: date-time */
+      updated_at: string;
+      escalated: boolean;
+      /** Format: double */
+      message_count: number;
+      first_message: string | null;
+      last_message: string | null;
+      user_email: string | null;
+      org_name: string | null;
+      org_tier: string | null;
+    };
+    HelixThreadListResponse: {
+      threads: components["schemas"]["HelixThreadSummary"][];
+      /** Format: double */
+      total: number;
+    };
+    ResultSuccess_HelixThreadListResponse_: {
+      data: components["schemas"]["HelixThreadListResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HelixThreadListResponse.string_": components["schemas"]["ResultSuccess_HelixThreadListResponse_"] | components["schemas"]["ResultError_string_"];
+    HelixThreadDetail: {
+      id: string;
+      chat: unknown;
+      user_id: string;
+      org_id: string;
+      created_at: string;
+      escalated: boolean;
+      metadata: unknown;
+      updated_at: string;
+      soft_delete: boolean;
+      user_email: string | null;
+    };
+    ResultSuccess_HelixThreadDetail_: {
+      data: components["schemas"]["HelixThreadDetail"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HelixThreadDetail.string_": components["schemas"]["ResultSuccess_HelixThreadDetail_"] | components["schemas"]["ResultError_string_"];
     InAppThread: {
       id: string;
       chat: unknown;
@@ -16595,6 +16650,8 @@ Json: JsonObject;
       endDate: string;
       /** Format: double */
       amountCents: number;
+      /** Format: double */
+      subtotalCents: number | null;
       notes: string | null;
       createdAt: string;
     };
@@ -16772,6 +16829,8 @@ Json: JsonObject;
       dashboardUrl: string;
       /** Format: double */
       amountCents: number;
+      /** Format: double */
+      subtotalCents: number;
       ptbInvoiceId: string;
     };
     ResultSuccess_CreateInvoiceResponse_: {
@@ -17525,6 +17584,16 @@ export interface operations {
       };
     };
   };
+  GetModels: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__model-string_-Array.string_"];
+        };
+      };
+    };
+  };
   GetOrganization: {
     parameters: {
       path: {
@@ -17830,16 +17899,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  GetModels: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__model-string_-Array.string_"];
         };
       };
     };
@@ -20592,10 +20651,74 @@ export interface operations {
       };
     };
   };
+  ListHelixThreads: {
+    parameters: {
+      query?: {
+        limit?: number;
+        offset?: number;
+        status?: "all" | "escalated" | "resolved";
+        tier?: "all" | "free" | "pro" | "growth" | "enterprise";
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HelixThreadListResponse.string_"];
+        };
+      };
+    };
+  };
   GetHelixThread: {
     parameters: {
       path: {
         sessionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HelixThreadDetail.string_"];
+        };
+      };
+    };
+  };
+  ReplyToHelixThread: {
+    parameters: {
+      path: {
+        sessionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          name?: string;
+          message: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_InAppThread.string_"];
+        };
+      };
+    };
+  };
+  ResolveHelixThread: {
+    parameters: {
+      path: {
+        sessionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          adminEmail?: string;
+          resolved: boolean;
+        };
       };
     };
     responses: {
