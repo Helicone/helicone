@@ -508,7 +508,19 @@ const AdminHelixThreads = () => {
                       <div className="flex flex-col items-end gap-1 text-sm">
                         <div className="flex items-center gap-2">
                           <span className="text-muted-foreground">User:</span>
-                          <span>{selectedThread.data.data.user_id}</span>
+                          <button
+                            onClick={() => {
+                              const email = selectedThread.data.data?.user_email;
+                              if (email) {
+                                navigator.clipboard.writeText(email);
+                                toast.success("Email copied to clipboard");
+                              }
+                            }}
+                            className="flex items-center gap-1 hover:text-primary"
+                          >
+                            <span>{selectedThread.data.data.user_email || selectedThread.data.data.user_id}</span>
+                            <Copy size={12} className="text-muted-foreground" />
+                          </button>
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-muted-foreground">Org:</span>

@@ -51,6 +51,19 @@ export interface HelixThreadListResponse {
   threads: HelixThreadSummary[];
   total: number;
 }
+
+export interface HelixThreadDetail {
+  id: string;
+  chat: unknown;
+  user_id: string;
+  org_id: string;
+  created_at: string;
+  escalated: boolean;
+  metadata: unknown;
+  updated_at: string;
+  soft_delete: boolean;
+  user_email: string | null;
+}
 import { HqlQueryManager } from "../../managers/HqlQueryManager";
 import { HqlSavedQuery } from "../public/heliconeSqlController";
 
@@ -2430,10 +2443,13 @@ export class AdminController extends Controller {
   public async getHelixThread(
     @Request() request: JawnAuthenticatedRequest,
     @Path() sessionId: string
-  ): Promise<Result<InAppThread, string>> {
+  ): Promise<Result<HelixThreadDetail, string>> {
     await authCheckThrow(request.authParams.userId);
-    const thread = await dbExecute<InAppThread>(
-      `SELECT * FROM in_app_threads WHERE id = $1`,
+    const thread = await dbExecute<HelixThreadDetail>(
+      `SELECT t.*, u.email as user_email
+       FROM in_app_threads t
+       LEFT JOIN auth.users u ON t.user_id::uuid = u.id
+       WHERE t.id = $1`,
       [sessionId]
     );
     if (thread.error) {
@@ -2523,7 +2539,7 @@ export class AdminController extends Controller {
   ): Promise<Result<InAppThread, string>> {
     await authCheckThrow(request.authParams.userId);
 
-    // Get the current thread to add status message
+    // Get the current thread for Slack notification
     const threadResult = await dbExecute<InAppThread>(
       `SELECT * FROM in_app_threads WHERE id = $1`,
       [sessionId]
@@ -2538,27 +2554,14 @@ export class AdminController extends Controller {
     }
 
     const thread = threadResult.data[0];
-    const messages = (thread.chat as any)?.messages || [];
 
-    // Add a status message as an assistant reply with name for proper styling
-    const adminName = body.adminEmail?.split("@")[0] || "Admin";
-    const statusMessage = body.resolved
-      ? `This chat has been marked as resolved.`
-      : `This chat has been reopened.`;
-
-    messages.push({
-      role: "assistant",
-      content: statusMessage,
-      name: adminName,
-    });
-
-    // Update the escalated status and messages
+    // Update the escalated status only (no message added to thread)
     const updateResult = await dbExecute<InAppThread>(
       `UPDATE in_app_threads
-       SET escalated = $1, chat = $2::jsonb, updated_at = NOW()
-       WHERE id = $3
+       SET escalated = $1, updated_at = NOW()
+       WHERE id = $2
        RETURNING *`,
-      [!body.resolved, JSON.stringify({ messages }), sessionId]
+      [!body.resolved, sessionId]
     );
 
     if (updateResult.error) {

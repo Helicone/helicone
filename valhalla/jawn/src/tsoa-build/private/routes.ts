@@ -14757,6 +14757,37 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_HelixThreadListResponse_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "HelixThreadDetail": {
+        "dataType": "refObject",
+        "properties": {
+            "id": {"dataType":"string","required":true},
+            "chat": {"dataType":"any","required":true},
+            "user_id": {"dataType":"string","required":true},
+            "org_id": {"dataType":"string","required":true},
+            "created_at": {"dataType":"string","required":true},
+            "escalated": {"dataType":"boolean","required":true},
+            "metadata": {"dataType":"any","required":true},
+            "updated_at": {"dataType":"string","required":true},
+            "soft_delete": {"dataType":"boolean","required":true},
+            "user_email": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_HelixThreadDetail_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"ref":"HelixThreadDetail","required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_HelixThreadDetail.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_HelixThreadDetail_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "InAppThread": {
         "dataType": "refObject",
         "properties": {

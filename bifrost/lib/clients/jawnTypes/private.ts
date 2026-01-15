@@ -16423,6 +16423,24 @@ Json: JsonObject;
       error: null;
     };
     "Result_HelixThreadListResponse.string_": components["schemas"]["ResultSuccess_HelixThreadListResponse_"] | components["schemas"]["ResultError_string_"];
+    HelixThreadDetail: {
+      id: string;
+      chat: unknown;
+      user_id: string;
+      org_id: string;
+      created_at: string;
+      escalated: boolean;
+      metadata: unknown;
+      updated_at: string;
+      soft_delete: boolean;
+      user_email: string | null;
+    };
+    ResultSuccess_HelixThreadDetail_: {
+      data: components["schemas"]["HelixThreadDetail"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HelixThreadDetail.string_": components["schemas"]["ResultSuccess_HelixThreadDetail_"] | components["schemas"]["ResultError_string_"];
     InAppThread: {
       id: string;
       chat: unknown;
@@ -20661,7 +20679,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_InAppThread.string_"];
+          "application/json": components["schemas"]["Result_HelixThreadDetail.string_"];
         };
       };
     };
