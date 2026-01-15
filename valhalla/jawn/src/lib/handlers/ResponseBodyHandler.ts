@@ -79,9 +79,10 @@ export class ResponseBodyHandler extends AbstractLogHandler {
         context.message.log.response.status =
           processedResponseBody.data.statusOverride;
       }
-      context.processedLog.response.model = getModelFromResponse(
-        processedResponseBody.data?.processedBody
-      );
+      // Get model from response body, or fall back to Worker-provided model when body isn't stored
+      context.processedLog.response.model =
+        getModelFromResponse(processedResponseBody.data?.processedBody) ||
+        context.message.log.response.model;
 
       const definedModel =
         calculateModel(
@@ -113,13 +114,21 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       }
 
       // Set legacy usage values captured from body processors
+      // Fall back to Worker-provided tokens when body isn't stored (free tier limit exceeded)
       const legacyUsage =
         processedResponseBody.data?.usage ??
         processedResponseBody.data?.processedBody?.usage ??
         {};
-      context.legacyUsage.completionTokens = legacyUsage.completionTokens;
-      context.legacyUsage.promptTokens = legacyUsage.promptTokens;
-      context.legacyUsage.totalTokens = legacyUsage.totalTokens;
+      context.legacyUsage.completionTokens =
+        legacyUsage.completionTokens ??
+        context.message.log.response.completionTokens;
+      context.legacyUsage.promptTokens =
+        legacyUsage.promptTokens ?? context.message.log.response.promptTokens;
+      context.legacyUsage.totalTokens =
+        legacyUsage.totalTokens ??
+        ((context.legacyUsage.promptTokens ?? 0) +
+          (context.legacyUsage.completionTokens ?? 0) ||
+          undefined);
       context.legacyUsage.heliconeCalculated = legacyUsage.heliconeCalculated;
       context.legacyUsage.promptCacheWriteTokens =
         legacyUsage.promptCacheWriteTokens;
@@ -133,17 +142,18 @@ export class ResponseBodyHandler extends AbstractLogHandler {
       if (typeof legacyUsage.cost === "number" && legacyUsage.cost) {
         context.legacyUsage.cost = legacyUsage.cost;
       } else {
+        // Use context.legacyUsage which has Worker-provided tokens as fallback
         const cost = modelCost({
           model: context.processedLog.model ?? "",
           provider: context.message.log.request.provider ?? "",
-          sum_prompt_tokens: legacyUsage.promptTokens ?? 0,
-          prompt_cache_write_tokens: legacyUsage.promptCacheWriteTokens ?? 0,
-          prompt_cache_read_tokens: legacyUsage.promptCacheReadTokens ?? 0,
-          prompt_audio_tokens: legacyUsage.promptAudioTokens ?? 0,
-          sum_completion_tokens: legacyUsage.completionTokens ?? 0,
-          completion_audio_tokens: legacyUsage.completionAudioTokens ?? 0,
-          prompt_cache_write_5m: legacyUsage.promptCacheWrite5m ?? 0,
-          prompt_cache_write_1h: legacyUsage.promptCacheWrite1h ?? 0,
+          sum_prompt_tokens: context.legacyUsage.promptTokens ?? 0,
+          prompt_cache_write_tokens: context.legacyUsage.promptCacheWriteTokens ?? 0,
+          prompt_cache_read_tokens: context.legacyUsage.promptCacheReadTokens ?? 0,
+          prompt_audio_tokens: context.legacyUsage.promptAudioTokens ?? 0,
+          sum_completion_tokens: context.legacyUsage.completionTokens ?? 0,
+          completion_audio_tokens: context.legacyUsage.completionAudioTokens ?? 0,
+          prompt_cache_write_5m: context.legacyUsage.promptCacheWrite5m ?? 0,
+          prompt_cache_write_1h: context.legacyUsage.promptCacheWrite1h ?? 0,
         });
 
         context.legacyUsage.cost = cost;

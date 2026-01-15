@@ -7154,6 +7154,17 @@
 				"properties": {
 					"response": {
 						"properties": {
+							"model": {
+								"type": "string"
+							},
+							"completionTokens": {
+								"type": "number",
+								"format": "double"
+							},
+							"promptTokens": {
+								"type": "number",
+								"format": "double"
+							},
 							"cost": {
 								"type": "number",
 								"format": "double"

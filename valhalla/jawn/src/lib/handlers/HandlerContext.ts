@@ -70,6 +70,11 @@ export type Log = {
     delayMs: number;
     cachedLatency?: number;
     cost?: number;
+    // Token usage (from Worker when body isn't stored)
+    promptTokens?: number;
+    completionTokens?: number;
+    // Model (from Worker when body isn't stored)
+    model?: string;
   };
 };
 

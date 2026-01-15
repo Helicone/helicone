@@ -416,34 +416,55 @@ export class DBLoggable {
     prompt_tokens: number | undefined;
     completion_tokens: number | undefined;
   } {
-    if (
-      typeof parsedResponse !== "object" ||
-      parsedResponse === null ||
-      !("usage" in parsedResponse)
-    ) {
+    if (typeof parsedResponse !== "object" || parsedResponse === null) {
       return {
         prompt_tokens: undefined,
         completion_tokens: undefined,
       };
     }
 
-    const response = parsedResponse as {
-      usage: {
-        prompt_tokens?: number;
-        completion_tokens?: number;
-        input_tokens?: number;
-        output_tokens?: number;
-        inputTokens?: number;
-        outputTokens?: number;
+    // Handle OpenAI format (usage field)
+    if ("usage" in parsedResponse) {
+      const response = parsedResponse as {
+        usage: {
+          prompt_tokens?: number;
+          completion_tokens?: number;
+          input_tokens?: number;
+          output_tokens?: number;
+          inputTokens?: number;
+          outputTokens?: number;
+        };
       };
-    };
-    const usage = response.usage;
+      const usage = response.usage;
+
+      return {
+        prompt_tokens:
+          usage?.prompt_tokens ?? usage?.input_tokens ?? usage?.inputTokens,
+        completion_tokens:
+          usage?.completion_tokens ?? usage?.output_tokens ?? usage?.outputTokens,
+      };
+    }
+
+    // Handle Gemini format (usageMetadata field)
+    if ("usageMetadata" in parsedResponse) {
+      const response = parsedResponse as {
+        usageMetadata: {
+          promptTokenCount?: number;
+          candidatesTokenCount?: number;
+          totalTokenCount?: number;
+        };
+      };
+      const usageMetadata = response.usageMetadata;
+
+      return {
+        prompt_tokens: usageMetadata?.promptTokenCount,
+        completion_tokens: usageMetadata?.candidatesTokenCount,
+      };
+    }
 
     return {
-      prompt_tokens:
-        usage?.prompt_tokens ?? usage?.input_tokens ?? usage?.inputTokens,
-      completion_tokens:
-        usage?.completion_tokens ?? usage?.output_tokens ?? usage?.outputTokens,
+      prompt_tokens: undefined,
+      completion_tokens: undefined,
     };
   }
 
@@ -695,6 +716,26 @@ export class DBLoggable {
     const { body: rawResponseBody, endTime: responseEndTime } =
       await this.response.getResponseBody();
 
+    // Extract usage and model from response body (needed for cases where body isn't stored)
+    let extractedUsage: { prompt_tokens?: number; completion_tokens?: number } =
+      {};
+    let extractedModel: string | undefined;
+    try {
+      const responseText = rawResponseBody.join("");
+      const parsedResponse = JSON.parse(responseText);
+      extractedUsage = this.getUsage(parsedResponse);
+      // Extract model from response (OpenAI format)
+      if (
+        typeof parsedResponse === "object" &&
+        parsedResponse !== null &&
+        "model" in parsedResponse
+      ) {
+        extractedModel = (parsedResponse as { model?: string }).model;
+      }
+    } catch {
+      // Ignore parsing errors - usage will be extracted later by Jawn if body is stored
+    }
+
     // Skip S3 storage if:
     // 1. Free tier AND limit exceeded (both conditions must be true)
     // 2. Omit request/response headers are set
@@ -867,6 +908,9 @@ export class DBLoggable {
                   }
                 })(),
           cost: this.response.cost,
+          promptTokens: extractedUsage.prompt_tokens,
+          completionTokens: extractedUsage.completion_tokens,
+          model: extractedModel,
         },
       },
     };

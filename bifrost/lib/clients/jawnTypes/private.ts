@@ -2637,6 +2637,11 @@ Json: JsonObject;
     };
     Log: {
       response: {
+        model?: string;
+        /** Format: double */
+        completionTokens?: number;
+        /** Format: double */
+        promptTokens?: number;
         /** Format: double */
         cost?: number;
         /** Format: double */

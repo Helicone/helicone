@@ -79,5 +79,10 @@ export type Log = {
     delayMs: number;
     cachedLatency?: number;
     cost?: number;
+    // Token usage (extracted from response for cases where body isn't stored)
+    promptTokens?: number;
+    completionTokens?: number;
+    // Model (extracted from response for cases where body isn't stored)
+    model?: string;
   };
 };
