@@ -192,7 +192,7 @@ const chat = new ChatOpenAI({
     model: 'gpt-4.1-mini',                      // 100+ models supported
     apiKey: process.env.HELICONE_API_KEY,      // Your Helicone API key
     configuration: {
-        baseURL: "https://ai-gateway.helicone.ai/v1"  // Add this!
+        baseURL: "https://ai-gateway.helicone.ai/"  // Add this!
     },
 });
 ```
@@ -207,8 +207,6 @@ chat = ChatOpenAI(
 )
 ```
 </CodeGroup>
-
-That's it! Just two changes and you're routing through Helicone's AI Gateway.
 
 ## Complete Working Examples
 
@@ -328,76 +326,111 @@ streaming_example()
 ```
 </CodeGroup>
 
-### Multiple Models Example
-
+### Agents
 <CodeGroup>
-```typescript TypeScript
-async function testMultipleModels() {
-    console.log('🚀 Testing multiple models through Helicone AI Gateway\n');
+```typescript Typescript
+import { createAgent, tool } from "langchain";
+import { ChatOpenAI } from "@langchain/openai";
+import * as z from "zod";
+import dotenv from "dotenv";
 
-    const models = [
-        { id: 'gpt-4.1-mini', name: 'OpenAI GPT-4.1 Mini' },
-        { id: 'claude-opus-4-1', name: 'Anthropic Claude Opus 4.1' },
-        { id: 'gemini-2.5-flash-lite', name: 'Google Gemini 2.5 Flash Lite' },
-    ];
+dotenv.config();
 
-    for (const model of models) {
-        try {
-            const chat = new ChatOpenAI({
-                model: model.id,
-                apiKey: process.env.HELICONE_API_KEY,
-                configuration: {
-                    baseURL: "https://ai-gateway.helicone.ai/v1",
-                },
-            });
+// Helicone-configured model instance
+const model = new ChatOpenAI({
+  modelName: "claude-3-haiku-20240307", // any supported model via Helicone
+  apiKey: process.env.HELICONE_API_KEY,
+  configuration: {
+    baseURL: "https://ai-gateway.helicone.ai/v1",
+    defaultHeaders: {
+      "Helicone-Session-Id": "agent-session-001",
+      "Helicone-User-Id": "User1234",
+      "Helicone-Property-Environment": "production",
+    },
+  },
+});
 
-            console.log(`🤖 Testing ${model.name}... `);
-            const response = await chat.invoke([
-                new HumanMessage("Say hello in one sentence."),
-            ]);
-            console.log(`   Response: ${response.content}\n`);
-        } catch (error) {
-            console.error(`   Error: ${error}\n`);
-        }
-    }
+// Simple tools
+const search = tool(({ query }) => `Results for: ${query}`, {
+  name: "search",
+  description: "Search for information",
+  schema: z.object({ query: z.string() }),
+});
 
-    console.log('✅ All models tested!');
-    console.log('🔍 Check your dashboard: https://us.helicone.ai/dashboard');
-}
+const getWeather = tool(
+  ({ location }) => `Weather in ${location}: Sunny, 72°F`,
+  {
+    name: "get_weather",
+    description: "Get weather info",
+    schema: z.object({ location: z.string() }),
+  }
+);
 
-testMultipleModels().catch(console.error);
+// Agent with Helicone-backed model
+const agent = createAgent({
+  model,
+  tools: [search, getWeather],
+  systemPrompt: "You are a helpful assistant. Be concise and accurate.",
+});
+
+// Invoke
+const result = await agent.invoke({
+  messages: [
+    { role: "user", content: "Search AI news and summarize top 3 stories." },
+  ],
+});
+
+console.log(result.messages[result.messages.length - 1].content);
 ```
 
 ```python Python
-def test_multiple_models():
-    print('🚀 Testing multiple models through Helicone AI Gateway\n')
+from langchain_openai import ChatOpenAI
+from langchain_core.tools import tool
+from langchain.agents import create_agent
+from dotenv import load_dotenv
+import os
 
-    models = [
-        {'id': 'gpt-4.1-mini', 'name': 'OpenAI GPT-4.1 Mini'},
-        {'id': 'claude-opus-4-1', 'name': 'Anthropic Claude Opus 4.1'},
-        {'id': 'gemini-2.5-flash-lite', 'name': 'Google Gemini 2.5 Flash Lite'},
-    ]
+load_dotenv()
 
-    for model in models:
-        try:
-            chat = ChatOpenAI(
-                model=model['id'],
-                api_key=os.getenv('HELICONE_API_KEY'),
-                base_url="https://ai-gateway.helicone.ai/v1",
-            )
+# Helicone-configured model instance
+model = ChatOpenAI(
+    model="claude-3-haiku-20240307",  # any supported model via Helicone AI Gateway
+    api_key=os.getenv("HELICONE_API_KEY"),
+    base_url="https://ai-gateway.helicone.ai/v1",
+    default_headers={
+        "Helicone-Session-Id": "agent-session-001",
+        "Helicone-User-Id": "User123",
+        "Helicone-Property-Environment": "production",
+    },
+)
 
-            print(f"🤖 Testing {model['name']}... ")
-            response = chat.invoke([
-                HumanMessage(content="Say hello in one sentence."),
-            ])
-            print(f"   Response: {response.content}\n")
-        except Exception as error:
-            print(f"   Error: {error}\n")
+# Simple tools
+@tool
+def search(query: str) -> str:
+    """Search for information."""
+    return f"Results for: {query}"
 
-    print('✅ All models tested!')
-    print('🔍 Check your dashboard: https://us.helicone.ai/dashboard')
+@tool
+def get_weather(location: str) -> str:
+    """Get weather info."""
+    return f"Weather in {location}: Sunny, 72°F"
 
-test_multiple_models()
+# Agent tools
+tools = [search, get_weather]
+
+# Create agent with simple system prompt string
+agent = create_agent(
+    model,
+    tools,
+    system_prompt="You are a helpful assistant. Be concise and accurate."
+)
+
+# Invoke
+result = agent.invoke({
+    "messages": [{"role": "user", "content": "Search AI news and summarize top 3 stories."}]
+})
+
+print(result["messages"][-1].content)
 ```
 </CodeGroup>
 
