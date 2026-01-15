@@ -80,7 +80,7 @@ const useRequestsPageV2 = (
         request_response_rmt: {
           properties: {
             "Helicone-Rate-Limit-Status": {
-              equals: "rate_limited",
+              equals: "bucket_rate_limited",
             },
           },
         },
