@@ -31,6 +31,7 @@ import { err, ok, Result } from "../../packages/common/result";
 import { InAppThread } from "../../managers/InAppThreadsManager";
 import { HeliconeSqlManager } from "../../managers/HeliconeSqlManager";
 import { SlackService } from "../../services/SlackService";
+import { validate as uuidValidate } from "uuid";
 
 export interface HelixThreadSummary {
   id: string;
@@ -2389,13 +2390,16 @@ export class AdminController extends Controller {
     }
 
     // Build tier filter (handle pro-20240913 as pro)
+    // Using explicit mapping to prevent SQL injection - never interpolate user input
     let tierFilter = "";
     if (tier && tier !== "all") {
-      if (tier === "pro") {
-        tierFilter = "AND (o.tier = 'pro' OR o.tier = 'pro-20240913')";
-      } else {
-        tierFilter = `AND o.tier = '${tier}'`;
-      }
+      const tierMap: Record<string, string> = {
+        pro: "AND (o.tier = 'pro' OR o.tier = 'pro-20240913')",
+        free: "AND o.tier = 'free'",
+        growth: "AND o.tier = 'growth'",
+        enterprise: "AND o.tier = 'enterprise'",
+      };
+      tierFilter = tierMap[tier] ?? "";
     }
 
     const threads = await dbExecute<HelixThreadSummary>(
@@ -2445,6 +2449,11 @@ export class AdminController extends Controller {
     @Path() sessionId: string
   ): Promise<Result<HelixThreadDetail, string>> {
     await authCheckThrow(request.authParams.userId);
+
+    if (!uuidValidate(sessionId)) {
+      return err("Invalid session ID format");
+    }
+
     const thread = await dbExecute<HelixThreadDetail>(
       `SELECT t.*, u.email as user_email
        FROM in_app_threads t
@@ -2468,6 +2477,10 @@ export class AdminController extends Controller {
     @Body() body: { message: string; name?: string }
   ): Promise<Result<InAppThread, string>> {
     await authCheckThrow(request.authParams.userId);
+
+    if (!uuidValidate(sessionId)) {
+      return err("Invalid session ID format");
+    }
 
     // Get the current thread
     const threadResult = await dbExecute<InAppThread>(
@@ -2538,6 +2551,10 @@ export class AdminController extends Controller {
     @Body() body: { resolved: boolean; adminEmail?: string }
   ): Promise<Result<InAppThread, string>> {
     await authCheckThrow(request.authParams.userId);
+
+    if (!uuidValidate(sessionId)) {
+      return err("Invalid session ID format");
+    }
 
     // Get the current thread for Slack notification
     const threadResult = await dbExecute<InAppThread>(
