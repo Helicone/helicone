@@ -477,19 +477,19 @@ const AdminHelixThreads = () => {
                     <div className="flex items-center gap-4">
                       <Button
                         variant={
-                          selectedThread.data.data.escalated
+                          selectedThread.data.data!.escalated
                             ? "default"
                             : "outline"
                         }
                         size="sm"
                         onClick={() =>
                           resolveMutation.mutate(
-                            selectedThread.data.data.escalated
+                            selectedThread.data.data!.escalated
                           )
                         }
                         disabled={resolveMutation.isPending}
                       >
-                        {selectedThread.data.data.escalated ? (
+                        {selectedThread.data.data!.escalated ? (
                           <>
                             <CheckCircle size={14} className="mr-1" />
                             {resolveMutation.isPending
