@@ -22192,7 +22192,7 @@ export function RegisterRoutes(app: Router) {
         const argsAdminController_resolveHelixThread: Record<string, TsoaRoute.ParameterSchema> = {
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
                 sessionId: {"in":"path","name":"sessionId","required":true,"dataType":"string"},
-                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"resolved":{"dataType":"boolean","required":true}}},
+                body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"adminEmail":{"dataType":"string"},"resolved":{"dataType":"boolean","required":true}}},
         };
         app.post('/v1/admin/helix-thread/:sessionId/resolve',
             authenticateMiddleware([{"api_key":[]}]),

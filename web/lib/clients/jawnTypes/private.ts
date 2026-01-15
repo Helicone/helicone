@@ -20698,6 +20698,7 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
+          adminEmail?: string;
           resolved: boolean;
         };
       };

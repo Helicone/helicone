@@ -1,4 +1,5 @@
 import { useOrg } from "@/components/layout/org/organizationContext";
+import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -106,6 +107,7 @@ const AdminHelixThreads = () => {
   };
 
   const org = useOrg();
+  const { user } = useHeliconeAuthClient();
 
   // Fetch list of all threads
   const { data: threadsList, isLoading: isLoadingList } = useQuery({
@@ -168,7 +170,7 @@ const AdminHelixThreads = () => {
       const jawn = getJawnClient(org?.currentOrg?.id);
       return jawn.POST(`/v1/admin/helix-thread/{sessionId}/resolve`, {
         params: { path: { sessionId: selectedSessionId } },
-        body: { resolved },
+        body: { resolved, adminEmail: user?.email },
       });
     },
     onSuccess: (_, resolved) => {

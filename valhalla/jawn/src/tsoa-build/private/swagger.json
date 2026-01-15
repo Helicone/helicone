@@ -60448,6 +60448,9 @@
 						"application/json": {
 							"schema": {
 								"properties": {
+									"adminEmail": {
+										"type": "string"
+									},
 									"resolved": {
 										"type": "boolean"
 									}

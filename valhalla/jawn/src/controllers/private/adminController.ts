@@ -30,6 +30,7 @@ import {
 import { err, ok, Result } from "../../packages/common/result";
 import { InAppThread } from "../../managers/InAppThreadsManager";
 import { HeliconeSqlManager } from "../../managers/HeliconeSqlManager";
+import { SlackService } from "../../services/SlackService";
 
 export interface HelixThreadSummary {
   id: string;
@@ -2496,6 +2497,21 @@ export class AdminController extends Controller {
       return err("Failed to update thread");
     }
 
+    // Post reply to Slack if thread has a Slack thread
+    const slackThreadTs = thread.metadata?.slack_thread_ts;
+    if (slackThreadTs) {
+      try {
+        const slackService = SlackService.getInstance();
+        const slackMessage = body.name
+          ? `💬 *${body.name}:* ${body.message}`
+          : `💬 *Admin:* ${body.message}`;
+        await slackService.postThreadMessage(slackThreadTs, slackMessage);
+      } catch (slackError) {
+        console.error("Failed to post reply to Slack:", slackError);
+        // Don't fail the request if Slack fails
+      }
+    }
+
     return ok(updateResult.data[0]);
   }
 
@@ -2503,17 +2519,46 @@ export class AdminController extends Controller {
   public async resolveHelixThread(
     @Request() request: JawnAuthenticatedRequest,
     @Path() sessionId: string,
-    @Body() body: { resolved: boolean }
+    @Body() body: { resolved: boolean; adminEmail?: string }
   ): Promise<Result<InAppThread, string>> {
     await authCheckThrow(request.authParams.userId);
 
-    // Update the escalated status (resolved = not escalated)
+    // Get the current thread to add status message
+    const threadResult = await dbExecute<InAppThread>(
+      `SELECT * FROM in_app_threads WHERE id = $1`,
+      [sessionId]
+    );
+
+    if (threadResult.error) {
+      return err(threadResult.error);
+    }
+
+    if (!threadResult.data?.[0]) {
+      return err("Thread not found");
+    }
+
+    const thread = threadResult.data[0];
+    const messages = (thread.chat as any)?.messages || [];
+
+    // Add a status message as an assistant reply with name for proper styling
+    const adminName = body.adminEmail?.split("@")[0] || "Admin";
+    const statusMessage = body.resolved
+      ? `This chat has been marked as resolved.`
+      : `This chat has been reopened.`;
+
+    messages.push({
+      role: "assistant",
+      content: statusMessage,
+      name: adminName,
+    });
+
+    // Update the escalated status and messages
     const updateResult = await dbExecute<InAppThread>(
       `UPDATE in_app_threads
-       SET escalated = $1, updated_at = NOW()
-       WHERE id = $2
+       SET escalated = $1, chat = $2::jsonb, updated_at = NOW()
+       WHERE id = $3
        RETURNING *`,
-      [!body.resolved, sessionId]
+      [!body.resolved, JSON.stringify({ messages }), sessionId]
     );
 
     if (updateResult.error) {
@@ -2521,7 +2566,22 @@ export class AdminController extends Controller {
     }
 
     if (!updateResult.data?.[0]) {
-      return err("Thread not found");
+      return err("Failed to update thread");
+    }
+
+    // Post status update to Slack if thread has a Slack thread
+    const slackThreadTs = thread.metadata?.slack_thread_ts;
+    if (slackThreadTs) {
+      try {
+        const slackService = SlackService.getInstance();
+        const slackMessage = body.resolved
+          ? `✅ *${body.adminEmail || "Admin"}* marked this thread as resolved.`
+          : `🔄 *${body.adminEmail || "Admin"}* reopened this thread.`;
+        await slackService.postThreadMessage(slackThreadTs, slackMessage);
+      } catch (slackError) {
+        console.error("Failed to post resolve status to Slack:", slackError);
+        // Don't fail the request if Slack fails
+      }
     }
 
     return ok(updateResult.data[0]);
