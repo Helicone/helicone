@@ -259,22 +259,6 @@ export default function AdminWallet() {
 
   // Invoice queries and mutations
   const {
-    data: invoiceSummaryResponse,
-    refetch: refetchInvoiceSummary,
-    isLoading: invoiceSummaryLoading,
-    error: invoiceSummaryError,
-  } = $JAWN_API.useQuery(
-    "post",
-    "/v1/admin/wallet/{orgId}/invoice-summary",
-    {
-      params: {
-        path: { orgId: selectedOrg || "" },
-      },
-    },
-    { enabled: !!selectedOrg, retry: false },
-  );
-
-  const {
     data: invoicesListResponse,
     refetch: refetchInvoicesList,
     isLoading: invoicesListLoading,
@@ -714,7 +698,6 @@ export default function AdminWallet() {
     }
   };
 
-  const invoiceSummary = (invoiceSummaryResponse as any)?.data;
   const invoicesList = (invoicesListResponse as any)?.data || [];
   const spendBreakdown = (spendBreakdownResponse as any)?.data || [];
   const discountsList: Array<{
@@ -1423,11 +1406,8 @@ export default function AdminWallet() {
                                 >
                                   {/* Invoicing */}
                                   <div className="flex flex-col gap-3">
-                                    <H4>PTB Invoicing</H4>
-
                                     {/* Show message if invoicing not available (migration not applied) */}
-                                    {invoiceSummaryError ||
-                                    invoicesListError ? (
+                                    {invoicesListError ? (
                                       <div className="rounded-md border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-950">
                                         <Small className="text-amber-700 dark:text-amber-300">
                                           Invoicing not available. Migration may
@@ -1436,68 +1416,7 @@ export default function AdminWallet() {
                                       </div>
                                     ) : (
                                       <>
-                                        {/* Invoice Summary */}
-                                        {invoiceSummaryLoading ? (
-                                          <div className="flex items-center gap-2">
-                                            <Loader2
-                                              size={14}
-                                              className="animate-spin"
-                                            />
-                                            <Small>Loading summary...</Small>
-                                          </div>
-                                        ) : invoiceSummary ? (
-                                          <div className="flex items-center gap-6 rounded-md border bg-muted/30 p-3">
-                                            <div className="flex flex-col gap-0.5">
-                                              <Small className="text-muted-foreground">
-                                                Total Spend
-                                              </Small>
-                                              <span className="font-medium">
-                                                {formatCurrency(
-                                                  invoiceSummary.totalSpendCents /
-                                                    100,
-                                                )}
-                                              </span>
-                                            </div>
-                                            <div className="flex flex-col gap-0.5">
-                                              <Small className="text-muted-foreground">
-                                                Total Invoiced
-                                              </Small>
-                                              <span className="font-medium">
-                                                {formatCurrency(
-                                                  invoiceSummary.totalInvoicedCents /
-                                                    100,
-                                                )}
-                                              </span>
-                                            </div>
-                                            <div className="flex flex-col gap-0.5">
-                                              <Small className="text-muted-foreground">
-                                                Uninvoiced Balance
-                                              </Small>
-                                              <span
-                                                className={`font-semibold ${invoiceSummary.uninvoicedBalanceCents > 0 ? "text-amber-600" : ""}`}
-                                              >
-                                                {formatCurrency(
-                                                  invoiceSummary.uninvoicedBalanceCents /
-                                                    100,
-                                                )}
-                                              </span>
-                                            </div>
-                                            {invoiceSummary.lastInvoiceEndDate && (
-                                              <div className="flex flex-col gap-0.5">
-                                                <Small className="text-muted-foreground">
-                                                  Last Invoice Through
-                                                </Small>
-                                                <span className="font-medium">
-                                                  {invoiceSummary.lastInvoiceEndDate.split(
-                                                    "T",
-                                                  )[0]}
-                                                </span>
-                                              </div>
-                                            )}
-                                          </div>
-                                        ) : null}
-
-                                        {/* Get Spend Breakdown */}
+                                        {/* Create New Invoice */}
                                         <div className="flex flex-col gap-2 rounded-md border p-3">
                                           <Small className="font-semibold">
                                             Create New Invoice
@@ -1783,6 +1702,9 @@ export default function AdminWallet() {
                                                     <th className="p-2 text-right">
                                                       Total
                                                     </th>
+                                                    <th className="p-2 text-right">
+                                                      Saved
+                                                    </th>
                                                     <th className="p-2 text-left">
                                                       Hosted URL
                                                     </th>
@@ -1822,6 +1744,19 @@ export default function AdminWallet() {
                                                             inv.amountCents /
                                                               100,
                                                           )}
+                                                        </td>
+                                                        <td className="font-mono p-2 text-right text-green-600">
+                                                          {inv.subtotalCents !=
+                                                            null &&
+                                                          inv.subtotalCents -
+                                                            inv.amountCents >
+                                                            0
+                                                            ? formatCurrency(
+                                                                (inv.subtotalCents -
+                                                                  inv.amountCents) /
+                                                                  100,
+                                                              )
+                                                            : "-"}
                                                         </td>
                                                         <td className="p-2">
                                                           {editingHostedUrl?.invoiceId ===
