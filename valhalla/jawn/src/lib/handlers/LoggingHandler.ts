@@ -43,7 +43,7 @@ type RequestRecord = {
   organizationId: string;
   requestBody: string;
   responseBody: string;
-  location: "s3" | "clickhouse";
+  location: "s3" | "clickhouse" | "not_stored_exceeded_free";
 };
 
 // Legacy type definitions for deleted tables

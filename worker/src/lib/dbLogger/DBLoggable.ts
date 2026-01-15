@@ -739,10 +739,19 @@ export class DBLoggable {
     // Skip S3 storage if:
     // 1. Free tier AND limit exceeded (both conditions must be true)
     // 2. Omit request/response headers are set
+    const freeLimitExceeded =
+      org.data.tier === "free" && org.data.freeLimitExceeded === true;
     const skipS3Storage =
-      (org.data.tier === "free" && org.data.freeLimitExceeded === true) ||
+      freeLimitExceeded ||
       requestHeaders?.omitHeaders?.omitRequest === true ||
       requestHeaders?.omitHeaders?.omitResponse === true;
+
+    // Log when S3 storage is skipped due to free tier limit for observability
+    if (freeLimitExceeded) {
+      console.log(
+        `[FreeTierLimit] Skipping S3 storage for org ${authParams.organizationId} - free tier limit exceeded`
+      );
+    }
 
     if (S3_ENABLED === "true" && !skipS3Storage) {
       try {

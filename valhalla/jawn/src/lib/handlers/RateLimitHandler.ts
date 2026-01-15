@@ -12,6 +12,7 @@ import { dbQueryClickhouse, dbExecute } from "../shared/db/dbExecute";
 
 const FREE_TIER_LIMIT = 10_000;
 const FREE_TIER_CHECK_PROBABILITY = 0.01; // 1% of requests
+const FREE_TIER_RECOVERY_CHECK_PROBABILITY = 0.001; // 0.1% of requests for recovery check
 
 export class RateLimitHandler extends AbstractLogHandler {
   private rateLimitStore: RateLimitStore;
@@ -41,6 +42,16 @@ export class RateLimitHandler extends AbstractLogHandler {
         Math.random() < FREE_TIER_CHECK_PROBABILITY
       ) {
         await this.checkAndSetFreeTierLimit(context.orgParams.id);
+      }
+
+      // Recovery check: periodically verify if limit-exceeded orgs are still over limit
+      // This handles cases where old requests aged out of the 30-day window
+      if (
+        context.orgParams.tier === "free" &&
+        context.orgParams.freeLimitExceeded &&
+        Math.random() < FREE_TIER_RECOVERY_CHECK_PROBABILITY
+      ) {
+        await this.checkAndResetFreeTierLimit(context.orgParams.id);
       }
 
       const { data: isRateLimited, error: rateLimitErr } = this.rateLimitEntry(
@@ -77,12 +88,29 @@ export class RateLimitHandler extends AbstractLogHandler {
       if (count >= FREE_TIER_LIMIT) {
         await this.setFreeLimitExceeded(orgId, true);
         console.log(
-          `Free tier limit exceeded for org ${orgId}: ${count} requests in last 30 days`
+          `[FreeTierLimit] Limit exceeded for org ${orgId}: ${count} requests in last 30 days`
         );
       }
     } catch (error) {
       // Don't fail the request if the check fails
       console.error(`Error checking free tier limit for org ${orgId}:`, error);
+    }
+  }
+
+  // Recovery mechanism: reset the flag if org is now under the limit
+  // (e.g., old requests aged out of the 30-day rolling window)
+  private async checkAndResetFreeTierLimit(orgId: string): Promise<void> {
+    try {
+      const count = await this.get30DayRequestCount(orgId);
+      if (count < FREE_TIER_LIMIT) {
+        await this.setFreeLimitExceeded(orgId, false);
+        console.log(
+          `[FreeTierLimit] Limit reset for org ${orgId}: ${count} requests in last 30 days (under ${FREE_TIER_LIMIT} limit)`
+        );
+      }
+    } catch (error) {
+      // Don't fail the request if the check fails
+      console.error(`Error checking free tier recovery for org ${orgId}:`, error);
     }
   }
 
