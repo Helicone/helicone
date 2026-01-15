@@ -48390,6 +48390,120 @@
 				],
 				"type": "object"
 			},
+			"HelixThreadSummary": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"user_id": {
+						"type": "string"
+					},
+					"org_id": {
+						"type": "string"
+					},
+					"created_at": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"updated_at": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"escalated": {
+						"type": "boolean"
+					},
+					"message_count": {
+						"type": "number",
+						"format": "double"
+					},
+					"first_message": {
+						"type": "string",
+						"nullable": true
+					},
+					"last_message": {
+						"type": "string",
+						"nullable": true
+					},
+					"user_email": {
+						"type": "string",
+						"nullable": true
+					},
+					"org_name": {
+						"type": "string",
+						"nullable": true
+					},
+					"org_tier": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"id",
+					"user_id",
+					"org_id",
+					"created_at",
+					"updated_at",
+					"escalated",
+					"message_count",
+					"first_message",
+					"last_message",
+					"user_email",
+					"org_name",
+					"org_tier"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"HelixThreadListResponse": {
+				"properties": {
+					"threads": {
+						"items": {
+							"$ref": "#/components/schemas/HelixThreadSummary"
+						},
+						"type": "array"
+					},
+					"total": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"threads",
+					"total"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_HelixThreadListResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/HelixThreadListResponse"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_HelixThreadListResponse.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_HelixThreadListResponse_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"InAppThread": {
 				"properties": {
 					"id": {
@@ -60131,6 +60245,79 @@
 				}
 			}
 		},
+		"/v1/admin/helix-threads": {
+			"get": {
+				"operationId": "ListHelixThreads",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_HelixThreadListResponse.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "offset",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "status",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"all",
+								"escalated",
+								"resolved"
+							]
+						}
+					},
+					{
+						"in": "query",
+						"name": "tier",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"all",
+								"free",
+								"pro",
+								"growth",
+								"enterprise"
+							]
+						}
+					}
+				]
+			}
+		},
 		"/v1/admin/helix-thread/{sessionId}": {
 			"get": {
 				"operationId": "GetHelixThread",
@@ -60164,6 +60351,115 @@
 						}
 					}
 				]
+			}
+		},
+		"/v1/admin/helix-thread/{sessionId}/reply": {
+			"post": {
+				"operationId": "ReplyToHelixThread",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_InAppThread.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "sessionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"name": {
+										"type": "string"
+									},
+									"message": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"message"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/helix-thread/{sessionId}/resolve": {
+			"post": {
+				"operationId": "ResolveHelixThread",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_InAppThread.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "sessionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"resolved": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"resolved"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/admin/hql-enriched": {

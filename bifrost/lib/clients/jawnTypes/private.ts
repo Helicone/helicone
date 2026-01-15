@@ -629,8 +629,17 @@ export interface paths {
     /** @description Backfill costs in Clickhouse with updated cost package data. */
     post: operations["BackfillCosts"];
   };
+  "/v1/admin/helix-threads": {
+    get: operations["ListHelixThreads"];
+  };
   "/v1/admin/helix-thread/{sessionId}": {
     get: operations["GetHelixThread"];
+  };
+  "/v1/admin/helix-thread/{sessionId}/reply": {
+    post: operations["ReplyToHelixThread"];
+  };
+  "/v1/admin/helix-thread/{sessionId}/resolve": {
+    post: operations["ResolveHelixThread"];
   };
   "/v1/admin/hql-enriched": {
     post: operations["ExecuteEnrichedHql"];
@@ -16386,6 +16395,34 @@ Json: JsonObject;
       modelRow: components["schemas"]["ModelRow"];
       provider: string;
     };
+    HelixThreadSummary: {
+      id: string;
+      user_id: string;
+      org_id: string;
+      /** Format: date-time */
+      created_at: string;
+      /** Format: date-time */
+      updated_at: string;
+      escalated: boolean;
+      /** Format: double */
+      message_count: number;
+      first_message: string | null;
+      last_message: string | null;
+      user_email: string | null;
+      org_name: string | null;
+      org_tier: string | null;
+    };
+    HelixThreadListResponse: {
+      threads: components["schemas"]["HelixThreadSummary"][];
+      /** Format: double */
+      total: number;
+    };
+    ResultSuccess_HelixThreadListResponse_: {
+      data: components["schemas"]["HelixThreadListResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HelixThreadListResponse.string_": components["schemas"]["ResultSuccess_HelixThreadListResponse_"] | components["schemas"]["ResultError_string_"];
     InAppThread: {
       id: string;
       chat: unknown;
@@ -20596,10 +20633,73 @@ export interface operations {
       };
     };
   };
+  ListHelixThreads: {
+    parameters: {
+      query?: {
+        limit?: number;
+        offset?: number;
+        status?: "all" | "escalated" | "resolved";
+        tier?: "all" | "free" | "pro" | "growth" | "enterprise";
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HelixThreadListResponse.string_"];
+        };
+      };
+    };
+  };
   GetHelixThread: {
     parameters: {
       path: {
         sessionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_InAppThread.string_"];
+        };
+      };
+    };
+  };
+  ReplyToHelixThread: {
+    parameters: {
+      path: {
+        sessionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          name?: string;
+          message: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_InAppThread.string_"];
+        };
+      };
+    };
+  };
+  ResolveHelixThread: {
+    parameters: {
+      path: {
+        sessionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          resolved: boolean;
+        };
       };
     };
     responses: {
