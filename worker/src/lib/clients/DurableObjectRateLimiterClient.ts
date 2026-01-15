@@ -4,6 +4,7 @@ import {
   RateLimitResponse as DORateLimitResponse,
   RateLimiterDO,
 } from "../durable-objects/RateLimiterDO";
+import { DataDogTracer, TraceContext } from "../monitoring/DataDogTracer";
 
 export interface RateLimitOptions {
   time_window: number;
@@ -26,6 +27,8 @@ interface RateLimitProps {
   organizationId: string;
   rateLimiterDO: DurableObjectNamespace<RateLimiterDO>;
   cost: number;
+  tracer?: DataDogTracer;
+  traceContext?: TraceContext | null;
 }
 
 async function getSegmentKeyValue(
@@ -67,8 +70,28 @@ export async function checkRateLimit(
     rateLimitOptions,
     organizationId,
     rateLimiterDO,
+    tracer,
+    traceContext,
   } = props;
   const { time_window, segment, quota, unit } = rateLimitOptions;
+
+  // Start tracing span if tracer is available
+  const spanId =
+    tracer && traceContext?.sampled
+      ? tracer.startSpan(
+          "rate_limit.check",
+          "checkRateLimit",
+          "rate-limiter",
+          {
+            org_id: organizationId,
+            segment: segment ?? "global",
+            quota: quota.toString(),
+            time_window: time_window.toString(),
+            unit,
+          },
+          traceContext
+        )
+      : null;
 
   const segmentKeyValue = await getSegmentKeyValue(
     heliconeProperties,
@@ -94,13 +117,35 @@ export async function checkRateLimit(
 
   try {
     const response = await doStub.processRateLimit(request);
-    return {
+    const result: RateLimitResponse = {
       status: response.status,
       limit: response.limit,
       remaining: response.remaining,
       reset: response.reset,
     };
+
+    // Add result tags to span
+    if (tracer && spanId) {
+      tracer.setTag(
+        spanId,
+        "rate_limited",
+        response.status === "rate_limited" ? "true" : "false"
+      );
+      tracer.setTag(spanId, "limit", response.limit);
+      tracer.setTag(spanId, "remaining", response.remaining);
+      if (response.reset) {
+        tracer.setTag(spanId, "reset", response.reset);
+      }
+      tracer.finishSpan(spanId);
+    }
+
+    return result;
   } catch (error) {
+    // Set error on span
+    if (tracer && spanId) {
+      tracer.setError(spanId, error instanceof Error ? error : String(error));
+      tracer.finishSpan(spanId);
+    }
     console.error("[DORateLimit] Error calling DO:", error);
     return { status: "ok", limit: quota, remaining: quota };
   }
@@ -115,8 +160,29 @@ export async function updateRateLimitCounter(
     rateLimitOptions,
     organizationId,
     rateLimiterDO,
+    tracer,
+    traceContext,
   } = props;
   const { time_window, segment, quota, unit } = rateLimitOptions;
+
+  // Start tracing span if tracer is available
+  const spanId =
+    tracer && traceContext?.sampled
+      ? tracer.startSpan(
+          "rate_limit.update",
+          "updateRateLimitCounter",
+          "rate-limiter",
+          {
+            org_id: organizationId,
+            segment: segment ?? "global",
+            quota: quota.toString(),
+            time_window: time_window.toString(),
+            unit,
+            cost: props.cost.toString(),
+          },
+          traceContext
+        )
+      : null;
 
   const segmentKeyValue = await getSegmentKeyValue(
     heliconeProperties,
@@ -145,8 +211,23 @@ export async function updateRateLimitCounter(
     const response = await doStub.processRateLimit(request);
     if (response.status !== "ok") {
       console.error("[DORateLimit] Update failed:", response.status);
+      if (tracer && spanId) {
+        tracer.setTag(spanId, "update_failed", "true");
+        tracer.setTag(spanId, "update_status", response.status);
+      }
+    } else if (tracer && spanId) {
+      tracer.setTag(spanId, "update_success", "true");
+      tracer.setTag(spanId, "new_remaining", response.remaining);
+    }
+
+    if (tracer && spanId) {
+      tracer.finishSpan(spanId);
     }
   } catch (error) {
+    if (tracer && spanId) {
+      tracer.setError(spanId, error instanceof Error ? error : String(error));
+      tracer.finishSpan(spanId);
+    }
     console.error("[DORateLimit] Update error:", error);
   }
 }

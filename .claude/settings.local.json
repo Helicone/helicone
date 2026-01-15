@@ -104,7 +104,9 @@
       "WebFetch(domain:docs.stripe.com)",
       "WebFetch(domain:ai.google.dev)",
       "Bash(npx tsoa:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(npx eslint:*)",
+      "Bash(./run_all_workers.sh:*)"
     ],
     "deny": []
   },
