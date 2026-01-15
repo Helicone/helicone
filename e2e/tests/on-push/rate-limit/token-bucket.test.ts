@@ -17,7 +17,7 @@
 
 import axios, { AxiosInstance, AxiosResponse } from "axios";
 import {
-  AI_GATEWAY_URL,
+  OPENAI_PROXY_URL,
   TEST_ORG_API_KEY,
   TEST_MESSAGES,
   MOCK_OPENAI_RESPONSE,
@@ -58,7 +58,7 @@ function createRateLimitClient(
   additionalHeaders: Record<string, string> = {}
 ): AxiosInstance {
   return axios.create({
-    baseURL: AI_GATEWAY_URL,
+    baseURL: OPENAI_PROXY_URL,
     timeout: 30000,
     headers: {
       "Content-Type": "application/json",
@@ -377,7 +377,7 @@ describe("Token Bucket Rate Limiter E2E", () => {
     it("should handle missing policy header gracefully", async () => {
       // Client without rate limit policy
       const client = axios.create({
-        baseURL: AI_GATEWAY_URL,
+        baseURL: OPENAI_PROXY_URL,
         timeout: 30000,
         headers: {
           "Content-Type": "application/json",

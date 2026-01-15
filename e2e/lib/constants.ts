@@ -5,6 +5,9 @@
 // Service URLs
 export const AI_GATEWAY_URL =
   process.env.AI_GATEWAY_URL || "http://localhost:8793";
+// OpenAI proxy URL - uses BYOK flow (no wallet/credits needed)
+export const OPENAI_PROXY_URL =
+  process.env.OPENAI_PROXY_URL || "http://localhost:8787";
 export const WORKER_API_URL =
   process.env.WORKER_API_URL || "http://localhost:8788";
 export const JAWN_URL = process.env.JAWN_URL || "http://localhost:8585";
