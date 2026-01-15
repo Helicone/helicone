@@ -664,7 +664,6 @@ export default function AdminWallet() {
 
       if (result.data) {
         // Refetch data
-        await refetchInvoiceSummary();
         await refetchInvoicesList();
       }
     } catch (error) {
@@ -1537,37 +1536,57 @@ export default function AdminWallet() {
                                                           {item.provider ||
                                                             "(unknown)"}
                                                         </td>
-                                                        <td className="font-mono p-2 text-right text-xs">
+                                                        <td className="p-2 text-right font-mono text-xs">
                                                           {item.promptTokens.toLocaleString()}
                                                         </td>
-                                                        <td className="font-mono p-2 text-right text-xs">
+                                                        <td className="p-2 text-right font-mono text-xs">
                                                           {item.completionTokens.toLocaleString()}
                                                         </td>
-                                                        <td className="font-mono p-2 text-right text-xs">
-                                                          {(item.cacheReadTokens || 0).toLocaleString()}
+                                                        <td className="p-2 text-right font-mono text-xs">
+                                                          {(
+                                                            item.cacheReadTokens ||
+                                                            0
+                                                          ).toLocaleString()}
                                                         </td>
-                                                        <td className="font-mono p-2 text-right text-xs">
-                                                          {(item.cacheWriteTokens || 0).toLocaleString()}
+                                                        <td className="p-2 text-right font-mono text-xs">
+                                                          {(
+                                                            item.cacheWriteTokens ||
+                                                            0
+                                                          ).toLocaleString()}
                                                         </td>
-                                                        <td className="font-mono p-2 text-right text-xs text-muted-foreground">
-                                                          {item.pricing?.cacheReadPer1M
-                                                            ? formatCurrency(item.pricing.cacheReadPer1M)
+                                                        <td className="p-2 text-right font-mono text-xs text-muted-foreground">
+                                                          {item.pricing
+                                                            ?.cacheReadPer1M
+                                                            ? formatCurrency(
+                                                                item.pricing
+                                                                  .cacheReadPer1M,
+                                                              )
                                                             : "-"}
                                                         </td>
-                                                        <td className="font-mono p-2 text-right text-xs text-muted-foreground">
-                                                          {item.pricing?.cacheWritePer1M
-                                                            ? formatCurrency(item.pricing.cacheWritePer1M)
+                                                        <td className="p-2 text-right font-mono text-xs text-muted-foreground">
+                                                          {item.pricing
+                                                            ?.cacheWritePer1M
+                                                            ? formatCurrency(
+                                                                item.pricing
+                                                                  .cacheWritePer1M,
+                                                              )
                                                             : "-"}
                                                         </td>
-                                                        <td className="font-mono p-2 text-right text-muted-foreground">
+                                                        <td className="p-2 text-right font-mono text-muted-foreground">
                                                           {formatCurrency(
-                                                            item.subtotal - (item.cacheAdjustment || 0),
+                                                            item.subtotal -
+                                                              (item.cacheAdjustment ||
+                                                                0),
                                                           )}
                                                         </td>
-                                                        <td className="font-mono p-2 text-right">
-                                                          {item.cacheAdjustment > 0 ? (
+                                                        <td className="p-2 text-right font-mono">
+                                                          {item.cacheAdjustment >
+                                                          0 ? (
                                                             <span className="text-amber-600">
-                                                              +{formatCurrency(item.cacheAdjustment)}
+                                                              +
+                                                              {formatCurrency(
+                                                                item.cacheAdjustment,
+                                                              )}
                                                             </span>
                                                           ) : (
                                                             <span className="text-muted-foreground">
@@ -1575,7 +1594,7 @@ export default function AdminWallet() {
                                                             </span>
                                                           )}
                                                         </td>
-                                                        <td className="font-mono p-2 text-right">
+                                                        <td className="p-2 text-right font-mono">
                                                           {item.discountPercent >
                                                           0 ? (
                                                             <span className="text-green-600">
@@ -1591,7 +1610,7 @@ export default function AdminWallet() {
                                                             </span>
                                                           )}
                                                         </td>
-                                                        <td className="font-mono p-2 text-right font-medium">
+                                                        <td className="p-2 text-right font-mono font-medium">
                                                           {formatCurrency(
                                                             item.total,
                                                           )}
@@ -1607,7 +1626,7 @@ export default function AdminWallet() {
                                                       Subtotal (for wallet
                                                       credit):
                                                     </td>
-                                                    <td className="font-mono p-2 text-right">
+                                                    <td className="p-2 text-right font-mono">
                                                       {formatCurrency(
                                                         spendBreakdown.reduce(
                                                           (
@@ -1627,7 +1646,7 @@ export default function AdminWallet() {
                                                     >
                                                       Total (invoice amount):
                                                     </td>
-                                                    <td className="font-mono p-2 text-right">
+                                                    <td className="p-2 text-right font-mono">
                                                       {formatCurrency(
                                                         spendBreakdown.reduce(
                                                           (
@@ -1729,7 +1748,7 @@ export default function AdminWallet() {
                                                             .replace("T", " ")
                                                             .slice(0, 16)}
                                                         </td>
-                                                        <td className="font-mono p-2 text-right text-muted-foreground">
+                                                        <td className="p-2 text-right font-mono text-muted-foreground">
                                                           {inv.subtotalCents !=
                                                           null
                                                             ? formatCurrency(
@@ -1738,13 +1757,13 @@ export default function AdminWallet() {
                                                               )
                                                             : "-"}
                                                         </td>
-                                                        <td className="font-mono p-2 text-right">
+                                                        <td className="p-2 text-right font-mono">
                                                           {formatCurrency(
                                                             inv.amountCents /
                                                               100,
                                                           )}
                                                         </td>
-                                                        <td className="font-mono p-2 text-right text-green-600">
+                                                        <td className="p-2 text-right font-mono text-green-600">
                                                           {inv.subtotalCents !=
                                                             null &&
                                                           inv.subtotalCents -
@@ -1763,7 +1782,8 @@ export default function AdminWallet() {
                                                             <div className="flex items-center gap-1">
                                                               <Input
                                                                 value={
-                                                                  editingHostedUrl?.url ?? ""
+                                                                  editingHostedUrl?.url ??
+                                                                  ""
                                                                 }
                                                                 onChange={(e) =>
                                                                   setEditingHostedUrl(
@@ -1786,7 +1806,8 @@ export default function AdminWallet() {
                                                                 onClick={() =>
                                                                   handleSaveHostedUrl(
                                                                     inv.id,
-                                                                    editingHostedUrl?.url ?? "",
+                                                                    editingHostedUrl?.url ??
+                                                                      "",
                                                                   )
                                                                 }
                                                               >
@@ -1865,9 +1886,11 @@ export default function AdminWallet() {
                                                           )}
                                                         </td>
                                                         <td className="p-2 text-muted-foreground">
-                                                          {inv.createdAt.split(
-                                                            "T",
-                                                          )[0]}
+                                                          {
+                                                            inv.createdAt.split(
+                                                              "T",
+                                                            )[0]
+                                                          }
                                                         </td>
                                                         <td className="p-2">
                                                           <Button
@@ -1965,10 +1988,10 @@ export default function AdminWallet() {
                                                     {discount.provider ||
                                                       "(any)"}
                                                   </td>
-                                                  <td className="font-mono p-2 text-xs">
+                                                  <td className="p-2 font-mono text-xs">
                                                     {discount.model || "(any)"}
                                                   </td>
-                                                  <td className="font-mono p-2 text-right text-green-600">
+                                                  <td className="p-2 text-right font-mono text-green-600">
                                                     {discount.percent}%
                                                   </td>
                                                   <td className="p-2">
@@ -2133,7 +2156,7 @@ export default function AdminWallet() {
                                                   key={idx}
                                                   className="border-t"
                                                 >
-                                                  <td className="font-mono p-2 text-xs">
+                                                  <td className="p-2 font-mono text-xs">
                                                     {entry.helicone_request_id.substring(
                                                       0,
                                                       8,
@@ -2220,7 +2243,7 @@ export default function AdminWallet() {
                                           </div>
                                         ) : tableData?.data ? (
                                           <div className="max-h-64 overflow-auto">
-                                            <pre className="font-mono whitespace-pre-wrap text-xs">
+                                            <pre className="whitespace-pre-wrap font-mono text-xs">
                                               {JSON.stringify(
                                                 tableData.data,
                                                 null,
@@ -2364,8 +2387,7 @@ export default function AdminWallet() {
               <br />
               <br />
               <strong>Period:</strong>{" "}
-              {invoiceToDelete && invoiceToDelete.startDate.split("T")[0]}{" "}
-              -{" "}
+              {invoiceToDelete && invoiceToDelete.startDate.split("T")[0]} -{" "}
               {invoiceToDelete && invoiceToDelete.endDate.split("T")[0]}
               <br />
               <strong>Amount:</strong>{" "}
@@ -2401,8 +2423,7 @@ export default function AdminWallet() {
               This will create a draft invoice in Stripe for:
               <br />
               <br />
-              <strong>Period:</strong> {invoiceStartDate} -{" "}
-              {invoiceEndDate}
+              <strong>Period:</strong> {invoiceStartDate} - {invoiceEndDate}
               <br />
               <strong>Subtotal (credit to wallet):</strong>{" "}
               {formatCurrency(
