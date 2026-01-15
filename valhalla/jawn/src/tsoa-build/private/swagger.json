@@ -3872,15 +3872,6 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
-			"Partial_VectorOperators_": {
-				"properties": {
-					"contains": {
-						"type": "string"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
 			"Partial_RequestResponseRMTToOperators_": {
 				"properties": {
 					"country_code": {
@@ -3982,10 +3973,10 @@
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
 					"request_body": {
-						"$ref": "#/components/schemas/Partial_VectorOperators_"
+						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
 					"response_body": {
-						"$ref": "#/components/schemas/Partial_VectorOperators_"
+						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
 					"cache_enabled": {
 						"$ref": "#/components/schemas/Partial_BooleanOperators_"
