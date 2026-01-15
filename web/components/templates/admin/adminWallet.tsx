@@ -633,7 +633,6 @@ export default function AdminWallet() {
           `Draft created: ${formatCurrency(result.data.amountCents / 100)} - ${result.data.invoiceId}`,
         );
         // Refetch data
-        refetchInvoiceSummary();
         refetchInvoicesList();
 
         // Open the invoice in Stripe dashboard in a new tab
