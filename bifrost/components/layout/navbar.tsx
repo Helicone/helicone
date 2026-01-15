@@ -151,7 +151,7 @@ const MobileNav = () => {
       <div className="fixed inset-x-0 top-0 z-50 bg-background">
         <MobileHeader
           menuDispatch={[menuOpen, setMenuOpen]}
-          className="pl-2 pr-4"
+          className="pr-4"
         />
       </div>
       {menuOpen && (
