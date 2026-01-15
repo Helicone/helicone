@@ -351,7 +351,7 @@ const NavBar = (props: NavBarProps) => {
       <MobileNav />
 
       <nav
-        className="gap-x-3 mx-auto lg:flex sm:px-16 lg:px-24 2xl:px-40 max-w-[2000px] items-center py-2 hidden justify-between"
+        className="gap-x-3 mx-auto lg:flex lg:px-8 xl:px-16 2xl:px-40 max-w-[2000px] items-center py-2 hidden justify-between"
         aria-label="Global"
       >
         {/* Logo */}
