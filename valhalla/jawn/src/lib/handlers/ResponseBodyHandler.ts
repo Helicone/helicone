@@ -130,13 +130,22 @@ export class ResponseBodyHandler extends AbstractLogHandler {
           (context.legacyUsage.completionTokens ?? 0) ||
           undefined);
       context.legacyUsage.heliconeCalculated = legacyUsage.heliconeCalculated;
+      // Fall back to Worker-provided cache/audio tokens when body isn't stored
       context.legacyUsage.promptCacheWriteTokens =
-        legacyUsage.promptCacheWriteTokens;
+        legacyUsage.promptCacheWriteTokens ??
+        context.message.log.response.promptCacheWriteTokens;
       context.legacyUsage.promptCacheReadTokens =
-        legacyUsage.promptCacheReadTokens;
-      context.legacyUsage.promptAudioTokens = legacyUsage.promptAudioTokens;
+        legacyUsage.promptCacheReadTokens ??
+        context.message.log.response.promptCacheReadTokens;
+      context.legacyUsage.promptAudioTokens =
+        legacyUsage.promptAudioTokens ??
+        context.message.log.response.promptAudioTokens;
       context.legacyUsage.completionAudioTokens =
-        legacyUsage.completionAudioTokens;
+        legacyUsage.completionAudioTokens ??
+        context.message.log.response.completionAudioTokens;
+      context.legacyUsage.reasoningTokens =
+        legacyUsage.reasoningTokens ??
+        context.message.log.response.reasoningTokens;
       context.legacyUsage.promptCacheWrite5m = legacyUsage.promptCacheWrite5m;
       context.legacyUsage.promptCacheWrite1h = legacyUsage.promptCacheWrite1h;
       if (typeof legacyUsage.cost === "number" && legacyUsage.cost) {

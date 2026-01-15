@@ -73,6 +73,11 @@ export type Log = {
     // Token usage (from Worker when body isn't stored)
     promptTokens?: number;
     completionTokens?: number;
+    promptCacheReadTokens?: number;
+    promptCacheWriteTokens?: number;
+    promptAudioTokens?: number;
+    completionAudioTokens?: number;
+    reasoningTokens?: number;
     // Model (from Worker when body isn't stored)
     model?: string;
   };
@@ -85,6 +90,7 @@ export type Usage = {
   promptAudioTokens?: number;
   completionTokens?: number;
   completionAudioTokens?: number;
+  reasoningTokens?: number;
 
   // anthropic cache control
   promptCacheWrite5m?: number;

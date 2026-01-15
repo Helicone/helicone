@@ -468,6 +468,84 @@ export class DBLoggable {
     };
   }
 
+  // Extract detailed usage including cache tokens, audio tokens, reasoning tokens
+  getDetailedUsage(parsedResponse: unknown): {
+    prompt_tokens?: number;
+    completion_tokens?: number;
+    prompt_cache_read_tokens?: number;
+    prompt_cache_write_tokens?: number;
+    prompt_audio_tokens?: number;
+    completion_audio_tokens?: number;
+    reasoning_tokens?: number;
+  } {
+    if (typeof parsedResponse !== "object" || parsedResponse === null) {
+      return {};
+    }
+
+    // Handle OpenAI format (usage field with details)
+    if ("usage" in parsedResponse) {
+      const response = parsedResponse as {
+        usage: {
+          prompt_tokens?: number;
+          completion_tokens?: number;
+          input_tokens?: number;
+          output_tokens?: number;
+          // OpenAI detailed usage
+          prompt_tokens_details?: {
+            cached_tokens?: number;
+            audio_tokens?: number;
+          };
+          completion_tokens_details?: {
+            reasoning_tokens?: number;
+            audio_tokens?: number;
+          };
+          // Anthropic cache usage
+          cache_creation_input_tokens?: number;
+          cache_read_input_tokens?: number;
+        };
+      };
+      const usage = response.usage;
+
+      return {
+        prompt_tokens:
+          usage?.prompt_tokens ?? usage?.input_tokens,
+        completion_tokens:
+          usage?.completion_tokens ?? usage?.output_tokens,
+        prompt_cache_read_tokens:
+          usage?.prompt_tokens_details?.cached_tokens ??
+          usage?.cache_read_input_tokens,
+        prompt_cache_write_tokens:
+          usage?.cache_creation_input_tokens,
+        prompt_audio_tokens:
+          usage?.prompt_tokens_details?.audio_tokens,
+        completion_audio_tokens:
+          usage?.completion_tokens_details?.audio_tokens,
+        reasoning_tokens:
+          usage?.completion_tokens_details?.reasoning_tokens,
+      };
+    }
+
+    // Handle Gemini format (usageMetadata field)
+    if ("usageMetadata" in parsedResponse) {
+      const response = parsedResponse as {
+        usageMetadata: {
+          promptTokenCount?: number;
+          candidatesTokenCount?: number;
+          cachedContentTokenCount?: number;
+        };
+      };
+      const usageMetadata = response.usageMetadata;
+
+      return {
+        prompt_tokens: usageMetadata?.promptTokenCount,
+        completion_tokens: usageMetadata?.candidatesTokenCount,
+        prompt_cache_read_tokens: usageMetadata?.cachedContentTokenCount,
+      };
+    }
+
+    return {};
+  }
+
   async getStatus() {
     return await this.response.status();
   }
@@ -717,13 +795,20 @@ export class DBLoggable {
       await this.response.getResponseBody();
 
     // Extract usage and model from response body (needed for cases where body isn't stored)
-    let extractedUsage: { prompt_tokens?: number; completion_tokens?: number } =
-      {};
+    let extractedUsage: {
+      prompt_tokens?: number;
+      completion_tokens?: number;
+      prompt_cache_read_tokens?: number;
+      prompt_cache_write_tokens?: number;
+      prompt_audio_tokens?: number;
+      completion_audio_tokens?: number;
+      reasoning_tokens?: number;
+    } = {};
     let extractedModel: string | undefined;
     try {
       const responseText = rawResponseBody.join("");
       const parsedResponse = JSON.parse(responseText);
-      extractedUsage = this.getUsage(parsedResponse);
+      extractedUsage = this.getDetailedUsage(parsedResponse);
       // Extract model from response (OpenAI format)
       if (
         typeof parsedResponse === "object" &&
@@ -919,6 +1004,11 @@ export class DBLoggable {
           cost: this.response.cost,
           promptTokens: extractedUsage.prompt_tokens,
           completionTokens: extractedUsage.completion_tokens,
+          promptCacheReadTokens: extractedUsage.prompt_cache_read_tokens,
+          promptCacheWriteTokens: extractedUsage.prompt_cache_write_tokens,
+          promptAudioTokens: extractedUsage.prompt_audio_tokens,
+          completionAudioTokens: extractedUsage.completion_audio_tokens,
+          reasoningTokens: extractedUsage.reasoning_tokens,
           model: extractedModel,
         },
       },
