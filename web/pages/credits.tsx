@@ -807,7 +807,9 @@ const Credits: NextPageWithLayout<void> = () => {
                       <TableRow className="border-b">
                         <TableHead>Period</TableHead>
                         <TableHead>Created</TableHead>
-                        <TableHead className="text-right">Amount</TableHead>
+                        <TableHead className="text-right">Subtotal</TableHead>
+                        <TableHead className="text-right">Total</TableHead>
+                        <TableHead className="text-right">Saved</TableHead>
                         <TableHead className="text-right">Status</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -821,11 +823,31 @@ const Credits: NextPageWithLayout<void> = () => {
                           <TableCell className="text-muted-foreground">
                             {new Date(invoice.createdAt).toLocaleDateString()}
                           </TableCell>
+                          <TableCell className="font-mono text-right text-muted-foreground">
+                            {invoice.subtotalCents != null
+                              ? (invoice.subtotalCents / 100).toLocaleString(
+                                  "en-US",
+                                  { style: "currency", currency: "usd" },
+                                )
+                              : "-"}
+                          </TableCell>
                           <TableCell className="font-mono text-right font-semibold">
                             {(invoice.amountCents / 100).toLocaleString(
                               "en-US",
                               { style: "currency", currency: "usd" },
                             )}
+                          </TableCell>
+                          <TableCell className="font-mono text-right text-green-600">
+                            {invoice.subtotalCents != null &&
+                            invoice.subtotalCents - invoice.amountCents > 0
+                              ? (
+                                  (invoice.subtotalCents - invoice.amountCents) /
+                                  100
+                                ).toLocaleString("en-US", {
+                                  style: "currency",
+                                  currency: "usd",
+                                })
+                              : "-"}
                           </TableCell>
                           <TableCell className="text-right">
                             {invoice.hostedInvoiceUrl ? (

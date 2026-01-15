@@ -14385,6 +14385,11 @@
 						"type": "number",
 						"format": "double"
 					},
+					"subtotalCents": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
 					"notes": {
 						"type": "string",
 						"nullable": true
@@ -14401,6 +14406,7 @@
 					"startDate",
 					"endDate",
 					"amountCents",
+					"subtotalCents",
 					"notes",
 					"createdAt"
 				],

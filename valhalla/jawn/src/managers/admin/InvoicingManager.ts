@@ -26,6 +26,7 @@ export interface CreateInvoiceResponse {
   hostedInvoiceUrl: string | null;
   dashboardUrl: string;
   amountCents: number;
+  subtotalCents: number;
   ptbInvoiceId: string;
 }
 
@@ -173,16 +174,8 @@ export class InvoicingManager {
       });
 
       // 5. Create the invoice (in draft mode)
-      const periodStart = startDate.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
-      const periodEnd = endDate.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
+      const periodStart = startDate.toISOString().split("T")[0];
+      const periodEnd = endDate.toISOString().split("T")[0];
 
       const invoice = await stripe.invoices.create({
         customer: stripeCustomerId,
@@ -200,6 +193,7 @@ export class InvoicingManager {
 
       // 6. Create invoice items with discounts applied
       let totalAmountCents = 0;
+      let totalSubtotalCents = 0;
 
       for (const item of spendResult.data) {
         const baseSubtotalUsd = parseFloat(item.cost);
@@ -216,11 +210,13 @@ export class InvoicingManager {
 
         const discountPercent = findDiscount(discounts, item.model, item.provider);
         const totalUsd = subtotalUsd * (1 - discountPercent / 100);
+        const subtotalCents = Math.round(subtotalUsd * 100);
         const amountCents = Math.round(totalUsd * 100);
 
         if (amountCents <= 0) continue;
 
         totalAmountCents += amountCents;
+        totalSubtotalCents += subtotalCents;
 
         const promptTokens = parseInt(item.prompt_tokens, 10) || 0;
         const completionTokens = parseInt(item.completion_tokens, 10) || 0;
@@ -240,10 +236,10 @@ export class InvoicingManager {
         });
       }
 
-      // 7. Record in ptb_invoices
-      const ptbResult = await dbExecute<{ id: string }>(
-        `INSERT INTO ptb_invoices (organization_id, stripe_invoice_id, start_date, end_date, amount_cents, notes)
-         VALUES ($1, $2, $3, $4, $5, $6)
+      // 7. Record in ptb_invoices (with fallback if subtotal_cents column doesn't exist yet)
+      let ptbResult = await dbExecute<{ id: string }>(
+        `INSERT INTO ptb_invoices (organization_id, stripe_invoice_id, start_date, end_date, amount_cents, subtotal_cents, notes)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
          RETURNING id`,
         [
           this.orgId,
@@ -251,9 +247,27 @@ export class InvoicingManager {
           startDate,
           endDate,
           totalAmountCents,
+          totalSubtotalCents,
           `Auto-created invoice for ${orgName}`,
         ]
       );
+
+      // If subtotal_cents column doesn't exist yet, fall back to insert without it
+      if (ptbResult.error && JSON.stringify(ptbResult.error).includes("42703")) {
+        ptbResult = await dbExecute<{ id: string }>(
+          `INSERT INTO ptb_invoices (organization_id, stripe_invoice_id, start_date, end_date, amount_cents, notes)
+           VALUES ($1, $2, $3, $4, $5, $6)
+           RETURNING id`,
+          [
+            this.orgId,
+            invoice.id,
+            startDate,
+            endDate,
+            totalAmountCents,
+            `Auto-created invoice for ${orgName}`,
+          ]
+        );
+      }
 
       if (ptbResult.error) {
         console.error("Failed to record invoice in ptb_invoices:", ptbResult.error);
@@ -266,6 +280,7 @@ export class InvoicingManager {
         hostedInvoiceUrl: null,
         dashboardUrl,
         amountCents: totalAmountCents,
+        subtotalCents: totalSubtotalCents,
         ptbInvoiceId: ptbResult.data?.[0]?.id || "",
       });
     } catch (error: any) {
