@@ -277,6 +277,169 @@ const RevenueChartCell = ({
   );
 };
 
+// Deposit chart data type
+interface DepositDataPoint {
+  timestamp: string;
+  amount: number;
+}
+
+// Deposit Chart Cell Component
+const DepositChartCell = ({
+  deposits,
+  isLoading,
+}: {
+  deposits: DepositDataPoint[];
+  isLoading?: boolean;
+}) => {
+  const chartData = useMemo(() => {
+    // Create 6 month buckets
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setMonth(endDate.getMonth() - 5);
+
+    const monthBuckets: Record<string, ChartDataItem> = {};
+
+    for (let i = 0; i < 6; i++) {
+      const date = new Date(startDate);
+      date.setMonth(startDate.getMonth() + i);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      const monthName = date.toLocaleString("default", { month: "short" });
+
+      monthBuckets[monthKey] = {
+        month: monthName,
+        monthKey,
+        billed: 0,
+        upcoming: 0,
+        total: 0,
+      };
+    }
+
+    // Fill in deposit data
+    deposits.forEach((d) => {
+      const date = new Date(d.timestamp);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      if (monthBuckets[monthKey]) {
+        monthBuckets[monthKey].billed += d.amount;
+        monthBuckets[monthKey].total += d.amount;
+      }
+    });
+
+    return Object.values(monthBuckets).sort((a, b) =>
+      a.monthKey.localeCompare(b.monthKey)
+    );
+  }, [deposits]);
+
+  const currentMonth = chartData[chartData.length - 1];
+  const previousMonth = chartData[chartData.length - 2];
+  const currentMonthTotal = currentMonth?.total || 0;
+  const trend =
+    previousMonth && previousMonth.total > 0
+      ? ((currentMonthTotal - previousMonth.total) / previousMonth.total) * 100
+      : null;
+
+  if (isLoading) {
+    return (
+      <div className="p-4 flex items-center justify-center h-[180px]">
+        <Loader2 size={20} className="animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-4">
+      {/* Header with amount */}
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <div className="flex flex-col">
+            <Small className="font-semibold">Deposits</Small>
+            <Muted className="text-[10px]">(not in All Products)</Muted>
+          </div>
+          {trend !== null && (
+            <div className="flex items-center gap-0.5">
+              {trend >= 0 ? (
+                <TrendingUp size={10} className="text-green-500" />
+              ) : (
+                <TrendingDown size={10} className="text-red-500" />
+              )}
+              <span
+                className={cn(
+                  "text-[10px] tabular-nums",
+                  trend >= 0 ? "text-green-500" : "text-red-500"
+                )}
+              >
+                {Math.abs(trend).toFixed(0)}%
+              </span>
+            </div>
+          )}
+        </div>
+        <div className="flex flex-col items-end">
+          <span className="text-sm font-semibold tabular-nums">
+            ${currentMonthTotal.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+          </span>
+          <span className="text-[10px] text-muted-foreground tabular-nums">
+            this month
+          </span>
+        </div>
+      </div>
+
+      {/* Chart */}
+      <div className="h-[140px] w-full">
+        <ChartContainer
+          config={{
+            billed: {
+              label: "Deposits",
+              color: "hsl(142 76% 36%)",
+            },
+          }}
+          className="h-full w-full"
+        >
+          <BarChart
+            data={chartData}
+            margin={{ top: 5, right: 0, left: 0, bottom: 0 }}
+            barCategoryGap="15%"
+          >
+            <CartesianGrid
+              vertical={false}
+              strokeDasharray="3 3"
+              opacity={0.15}
+            />
+            <XAxis
+              dataKey="month"
+              tickLine={false}
+              tickMargin={6}
+              axisLine={false}
+              fontSize={9}
+            />
+            <ChartTooltip
+              content={
+                <ChartTooltipContent
+                  valueFormatter={(value) =>
+                    `$${(value as number).toLocaleString("en-US", { minimumFractionDigits: 0 })}`
+                  }
+                  labelFormatter={(label, payload) => {
+                    if (payload && payload.length > 0) {
+                      const data = payload[0]?.payload as ChartDataItem;
+                      const total = data?.total || 0;
+                      return `${label} — $${total.toLocaleString("en-US", { minimumFractionDigits: 0 })}`;
+                    }
+                    return label;
+                  }}
+                />
+              }
+            />
+            <Bar
+              dataKey="billed"
+              stackId="a"
+              fill="var(--color-billed)"
+              radius={0}
+            />
+          </BarChart>
+        </ChartContainer>
+      </div>
+    </div>
+  );
+};
+
 const AdminProjections = () => {
   const jawn = useJawnClient();
   const [refreshCounter, setRefreshCounter] = useState(0);
@@ -287,6 +450,10 @@ const AdminProjections = () => {
     upcomingInvoices: MOCK_UPCOMING_INVOICES,
   });
   const [error, setError] = useState<string | null>(null);
+
+  // Deposit data state
+  const [depositData, setDepositData] = useState<DepositDataPoint[]>([]);
+  const [depositLoading, setDepositLoading] = useState(true);
 
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [selectedMonths, setSelectedMonths] = useState<Record<string, string>>({});
@@ -418,6 +585,58 @@ const AdminProjections = () => {
     fetchSubscriptionData();
   }, [refreshCounter]);
 
+  // Fetch deposit data (max 90 days per request, so we make multiple requests)
+  useEffect(() => {
+    const fetchDepositData = async () => {
+      setDepositLoading(true);
+      try {
+        const allDeposits: DepositDataPoint[] = [];
+        const now = new Date();
+
+        // Make 3 requests of 60 days each to cover ~6 months
+        for (let i = 0; i < 3; i++) {
+          const endDate = new Date(now);
+          endDate.setDate(endDate.getDate() - (i * 60));
+          const startDate = new Date(endDate);
+          startDate.setDate(startDate.getDate() - 60);
+
+          console.log(`[Deposits] Fetching chunk ${i + 1}/3:`, {
+            startDate: startDate.toISOString(),
+            endDate: endDate.toISOString(),
+          });
+
+          const response = await jawn.POST("/v1/admin/wallet/analytics/time-series", {
+            params: {
+              query: {
+                startDate: startDate.toISOString(),
+                endDate: endDate.toISOString(),
+                groupBy: "day",
+              },
+            },
+          });
+
+          console.log(`[Deposits] Response for chunk ${i + 1}:`, response);
+
+          const data = (response as any)?.data?.data || (response as any)?.data;
+          if (data?.deposits) {
+            allDeposits.push(...data.deposits);
+          }
+        }
+
+        console.log("[Deposits] Total deposits fetched:", allDeposits.length);
+        setDepositData(allDeposits);
+      } catch (err) {
+        console.error("[Deposits] Error fetching deposit data:", err);
+        logger.error({ error: err }, "Error fetching deposit data");
+        setDepositData([]);
+      } finally {
+        setDepositLoading(false);
+      }
+    };
+
+    fetchDepositData();
+  }, [refreshCounter]);
+
   const revenueCalculator = useMemo(() => {
     return new RevenueCalculator(rawData);
   }, [rawData]);
@@ -530,6 +749,15 @@ const AdminProjections = () => {
                       />
                     </div>
                   ))}
+                {/* Deposits Chart */}
+                <div
+                  className={cn(
+                    "border-border",
+                    "border-t md:border-t",
+                  )}
+                >
+                  <DepositChartCell deposits={depositData} isLoading={depositLoading} />
+                </div>
               </div>
             </div>
 
