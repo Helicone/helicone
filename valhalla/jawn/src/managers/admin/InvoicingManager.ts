@@ -173,16 +173,8 @@ export class InvoicingManager {
       });
 
       // 5. Create the invoice (in draft mode)
-      const periodStart = startDate.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
-      const periodEnd = endDate.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
+      const periodStart = startDate.toISOString().split("T")[0];
+      const periodEnd = endDate.toISOString().split("T")[0];
 
       const invoice = await stripe.invoices.create({
         customer: stripeCustomerId,

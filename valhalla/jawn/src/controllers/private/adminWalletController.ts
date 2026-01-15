@@ -30,6 +30,19 @@ import {
   CreateInvoiceResponse,
 } from "../../managers/admin/InvoicingManager";
 
+// Date normalization helpers for invoice date boundaries
+const normalizeToStartOfDay = (dateStr: string): Date => {
+  const date = new Date(dateStr);
+  date.setUTCHours(0, 0, 0, 0);
+  return date;
+};
+
+const normalizeToEndOfDay = (dateStr: string): Date => {
+  const date = new Date(dateStr);
+  date.setUTCHours(23, 59, 59, 999);
+  return date;
+};
+
 interface DashboardData {
   organizations: Array<{
     orgId: string;
@@ -566,8 +579,8 @@ export class AdminWalletController extends Controller {
   ): Promise<Result<ModelSpend[], string>> {
     await authCheckThrow(request.authParams.userId);
 
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    const start = normalizeToStartOfDay(startDate);
+    const end = normalizeToEndOfDay(endDate);
 
     if (isNaN(start.getTime()) || isNaN(end.getTime())) {
       return err("Invalid date format");
@@ -668,8 +681,8 @@ export class AdminWalletController extends Controller {
   ): Promise<Result<CreateInvoiceResponse, string>> {
     await authCheckThrow(request.authParams.userId);
 
-    const start = new Date(body.startDate);
-    const end = new Date(body.endDate);
+    const start = normalizeToStartOfDay(body.startDate);
+    const end = normalizeToEndOfDay(body.endDate);
 
     if (isNaN(start.getTime()) || isNaN(end.getTime())) {
       return err("Invalid date format");

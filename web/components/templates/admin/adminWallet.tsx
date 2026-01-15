@@ -133,6 +133,14 @@ export default function AdminWallet() {
   const [invoiceSuccess, setInvoiceSuccess] = useState<string | null>(null);
   const [createInvoiceDialogOpen, setCreateInvoiceDialogOpen] = useState(false);
 
+  // UTC date helpers for invoice dates
+  const toStartOfDayUTC = (dateStr: string): string => {
+    return `${dateStr}T00:00:00.000Z`;
+  };
+  const toEndOfDayUTC = (dateStr: string): string => {
+    return `${dateStr}T23:59:59.999Z`;
+  };
+
   // Hosted URL editing state - tracks pending edits before save
   const [editingHostedUrl, setEditingHostedUrl] = useState<{
     invoiceId: string;
@@ -293,8 +301,8 @@ export default function AdminWallet() {
       params: {
         path: { orgId: selectedOrg || "" },
         query: {
-          startDate: invoiceStartDate,
-          endDate: invoiceEndDate,
+          startDate: invoiceStartDate ? toStartOfDayUTC(invoiceStartDate) : "",
+          endDate: invoiceEndDate ? toEndOfDayUTC(invoiceEndDate) : "",
         },
       },
     },
@@ -628,8 +636,8 @@ export default function AdminWallet() {
           path: { orgId: selectedOrg },
         },
         body: {
-          startDate: invoiceStartDate,
-          endDate: invoiceEndDate,
+          startDate: toStartOfDayUTC(invoiceStartDate),
+          endDate: toEndOfDayUTC(invoiceEndDate),
           daysUntilDue: 30,
         },
       });
@@ -1480,9 +1488,9 @@ export default function AdminWallet() {
                                                   Last Invoice Through
                                                 </Small>
                                                 <span className="font-medium">
-                                                  {new Date(
-                                                    invoiceSummary.lastInvoiceEndDate,
-                                                  ).toLocaleDateString()}
+                                                  {invoiceSummary.lastInvoiceEndDate.split(
+                                                    "T",
+                                                  )[0]}
                                                 </span>
                                               </div>
                                             )}
@@ -1495,29 +1503,39 @@ export default function AdminWallet() {
                                             Create New Invoice
                                           </Small>
                                           <div className="flex items-center gap-2">
-                                            <Input
-                                              type="date"
-                                              value={invoiceStartDate}
-                                              onChange={(e) =>
-                                                setInvoiceStartDate(
-                                                  e.target.value,
-                                                )
-                                              }
-                                              className="h-8 w-40"
-                                            />
+                                            <div className="flex flex-col">
+                                              <Input
+                                                type="date"
+                                                value={invoiceStartDate}
+                                                onChange={(e) =>
+                                                  setInvoiceStartDate(
+                                                    e.target.value,
+                                                  )
+                                                }
+                                                className="h-8 w-40"
+                                              />
+                                              <span className="text-xs text-muted-foreground">
+                                                00:00:00 UTC
+                                              </span>
+                                            </div>
                                             <span className="text-muted-foreground">
                                               to
                                             </span>
-                                            <Input
-                                              type="date"
-                                              value={invoiceEndDate}
-                                              onChange={(e) =>
-                                                setInvoiceEndDate(
-                                                  e.target.value,
-                                                )
-                                              }
-                                              className="h-8 w-40"
-                                            />
+                                            <div className="flex flex-col">
+                                              <Input
+                                                type="date"
+                                                value={invoiceEndDate}
+                                                onChange={(e) =>
+                                                  setInvoiceEndDate(
+                                                    e.target.value,
+                                                  )
+                                                }
+                                                className="h-8 w-40"
+                                              />
+                                              <span className="text-xs text-muted-foreground">
+                                                23:59:59 UTC
+                                              </span>
+                                            </div>
                                             <Button
                                               size="sm"
                                               variant="outline"
@@ -1758,13 +1776,13 @@ export default function AdminWallet() {
                                                         className="border-t"
                                                       >
                                                         <td className="p-2">
-                                                          {new Date(
-                                                            inv.startDate,
-                                                          ).toLocaleDateString()}{" "}
+                                                          {inv.startDate
+                                                            .replace("T", " ")
+                                                            .slice(0, 16)}{" "}
                                                           -{" "}
-                                                          {new Date(
-                                                            inv.endDate,
-                                                          ).toLocaleDateString()}
+                                                          {inv.endDate
+                                                            .replace("T", " ")
+                                                            .slice(0, 16)}
                                                         </td>
                                                         <td className="font-mono p-2 text-right">
                                                           {formatCurrency(
@@ -1880,9 +1898,9 @@ export default function AdminWallet() {
                                                           )}
                                                         </td>
                                                         <td className="p-2 text-muted-foreground">
-                                                          {new Date(
-                                                            inv.createdAt,
-                                                          ).toLocaleDateString()}
+                                                          {inv.createdAt.split(
+                                                            "T",
+                                                          )[0]}
                                                         </td>
                                                         <td className="p-2">
                                                           <Button
@@ -2379,11 +2397,9 @@ export default function AdminWallet() {
               <br />
               <br />
               <strong>Period:</strong>{" "}
-              {invoiceToDelete &&
-                new Date(invoiceToDelete.startDate).toLocaleDateString()}{" "}
+              {invoiceToDelete && invoiceToDelete.startDate.split("T")[0]}{" "}
               -{" "}
-              {invoiceToDelete &&
-                new Date(invoiceToDelete.endDate).toLocaleDateString()}
+              {invoiceToDelete && invoiceToDelete.endDate.split("T")[0]}
               <br />
               <strong>Amount:</strong>{" "}
               {invoiceToDelete &&
@@ -2418,11 +2434,8 @@ export default function AdminWallet() {
               This will create a draft invoice in Stripe for:
               <br />
               <br />
-              <strong>Period:</strong>{" "}
-              {invoiceStartDate &&
-                new Date(invoiceStartDate).toLocaleDateString()}{" "}
-              -{" "}
-              {invoiceEndDate && new Date(invoiceEndDate).toLocaleDateString()}
+              <strong>Period:</strong> {invoiceStartDate} -{" "}
+              {invoiceEndDate}
               <br />
               <strong>Amount:</strong>{" "}
               {formatCurrency(
