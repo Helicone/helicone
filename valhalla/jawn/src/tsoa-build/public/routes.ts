@@ -4775,6 +4775,7 @@ const models: TsoaRoute.Models = {
             "startDate": {"dataType":"string","required":true},
             "endDate": {"dataType":"string","required":true},
             "amountCents": {"dataType":"double","required":true},
+            "subtotalCents": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
             "notes": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},
             "createdAt": {"dataType":"string","required":true},
         },

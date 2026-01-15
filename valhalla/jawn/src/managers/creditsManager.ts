@@ -29,6 +29,7 @@ export interface PTBInvoice {
   startDate: string;
   endDate: string;
   amountCents: number;
+  subtotalCents: number | null; // Pre-discount amount for wallet crediting (null for old invoices)
   notes: string | null;
   createdAt: string;
 }
@@ -311,7 +312,8 @@ export class CreditsManager extends BaseManager {
    */
   public async listInvoices(): Promise<Result<PTBInvoice[], string>> {
     try {
-      const result = await dbExecute<{
+      // Try query with subtotal_cents column first
+      let result = await dbExecute<{
         id: string;
         organization_id: string;
         stripe_invoice_id: string | null;
@@ -319,16 +321,58 @@ export class CreditsManager extends BaseManager {
         start_date: string;
         end_date: string;
         amount_cents: string;
+        subtotal_cents: string | null;
         notes: string | null;
         created_at: string;
       }>(
         `SELECT id, organization_id, stripe_invoice_id, hosted_invoice_url,
-                start_date, end_date, amount_cents, notes, created_at
+                start_date, end_date, amount_cents, subtotal_cents, notes, created_at
          FROM ptb_invoices
          WHERE organization_id = $1
          ORDER BY created_at DESC`,
         [this.authParams.organizationId]
       );
+
+      // If subtotal_cents column doesn't exist yet, fall back to query without it
+      if (result.error && JSON.stringify(result.error).includes("42703")) {
+        const fallbackResult = await dbExecute<{
+          id: string;
+          organization_id: string;
+          stripe_invoice_id: string | null;
+          hosted_invoice_url: string | null;
+          start_date: string;
+          end_date: string;
+          amount_cents: string;
+          notes: string | null;
+          created_at: string;
+        }>(
+          `SELECT id, organization_id, stripe_invoice_id, hosted_invoice_url,
+                  start_date, end_date, amount_cents, notes, created_at
+           FROM ptb_invoices
+           WHERE organization_id = $1
+           ORDER BY created_at DESC`,
+          [this.authParams.organizationId]
+        );
+
+        if (fallbackResult.error) {
+          return err(`Error listing invoices: ${fallbackResult.error}`);
+        }
+
+        const invoices: PTBInvoice[] = (fallbackResult.data || []).map((row) => ({
+          id: row.id,
+          organizationId: row.organization_id,
+          stripeInvoiceId: row.stripe_invoice_id,
+          hostedInvoiceUrl: row.hosted_invoice_url,
+          startDate: row.start_date,
+          endDate: row.end_date,
+          amountCents: parseInt(row.amount_cents, 10),
+          subtotalCents: null, // Column doesn't exist yet
+          notes: row.notes,
+          createdAt: row.created_at,
+        }));
+
+        return ok(invoices);
+      }
 
       if (result.error) {
         return err(`Error listing invoices: ${result.error}`);
@@ -342,6 +386,7 @@ export class CreditsManager extends BaseManager {
         startDate: row.start_date,
         endDate: row.end_date,
         amountCents: parseInt(row.amount_cents, 10),
+        subtotalCents: row.subtotal_cents ? parseInt(row.subtotal_cents, 10) : null,
         notes: row.notes,
         createdAt: row.created_at,
       }));

@@ -4734,6 +4734,8 @@ Json: JsonObject;
       endDate: string;
       /** Format: double */
       amountCents: number;
+      /** Format: double */
+      subtotalCents: number | null;
       notes: string | null;
       createdAt: string;
     };

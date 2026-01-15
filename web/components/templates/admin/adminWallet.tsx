@@ -1686,7 +1686,28 @@ export default function AdminWallet() {
                                                       colSpan={11}
                                                       className="p-2 text-right"
                                                     >
-                                                      Total:
+                                                      Subtotal (for wallet
+                                                      credit):
+                                                    </td>
+                                                    <td className="font-mono p-2 text-right">
+                                                      {formatCurrency(
+                                                        spendBreakdown.reduce(
+                                                          (
+                                                            sum: number,
+                                                            item: any,
+                                                          ) =>
+                                                            sum + item.subtotal,
+                                                          0,
+                                                        ),
+                                                      )}
+                                                    </td>
+                                                  </tr>
+                                                  <tr className="bg-muted/50 font-medium">
+                                                    <td
+                                                      colSpan={11}
+                                                      className="p-2 text-right"
+                                                    >
+                                                      Total (invoice amount):
                                                     </td>
                                                     <td className="font-mono p-2 text-right">
                                                       {formatCurrency(
@@ -1757,7 +1778,10 @@ export default function AdminWallet() {
                                                       Period
                                                     </th>
                                                     <th className="p-2 text-right">
-                                                      Amount
+                                                      Subtotal
+                                                    </th>
+                                                    <th className="p-2 text-right">
+                                                      Total
                                                     </th>
                                                     <th className="p-2 text-left">
                                                       Hosted URL
@@ -1783,6 +1807,15 @@ export default function AdminWallet() {
                                                           {inv.endDate
                                                             .replace("T", " ")
                                                             .slice(0, 16)}
+                                                        </td>
+                                                        <td className="font-mono p-2 text-right text-muted-foreground">
+                                                          {inv.subtotalCents !=
+                                                          null
+                                                            ? formatCurrency(
+                                                                inv.subtotalCents /
+                                                                  100,
+                                                              )
+                                                            : "-"}
                                                         </td>
                                                         <td className="font-mono p-2 text-right">
                                                           {formatCurrency(
@@ -2437,7 +2470,15 @@ export default function AdminWallet() {
               <strong>Period:</strong> {invoiceStartDate} -{" "}
               {invoiceEndDate}
               <br />
-              <strong>Amount:</strong>{" "}
+              <strong>Subtotal (credit to wallet):</strong>{" "}
+              {formatCurrency(
+                spendBreakdown.reduce(
+                  (sum: number, item: any) => sum + item.subtotal,
+                  0,
+                ),
+              )}
+              <br />
+              <strong>Total (invoice amount):</strong>{" "}
               {formatCurrency(
                 spendBreakdown.reduce(
                   (sum: number, item: any) => sum + item.total,

@@ -49208,6 +49208,11 @@
 						"type": "number",
 						"format": "double"
 					},
+					"subtotalCents": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
 					"notes": {
 						"type": "string",
 						"nullable": true
@@ -49224,6 +49229,7 @@
 					"startDate",
 					"endDate",
 					"amountCents",
+					"subtotalCents",
 					"notes",
 					"createdAt"
 				],
@@ -49919,6 +49925,10 @@
 						"type": "number",
 						"format": "double"
 					},
+					"subtotalCents": {
+						"type": "number",
+						"format": "double"
+					},
 					"ptbInvoiceId": {
 						"type": "string"
 					}
@@ -49928,6 +49938,7 @@
 					"hostedInvoiceUrl",
 					"dashboardUrl",
 					"amountCents",
+					"subtotalCents",
 					"ptbInvoiceId"
 				],
 				"type": "object",
