@@ -77,17 +77,16 @@ export type ExecuteSqlResponse = {
   rowCount: number;
 };
 
+// Type that matches what TracedController expects
+type TracedControllerError = { statusCode?: number; code?: string; message: string; details?: string };
+
 // Helper function to convert HqlError to string for API responses
-function formatHqlError(error: HqlError | string | undefined): string {
-  // Handle string errors (raw error messages)
-  if (typeof error === 'string') {
-    return error;
-  }
+function formatHqlError(error: TracedControllerError): string {
   // Handle undefined/null errors
   if (!error) {
     return 'An unexpected error occurred';
   }
-  // Handle HqlError objects
+  // Handle error objects
   const codePrefix = error.code ? `[${error.code}] ` : '';
   const message = error.details ? `${error.message}: ${error.details}` : error.message;
   return `${codePrefix}${message}`;
