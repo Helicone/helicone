@@ -512,9 +512,12 @@ const AdminHelixThreads = () => {
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-muted-foreground">Org:</span>
-                          <span className="font-mono text-xs">
+                          <a
+                            href={`/admin/org-search?orgId=${selectedThread.data.data.org_id}`}
+                            className="font-mono text-xs text-primary hover:underline"
+                          >
                             {selectedThread.data.data.org_id}
-                          </span>
+                          </a>
                         </div>
                       </div>
                     </div>
