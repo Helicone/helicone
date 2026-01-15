@@ -176,9 +176,7 @@ export async function proxyForwarder(
             },
           });
 
-          responseBuilder.addTokenBucketRateLimitHeaders(
-            bucketResult.headers
-          );
+          responseBuilder.addTokenBucketRateLimitHeaders(bucketResult.headers);
 
           if (!bucketResult.allowed) {
             rateLimited = true;

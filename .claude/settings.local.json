@@ -104,7 +104,10 @@
       "WebFetch(domain:docs.stripe.com)",
       "Bash(npx tsoa:*)",
       "Bash(python3:*)",
-      "Bash(git mv:*)"
+      "Bash(git mv:*)",
+      "Bash(npm run test:rate-limit:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npm test:*)"
     ],
     "deny": []
   },

@@ -13,11 +13,23 @@
  * - w: Time window in seconds (min 60)
  * - u: Unit type - "request" (default) or "cents"
  * - s: Segment - "user" or custom property name (default: global)
+ *
+ * Note on AI Gateway:
+ * These tests use the legacy OpenAI proxy endpoint (OPENAI_PROXY_URL), but the
+ * rate limiting logic is validated for BOTH legacy proxy AND AI Gateway since
+ * they share the same code path:
+ *   - Legacy Proxy: Request → proxyForwarder → BucketRateLimiterDO
+ *   - AI Gateway:   Request → SimpleAIGateway → gatewayForwarder → proxyForwarder → BucketRateLimiterDO
+ *
+ * The bucket rate limiter (checkBucketRateLimit/recordBucketUsage) is called in
+ * proxyForwarder.ts, which is used by both flows. Testing against the legacy proxy
+ * effectively tests the rate limiting implementation for all request paths.
  */
 
 import axios, { AxiosInstance, AxiosResponse } from "axios";
 import {
   OPENAI_PROXY_URL,
+  AI_GATEWAY_URL,
   TEST_ORG_API_KEY,
   TEST_MESSAGES,
   MOCK_OPENAI_RESPONSE,
@@ -452,6 +464,80 @@ describe("Token Bucket Rate Limiter E2E", () => {
         const resetSeconds = parseInt(result.reset);
         expect(resetSeconds).toBeGreaterThan(0);
         expect(resetSeconds).toBeLessThanOrEqual(120);
+      }
+    });
+  });
+
+  describe("AI Gateway Integration", () => {
+    /**
+     * Note: Direct rate limiting tests for AI Gateway are not included because
+     * AI Gateway requires either:
+     * 1. BYOK (Bring Your Own Key): Provider keys stored in the database
+     * 2. PTB (Pay By Token): Wallet credits for the organization
+     *
+     * However, the rate limiting logic is the same for both paths since
+     * AI Gateway goes through: gatewayForwarder → proxyForwarder
+     * The tests above validate this shared code path through the legacy proxy.
+     */
+
+    it("should verify AI Gateway endpoint is accessible", async () => {
+      const response = await axios.get(`${AI_GATEWAY_URL}/healthcheck`, {
+        validateStatus: () => true,
+      });
+
+      expect(response.status).toBe(200);
+    });
+
+    it("should return 401 for unauthenticated AI Gateway requests", async () => {
+      // AI Gateway requires authentication for actual requests
+      const response = await axios.post(
+        `${AI_GATEWAY_URL}/v1/chat/completions`,
+        {
+          model: "gpt-4",
+          messages: [{ role: "user", content: "test" }],
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            // No Authorization header - should fail auth
+          },
+          validateStatus: () => true,
+        }
+      );
+
+      // Should return 401 Unauthorized without valid Helicone API key
+      expect(response.status).toBe(401);
+    });
+
+    it("should authenticate with valid Helicone API key", async () => {
+      // AI Gateway authenticates the Helicone key but may fail on provider selection
+      // (since we don't have BYOK keys or wallet credits configured)
+      const response = await axios.post(
+        `${AI_GATEWAY_URL}/v1/chat/completions`,
+        {
+          model: "gpt-4",
+          messages: [{ role: "user", content: "test" }],
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${TEST_ORG_API_KEY}`,
+          },
+          validateStatus: () => true,
+        }
+      );
+
+      // Should pass auth (not 401) but may fail on provider selection
+      // (since we don't have BYOK keys or wallet credits configured)
+      expect(response.status).not.toBe(401);
+      // 400 = No available providers (body error)
+      // 429 = Insufficient credits (no wallet balance)
+      // 500 = No available providers (server error response)
+      expect([400, 429, 500]).toContain(response.status);
+
+      // Verify it's a provider error, not an auth error
+      if (response.data?.error) {
+        expect(response.data.error.message).toContain("provider");
       }
     });
   });
