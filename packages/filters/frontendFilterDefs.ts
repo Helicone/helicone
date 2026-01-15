@@ -291,6 +291,7 @@ export const REQUEST_TABLE_FILTERS: [
   SingleFilterDef<"request_response_rmt">,
   SingleFilterDef<"request_response_rmt">,
   SingleFilterDef<"request_response_rmt">,
+  SingleFilterDef<"request_response_rmt">,
   SingleFilterDef<"request_response_rmt">
 ] = [
   {
@@ -347,6 +348,13 @@ export const REQUEST_TABLE_FILTERS: [
     operators: textOperators,
     table: "request_response_rmt",
     column: "model",
+    category: "request",
+  },
+  {
+    label: "Provider",
+    operators: textOperators,
+    table: "request_response_rmt",
+    column: "provider",
     category: "request",
   },
   {

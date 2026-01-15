@@ -1254,6 +1254,47 @@
 					}
 				]
 			},
+			"ResultSuccess__model-string_-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"properties": {
+								"model": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"model"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__model-string_-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__model-string_-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"ResultSuccess_Database-at-public_91_Tables_93_-at-organization_91_Row_93__": {
 				"properties": {
 					"data": {
@@ -2176,47 +2217,6 @@
 			},
 			"OnboardingStatus": {
 				"$ref": "#/components/schemas/Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--hasCompletedQuickstart-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___"
-			},
-			"ResultSuccess__model-string_-Array_": {
-				"properties": {
-					"data": {
-						"items": {
-							"properties": {
-								"model": {
-									"type": "string"
-								}
-							},
-							"required": [
-								"model"
-							],
-							"type": "object"
-						},
-						"type": "array"
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result__model-string_-Array.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess__model-string_-Array_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
-					}
-				]
 			},
 			"EvaluatorResult": {
 				"properties": {
@@ -3545,8 +3545,11 @@
 					"commit_message": {
 						"type": "string"
 					},
-					"environment": {
-						"type": "string"
+					"environments": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
 					},
 					"created_at": {
 						"type": "string"
@@ -3869,15 +3872,6 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
-			"Partial_VectorOperators_": {
-				"properties": {
-					"contains": {
-						"type": "string"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
 			"Partial_RequestResponseRMTToOperators_": {
 				"properties": {
 					"country_code": {
@@ -3979,10 +3973,10 @@
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
 					"request_body": {
-						"$ref": "#/components/schemas/Partial_VectorOperators_"
+						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
 					"response_body": {
-						"$ref": "#/components/schemas/Partial_VectorOperators_"
+						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
 					"cache_enabled": {
 						"$ref": "#/components/schemas/Partial_BooleanOperators_"
@@ -48387,6 +48381,195 @@
 				],
 				"type": "object"
 			},
+			"HelixThreadSummary": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"user_id": {
+						"type": "string"
+					},
+					"org_id": {
+						"type": "string"
+					},
+					"created_at": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"updated_at": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"escalated": {
+						"type": "boolean"
+					},
+					"message_count": {
+						"type": "number",
+						"format": "double"
+					},
+					"first_message": {
+						"type": "string",
+						"nullable": true
+					},
+					"last_message": {
+						"type": "string",
+						"nullable": true
+					},
+					"user_email": {
+						"type": "string",
+						"nullable": true
+					},
+					"org_name": {
+						"type": "string",
+						"nullable": true
+					},
+					"org_tier": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"id",
+					"user_id",
+					"org_id",
+					"created_at",
+					"updated_at",
+					"escalated",
+					"message_count",
+					"first_message",
+					"last_message",
+					"user_email",
+					"org_name",
+					"org_tier"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"HelixThreadListResponse": {
+				"properties": {
+					"threads": {
+						"items": {
+							"$ref": "#/components/schemas/HelixThreadSummary"
+						},
+						"type": "array"
+					},
+					"total": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"threads",
+					"total"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_HelixThreadListResponse_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/HelixThreadListResponse"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_HelixThreadListResponse.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_HelixThreadListResponse_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"HelixThreadDetail": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"chat": {},
+					"user_id": {
+						"type": "string"
+					},
+					"org_id": {
+						"type": "string"
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"escalated": {
+						"type": "boolean"
+					},
+					"metadata": {},
+					"updated_at": {
+						"type": "string"
+					},
+					"soft_delete": {
+						"type": "boolean"
+					},
+					"user_email": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"id",
+					"chat",
+					"user_id",
+					"org_id",
+					"created_at",
+					"escalated",
+					"metadata",
+					"updated_at",
+					"soft_delete",
+					"user_email"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_HelixThreadDetail_": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/HelixThreadDetail"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_HelixThreadDetail.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_HelixThreadDetail_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"InAppThread": {
 				"properties": {
 					"id": {
@@ -48509,6 +48692,349 @@
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ResultSuccess__rows-Record_string.any_-Array--elapsedMilliseconds-number--size-number--rowCount-number__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__previousTier-string--newTier-string--subscriptionId-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"subscriptionId": {
+								"type": "string"
+							},
+							"newTier": {
+								"type": "string"
+							},
+							"previousTier": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"subscriptionId",
+							"newTier",
+							"previousTier"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__previousTier-string--newTier-string--subscriptionId-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__previousTier-string--newTier-string--subscriptionId-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__previousTier-string--newTier-string--subscriptionId-string--usage_58__requests-number--storageBytes-number--storageMb-number--source-clickhouse-or-override_--backfillResult_58__requestsEvent-string--storageEvent-string___": {
+				"properties": {
+					"data": {
+						"properties": {
+							"backfillResult": {
+								"properties": {
+									"storageEvent": {
+										"type": "string"
+									},
+									"requestsEvent": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"storageEvent",
+									"requestsEvent"
+								],
+								"type": "object"
+							},
+							"usage": {
+								"properties": {
+									"source": {
+										"type": "string",
+										"enum": [
+											"clickhouse",
+											"override"
+										]
+									},
+									"storageMb": {
+										"type": "number",
+										"format": "double"
+									},
+									"storageBytes": {
+										"type": "number",
+										"format": "double"
+									},
+									"requests": {
+										"type": "number",
+										"format": "double"
+									}
+								},
+								"required": [
+									"source",
+									"storageMb",
+									"storageBytes",
+									"requests"
+								],
+								"type": "object"
+							},
+							"subscriptionId": {
+								"type": "string"
+							},
+							"newTier": {
+								"type": "string"
+							},
+							"previousTier": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"backfillResult",
+							"usage",
+							"subscriptionId",
+							"newTier",
+							"previousTier"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__previousTier-string--newTier-string--subscriptionId-string--usage_58__requests-number--storageBytes-number--storageMb-number--source-clickhouse-or-override_--backfillResult_58__requestsEvent-string--storageEvent-string__.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__previousTier-string--newTier-string--subscriptionId-string--usage_58__requests-number--storageBytes-number--storageMb-number--source-clickhouse-or-override_--backfillResult_58__requestsEvent-string--storageEvent-string___"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__previousTier-string--newTier-string--subscriptionId-string--scheduleId-string--scheduledFor-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"scheduledFor": {
+								"type": "string"
+							},
+							"scheduleId": {
+								"type": "string"
+							},
+							"subscriptionId": {
+								"type": "string"
+							},
+							"newTier": {
+								"type": "string"
+							},
+							"previousTier": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"scheduledFor",
+							"scheduleId",
+							"subscriptionId",
+							"newTier",
+							"previousTier"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__previousTier-string--newTier-string--subscriptionId-string--scheduleId-string--scheduledFor-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__previousTier-string--newTier-string--subscriptionId-string--scheduleId-string--scheduledFor-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__id-string--name-string--tier-string--stripe_customer_id-string-or-null--stripe_subscription_id-string-or-null--subscription_status-string-or-null--owner_email-string-or-null--created_at-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"created_at": {
+								"type": "string"
+							},
+							"owner_email": {
+								"type": "string",
+								"nullable": true
+							},
+							"subscription_status": {
+								"type": "string",
+								"nullable": true
+							},
+							"stripe_subscription_id": {
+								"type": "string",
+								"nullable": true
+							},
+							"stripe_customer_id": {
+								"type": "string",
+								"nullable": true
+							},
+							"tier": {
+								"type": "string"
+							},
+							"name": {
+								"type": "string"
+							},
+							"id": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"created_at",
+							"owner_email",
+							"subscription_status",
+							"stripe_subscription_id",
+							"stripe_customer_id",
+							"tier",
+							"name",
+							"id"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__id-string--name-string--tier-string--stripe_customer_id-string-or-null--stripe_subscription_id-string-or-null--subscription_status-string-or-null--owner_email-string-or-null--created_at-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__id-string--name-string--tier-string--stripe_customer_id-string-or-null--stripe_subscription_id-string-or-null--subscription_status-string-or-null--owner_email-string-or-null--created_at-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__message-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"message": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"message"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__message-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__message-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__message-string--previousTier-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"previousTier": {
+								"type": "string"
+							},
+							"message": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"previousTier",
+							"message"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__message-string--previousTier-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__message-string--previousTier-string__"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -48862,6 +49388,11 @@
 						"type": "number",
 						"format": "double"
 					},
+					"subtotalCents": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
 					"notes": {
 						"type": "string",
 						"nullable": true
@@ -48878,6 +49409,7 @@
 					"startDate",
 					"endDate",
 					"amountCents",
+					"subtotalCents",
 					"notes",
 					"createdAt"
 				],
@@ -49573,6 +50105,10 @@
 						"type": "number",
 						"format": "double"
 					},
+					"subtotalCents": {
+						"type": "number",
+						"format": "double"
+					},
 					"ptbInvoiceId": {
 						"type": "string"
 					}
@@ -49582,6 +50118,7 @@
 					"hostedInvoiceUrl",
 					"dashboardUrl",
 					"amountCents",
+					"subtotalCents",
 					"ptbInvoiceId"
 				],
 				"type": "object",
@@ -51731,6 +52268,32 @@
 				"parameters": []
 			}
 		},
+		"/v1/organization/models": {
+			"get": {
+				"operationId": "GetModels",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__model-string_-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Organization"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
 		"/v1/organization/{organizationId}": {
 			"get": {
 				"operationId": "GetOrganization",
@@ -52490,32 +53053,6 @@
 						}
 					}
 				}
-			}
-		},
-		"/v1/organization/models": {
-			"get": {
-				"operationId": "GetModels",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Result__model-string_-Array.string_"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Organization"
-				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
-				"parameters": []
 			}
 		},
 		"/v1/evaluator": {
@@ -53487,6 +54024,58 @@
 		"/v1/prompt-2025/update/environment": {
 			"post": {
 				"operationId": "SetPromptVersionEnvironment",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"environment": {
+										"type": "string"
+									},
+									"promptVersionId": {
+										"type": "string"
+									},
+									"promptId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"environment",
+									"promptVersionId",
+									"promptId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt-2025/remove/environment": {
+			"post": {
+				"operationId": "RemoveEnvironmentFromVersion",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -59722,9 +60311,117 @@
 				}
 			}
 		},
+		"/v1/admin/helix-threads": {
+			"get": {
+				"operationId": "ListHelixThreads",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_HelixThreadListResponse.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "offset",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "status",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"all",
+								"escalated",
+								"resolved"
+							]
+						}
+					},
+					{
+						"in": "query",
+						"name": "tier",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"all",
+								"free",
+								"pro",
+								"growth",
+								"enterprise"
+							]
+						}
+					}
+				]
+			}
+		},
 		"/v1/admin/helix-thread/{sessionId}": {
 			"get": {
 				"operationId": "GetHelixThread",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_HelixThreadDetail.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "sessionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/helix-thread/{sessionId}/reply": {
+			"post": {
+				"operationId": "ReplyToHelixThread",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -59754,7 +60451,84 @@
 							"type": "string"
 						}
 					}
-				]
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"name": {
+										"type": "string"
+									},
+									"message": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"message"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/helix-thread/{sessionId}/resolve": {
+			"post": {
+				"operationId": "ResolveHelixThread",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_InAppThread.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "sessionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"adminEmail": {
+										"type": "string"
+									},
+									"resolved": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"resolved"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/admin/hql-enriched": {
@@ -59965,6 +60739,537 @@
 					{
 						"in": "path",
 						"name": "queryId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/pricing-migration/pending": {
+			"post": {
+				"operationId": "GetPendingMigrations",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"hasMore": {
+											"type": "boolean"
+										},
+										"summary": {
+											"properties": {
+												"byTier": {
+													"$ref": "#/components/schemas/Record_string.number_"
+												},
+												"total": {
+													"type": "number",
+													"format": "double"
+												}
+											},
+											"required": [
+												"byTier",
+												"total"
+											],
+											"type": "object"
+										},
+										"organizations": {
+											"items": {
+												"properties": {
+													"member_count": {
+														"type": "number",
+														"format": "double"
+													},
+													"created_at": {
+														"type": "string"
+													},
+													"stripe_status": {
+														"type": "string",
+														"nullable": true
+													},
+													"subscription_status": {
+														"type": "string",
+														"nullable": true
+													},
+													"stripe_subscription_id": {
+														"type": "string",
+														"nullable": true
+													},
+													"stripe_customer_id": {
+														"type": "string",
+														"nullable": true
+													},
+													"owner_email": {
+														"type": "string",
+														"nullable": true
+													},
+													"tier": {
+														"type": "string"
+													},
+													"name": {
+														"type": "string"
+													},
+													"id": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"member_count",
+													"created_at",
+													"stripe_status",
+													"subscription_status",
+													"stripe_subscription_id",
+													"stripe_customer_id",
+													"owner_email",
+													"tier",
+													"name",
+													"id"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"hasMore",
+										"summary",
+										"organizations"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get all organizations that need to be migrated to new pricing\nSupports pagination, search, and tier filtering",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"tierFilter": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
+									"search": {
+										"type": "string"
+									},
+									"offset": {
+										"type": "number",
+										"format": "double"
+									},
+									"limit": {
+										"type": "number",
+										"format": "double"
+									}
+								},
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/pricing-migration/migrate/{orgId}": {
+			"post": {
+				"operationId": "MigrateOrganization",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__previousTier-string--newTier-string--subscriptionId-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Migrate a single organization to new pricing (legacy - use migrate-instant or migrate-scheduled instead)",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/pricing-migration/migrate-instant/{orgId}": {
+			"post": {
+				"operationId": "MigrateInstant",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__previousTier-string--newTier-string--subscriptionId-string--usage_58__requests-number--storageBytes-number--storageMb-number--source-clickhouse-or-override_--backfillResult_58__requestsEvent-string--storageEvent-string__.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Migrate instantly with usage backfill\nUpdates subscription immediately and backfills metered usage events for current billing period",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"storageBytesOverride": {
+										"type": "number",
+										"format": "double"
+									},
+									"requestsOverride": {
+										"type": "number",
+										"format": "double"
+									}
+								},
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/pricing-migration/migrate-scheduled/{orgId}": {
+			"post": {
+				"operationId": "MigrateScheduled",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__previousTier-string--newTier-string--subscriptionId-string--scheduleId-string--scheduledFor-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Schedule migration for next billing period\nUses Stripe subscription schedules to defer the pricing change",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/pricing-migration/completed": {
+			"get": {
+				"operationId": "GetCompletedMigrations",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"summary": {
+											"properties": {
+												"byTier": {
+													"$ref": "#/components/schemas/Record_string.number_"
+												},
+												"total": {
+													"type": "number",
+													"format": "double"
+												}
+											},
+											"required": [
+												"byTier",
+												"total"
+											],
+											"type": "object"
+										},
+										"organizations": {
+											"items": {
+												"properties": {
+													"subscription_status": {
+														"type": "string",
+														"nullable": true
+													},
+													"stripe_subscription_id": {
+														"type": "string",
+														"nullable": true
+													},
+													"stripe_customer_id": {
+														"type": "string",
+														"nullable": true
+													},
+													"owner_email": {
+														"type": "string",
+														"nullable": true
+													},
+													"tier": {
+														"type": "string"
+													},
+													"name": {
+														"type": "string"
+													},
+													"id": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"subscription_status",
+													"stripe_subscription_id",
+													"stripe_customer_id",
+													"owner_email",
+													"tier",
+													"name",
+													"id"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"summary",
+										"organizations"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get migration history/status",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/admin/pricing-migration/reapply/{orgId}": {
+			"post": {
+				"operationId": "ReapplyMigration",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__previousTier-string--newTier-string--subscriptionId-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Reapply migration for an already migrated organization (for fixing issues)",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/pricing-migration/org/{orgId}": {
+			"get": {
+				"operationId": "GetOrgDetails",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__id-string--name-string--tier-string--stripe_customer_id-string-or-null--stripe_subscription_id-string-or-null--subscription_status-string-or-null--owner_email-string-or-null--created_at-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get organization details for admin view",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/pricing-migration/add-usage/{orgId}": {
+			"post": {
+				"operationId": "AddMeteredUsage",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__message-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Add metered usage for an organization (for testing/fixing billing)\nUses Stripe Billing Meter events",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"timestamp": {
+										"type": "string"
+									},
+									"quantity": {
+										"type": "number",
+										"format": "double"
+									},
+									"usageType": {
+										"type": "string",
+										"enum": [
+											"requests",
+											"storage_gb"
+										]
+									}
+								},
+								"required": [
+									"quantity",
+									"usageType"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/pricing-migration/switch-to-free/{orgId}": {
+			"post": {
+				"operationId": "SwitchToFree",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__message-string--previousTier-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Switch an organization to free tier (for cancelled subscriptions)",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
 						"required": true,
 						"schema": {
 							"type": "string"

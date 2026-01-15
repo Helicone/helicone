@@ -213,6 +213,7 @@ export interface PTBInvoice {
   startDate: string;
   endDate: string;
   amountCents: number;
+  subtotalCents: number | null; // Pre-discount amount (null for old invoices)
   notes: string | null;
   createdAt: string;
 }

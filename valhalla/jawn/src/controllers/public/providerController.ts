@@ -62,11 +62,13 @@ export class ProviderController extends Controller {
       },
     });
 
+    // Use count(*) instead of count(DISTINCT request_id) for better performance
+    // Each row in request_response_rmt represents a unique request
     const result = await dbQueryClickhouse<ProviderMetric>(
       `
       SELECT
         provider,
-        count(DISTINCT request_id) as total_requests
+        count(*) as total_requests
       FROM request_response_rmt
       WHERE ${builtFilter.filter}
       GROUP BY provider

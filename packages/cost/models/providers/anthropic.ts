@@ -27,9 +27,7 @@ export class AnthropicProvider extends BaseProvider {
   authenticate(authContext: AuthContext, endpoint: Endpoint): AuthResult {
     const headers: Record<string, string> = {};
     headers["x-api-key"] = authContext.apiKey || "";
-    const enabledBetaHeaders = [
-      "context-management-2025-06-27"
-    ];
+    const enabledBetaHeaders = ["context-management-2025-06-27"];
     if (authContext.bodyMapping === "OPENAI" || !headers["anthropic-version"]) {
       headers["anthropic-version"] = "2023-06-01";
     }
@@ -52,8 +50,10 @@ export class AnthropicProvider extends BaseProvider {
     if (context.bodyMapping === "RESPONSES") {
       updatedBody = context.toChatCompletions(updatedBody);
     }
-    const anthropicBody = context.toAnthropic(updatedBody, endpoint.providerModelId);
+    const anthropicBody = context.toAnthropic(
+      updatedBody,
+      endpoint.providerModelId
+    );
     return JSON.stringify(anthropicBody);
   }
-
 }

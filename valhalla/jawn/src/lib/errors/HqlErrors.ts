@@ -138,7 +138,7 @@ export function hqlError<T>(
 }
 
 export function parseClickhouseError(error: string): HqlErrorCode {
-  if (error.includes('max_execution_time')) {
+  if (error.includes('max_execution_time') || error.includes('Timeout error')) {
     return HqlErrorCode.QUERY_TIMEOUT;
   }
   if (error.includes('max_memory_usage')) {

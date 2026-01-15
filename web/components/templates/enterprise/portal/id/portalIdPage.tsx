@@ -71,19 +71,20 @@ const PortalIdPage = (props: PortalIdPageProps) => {
     organizationId: orgId || undefined,
   });
 
-  const chartData = data?.data?.map((d: any) => {
-    if (new Date(d.time) > new Date()) {
-      return {
-        requests: null,
-        date: new Date(d.time).toLocaleDateString(),
-      };
-    } else {
-      return {
-        requests: +d.count,
-        date: new Date(d.time).toLocaleDateString(),
-      };
-    }
-  });
+  const chartData =
+    data?.data?.map((d: any) => {
+      if (new Date(d.time) > new Date()) {
+        return {
+          requests: null,
+          date: new Date(d.time).toLocaleDateString(),
+        };
+      } else {
+        return {
+          requests: +d.count,
+          date: new Date(d.time).toLocaleDateString(),
+        };
+      }
+    }) ?? [];
 
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);

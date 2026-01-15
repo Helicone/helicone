@@ -61,6 +61,7 @@ interface HeliconeAgentContextType {
   switchToSession: (sessionId: string) => void;
   deleteSession: (sessionId: string) => void;
   escalateSession: () => Promise<void>;
+  reopenSession: () => Promise<void>;
   agentChatOpen: boolean;
   setAgentChatOpen: (open: boolean) => void;
 
@@ -180,6 +181,17 @@ export const HeliconeAgentProvider: React.FC<{
         if (data.data?.id) {
           setCurrentSessionId(data.data.id);
         }
+        refetchThreads();
+        refetchThread();
+      },
+    },
+  );
+
+  const { mutateAsync: reopenThread } = $JAWN_API.useMutation(
+    "post",
+    "/v1/agent/thread/{sessionId}/reopen",
+    {
+      onSuccess: () => {
         refetchThreads();
         refetchThread();
       },
@@ -329,6 +341,22 @@ export const HeliconeAgentProvider: React.FC<{
             }
           } catch (error) {
             console.error("Escalation failed:", error);
+            throw error;
+          }
+        },
+        reopenSession: async () => {
+          try {
+            if (currentSessionId) {
+              await reopenThread({
+                params: {
+                  path: {
+                    sessionId: currentSessionId,
+                  },
+                },
+              });
+            }
+          } catch (error) {
+            console.error("Reopen failed:", error);
             throw error;
           }
         },

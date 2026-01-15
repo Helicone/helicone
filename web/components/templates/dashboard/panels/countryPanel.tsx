@@ -1,8 +1,7 @@
 import StyledAreaChart from "../styledAreaChart";
-import { useCountries } from "../../../../services/hooks/country";
+import { useCountries, CountryData } from "../../../../services/hooks/country";
 import { TimeFilter } from "@/types/timeFilter";
 import { COUTNRY_CODE_DIRECTORY } from "../../requests/countryCodeDirectory";
-import { CountryData } from "../../../../services/lib/country";
 import { FilterNode } from "@helicone-package/filters/filterDefs";
 import { useOrg } from "@/components/layout/org/organizationContext";
 import { getMockCountries } from "../mockDashboardData";

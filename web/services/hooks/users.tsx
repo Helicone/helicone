@@ -4,7 +4,7 @@ import { useFilterAST } from "@/filterAST/context/filterContext";
 import { FilterExpression } from "@helicone-package/filters/types";
 import { FilterLeaf } from "@helicone-package/filters/filterDefs";
 import { toFilterNode } from "@helicone-package/filters/toFilterNode";
-import { getJawnClient } from "@/lib/clients/jawn";
+import { getJawnClient, $JAWN_API } from "@/lib/clients/jawn";
 import { TimeFilter } from "@/types/timeFilter";
 
 const useUserId = (userId: string) => {
@@ -22,16 +22,18 @@ const useUserId = (userId: string) => {
         end: new Date().toISOString(),
       };
 
+      const userFilter = {
+        request_response_rmt: {
+          user_id: {
+            equals: userId,
+          },
+        },
+      };
+
       const [response, requestOverTime, costOverTime] = await Promise.all([
         jawn.POST("/v1/user/metrics/query", {
           body: {
-            filter: {
-              request_response_rmt: {
-                user_id: {
-                  equals: userId,
-                },
-              },
-            },
+            filter: userFilter,
             offset: 0,
             limit: 1,
             sort: {
@@ -48,49 +50,27 @@ const useUserId = (userId: string) => {
             timeZoneDifferenceMinutes: new Date().getTimezoneOffset(),
           },
         }),
-        fetch("/api/metrics/requestOverTime", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
+        jawn.POST("/v1/metrics/requestOverTime", {
+          body: {
             timeFilter,
-            filter: {
-              request_response_rmt: {
-                user_id: {
-                  equals: userId,
-                },
-              },
-            },
-            apiKeyFilter: null,
+            filter: userFilter as any,
             dbIncrement: "day",
             timeZoneDifference: new Date().getTimezoneOffset(),
-          }),
-        }).then((res) => res.json()),
-        fetch("/api/metrics/costOverTime", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
           },
-          body: JSON.stringify({
+        }),
+        jawn.POST("/v1/metrics/costOverTime", {
+          body: {
             timeFilter,
-            filter: {
-              request_response_rmt: {
-                user_id: {
-                  equals: userId,
-                },
-              },
-            },
-            apiKeyFilter: null,
+            filter: userFilter as any,
             dbIncrement: "day",
             timeZoneDifference: new Date().getTimezoneOffset(),
-          }),
-        }).then((res) => res.json()),
+          },
+        }),
       ]);
 
       return {
         response,
-        requestOverTime: requestOverTime?.data?.map((d: any) => ({
+        requestOverTime: requestOverTime?.data?.data?.map((d: any) => ({
           requests: +d.count,
           date: new Date(d.time).toLocaleDateString("en-US", {
             year: "numeric",
@@ -98,7 +78,7 @@ const useUserId = (userId: string) => {
             day: "numeric",
           }),
         })),
-        costOverTime: costOverTime?.data?.map((d: any) => ({
+        costOverTime: costOverTime?.data?.data?.map((d: any) => ({
           cost: +d.cost,
           date: new Date(d.time).toLocaleDateString("en-US", {
             year: "numeric",

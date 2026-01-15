@@ -133,6 +133,14 @@ export default function AdminWallet() {
   const [invoiceSuccess, setInvoiceSuccess] = useState<string | null>(null);
   const [createInvoiceDialogOpen, setCreateInvoiceDialogOpen] = useState(false);
 
+  // UTC date helpers for invoice dates
+  const toStartOfDayUTC = (dateStr: string): string => {
+    return `${dateStr}T00:00:00.000Z`;
+  };
+  const toEndOfDayUTC = (dateStr: string): string => {
+    return `${dateStr}T23:59:59.999Z`;
+  };
+
   // Hosted URL editing state - tracks pending edits before save
   const [editingHostedUrl, setEditingHostedUrl] = useState<{
     invoiceId: string;
@@ -251,22 +259,6 @@ export default function AdminWallet() {
 
   // Invoice queries and mutations
   const {
-    data: invoiceSummaryResponse,
-    refetch: refetchInvoiceSummary,
-    isLoading: invoiceSummaryLoading,
-    error: invoiceSummaryError,
-  } = $JAWN_API.useQuery(
-    "post",
-    "/v1/admin/wallet/{orgId}/invoice-summary",
-    {
-      params: {
-        path: { orgId: selectedOrg || "" },
-      },
-    },
-    { enabled: !!selectedOrg, retry: false },
-  );
-
-  const {
     data: invoicesListResponse,
     refetch: refetchInvoicesList,
     isLoading: invoicesListLoading,
@@ -293,8 +285,8 @@ export default function AdminWallet() {
       params: {
         path: { orgId: selectedOrg || "" },
         query: {
-          startDate: invoiceStartDate,
-          endDate: invoiceEndDate,
+          startDate: invoiceStartDate ? toStartOfDayUTC(invoiceStartDate) : "",
+          endDate: invoiceEndDate ? toEndOfDayUTC(invoiceEndDate) : "",
         },
       },
     },
@@ -628,8 +620,8 @@ export default function AdminWallet() {
           path: { orgId: selectedOrg },
         },
         body: {
-          startDate: invoiceStartDate,
-          endDate: invoiceEndDate,
+          startDate: toStartOfDayUTC(invoiceStartDate),
+          endDate: toEndOfDayUTC(invoiceEndDate),
           daysUntilDue: 30,
         },
       });
@@ -641,7 +633,6 @@ export default function AdminWallet() {
           `Draft created: ${formatCurrency(result.data.amountCents / 100)} - ${result.data.invoiceId}`,
         );
         // Refetch data
-        refetchInvoiceSummary();
         refetchInvoicesList();
 
         // Open the invoice in Stripe dashboard in a new tab
@@ -673,7 +664,6 @@ export default function AdminWallet() {
 
       if (result.data) {
         // Refetch data
-        await refetchInvoiceSummary();
         await refetchInvoicesList();
       }
     } catch (error) {
@@ -706,7 +696,6 @@ export default function AdminWallet() {
     }
   };
 
-  const invoiceSummary = (invoiceSummaryResponse as any)?.data;
   const invoicesList = (invoicesListResponse as any)?.data || [];
   const spendBreakdown = (spendBreakdownResponse as any)?.data || [];
   const discountsList: Array<{
@@ -1415,11 +1404,8 @@ export default function AdminWallet() {
                                 >
                                   {/* Invoicing */}
                                   <div className="flex flex-col gap-3">
-                                    <H4>PTB Invoicing</H4>
-
                                     {/* Show message if invoicing not available (migration not applied) */}
-                                    {invoiceSummaryError ||
-                                    invoicesListError ? (
+                                    {invoicesListError ? (
                                       <div className="rounded-md border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-950">
                                         <Small className="text-amber-700 dark:text-amber-300">
                                           Invoicing not available. Migration may
@@ -1428,96 +1414,45 @@ export default function AdminWallet() {
                                       </div>
                                     ) : (
                                       <>
-                                        {/* Invoice Summary */}
-                                        {invoiceSummaryLoading ? (
-                                          <div className="flex items-center gap-2">
-                                            <Loader2
-                                              size={14}
-                                              className="animate-spin"
-                                            />
-                                            <Small>Loading summary...</Small>
-                                          </div>
-                                        ) : invoiceSummary ? (
-                                          <div className="flex items-center gap-6 rounded-md border bg-muted/30 p-3">
-                                            <div className="flex flex-col gap-0.5">
-                                              <Small className="text-muted-foreground">
-                                                Total Spend
-                                              </Small>
-                                              <span className="font-medium">
-                                                {formatCurrency(
-                                                  invoiceSummary.totalSpendCents /
-                                                    100,
-                                                )}
-                                              </span>
-                                            </div>
-                                            <div className="flex flex-col gap-0.5">
-                                              <Small className="text-muted-foreground">
-                                                Total Invoiced
-                                              </Small>
-                                              <span className="font-medium">
-                                                {formatCurrency(
-                                                  invoiceSummary.totalInvoicedCents /
-                                                    100,
-                                                )}
-                                              </span>
-                                            </div>
-                                            <div className="flex flex-col gap-0.5">
-                                              <Small className="text-muted-foreground">
-                                                Uninvoiced Balance
-                                              </Small>
-                                              <span
-                                                className={`font-semibold ${invoiceSummary.uninvoicedBalanceCents > 0 ? "text-amber-600" : ""}`}
-                                              >
-                                                {formatCurrency(
-                                                  invoiceSummary.uninvoicedBalanceCents /
-                                                    100,
-                                                )}
-                                              </span>
-                                            </div>
-                                            {invoiceSummary.lastInvoiceEndDate && (
-                                              <div className="flex flex-col gap-0.5">
-                                                <Small className="text-muted-foreground">
-                                                  Last Invoice Through
-                                                </Small>
-                                                <span className="font-medium">
-                                                  {new Date(
-                                                    invoiceSummary.lastInvoiceEndDate,
-                                                  ).toLocaleDateString()}
-                                                </span>
-                                              </div>
-                                            )}
-                                          </div>
-                                        ) : null}
-
-                                        {/* Get Spend Breakdown */}
+                                        {/* Create New Invoice */}
                                         <div className="flex flex-col gap-2 rounded-md border p-3">
                                           <Small className="font-semibold">
                                             Create New Invoice
                                           </Small>
                                           <div className="flex items-center gap-2">
-                                            <Input
-                                              type="date"
-                                              value={invoiceStartDate}
-                                              onChange={(e) =>
-                                                setInvoiceStartDate(
-                                                  e.target.value,
-                                                )
-                                              }
-                                              className="h-8 w-40"
-                                            />
+                                            <div className="flex flex-col">
+                                              <Input
+                                                type="date"
+                                                value={invoiceStartDate}
+                                                onChange={(e) =>
+                                                  setInvoiceStartDate(
+                                                    e.target.value,
+                                                  )
+                                                }
+                                                className="h-8 w-40"
+                                              />
+                                              <span className="text-xs text-muted-foreground">
+                                                00:00:00 UTC
+                                              </span>
+                                            </div>
                                             <span className="text-muted-foreground">
                                               to
                                             </span>
-                                            <Input
-                                              type="date"
-                                              value={invoiceEndDate}
-                                              onChange={(e) =>
-                                                setInvoiceEndDate(
-                                                  e.target.value,
-                                                )
-                                              }
-                                              className="h-8 w-40"
-                                            />
+                                            <div className="flex flex-col">
+                                              <Input
+                                                type="date"
+                                                value={invoiceEndDate}
+                                                onChange={(e) =>
+                                                  setInvoiceEndDate(
+                                                    e.target.value,
+                                                  )
+                                                }
+                                                className="h-8 w-40"
+                                              />
+                                              <span className="text-xs text-muted-foreground">
+                                                23:59:59 UTC
+                                              </span>
+                                            </div>
                                             <Button
                                               size="sm"
                                               variant="outline"
@@ -1601,37 +1536,57 @@ export default function AdminWallet() {
                                                           {item.provider ||
                                                             "(unknown)"}
                                                         </td>
-                                                        <td className="font-mono p-2 text-right text-xs">
+                                                        <td className="p-2 text-right font-mono text-xs">
                                                           {item.promptTokens.toLocaleString()}
                                                         </td>
-                                                        <td className="font-mono p-2 text-right text-xs">
+                                                        <td className="p-2 text-right font-mono text-xs">
                                                           {item.completionTokens.toLocaleString()}
                                                         </td>
-                                                        <td className="font-mono p-2 text-right text-xs">
-                                                          {(item.cacheReadTokens || 0).toLocaleString()}
+                                                        <td className="p-2 text-right font-mono text-xs">
+                                                          {(
+                                                            item.cacheReadTokens ||
+                                                            0
+                                                          ).toLocaleString()}
                                                         </td>
-                                                        <td className="font-mono p-2 text-right text-xs">
-                                                          {(item.cacheWriteTokens || 0).toLocaleString()}
+                                                        <td className="p-2 text-right font-mono text-xs">
+                                                          {(
+                                                            item.cacheWriteTokens ||
+                                                            0
+                                                          ).toLocaleString()}
                                                         </td>
-                                                        <td className="font-mono p-2 text-right text-xs text-muted-foreground">
-                                                          {item.pricing?.cacheReadPer1M
-                                                            ? formatCurrency(item.pricing.cacheReadPer1M)
+                                                        <td className="p-2 text-right font-mono text-xs text-muted-foreground">
+                                                          {item.pricing
+                                                            ?.cacheReadPer1M
+                                                            ? formatCurrency(
+                                                                item.pricing
+                                                                  .cacheReadPer1M,
+                                                              )
                                                             : "-"}
                                                         </td>
-                                                        <td className="font-mono p-2 text-right text-xs text-muted-foreground">
-                                                          {item.pricing?.cacheWritePer1M
-                                                            ? formatCurrency(item.pricing.cacheWritePer1M)
+                                                        <td className="p-2 text-right font-mono text-xs text-muted-foreground">
+                                                          {item.pricing
+                                                            ?.cacheWritePer1M
+                                                            ? formatCurrency(
+                                                                item.pricing
+                                                                  .cacheWritePer1M,
+                                                              )
                                                             : "-"}
                                                         </td>
-                                                        <td className="font-mono p-2 text-right text-muted-foreground">
+                                                        <td className="p-2 text-right font-mono text-muted-foreground">
                                                           {formatCurrency(
-                                                            item.subtotal - (item.cacheAdjustment || 0),
+                                                            item.subtotal -
+                                                              (item.cacheAdjustment ||
+                                                                0),
                                                           )}
                                                         </td>
-                                                        <td className="font-mono p-2 text-right">
-                                                          {item.cacheAdjustment > 0 ? (
+                                                        <td className="p-2 text-right font-mono">
+                                                          {item.cacheAdjustment >
+                                                          0 ? (
                                                             <span className="text-amber-600">
-                                                              +{formatCurrency(item.cacheAdjustment)}
+                                                              +
+                                                              {formatCurrency(
+                                                                item.cacheAdjustment,
+                                                              )}
                                                             </span>
                                                           ) : (
                                                             <span className="text-muted-foreground">
@@ -1639,7 +1594,7 @@ export default function AdminWallet() {
                                                             </span>
                                                           )}
                                                         </td>
-                                                        <td className="font-mono p-2 text-right">
+                                                        <td className="p-2 text-right font-mono">
                                                           {item.discountPercent >
                                                           0 ? (
                                                             <span className="text-green-600">
@@ -1655,7 +1610,7 @@ export default function AdminWallet() {
                                                             </span>
                                                           )}
                                                         </td>
-                                                        <td className="font-mono p-2 text-right font-medium">
+                                                        <td className="p-2 text-right font-mono font-medium">
                                                           {formatCurrency(
                                                             item.total,
                                                           )}
@@ -1668,9 +1623,30 @@ export default function AdminWallet() {
                                                       colSpan={11}
                                                       className="p-2 text-right"
                                                     >
-                                                      Total:
+                                                      Subtotal (for wallet
+                                                      credit):
                                                     </td>
-                                                    <td className="font-mono p-2 text-right">
+                                                    <td className="p-2 text-right font-mono">
+                                                      {formatCurrency(
+                                                        spendBreakdown.reduce(
+                                                          (
+                                                            sum: number,
+                                                            item: any,
+                                                          ) =>
+                                                            sum + item.subtotal,
+                                                          0,
+                                                        ),
+                                                      )}
+                                                    </td>
+                                                  </tr>
+                                                  <tr className="bg-muted/50 font-medium">
+                                                    <td
+                                                      colSpan={11}
+                                                      className="p-2 text-right"
+                                                    >
+                                                      Total (invoice amount):
+                                                    </td>
+                                                    <td className="p-2 text-right font-mono">
                                                       {formatCurrency(
                                                         spendBreakdown.reduce(
                                                           (
@@ -1739,7 +1715,13 @@ export default function AdminWallet() {
                                                       Period
                                                     </th>
                                                     <th className="p-2 text-right">
-                                                      Amount
+                                                      Subtotal
+                                                    </th>
+                                                    <th className="p-2 text-right">
+                                                      Total
+                                                    </th>
+                                                    <th className="p-2 text-right">
+                                                      Saved
                                                     </th>
                                                     <th className="p-2 text-left">
                                                       Hosted URL
@@ -1758,19 +1740,41 @@ export default function AdminWallet() {
                                                         className="border-t"
                                                       >
                                                         <td className="p-2">
-                                                          {new Date(
-                                                            inv.startDate,
-                                                          ).toLocaleDateString()}{" "}
+                                                          {inv.startDate
+                                                            .replace("T", " ")
+                                                            .slice(0, 16)}{" "}
                                                           -{" "}
-                                                          {new Date(
-                                                            inv.endDate,
-                                                          ).toLocaleDateString()}
+                                                          {inv.endDate
+                                                            .replace("T", " ")
+                                                            .slice(0, 16)}
                                                         </td>
-                                                        <td className="font-mono p-2 text-right">
+                                                        <td className="p-2 text-right font-mono text-muted-foreground">
+                                                          {inv.subtotalCents !=
+                                                          null
+                                                            ? formatCurrency(
+                                                                inv.subtotalCents /
+                                                                  100,
+                                                              )
+                                                            : "-"}
+                                                        </td>
+                                                        <td className="p-2 text-right font-mono">
                                                           {formatCurrency(
                                                             inv.amountCents /
                                                               100,
                                                           )}
+                                                        </td>
+                                                        <td className="p-2 text-right font-mono text-green-600">
+                                                          {inv.subtotalCents !=
+                                                            null &&
+                                                          inv.subtotalCents -
+                                                            inv.amountCents >
+                                                            0
+                                                            ? formatCurrency(
+                                                                (inv.subtotalCents -
+                                                                  inv.amountCents) /
+                                                                  100,
+                                                              )
+                                                            : "-"}
                                                         </td>
                                                         <td className="p-2">
                                                           {editingHostedUrl?.invoiceId ===
@@ -1778,7 +1782,8 @@ export default function AdminWallet() {
                                                             <div className="flex items-center gap-1">
                                                               <Input
                                                                 value={
-                                                                  editingHostedUrl?.url ?? ""
+                                                                  editingHostedUrl?.url ??
+                                                                  ""
                                                                 }
                                                                 onChange={(e) =>
                                                                   setEditingHostedUrl(
@@ -1801,7 +1806,8 @@ export default function AdminWallet() {
                                                                 onClick={() =>
                                                                   handleSaveHostedUrl(
                                                                     inv.id,
-                                                                    editingHostedUrl?.url ?? "",
+                                                                    editingHostedUrl?.url ??
+                                                                      "",
                                                                   )
                                                                 }
                                                               >
@@ -1880,9 +1886,11 @@ export default function AdminWallet() {
                                                           )}
                                                         </td>
                                                         <td className="p-2 text-muted-foreground">
-                                                          {new Date(
-                                                            inv.createdAt,
-                                                          ).toLocaleDateString()}
+                                                          {
+                                                            inv.createdAt.split(
+                                                              "T",
+                                                            )[0]
+                                                          }
                                                         </td>
                                                         <td className="p-2">
                                                           <Button
@@ -1980,10 +1988,10 @@ export default function AdminWallet() {
                                                     {discount.provider ||
                                                       "(any)"}
                                                   </td>
-                                                  <td className="font-mono p-2 text-xs">
+                                                  <td className="p-2 font-mono text-xs">
                                                     {discount.model || "(any)"}
                                                   </td>
-                                                  <td className="font-mono p-2 text-right text-green-600">
+                                                  <td className="p-2 text-right font-mono text-green-600">
                                                     {discount.percent}%
                                                   </td>
                                                   <td className="p-2">
@@ -2148,7 +2156,7 @@ export default function AdminWallet() {
                                                   key={idx}
                                                   className="border-t"
                                                 >
-                                                  <td className="font-mono p-2 text-xs">
+                                                  <td className="p-2 font-mono text-xs">
                                                     {entry.helicone_request_id.substring(
                                                       0,
                                                       8,
@@ -2235,7 +2243,7 @@ export default function AdminWallet() {
                                           </div>
                                         ) : tableData?.data ? (
                                           <div className="max-h-64 overflow-auto">
-                                            <pre className="font-mono whitespace-pre-wrap text-xs">
+                                            <pre className="whitespace-pre-wrap font-mono text-xs">
                                               {JSON.stringify(
                                                 tableData.data,
                                                 null,
@@ -2379,11 +2387,8 @@ export default function AdminWallet() {
               <br />
               <br />
               <strong>Period:</strong>{" "}
-              {invoiceToDelete &&
-                new Date(invoiceToDelete.startDate).toLocaleDateString()}{" "}
-              -{" "}
-              {invoiceToDelete &&
-                new Date(invoiceToDelete.endDate).toLocaleDateString()}
+              {invoiceToDelete && invoiceToDelete.startDate.split("T")[0]} -{" "}
+              {invoiceToDelete && invoiceToDelete.endDate.split("T")[0]}
               <br />
               <strong>Amount:</strong>{" "}
               {invoiceToDelete &&
@@ -2418,13 +2423,17 @@ export default function AdminWallet() {
               This will create a draft invoice in Stripe for:
               <br />
               <br />
-              <strong>Period:</strong>{" "}
-              {invoiceStartDate &&
-                new Date(invoiceStartDate).toLocaleDateString()}{" "}
-              -{" "}
-              {invoiceEndDate && new Date(invoiceEndDate).toLocaleDateString()}
+              <strong>Period:</strong> {invoiceStartDate} - {invoiceEndDate}
               <br />
-              <strong>Amount:</strong>{" "}
+              <strong>Subtotal (credit to wallet):</strong>{" "}
+              {formatCurrency(
+                spendBreakdown.reduce(
+                  (sum: number, item: any) => sum + item.subtotal,
+                  0,
+                ),
+              )}
+              <br />
+              <strong>Total (invoice amount):</strong>{" "}
               {formatCurrency(
                 spendBreakdown.reduce(
                   (sum: number, item: any) => sum + item.total,

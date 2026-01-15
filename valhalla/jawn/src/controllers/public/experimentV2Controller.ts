@@ -23,6 +23,7 @@ import {
 } from "./promptController";
 import { EvaluatorManager } from "../../managers/evaluator/EvaluatorManager";
 import { EvaluatorResult } from "./evaluatorController";
+import { randomUUID } from "crypto";
 import { RequestManager } from "../../managers/request/RequestManager";
 import { PromptManager } from "../../managers/prompt/PromptManager";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
@@ -106,7 +107,7 @@ export class ExperimentV2Controller extends Controller {
           },
         ],
       },
-      userDefinedId: `empty-prompt-${Date.now()}`,
+      userDefinedId: `empty-prompt-${randomUUID()}`,
     });
 
     if (promptVersionResult.error) {
@@ -115,7 +116,7 @@ export class ExperimentV2Controller extends Controller {
 
     const experimentManager = new ExperimentV2Manager(request.authParams);
     const experiment = await experimentManager.createNewExperiment(
-      `experiment-${Date.now()}`,
+      `experiment-${randomUUID()}`,
       promptVersionResult.data?.prompt_version_id!
     );
 
@@ -148,7 +149,7 @@ export class ExperimentV2Controller extends Controller {
 
     const experimentManager = new ExperimentV2Manager(request.authParams);
     const experiment = await experimentManager.createNewExperiment(
-      `experiment-from-request-${requestId}-${Date.now()}`,
+      `experiment-from-request-${requestId}-${randomUUID()}`,
       promptVersionResult.data!
     );
 

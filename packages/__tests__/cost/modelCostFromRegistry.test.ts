@@ -183,6 +183,91 @@ describe("modelCostBreakdownFromRegistry", () => {
     }
   });
 
+  it("should calculate correct image output pricing for Gemini 3 Pro Image", () => {
+    // Simulate a 1K/2K image generation (1120 tokens per Google's pricing docs)
+    const modelUsage: ModelUsage = {
+      input: 100, // text prompt tokens
+      output: 50, // text output tokens
+      image: {
+        input: 0,
+        output: 1120, // 1K/2K image = 1120 tokens
+      },
+    };
+
+    const breakdown = modelCostBreakdownFromRegistry({
+      modelUsage,
+      providerModelId: "gemini-3-pro-image-preview",
+      provider: "google-ai-studio" as ModelProviderName,
+    });
+
+    expect(breakdown).not.toBeNull();
+    if (breakdown) {
+      // Text pricing: $2/1M input, $12/1M output
+      expect(breakdown.inputCost).toBeCloseTo(100 * 0.000002, 10);
+      expect(breakdown.outputCost).toBeCloseTo(50 * 0.000012, 10);
+
+      // Image output pricing: $120/1M tokens = $0.00012/token
+      // 1120 tokens * $0.00012 = $0.1344 (matches Google's $0.134 per 1K/2K image)
+      expect(breakdown.image).toBeDefined();
+      expect(breakdown.image!.outputCost).toBeCloseTo(1120 * 0.00012, 10);
+      expect(breakdown.image!.outputCost).toBeCloseTo(0.1344, 4);
+
+      // Total should include text + image costs
+      const expectedTotal =
+        breakdown.inputCost + breakdown.outputCost + breakdown.image!.outputCost;
+      expect(breakdown.totalCost).toBeCloseTo(expectedTotal, 10);
+    }
+  });
+
+  it("should calculate correct image output pricing for Gemini 3 Pro Image on Vertex", () => {
+    const modelUsage: ModelUsage = {
+      input: 100,
+      output: 50,
+      image: {
+        input: 0,
+        output: 1120, // 1K/2K image
+      },
+    };
+
+    const breakdown = modelCostBreakdownFromRegistry({
+      modelUsage,
+      providerModelId: "gemini-3-pro-image-preview",
+      provider: "vertex" as ModelProviderName,
+    });
+
+    expect(breakdown).not.toBeNull();
+    if (breakdown) {
+      // Image output pricing should be $120/1M = $0.00012/token
+      expect(breakdown.image).toBeDefined();
+      expect(breakdown.image!.outputCost).toBeCloseTo(0.1344, 4);
+    }
+  });
+
+  it("should calculate correct image output pricing for Gemini 3 Pro Image on OpenRouter", () => {
+    const modelUsage: ModelUsage = {
+      input: 100,
+      output: 50,
+      image: {
+        input: 0,
+        output: 1120, // 1K/2K image
+      },
+    };
+
+    const breakdown = modelCostBreakdownFromRegistry({
+      modelUsage,
+      providerModelId: "google/gemini-3-pro-image-preview",
+      provider: "openrouter" as ModelProviderName,
+    });
+
+    expect(breakdown).not.toBeNull();
+    if (breakdown) {
+      // OpenRouter has 5.5% markup: $126.60/1M = $0.0001266/token
+      // 1120 * $0.0001266 = $0.141792
+      expect(breakdown.image).toBeDefined();
+      expect(breakdown.image!.outputCost).toBeCloseTo(1120 * 0.0001266, 4);
+    }
+  });
+
   describe("threshold-based pricing", () => {
     it("should use base tier pricing for Claude Sonnet 4 under 200K tokens", () => {
       const modelUsage: ModelUsage = {

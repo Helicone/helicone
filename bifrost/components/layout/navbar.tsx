@@ -24,6 +24,7 @@ import {
   HandCoins,
   TrendingUp,
   BarChart3,
+  Bot,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -150,7 +151,7 @@ const MobileNav = () => {
       <div className="fixed inset-x-0 top-0 z-50 bg-background">
         <MobileHeader
           menuDispatch={[menuOpen, setMenuOpen]}
-          className="pl-2 pr-4"
+          className="pr-4"
         />
       </div>
       {menuOpen && (
@@ -258,6 +259,15 @@ const toolsComponents: LinkItem[] = [
     description: "Calculate and compare API costs",
     icon: <HandCoins className="size-5 navbar-icon-style" />,
   },
+  {
+    title: "Agent Email Course",
+    link: {
+      href: "/agent-course",
+      isExternal: false,
+    },
+    description: "From Engineer to AI Engineer in 7 days",
+    icon: <Bot className="size-5 navbar-icon-style" />,
+  },
 ];
 
 const mainComponents: LinkItem[] = [
@@ -341,7 +351,7 @@ const NavBar = (props: NavBarProps) => {
       <MobileNav />
 
       <nav
-        className="gap-x-3 mx-auto lg:flex sm:px-16 lg:px-24 2xl:px-40 max-w-[2000px] items-center py-2 hidden justify-between"
+        className="gap-x-3 mx-auto lg:flex lg:px-8 xl:px-16 2xl:px-40 max-w-[2000px] items-center py-2 hidden justify-between"
         aria-label="Global"
       >
         {/* Logo */}

@@ -189,28 +189,44 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
       const [_, start, end] = currentTimeFilter.split("_");
 
-      const filter: FilterNode = {
-        left: {
-          request_response_rmt: {
-            request_created_at: {
-              gte: new Date(start),
-            },
-          },
-        },
-        operator: "and",
-        right: {
+      // When live mode is on, don't set an upper bound so new data can appear
+      if (isLive) {
+        const filter: FilterNode = {
           left: {
             request_response_rmt: {
               request_created_at: {
-                lte: new Date(end),
+                gte: new Date(start),
               },
             },
           },
           operator: "and",
           right: cacheFilter,
-        },
-      };
-      return filter;
+        };
+        return filter;
+      } else {
+        const filter: FilterNode = {
+          left: {
+            request_response_rmt: {
+              request_created_at: {
+                gte: new Date(start),
+              },
+            },
+          },
+          operator: "and",
+          right: {
+            left: {
+              request_response_rmt: {
+                request_created_at: {
+                  lte: new Date(end),
+                },
+              },
+            },
+            operator: "and",
+            right: cacheFilter,
+          },
+        };
+        return filter;
+      }
     } else {
       return defaultFilter;
     }
@@ -529,28 +545,44 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     (key: TimeInterval, value: string) => {
       if (key === "custom") {
         const [start, end] = value.split("_");
-        const filter: FilterNode = {
-          left: {
-            request_response_rmt: {
-              request_created_at: {
-                gte: new Date(start),
-              },
-            },
-          },
-          operator: "and",
-          right: {
+        // When live mode is on, don't set an upper bound so new data can appear
+        if (isLive) {
+          const filter: FilterNode = {
             left: {
               request_response_rmt: {
                 request_created_at: {
-                  lte: new Date(end),
+                  gte: new Date(start),
                 },
               },
             },
             operator: "and",
             right: cacheFilter,
-          },
-        };
-        setTimeFilter(filter);
+          };
+          setTimeFilter(filter);
+        } else {
+          const filter: FilterNode = {
+            left: {
+              request_response_rmt: {
+                request_created_at: {
+                  gte: new Date(start),
+                },
+              },
+            },
+            operator: "and",
+            right: {
+              left: {
+                request_response_rmt: {
+                  request_created_at: {
+                    lte: new Date(end),
+                  },
+                },
+              },
+              operator: "and",
+              right: cacheFilter,
+            },
+          };
+          setTimeFilter(filter);
+        }
       } else {
         setTimeFilter({
           request_response_rmt: {
@@ -561,7 +593,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
         });
       }
     },
-    [isCached, setTimeFilter],
+    [isCached, isLive, setTimeFilter],
   );
 
   // if shift is pressed, we select the rows in the highlighted range
@@ -610,6 +642,15 @@ export default function RequestsPage(props: RequestsPageV2Props) {
   /* -------------------------------------------------------------------------- */
   /*                                   EFFECTS                                  */
   /* -------------------------------------------------------------------------- */
+  // When isLive changes, re-apply the time filter to add/remove upper bound
+  useEffect(() => {
+    const currentTimeFilter = searchParams.get("t");
+    if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
+      const [, start, end] = currentTimeFilter.split("_");
+      onTimeSelectHandler("custom" as TimeInterval, `${start}_${end}`);
+    }
+  }, [isLive]);
+
   // Synchronize page state from URL query parameters
   useEffect(() => {
     const pageFromQuery = router.query.page;

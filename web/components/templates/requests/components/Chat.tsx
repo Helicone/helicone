@@ -107,7 +107,8 @@ export default function Chat({
             return [...acc, reasoningMessage];
           }
 
-          if (!message.content && !message.reasoning) {
+          // Keep image messages even if they don't have content
+          if (!message.content && !message.reasoning && message._type !== "image") {
             return acc;
           }
 

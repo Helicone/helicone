@@ -5,7 +5,7 @@
 
 import { Result } from "@/packages/common/result";
 import { TimeIncrement } from "@/lib/timeCalculations/fetchTimeData";
-import { ModelMetric } from "@/lib/api/models/models";
+import { ModelMetric } from "@/services/hooks/models";
 import { SingleFilterDef } from "@helicone-package/filters/frontendFilterDefs";
 
 // Mock metrics data

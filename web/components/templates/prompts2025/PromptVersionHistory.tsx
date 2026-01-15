@@ -8,6 +8,11 @@ interface PromptVersionHistoryProps {
     promptVersionId: string,
     environment: string,
   ) => void;
+  onRemoveEnvironment: (
+    promptId: string,
+    promptVersionId: string,
+    environment: string,
+  ) => void;
   onOpenPromptVersion: (promptVersionId: string) => void;
   onDeletePromptVersion: (promptVersionId: string) => void;
 }
@@ -15,6 +20,7 @@ interface PromptVersionHistoryProps {
 const PromptVersionHistory = ({
   promptWithVersions,
   onSetEnvironment,
+  onRemoveEnvironment,
   onOpenPromptVersion,
   onDeletePromptVersion,
 }: PromptVersionHistoryProps) => {
@@ -28,6 +34,7 @@ const PromptVersionHistory = ({
           version={version}
           isProductionVersion={version.id === productionVersion.id}
           onSetEnvironment={onSetEnvironment}
+          onRemoveEnvironment={onRemoveEnvironment}
           onOpenPromptVersion={onOpenPromptVersion}
           onDeletePromptVersion={onDeletePromptVersion}
         />

@@ -246,7 +246,7 @@ describe('Frontend Filter Definitions', () => {
 
   describe('REQUEST_TABLE_FILTERS', () => {
     test('should have correct structure and length', () => {
-      expect(REQUEST_TABLE_FILTERS).toHaveLength(12);
+      expect(REQUEST_TABLE_FILTERS).toHaveLength(13);
 
       const filterLabels = REQUEST_TABLE_FILTERS.map(f => f.label);
       const expectedLabels = [
@@ -258,6 +258,7 @@ describe('Frontend Filter Definitions', () => {
         'Total Tokens',
         'User',
         'Model',
+        'Provider',
         'Status',
         'Path',
         'Feedback',
@@ -278,7 +279,7 @@ describe('Frontend Filter Definitions', () => {
       const responseFilters = REQUEST_TABLE_FILTERS.filter(f => f.category === 'response');
       const feedbackFilters = REQUEST_TABLE_FILTERS.filter(f => f.category === 'feedback');
 
-      expect(requestFilters).toHaveLength(10);
+      expect(requestFilters).toHaveLength(11);
       expect(responseFilters).toHaveLength(1);
       expect(feedbackFilters).toHaveLength(1);
     });

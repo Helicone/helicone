@@ -101,10 +101,15 @@
       "WebFetch(domain:streamdown.ai)",
       "mcp__ide__getDiagnostics",
       "Bash(yarn cf-typegen:*)",
-      "WebFetch(domain:docs.stripe.com)"
+      "WebFetch(domain:docs.stripe.com)",
+      "WebFetch(domain:ai.google.dev)",
+      "Bash(npx tsoa:*)",
+      "Bash(python3:*)"
     ],
     "deny": []
   },
   "enableAllProjectMcpServers": true,
-  "enabledMcpjsonServers": ["playwright"]
+  "enabledMcpjsonServers": [
+    "playwright"
+  ]
 }
