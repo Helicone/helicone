@@ -1,8 +1,9 @@
 import { FilterNode } from "@helicone-package/filters/filterDefs";
 import { timeFilterToFilterNode } from "@helicone-package/filters/helpers";
-import { buildFilterWithAuthClickHousePropertiesV2 } from "@helicone-package/filters/filters";
+import { buildFilterWithAuthClickHouse } from "@helicone-package/filters/filters";
 import { Result, resultMap } from "@/packages/common/result";
 import { dbQueryClickhouse } from "../db/dbExecute";
+import { transformSearchPropertiesToPropertyKey } from "./propertyFilterHelpers";
 
 export async function getTotalRequests(
   filter: FilterNode,
@@ -10,24 +11,29 @@ export async function getTotalRequests(
     start: Date;
     end: Date;
   },
-  org_id: string,
+  org_id: string
 ): Promise<Result<number, string>> {
-  const { filter: filterString, argsAcc } =
-    await buildFilterWithAuthClickHousePropertiesV2({
-      org_id,
-      filter: {
-        left: timeFilterToFilterNode(timeFilter, "request_response_rmt"),
-        right: filter,
-        operator: "and",
-      },
-      argsAcc: [],
-    });
-  const query = `
+  // Transform search_properties to property_key to avoid ARRAY JOIN
+  const transformedFilter = transformSearchPropertiesToPropertyKey({
+    left: timeFilterToFilterNode(timeFilter, "request_response_rmt"),
+    right: filter,
+    operator: "and",
+  });
 
+  const { filter: filterString, argsAcc } = await buildFilterWithAuthClickHouse(
+    {
+      org_id,
+      filter: transformedFilter,
+      argsAcc: [],
+    }
+  );
+
+  // Query without ARRAY JOIN - uses property_key filter which generates
+  // has(mapKeys(properties), 'key') instead of requiring ARRAY JOIN
+  const query = `
   WITH total_count AS (
     SELECT count(*) as count
     FROM request_response_rmt
-    ARRAY JOIN mapKeys(properties) AS key
     WHERE (
       (${filterString})
     )
