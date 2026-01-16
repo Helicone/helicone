@@ -1,0 +1,102 @@
+---
+title: "Pydantic AI Integration"
+sidebarTitle: "Pydantic AI"
+description: "Integrate Helicone AI Gateway with Pydantic AI to access 100+ LLM providers with unified observability."
+"twitter:title": "Pydantic AI Integration - Helicone OSS LLM Observability"
+iconType: "solid"
+---
+
+import { strings } from "/snippets/strings.mdx";
+import Star from "/snippets/star.mdx";
+import RequestIntegration from "/snippets/request-integration.mdx";
+
+## Introduction
+
+[Pydantic AI](https://ai.pydantic.dev/) is a Python framework for building AI agents with type-safe, validated outputs using Pydantic models.
+
+## {strings.howToIntegrate}
+
+<Steps>
+  <Step title={strings.generateKey}>
+    <div dangerouslySetInnerHTML={{ __html: strings.generateKeyInstructions }} />
+  </Step>
+
+  <Step title={strings.setApiKey}>
+    ```bash
+    HELICONE_API_KEY=<your-helicone-api-key>
+    ```
+  </Step>
+
+  <Step title={strings.installSDK("Pydantic AI")}>
+    ```bash Python
+    pip install pydantic-ai
+    ```
+  </Step>
+
+  <Step title="Configure Pydantic AI with Helicone AI Gateway">
+    ```python Python
+    import os
+    from pydantic_ai import Agent
+    from pydantic_ai.models.openai import OpenAIChatModel, OpenAIModelSettings
+    from pydantic_ai.providers.openai import OpenAIProvider
+    from dotenv import load_dotenv
+    load_dotenv()
+
+    helicone_api_key = os.environ.get("HELICONE_API_KEY")
+
+    provider = OpenAIProvider(
+        base_url="https://ai-gateway.helicone.ai",
+        api_key=helicone_api_key
+    )
+    model = OpenAIChatModel("gpt-4o-mini", provider=provider)
+
+    agent = Agent(model, system_prompt="You are a helpful assistant. Keep answers concise.")
+
+    result = agent.run_sync("Capital of France?")
+    print(result.output)
+    ```
+
+    <div dangerouslySetInnerHTML={{ __html: strings.modelRegistryDescription }} />
+  </Step>
+
+  <Step title={strings.viewRequestsInDashboard}>
+    <div dangerouslySetInnerHTML={{ __html: strings.viewRequestsInDashboardDescription("Pydantic AI") }} />
+
+    - Request/response bodies
+    - Latency metrics
+    - Token usage and costs
+    - Model performance analytics
+    - Error tracking
+    - Session tracking
+
+    <Star />
+  </Step>
+</Steps>
+
+<RequestIntegration />
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="AI Gateway Overview" icon="arrow-progress" href="/gateway/overview">
+    Learn about Helicone's AI Gateway features and capabilities
+  </Card>
+  <Card title="Provider Routing" icon="route" href="/gateway/provider-routing">
+    Configure intelligent routing and automatic failover
+  </Card>
+  <Card title="Model Registry" icon="database" href="https://helicone.ai/models">
+    Browse all available models and providers
+  </Card>
+  <Card title="Prompt Management" icon="code" href="/gateway/concepts/prompt-caching">
+    Version and manage prompts with Helicone Prompts
+  </Card>
+  <Card title="Custom Properties" icon="tags" href="/features/advanced-usage/custom-properties">
+    Add metadata to track and filter your requests
+  </Card>
+  <Card title="Sessions" icon="link" href="/features/sessions">
+    Track multi-turn conversations and user sessions
+  </Card>
+  <Card title="Rate Limiting" icon="gauge" href="/features/advanced-usage/custom-rate-limits">
+    Configure rate limits for your applications
+  </Card>
+</CardGroup>
