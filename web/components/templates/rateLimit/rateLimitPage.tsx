@@ -103,15 +103,11 @@ const RateLimitPage = (props: {}) => {
     () => ({
       timeFilter: urlTimeFilter,
       userFilters: {
-        left: {
-          request_response_rmt: {
-            properties: {
-              "Helicone-Rate-Limit-Status": { equals: "rate_limited" },
-            },
+        request_response_rmt: {
+          properties: {
+            "Helicone-Rate-Limit-Status": { equals: "bucket_rate_limited" },
           },
         },
-        operator: "and" as const, // Ensure const for type stability
-        right: "all" as const,
       },
       timeZoneDifference,
       dbIncrement: timeIncrement,
