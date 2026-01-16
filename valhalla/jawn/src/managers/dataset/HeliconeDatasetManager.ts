@@ -1,6 +1,6 @@
 import { Json } from "../../lib/db/database.types";
 import { AuthParams } from "../../packages/common/auth/types";
-import { dbExecute } from "../../lib/shared/db/dbExecute";
+import { dbExecute, dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 import { S3Client } from "../../lib/shared/db/s3Client";
 import {
   Result,
@@ -243,7 +243,20 @@ export class HeliconeDatasetManager extends BaseManager {
             row.id,
             this.authParams.organizationId
           );
-          return await this.s3Client.copyObject(key, newKey);
+
+          // Try to copy from S3 first
+          const copyResult = await this.s3Client.copyObject(key, newKey);
+
+          // If copy fails (e.g., source doesn't exist), try to fetch from ClickHouse and store directly
+          if (copyResult.error) {
+            const fallbackResult = await this.fetchAndStoreRequestBody(
+              row.origin_request_id,
+              newKey
+            );
+            return fallbackResult;
+          }
+
+          return copyResult;
         })
       );
 
@@ -254,6 +267,57 @@ export class HeliconeDatasetManager extends BaseManager {
       return ok(null);
     } catch (error) {
       return err(`Failed to add requests to dataset: ${error}`);
+    }
+  }
+
+  /**
+   * Fetches request/response body from ClickHouse and stores it in S3
+   * Used as a fallback when the source S3 object doesn't exist
+   */
+  private async fetchAndStoreRequestBody(
+    requestId: string,
+    destinationKey: string
+  ): Promise<Result<string, string>> {
+    try {
+      // Fetch the request/response body from ClickHouse
+      const query = `
+        SELECT
+          request_body,
+          response_body
+        FROM request_response_rmt
+        WHERE request_id = {val_0: String}
+        AND organization_id = {val_1: String}
+        LIMIT 1
+      `;
+
+      const result = await dbQueryClickhouse<{
+        request_body: string;
+        response_body: string;
+      }>(query, [requestId, this.authParams.organizationId]);
+
+      if (result.error || !result.data || result.data.length === 0) {
+        return err(
+          `Request body not found in ClickHouse for request ${requestId}`
+        );
+      }
+
+      const { request_body, response_body } = result.data[0];
+
+      // Store the body in S3 at the dataset location
+      const bodyData = JSON.stringify({
+        request: request_body ? JSON.parse(request_body) : {},
+        response: response_body ? JSON.parse(response_body) : {},
+      });
+
+      const storeResult = await this.s3Client.store(destinationKey, bodyData);
+
+      if (storeResult.error) {
+        return err(`Failed to store request body: ${storeResult.error}`);
+      }
+
+      return ok("Success");
+    } catch (error) {
+      return err(`Failed to fetch and store request body: ${error}`);
     }
   }
 
