@@ -47,6 +47,17 @@ export class HeliconeDatasetManager extends BaseManager {
     );
   }
 
+  private async getTodayRowCount(): Promise<number> {
+    const result = await dbExecute<{ count: number }>(
+      `SELECT COUNT(*)::int as count
+       FROM helicone_dataset_row
+       WHERE organization_id = $1
+         AND created_at >= CURRENT_DATE`,
+      [this.authParams.organizationId]
+    );
+    return result.data?.[0]?.count ?? 0;
+  }
+
   async getDatasets(params: {
     datasetIds?: string[];
   }): Promise<Result<HeliconeDataset[], string>> {
@@ -205,6 +216,16 @@ export class HeliconeDatasetManager extends BaseManager {
     datasetId: string,
     addRequests: string[]
   ): Promise<Result<null, string>> {
+    // Rate limit: 1000 rows per day per organization
+    const todayCount = await this.getTodayRowCount();
+    if (todayCount + addRequests.length > 1000) {
+      return err(
+        `Rate limit exceeded: You can add up to 1000 dataset rows per day. ` +
+          `Today's usage: ${todayCount}. Requested: ${addRequests.length}. ` +
+          `Limit resets at midnight UTC.`
+      );
+    }
+
     try {
       // Build the VALUES part of the query dynamically
       const values = addRequests
