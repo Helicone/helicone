@@ -105,7 +105,10 @@
       "WebFetch(domain:ai.google.dev)",
       "Bash(npx tsoa:*)",
       "Bash(python3:*)",
+      "Bash(git mv:*)",
+      "Bash(npm run test:rate-limit:*)",
       "Bash(npx eslint:*)",
+      "Bash(npm test:*)",
       "Bash(./run_all_workers.sh:*)"
     ],
     "deny": []
