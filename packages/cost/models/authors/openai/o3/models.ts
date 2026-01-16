@@ -22,6 +22,7 @@ export const models = {
     created: "2024-06-01T00:00:00.000Z",
     modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
+    stripeModelId: "o3-pro",
   },
   "o3-mini": {
     name: "OpenAI o3 Mini",
@@ -33,6 +34,7 @@ export const models = {
     created: "2023-10-01T00:00:00.000Z",
     modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "GPT",
+    stripeModelId: "o3-mini",
   },
 } satisfies Record<string, ModelConfig>;
 
