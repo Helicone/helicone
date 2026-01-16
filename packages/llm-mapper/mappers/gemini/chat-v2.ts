@@ -230,6 +230,11 @@ const convertResponseMessages = (responseBody: any): Message[] => {
           .map((part: any) => part.text)
           .join("");
 
+        // Extract image parts from inlineData
+        const imageParts = parts.filter(
+          (part: any) => part && part.inlineData?.data
+        );
+
         // Check for function calls
         const functionCallPart = parts.find(
           (part: any) => part && part.functionCall
@@ -245,12 +250,64 @@ const convertResponseMessages = (responseBody: any): Message[] => {
             ]
           : undefined;
 
-        messages.push({
-          _type: functionCall ? "functionCall" : "message",
-          role: content.role ?? "model",
-          content: combinedContent || undefined,
-          tool_calls: toolCalls,
-        });
+        const role = content.role ?? "model";
+
+        if (functionCall) {
+          // Function call response
+          messages.push({
+            _type: "functionCall",
+            role,
+            content: combinedContent || undefined,
+            tool_calls: toolCalls,
+          });
+        } else if (imageParts.length > 0 && textParts.length > 0) {
+          // Mixed content: text + images - create contentArray
+          const contentArray: Message[] = [];
+
+          // Add text part first
+          if (combinedContent) {
+            contentArray.push({
+              _type: "message",
+              role,
+              content: combinedContent,
+            });
+          }
+
+          // Add image parts
+          for (const imgPart of imageParts) {
+            const mimeType = imgPart.inlineData.mimeType || "image/png";
+            contentArray.push({
+              _type: "image",
+              role,
+              mime_type: mimeType,
+              image_url: `data:${mimeType};base64,${imgPart.inlineData.data}`,
+            });
+          }
+
+          messages.push({
+            _type: "contentArray",
+            role,
+            contentArray,
+          });
+        } else if (imageParts.length > 0) {
+          // Image only response
+          for (const imgPart of imageParts) {
+            const mimeType = imgPart.inlineData.mimeType || "image/png";
+            messages.push({
+              _type: "image",
+              role,
+              mime_type: mimeType,
+              image_url: `data:${mimeType};base64,${imgPart.inlineData.data}`,
+            });
+          }
+        } else {
+          // Text only response (existing behavior)
+          messages.push({
+            _type: "message",
+            role,
+            content: combinedContent || undefined,
+          });
+        }
       }
     }
   }

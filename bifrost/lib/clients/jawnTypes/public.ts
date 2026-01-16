@@ -838,6 +838,9 @@ export interface paths {
   "/v1/agent/thread/create-and-escalate": {
     post: operations["CreateAndEscalateThread"];
   };
+  "/v1/agent/thread/{sessionId}/reopen": {
+    post: operations["ReopenThread"];
+  };
   "/v1/agent/threads": {
     get: operations["GetAllThreads"];
   };
@@ -1868,10 +1871,6 @@ Json: JsonObject;
       gt?: string;
     };
     /** @description Make all properties in T optional */
-    Partial_VectorOperators_: {
-      contains?: string;
-    };
-    /** @description Make all properties in T optional */
     Partial_RequestResponseRMTToOperators_: {
       country_code?: components["schemas"]["Partial_TextOperators_"];
       latency?: components["schemas"]["Partial_NumberOperators_"];
@@ -1907,8 +1906,8 @@ Json: JsonObject;
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
       scores_column?: components["schemas"]["Partial_TextOperators_"];
-      request_body?: components["schemas"]["Partial_VectorOperators_"];
-      response_body?: components["schemas"]["Partial_VectorOperators_"];
+      request_body?: components["schemas"]["Partial_TextOperators_"];
+      response_body?: components["schemas"]["Partial_TextOperators_"];
       cache_enabled?: components["schemas"]["Partial_BooleanOperators_"];
       cache_reference_id?: components["schemas"]["Partial_TextOperators_"];
       cached?: components["schemas"]["Partial_BooleanOperators_"];
@@ -3173,7 +3172,7 @@ Json: JsonObject;
     };
     SingleKey_TablesAndViews_: components["schemas"]["Partial_TablesAndViews_"];
     FilterLeaf: components["schemas"]["SingleKey_TablesAndViews_"];
-    FilterNode: components["schemas"]["FilterLeaf"] | components["schemas"]["FilterBranch"] | Record<string, never>;
+    FilterNode: components["schemas"]["FilterLeaf"] | components["schemas"]["FilterBranch"] | Record<string, never> | "all";
     FilterBranch: {
       left: components["schemas"]["FilterNode"];
       /** @enum {string} */
@@ -4734,6 +4733,8 @@ Json: JsonObject;
       endDate: string;
       /** Format: double */
       amountCents: number;
+      /** Format: double */
+      subtotalCents: number | null;
       notes: string | null;
       createdAt: string;
     };
@@ -9285,6 +9286,21 @@ export interface operations {
     };
   };
   CreateAndEscalateThread: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_InAppThread.string_"];
+        };
+      };
+    };
+  };
+  ReopenThread: {
+    parameters: {
+      path: {
+        sessionId: string;
+      };
+    };
     responses: {
       /** @description Ok */
       200: {

@@ -61,19 +61,20 @@ const CustomerRow = (props: CustomerRowProps) => {
     organizationId: org.id,
   });
 
-  const chartData = data?.data?.map((d: any) => {
-    if (new Date(d.time) > new Date()) {
-      return {
-        requests: null,
-        date: new Date(d.time).toLocaleDateString(),
-      };
-    } else {
-      return {
-        requests: +d.count,
-        date: new Date(d.time).toLocaleDateString(),
-      };
-    }
-  });
+  const chartData =
+    data?.data?.map((d: any) => {
+      if (new Date(d.time) > new Date()) {
+        return {
+          requests: null,
+          date: new Date(d.time).toLocaleDateString(),
+        };
+      } else {
+        return {
+          requests: +d.count,
+          date: new Date(d.time).toLocaleDateString(),
+        };
+      }
+    }) ?? [];
 
   const currentIcon = ORGANIZATION_ICONS.find((icon) => icon.name === org.icon);
 

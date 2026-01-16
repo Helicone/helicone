@@ -86,6 +86,7 @@ export class RevenueCalculator {
   public getProductRevenue(
     productId: string | string[],
     months = 6,
+    priceFilter?: { include?: string[]; exclude?: string[] },
   ): MonthlyRevenueData {
     // Get all invoices for this product/products
     let invoices: Stripe.Invoice[] = [];
@@ -129,10 +130,11 @@ export class RevenueCalculator {
       this.filterUpcomingInvoicesForCurrentMonth(allUpcomingInvoices);
 
     // Format all invoices
-    const billedInvoices = this.formatInvoices(filteredInvoices, productId);
+    const billedInvoices = this.formatInvoices(filteredInvoices, productId, priceFilter);
     const upcomingFormattedInvoices = this.formatInvoices(
       upcomingInvoices,
       productId,
+      priceFilter,
     );
 
     // Group billed invoices by month
@@ -237,6 +239,7 @@ export class RevenueCalculator {
   private formatInvoices(
     invoices: Stripe.Invoice[] | Stripe.UpcomingInvoice[],
     productId?: string | string[],
+    priceFilter?: { include?: string[]; exclude?: string[] },
   ): InvoiceData[] {
     return invoices
       .map((inv) => {
@@ -246,6 +249,7 @@ export class RevenueCalculator {
             inv,
             this.discounts,
             typeof productId === "string" ? productId : undefined, // Only pass single productId
+            priceFilter,
           );
 
         if (amountAfterProcessing <= 0) return null;

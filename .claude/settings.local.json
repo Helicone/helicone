@@ -102,12 +102,14 @@
       "mcp__ide__getDiagnostics",
       "Bash(yarn cf-typegen:*)",
       "WebFetch(domain:docs.stripe.com)",
+      "WebFetch(domain:ai.google.dev)",
       "Bash(npx tsoa:*)",
       "Bash(python3:*)",
       "Bash(git mv:*)",
       "Bash(npm run test:rate-limit:*)",
       "Bash(npx eslint:*)",
-      "Bash(npm test:*)"
+      "Bash(npm test:*)",
+      "Bash(./run_all_workers.sh:*)"
     ],
     "deny": []
   },

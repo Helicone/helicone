@@ -5,6 +5,7 @@ import { getTimeInterval } from "../../../../lib/timeCalculations/time";
 import { filterListToTree } from "@helicone-package/filters/helpers";
 import StyledAreaChart from "../../dashboard/styledAreaChart";
 import { AreaChart } from "@tremor/react";
+import { $JAWN_API } from "@/lib/clients/jawn";
 
 interface RenderOrgPlanProps {
   currentMonth: Date;
@@ -51,20 +52,21 @@ const RenderOrgPlan = (props: RenderOrgPlanProps) => {
     refetch();
   }, [currentMonth, refetch]);
 
-  const chartData = data?.data.map((d: any) => {
-    // if the date is in the future, return null
-    if (new Date(d.time) > new Date()) {
-      return {
-        requests: null,
-        date: new Date(d.time).toLocaleDateString(),
-      };
-    } else {
-      return {
-        requests: +d.count,
-        date: new Date(d.time).toLocaleDateString(),
-      };
-    }
-  });
+  const chartData =
+    data?.data?.map((d: any) => {
+      // if the date is in the future, return null
+      if (new Date(d.time) > new Date()) {
+        return {
+          requests: null,
+          date: new Date(d.time).toLocaleDateString(),
+        };
+      } else {
+        return {
+          requests: +d.count,
+          date: new Date(d.time).toLocaleDateString(),
+        };
+      }
+    }) ?? [];
 
   return (
     <StyledAreaChart
@@ -103,26 +105,20 @@ export const useRequestsOverTime = (props: {
       };
 
       const timeIncrement = getTimeInterval(timeFilter);
-      const params = {
-        timeFilter: {
-          start: timeFilter.start.toISOString(),
-          end: timeFilter.end.toISOString(),
-        },
-        filter: filterListToTree([], "and"),
-        dbIncrement: timeIncrement,
-        timeZoneDifference: new Date().getTimezoneOffset(),
-        organizationId: orgId,
-      };
 
-      const data = await fetch("/api/metrics/requestOverTime", {
-        headers: {
-          "Content-Type": "application/json",
+      const response = await $JAWN_API.POST("/v1/metrics/requestOverTime", {
+        body: {
+          timeFilter: {
+            start: timeFilter.start.toISOString(),
+            end: timeFilter.end.toISOString(),
+          },
+          filter: filterListToTree([], "and") as any,
+          dbIncrement: timeIncrement,
+          timeZoneDifference: new Date().getTimezoneOffset(),
         },
-        method: "POST",
-        body: JSON.stringify(params),
-      }).then((res) => res.json());
+      });
 
-      return data;
+      return response.data;
     },
     refetchOnWindowFocus: false,
     // 1 minute refetch interval

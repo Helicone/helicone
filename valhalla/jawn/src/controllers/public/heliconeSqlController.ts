@@ -77,12 +77,25 @@ export type ExecuteSqlResponse = {
   rowCount: number;
 };
 
+// Type that matches what TracedController expects
+type TracedControllerError = { statusCode?: number; code?: string; message: string; details?: string };
+
 // Helper function to convert HqlError to string for API responses
-function formatHqlError(error: HqlError): string {
-  // Include error code in the response for frontend parsing
+function formatHqlError(error: TracedControllerError): string {
+  // Handle undefined/null errors
+  if (!error) {
+    return 'An unexpected error occurred';
+  }
+  // Handle error objects
   const codePrefix = error.code ? `[${error.code}] ` : '';
   const message = error.details ? `${error.message}: ${error.details}` : error.message;
   return `${codePrefix}${message}`;
+}
+
+// Formatter for TracedController decorator - matches expected type signature
+function formatTracedError(error: { statusCode?: number; code?: string; message: string }): string {
+  const codePrefix = error.code ? `[${error.code}] ` : '';
+  return `${codePrefix}${error.message}`;
 }
 
 @Route("v1/helicone-sql")
@@ -105,7 +118,7 @@ export class HeliconeSqlController extends Controller {
         "span.kind": "server",
       };
     },
-    formatError: formatHqlError,
+    formatError: formatTracedError,
     successStatus: 200,
   })
   public async getClickHouseSchema(
@@ -137,7 +150,7 @@ export class HeliconeSqlController extends Controller {
         "sql.length": requestBody.sql?.length || 0,
       };
     },
-    formatError: formatHqlError,
+    formatError: formatTracedError,
     successStatus: 200,
   })
   public async executeSql(
@@ -186,7 +199,7 @@ export class HeliconeSqlController extends Controller {
         "sql.length": requestBody.sql?.length || 0,
       };
     },
-    formatError: formatHqlError,
+    formatError: formatTracedError,
     successStatus: 200,
   })
   public async downloadCsv(
