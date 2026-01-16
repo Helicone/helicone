@@ -376,23 +376,24 @@ const PromptChatRow = (props: PromptChatRowProps) => {
       );
       const text = textMessage?.text || "";
       const isMinimized = minimize && text.length > 100;
-      const displayText = isMinimized ? `${text.substring(0, 100)}...` : text;
       const isStatic = text.includes("<helicone-prompt-static>");
+      // Always use full text to avoid truncation bugs - use CSS for visual truncation
+      const displayText = isStatic
+        ? text.replace(
+            /<helicone-prompt-static>(.*?)<\/helicone-prompt-static>/g,
+            "$1",
+          )
+        : text;
 
       return (
         <div className="flex flex-col space-y-4 whitespace-pre-wrap">
-          <RenderWithPrettyInputKeys
-            text={removeLeadingWhitespace(
-              isStatic
-                ? displayText.replace(
-                    /<helicone-prompt-static>(.*?)<\/helicone-prompt-static>/g,
-                    "$1",
-                  )
-                : displayText,
-            )}
-            selectedProperties={selectedProperties}
-            playgroundMode={playgroundMode}
-          />
+          <div className={isMinimized ? "line-clamp-3" : ""}>
+            <RenderWithPrettyInputKeys
+              text={removeLeadingWhitespace(displayText)}
+              selectedProperties={selectedProperties}
+              playgroundMode={playgroundMode}
+            />
+          </div>
           {hasImage(content) && (
             <div className="flex flex-wrap items-center border-t border-slate-300 pt-4 dark:border-slate-700">
               {content
@@ -480,17 +481,16 @@ const PromptChatRow = (props: PromptChatRowProps) => {
     } else {
       const contentString = enforceString(content) || "";
       const isMinimized = minimize && contentString.length > 100;
-      const displayText = isMinimized
-        ? `${contentString.substring(0, 100)}...`
-        : contentString;
 
       return (
         <div className="flex flex-col space-y-4 whitespace-pre-wrap">
-          <RenderWithPrettyInputKeys
-            text={displayText}
-            selectedProperties={selectedProperties}
-            playgroundMode={playgroundMode}
-          />
+          <div className={isMinimized ? "line-clamp-3" : ""}>
+            <RenderWithPrettyInputKeys
+              text={contentString}
+              selectedProperties={selectedProperties}
+              playgroundMode={playgroundMode}
+            />
+          </div>
         </div>
       );
     }
