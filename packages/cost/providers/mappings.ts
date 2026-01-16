@@ -28,7 +28,7 @@ import { costs as xCosts } from "./x";
 import { googleProvider } from "./google";
 import { costs as vercelCosts } from "./vercel";
 
-const openAiPattern = /^https:\/\/api\.openai\.com/;
+const openAiPattern = /^https:\/\/(us\.)?api\.openai\.com/;
 const anthropicPattern = /^https:\/\/api\.anthropic\.com/;
 export const azurePattern =
   /^(https?:\/\/)?([^.]*\.)?(openai\.azure\.com|azure-api\.net|cognitiveservices\.azure\.com|services\.ai\.azure\.com)(\/.*)?$/;
