@@ -194,6 +194,8 @@ export async function proxyForwarder(
             config: {
               failureMode: "fail-open", // Preserve availability on errors
             },
+            tracer,
+            traceContext,
           });
 
           responseBuilder.addTokenBucketRateLimitHeaders(bucketResult.headers);
@@ -712,6 +714,8 @@ async function log(
               proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
             rateLimiterDO: env.BUCKET_RATE_LIMITER,
             costCents: costInCents,
+            tracer,
+            traceContext,
           });
         }
       }

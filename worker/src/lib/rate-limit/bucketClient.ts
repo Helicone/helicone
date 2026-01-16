@@ -34,6 +34,7 @@ import {
   parseRateLimitPolicy,
   ParsedRateLimitPolicy,
   buildPolicyString,
+  SegmentType,
 } from "./policyParser";
 import {
   extractSegmentIdentifier,
@@ -41,6 +42,7 @@ import {
   createPropertySourceFromHeaders,
 } from "./segmentExtractor";
 import { Result, err, ok } from "../util/results";
+import { DataDogTracer, TraceContext } from "../monitoring/DataDogTracer";
 
 /**
  * Result of a rate limit check
@@ -87,6 +89,32 @@ const DEFAULT_CONFIG: BucketClientConfig = {
   defaultCostCents: 0, // Reject cost-based policies without explicit cost
 };
 
+// Get the segment type as a string for logging
+function getSegmentTypeString(segment: SegmentType): string {
+  if (segment.type === "global") {
+    return "global";
+  } else if (segment.type === "user") {
+    return "user";
+  } else {
+    return segment.name;
+  }
+}
+
+// Get just the raw segment value for logging (without the key= prefix)
+function getRawSegmentValue(
+  properties: Record<string, string>,
+  userId: string | undefined,
+  segment: SegmentType
+): string {
+  if (segment.type === "global") {
+    return "global";
+  } else if (segment.type === "user") {
+    return userId ?? "unknown";
+  } else {
+    return properties[segment.name.toLowerCase()] ?? "unknown";
+  }
+}
+
 /**
  * Check rate limit for a request
  *
@@ -108,6 +136,10 @@ export async function checkBucketRateLimit(params: {
   costCents?: number;
   /** Optional configuration overrides */
   config?: Partial<BucketClientConfig>;
+  /** Optional DataDog tracer for monitoring */
+  tracer?: DataDogTracer;
+  /** Optional trace context for span correlation */
+  traceContext?: TraceContext | null;
 }): Promise<RateLimitCheckResult> {
   const config = { ...DEFAULT_CONFIG, ...params.config };
 
@@ -154,6 +186,34 @@ export async function checkBucketRateLimit(params: {
 
   const segment = segmentResult.data!;
 
+  // Get segment info for logging
+  const segmentTypeStr = getSegmentTypeString(policy.segment);
+  const rawSegmentValue = getRawSegmentValue(
+    params.heliconeProperties,
+    params.userId,
+    policy.segment
+  );
+
+  // Generate a policy_id for grouping in dashboards
+  const policyId = `${params.organizationId}_${segmentTypeStr}_${policy.quota}_${policy.windowSeconds}_${policy.unit}`;
+
+  // Start tracing span if tracer is available
+  const spanId =
+    params.tracer && params.traceContext?.sampled
+      ? params.tracer.startSpan(
+          "bucket_rate_limit.check",
+          "checkBucketRateLimit",
+          "bucket-rate-limiter",
+          {
+            org_id: params.organizationId,
+            policy_id: policyId,
+            segment: segmentTypeStr,
+            segment_value: rawSegmentValue,
+          },
+          params.traceContext
+        )
+      : null;
+
   // For cents-based policies without explicit cost, we do a check-only
   // to see if there's capacity. Actual cost is recorded post-request.
   const isCentsWithoutCost =
@@ -170,6 +230,10 @@ export async function checkBucketRateLimit(params: {
   );
 
   if (cost.error) {
+    if (params.tracer && spanId) {
+      params.tracer.setError(spanId, cost.error);
+      params.tracer.finishSpan(spanId);
+    }
     return createErrorResult(cost.error, config.failureMode, policy);
   }
 
@@ -196,10 +260,31 @@ export async function checkBucketRateLimit(params: {
       checkOnly: isCentsWithoutCost,
     });
 
+    // Add result tags to span
+    if (params.tracer && spanId) {
+      params.tracer.setTag(
+        spanId,
+        "rate_limited",
+        response.allowed ? "false" : "true"
+      );
+      params.tracer.setTag(spanId, "remaining", response.remaining);
+      params.tracer.setTag(spanId, "time_window_seconds", policy.windowSeconds);
+      params.tracer.setTag(spanId, "quota_limit", policy.quota);
+      params.tracer.setTag(spanId, "rate_limit_unit", policy.unit);
+      params.tracer.setTag(spanId, "check_only", isCentsWithoutCost.toString());
+      params.tracer.finishSpan(spanId);
+    }
+
     return createSuccessResult(response, policy);
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown DO error";
+
+    // Set error on span
+    if (params.tracer && spanId) {
+      params.tracer.setError(spanId, error instanceof Error ? error : String(error));
+      params.tracer.finishSpan(spanId);
+    }
 
     return createErrorResult(
       `Rate limiter error: ${errorMessage}`,
@@ -298,6 +383,10 @@ export async function recordBucketUsage(params: {
   heliconeProperties: Record<string, string>;
   rateLimiterDO: DurableObjectNamespace<BucketRateLimiterDO>;
   costCents: number;
+  /** Optional DataDog tracer for monitoring */
+  tracer?: DataDogTracer;
+  /** Optional trace context for span correlation */
+  traceContext?: TraceContext | null;
 }): Promise<void> {
   const policyResult = parseRateLimitPolicy(params.policyHeader);
   if (policyResult.error || !policyResult.data) {
@@ -325,6 +414,35 @@ export async function recordBucketUsage(params: {
   }
 
   const segment = segmentResult.data!;
+
+  // Get segment info for logging
+  const segmentTypeStr = getSegmentTypeString(policy.segment);
+  const rawSegmentValue = getRawSegmentValue(
+    params.heliconeProperties,
+    params.userId,
+    policy.segment
+  );
+
+  // Generate a policy_id for grouping in dashboards
+  const policyId = `${params.organizationId}_${segmentTypeStr}_${policy.quota}_${policy.windowSeconds}_${policy.unit}`;
+
+  // Start tracing span if tracer is available
+  const spanId =
+    params.tracer && params.traceContext?.sampled
+      ? params.tracer.startSpan(
+          "bucket_rate_limit.update",
+          "recordBucketUsage",
+          "bucket-rate-limiter",
+          {
+            org_id: params.organizationId,
+            policy_id: policyId,
+            segment: segmentTypeStr,
+            segment_value: rawSegmentValue,
+          },
+          params.traceContext
+        )
+      : null;
+
   const doKey = buildDurableObjectKey(
     params.organizationId,
     segment,
@@ -336,7 +454,7 @@ export async function recordBucketUsage(params: {
     const doStub = params.rateLimiterDO.get(doId);
 
     // Consume the actual cost
-    await doStub.consume({
+    const response = await doStub.consume({
       capacity: policy.quota,
       windowSeconds: policy.windowSeconds,
       unit: policy.unit,
@@ -344,7 +462,24 @@ export async function recordBucketUsage(params: {
       policyString: policy.policyString,
       checkOnly: false,
     });
-  } catch {
+
+    // Add result tags to span
+    if (params.tracer && spanId) {
+      params.tracer.setTag(spanId, "time_window_seconds", policy.windowSeconds);
+      params.tracer.setTag(spanId, "quota_limit", policy.quota);
+      params.tracer.setTag(spanId, "rate_limit_unit", policy.unit);
+      params.tracer.setTag(spanId, "cost", params.costCents);
+      params.tracer.setTag(spanId, "update_success", "true");
+      params.tracer.setTag(spanId, "new_remaining", response.remaining);
+      params.tracer.finishSpan(spanId);
+    }
+  } catch (error) {
+    // Set error on span
+    if (params.tracer && spanId) {
+      params.tracer.setError(spanId, error instanceof Error ? error : String(error));
+      params.tracer.setTag(spanId, "update_failed", "true");
+      params.tracer.finishSpan(spanId);
+    }
     // Silently fail - usage recording is best-effort
   }
 }
