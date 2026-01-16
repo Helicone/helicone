@@ -5,6 +5,11 @@ import {
   checkRateLimit as checkRateLimitDO,
   updateRateLimitCounter as updateRateLimitCounterDO,
 } from "../clients/DurableObjectRateLimiterClient";
+import {
+  createDataDogTracer,
+  DataDogTracer,
+  TraceContext,
+} from "../monitoring/DataDogTracer";
 
 import { HeliconeProducer } from "../clients/producers/HeliconeProducer";
 import { checkPromptSecurity } from "../clients/PromptSecurityClient";
@@ -59,6 +64,14 @@ export async function proxyForwarder(
   }
   const responseBuilder = new ResponseBuilder();
 
+  // Create DataDog tracer for rate limit monitoring
+  const tracer = createDataDogTracer(env);
+  const traceContext = tracer.startTrace(
+    "proxy.rate_limit",
+    `${provider}:${request.url.pathname}`,
+    { provider }
+  );
+
   const { data: cacheSettings, error: cacheError } = getCacheSettings(
     proxyRequest.requestWrapper.getHeaders()
   );
@@ -112,6 +125,8 @@ export async function proxyForwarder(
                 ctx,
                 rateLimited,
                 response.status,
+                tracer,
+                traceContext,
                 "false", // S3_ENABLED
                 cachedResponse,
                 cacheSettings
@@ -150,6 +165,11 @@ export async function proxyForwarder(
         }
 
         if (finalRateLimitOptions) {
+          // Set org_id on tracer for correlation
+          if (traceContext?.sampled) {
+            tracer.setOrgId(orgData.organizationId);
+          }
+
           try {
             const rateLimitCheckResult = await checkRateLimitDO({
               organizationId: orgData.organizationId,
@@ -158,6 +178,8 @@ export async function proxyForwarder(
               rateLimitOptions: finalRateLimitOptions,
               userId: proxyRequest.userId,
               cost: 1,
+              tracer,
+              traceContext,
             });
             responseBuilder.addRateLimitHeaders(
               rateLimitCheckResult,
@@ -235,6 +257,8 @@ export async function proxyForwarder(
             ctx,
             rateLimited,
             response.status,
+            tracer,
+            traceContext,
             undefined,
             undefined,
             undefined
@@ -306,6 +330,8 @@ export async function proxyForwarder(
           ctx,
           rateLimited,
           moderationRes.response?.status ?? 500,
+          tracer,
+          traceContext,
           undefined,
           undefined,
           undefined
@@ -402,6 +428,8 @@ export async function proxyForwarder(
         ctx,
         rateLimited,
         response.status,
+        tracer,
+        traceContext,
         undefined,
         undefined,
         undefined
@@ -448,6 +476,8 @@ async function log(
   ctx: ExecutionContext,
   rateLimited: boolean,
   statusCode: number,
+  tracer: DataDogTracer,
+  traceContext: TraceContext | null,
   S3_ENABLED?: Env["S3_ENABLED"],
   cachedResponse?: Response,
   cacheSettings?: CacheSettings
@@ -667,8 +697,16 @@ async function log(
             rateLimitOptions: finalRateLimitOptions,
             userId: proxyRequest.userId,
             cost: costInCents,
+            tracer,
+            traceContext,
           });
         }
+      }
+
+      // Finish trace and send to DataDog
+      if (tracer && traceContext?.sampled) {
+        tracer.finishTrace({ rate_limited: rateLimited.toString() });
+        await tracer.sendTrace();
       }
     })
     .catch((error) => {
