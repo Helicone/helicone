@@ -120,9 +120,6 @@ export async function checkRateLimit(
             policy_id: policyId,
             segment: segment ?? "global",
             segment_value: rawSegmentValue,
-            quota: quota.toString(),
-            time_window: time_window.toString(),
-            unit,
           },
           traceContext
         )
@@ -160,11 +157,10 @@ export async function checkRateLimit(
         "rate_limited",
         response.status === "rate_limited" ? "true" : "false"
       );
-      tracer.setTag(spanId, "limit", response.limit);
       tracer.setTag(spanId, "remaining", response.remaining);
-      if (response.reset) {
-        tracer.setTag(spanId, "reset", response.reset);
-      }
+      tracer.setTag(spanId, "time_window_seconds", time_window);
+      tracer.setTag(spanId, "quota_limit", quota);
+      tracer.setTag(spanId, "rate_limit_unit", unit);
       tracer.finishSpan(spanId);
     }
 
@@ -223,10 +219,6 @@ export async function updateRateLimitCounter(
             policy_id: policyId,
             segment: segment ?? "global",
             segment_value: rawSegmentValue,
-            quota: quota.toString(),
-            time_window: time_window.toString(),
-            unit,
-            cost: props.cost.toString(),
           },
           traceContext
         )
@@ -251,6 +243,12 @@ export async function updateRateLimitCounter(
     };
 
     const response = await doStub.processRateLimit(request);
+    if (tracer && spanId) {
+      tracer.setTag(spanId, "time_window_seconds", time_window);
+      tracer.setTag(spanId, "quota_limit", quota);
+      tracer.setTag(spanId, "rate_limit_unit", unit);
+      tracer.setTag(spanId, "cost", props.cost);
+    }
     if (response.status !== "ok") {
       console.error("[DORateLimit] Update failed:", response.status);
       if (tracer && spanId) {
