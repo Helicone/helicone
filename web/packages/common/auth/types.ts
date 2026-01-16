@@ -50,6 +50,7 @@ export type HeliconeUserResult = PromiseGenericResult<HeliconeUser>;
 export type HeliconeOrg = {
   color: string;
   created_at: string | null;
+  default_time_filter: string | null;
   domain: string | null;
   governance_settings: any | null;
   gateway_discount_enabled: boolean;

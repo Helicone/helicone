@@ -20,6 +20,7 @@ export type UpdateOrganizationParams = Pick<
   | "limits"
   | "organization_type"
   | "onboarding_status"
+  | "default_time_filter"
 > & {
   variant?: string;
 };

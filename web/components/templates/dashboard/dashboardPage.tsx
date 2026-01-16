@@ -97,6 +97,9 @@ const DashboardPage = (props: DashboardPageProps) => {
 
   // TODO: Move this to a hook and consolidate with the request page
   // Make the hook called like "useTimeFilter"
+  // Get the default time filter from org settings, fallback to "7d"
+  const defaultTimeFilter = (orgContext?.currentOrg?.default_time_filter ?? "7d") as TimeInterval;
+
   const getTimeFilter = () => {
     const currentTimeFilter = searchParams.get("t");
     let range: TimeFilter;
@@ -112,7 +115,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       };
     } else {
       range = {
-        start: getTimeIntervalAgo((currentTimeFilter as TimeInterval) || "1m"),
+        start: getTimeIntervalAgo((currentTimeFilter as TimeInterval) || defaultTimeFilter),
         end: new Date(),
       };
     }
@@ -125,7 +128,7 @@ const DashboardPage = (props: DashboardPageProps) => {
       if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
         return "custom";
       } else {
-        return currentTimeFilter || "1m";
+        return currentTimeFilter || defaultTimeFilter;
       }
     })(),
   );
@@ -146,6 +149,19 @@ const DashboardPage = (props: DashboardPageProps) => {
   const { unauthorized, currentTier } = useGetUnauthorized(user.id);
 
   const [isLive, setIsLive] = useLocalStorage("isLive-DashboardPage", false);
+
+  // Update time filter when org's default changes and no URL param is set
+  useEffect(() => {
+    const currentTimeFilter = searchParams.get("t");
+    if (!currentTimeFilter && orgContext?.currentOrg?.default_time_filter) {
+      const newDefaultInterval = orgContext.currentOrg.default_time_filter as TimeInterval;
+      setInterval(newDefaultInterval);
+      setTimeFilter({
+        start: getTimeIntervalAgo(newDefaultInterval),
+        end: new Date(),
+      });
+    }
+  }, [orgContext?.currentOrg?.default_time_filter]);
 
   useEffect(() => {
     if (orgContext?.currentOrg?.tier === "demo") {

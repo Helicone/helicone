@@ -1614,6 +1614,7 @@ export type Database = {
           color: string
           created_at: string | null
           credit_limit: number
+          default_time_filter: string | null
           domain: string | null
           gateway_discount_enabled: boolean
           governance_settings: Json | null
@@ -1647,6 +1648,7 @@ export type Database = {
           color?: string
           created_at?: string | null
           credit_limit?: number
+          default_time_filter?: string | null
           domain?: string | null
           gateway_discount_enabled?: boolean
           governance_settings?: Json | null
@@ -1680,6 +1682,7 @@ export type Database = {
           color?: string
           created_at?: string | null
           credit_limit?: number
+          default_time_filter?: string | null
           domain?: string | null
           gateway_discount_enabled?: boolean
           governance_settings?: Json | null
