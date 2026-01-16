@@ -1,0 +1,149 @@
+As LLMs became smarter, it became clear that APIs were built for humans, not for models.
+
+Model Context Protocol (MCP) emerged to fill that gap, not by replacing APIs, but by standardizing how models interact with them through a consistent, discoverable protocol.
+
+## What Is MCP (and Why It Exists)
+
+**Model Context Protocol (MCP)** is a standard for connecting LLMs to external tools and services through a consistent, machine-readable interface. Similar to APIs, but for LLMs.
+
+MCP defines a **shared contract** between:
+
+* LLMs (i.e. Sonnet 4.5)
+* Tool clients (i.e. apps)
+* Tool servers (i.e. Google, maintained by service providers or the community)
+
+That way, **it's easy for LLMs to discover tools at runtime and execute better autonomous actions.**
+
+*-- For a comprehensive technical guide on getting started with MCP, see our [full developer guide](https://www.helicone.ai/blog/mcp-full-developer-guide) or learn how to [build your first MCP server](https://www.helicone.ai/blog/building-first-mcp-for-developers).*
+
+At a high level:
+
+```
+LLM -> MCP Client (your app) -> MCP Server (i.e. Google) -> External Service (i.e. Google API)
+```
+
+## MCP vs APIs
+
+As you can see, MCPs don't replace APIs. MCP sits *above* them.
+
+APIs are for humans and applications. MCP is for models.
+
+MCP assumes:
+
+* Tools are **discovered** at runtime,
+* Inputs and outputs are **structured** for machines,
+* Models decide **when** and **how** to use tools,
+* Servers are maintained by the service owner who knows their API best.
+
+| APIs                           | MCP                            |
+| ------------------------------ | ------------------------------ |
+| Designed for developers        | Designed for models            |
+| Custom integration per service | Standard interface everywhere  |
+| App owns maintenance           | Tool provider owns maintenance |
+| Hard-coded behavior            | Model-driven behavior          |
+
+## The Role of MCP in Agents
+
+MCP improves agent systems in a few key ways:
+
+### 1. Tool discovery instead of hardcoding
+
+**MCP servers expose what they can do.** Agents don't need prior knowledge of every function signature.
+
+This enables:
+
+* Agents to make dynamic decisions
+* Pluggable tools from external servers
+* No need to redeploy when APIs change because the MCP maintainers adapt this for you
+
+### 2. Clear separation of concerns
+
+With MCP:
+
+* The **agent** decides *what* to do,
+* The **tool client** manages the connection,
+* The **tool server** handles auth, validation, and API calls.
+
+Each layer does one thing well.
+
+### 3. Multi-step, multi-tool workflows
+
+Modern agents rarely call one tool and stop. They:
+
+1. fetch context,
+2. transform it,
+3. act somewhere else.
+
+MCP supports this naturally. The agent can chain tool calls across different MCP servers **without every integration being bespoke.**
+
+<CallToAction
+  title="Ready to build AI agents?"
+  description="Join our free 7-day email course: From Engineer to AI Engineer. You'll learn how to build, monitor, and deploy AI agents with MCP, complete with working code examples."
+  primaryButtonText="Join the Course"
+  primaryButtonLink="https://www.helicone.ai/agent-course"
+/>
+
+## MCP in Practice
+
+MCP is most valuable when tools are:
+
+* External
+* Stateful
+* Not owned by you
+
+Some strong use cases:
+
+* **Content workflows** (drafting, scheduling, publishing)
+* **Developer tooling** (GitHub, Linear, CI systems)
+* **Internal ops** (Slack, Notion, Sheets)
+* **Autonomous background agents** (cron-driven, event-driven)
+
+To get started with the Helicone MCP server for querying your observability data, see our [MCP integration documentation](https://docs.helicone.ai/integrations/tools/mcp).
+
+## How to Trace MCP Workflows?
+
+Because agents are calling on external servers when using MCP tools, **MCP observability tends to be a black box.**
+
+We can review when a model reasons, calls multiple tools, handles retries, fails, and recovers. But we can't see the actual tool call beyond its inputs and outputs because this is **logged on the external server.**
+
+Once you introduce MCP, tool calls stop being “side effects” and start being first-class events in an agent's lifecycle.
+
+This is where **Sessions** come in. Sessions let you group:
+
+* Model calls
+* Tool calls
+* MCP interactions
+* Retries and failures
+
+Instead of seeing: `“The model failed”`
+
+You see: `“The model called Tool A → Tool B → Tool C, Tool B timed out, the model adapted, and the workflow recovered.”`
+
+For MCP-based agents, observability is critical so debugging is not "guessing":
+
+* Which tool caused this agent to fail?
+* How often does a given MCP server error?
+* Are retries coming from the model or the tool?
+* What does a "successful" agent run actually look like?
+
+*-- To implement session tracking for your MCP workflows, see our [Sessions documentation](https://docs.helicone.ai/features/sessions).*
+
+## Conclusion
+
+Similar to APIs, the real impact of MCP is the ecosystem it enables for LLMs.
+
+When service providers publish MCP servers, agents can dynamically discover and use their tools.
+
+This means we stop building one-off agent demos and can start building interconnected **systems**.
+
+APIs gave us composable software.
+MCP gives us composable *capabilities* for models.
+
+---
+
+**Ready to start building with MCP?**
+
+- Set up the [Helicone MCP server](https://docs.helicone.ai/integrations/tools/mcp) in your product to query your observability data and train your agent to make better desicions
+- Learn how to [build your first MCP](https://www.helicone.ai/blog/building-first-mcp-for-developers) from scratch
+- Implement [session tracking](https://docs.helicone.ai/features/sessions) to monitor your MCP workflows
+- Explore our [AI agents guide](https://docs.helicone.ai/guides/cookbooks/ai-agents) for building autonomous systems

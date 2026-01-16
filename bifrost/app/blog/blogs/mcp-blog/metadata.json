@@ -1,0 +1,11 @@
+{
+  "title": "MCPs: What, Why, and How",
+  "title1": "MCPs: What, Why, and How",
+  "title2": "MCPs: What, Why, and How",
+  "description": "Model Context Protocol (MCP) provides a standardized interface for connecting Large Language Models to external data sources and tools. Here's a rundown of what it is, why to use it, and how to implement.",
+  "images": "/static/blog/mcp-blog/cover.webp",
+  "time": "5 minute read",
+  "author": "Juliette Chevalier",
+  "date": "January 14, 2026",
+  "badge": "Frameworks & Tools"
+}
