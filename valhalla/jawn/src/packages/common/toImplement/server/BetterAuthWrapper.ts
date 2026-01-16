@@ -191,6 +191,9 @@ limit 1
       percentLog: org?.data?.[0]?.percent_to_log ?? 100_000,
       has_onboarded: org?.data?.[0]?.has_onboarded ?? false,
       has_integrated: org?.data?.[0]?.has_integrated ?? false,
+      freeLimitExceeded:
+        (org?.data?.[0] as { free_limit_exceeded?: boolean })
+          ?.free_limit_exceeded ?? false,
     };
 
     return ok(orgResult);

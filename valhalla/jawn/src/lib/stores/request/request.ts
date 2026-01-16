@@ -351,6 +351,11 @@ async function mapLLMCalls(
         return heliconeRequest;
       }
 
+      // If free tier limit exceeded, bodies were not stored - return as is
+      if (heliconeRequest.storage_location === "not_stored_exceeded_free") {
+        return heliconeRequest;
+      }
+
       const { data: signedBodyUrl, error: signedBodyUrlErr } =
         await s3Client.getRequestResponseBodySignedUrl(
           orgId,

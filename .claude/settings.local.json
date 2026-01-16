@@ -104,7 +104,8 @@
       "WebFetch(domain:docs.stripe.com)",
       "WebFetch(domain:ai.google.dev)",
       "Bash(npx tsoa:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(lsof:*)"
     ],
     "deny": []
   },

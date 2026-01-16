@@ -2575,6 +2575,7 @@ Json: JsonObject;
     /** @enum {string} */
     BodyMappingType: "OPENAI" | "NO_MAPPING" | "RESPONSES";
     HeliconeMeta: {
+      freeLimitExceeded?: boolean;
       aiGatewayBodyMapping?: components["schemas"]["BodyMappingType"];
       providerModelId?: string;
       gatewayModel?: string;
@@ -2641,6 +2642,11 @@ Json: JsonObject;
     };
     Log: {
       response: {
+        model?: string;
+        /** Format: double */
+        completionTokens?: number;
+        /** Format: double */
+        promptTokens?: number;
         /** Format: double */
         cost?: number;
         /** Format: double */

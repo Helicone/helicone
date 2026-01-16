@@ -16,8 +16,10 @@ import {
   Coins,
   FileText,
   ArrowUpRight,
+  AlertTriangle,
 } from "lucide-react";
 import { useTheme } from "next-themes";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import ChangelogModal from "../ChangelogModal";
@@ -286,6 +288,33 @@ const DesktopSidebar = ({
             >
               {/* Navigation items */}
               <div className="flex flex-col">
+                {/* Free Limit Warning - Show at top when exceeded */}
+                {orgContext?.currentOrg?.free_limit_exceeded &&
+                  orgContext?.currentOrg?.tier === "free" &&
+                  !isCollapsed && (
+                    <div className="mx-2 mb-2 mt-2 rounded-lg border border-destructive/50 bg-destructive/10 p-3">
+                      <div className="flex items-center gap-2 text-destructive">
+                        <AlertTriangle size={16} />
+                        <span className="text-sm font-medium">
+                          Free limit reached
+                        </span>
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Request/response bodies are no longer being stored.
+                        Upgrade to continue logging full data.
+                      </p>
+                      <Link href="/settings/billing">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mt-2 w-full"
+                        >
+                          Upgrade Now
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
+
                 {/* Wrapped 2025 Button - Only show if org has data */}
                 {hasWrappedData && (
                   <div className="px-2 pt-2">
@@ -364,6 +393,7 @@ const DesktopSidebar = ({
                 {/* InfoBox */}
                 {canShowInfoBox &&
                   orgContext?.currentOrg?.tier === "free" &&
+                  !orgContext?.currentOrg?.free_limit_exceeded &&
                   (isCollapsed ? (
                     <div className="px-2 py-2">
                       <ProFeatureWrapper featureName="pro" enabled={false}>

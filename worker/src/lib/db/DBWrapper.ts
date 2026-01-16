@@ -310,6 +310,7 @@ export class DBWrapper {
         tier: string;
         id: string;
         percentLog: number;
+        freeLimitExceeded: boolean;
       },
       string
     >
@@ -323,10 +324,11 @@ export class DBWrapper {
         tier: string;
         id: string;
         percentLog: number;
+        freeLimitExceeded: boolean;
       },
       string
     >(
-      `org-${authParams.data.organizationId}`,
+      `org-v2-${authParams.data.organizationId}`,
       this.secureCacheEnv,
       async () => {
         const { data, error } = await this.supabaseClient
@@ -342,9 +344,12 @@ export class DBWrapper {
           tier: data?.tier ?? "free",
           id: data?.id ?? "",
           percentLog: data?.percent_to_log ?? 100_000,
+          freeLimitExceeded:
+            (data as { free_limit_exceeded?: boolean })?.free_limit_exceeded ??
+            false,
         });
       },
-      43200 // 12 hours
+      600 // 10 minutes - shorter TTL so freeLimitExceeded flag updates quickly after upgrade
     );
   }
 

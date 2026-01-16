@@ -45,9 +45,16 @@ export class S3ReaderHandler extends AbstractLogHandler {
 
       if (content.error || !content.data) {
         if (content.error?.notFoundErr) {
-          // Not found is unrecoverable, we will have no request/response to log
-          // Do not process further, do not send to DLQ
-          return ok(`Content not found in S3: ${signedUrl.data}`);
+          // Content not found in S3 - this can happen when:
+          // 1. Free tier limit exceeded (bodies not stored)
+          // 2. Omit headers set (bodies not stored)
+          // Continue processing with empty bodies - metadata will still be logged
+          console.log(
+            `S3 content not found for request ${context.message.log.request.id}, continuing with empty bodies`
+          );
+          context.rawLog.rawRequestBody = undefined;
+          context.rawLog.rawResponseBody = undefined;
+          return await super.handle(context);
         }
         return err(
           `Error fetching content from S3: ${JSON.stringify(content.error)}`
