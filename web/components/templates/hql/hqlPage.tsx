@@ -341,6 +341,7 @@ function HQLPage() {
             "TOKENS: Use 'prompt_tokens' and 'completion_tokens' for token counts. 'total_tokens' = prompt_tokens + completion_tokens.",
             "STATUS: The 'status' column contains the HTTP status code (200 = success, 4xx/5xx = errors).",
             "LATENCY: Use 'latency' for request latency in milliseconds.",
+            "BODY CONTENT: The 'request_body' and 'response_body' columns contain S3 references, NOT actual content. To fetch the actual body content, use getBody(request_body) or getBody(response_body). Example: SELECT getBody(request_body) as request, getBody(response_body) as response FROM request_response_rmt LIMIT 10",
           ],
           exampleQueries: [
             `Total cost by day: SELECT toDate(request_created_at) as date, SUM(cost) / ${COST_PRECISION_MULTIPLIER} as total_cost_usd FROM request_response_rmt GROUP BY date ORDER BY date`,

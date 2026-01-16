@@ -195,6 +195,24 @@ function TableList({ tables }: { tables: any[] }) {
 
   return (
     <>
+      {/* Important Notes */}
+      <div className="mb-4 rounded-md border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-950/20">
+        <h4 className="mb-2 text-xs font-semibold text-blue-800 dark:text-blue-200">
+          Important Notes
+        </h4>
+        <ul className="space-y-1.5 text-xs text-blue-700 dark:text-blue-300">
+          <li>
+            <span className="font-medium">Cost:</span> Divide by 1,000,000,000
+            to get USD (e.g., <code className="rounded bg-blue-100 px-1 dark:bg-blue-900">SUM(cost) / 1000000000</code>)
+          </li>
+          <li>
+            <span className="font-medium">Bodies:</span> Use{" "}
+            <code className="rounded bg-blue-100 px-1 dark:bg-blue-900">getBody(request_body)</code> or{" "}
+            <code className="rounded bg-blue-100 px-1 dark:bg-blue-900">getBody(response_body)</code> to fetch from S3
+          </li>
+        </ul>
+      </div>
+
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-medium text-muted-foreground">
           Tables ({tables.length})
