@@ -179,6 +179,11 @@ export async function proxyForwarder(
       const db = new DBWrapper(env, auth);
       const { data: orgData, error: orgError } = await db.getAuthParams();
       if (orgError === null && orgData?.organizationId) {
+        // Set org_id on tracer for correlation
+        if (traceContext?.sampled) {
+          tracer.setOrgId(orgData.organizationId);
+        }
+
         try {
           const bucketResult = await checkBucketRateLimit({
             policyHeader: effectivePolicyHeader,
