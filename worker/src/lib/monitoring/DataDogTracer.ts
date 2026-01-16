@@ -65,9 +65,6 @@ export class DataDogTracer {
     forceSample = false
   ): TraceContext | null {
     if (this.spans.size >= MAX_SPANS) {
-      console.log(
-        `[DataDogTracer] Max spans (${MAX_SPANS}) reached, skipping trace`
-      );
       return null;
     }
     // Check kill switch and config
@@ -78,9 +75,6 @@ export class DataDogTracer {
     // Apply sampling decision (unless forced)
     const sampled = forceSample || Math.random() < this.config.sampleRate;
     if (!sampled) {
-      console.log(
-        `[DataDogTracer] Trace not sampled (rate: ${this.config.sampleRate})`
-      );
       return { trace_id: "", sampled: false, tags: {} };
     }
 
@@ -103,10 +97,6 @@ export class DataDogTracer {
     };
 
     this.spans.set(this.rootSpanId, span);
-
-    console.log(
-      `[DataDogTracer] Started trace: ${name} (trace_id: ${this.traceId}, span_id: ${this.rootSpanId})`
-    );
 
     return {
       trace_id: this.traceId,
@@ -152,9 +142,6 @@ export class DataDogTracer {
     };
 
     this.spans.set(spanId, span);
-    console.log(
-      `[DataDogTracer] Started span: ${name} (span_id: ${spanId}, parent_id: ${parentSpanId}, service: ${service || this.config.service})`
-    );
     return spanId;
   }
 
@@ -183,10 +170,6 @@ export class DataDogTracer {
     if (typeof error !== "string" && error.stack) {
       span.meta["error.stack"] = error.stack;
     }
-
-    console.log(
-      `[DataDogTracer] Error set on span: ${span.name} (span_id: ${spanId}, error: ${errorMessage})`
-    );
   }
 
   finishSpan(spanId: string | null, tags?: Record<string, string>): void {
@@ -196,15 +179,10 @@ export class DataDogTracer {
     if (!span) return;
 
     span.duration = this.nowNanos() - span.start;
-    const durationMs = span.duration / 1_000_000;
 
     if (tags) {
       Object.assign(span.meta, tags);
     }
-
-    console.log(
-      `[DataDogTracer] Finished span: ${span.name} (span_id: ${spanId}, duration: ${durationMs.toFixed(2)}ms)`
-    );
   }
 
   finishTrace(tags?: Record<string, string>): void {
@@ -218,9 +196,6 @@ export class DataDogTracer {
   async sendTrace(): Promise<void> {
     try {
       if (this.DISABLED || !this.config.enabled || this.spans.size === 0) {
-        if (this.spans.size === 0) {
-          console.log("[DataDogTracer] No spans to send, skipping");
-        }
         return;
       }
 
@@ -229,10 +204,6 @@ export class DataDogTracer {
         console.warn("[DataDogTracer] No API key configured, skipping trace");
         return;
       }
-
-      console.log(
-        `[DataDogTracer] Preparing to send ${this.spans.size} span(s) to DataDog`
-      );
 
       // Convert spans to structured log entries
       const logEntries = Array.from(this.spans.values()).map((span) => {
@@ -278,18 +249,6 @@ export class DataDogTracer {
         };
       });
 
-      // Log summary of spans being sent
-      const spanSummary = logEntries.map((entry) => ({
-        operation: entry.operation,
-        resource: entry.resource,
-        duration_ms: entry.duration_ms,
-        error: entry.error,
-      }));
-      console.log(
-        `[DataDogTracer] Sending spans:`,
-        JSON.stringify(spanSummary)
-      );
-
       // Send to Datadog Logs API (accepts array of log entries)
       const response = await fetch(`${this.config.endpoint}/api/v2/logs`, {
         method: "POST",
@@ -301,14 +260,7 @@ export class DataDogTracer {
       });
 
       if (!response.ok) {
-        const responseText = await response.text();
-        console.error(
-          `[DataDogTracer] Failed to send trace: ${response.status} - ${responseText}`
-        );
-      } else {
-        console.log(
-          `[DataDogTracer] Successfully sent ${logEntries.length} span(s) to DataDog (trace_id: ${this.traceId})`
-        );
+        console.error("[DataDogTracer] Failed to send trace:", response.status);
       }
     } catch (error) {
       // Silently ignore errors - monitoring must never break the app
@@ -354,11 +306,6 @@ export function createDataDogTracer(env: {
   // Support both DATADOG_APM_ENABLED and DATADOG_ENABLED
   const enabled =
     (env.DATADOG_APM_ENABLED ?? env.DATADOG_ENABLED ?? "false") === "true";
-  const hasApiKey = !!env.DATADOG_API_KEY;
-
-  console.log(
-    `[DataDogTracer] Initializing: enabled=${enabled}, hasApiKey=${hasApiKey}, endpoint=${env.DATADOG_APM_ENDPOINT || "default"}`
-  );
 
   return new DataDogTracer({
     enabled,

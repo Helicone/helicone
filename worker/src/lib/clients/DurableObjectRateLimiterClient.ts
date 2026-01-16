@@ -52,6 +52,21 @@ async function getSegmentKeyValue(
   }
 }
 
+// Get just the raw segment value for logging (without the key= prefix)
+function getRawSegmentValue(
+  properties: HeliconeProperties,
+  userId: string | undefined,
+  segment: string | undefined
+): string {
+  if (segment === undefined) {
+    return "global";
+  } else if (segment === "user") {
+    return userId ?? "unknown";
+  } else {
+    return properties[segment.toLowerCase()] ?? "unknown";
+  }
+}
+
 function getDurableObjectId(
   namespace: DurableObjectNamespace<RateLimiterDO>,
   organizationId: string,
@@ -75,6 +90,24 @@ export async function checkRateLimit(
   } = props;
   const { time_window, segment, quota, unit } = rateLimitOptions;
 
+  // Get segment value for DO key (includes prefix like "tenant-id=value")
+  const segmentKeyValue = await getSegmentKeyValue(
+    heliconeProperties,
+    userId,
+    segment
+  );
+
+  // Get raw segment value for logging (just the value, e.g., "tenant-1")
+  const rawSegmentValue = getRawSegmentValue(
+    heliconeProperties,
+    userId,
+    segment
+  );
+
+  // Generate a policy_id for grouping in dashboards
+  // Format: org_segment_quota_window_unit (e.g., "abc123_tenant-id_100_60_request")
+  const policyId = `${organizationId}_${segment ?? "global"}_${quota}_${time_window}_${unit}`;
+
   // Start tracing span if tracer is available
   const spanId =
     tracer && traceContext?.sampled
@@ -84,7 +117,9 @@ export async function checkRateLimit(
           "rate-limiter",
           {
             org_id: organizationId,
+            policy_id: policyId,
             segment: segment ?? "global",
+            segment_value: rawSegmentValue,
             quota: quota.toString(),
             time_window: time_window.toString(),
             unit,
@@ -92,12 +127,6 @@ export async function checkRateLimit(
           traceContext
         )
       : null;
-
-  const segmentKeyValue = await getSegmentKeyValue(
-    heliconeProperties,
-    userId,
-    segment
-  );
 
   const doId = getDurableObjectId(
     rateLimiterDO,
@@ -165,6 +194,23 @@ export async function updateRateLimitCounter(
   } = props;
   const { time_window, segment, quota, unit } = rateLimitOptions;
 
+  // Get segment value for DO key (includes prefix like "tenant-id=value")
+  const segmentKeyValue = await getSegmentKeyValue(
+    heliconeProperties,
+    userId,
+    segment
+  );
+
+  // Get raw segment value for logging (just the value, e.g., "tenant-1")
+  const rawSegmentValue = getRawSegmentValue(
+    heliconeProperties,
+    userId,
+    segment
+  );
+
+  // Generate a policy_id for grouping in dashboards
+  const policyId = `${organizationId}_${segment ?? "global"}_${quota}_${time_window}_${unit}`;
+
   // Start tracing span if tracer is available
   const spanId =
     tracer && traceContext?.sampled
@@ -174,7 +220,9 @@ export async function updateRateLimitCounter(
           "rate-limiter",
           {
             org_id: organizationId,
+            policy_id: policyId,
             segment: segment ?? "global",
+            segment_value: rawSegmentValue,
             quota: quota.toString(),
             time_window: time_window.toString(),
             unit,
@@ -183,12 +231,6 @@ export async function updateRateLimitCounter(
           traceContext
         )
       : null;
-
-  const segmentKeyValue = await getSegmentKeyValue(
-    heliconeProperties,
-    userId,
-    segment
-  );
 
   const doId = getDurableObjectId(
     rateLimiterDO,
