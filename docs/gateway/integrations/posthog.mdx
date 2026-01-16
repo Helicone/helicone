@@ -1,0 +1,145 @@
+---
+title: "PostHog Integration"
+sidebarTitle: "PostHog"
+description: "Integrate Helicone AI Gateway with PostHog to automatically export LLM request events to your PostHog analytics platform for unified product analytics."
+"twitter:title": "PostHog Integration - Helicone OSS LLM Observability"
+iconType: "solid"
+---
+
+import { strings } from "/snippets/strings.mdx";
+import Star from "/snippets/star.mdx";
+import RequestIntegration from "/snippets/request-integration.mdx";
+
+## Introduction
+
+[PostHog](https://www.posthog.com/) is a comprehensive product analytics platform that helps you understand user behavior and product performance.
+
+## {strings.howToIntegrate}
+
+<Steps>
+  <Step title={strings.generateKey}>
+    <p>Sign up at <a href="https://www.helicone.ai" target="_blank">helicone.ai</a> and generate an <a href="https://us.helicone.ai/settings/api-keys" target="_blank">API key</a>.</p>
+    <p>Create a <a href="https://posthog.com" target="_blank">Posthog account</a> if you don't have one. Get your Project API Key from your <a href="https://us.posthog.com/settings/project" target="_blank">PostHog project settings</a>.</p>
+
+    ```env
+    HELICONE_API_KEY=sk-helicone-...
+    POSTHOG_PROJECT_API_KEY=phc_...
+
+    # Optional: PostHog host (defaults to https://app.posthog.com)
+    # Only needed if using self-hosted PostHog
+    # POSTHOG_CLIENT_API_HOST=https://app.posthog.com
+    ```
+  </Step>
+
+  <Step title={strings.installSDK('OpenAI')}>
+    <CodeGroup>
+    ```bash TypeScript
+    npm install openai
+    # or
+    yarn add openai
+    ```
+
+    ```bash Python
+    pip install openai
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Configure OpenAI client with Helicone AI Gateway">
+    <CodeGroup>
+    ```typescript TypeScript
+    import { OpenAI } from "openai";
+    import dotenv from "dotenv";
+
+    dotenv.config();
+
+    const client = new OpenAI({
+      baseURL: "https://ai-gateway.helicone.ai",
+      apiKey: process.env.HELICONE_API_KEY,
+      defaultHeaders: {
+        "Helicone-Posthog-Key": POSTHOG_PROJECT_API_KEY,
+        "Helicone-Posthog-Host": POSTHOG_CLIENT_API_HOST
+      },
+    });
+    ```
+
+    ```python Python
+    import os
+    from openai import OpenAI
+    from dotenv import load_dotenv
+
+    load_dotenv()
+
+    client = OpenAI(
+        base_url="https://ai-gateway.helicone.ai",
+        api_key=os.getenv("HELICONE_API_KEY"),
+        default_headers={
+            "Helicone-Posthog-Key": os.getenv("POSTHOG_PROJECT_API_KEY"),
+            "Helicone-Posthog-Host": os.getenv("POSTHOG_CLIENT_API_HOST")
+        },
+    )
+    ```
+    </CodeGroup>
+
+    <div dangerouslySetInnerHTML={{ __html: strings.modelRegistryDescription }} />
+  </Step>
+
+  <Step title={strings.useTheSDK('OpenAI')}>
+    Your existing OpenAI code continues to work without any changes. Events will automatically be exported to PostHog.
+
+    <CodeGroup>
+    ```typescript TypeScript
+      const response = await client.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: "Hello, world!" }],
+        temperature: 0.7,
+      });
+
+      console.log(response.choices[0]?.message?.content);
+    ```
+
+    ```python Python
+      response = client.chat.completions.create(
+          model="gpt-4o-mini",
+          messages=[{"role": "user", "content": "Hello, world!"}],
+          temperature=0.7,
+      )
+
+      print("Completion:", response.choices[0].message.content)
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title={strings.verifyInHelicone}>
+    <div dangerouslySetInnerHTML={{ __html: strings.verifyInHeliconeDesciption("Posthog") }} />
+
+    1. Go to your <a href="https://us.posthog.com/events" target="_blank">PostHog Events</a> page
+    2. Look for events with the <code>helicone_request</code> event name
+    3. Each event contains metadata about the LLM request including:
+       - Model used
+       - Token counts
+       - Latency
+       - Cost
+       - Request/response data
+  </Step>
+</Steps>
+
+<Star />
+<RequestIntegration />
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="AI Gateway Overview" icon="arrow-progress" href="/gateway/overview">
+    Learn about Helicone's AI Gateway features and capabilities
+  </Card>
+  <Card title="Custom Properties" icon="tags" href="/features/advanced-usage/custom-properties">
+    Add metadata to track and filter your requests
+  </Card>
+  <Card title="Sessions" icon="link" href="/features/sessions">
+    Track multi-turn conversations and user sessions
+  </Card>
+  <Card title="Model Registry" icon="database" href="https://helicone.ai/models">
+    Browse all available models and providers
+  </Card>
+</CardGroup>
