@@ -1,4 +1,26 @@
-# Running locally
+# Docker Setup
+
+## Quick Start: All-in-One Container
+
+For the simplest self-hosted setup, use the all-in-one Docker image:
+
+```bash
+docker pull helicone/helicone-all-in-one:latest
+docker run -d --name helicone -p 3000:3000 -p 8585:8585 -p 9080:9080 helicone/helicone-all-in-one:latest
+```
+
+**Ports:**
+- `3000` - Web dashboard
+- `8585` - Jawn API + LLM proxy
+- `9080` - MinIO S3 storage (for request/response bodies)
+
+For production deployments with custom domains, see the [official self-hosting docs](https://docs.helicone.ai/getting-started/self-host/docker).
+
+---
+
+# Local Development
+
+## Running with Docker Compose
 
 ```
 cp .env.example .env
@@ -8,12 +30,12 @@ docker compose up
 NOTE: To create a user go to http://localhost:54323/project/default/auth/users and add your account.
 You can use this account to sign into Helicone at localhost:3000 via your browser.
 
-Default URLs:
+**Default URLs (Development):**
 
 - Helicone Webpage: localhost:3000
-- Helicone OpenAI Proxy: localhost:8787
-- Helicone API: localhost:8788
-- Helicone GATEWAY: localhost:8790
+- Helicone Jawn API/Proxy: localhost:8585
+- OpenAI Proxy Worker: localhost:8787 (when running workers separately)
+- Helicone API Worker: localhost:8788 (when running workers separately)
 
 # Maintenance
 
