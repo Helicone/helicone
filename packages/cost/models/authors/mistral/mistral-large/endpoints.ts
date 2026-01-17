@@ -34,6 +34,38 @@ export const endpoints = {
       "*": {},
     },
   },
+  // io.net Intelligence endpoints
+  "mistral-large-2411:io-intelligence": {
+    providerModelId: "mistralai/Mistral-Large-Instruct-2411",
+    provider: "io-intelligence",
+    author: "mistral",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000002, // $2.00 per 1M tokens
+        output: 0.000006, // $6.00 per 1M tokens
+      },
+    ],
+    contextLength: 128_000,
+    maxCompletionTokens: 32_768,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "response_format",
+      "structured_outputs",
+      "tools",
+      "tool_choice",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<
     `${MistralLargeModelName}:${ModelProviderName}` | MistralLargeModelName,

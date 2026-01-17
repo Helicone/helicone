@@ -696,6 +696,38 @@ export const endpoints = {
       "*": {},
     },
   },
+  // io.net Intelligence endpoints
+  "llama-4-maverick:io-intelligence": {
+    providerModelId: "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
+    provider: "io-intelligence",
+    author: "meta-llama",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000015, // $0.15 per 1M tokens
+        output: 0.0000006, // $0.60 per 1M tokens
+      },
+    ],
+    quantization: "fp8",
+    contextLength: 430_000,
+    maxCompletionTokens: 131_072,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "response_format",
+      "tools",
+      "tool_choice",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${LlamaModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

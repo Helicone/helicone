@@ -28,7 +28,7 @@ export const models = {
     author: "deepseek",
     description:
       "DeepSeek-V3.2-Exp is an experimental model introducing the groundbreaking DeepSeek Sparse Attention (DSA) mechanism for enhanced long-context processing efficiency. Built on V3.1-Terminus, DSA achieves fine-grained sparse attention while maintaining identical output quality. This delivers substantial computational efficiency improvements without compromising accuracy. Comprehensive benchmarks confirm V3.2-Exp matches V3.1-Terminus performance, proving efficiency gains don't sacrifice capability. As both a powerful tool and research platform, it establishes new paradigms for efficient long-context AI processing.",
-    contextLength: 163_840,
+    contextLength: 128_000,
     maxOutputTokens: 65_536,
     created: "2025-09-22T00:00:00.000Z",
     modality: { inputs: ["text"], outputs: ["text"] },

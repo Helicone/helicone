@@ -21,6 +21,7 @@ export function getUsageProcessor(
     case "chutes":
     case "deepinfra":
     case "helicone":
+    case "io-intelligence":
     case "mistral":
     case "nebius":
     case "novita":

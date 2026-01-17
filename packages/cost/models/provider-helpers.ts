@@ -46,6 +46,8 @@ export function heliconeProviderToModelProviderName(
       return "openrouter";
     case "DEEPINFRA":
       return "deepinfra";
+    case "IO_INTELLIGENCE":
+      return "io-intelligence";
     case "MISTRAL":
       return "mistral";
     case "NOVITA":

@@ -1675,6 +1675,30 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "deepseek-reasoner:io-intelligence": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 64000,
+      "modelId": "deepseek-ai/DeepSeek-R1-0528",
+      "parameters": [
+        "frequency_penalty",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "stream",
+        "temperature",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "io-intelligence",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
     "deepseek-reasoner:openrouter": {
       "context": 163840,
       "crossRegion": false,
@@ -1826,6 +1850,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
       "provider": "canopywave",
       "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "deepseek-v3.2:io-intelligence": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "deepseek-ai/DeepSeek-V3.2",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "io-intelligence",
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -2921,6 +2968,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "llama-4-maverick:io-intelligence": {
+      "context": 430000,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "io-intelligence",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
     "llama-4-maverick:novita": {
       "context": 1048576,
       "crossRegion": false,
@@ -3153,6 +3223,30 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "mistral/mistral-large": {
+    "mistral-large-2411:io-intelligence": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "mistralai/Mistral-Large-Instruct-2411",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "io-intelligence",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
     "mistral-large-2411:mistral": {
       "context": 128000,
       "crossRegion": false,
@@ -5567,6 +5661,38 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "gpt-oss-120b:io-intelligence": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "openai/gpt-oss-120b",
+      "parameters": [
+        "frequency_penalty",
+        "include_reasoning",
+        "logit_bias",
+        "logprobs",
+        "max_completion_tokens",
+        "min_p",
+        "presence_penalty",
+        "reasoning",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "io-intelligence",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-oss-120b:openrouter": {
       "context": 131072,
       "crossRegion": false,
@@ -6313,6 +6439,36 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "glm-4.6:io-intelligence": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "zai-org/GLM-4.6",
+      "parameters": [
+        "frequency_penalty",
+        "functions",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "reasoning",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "io-intelligence",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
     "glm-4.6:novita": {
       "context": 204800,
       "crossRegion": false,
@@ -6339,6 +6495,36 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
       "provider": "novita",
       "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "glm-4.7:io-intelligence": {
+      "context": 200000,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "zai-org/GLM-4.7",
+      "parameters": [
+        "frequency_penalty",
+        "functions",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "reasoning",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "io-intelligence",
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -6460,6 +6646,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "chutes",
     "deepinfra",
     "deepseek",
+    "io-intelligence",
     "openrouter",
   ],
   "deepseek/deepseek-v3": [
@@ -6468,6 +6655,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "deepinfra",
     "deepinfra",
     "deepseek",
+    "io-intelligence",
     "novita",
     "novita",
     "openrouter",
@@ -6535,6 +6723,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "groq",
     "groq",
     "groq",
+    "io-intelligence",
     "nebius",
     "nebius",
     "novita",
@@ -6548,6 +6737,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
   ],
   "mistral/mistral-large": [
+    "io-intelligence",
     "mistral",
   ],
   "mistral/mistral-nemo": [
@@ -6692,6 +6882,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "deepinfra",
     "groq",
     "groq",
+    "io-intelligence",
     "novita",
     "openrouter",
     "openrouter",
@@ -6727,6 +6918,8 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   ],
   "zai/glm-4": [
     "canopywave",
+    "io-intelligence",
+    "io-intelligence",
     "novita",
   ],
 }
@@ -7626,6 +7819,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 0,
       },
     ],
+    "io-intelligence": [
+      {
+        "input": 4e-7,
+        "output": 0.00000175,
+        "threshold": 0,
+      },
+    ],
     "openrouter": [
       {
         "input": 0.00000316,
@@ -7666,6 +7866,16 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         },
         "input": 5.6e-7,
         "output": 0.00000168,
+        "threshold": 0,
+      },
+    ],
+    "io-intelligence": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.5,
+        },
+        "input": 2.5e-7,
+        "output": 3.8e-7,
         "threshold": 0,
       },
     ],
@@ -8068,6 +8278,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 0,
       },
     ],
+    "io-intelligence": [
+      {
+        "input": 1.5e-7,
+        "output": 6e-7,
+        "threshold": 0,
+      },
+    ],
     "nebius": [
       {
         "input": 3e-8,
@@ -8091,6 +8308,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "mistral/mistral-large": {
+    "io-intelligence": [
+      {
+        "input": 0.000002,
+        "output": 0.000006,
+        "threshold": 0,
+      },
+    ],
     "mistral": [
       {
         "input": 0.000002,
@@ -8501,6 +8725,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "web_search": 0.01,
       },
     ],
+    "io-intelligence": [
+      {
+        "input": 2e-8,
+        "output": 1e-7,
+        "threshold": 0,
+      },
+    ],
     "novita": [
       {
         "input": 5e-8,
@@ -8567,6 +8798,16 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       {
         "input": 4.5e-7,
         "output": 0.0000015,
+        "threshold": 0,
+      },
+    ],
+    "io-intelligence": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.5,
+        },
+        "input": 3e-7,
+        "output": 0.0000014,
         "threshold": 0,
       },
     ],
@@ -8740,6 +8981,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "providers": [
         "deepinfra",
         "deepseek",
+        "io-intelligence",
         "openrouter",
       ],
     },
@@ -8769,6 +9011,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "providers": [
         "baseten",
         "canopywave",
+        "io-intelligence",
         "novita",
       ],
     },
@@ -8851,7 +9094,14 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "glm-4.6",
       "providers": [
         "canopywave",
+        "io-intelligence",
         "novita",
+      ],
+    },
+    {
+      "model": "glm-4.7",
+      "providers": [
+        "io-intelligence",
       ],
     },
     {
@@ -9056,6 +9306,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
         "cerebras",
         "deepinfra",
         "groq",
+        "io-intelligence",
         "openrouter",
       ],
     },
@@ -9200,6 +9451,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "providers": [
         "deepinfra",
         "groq",
+        "io-intelligence",
         "novita",
         "openrouter",
       ],
@@ -9235,6 +9487,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "mistral-large-2411",
       "providers": [
+        "io-intelligence",
         "mistral",
       ],
     },
@@ -9432,6 +9685,10 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "helicone",
     },
     {
+      "modelCount": 7,
+      "provider": "io-intelligence",
+    },
+    {
       "modelCount": 1,
       "provider": "mistral",
     },
@@ -9575,9 +9832,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 288,
-  "totalModelProviderConfigs": 288,
+  "totalEndpoints": 295,
+  "totalModelProviderConfigs": 295,
   "totalModelsWithPtb": 100,
-  "totalProviders": 21,
+  "totalProviders": 22,
 }
 `;
