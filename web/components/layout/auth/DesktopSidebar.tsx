@@ -29,8 +29,6 @@ import { ChangelogItem } from "./types";
 import SidebarQuickstepCard from "../SidebarQuickstartCard";
 import { useHeliconeAgent } from "@/components/templates/agent/HeliconeAgentContext";
 import { useCredits } from "@/services/hooks/useCredits";
-import { useHasWrappedData } from "@/components/templates/wrapped/useWrapped";
-import { Gift } from "lucide-react";
 
 // Sidebar width constants
 const SIDEBAR_WIDTH_COLLAPSED = "w-12"; // 48px
@@ -65,9 +63,6 @@ const DesktopSidebar = ({
 
   // Fetch credit balance - defaults to 0 if it fails
   const { data: creditData } = useCredits();
-
-  // Check if org has wrapped data
-  const { hasData: hasWrappedData } = useHasWrappedData();
 
   const [isCollapsed, setIsCollapsed] = useLocalStorage(
     "isSideBarCollapsed",
@@ -286,23 +281,6 @@ const DesktopSidebar = ({
             >
               {/* Navigation items */}
               <div className="flex flex-col">
-                {/* Wrapped 2025 Button - Only show if org has data */}
-                {hasWrappedData && (
-                  <div className="px-2 pt-2">
-                    <Button
-                      variant="ghost"
-                      onClick={() => router.push("/wrapped")}
-                      className={cn(
-                        "w-full gap-2 bg-blue-100 font-medium text-blue-700 hover:bg-blue-200 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900/70",
-                        isCollapsed ? "h-8 w-8 p-0" : "h-9",
-                      )}
-                    >
-                      <Gift size={16} />
-                      {!isCollapsed && <span>Merry Christmas!</span>}
-                    </Button>
-                  </div>
-                )}
-
                 {/* Quickstart Card - Only show if organization hasn't integrated */}
                 {onboardingStatus?.hasCompletedQuickstart === false &&
                   !isCollapsed && <SidebarQuickstepCard />}
