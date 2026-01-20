@@ -7,12 +7,12 @@ interface CompaniesProps {
 
 const Companies = ({ className }: CompaniesProps) => {
   return (
-    <div className={cn("py-16", className)}>
+    <div className={cn("pt-2", className)}>
       <div className="max-w-6xl mx-auto px-4">
-        <p className="text-center text-md mb-8">
+        <p className="text-center text-md mb-4">
           1000+ AI teams use Helicone to build reliable products
         </p>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-8 items-center justify-items-center">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 items-center justify-items-center">
           {(
             [
               ["/static/togetherai.webp", "togetherai", 169, 53],
