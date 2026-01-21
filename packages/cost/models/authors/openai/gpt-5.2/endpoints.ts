@@ -253,6 +253,51 @@ export const endpoints = {
       "*": {},
     },
   },
+  "gpt-5.2:azure": {
+    provider: "azure",
+    author: "openai",
+    providerModelId: "gpt-5.2",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000175, // $1.75 per 1M tokens
+        output: 0.000014, // $14.00 per 1M tokens
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
+        cacheMultipliers: {
+          cachedInput: 0.1, // $0.175 per 1M tokens
+        },
+      },
+    ],
+    contextLength: 400000,
+    maxCompletionTokens: 128000,
+    rateLimits: {
+      rpm: 50,
+      tpm: 100000,
+    },
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_completion_tokens",
+      "response_format",
+      "stop",
+      "verbosity",
+      "temperature",
+      "top_p",
+      "logprobs",
+    ],
+    unsupportedParameters: [
+      "presence_penalty",
+      "frequency_penalty",
+      "top_logprobs",
+      "logit_bias",
+      "max_tokens",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${GPT52ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;
