@@ -226,6 +226,11 @@ export const BLOG_CONTENT: BlogStructure[] = [
   },
   {
     dynmaicEntry: {
+      folderName: "tools"
+    }
+  },
+  {
+    dynmaicEntry: {
       folderName: "what-is-ai-gateway",
     },
   },
