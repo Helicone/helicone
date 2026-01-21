@@ -249,7 +249,7 @@ export interface UserEndpointConfig {
   region?: string;
   location?: string;
   projectId?: string;
-  baseUri?: string; // Azure OpenAI
+  baseUri?: string; // Custom base URL (e.g., Azure OpenAI, OpenAI US data residency)
   deploymentName?: string;
   resourceName?: string;
   apiVersion?: string; // Azure OpenAI
