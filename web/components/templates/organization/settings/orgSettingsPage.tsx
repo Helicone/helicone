@@ -2,6 +2,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { XSmall } from "@/components/ui/typography";
 import { useUpdateOrgMutation } from "@/services/hooks/organizations";
 import { useEffect, useState } from "react";
@@ -18,6 +25,14 @@ import {
   SettingsContainer,
   SettingsSection,
 } from "@/components/ui/settings-container";
+
+const TIME_FILTER_OPTIONS = [
+  { value: "1h", label: "Last Hour" },
+  { value: "24h", label: "Last 24 Hours" },
+  { value: "7d", label: "Last 7 Days" },
+  { value: "1m", label: "Last Month" },
+  { value: "3m", label: "Last 3 Months" },
+] as const;
 interface OrgSettingsPageProps {
   org: Database["public"]["Tables"]["organization"]["Row"];
   variant?: "organization" | "reseller";
@@ -44,6 +59,7 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
     color: string;
     icon: string;
     variant: string;
+    default_time_filter?: string;
   }) => {
     updateOrgMutation.mutate(updateData, {
       onSuccess: () => {
@@ -196,6 +212,40 @@ const OrgSettingsPage = (props: OrgSettingsPageProps) => {
               ))}
             </RadioGroup>
           </div>
+        </div>
+      </SettingsSection>
+
+      <SettingsSection title="Default Time Window">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="default-time-filter">
+            <XSmall className="font-medium">
+              Default time filter for Dashboard and Requests pages
+            </XSmall>
+          </Label>
+          <Select
+            value={org.default_time_filter ?? "7d"}
+            onValueChange={(value) =>
+              handleOrgUpdate({
+                orgId: org.id,
+                name: debouncedOrgName,
+                color: org.color,
+                icon: org.icon,
+                variant: variant,
+                default_time_filter: value,
+              })
+            }
+          >
+            <SelectTrigger className="max-w-[250px]">
+              <SelectValue placeholder="Select default time range" />
+            </SelectTrigger>
+            <SelectContent>
+              {TIME_FILTER_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </SettingsSection>
 
