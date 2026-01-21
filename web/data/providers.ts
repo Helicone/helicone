@@ -175,6 +175,17 @@ export const providers: Provider[] = [
     relevanceScore: 40,
   },
   {
+    id: "io-intelligence",
+    name: "io.net Intelligence",
+    logoUrl: "/assets/home/providers/io-intelligence.png",
+    description:
+      "Configure your io.net Intelligence API keys for decentralized AI inference",
+    docsUrl: "https://docs.helicone.ai/getting-started/integration-methods",
+    apiKeyLabel: "io.net Intelligence API Key",
+    apiKeyPlaceholder: "...",
+    relevanceScore: 38,
+  },
+  {
     id: "openrouter",
     name: "OpenRouter",
     logoUrl: "/assets/home/providers/openrouter.jpg",

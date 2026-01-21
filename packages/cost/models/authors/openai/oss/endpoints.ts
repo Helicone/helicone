@@ -280,6 +280,47 @@ export const endpoints = {
       "*": {},
     },
   },
+  // io.net Intelligence endpoints
+  "gpt-oss-120b:io-intelligence": {
+    providerModelId: "openai/gpt-oss-120b",
+    provider: "io-intelligence",
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000002, // $0.02 per 1M tokens
+        output: 0.0000001, // $0.10 per 1M tokens
+      },
+    ],
+    quantization: "fp16",
+    contextLength: 131_072,
+    maxCompletionTokens: 65_536,
+    supportedParameters: [
+      "frequency_penalty",
+      "include_reasoning",
+      "logit_bias",
+      "logprobs",
+      "max_completion_tokens",
+      "min_p",
+      "presence_penalty",
+      "reasoning",
+      "repetition_penalty",
+      "response_format",
+      "seed",
+      "stop",
+      "structured_outputs",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_k",
+      "top_logprobs",
+      "top_p",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${GPTOSSModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;
