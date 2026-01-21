@@ -51,6 +51,7 @@ export function calculateInvoiceAmounts(
   invoice: Stripe.Invoice | Stripe.UpcomingInvoice,
   discounts?: Record<string, Stripe.Discount>,
   productId?: string,
+  priceFilter?: { include?: string[]; exclude?: string[] },
 ): {
   amount: number;
   amountAfterProcessing: number;
@@ -60,9 +61,19 @@ export function calculateInvoiceAmounts(
   let amount = 0;
 
   if (productId) {
-    // Sum only line items matching this product
+    // Sum only line items matching this product (and price filter if provided)
     invoice.lines?.data?.forEach((line) => {
       if (line.price?.product === productId) {
+        const priceId = line.price?.id;
+        // Apply price filter if provided
+        if (priceFilter) {
+          if (priceFilter.include && priceId && !priceFilter.include.includes(priceId)) {
+            return; // Skip if not in include list
+          }
+          if (priceFilter.exclude && priceId && priceFilter.exclude.includes(priceId)) {
+            return; // Skip if in exclude list
+          }
+        }
         amount += (line.amount || 0) / 100;
       }
     });

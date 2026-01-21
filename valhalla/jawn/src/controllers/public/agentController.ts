@@ -290,6 +290,23 @@ export class AgentController extends Controller {
     return ok(result.data!);
   }
 
+  @Post("/thread/{sessionId}/reopen")
+  public async reopenThread(
+    @Path() sessionId: string,
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<Result<InAppThread, string>> {
+    const threadsManager = new InAppThreadsManager(request.authParams);
+
+    const result = await threadsManager.reopenThread(sessionId);
+
+    if (result.error) {
+      this.setStatus(400);
+      return err(result.error);
+    }
+
+    return ok(result.data!);
+  }
+
   @Get("/threads")
   public async getAllThreads(
     @Request() request: JawnAuthenticatedRequest

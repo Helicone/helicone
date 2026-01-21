@@ -37,7 +37,6 @@ const TeamCard: React.FC = () => {
               "5 organizations",
               "SOC-2 & HIPAA compliance",
               "Dedicated Slack channel",
-              "Support engineer & SLAs",
             ].map((feature, index) => (
               <div key={index} className="py-1.5 flex items-center gap-2">
                 <div className="w-4 h-4 relative overflow-hidden">
@@ -50,6 +49,10 @@ const TeamCard: React.FC = () => {
             ))}
           </Col>
         </Col>
+
+        <div className="text-xs text-muted-foreground mt-2">
+          * Usage-based pricing applies
+        </div>
 
         <Link href="https://us.helicone.ai/settings/billing">
           <Button variant="secondary" className="w-full text-base py-5">

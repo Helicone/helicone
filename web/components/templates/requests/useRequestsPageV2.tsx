@@ -72,18 +72,20 @@ const useRequestsPageV2 = (
     };
   }
 
-  const rateLimitFilterMapIndex = filterMap.findIndex(
-    (filter: any) => filter.label?.trim() === "Helicone-Rate-Limit-Status",
-  );
-
-  let rateLimitFilterNode: FilterNode = {} as FilterLeaf;
-  if (rateLimited && rateLimitFilterMapIndex !== -1) {
-    rateLimitFilterNode = filterUITreeToFilterNode(filterMap, {
-      filterMapIdx: rateLimitFilterMapIndex,
-      operatorIdx: 0,
-      value: "rate_limited",
-    });
-  }
+  // Build rate limit filter directly instead of looking it up in filterMap
+  // This ensures it works even if the property hasn't been used yet
+  // Use empty object {} to match all when not filtering by rate limited
+  const rateLimitFilterNode: FilterNode = rateLimited
+    ? {
+        request_response_rmt: {
+          properties: {
+            "Helicone-Rate-Limit-Status": {
+              equals: "bucket_rate_limited",
+            },
+          },
+        },
+      }
+    : {};
 
   // sort the model by name
   models?.data?.sort((a, b) => a.model.localeCompare(b.model));

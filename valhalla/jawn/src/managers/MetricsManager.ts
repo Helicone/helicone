@@ -756,10 +756,13 @@ export class MetricsManager extends BaseManager {
       argsAcc: builtFilter.argsAcc,
     });
 
+    // Use count(*) instead of count(DISTINCT request_id) for better performance
+    // Each row in request_response_rmt represents a unique request, so DISTINCT is unnecessary
+    // and causes excessive memory usage for large organizations (10GB+ for 38M requests)
     const query = `
     SELECT
       request_response_rmt.model as model,
-      count(DISTINCT request_id) as total_requests,
+      count(*) as total_requests,
       sum(request_response_rmt.completion_tokens) as total_completion_tokens,
       sum(request_response_rmt.prompt_tokens) as total_prompt_token,
       sum(request_response_rmt.prompt_tokens) + sum(request_response_rmt.completion_tokens) as total_tokens,

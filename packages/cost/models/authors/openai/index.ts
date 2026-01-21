@@ -15,6 +15,7 @@ import { models as gpt5Models } from "./gpt-5/models";
 import { models as gpt51Models } from "./gpt-5.1/models";
 import { models as gpt52Models } from "./gpt-5.2/models";
 import { models as ossModels } from "./oss/models";
+import { models as gptImage1Models } from "./gpt-image-1/models";
 
 // Import endpoints
 import { endpoints as gpt4oEndpoints } from "./gpt-4o/endpoints";
@@ -26,6 +27,7 @@ import { endpoints as gpt5Endpoints } from "./gpt-5/endpoints";
 import { endpoints as gpt51Endpoints } from "./gpt-5.1/endpoints";
 import { endpoints as gpt52Endpoints } from "./gpt-5.2/endpoints";
 import { endpoints as ossEndpoints } from "./oss/endpoints";
+import { endpoints as gptImage1Endpoints } from "./gpt-image-1/endpoints";
 
 // Aggregate models
 export const openaiModels = {
@@ -38,6 +40,7 @@ export const openaiModels = {
   ...gpt51Models,
   ...gpt52Models,
   ...ossModels,
+  ...gptImage1Models,
 } satisfies Record<string, ModelConfig>;
 
 // Aggregate endpoints
@@ -51,4 +54,5 @@ export const openaiEndpointConfig = {
   ...gpt51Endpoints,
   ...gpt52Endpoints,
   ...ossEndpoints,
+  ...gptImage1Endpoints,
 } satisfies Record<string, ModelProviderConfig>;

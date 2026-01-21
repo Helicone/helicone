@@ -4036,15 +4036,6 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
-			"Partial_VectorOperators_": {
-				"properties": {
-					"contains": {
-						"type": "string"
-					}
-				},
-				"type": "object",
-				"description": "Make all properties in T optional"
-			},
 			"Partial_RequestResponseRMTToOperators_": {
 				"properties": {
 					"country_code": {
@@ -4146,10 +4137,10 @@
 						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
 					"request_body": {
-						"$ref": "#/components/schemas/Partial_VectorOperators_"
+						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
 					"response_body": {
-						"$ref": "#/components/schemas/Partial_VectorOperators_"
+						"$ref": "#/components/schemas/Partial_TextOperators_"
 					},
 					"cache_enabled": {
 						"$ref": "#/components/schemas/Partial_BooleanOperators_"
@@ -8902,6 +8893,12 @@
 					{
 						"properties": {},
 						"type": "object"
+					},
+					{
+						"type": "string",
+						"enum": [
+							"all"
+						]
 					}
 				]
 			},
@@ -14379,6 +14376,11 @@
 						"type": "number",
 						"format": "double"
 					},
+					"subtotalCents": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
 					"notes": {
 						"type": "string",
 						"nullable": true
@@ -14395,6 +14397,7 @@
 					"startDate",
 					"endDate",
 					"amountCents",
+					"subtotalCents",
 					"notes",
 					"createdAt"
 				],
@@ -26172,6 +26175,41 @@
 					}
 				],
 				"parameters": []
+			}
+		},
+		"/v1/agent/thread/{sessionId}/reopen": {
+			"post": {
+				"operationId": "ReopenThread",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_InAppThread.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Agent"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "sessionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/v1/agent/threads": {

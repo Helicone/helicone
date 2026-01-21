@@ -10,7 +10,7 @@ import MessageRenderer from "./MessageRenderer";
 import { SessionDropdown } from "./SessionDropdown";
 import ChatInterface from "./ChatInterface";
 import { useRouter } from "next/router";
-import { XIcon, Plus, Clock } from "lucide-react";
+import { XIcon, Plus, Clock, CheckCircle, RotateCcw } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 
 type Message = NonNullable<OpenAIChatRequest["messages"]>[0];
@@ -52,12 +52,19 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
     updateCurrentSessionMessages,
     createNewSession,
     escalateSession,
+    reopenSession,
     currentSession,
     agentState,
     setAgentState,
   } = useHeliconeAgent();
 
   const [escalating, setEscalating] = useState(false);
+  const [reopening, setReopening] = useState(false);
+
+  // Check if thread was ever escalated (has messages from support)
+  const wasEverEscalated =
+    currentSession?.escalated ||
+    messages.some((msg) => (msg as any).name !== undefined);
 
   const addErrorMessage = (
     updatedMessages: Message[],
@@ -501,7 +508,7 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
         </div>
       </div>
 
-      {/* Escalation Banner */}
+      {/* Escalation Banner - Live */}
       {currentSession?.escalated && (
         <div className="mx-3 mb-3 rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-950/20">
           <div className="flex items-center gap-3">
@@ -522,6 +529,47 @@ const AgentChat = ({ onClose }: AgentChatProps) => {
                 shortly.
               </p>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Resolved Banner - when thread was escalated but is now resolved */}
+      {!currentSession?.escalated && wasEverEscalated && (
+        <div className="mx-3 mb-3 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-900/20">
+          <div className="flex items-center gap-3">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
+              <CheckCircle
+                size={16}
+                className="text-slate-600 dark:text-slate-400"
+              />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                  Support ticket resolved
+                </span>
+              </div>
+              <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">
+                This conversation has been marked as resolved by our team.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                setReopening(true);
+                try {
+                  await reopenSession();
+                } finally {
+                  setReopening(false);
+                }
+              }}
+              disabled={reopening}
+              className="flex items-center gap-1"
+            >
+              <RotateCcw size={14} />
+              {reopening ? "Reopening..." : "Reopen"}
+            </Button>
           </div>
         </div>
       )}

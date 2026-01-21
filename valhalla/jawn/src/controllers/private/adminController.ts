@@ -30,6 +30,41 @@ import {
 import { err, ok, Result } from "../../packages/common/result";
 import { InAppThread } from "../../managers/InAppThreadsManager";
 import { HeliconeSqlManager } from "../../managers/HeliconeSqlManager";
+import { SlackService } from "../../services/SlackService";
+import { validate as uuidValidate } from "uuid";
+
+export interface HelixThreadSummary {
+  id: string;
+  user_id: string;
+  org_id: string;
+  created_at: Date;
+  updated_at: Date;
+  escalated: boolean;
+  message_count: number;
+  first_message: string | null;
+  last_message: string | null;
+  user_email: string | null;
+  org_name: string | null;
+  org_tier: string | null;
+}
+
+export interface HelixThreadListResponse {
+  threads: HelixThreadSummary[];
+  total: number;
+}
+
+export interface HelixThreadDetail {
+  id: string;
+  chat: unknown;
+  user_id: string;
+  org_id: string;
+  created_at: string;
+  escalated: boolean;
+  metadata: unknown;
+  updated_at: string;
+  soft_delete: boolean;
+  user_email: string | null;
+}
 import { HqlQueryManager } from "../../managers/HqlQueryManager";
 import { HqlSavedQuery } from "../public/heliconeSqlController";
 
@@ -2333,14 +2368,97 @@ export class AdminController extends Controller {
     return { query };
   }
 
+  @Get("/helix-threads")
+  public async listHelixThreads(
+    @Request() request: JawnAuthenticatedRequest,
+    @Query() limit?: number,
+    @Query() offset?: number,
+    @Query() status?: "all" | "escalated" | "resolved",
+    @Query() tier?: "all" | "free" | "pro" | "growth" | "enterprise"
+  ): Promise<Result<HelixThreadListResponse, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    const queryLimit = Math.min(limit ?? 50, 100);
+    const queryOffset = offset ?? 0;
+
+    // Build status filter
+    let statusFilter = "";
+    if (status === "escalated") {
+      statusFilter = "AND t.escalated = true";
+    } else if (status === "resolved") {
+      statusFilter = "AND t.escalated = false";
+    }
+
+    // Build tier filter (handle pro-20240913 as pro)
+    // Using explicit mapping to prevent SQL injection - never interpolate user input
+    let tierFilter = "";
+    if (tier && tier !== "all") {
+      const tierMap: Record<string, string> = {
+        pro: "AND (o.tier = 'pro' OR o.tier = 'pro-20240913')",
+        free: "AND o.tier = 'free'",
+        growth: "AND o.tier = 'growth'",
+        enterprise: "AND o.tier = 'enterprise'",
+      };
+      tierFilter = tierMap[tier] ?? "";
+    }
+
+    const threads = await dbExecute<HelixThreadSummary>(
+      `SELECT
+        t.id,
+        t.user_id,
+        t.org_id,
+        t.created_at,
+        t.updated_at,
+        t.escalated,
+        jsonb_array_length(t.chat->'messages') as message_count,
+        t.chat->'messages'->0->>'content' as first_message,
+        t.chat->'messages'->-1->>'content' as last_message,
+        u.email as user_email,
+        o.name as org_name,
+        o.tier as org_tier
+      FROM in_app_threads t
+      LEFT JOIN auth.users u ON t.user_id::uuid = u.id
+      LEFT JOIN organization o ON t.org_id::uuid = o.id
+      WHERE t.soft_delete = false ${statusFilter} ${tierFilter}
+      ORDER BY t.updated_at DESC
+      LIMIT $1 OFFSET $2`,
+      [queryLimit, queryOffset]
+    );
+
+    if (threads.error) {
+      return err(threads.error);
+    }
+
+    const countResult = await dbExecute<{ count: number }>(
+      `SELECT COUNT(*) as count
+       FROM in_app_threads t
+       LEFT JOIN organization o ON t.org_id::uuid = o.id
+       WHERE t.soft_delete = false ${statusFilter} ${tierFilter}`,
+      []
+    );
+
+    return ok({
+      threads: threads.data ?? [],
+      total: countResult.data?.[0]?.count ?? 0,
+    });
+  }
+
   @Get("/helix-thread/{sessionId}")
   public async getHelixThread(
     @Request() request: JawnAuthenticatedRequest,
     @Path() sessionId: string
-  ): Promise<Result<InAppThread, string>> {
+  ): Promise<Result<HelixThreadDetail, string>> {
     await authCheckThrow(request.authParams.userId);
-    const thread = await dbExecute<InAppThread>(
-      `SELECT * FROM in_app_threads WHERE id = $1`,
+
+    if (!uuidValidate(sessionId)) {
+      return err("Invalid session ID format");
+    }
+
+    const thread = await dbExecute<HelixThreadDetail>(
+      `SELECT t.*, u.email as user_email
+       FROM in_app_threads t
+       LEFT JOIN auth.users u ON t.user_id::uuid = u.id
+       WHERE t.id = $1`,
       [sessionId]
     );
     if (thread.error) {
@@ -2350,6 +2468,143 @@ export class AdminController extends Controller {
       return err("Thread not found");
     }
     return ok(thread.data?.[0]);
+  }
+
+  @Post("/helix-thread/{sessionId}/reply")
+  public async replyToHelixThread(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() sessionId: string,
+    @Body() body: { message: string; name?: string }
+  ): Promise<Result<InAppThread, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    if (!uuidValidate(sessionId)) {
+      return err("Invalid session ID format");
+    }
+
+    // Get the current thread
+    const threadResult = await dbExecute<InAppThread>(
+      `SELECT * FROM in_app_threads WHERE id = $1`,
+      [sessionId]
+    );
+
+    if (threadResult.error) {
+      return err(threadResult.error);
+    }
+
+    if (!threadResult.data?.[0]) {
+      return err("Thread not found");
+    }
+
+    const thread = threadResult.data[0];
+    const messages = (thread.chat as any)?.messages || [];
+
+    // Add the admin reply as an assistant message with name for styling
+    const newMessage: { role: string; content: string; name?: string } = {
+      role: "assistant",
+      content: body.message,
+    };
+    if (body.name) {
+      newMessage.name = body.name;
+    }
+    messages.push(newMessage);
+
+    // Update the thread with the new message
+    const updateResult = await dbExecute<InAppThread>(
+      `UPDATE in_app_threads
+       SET chat = $1::jsonb, updated_at = NOW()
+       WHERE id = $2
+       RETURNING *`,
+      [JSON.stringify({ messages }), sessionId]
+    );
+
+    if (updateResult.error) {
+      return err(updateResult.error);
+    }
+
+    if (!updateResult.data?.[0]) {
+      return err("Failed to update thread");
+    }
+
+    // Post reply to Slack if thread has a Slack thread
+    const slackThreadTs = thread.metadata?.slack_thread_ts;
+    if (slackThreadTs) {
+      try {
+        const slackService = SlackService.getInstance();
+        const slackMessage = body.name
+          ? `💬 *${body.name}:* ${body.message}`
+          : `💬 *Admin:* ${body.message}`;
+        await slackService.postThreadMessage(slackThreadTs, slackMessage);
+      } catch (slackError) {
+        console.error("Failed to post reply to Slack:", slackError);
+        // Don't fail the request if Slack fails
+      }
+    }
+
+    return ok(updateResult.data[0]);
+  }
+
+  @Post("/helix-thread/{sessionId}/resolve")
+  public async resolveHelixThread(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() sessionId: string,
+    @Body() body: { resolved: boolean; adminEmail?: string }
+  ): Promise<Result<InAppThread, string>> {
+    await authCheckThrow(request.authParams.userId);
+
+    if (!uuidValidate(sessionId)) {
+      return err("Invalid session ID format");
+    }
+
+    // Get the current thread for Slack notification
+    const threadResult = await dbExecute<InAppThread>(
+      `SELECT * FROM in_app_threads WHERE id = $1`,
+      [sessionId]
+    );
+
+    if (threadResult.error) {
+      return err(threadResult.error);
+    }
+
+    if (!threadResult.data?.[0]) {
+      return err("Thread not found");
+    }
+
+    const thread = threadResult.data[0];
+
+    // Update the escalated status only (no message added to thread)
+    const updateResult = await dbExecute<InAppThread>(
+      `UPDATE in_app_threads
+       SET escalated = $1, updated_at = NOW()
+       WHERE id = $2
+       RETURNING *`,
+      [!body.resolved, sessionId]
+    );
+
+    if (updateResult.error) {
+      return err(updateResult.error);
+    }
+
+    if (!updateResult.data?.[0]) {
+      return err("Failed to update thread");
+    }
+
+    // Post status update to Slack if thread has a Slack thread
+    const slackThreadTs = thread.metadata?.slack_thread_ts;
+    if (slackThreadTs) {
+      try {
+        const slackService = SlackService.getInstance();
+        const slackMessage = body.resolved
+          ? `✅ *${body.adminEmail || "Admin"}* marked this thread as resolved.`
+          : `🔄 *${body.adminEmail || "Admin"}* reopened this thread.`;
+        await slackService.postThreadMessage(slackThreadTs, slackMessage);
+      } catch (slackError) {
+        console.error("Failed to post resolve status to Slack:", slackError);
+        // Don't fail the request if Slack fails
+      }
+    }
+
+    return ok(updateResult.data[0]);
   }
 
   @Post("/hql-enriched")

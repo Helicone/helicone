@@ -222,12 +222,14 @@ export const useUpdateOrgMutation = () => {
       color,
       icon,
       variant,
+      default_time_filter,
     }: {
       orgId: string;
       name: string;
       color: string;
       icon: string;
       variant: string;
+      default_time_filter?: string;
       orgProviderKey?: string;
       limits?: any;
       organizationType?: string;
@@ -242,6 +244,7 @@ export const useUpdateOrgMutation = () => {
             color,
             icon,
             variant,
+            default_time_filter,
           },
         },
       );

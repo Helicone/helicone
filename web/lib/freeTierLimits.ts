@@ -92,21 +92,15 @@ export const FREE_TIER_CONFIG: FreeTierConfig = {
     },
     datasets: {
       main: {
-        getLimit: () => 1,
-        description: (limit) =>
-          `You can create up to ${limit} datasets with the free tier`,
+        getLimit: () => Infinity, // Unlimited datasets for free tier
+        description: () => `Unlimited datasets`,
         upgradeFeatureName: FEATURE_DISPLAY_NAMES.datasets,
-        upgradeMessage: (limit, used) =>
-          `You've used ${used}/${limit} datasets. Upgrade for unlimited access.`,
       },
       subfeatures: {
         requests: {
-          getLimit: () => 10,
-          description: (limit) =>
-            `You can add up to ${limit} requests per dataset with the free tier`,
+          getLimit: () => Infinity, // Unlimited requests per dataset for free tier
+          description: () => `Unlimited requests per dataset`,
           upgradeFeatureName: FEATURE_DISPLAY_NAMES.datasets,
-          upgradeMessage: (limit, used) =>
-            `You've selected ${used}/${limit} requests. Upgrade to add more requests per dataset.`,
         },
       },
     },

@@ -147,6 +147,12 @@ export class OrganizationStore extends BaseStore {
         paramIndex++;
       }
 
+      if (updateOrgParams.default_time_filter !== undefined) {
+        updateFields.push(`default_time_filter = $${paramIndex}`);
+        params.push(updateOrgParams.default_time_filter);
+        paramIndex++;
+      }
+
       if (updateFields.length === 0) {
         return err("No fields to update");
       }

@@ -3,8 +3,10 @@ import { defineWorkersConfig } from "@cloudflare/vitest-pool-workers/config";
 export default defineWorkersConfig({
   test: {
     retry: 2,
+    testTimeout: 30000, // Increase timeout for Durable Object tests
     poolOptions: {
       workers: {
+        singleWorker: true, // Run tests sequentially to avoid isolated storage conflicts
         wrangler: { configPath: "../../wrangler.toml" },
         miniflare: {
           compatibilityDate: "2025-08-03",

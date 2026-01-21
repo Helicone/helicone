@@ -163,11 +163,14 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       }
     : "all";
 
+  // Get the default time filter from org settings, fallback to "7d"
+  const defaultTimeFilter = (orgContext?.currentOrg?.default_time_filter ?? "7d") as TimeInterval;
+
   // filter when custom is not selected
   const defaultFilter = useMemo<FilterNode>(() => {
     const currentTimeFilter = searchParams.get("t");
     const timeIntervalDate = getTimeIntervalAgo(
-      (currentTimeFilter as TimeInterval) || "1m",
+      (currentTimeFilter as TimeInterval) || defaultTimeFilter,
     );
     return {
       left: {
@@ -180,7 +183,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       operator: "and",
       right: cacheFilter,
     };
-  }, [cacheFilter]);
+  }, [cacheFilter, defaultTimeFilter]);
 
   // TODO: Move this to a better place or turn into callback
   const getTimeFilter = () => {
@@ -238,7 +241,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
     if (currentTimeFilter && currentTimeFilter.split("_")[0] === "custom") {
       const start = currentTimeFilter.split("_")[1]
         ? new Date(currentTimeFilter.split("_")[1])
-        : getTimeIntervalAgo("1m");
+        : getTimeIntervalAgo(defaultTimeFilter);
       const end = new Date(currentTimeFilter.split("_")[2] || new Date());
       range = {
         start,
@@ -246,13 +249,21 @@ export default function RequestsPage(props: RequestsPageV2Props) {
       };
     } else {
       range = {
-        start: getTimeIntervalAgo((currentTimeFilter as TimeInterval) || "1m"),
+        start: getTimeIntervalAgo((currentTimeFilter as TimeInterval) || defaultTimeFilter),
         end: new Date(),
       };
     }
     return range;
   };
   const [timeFilter, setTimeFilter] = useState<FilterNode>(getTimeFilter());
+
+  // Update time filter when org's default changes and no URL param is set
+  useEffect(() => {
+    const currentTimeFilter = searchParams.get("t");
+    if (!currentTimeFilter && orgContext?.currentOrg?.default_time_filter) {
+      setTimeFilter(defaultFilter);
+    }
+  }, [orgContext?.currentOrg?.default_time_filter, defaultFilter]);
 
   // TODO: Should this ever use states?
   const sortLeaf: SortLeafRequest = getSortLeaf(
@@ -848,7 +859,7 @@ export default function RequestsPage(props: RequestsPageV2Props) {
                 !userId
                   ? {
                       currentTimeFilter: timeRange,
-                      defaultValue: "1m",
+                      defaultValue: (orgContext?.currentOrg?.default_time_filter ?? "7d") as "24h" | "7d" | "1m" | "3m" | "all",
                       onTimeSelectHandler: onTimeSelectHandler,
                     }
                   : undefined

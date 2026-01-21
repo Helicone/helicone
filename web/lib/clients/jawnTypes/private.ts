@@ -126,6 +126,9 @@ export interface paths {
   "/v1/organization": {
     get: operations["GetOrganizations"];
   };
+  "/v1/organization/models": {
+    get: operations["GetModels"];
+  };
   "/v1/organization/{organizationId}": {
     get: operations["GetOrganization"];
   };
@@ -179,9 +182,6 @@ export interface paths {
   };
   "/v1/organization/update_onboarding": {
     post: operations["UpdateOnboardingStatus"];
-  };
-  "/v1/organization/models": {
-    get: operations["GetModels"];
   };
   "/v1/evaluator": {
     post: operations["CreateEvaluator"];
@@ -629,8 +629,17 @@ export interface paths {
     /** @description Backfill costs in Clickhouse with updated cost package data. */
     post: operations["BackfillCosts"];
   };
+  "/v1/admin/helix-threads": {
+    get: operations["ListHelixThreads"];
+  };
   "/v1/admin/helix-thread/{sessionId}": {
     get: operations["GetHelixThread"];
+  };
+  "/v1/admin/helix-thread/{sessionId}/reply": {
+    post: operations["ReplyToHelixThread"];
+  };
+  "/v1/admin/helix-thread/{sessionId}/resolve": {
+    post: operations["ResolveHelixThread"];
   };
   "/v1/admin/hql-enriched": {
     post: operations["ExecuteEnrichedHql"];
@@ -1107,6 +1116,7 @@ Json: JsonObject;
           governance_settings: components["schemas"]["Json"] | null;
           gateway_discount_enabled: boolean;
           domain: string | null;
+          default_time_filter: string | null;
           /** Format: double */
           credit_limit: number;
           created_at: string | null;
@@ -1119,6 +1129,14 @@ Json: JsonObject;
       error: null;
     };
     "Result__40_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-and-_role-string__41_-Array.string_": components["schemas"]["ResultSuccess__40_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-and-_role-string__41_-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__model-string_-Array_": {
+      data: {
+          model: string;
+        }[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__model-string_-Array.string_": components["schemas"]["ResultSuccess__model-string_-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess_Database-at-public_91_Tables_93_-at-organization_91_Row_93__": {
       data: {
         tier: string | null;
@@ -1150,6 +1168,7 @@ Json: JsonObject;
         governance_settings: components["schemas"]["Json"] | null;
         gateway_discount_enabled: boolean;
         domain: string | null;
+        default_time_filter: string | null;
         /** Format: double */
         credit_limit: number;
         created_at: string | null;
@@ -1160,7 +1179,7 @@ Json: JsonObject;
       error: null;
     };
     "Result_Database-at-public_91_Tables_93_-at-organization_91_Row_93_.string_": components["schemas"]["ResultSuccess_Database-at-public_91_Tables_93_-at-organization_91_Row_93__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
+    "ResultSuccess__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--default_time_filter-string--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
       data: {
           tier: string;
           subscription_status: string;
@@ -1191,6 +1210,7 @@ Json: JsonObject;
           governance_settings: components["schemas"]["Json"];
           gateway_discount_enabled: boolean;
           domain: string;
+          default_time_filter: string;
           /** Format: double */
           credit_limit: number;
           created_at: string;
@@ -1200,9 +1220,9 @@ Json: JsonObject;
       /** @enum {number|null} */
       error: null;
     };
-    "Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_": components["schemas"]["ResultSuccess__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__": {
-      data: components["schemas"]["Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_"];
+    "Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--default_time_filter-string--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_": components["schemas"]["ResultSuccess__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--default_time_filter-string--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--default_time_filter-string--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__": {
+      data: components["schemas"]["Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--default_time_filter-string--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_"];
       /** @enum {number|null} */
       error: null;
     };
@@ -1211,7 +1231,7 @@ Json: JsonObject;
       data: null;
       error: unknown;
     };
-    "Result_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_": components["schemas"]["ResultSuccess_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__"] | components["schemas"]["ResultError_unknown_"];
+    "Result_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--default_time_filter-string--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_": components["schemas"]["ResultSuccess_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--default_time_filter-string--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__"] | components["schemas"]["ResultError_unknown_"];
     ResultSuccess_string_: {
       data: string;
       /** @enum {number|null} */
@@ -1248,6 +1268,7 @@ Json: JsonObject;
       governance_settings?: components["schemas"]["Json"] | null;
       gateway_discount_enabled?: boolean;
       domain?: string | null;
+      default_time_filter?: string | null;
       /** Format: double */
       credit_limit?: number;
       created_at?: string | null;
@@ -1255,7 +1276,7 @@ Json: JsonObject;
       allow_negative_balance?: boolean;
     };
     /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-organization_type-or-onboarding_status_": {
+    "Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-organization_type-or-onboarding_status-or-default_time_filter_": {
       name: string;
       color?: string;
       icon?: string;
@@ -1263,8 +1284,9 @@ Json: JsonObject;
       limits?: components["schemas"]["Json"];
       organization_type?: string;
       onboarding_status?: components["schemas"]["Json"];
+      default_time_filter?: string;
     };
-    UpdateOrganizationParams: components["schemas"]["Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-organization_type-or-onboarding_status_"] & {
+    UpdateOrganizationParams: components["schemas"]["Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-organization_type-or-onboarding_status-or-default_time_filter_"] & {
       variant?: string;
     };
     "ResultSuccess__temporaryPassword_63_-string_-or-null_": {
@@ -1344,14 +1366,6 @@ Json: JsonObject;
       };
     };
     OnboardingStatus: components["schemas"]["Partial__currentStep-string--selectedTier-string--hasOnboarded-boolean--hasIntegrated-boolean--hasCompletedQuickstart-boolean--members-any-Array--addons_58__prompts-boolean--experiments-boolean--evals-boolean___"];
-    "ResultSuccess__model-string_-Array_": {
-      data: {
-          model: string;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__model-string_-Array.string_": components["schemas"]["ResultSuccess__model-string_-Array_"] | components["schemas"]["ResultError_string_"];
     EvaluatorResult: {
       id: string;
       created_at: string;
@@ -1781,10 +1795,6 @@ Json: JsonObject;
       gt?: string;
     };
     /** @description Make all properties in T optional */
-    Partial_VectorOperators_: {
-      contains?: string;
-    };
-    /** @description Make all properties in T optional */
     Partial_RequestResponseRMTToOperators_: {
       country_code?: components["schemas"]["Partial_TextOperators_"];
       latency?: components["schemas"]["Partial_NumberOperators_"];
@@ -1820,8 +1830,8 @@ Json: JsonObject;
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
       scores_column?: components["schemas"]["Partial_TextOperators_"];
-      request_body?: components["schemas"]["Partial_VectorOperators_"];
-      response_body?: components["schemas"]["Partial_VectorOperators_"];
+      request_body?: components["schemas"]["Partial_TextOperators_"];
+      response_body?: components["schemas"]["Partial_TextOperators_"];
       cache_enabled?: components["schemas"]["Partial_BooleanOperators_"];
       cache_reference_id?: components["schemas"]["Partial_TextOperators_"];
       cached?: components["schemas"]["Partial_BooleanOperators_"];
@@ -16392,6 +16402,52 @@ Json: JsonObject;
       modelRow: components["schemas"]["ModelRow"];
       provider: string;
     };
+    HelixThreadSummary: {
+      id: string;
+      user_id: string;
+      org_id: string;
+      /** Format: date-time */
+      created_at: string;
+      /** Format: date-time */
+      updated_at: string;
+      escalated: boolean;
+      /** Format: double */
+      message_count: number;
+      first_message: string | null;
+      last_message: string | null;
+      user_email: string | null;
+      org_name: string | null;
+      org_tier: string | null;
+    };
+    HelixThreadListResponse: {
+      threads: components["schemas"]["HelixThreadSummary"][];
+      /** Format: double */
+      total: number;
+    };
+    ResultSuccess_HelixThreadListResponse_: {
+      data: components["schemas"]["HelixThreadListResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HelixThreadListResponse.string_": components["schemas"]["ResultSuccess_HelixThreadListResponse_"] | components["schemas"]["ResultError_string_"];
+    HelixThreadDetail: {
+      id: string;
+      chat: unknown;
+      user_id: string;
+      org_id: string;
+      created_at: string;
+      escalated: boolean;
+      metadata: unknown;
+      updated_at: string;
+      soft_delete: boolean;
+      user_email: string | null;
+    };
+    ResultSuccess_HelixThreadDetail_: {
+      data: components["schemas"]["HelixThreadDetail"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_HelixThreadDetail.string_": components["schemas"]["ResultSuccess_HelixThreadDetail_"] | components["schemas"]["ResultError_string_"];
     InAppThread: {
       id: string;
       chat: unknown;
@@ -16601,6 +16657,8 @@ Json: JsonObject;
       endDate: string;
       /** Format: double */
       amountCents: number;
+      /** Format: double */
+      subtotalCents: number | null;
       notes: string | null;
       createdAt: string;
     };
@@ -16778,6 +16836,8 @@ Json: JsonObject;
       dashboardUrl: string;
       /** Format: double */
       amountCents: number;
+      /** Format: double */
+      subtotalCents: number;
       ptbInvoiceId: string;
     };
     ResultSuccess_CreateInvoiceResponse_: {
@@ -17531,6 +17591,16 @@ export interface operations {
       };
     };
   };
+  GetModels: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__model-string_-Array.string_"];
+        };
+      };
+    };
+  };
   GetOrganization: {
     parameters: {
       path: {
@@ -17556,7 +17626,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_"];
+          "application/json": components["schemas"]["Result_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--default_time_filter-string--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_"];
         };
       };
     };
@@ -17836,16 +17906,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  GetModels: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__model-string_-Array.string_"];
         };
       };
     };
@@ -20598,10 +20658,74 @@ export interface operations {
       };
     };
   };
+  ListHelixThreads: {
+    parameters: {
+      query?: {
+        limit?: number;
+        offset?: number;
+        status?: "all" | "escalated" | "resolved";
+        tier?: "all" | "free" | "pro" | "growth" | "enterprise";
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HelixThreadListResponse.string_"];
+        };
+      };
+    };
+  };
   GetHelixThread: {
     parameters: {
       path: {
         sessionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_HelixThreadDetail.string_"];
+        };
+      };
+    };
+  };
+  ReplyToHelixThread: {
+    parameters: {
+      path: {
+        sessionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          name?: string;
+          message: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_InAppThread.string_"];
+        };
+      };
+    };
+  };
+  ResolveHelixThread: {
+    parameters: {
+      path: {
+        sessionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          adminEmail?: string;
+          resolved: boolean;
+        };
       };
     };
     responses: {

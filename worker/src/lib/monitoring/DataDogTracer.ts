@@ -165,8 +165,8 @@ export class DataDogTracer {
     if (!span) return;
 
     span.error = 1;
-    span.meta["error.message"] =
-      typeof error === "string" ? error : error.message;
+    const errorMessage = typeof error === "string" ? error : error.message;
+    span.meta["error.message"] = errorMessage;
     if (typeof error !== "string" && error.stack) {
       span.meta["error.stack"] = error.stack;
     }
@@ -297,13 +297,18 @@ export class DataDogTracer {
 
 export function createDataDogTracer(env: {
   DATADOG_APM_ENABLED?: string;
+  DATADOG_ENABLED?: string; // Alternative name for compatibility
   DATADOG_API_KEY?: string;
   DATADOG_APM_ENDPOINT?: string;
   DATADOG_APM_SAMPLING_RATE?: string;
   ENVIRONMENT?: string;
 }): DataDogTracer {
+  // Support both DATADOG_APM_ENABLED and DATADOG_ENABLED
+  const enabled =
+    (env.DATADOG_APM_ENABLED ?? env.DATADOG_ENABLED ?? "false") === "true";
+
   return new DataDogTracer({
-    enabled: (env.DATADOG_APM_ENABLED ?? "false") === "true",
+    enabled,
     apiKey: env.DATADOG_API_KEY || "",
     endpoint:
       env.DATADOG_APM_ENDPOINT || "https://http-intake.logs.us5.datadoghq.com",

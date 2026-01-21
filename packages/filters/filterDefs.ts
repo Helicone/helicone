@@ -214,8 +214,8 @@ interface RequestResponseRMTToOperators {
     [key: string]: SingleKey<TextOperators>;
   };
   scores_column: SingleKey<TextOperators>;
-  request_body: SingleKey<VectorOperators>;
-  response_body: SingleKey<VectorOperators>;
+  request_body: SingleKey<TextOperators>;
+  response_body: SingleKey<TextOperators>;
   cache_enabled: SingleKey<BooleanOperators>;
   cache_reference_id: SingleKey<TextOperators>;
   cached: SingleKey<BooleanOperators>;
@@ -391,7 +391,8 @@ export type TablesAndViews = {
 };
 export type FilterLeaf = SingleKey<TablesAndViews>;
 
-export type FilterNode = FilterLeaf | FilterBranch | {};
+// "all" is used by frontend to represent "match everything" - it's handled in buildFilter
+export type FilterNode = FilterLeaf | FilterBranch | "all" | {};
 
 export interface FilterBranch {
   left: FilterNode;
