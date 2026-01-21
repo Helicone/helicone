@@ -37,8 +37,21 @@ import useNotification from "@/components/shared/notification/useNotification";
 import { Small } from "@/components/ui/typography";
 import { Label } from "../ui/label";
 import { Checkbox } from "../ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import { cn } from "@/lib/utils";
 import { logger } from "@/lib/telemetry/logger";
+
+// Allowed OpenAI endpoints for data residency
+const OPENAI_ENDPOINTS = [
+  { value: "", label: "Default (api.openai.com)" },
+  { value: "https://us.api.openai.com", label: "US Data Residency (us.api.openai.com)" },
+] as const;
 
 // ====== Types ======
 interface ProviderCardProps {
@@ -284,9 +297,11 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
   };
 
   const handleUpdateConfigField = (key: string, value: string) => {
+    // Convert "default" placeholder value to empty string for storage
+    const normalizedValue = value === "default" ? "" : value;
     setConfigValues((prev) => ({
       ...prev,
-      [key]: value,
+      [key]: normalizedValue,
     }));
   };
 
@@ -401,9 +416,10 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
     if (provider.id === "openai") {
       configFields = [
         {
-          label: "Base URL (optional)",
+          label: "Endpoint Region",
           key: "baseUri",
-          placeholder: "https://us.api.openai.com (for US data residency)",
+          placeholder: "",
+          type: "select",
         },
       ];
     } else if (provider.id === "azure") {
@@ -483,6 +499,28 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                       : field.label}
                   </Label>
                 </div>
+              ) : field.type === "select" && provider.id === "openai" ? (
+                <Select
+                  value={configValues[field.key] || "default"}
+                  onValueChange={(value) =>
+                    handleUpdateConfigField(field.key, value)
+                  }
+                  disabled={isEditMode && !isEditingKey}
+                >
+                  <SelectTrigger className="h-7 text-xs">
+                    <SelectValue placeholder="Select endpoint region" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {OPENAI_ENDPOINTS.map((endpoint) => (
+                      <SelectItem
+                        key={endpoint.value || "default"}
+                        value={endpoint.value || "default"}
+                      >
+                        {endpoint.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               ) : (
                 <Input
                   type={field.type ?? "text"}
