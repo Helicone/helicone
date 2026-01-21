@@ -9,13 +9,99 @@ description: "Set up Helicone on cloud infrastructure. Step-by-step instructions
 
 Create your node on the cloud. For example, on AWS, you can create an EC2 instance.
 Make sure that the instance has enough memory and disk space to run Helicone.
-For example, you can use the `m5.2xlarge` instance type on AWS.
+For example, you can use the `m5.xlarge` instance type on AWS.
 
-Recommend Requirements
+Recommended Requirements
 
-- 8 vCPUs
-- 32 GB RAM
-- 250 GB disk space
+- 4 vCPUs
+- 16 GB RAM
+- 100 GB disk space
+
+## Option 1: All-in-One Image (Recommended)
+
+The simplest approach uses the pre-built `helicone-all-in-one` Docker image.
+
+### Within your remote machine
+
+[Install Docker](https://docs.docker.com/engine/install/)
+
+Run the container with your server's public IP:
+
+```bash
+export PUBLIC_URL="http://YOUR_IP:3000"
+export JAWN_URL="http://YOUR_IP:8585"
+export S3_URL="http://YOUR_IP:9080"
+
+docker run -d \
+  --name helicone \
+  -p 3000:3000 \
+  -p 8585:8585 \
+  -p 9080:9080 \
+  -e SITE_URL="$PUBLIC_URL" \
+  -e BETTER_AUTH_URL="$PUBLIC_URL" \
+  -e BETTER_AUTH_SECRET="$(openssl rand -base64 32)" \
+  -e NEXT_PUBLIC_APP_URL="$PUBLIC_URL" \
+  -e NEXT_PUBLIC_HELICONE_JAWN_SERVICE="$JAWN_URL" \
+  -e NEXT_PUBLIC_IS_ON_PREM=true \
+  -e S3_ENDPOINT="$S3_URL" \
+  helicone/helicone-all-in-one:latest
+```
+
+See the [Docker guide](/getting-started/self-host/docker) for environment variables, user setup, and troubleshooting.
+
+### Adding HTTPS through a reverse proxy (optional)
+
+If you want to serve Helicone through a custom domain with HTTPS, you'll need a reverse proxy. Caddy is one option that provides automatic HTTPS with Let's Encrypt certificates. You can also use nginx, Traefik, or any other reverse proxy.
+
+1. Point a domain to your server's IP (A record), e.g., `helicone-api.yourdomain.com`
+
+2. Install Caddy:
+```bash
+curl -L "https://github.com/caddyserver/caddy/releases/latest/download/caddy_linux_amd64.tar.gz" -o caddy.tar.gz
+tar -xzf caddy.tar.gz caddy
+sudo mv caddy /usr/local/bin/
+sudo chmod +x /usr/local/bin/caddy
+```
+
+3. Create `/etc/caddy/Caddyfile`:
+```caddyfile
+helicone-api.yourdomain.com {
+    reverse_proxy localhost:8585
+}
+```
+
+4. Run Caddy:
+```bash
+sudo mkdir -p /var/log/caddy /etc/caddy
+
+sudo tee /etc/systemd/system/caddy.service > /dev/null <<'EOF'
+[Unit]
+Description=Caddy web server
+After=network.target
+
+[Service]
+Type=notify
+User=root
+ExecStart=/usr/local/bin/caddy run --config /etc/caddy/Caddyfile
+ExecReload=/usr/local/bin/caddy reload --config /etc/caddy/Caddyfile
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable caddy
+sudo systemctl start caddy
+```
+
+Now you can access the API via `https://helicone-api.yourdomain.com`.
+
+---
+
+## Option 2: Build from Source
+
+For more control, you can build and run Helicone from source using Docker Compose.
 
 ### Within your remote machine
 
@@ -35,7 +121,9 @@ cp .env.example .env
 ./helicone-compose.sh helicone up
 ```
 
-### Assuming you have your ssh config setup like this...
+### Accessing via SSH tunnel
+
+Assuming you have your ssh config setup like this:
 
 ```
 Host helicone
@@ -44,7 +132,7 @@ Host helicone
     IdentityFile ~/Desktop/secret.pem
 ```
 
-Let's test it by running this command on your localhost
+Test it by running this command on your localhost:
 
 ```bash
 ssh -N \
@@ -65,7 +153,7 @@ After you add a user, you can connect to the dashboard at http://localhost:3000/
 
 The proxy is setup at localhost:8787 for OpenAI.
 
-You can test it works by adding a new key on the http://localhost:3000 and then running this command on your localhost
+You can test it works by adding a new key on the http://localhost:3000 and then running this command on your localhost:
 
 ```bash
 # Test command
@@ -91,6 +179,10 @@ curl --request POST \
 ```
 
 You should see all the data show up on Helicone.
+
+---
+
+## Production Checklist
 
 The next steps before becoming production ready are:
 

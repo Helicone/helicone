@@ -22,12 +22,13 @@ import TeamCard from "../components/templates/pricing/TeamCard";
 import CustomerHighlights from "../components/templates/pricing/CustomerHighlights";
 import AvailableDiscounts from "../components/templates/pricing/AvailableDiscounts";
 import Companies from "@/components/home/Companies";
+import UsageEstimator from "../components/templates/pricing/UsageEstimator";
 
 export default function PricingPage() {
   return (
     <div className="bg-background text-slate-700">
       <div className=" mx-auto antialiased">
-        <div className="flex flex-col max-w-6xl mx-auto p-4 pb-24 pt-8 sm:pb-32 lg:flex gap-8 md:gap-16">
+        <div className="flex flex-col max-w-6xl mx-auto p-8 lg:flex gap-8 md:gap-16">
           <Col className="items-center gap-4">
             <span className="block sm:hidden">
               <Image
@@ -62,18 +63,16 @@ export default function PricingPage() {
             <TeamCard />
             <EnterpriseCard />
           </div>
+        </div>
 
-          <div className="flex mt-4 justify-center flex-col items-center gap-4">
-            <h2 className="text-xl font-semibold text-sidebar-foreground text-center leading-8">
-              Powering leading companies
-              <br />
-              <span className="text-muted-foreground">
-                from next-gen startups to enterprise
-              </span>
-            </h2>
-            <Companies className="w-full" />
+        {/* Full-width gray section for calculator */}
+        <div id="calculator" className="bg-slate-50 py-12">
+          <div className="max-w-6xl mx-auto px-4">
+            <UsageEstimator />
           </div>
+        </div>
 
+        <div className="flex flex-col max-w-6xl mx-auto p-4 pt-8 gap-8 md:gap-16">
           <CustomerHighlights />
 
           <PricingComparisonTable />

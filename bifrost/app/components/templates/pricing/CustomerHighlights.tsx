@@ -54,7 +54,7 @@ const highlights: CustomerHighlight[] = [
 
 export default function CustomerHighlights() {
   return (
-    <div className="min-h-[200px] flex items-center justify-center">
+    <div className="flex items-center justify-center">
       <div className="w-full rounded-xl flex flex-col md:flex-row border border-border">
         {highlights.map((highlight, index) => (
           <div
@@ -66,7 +66,7 @@ export default function CustomerHighlights() {
               }
             `}
           >
-            <div className="flex flex-col-reverse gap-8 px-6 py-9">
+            <div className="flex flex-col-reverse gap-3 px-5 py-4">
               <div className="self-stretch">
                 <span className="text-xl text-slate-700 font-bold">
                   {highlight.metric}

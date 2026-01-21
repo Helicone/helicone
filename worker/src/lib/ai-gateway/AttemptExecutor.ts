@@ -151,6 +151,15 @@ export class AttemptExecutor {
 
     const awaitedEscrow = await pendingEscrow;
     if (awaitedEscrow.error) {
+      // Trigger auto-topoff check when escrow fails due to insufficient credits
+      // This ensures auto-topoff can trigger even when requests are being rejected
+      if (awaitedEscrow.error.type === "insufficient_credit_limit") {
+        const walletId = this.env.WALLET.idFromName(props.orgId);
+        const walletStub = this.env.WALLET.get(walletId);
+        this.ctx.waitUntil(
+          walletStub.checkAndScheduleAutoTopoffAlarm(props.orgId)
+        );
+      }
       if (walletSpanId) {
         this.tracer.setError(walletSpanId, awaitedEscrow.error.message);
         this.tracer.finishSpan(walletSpanId);

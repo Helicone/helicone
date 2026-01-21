@@ -1,8 +1,7 @@
-import { CheckIcon, ChevronDownIcon } from "@heroicons/react/20/solid";
+import { CheckIcon } from "@heroicons/react/20/solid";
 import Link from "next/link";
 import {
   StickyTable,
-  Table,
   TableBody,
   TableCell,
   TableHead,
@@ -10,11 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { useState, Fragment } from "react";
-import {
-  GB_PRICING_TIERS,
-  REQUEST_PRICING_TIERS,
-} from "@helicone-package/pricing";
+import { Fragment } from "react";
 
 interface PricingTier {
   name: string;
@@ -29,27 +24,12 @@ interface Feature {
   pro: string | boolean;
   team: string | boolean;
   enterprise: string | boolean;
-  tooltip?: "usage";
 }
 
 interface FeatureGroup {
   title: string;
   features: Feature[];
 }
-
-// Derive display data from shared pricing tiers
-const USAGE_PRICING_GB = GB_PRICING_TIERS.map((tier) => ({
-  label: tier.label,
-  rate: `$${tier.ratePerGB.toFixed(2)}/GB`,
-}));
-
-const USAGE_PRICING_REQUESTS = REQUEST_PRICING_TIERS.map((tier) => ({
-  label: tier.label,
-  rate:
-    tier.ratePerLog === 0
-      ? "Free"
-      : `$${tier.ratePerLog.toFixed(8).replace(/0+$/, "")}`,
-}));
 
 const tiers: PricingTier[] = [
   {
@@ -101,38 +81,30 @@ const featureGroups: FeatureGroup[] = [
       {
         name: "Requests",
         hobby: "10,000/mo",
-        pro: "Unlimited",
-        team: "Unlimited",
-        enterprise: "Unlimited",
-      },
-      {
-        name: "Usage-based pricing",
-        hobby: "10K requests",
-        pro: "Tiered pricing",
-        team: "Tiered pricing",
-        enterprise: "Volume discount",
-        tooltip: "usage",
+        pro: "10K free",
+        team: "10K free",
+        enterprise: "10K free",
       },
       {
         name: "Sessions",
-        hobby: "Unlimited",
-        pro: "Unlimited",
-        team: "Unlimited",
-        enterprise: "Unlimited",
+        hobby: true,
+        pro: true,
+        team: true,
+        enterprise: true,
       },
       {
         name: "User analytics",
-        hobby: "Unlimited",
-        pro: "Unlimited",
-        team: "Unlimited",
-        enterprise: "Unlimited",
+        hobby: true,
+        pro: true,
+        team: true,
+        enterprise: true,
       },
       {
         name: "Custom properties",
-        hobby: "Unlimited",
-        pro: "Unlimited",
-        team: "Unlimited",
-        enterprise: "Unlimited",
+        hobby: true,
+        pro: true,
+        team: true,
+        enterprise: true,
       },
       {
         name: "HQL (Query Language)",
@@ -162,31 +134,31 @@ const featureGroups: FeatureGroup[] = [
     features: [
       {
         name: "Playground",
-        hobby: "Unlimited",
-        pro: "Unlimited",
-        team: "Unlimited (credits)",
-        enterprise: "Unlimited",
+        hobby: true,
+        pro: true,
+        team: true,
+        enterprise: true,
       },
       {
         name: "Prompts",
-        hobby: "Unlimited",
-        pro: "Unlimited",
-        team: "Unlimited",
-        enterprise: "Unlimited",
+        hobby: true,
+        pro: true,
+        team: true,
+        enterprise: true,
       },
       {
         name: "Scores",
-        hobby: "Unlimited",
-        pro: "Unlimited",
-        team: "Unlimited",
-        enterprise: "Unlimited",
+        hobby: true,
+        pro: true,
+        team: true,
+        enterprise: true,
       },
       {
         name: "Datasets",
-        hobby: "Unlimited",
-        pro: "Unlimited",
-        team: "Unlimited",
-        enterprise: "Unlimited",
+        hobby: true,
+        pro: true,
+        team: true,
+        enterprise: true,
       },
       {
         name: "Webhooks",
@@ -232,6 +204,13 @@ const featureGroups: FeatureGroup[] = [
         pro: "1 month",
         team: "3 months",
         enterprise: "Forever",
+      },
+      {
+        name: "Storage",
+        hobby: "1 GB",
+        pro: "1 GB free",
+        team: "1 GB free",
+        enterprise: "1 GB free",
       },
       {
         name: "Configurable retention",
@@ -346,8 +325,6 @@ const featureGroups: FeatureGroup[] = [
 ];
 
 export default function PricingComparisonTable() {
-  const [showUsageTiers, setShowUsageTiers] = useState(false);
-
   return (
     <div className="flex flex-col gap-6">
       <h2 className="text-black text-4xl font-bold">Compare plans</h2>
@@ -419,95 +396,9 @@ export default function PricingComparisonTable() {
                           : ""
                       }`}
                     >
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-2">
-                          <span className="text-slate-500 text-sm font-medium">
-                            {feature.name}
-                          </span>
-                          {feature.tooltip === "usage" && (
-                            <button
-                              onClick={() => setShowUsageTiers(!showUsageTiers)}
-                              className="p-1 hover:bg-slate-100 rounded-full transition-colors"
-                            >
-                              <ChevronDownIcon
-                                className={`w-4 h-4 text-slate-400 transition-transform ${
-                                  showUsageTiers ? "rotate-180" : ""
-                                }`}
-                              />
-                            </button>
-                          )}
-                        </div>
-                        {feature.tooltip === "usage" && showUsageTiers && (
-                          <div className="pl-8 pt-4 space-y-4">
-                            {/* Storage Pricing */}
-                            <div>
-                              <div className="text-slate-600 text-xs font-semibold mb-2">
-                                Storage Pricing
-                              </div>
-                              <Table className="w-full">
-                                <TableHeader>
-                                  <TableRow className="hover:bg-transparent">
-                                    <TableHead className="text-slate-500 font-medium px-0 py-1">
-                                      Usage
-                                    </TableHead>
-                                    <TableHead className="text-slate-500 font-medium px-0 py-1 text-right">
-                                      Rate
-                                    </TableHead>
-                                  </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                  {USAGE_PRICING_GB.map((tier, i) => (
-                                    <TableRow
-                                      key={i}
-                                      className="hover:bg-transparent"
-                                    >
-                                      <TableCell className="px-0 py-1 text-sm text-slate-500">
-                                        {tier.label}
-                                      </TableCell>
-                                      <TableCell className="px-0 py-1 text-right text-sm text-slate-500">
-                                        {tier.rate}
-                                      </TableCell>
-                                    </TableRow>
-                                  ))}
-                                </TableBody>
-                              </Table>
-                            </div>
-                            {/* Request Pricing */}
-                            <div>
-                              <div className="text-slate-600 text-xs font-semibold mb-2">
-                                Request Pricing
-                              </div>
-                              <Table className="w-full">
-                                <TableHeader>
-                                  <TableRow className="hover:bg-transparent">
-                                    <TableHead className="text-slate-500 font-medium px-0 py-1">
-                                      Requests
-                                    </TableHead>
-                                    <TableHead className="text-slate-500 font-medium px-0 py-1 text-right">
-                                      Rate
-                                    </TableHead>
-                                  </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                  {USAGE_PRICING_REQUESTS.map((tier, i) => (
-                                    <TableRow
-                                      key={i}
-                                      className="hover:bg-transparent"
-                                    >
-                                      <TableCell className="px-0 py-1 text-sm text-slate-500">
-                                        {tier.label}
-                                      </TableCell>
-                                      <TableCell className="px-0 py-1 text-right text-sm text-slate-500">
-                                        {tier.rate}
-                                      </TableCell>
-                                    </TableRow>
-                                  ))}
-                                </TableBody>
-                              </Table>
-                            </div>
-                          </div>
-                        )}
-                      </div>
+                      <span className="text-slate-500 text-sm font-medium">
+                        {feature.name}
+                      </span>
                     </TableCell>
                     {[
                       feature.hobby,
@@ -526,9 +417,23 @@ export default function PricingComparisonTable() {
                         }`}
                       >
                         {typeof value === "string" ? (
-                          <div className="text-slate-500 text-sm font-medium">
-                            {value}
-                          </div>
+                          value.includes("free") ? (
+                            <div className="flex flex-col">
+                              <span className="text-slate-500 text-sm font-medium">
+                                {value}
+                              </span>
+                              <Link
+                                href="#calculator"
+                                className="text-brand text-xs hover:underline"
+                              >
+                                + usage-based ↑
+                              </Link>
+                            </div>
+                          ) : (
+                            <div className="text-slate-500 text-sm font-medium">
+                              {value}
+                            </div>
+                          )
                         ) : value === true ? (
                           <CheckIcon className="w-5 h-5 text-slate-500" />
                         ) : null}

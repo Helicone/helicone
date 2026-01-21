@@ -8,6 +8,7 @@ export default defineConfig({
       "./test/cache/vitest.config.mts",
       "./test/alerts/vitest.config.mts",
       "./test/token-limit-exception/vitest.config.mts",
+      "./test/rate-limit/vitest.config.mts",
     ],
   },
 });

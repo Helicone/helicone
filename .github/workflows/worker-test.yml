@@ -12,6 +12,10 @@ on:
   pull_request:
     branches:
       - main
+    paths:
+      - "worker/**"
+      - "packages/**"
+      - ".github/workflows/worker-test.yml"
 
 jobs:
   worker-ai-gateway-tests:

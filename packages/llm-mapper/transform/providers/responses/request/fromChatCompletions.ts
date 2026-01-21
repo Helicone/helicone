@@ -268,9 +268,8 @@ export function fromChatCompletions(
     ...(body.parallel_tool_calls != null && {
       parallel_tool_calls: body.parallel_tool_calls,
     }),
-    ...(body.stream_options != null && {
-      stream_options: body.stream_options,
-    }),
+    // Note: stream_options is NOT included here as it's a Chat Completions-only parameter
+    // The Responses API handles streaming usage differently
     // Tools
     ...(tools && { tools }),
     ...(tool_choice && { tool_choice }),
