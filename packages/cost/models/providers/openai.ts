@@ -9,11 +9,17 @@ export class OpenAIProvider extends BaseProvider {
   readonly modelPages = ["https://platform.openai.com/docs/models"];
 
   buildUrl(endpoint: Endpoint, requestParams: RequestParams): string {
+    // Use custom base URL if provided (e.g., for US data residency: us.api.openai.com)
+    const baseUrl = endpoint.userConfig.baseUri || "https://api.openai.com";
+    const normalizedBaseUrl = baseUrl.endsWith("/")
+      ? baseUrl.slice(0, -1)
+      : baseUrl;
+
     switch (requestParams.bodyMapping) {
       case "RESPONSES":
-        return "https://api.openai.com/v1/responses";
+        return `${normalizedBaseUrl}/v1/responses`;
       default:
-        return "https://api.openai.com/v1/chat/completions";
+        return `${normalizedBaseUrl}/v1/chat/completions`;
     }
   }
 

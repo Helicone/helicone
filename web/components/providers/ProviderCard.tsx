@@ -98,6 +98,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
   // ====== Derived state ======
   const isEditMode = !!existingKey;
   const hasAdvancedConfig =
+    provider.id === "openai" ||
     provider.id === "azure" ||
     provider.id === "bedrock" ||
     provider.id === "vertex";
@@ -119,7 +120,11 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
   useEffect(() => {
     // Initialize default config based on provider
     let initialConfig = {};
-    if (provider.id === "azure") {
+    if (provider.id === "openai") {
+      initialConfig = {
+        baseUri: "",
+      };
+    } else if (provider.id === "azure") {
       initialConfig = {
         baseUri: "",
         apiVersion: "",
@@ -393,7 +398,15 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
       type?: string;
     }[] = [];
 
-    if (provider.id === "azure") {
+    if (provider.id === "openai") {
+      configFields = [
+        {
+          label: "Base URL (optional)",
+          key: "baseUri",
+          placeholder: "https://us.api.openai.com (for US data residency)",
+        },
+      ];
+    } else if (provider.id === "azure") {
       configFields = [
         {
           label: "Base URI",
