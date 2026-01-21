@@ -5217,6 +5217,36 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "openai/gpt-image-1": {
+    "gpt-image-1.5:openai": {
+      "context": 8192,
+      "crossRegion": false,
+      "maxTokens": 4096,
+      "modelId": "gpt-image-1.5",
+      "parameters": [
+        "n",
+      ],
+      "provider": "openai",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-image-1:openai": {
+      "context": 8192,
+      "crossRegion": false,
+      "maxTokens": 4096,
+      "modelId": "gpt-image-1",
+      "parameters": [
+        "n",
+      ],
+      "provider": "openai",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
+  },
   "openai/o1": {
     "o1-mini:helicone": {
       "context": 128000,
@@ -6687,6 +6717,10 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "openrouter",
     "openrouter",
+  ],
+  "openai/gpt-image-1": [
+    "openai",
+    "openai",
   ],
   "openai/o1": [
     "helicone",
@@ -8409,6 +8443,15 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "openai/gpt-image-1": {
+    "openai": [
+      {
+        "input": 0.000005,
+        "output": 0.00001,
+        "threshold": 0,
+      },
+    ],
+  },
   "openai/o1": {
     "helicone": [
       {
@@ -9086,6 +9129,18 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "gpt-image-1",
+      "providers": [
+        "openai",
+      ],
+    },
+    {
+      "model": "gpt-image-1.5",
+      "providers": [
+        "openai",
+      ],
+    },
+    {
       "model": "gpt-oss-120b",
       "providers": [
         "baseten",
@@ -9480,7 +9535,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "novita",
     },
     {
-      "modelCount": 29,
+      "modelCount": 31,
       "provider": "openai",
     },
     {
@@ -9611,8 +9666,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 289,
-  "totalModelProviderConfigs": 289,
+  "totalEndpoints": 291,
+  "totalModelProviderConfigs": 291,
   "totalModelsWithPtb": 100,
   "totalProviders": 21,
 }

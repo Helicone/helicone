@@ -210,6 +210,21 @@ registerPrivateTSOARoutes(v1APIRouter);
 app.use(unAuthenticatedRouter);
 app.use(v1APIRouter);
 
+// Helper to detect safe-to-expose ClickHouse/database errors
+function getSafeErrorMessage(err: Error): string | null {
+  const msg = err.message.toLowerCase();
+  if (msg.includes("max_execution_time") || msg.includes("timeout")) {
+    return "Query timeout. Try a shorter time range or simpler filters.";
+  }
+  if (msg.includes("max_memory_usage")) {
+    return "Query exceeded memory limit. Try a shorter time range.";
+  }
+  if (msg.includes("max_result_rows") || msg.includes("max_rows_to_read")) {
+    return "Query returned too many rows. Add more filters.";
+  }
+  return null;
+}
+
 function errorHandler(
   err: unknown,
   req: express.Request,
@@ -224,10 +239,12 @@ function errorHandler(
     });
   }
   if (err instanceof Error) {
+    const safeMessage = getSafeErrorMessage(err);
     return res.status(500).json({
-      message: "Internal Server Error",
+      message: safeMessage || "Internal Server Error",
       details:
-        ENVIRONMENT === "production" ? "Internal Server Error" : err.message,
+        safeMessage ||
+        (ENVIRONMENT === "production" ? "Internal Server Error" : err.message),
       stack: ENVIRONMENT === "production" ? undefined : err.stack,
     });
   }

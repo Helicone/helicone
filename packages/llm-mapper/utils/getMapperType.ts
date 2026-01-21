@@ -190,7 +190,11 @@ export const getMapperType = ({
     return "gemini-chat";
   }
 
-  if (model === "dall-e-3" || model === "dall-e-2") {
+  if (
+    model === "dall-e-3" ||
+    model === "dall-e-2" ||
+    model.startsWith("gpt-image-1")
+  ) {
     return "openai-image";
   }
 
