@@ -292,6 +292,15 @@ describe("Registry Tests", () => {
           const body = (await response.json()) as any;
           expect(body).toHaveProperty("error");
           expect(body.success).toBe(false);
+
+          // Flush any pending Durable Object operations (e.g., auto-topoff check)
+          // to prevent isolated storage cleanup errors
+          const orgId = testCase.orgId ?? "test-org-id";
+          const walletId = env.WALLET.idFromName(orgId);
+          const walletStub = env.WALLET.get(walletId);
+          await runInDurableObject(walletStub, async () => {
+            // Just accessing the DO is enough to flush pending operations
+          });
         }, 10000); // 10s timeout for PTB tests with Durable Objects
       });
     });

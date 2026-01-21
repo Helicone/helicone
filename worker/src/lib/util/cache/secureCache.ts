@@ -267,10 +267,13 @@ export async function getAndStoreInCache<T, K>(
   if (cached !== null) {
     try {
       const cachedResult = JSON.parse(cached);
-      if (cachedResult._helicone_cached_string) {
+      // Check for null/undefined before accessing properties
+      if (cachedResult && cachedResult._helicone_cached_string) {
         return ok(cachedResult._helicone_cached_string);
       }
-      return ok(JSON.parse(cached) as T);
+      if (cachedResult !== null && cachedResult !== undefined) {
+        return ok(cachedResult as T);
+      }
     } catch (e) {
       console.error("Error parsing cached result", e);
     }
