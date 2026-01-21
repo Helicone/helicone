@@ -32,6 +32,15 @@ export const mapDalleRequest: MapperFn<DalleRequestBody, any> = ({
   statusCode = 200,
   model,
 }) => {
+  // Format the image URL properly - add data URL prefix for base64 images
+  const rawImageData =
+    response?.data?.[0]?.b64_json || response?.data?.[0]?.url || "";
+  const imageUrl = rawImageData
+    ? rawImageData.startsWith("http://") || rawImageData.startsWith("https://")
+      ? rawImageData
+      : `data:image/png;base64,${rawImageData}`
+    : "";
+
   const llmSchema: LlmSchema = {
     request: {
       model: request.model,
@@ -44,14 +53,24 @@ export const mapDalleRequest: MapperFn<DalleRequestBody, any> = ({
             json_schema: {},
           }
         : undefined,
+      // Add messages array for proper UI rendering
+      messages: request.prompt
+        ? [
+            {
+              role: "user",
+              content: request.prompt,
+              _type: "message",
+            },
+          ]
+        : [],
     },
     response: {
       messages: [
         {
+          role: "assistant",
           content: response?.data?.[0]?.revised_prompt || "",
           _type: "image",
-          image_url:
-            response?.data?.[0]?.b64_json || response?.data?.[0]?.url || "",
+          image_url: imageUrl,
         },
       ],
       model: model,
@@ -73,8 +92,7 @@ export const mapDalleRequest: MapperFn<DalleRequestBody, any> = ({
           content: response?.data?.[0]?.revised_prompt || "",
           role: "assistant",
           _type: "image",
-          image_url:
-            response?.data?.[0]?.b64_json || response?.data?.[0]?.url || "",
+          image_url: imageUrl,
         },
       ],
     },
