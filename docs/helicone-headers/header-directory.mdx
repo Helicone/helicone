@@ -97,7 +97,9 @@ const model = new ChatOpenAI({
 The URL to proxy the request to when using _gateway.helicone.ai_. For example, `https://api.openai.com/`.
 </ResponseField>
 <ResponseField name="Helicone-OpenAI-Api-Base" type="string (url)">
-  The URL to proxy the request to when using _oai.helicone.ai_. For example, `https://[YOUR_AZURE_DOMAIN].openai.azure.com`.
+  The URL to proxy the request to when using _oai.helicone.ai_. Use this for Azure OpenAI deployments or OpenAI's regional endpoints. Examples:
+  - Azure: `https://[YOUR_AZURE_DOMAIN].openai.azure.com`
+  - OpenAI US Data Residency: `https://us.api.openai.com`
 </ResponseField>
 <ResponseField name="Helicone-Request-Id" type="string (uuid)">
   The ID of the request, in the format: `123e4567-e89b-12d3-a456-426614174000`
