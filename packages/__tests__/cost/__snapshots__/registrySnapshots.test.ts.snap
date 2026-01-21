@@ -8411,8 +8411,8 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "openai/gpt-image-1": {
     "openai": [
       {
-        "input": 0.00000625,
-        "output": 0.0000125,
+        "input": 0.000005,
+        "output": 0.00001,
         "threshold": 0,
       },
     ],
