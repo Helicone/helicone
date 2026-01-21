@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Registry Snapshots archived endpoints snapshot 1`] = `{}`;
 
@@ -5142,6 +5142,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "gpt-5.2:azure": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5.2",
+      "parameters": [
+        "logprobs",
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+        "verbosity",
+      ],
+      "provider": "azure",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-5.2:openai": {
       "context": 400000,
       "crossRegion": false,
@@ -6657,6 +6680,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
   ],
   "openai/gpt-5.2": [
+    "azure",
     "openai",
     "openai",
     "openai",
@@ -8354,6 +8378,17 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "openai/gpt-5.2": {
+    "azure": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+        },
+        "input": 0.00000175,
+        "output": 0.000014,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
     "openai": [
       {
         "cacheMultipliers": {
@@ -9031,6 +9066,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "gpt-5.2",
       "providers": [
+        "azure",
         "openai",
         "openrouter",
       ],
@@ -9384,7 +9420,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "anthropic",
     },
     {
-      "modelCount": 15,
+      "modelCount": 16,
       "provider": "azure",
     },
     {
@@ -9575,8 +9611,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 288,
-  "totalModelProviderConfigs": 288,
+  "totalEndpoints": 289,
+  "totalModelProviderConfigs": 289,
   "totalModelsWithPtb": 100,
   "totalProviders": 21,
 }
