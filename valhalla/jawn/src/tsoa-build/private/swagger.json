@@ -7169,6 +7169,26 @@
 							"model": {
 								"type": "string"
 							},
+							"reasoningTokens": {
+								"type": "number",
+								"format": "double"
+							},
+							"completionAudioTokens": {
+								"type": "number",
+								"format": "double"
+							},
+							"promptAudioTokens": {
+								"type": "number",
+								"format": "double"
+							},
+							"promptCacheWriteTokens": {
+								"type": "number",
+								"format": "double"
+							},
+							"promptCacheReadTokens": {
+								"type": "number",
+								"format": "double"
+							},
 							"completionTokens": {
 								"type": "number",
 								"format": "double"

@@ -2649,6 +2649,16 @@ Json: JsonObject;
       response: {
         model?: string;
         /** Format: double */
+        reasoningTokens?: number;
+        /** Format: double */
+        completionAudioTokens?: number;
+        /** Format: double */
+        promptAudioTokens?: number;
+        /** Format: double */
+        promptCacheWriteTokens?: number;
+        /** Format: double */
+        promptCacheReadTokens?: number;
+        /** Format: double */
         completionTokens?: number;
         /** Format: double */
         promptTokens?: number;
