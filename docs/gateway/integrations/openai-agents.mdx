@@ -1,0 +1,196 @@
+---
+title: "OpenAI Agents Integration"
+sidebarTitle: "OpenAI Agents"
+description: "Integrate Helicone AI Gateway with OpenAI Agents SDK to build AI agents with tools and full observability."
+"twitter:title": "OpenAI Agents Integration - Helicone OSS LLM Observability"
+iconType: "solid"
+---
+
+import { strings } from "/snippets/strings.mdx";
+import Star from "/snippets/star.mdx";
+import RequestIntegration from "/snippets/request-integration.mdx";
+
+## Introduction
+
+[OpenAI Agents SDK](https://github.com/openai/agents) is a framework for building AI agents with tool calling, multi-step reasoning, and structured outputs.
+
+## {strings.howToIntegrate}
+
+<Steps>
+  <Step title={strings.generateKey}>
+    {strings.generateKeyInstructions}
+
+    ```js
+    HELICONE_API_KEY=sk-helicone-...
+    ```
+  </Step>
+
+  <Step title={strings.installSDK('OpenAI Agents SDK')}>
+    ```bash
+    npm install @openai/agents openai
+    # or
+    pip install openai-agents
+    ```
+  </Step>
+
+  <Step title="Configure OpenAI Agents with Helicone AI Gateway">
+    <CodeGroup>
+    ```typescript TypeScript
+    import { Agent, setDefaultOpenAIClient } from "@openai/agents";
+    import OpenAI from "openai";
+    import dotenv from "dotenv";
+
+    dotenv.config();
+
+    const client = new OpenAI({
+      baseURL: "https://ai-gateway.helicone.ai/v1",
+      apiKey: process.env.HELICONE_API_KEY
+    });
+
+    // Set the client globally for all agents
+    setDefaultOpenAIClient(client);
+    ```
+
+    ```python Python
+    import os
+    from agents import set_default_openai_client
+    from openai import OpenAI
+
+    client = OpenAI(
+        base_url="https://ai-gateway.helicone.ai/v1",
+        api_key=os.getenv("HELICONE_API_KEY")
+    )
+
+    # Set the client globally for all agents
+    set_default_openai_client(client)
+    ```
+    </CodeGroup>
+
+    <div dangerouslySetInnerHTML={{ __html: strings.modelRegistryDescription }} />
+  </Step>
+
+  <Step title="Use OpenAI Agents normally">
+    Your existing OpenAI Agents code continues to work without any changes:
+
+    <CodeGroup>
+    ```typescript TypeScript
+    import { Agent, run, tool } from "@openai/agents";
+    import { z } from "zod";
+
+    // Define tools
+    const calculator = tool({
+      name: "calculator",
+      description: "Perform basic arithmetic operations",
+      parameters: z.object({
+        operation: z.enum(["add", "subtract", "multiply", "divide"]),
+        a: z.number(),
+        b: z.number()
+      }),
+      async execute({ operation, a, b }) {
+        switch (operation) {
+          case "add":
+            return a + b;
+          case "subtract":
+            return a - b;
+          case "multiply":
+            return a * b;
+          case "divide":
+            if (b === 0) return "Error: Division by zero";
+            return a / b;
+        }
+      }
+    });
+
+    // Create an agent with tools
+    const agent = new Agent({
+      name: "Assistant",
+      instructions: "You are a helpful assistant.",
+      tools: [calculator],
+      model: "gpt-4o-mini",
+    });
+
+    // Run the agent
+    const result = await run(agent, "Multiply 2 by 2");
+    console.log(result.finalOutput);
+    ```
+
+    ```python Python
+    from agents import Agent, Runner, tool
+    from typing import Literal
+
+    # Define tools
+    @tool
+    def calculator(operation: Literal["add", "subtract", "multiply", "divide"], a: float, b: float) -> float | str:
+        """Perform basic arithmetic operations."""
+        if operation == "add":
+            return a + b
+        elif operation == "subtract":
+            return a - b
+        elif operation == "multiply":
+            return a * b
+        elif operation == "divide":
+            if b == 0:
+                return "Error: Division by zero"
+            return a / b
+
+    # Create an agent with tools
+    agent = Agent(
+        name="Assistant",
+        instructions="You are a helpful assistant.",
+        tools=[calculator],
+        model="gpt-4o-mini"
+    )
+
+    # Run the agent
+    result = Runner.run_sync(agent, "Multiply 2 by 2")
+    print(result.final_output)
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title={strings.viewRequestsInDashboard}>
+    <div dangerouslySetInnerHTML={{ __html: strings.viewRequestsInDashboardDescription("OpenAI Agents") }} />
+
+    - Request/response bodies
+    - Latency metrics
+    - Token usage and costs
+    - Model performance analytics
+    - Tool usage tracking
+    - Agent reasoning steps
+    - Error tracking
+    - Session tracking
+
+    <Star />
+  </Step>
+</Steps>
+
+<RequestIntegration />
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="AI Gateway Overview" icon="arrow-progress" href="/gateway/overview">
+    Learn about Helicone's AI Gateway features and capabilities
+  </Card>
+  <Card title="Provider Routing" icon="route" href="/gateway/provider-routing">
+    Configure intelligent routing and automatic failover
+  </Card>
+  <Card title="Model Registry" icon="database" href="https://helicone.ai/models">
+    Browse all available models and providers
+  </Card>
+  <Card title="Prompt Management" icon="code" href="/gateway/concepts/prompt-caching">
+    Version and manage prompts with Helicone Prompts
+  </Card>
+  <Card title="Custom Properties" icon="tags" href="/features/advanced-usage/custom-properties">
+    Add metadata to track and filter your requests
+  </Card>
+  <Card title="Sessions" icon="link" href="/features/sessions">
+    Track multi-turn conversations and user sessions
+  </Card>
+  <Card title="Rate Limiting" icon="gauge" href="/features/advanced-usage/custom-rate-limits">
+    Configure rate limits for your applications
+  </Card>
+  <Card title="Tool Usage Tracking" icon="wrench" href="/features/tool-usage">
+    Monitor tool calls and function usage in your agents
+  </Card>
+</CardGroup>
