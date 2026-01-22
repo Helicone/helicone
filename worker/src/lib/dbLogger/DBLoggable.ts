@@ -416,35 +416,134 @@ export class DBLoggable {
     prompt_tokens: number | undefined;
     completion_tokens: number | undefined;
   } {
-    if (
-      typeof parsedResponse !== "object" ||
-      parsedResponse === null ||
-      !("usage" in parsedResponse)
-    ) {
+    if (typeof parsedResponse !== "object" || parsedResponse === null) {
       return {
         prompt_tokens: undefined,
         completion_tokens: undefined,
       };
     }
 
-    const response = parsedResponse as {
-      usage: {
-        prompt_tokens?: number;
-        completion_tokens?: number;
-        input_tokens?: number;
-        output_tokens?: number;
-        inputTokens?: number;
-        outputTokens?: number;
+    // Handle OpenAI format (usage field)
+    if ("usage" in parsedResponse) {
+      const response = parsedResponse as {
+        usage: {
+          prompt_tokens?: number;
+          completion_tokens?: number;
+          input_tokens?: number;
+          output_tokens?: number;
+          inputTokens?: number;
+          outputTokens?: number;
+        };
       };
-    };
-    const usage = response.usage;
+      const usage = response.usage;
+
+      return {
+        prompt_tokens:
+          usage?.prompt_tokens ?? usage?.input_tokens ?? usage?.inputTokens,
+        completion_tokens:
+          usage?.completion_tokens ?? usage?.output_tokens ?? usage?.outputTokens,
+      };
+    }
+
+    // Handle Gemini format (usageMetadata field)
+    if ("usageMetadata" in parsedResponse) {
+      const response = parsedResponse as {
+        usageMetadata: {
+          promptTokenCount?: number;
+          candidatesTokenCount?: number;
+          totalTokenCount?: number;
+        };
+      };
+      const usageMetadata = response.usageMetadata;
+
+      return {
+        prompt_tokens: usageMetadata?.promptTokenCount,
+        completion_tokens: usageMetadata?.candidatesTokenCount,
+      };
+    }
 
     return {
-      prompt_tokens:
-        usage?.prompt_tokens ?? usage?.input_tokens ?? usage?.inputTokens,
-      completion_tokens:
-        usage?.completion_tokens ?? usage?.output_tokens ?? usage?.outputTokens,
+      prompt_tokens: undefined,
+      completion_tokens: undefined,
     };
+  }
+
+  // Extract detailed usage including cache tokens, audio tokens, reasoning tokens
+  getDetailedUsage(parsedResponse: unknown): {
+    prompt_tokens?: number;
+    completion_tokens?: number;
+    prompt_cache_read_tokens?: number;
+    prompt_cache_write_tokens?: number;
+    prompt_audio_tokens?: number;
+    completion_audio_tokens?: number;
+    reasoning_tokens?: number;
+  } {
+    if (typeof parsedResponse !== "object" || parsedResponse === null) {
+      return {};
+    }
+
+    // Handle OpenAI format (usage field with details)
+    if ("usage" in parsedResponse) {
+      const response = parsedResponse as {
+        usage: {
+          prompt_tokens?: number;
+          completion_tokens?: number;
+          input_tokens?: number;
+          output_tokens?: number;
+          // OpenAI detailed usage
+          prompt_tokens_details?: {
+            cached_tokens?: number;
+            audio_tokens?: number;
+          };
+          completion_tokens_details?: {
+            reasoning_tokens?: number;
+            audio_tokens?: number;
+          };
+          // Anthropic cache usage
+          cache_creation_input_tokens?: number;
+          cache_read_input_tokens?: number;
+        };
+      };
+      const usage = response.usage;
+
+      return {
+        prompt_tokens:
+          usage?.prompt_tokens ?? usage?.input_tokens,
+        completion_tokens:
+          usage?.completion_tokens ?? usage?.output_tokens,
+        prompt_cache_read_tokens:
+          usage?.prompt_tokens_details?.cached_tokens ??
+          usage?.cache_read_input_tokens,
+        prompt_cache_write_tokens:
+          usage?.cache_creation_input_tokens,
+        prompt_audio_tokens:
+          usage?.prompt_tokens_details?.audio_tokens,
+        completion_audio_tokens:
+          usage?.completion_tokens_details?.audio_tokens,
+        reasoning_tokens:
+          usage?.completion_tokens_details?.reasoning_tokens,
+      };
+    }
+
+    // Handle Gemini format (usageMetadata field)
+    if ("usageMetadata" in parsedResponse) {
+      const response = parsedResponse as {
+        usageMetadata: {
+          promptTokenCount?: number;
+          candidatesTokenCount?: number;
+          cachedContentTokenCount?: number;
+        };
+      };
+      const usageMetadata = response.usageMetadata;
+
+      return {
+        prompt_tokens: usageMetadata?.promptTokenCount,
+        completion_tokens: usageMetadata?.candidatesTokenCount,
+        prompt_cache_read_tokens: usageMetadata?.cachedContentTokenCount,
+      };
+    }
+
+    return {};
   }
 
   async getStatus() {
@@ -692,10 +791,64 @@ export class DBLoggable {
       return err(org.error);
     }
 
+    // Check if free tier limit is exceeded for the current month
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const freeLimitExceeded =
+      org.data.tier === "free" && org.data.freeLimitExceeded === currentMonth;
+    const isPassthroughBilling = this.request.escrowInfo ? true : false;
+
+    // Skip logging entirely if free limit exceeded and not PTB
+    // This saves processing - we don't need to extract usage or send to Kafka
+    if (freeLimitExceeded && !isPassthroughBilling) {
+      console.log(
+        `[FreeTierLimit] Skipping logging entirely for org ${authParams.organizationId} - free tier limit exceeded and not PTB`
+      );
+      return ok(null);
+    }
+
     const { body: rawResponseBody, endTime: responseEndTime } =
       await this.response.getResponseBody();
 
-    if (S3_ENABLED === "true") {
+    // Extract usage and model from response body (needed for cases where body isn't stored)
+    let extractedUsage: {
+      prompt_tokens?: number;
+      completion_tokens?: number;
+      prompt_cache_read_tokens?: number;
+      prompt_cache_write_tokens?: number;
+      prompt_audio_tokens?: number;
+      completion_audio_tokens?: number;
+      reasoning_tokens?: number;
+    } = {};
+    let extractedModel: string | undefined;
+    let failedToGetUsage = true;
+    try {
+      const responseText = rawResponseBody.join("");
+      const parsedResponse = JSON.parse(responseText);
+      extractedUsage = this.getDetailedUsage(parsedResponse);
+      // Check if we actually got usage tokens
+      failedToGetUsage = !extractedUsage.prompt_tokens && !extractedUsage.completion_tokens;
+      // Extract model from response (OpenAI format)
+      if (
+        typeof parsedResponse === "object" &&
+        parsedResponse !== null &&
+        "model" in parsedResponse
+      ) {
+        extractedModel = (parsedResponse as { model?: string }).model;
+      }
+    } catch {
+      // Parsing failed - Jawn will need to extract usage from the body
+      failedToGetUsage = true;
+    }
+
+    // Skip S3 storage only if BOTH request and response are omitted
+    // If only one is omitted, still store to S3 - Jawn will respect the omit flags
+    // IMPORTANT: For PTB, if we failed to get usage, always store to S3 so Jawn can extract it for billing
+    const skipS3Storage =
+      !(isPassthroughBilling && failedToGetUsage) &&
+      requestHeaders?.omitHeaders?.omitRequest === true &&
+      requestHeaders?.omitHeaders?.omitResponse === true;
+
+    if (S3_ENABLED === "true" && !skipS3Storage) {
       try {
         const providerResponse = rawResponseBody.join("");
         let openAIResponse: string | undefined;
@@ -799,6 +952,9 @@ export class DBLoggable {
           this.request.attempt?.endpoint.providerModelId ?? undefined,
         stripeCustomerId: requestHeaders.stripeCustomerId ?? undefined,
         aiGatewayBodyMapping: aiGatewayBodyMapping ?? undefined,
+        // Note: If we reach here with freeLimitExceeded=true, it means PTB is enabled
+        // (non-PTB exceeded requests exit early above)
+        freeLimitExceeded: freeLimitExceeded ? true : undefined,
       },
       log: {
         request: {
@@ -854,6 +1010,14 @@ export class DBLoggable {
                   }
                 })(),
           cost: this.response.cost,
+          promptTokens: extractedUsage.prompt_tokens,
+          completionTokens: extractedUsage.completion_tokens,
+          promptCacheReadTokens: extractedUsage.prompt_cache_read_tokens,
+          promptCacheWriteTokens: extractedUsage.prompt_cache_write_tokens,
+          promptAudioTokens: extractedUsage.prompt_audio_tokens,
+          completionAudioTokens: extractedUsage.completion_audio_tokens,
+          reasoningTokens: extractedUsage.reasoning_tokens,
+          model: extractedModel,
         },
       },
     };

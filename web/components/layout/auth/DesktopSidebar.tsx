@@ -16,8 +16,10 @@ import {
   Coins,
   FileText,
   ArrowUpRight,
+  AlertTriangle,
 } from "lucide-react";
 import { useTheme } from "next-themes";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import ChangelogModal from "../ChangelogModal";
@@ -113,6 +115,16 @@ const DesktopSidebar = ({
       return item;
     });
   }, [NAVIGATION, isCollapsed, expandedItems]);
+
+  // Check if free tier limit is exceeded for the current month
+  const isFreeLimitExceeded = useMemo(() => {
+    const freeLimitMonth = orgContext?.currentOrg?.free_limit_exceeded;
+    if (!freeLimitMonth || orgContext?.currentOrg?.tier !== "free") {
+      return false;
+    }
+    const currentMonth = new Date().toISOString().slice(0, 7); // "YYYY-MM"
+    return freeLimitMonth === currentMonth;
+  }, [orgContext?.currentOrg?.free_limit_exceeded, orgContext?.currentOrg?.tier]);
 
   const navItemsRef = useRef<HTMLDivElement>(null);
   const [canShowInfoBox, setCanShowInfoBox] = useState(false);
@@ -281,6 +293,31 @@ const DesktopSidebar = ({
             >
               {/* Navigation items */}
               <div className="flex flex-col">
+                {/* Free Limit Warning - Show at top when exceeded */}
+                {isFreeLimitExceeded && !isCollapsed && (
+                    <div className="mx-2 mb-2 mt-2 rounded-lg border border-destructive/50 bg-destructive/10 p-3">
+                      <div className="flex items-center gap-2 text-destructive">
+                        <AlertTriangle size={16} />
+                        <span className="text-sm font-medium">
+                          Free limit reached
+                        </span>
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Request/response bodies are no longer being stored.
+                        Upgrade to continue logging full data.
+                      </p>
+                      <Link href="/settings/billing">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mt-2 w-full"
+                        >
+                          Upgrade Now
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
+
                 {/* Quickstart Card - Only show if organization hasn't integrated */}
                 {onboardingStatus?.hasCompletedQuickstart === false &&
                   !isCollapsed && <SidebarQuickstepCard />}
@@ -342,6 +379,7 @@ const DesktopSidebar = ({
                 {/* InfoBox */}
                 {canShowInfoBox &&
                   orgContext?.currentOrg?.tier === "free" &&
+                  !isFreeLimitExceeded &&
                   (isCollapsed ? (
                     <div className="px-2 py-2">
                       <ProFeatureWrapper featureName="pro" enabled={false}>

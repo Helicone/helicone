@@ -228,6 +228,9 @@ export class SupabaseConnector {
       percentLog: data.percent_to_log ?? 100_000,
       has_onboarded: data.has_onboarded ?? false,
       has_integrated: data.has_integrated ?? false,
+      freeLimitExceeded:
+        (data as { free_limit_exceeded?: string | null }).free_limit_exceeded ??
+        null,
     };
 
     return ok(orgResult);
