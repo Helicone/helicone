@@ -208,7 +208,7 @@ const PricingVersionOld = {
     const orgId = subscription.metadata?.orgId;
 
     const { data: org, error: orgError } = await dbExecute(
-      `UPDATE organization SET subscription_status = 'active', stripe_subscription_id = $1, stripe_subscription_item_id = $2, tier = 'growth', stripe_metadata = $3, free_limit_exceeded = false WHERE id = $4`,
+      `UPDATE organization SET subscription_status = 'active', stripe_subscription_id = $1, stripe_subscription_item_id = $2, tier = 'growth', stripe_metadata = $3, free_limit_exceeded = NULL WHERE id = $4`,
       [subscriptionId, subscriptionItemId, {}, orgId],
     );
 
@@ -733,7 +733,7 @@ const TeamVersion20250130 = {
            stripe_subscription_item_id = $2,
            tier = 'team-20250130',
            stripe_metadata = $3,
-           free_limit_exceeded = false
+           free_limit_exceeded = NULL
        WHERE id = $4`,
       [subscriptionId, subscriptionItemId, { addons: {} }, orgId || ""],
     );
@@ -791,7 +791,7 @@ const PricingVersion20240913 = {
            stripe_subscription_item_id = $2,
            tier = 'pro-20250202',
            stripe_metadata = $3,
-           free_limit_exceeded = false
+           free_limit_exceeded = NULL
        WHERE id = $4`,
       [subscriptionId, subscriptionItemId, { addons: addons }, orgId || ""],
     );
@@ -851,7 +851,7 @@ const ProVersion20251210 = {
            stripe_subscription_item_id = $2,
            tier = 'pro-20251210',
            stripe_metadata = $3,
-           free_limit_exceeded = false
+           free_limit_exceeded = NULL
        WHERE id = $4`,
       [subscriptionId, subscriptionItemId, { addons: addons }, orgId],
     );
@@ -950,7 +950,7 @@ const TeamVersion20251210 = {
            stripe_subscription_item_id = $2,
            tier = 'team-20251210',
            stripe_metadata = $3,
-           free_limit_exceeded = false
+           free_limit_exceeded = NULL
        WHERE id = $4`,
       [subscriptionId, subscriptionItemId, { addons }, orgId],
     );

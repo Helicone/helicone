@@ -229,8 +229,8 @@ export class SupabaseConnector {
       has_onboarded: data.has_onboarded ?? false,
       has_integrated: data.has_integrated ?? false,
       freeLimitExceeded:
-        (data as { free_limit_exceeded?: boolean }).free_limit_exceeded ??
-        false,
+        (data as { free_limit_exceeded?: string | null }).free_limit_exceeded ??
+        null,
     };
 
     return ok(orgResult);

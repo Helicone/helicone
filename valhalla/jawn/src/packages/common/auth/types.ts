@@ -34,7 +34,7 @@ export interface OrgParams {
   percentLog: number;
   has_onboarded: boolean;
   has_integrated: boolean;
-  freeLimitExceeded: boolean;
+  freeLimitExceeded: string | null; // YYYY-MM format or null
 }
 
 export type OrgResult = PromiseGenericResult<OrgParams>;

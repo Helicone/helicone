@@ -1237,7 +1237,7 @@ WHERE (${builtFilter.filter})`,
       const updateResult = await dbExecute(
         `UPDATE organization
          SET tier = $1,
-             free_limit_exceeded = false
+             free_limit_exceeded = NULL
          WHERE id = $2`,
         ["pro-20250202", this.authParams.organizationId]
       );
@@ -1256,7 +1256,7 @@ WHERE (${builtFilter.filter})`,
         await dbExecute(
           `UPDATE organization
            SET tier = $1,
-               free_limit_exceeded = false
+               free_limit_exceeded = NULL
            WHERE id = $2`,
           ["pro-20250202", this.authParams.organizationId]
         );
@@ -1345,7 +1345,7 @@ WHERE (${builtFilter.filter})`,
          SET tier = $1,
              stripe_subscription_item_id = $2,
              stripe_metadata = $3,
-             free_limit_exceeded = false
+             free_limit_exceeded = NULL
          WHERE id = $4`,
         [
           newTier,

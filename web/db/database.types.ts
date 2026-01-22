@@ -1616,7 +1616,7 @@ export type Database = {
           credit_limit: number
           default_time_filter: string | null
           domain: string | null
-          free_limit_exceeded?: boolean
+          free_limit_exceeded?: string | null
           gateway_discount_enabled: boolean
           governance_settings: Json | null
           has_integrated: boolean
@@ -1651,7 +1651,7 @@ export type Database = {
           credit_limit?: number
           default_time_filter?: string | null
           domain?: string | null
-          free_limit_exceeded?: boolean
+          free_limit_exceeded?: string | null
           gateway_discount_enabled?: boolean
           governance_settings?: Json | null
           has_integrated?: boolean
@@ -1686,7 +1686,7 @@ export type Database = {
           credit_limit?: number
           default_time_filter?: string | null
           domain?: string | null
-          free_limit_exceeded?: boolean
+          free_limit_exceeded?: string | null
           gateway_discount_enabled?: boolean
           governance_settings?: Json | null
           has_integrated?: boolean

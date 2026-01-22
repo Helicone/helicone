@@ -12,7 +12,6 @@ import { dbQueryClickhouse, dbExecute } from "../shared/db/dbExecute";
 
 const FREE_TIER_LIMIT = 10_000;
 const FREE_TIER_CHECK_PROBABILITY = 0.01; // 1% of requests
-const FREE_TIER_RECOVERY_CHECK_PROBABILITY = 0.001; // 0.1% of requests for recovery check
 
 export class RateLimitHandler extends AbstractLogHandler {
   private rateLimitStore: RateLimitStore;
@@ -36,22 +35,14 @@ export class RateLimitHandler extends AbstractLogHandler {
 
     try {
       // Probabilistic free tier limit check (1% of requests)
+      // - If freeLimitExceeded is null: check with 1% probability
+      // - If freeLimitExceeded is current month: skip check (already exceeded this month)
+      // - If freeLimitExceeded is old month: check with 1% probability (may have reset)
       if (
         context.orgParams.tier === "free" &&
-        !context.orgParams.freeLimitExceeded &&
-        Math.random() < FREE_TIER_CHECK_PROBABILITY
+        this.shouldCheckFreeTierLimit(context.orgParams.freeLimitExceeded)
       ) {
-        await this.checkAndSetFreeTierLimit(context.orgParams.id);
-      }
-
-      // Recovery check: periodically verify if limit-exceeded orgs are still over limit
-      // This handles cases where old requests aged out of the 30-day window
-      if (
-        context.orgParams.tier === "free" &&
-        context.orgParams.freeLimitExceeded &&
-        Math.random() < FREE_TIER_RECOVERY_CHECK_PROBABILITY
-      ) {
-        await this.checkAndResetFreeTierLimit(context.orgParams.id);
+        await this.checkAndUpdateFreeTierLimit(context.orgParams.id);
       }
 
       const { data: isRateLimited, error: rateLimitErr } = this.rateLimitEntry(
@@ -82,35 +73,44 @@ export class RateLimitHandler extends AbstractLogHandler {
     }
   }
 
-  private async checkAndSetFreeTierLimit(orgId: string): Promise<void> {
+  private getCurrentMonth(): string {
+    return new Date().toISOString().slice(0, 7); // "YYYY-MM"
+  }
+
+  private shouldCheckFreeTierLimit(freeLimitExceeded: string | null): boolean {
+    if (freeLimitExceeded === null) {
+      // Not exceeded - check with 1% probability
+      return Math.random() < FREE_TIER_CHECK_PROBABILITY;
+    }
+
+    if (freeLimitExceeded === this.getCurrentMonth()) {
+      // Already exceeded this month - skip check entirely
+      return false;
+    }
+
+    // Old month - check with 1% probability to see if still over limit
+    return Math.random() < FREE_TIER_CHECK_PROBABILITY;
+  }
+
+  private async checkAndUpdateFreeTierLimit(orgId: string): Promise<void> {
     try {
       const count = await this.get30DayRequestCount(orgId);
       if (count >= FREE_TIER_LIMIT) {
+        // Over limit - set to current month
         await this.setFreeLimitExceeded(orgId, true);
         console.log(
           `[FreeTierLimit] Limit exceeded for org ${orgId}: ${count} requests in last 30 days`
+        );
+      } else {
+        // Under limit - clear the flag
+        await this.setFreeLimitExceeded(orgId, false);
+        console.log(
+          `[FreeTierLimit] Limit cleared for org ${orgId}: ${count} requests in last 30 days`
         );
       }
     } catch (error) {
       // Don't fail the request if the check fails
       console.error(`Error checking free tier limit for org ${orgId}:`, error);
-    }
-  }
-
-  // Recovery mechanism: reset the flag if org is now under the limit
-  // (e.g., old requests aged out of the 30-day rolling window)
-  private async checkAndResetFreeTierLimit(orgId: string): Promise<void> {
-    try {
-      const count = await this.get30DayRequestCount(orgId);
-      if (count < FREE_TIER_LIMIT) {
-        await this.setFreeLimitExceeded(orgId, false);
-        console.log(
-          `[FreeTierLimit] Limit reset for org ${orgId}: ${count} requests in last 30 days (under ${FREE_TIER_LIMIT} limit)`
-        );
-      }
-    } catch (error) {
-      // Don't fail the request if the check fails
-      console.error(`Error checking free tier recovery for org ${orgId}:`, error);
     }
   }
 
@@ -134,9 +134,11 @@ export class RateLimitHandler extends AbstractLogHandler {
     orgId: string,
     exceeded: boolean
   ): Promise<void> {
+    // Store as month string (e.g., "2026-01") or null
+    const value = exceeded ? this.getCurrentMonth() : null;
     const { error } = await dbExecute(
       `UPDATE organization SET free_limit_exceeded = $1 WHERE id = $2`,
-      [exceeded, orgId]
+      [value, orgId]
     );
 
     if (error) {

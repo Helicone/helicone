@@ -192,8 +192,8 @@ limit 1
       has_onboarded: org?.data?.[0]?.has_onboarded ?? false,
       has_integrated: org?.data?.[0]?.has_integrated ?? false,
       freeLimitExceeded:
-        (org?.data?.[0] as { free_limit_exceeded?: boolean })
-          ?.free_limit_exceeded ?? false,
+        (org?.data?.[0] as { free_limit_exceeded?: string | null })
+          ?.free_limit_exceeded ?? null,
     };
 
     return ok(orgResult);

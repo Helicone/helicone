@@ -116,6 +116,16 @@ const DesktopSidebar = ({
     });
   }, [NAVIGATION, isCollapsed, expandedItems]);
 
+  // Check if free tier limit is exceeded for the current month
+  const isFreeLimitExceeded = useMemo(() => {
+    const freeLimitMonth = orgContext?.currentOrg?.free_limit_exceeded;
+    if (!freeLimitMonth || orgContext?.currentOrg?.tier !== "free") {
+      return false;
+    }
+    const currentMonth = new Date().toISOString().slice(0, 7); // "YYYY-MM"
+    return freeLimitMonth === currentMonth;
+  }, [orgContext?.currentOrg?.free_limit_exceeded, orgContext?.currentOrg?.tier]);
+
   const navItemsRef = useRef<HTMLDivElement>(null);
   const [canShowInfoBox, setCanShowInfoBox] = useState(false);
 
@@ -284,9 +294,7 @@ const DesktopSidebar = ({
               {/* Navigation items */}
               <div className="flex flex-col">
                 {/* Free Limit Warning - Show at top when exceeded */}
-                {orgContext?.currentOrg?.free_limit_exceeded &&
-                  orgContext?.currentOrg?.tier === "free" &&
-                  !isCollapsed && (
+                {isFreeLimitExceeded && !isCollapsed && (
                     <div className="mx-2 mb-2 mt-2 rounded-lg border border-destructive/50 bg-destructive/10 p-3">
                       <div className="flex items-center gap-2 text-destructive">
                         <AlertTriangle size={16} />
@@ -371,7 +379,7 @@ const DesktopSidebar = ({
                 {/* InfoBox */}
                 {canShowInfoBox &&
                   orgContext?.currentOrg?.tier === "free" &&
-                  !orgContext?.currentOrg?.free_limit_exceeded &&
+                  !isFreeLimitExceeded &&
                   (isCollapsed ? (
                     <div className="px-2 py-2">
                       <ProFeatureWrapper featureName="pro" enabled={false}>

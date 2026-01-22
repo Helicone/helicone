@@ -52,7 +52,7 @@ export type HeliconeOrg = {
   created_at: string | null;
   default_time_filter: string | null;
   domain: string | null;
-  free_limit_exceeded?: boolean;
+  free_limit_exceeded?: string | null; // YYYY-MM format or null
   governance_settings: any | null;
   gateway_discount_enabled: boolean;
   has_onboarded: boolean;

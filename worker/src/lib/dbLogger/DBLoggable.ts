@@ -791,6 +791,21 @@ export class DBLoggable {
       return err(org.error);
     }
 
+    // Check if free tier limit is exceeded for the current month
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const freeLimitExceeded =
+      org.data.tier === "free" && org.data.freeLimitExceeded === currentMonth;
+    const isPassthroughBilling = this.request.escrowInfo ? true : false;
+
+    // Skip logging entirely if free limit exceeded and not PTB
+    // This saves processing - we don't need to extract usage or send to Kafka
+    if (freeLimitExceeded && !isPassthroughBilling) {
+      console.log(
+        `[FreeTierLimit] Skipping logging entirely for org ${authParams.organizationId} - free tier limit exceeded and not PTB`
+      );
+      return ok(null);
+    }
+
     const { body: rawResponseBody, endTime: responseEndTime } =
       await this.response.getResponseBody();
 
@@ -821,22 +836,11 @@ export class DBLoggable {
       // Ignore parsing errors - usage will be extracted later by Jawn if body is stored
     }
 
-    // Skip S3 storage if:
-    // 1. Free tier AND limit exceeded (both conditions must be true)
-    // 2. Omit request/response headers are set
-    const freeLimitExceeded =
-      org.data.tier === "free" && org.data.freeLimitExceeded === true;
+    // Skip S3 storage if omit headers are set
+    // Note: Free tier limit exceeded + PTB requests will still log but skip S3
     const skipS3Storage =
-      freeLimitExceeded ||
       requestHeaders?.omitHeaders?.omitRequest === true ||
       requestHeaders?.omitHeaders?.omitResponse === true;
-
-    // Log when S3 storage is skipped due to free tier limit for observability
-    if (freeLimitExceeded) {
-      console.log(
-        `[FreeTierLimit] Skipping S3 storage for org ${authParams.organizationId} - free tier limit exceeded`
-      );
-    }
 
     if (S3_ENABLED === "true" && !skipS3Storage) {
       try {
@@ -942,11 +946,9 @@ export class DBLoggable {
           this.request.attempt?.endpoint.providerModelId ?? undefined,
         stripeCustomerId: requestHeaders.stripeCustomerId ?? undefined,
         aiGatewayBodyMapping: aiGatewayBodyMapping ?? undefined,
-        // Only mark as exceeded if tier is free AND limit is exceeded
-        freeLimitExceeded:
-          org.data.tier === "free" && org.data.freeLimitExceeded
-            ? true
-            : undefined,
+        // Note: If we reach here with freeLimitExceeded=true, it means PTB is enabled
+        // (non-PTB exceeded requests exit early above)
+        freeLimitExceeded: freeLimitExceeded ? true : undefined,
       },
       log: {
         request: {
