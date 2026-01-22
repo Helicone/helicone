@@ -172,10 +172,12 @@ export class LoggingHandler extends AbstractLogHandler {
 
       context.sizeBytes = size ?? 0;
       // Determine storage location:
-      // 1. If free tier limit exceeded, bodies were not stored
+      // 1. If free tier limit exceeded AND not PTB, bodies were not stored
       // 2. If size is small enough, use clickhouse
       // 3. Otherwise use s3
-      if (context.message.heliconeMeta.freeLimitExceeded) {
+      // Note: PTB always stores bodies to S3 for billing purposes
+      const isPTB = context.message.heliconeMeta.isPassthroughBilling;
+      if (context.message.heliconeMeta.freeLimitExceeded && !isPTB) {
         context.storageLocation = "not_stored_exceeded_free";
       } else {
         context.storageLocation =
