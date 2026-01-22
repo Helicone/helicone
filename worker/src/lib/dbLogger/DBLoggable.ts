@@ -820,10 +820,13 @@ export class DBLoggable {
       reasoning_tokens?: number;
     } = {};
     let extractedModel: string | undefined;
+    let failedToGetUsage = true;
     try {
       const responseText = rawResponseBody.join("");
       const parsedResponse = JSON.parse(responseText);
       extractedUsage = this.getDetailedUsage(parsedResponse);
+      // Check if we actually got usage tokens
+      failedToGetUsage = !extractedUsage.prompt_tokens && !extractedUsage.completion_tokens;
       // Extract model from response (OpenAI format)
       if (
         typeof parsedResponse === "object" &&
@@ -833,12 +836,15 @@ export class DBLoggable {
         extractedModel = (parsedResponse as { model?: string }).model;
       }
     } catch {
-      // Ignore parsing errors - usage will be extracted later by Jawn if body is stored
+      // Parsing failed - Jawn will need to extract usage from the body
+      failedToGetUsage = true;
     }
 
     // Skip S3 storage only if BOTH request and response are omitted
     // If only one is omitted, still store to S3 - Jawn will respect the omit flags
+    // IMPORTANT: For PTB, if we failed to get usage, always store to S3 so Jawn can extract it for billing
     const skipS3Storage =
+      !(isPassthroughBilling && failedToGetUsage) &&
       requestHeaders?.omitHeaders?.omitRequest === true &&
       requestHeaders?.omitHeaders?.omitResponse === true;
 
