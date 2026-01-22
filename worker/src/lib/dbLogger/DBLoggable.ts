@@ -836,10 +836,13 @@ export class DBLoggable {
     }
 
     // Skip S3 storage if:
-    // 1. Free tier limit exceeded AND not PTB (metadata still logged, just no bodies)
-    // 2. Both omit headers are set
-    // IMPORTANT: For PTB, if we failed to get usage, always store to S3 so Jawn can extract it for billing
-    const skipS3ForFreeTier = freeLimitExceeded && !isPassthroughBilling;
+    // 1. Free tier limit exceeded AND (not PTB OR we got usage successfully)
+    //    - Non-PTB: always skip bodies
+    //    - PTB with usage: skip bodies (we have what we need for billing)
+    //    - PTB without usage: store bodies (Jawn needs to extract for billing)
+    // 2. Both omit headers are set (but not if PTB failed to get usage)
+    const skipS3ForFreeTier =
+      freeLimitExceeded && (!isPassthroughBilling || !failedToGetUsage);
     const skipS3ForOmitHeaders =
       !(isPassthroughBilling && failedToGetUsage) &&
       requestHeaders?.omitHeaders?.omitRequest === true &&
