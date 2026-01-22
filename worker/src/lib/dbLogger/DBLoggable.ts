@@ -836,10 +836,10 @@ export class DBLoggable {
       // Ignore parsing errors - usage will be extracted later by Jawn if body is stored
     }
 
-    // Skip S3 storage if omit headers are set
-    // Note: Free tier limit exceeded + PTB requests will still log but skip S3
+    // Skip S3 storage only if BOTH request and response are omitted
+    // If only one is omitted, still store to S3 - Jawn will respect the omit flags
     const skipS3Storage =
-      requestHeaders?.omitHeaders?.omitRequest === true ||
+      requestHeaders?.omitHeaders?.omitRequest === true &&
       requestHeaders?.omitHeaders?.omitResponse === true;
 
     if (S3_ENABLED === "true" && !skipS3Storage) {
