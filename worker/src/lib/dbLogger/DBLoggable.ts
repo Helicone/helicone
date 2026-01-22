@@ -797,14 +797,9 @@ export class DBLoggable {
       org.data.tier === "free" && org.data.freeLimitExceeded === currentMonth;
     const isPassthroughBilling = this.request.escrowInfo ? true : false;
 
-    // Skip logging entirely if free limit exceeded and not PTB
-    // This saves processing - we don't need to extract usage or send to Kafka
-    if (freeLimitExceeded && !isPassthroughBilling) {
-      console.log(
-        `[FreeTierLimit] Skipping logging entirely for org ${authParams.organizationId} - free tier limit exceeded and not PTB`
-      );
-      return ok(null);
-    }
+    // Note: We always log metadata to Kafka/ClickHouse even when free limit exceeded
+    // This allows tracking request volume for exceeded orgs
+    // We just skip S3 body storage for non-PTB exceeded requests
 
     const { body: rawResponseBody, endTime: responseEndTime } =
       await this.response.getResponseBody();
@@ -840,13 +835,19 @@ export class DBLoggable {
       failedToGetUsage = true;
     }
 
-    // Skip S3 storage only if BOTH request and response are omitted
-    // If only one is omitted, still store to S3 - Jawn will respect the omit flags
-    // IMPORTANT: For PTB, if we failed to get usage, always store to S3 so Jawn can extract it for billing
-    const skipS3Storage =
+    // Skip S3 storage if:
+    // 1. Free tier limit exceeded AND (not PTB OR we got usage successfully)
+    //    - Non-PTB: always skip bodies
+    //    - PTB with usage: skip bodies (we have what we need for billing)
+    //    - PTB without usage: store bodies (Jawn needs to extract for billing)
+    // 2. Both omit headers are set (but not if PTB failed to get usage)
+    const skipS3ForFreeTier =
+      freeLimitExceeded && (!isPassthroughBilling || !failedToGetUsage);
+    const skipS3ForOmitHeaders =
       !(isPassthroughBilling && failedToGetUsage) &&
       requestHeaders?.omitHeaders?.omitRequest === true &&
       requestHeaders?.omitHeaders?.omitResponse === true;
+    const skipS3Storage = skipS3ForFreeTier || skipS3ForOmitHeaders;
 
     if (S3_ENABLED === "true" && !skipS3Storage) {
       try {
@@ -952,8 +953,7 @@ export class DBLoggable {
           this.request.attempt?.endpoint.providerModelId ?? undefined,
         stripeCustomerId: requestHeaders.stripeCustomerId ?? undefined,
         aiGatewayBodyMapping: aiGatewayBodyMapping ?? undefined,
-        // Note: If we reach here with freeLimitExceeded=true, it means PTB is enabled
-        // (non-PTB exceeded requests exit early above)
+        // Pass freeLimitExceeded to Jawn so it knows bodies may not be in S3
         freeLimitExceeded: freeLimitExceeded ? true : undefined,
       },
       log: {
