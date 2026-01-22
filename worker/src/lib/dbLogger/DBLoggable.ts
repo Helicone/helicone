@@ -953,8 +953,7 @@ export class DBLoggable {
           this.request.attempt?.endpoint.providerModelId ?? undefined,
         stripeCustomerId: requestHeaders.stripeCustomerId ?? undefined,
         aiGatewayBodyMapping: aiGatewayBodyMapping ?? undefined,
-        // Note: If we reach here with freeLimitExceeded=true, it means PTB is enabled
-        // (non-PTB exceeded requests exit early above)
+        // Pass freeLimitExceeded to Jawn so it knows bodies may not be in S3
         freeLimitExceeded: freeLimitExceeded ? true : undefined,
       },
       log: {
