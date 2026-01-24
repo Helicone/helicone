@@ -44,6 +44,7 @@ import {
 } from "../../../services/lib/sorts/requests/sorts";
 import GenericButton from "../../layout/common/button";
 import { useOrg } from "../../layout/org/organizationContext";
+import { FreeTierExceededBanner } from "@/components/shared/FreeTierExceededBanner";
 import {
   DragColumnItem,
   columnDefToDragColumnItem,
@@ -735,6 +736,8 @@ export default function RequestsPage(props: RequestsPageV2Props) {
           />
         </div>
       )}
+      {/* Free tier exceeded warning */}
+      {!userId && <FreeTierExceededBanner />}
       {/* Header */}
       {!userId && (
         <Header

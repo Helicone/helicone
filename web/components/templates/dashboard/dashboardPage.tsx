@@ -37,6 +37,7 @@ import { useFilterStore } from "@/filterAST/store/filterStore";
 import { toFilterNode } from "@helicone-package/filters/toFilterNode";
 import { FilterLeaf } from "@helicone-package/filters/filterDefs";
 import Header from "../../shared/Header";
+import { FreeTierExceededBanner } from "../../shared/FreeTierExceededBanner";
 import LivePill from "../../shared/LivePill";
 import ThemedTimeFilter from "../../shared/themed/themedTimeFilter";
 import FilterASTButton from "@/filterAST/FilterASTButton";
@@ -429,6 +430,8 @@ const DashboardPage = (props: DashboardPageProps) => {
             }
           />
         )}
+        {/* Free tier exceeded warning */}
+        {!shouldShowMockData && <FreeTierExceededBanner />}
         {unauthorized ? (
           <UnauthorizedView currentTier={currentTier || ""} />
         ) : (
