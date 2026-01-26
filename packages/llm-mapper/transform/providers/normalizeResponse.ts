@@ -522,7 +522,8 @@ export async function normalizeAIGatewayResponse(params: {
 
       // by this line, normalizedOpenAIText is now in Chat Completions format
 
-      const nativelySupportsResponsesAPI = provider === "openai" || (provider === "helicone" && providerModelId.includes("gpt"));
+      // GPT models (gpt-* and Helicone's pa/gt-*) support Responses API natively
+      const nativelySupportsResponsesAPI = provider === "openai" || (provider === "helicone" && (providerModelId.includes("gpt") || providerModelId.includes("/gt")));
       if (bodyMapping === "RESPONSES" && !nativelySupportsResponsesAPI) {
         return convertOpenAIStreamToResponses(normalizedOpenAIText);
       }
@@ -557,7 +558,8 @@ export async function normalizeAIGatewayResponse(params: {
         }
       }
 
-      const nativelySupportsResponsesAPI = provider === "openai" || (provider === "helicone" && providerModelId.includes("gpt"));
+      // GPT models (gpt-* and Helicone's pa/gt-*) support Responses API natively
+      const nativelySupportsResponsesAPI = provider === "openai" || (provider === "helicone" && (providerModelId.includes("gpt") || providerModelId.includes("/gt")));
       if (bodyMapping === "RESPONSES" && !nativelySupportsResponsesAPI) {
         const responsesBody = toResponses(openAIBody);
         return JSON.stringify(responsesBody);
