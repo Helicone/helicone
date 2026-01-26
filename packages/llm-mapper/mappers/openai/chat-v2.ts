@@ -37,8 +37,9 @@ export interface OpenAIChatRequest {
     type: "function";
     function: {
       name: string;
-      description: string;
-      parameters: Record<string, any>; // JSON Schema
+      description?: string;
+      parameters?: Record<string, any>; // JSON Schema
+      strict?: boolean;
     };
   }[];
   tool_choice?:
@@ -294,7 +295,8 @@ const toExternalTools = (
     function: {
       name: tool.name,
       description: tool.description,
-      parameters: tool.parameters || {},
+      parameters: tool.parameters,
+      strict: tool.strict,
     },
   }));
 };
@@ -311,6 +313,7 @@ const convertTools = (
     name: tool.function?.name,
     description: tool.function?.description,
     parameters: tool.function?.parameters,
+    strict: tool.function?.strict,
   }));
 };
 

@@ -562,7 +562,7 @@ const toExternalTools = (
     type: "function",
     function: {
       name: tool?.name,
-      description: tool?.description,
+      description: tool?.description ?? "",
       parameters: tool?.parameters || {},
     },
   }));

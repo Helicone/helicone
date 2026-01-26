@@ -189,7 +189,7 @@ const toExternalTools = (
 
   return tools.map((tool) => ({
     name: tool.name,
-    description: tool.description,
+    description: tool.description ?? "",
     input_schema: tool.parameters || {},
   }));
 };
