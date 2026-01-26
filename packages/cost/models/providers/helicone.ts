@@ -1,4 +1,5 @@
 import { BaseProvider } from "./base";
+import { nativelySupportsResponsesAPI } from "./utils";
 import type {
   AuthContext,
   AuthResult,
@@ -66,12 +67,9 @@ export class HeliconeProvider extends BaseProvider {
       });
     }
 
-    // Convert responses API format to chat completions format first
-    // GPT models (gpt-* and Helicone's pa/gt-*) support Responses API natively
-    // Other models (o1, o3, claude, etc.) need conversion to chat completions
+    // Convert responses API format to chat completions format for models that don't natively support it
     if (context.bodyMapping === "RESPONSES" &&
-        !endpoint.providerModelId.includes("gpt") &&
-        !endpoint.providerModelId.includes("/gt")) {
+        !nativelySupportsResponsesAPI("helicone", endpoint.providerModelId)) {
       updatedBody = context.toChatCompletions(updatedBody);
     }
 
