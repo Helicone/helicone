@@ -35,6 +35,7 @@ import { DataDogTracer, TraceContext } from "../monitoring/DataDogTracer";
 import {
   ResponsesAPIEnabledProviders,
   ContextEditingEnabledProviders,
+  nativelySupportsResponsesAPI,
 } from "@helicone-package/cost/models/providers";
 import { oaiChat2responsesResponse } from "../clients/llmmapper/router/oaiChat2responses/nonStream";
 import { oaiChat2responsesStreamResponse } from "../clients/llmmapper/router/oaiChat2responses/stream";
@@ -657,10 +658,7 @@ export class SimpleAIGateway {
       }
 
       // Output now is in Chat Completions format
-      const nativelySupportsResponsesAPI =
-        provider === "openai" ||
-        (provider === "helicone" && providerModelId.includes("gpt"));
-      if (bodyMapping === "RESPONSES" && !nativelySupportsResponsesAPI) {
+      if (bodyMapping === "RESPONSES" && !nativelySupportsResponsesAPI(provider, providerModelId)) {
         if (isStream) {
           finalMappedResponse =
             oaiChat2responsesStreamResponse(finalMappedResponse);

@@ -97,3 +97,6 @@ export const ResponsesAPIEnabledProviders: ModelProviderName[] = [
 
 // Re-export base for extending
 export { BaseProvider } from "./base";
+
+// Re-export utilities
+export { nativelySupportsResponsesAPI } from "./utils";

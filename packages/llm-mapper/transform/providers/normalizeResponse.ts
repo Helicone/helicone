@@ -1,6 +1,6 @@
 import { getUsageProcessor } from "@helicone-package/cost/usage/getUsageProcessor";
 import { mapModelUsageToOpenAI } from "@helicone-package/cost/usage/mapModelUsageToOpenAI";
-import { ModelProviderName } from "@helicone-package/cost/models/providers";
+import { ModelProviderName, nativelySupportsResponsesAPI } from "@helicone-package/cost/models/providers";
 import {
   ResponseFormat,
   BodyMappingType,
@@ -522,8 +522,7 @@ export async function normalizeAIGatewayResponse(params: {
 
       // by this line, normalizedOpenAIText is now in Chat Completions format
 
-      const nativelySupportsResponsesAPI = provider === "openai" || (provider === "helicone" && providerModelId.includes("gpt"));
-      if (bodyMapping === "RESPONSES" && !nativelySupportsResponsesAPI) {
+      if (bodyMapping === "RESPONSES" && !nativelySupportsResponsesAPI(provider, providerModelId)) {
         return convertOpenAIStreamToResponses(normalizedOpenAIText);
       }
 
@@ -557,8 +556,7 @@ export async function normalizeAIGatewayResponse(params: {
         }
       }
 
-      const nativelySupportsResponsesAPI = provider === "openai" || (provider === "helicone" && providerModelId.includes("gpt"));
-      if (bodyMapping === "RESPONSES" && !nativelySupportsResponsesAPI) {
+      if (bodyMapping === "RESPONSES" && !nativelySupportsResponsesAPI(provider, providerModelId)) {
         const responsesBody = toResponses(openAIBody);
         return JSON.stringify(responsesBody);
       }
