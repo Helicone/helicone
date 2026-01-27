@@ -6513,7 +6513,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "context": 198000,
       "crossRegion": false,
       "maxTokens": 131072,
-      "modelId": "accounts/fireworks/models/glm-4-7",
+      "modelId": "accounts/fireworks/models/glm-4p7",
       "parameters": [
         "frequency_penalty",
         "functions",

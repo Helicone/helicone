@@ -159,7 +159,7 @@ export const endpoints = {
     },
   },
   "glm-4.7:fireworks": {
-    providerModelId: "accounts/fireworks/models/glm-4-7",
+    providerModelId: "accounts/fireworks/models/glm-4p7",
     provider: "fireworks",
     author: "zai",
     pricing: [
