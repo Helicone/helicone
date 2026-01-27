@@ -2934,4 +2934,181 @@ describe("Moonshot AI Registry Tests", () => {
         },
       }));
   });
+
+  describe("BYOK Tests - Kimi K2.5 Models", () => {
+    describe("kimi-k2.5 with Fireworks", () => {
+      it("should handle fireworks provider", () =>
+        runGatewayTest({
+          model: "kimi-k2.5/fireworks",
+          expected: {
+            providers: [
+              {
+                url: "https://api.fireworks.ai/inference/v1/chat/completions",
+                response: "success",
+                model: "accounts/fireworks/models/kimi-k2p5",
+                data: createOpenAIMockResponse(
+                  "accounts/fireworks/models/kimi-k2p5"
+                ),
+                expects: fireworksAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle tool calls with fireworks provider", () =>
+        runGatewayTest({
+          model: "kimi-k2.5/fireworks",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "What's the weather?" }],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "get_weather",
+                    description: "Get current weather",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        location: { type: "string" },
+                      },
+                      required: ["location"],
+                    },
+                  },
+                },
+              ],
+              tool_choice: "auto",
+              temperature: 0.7,
+              max_tokens: 1000,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.fireworks.ai/inference/v1/chat/completions",
+                response: "success",
+                model: "accounts/fireworks/models/kimi-k2p5",
+                data: createOpenAIMockResponse(
+                  "accounts/fireworks/models/kimi-k2p5"
+                ),
+                expects: fireworksAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("kimi-k2.5 with OpenRouter", () => {
+      it("should handle openrouter provider", () =>
+        runGatewayTest({
+          model: "kimi-k2.5/openrouter",
+          expected: {
+            providers: [
+              {
+                url: "https://openrouter.ai/api/v1/chat/completions",
+                response: "success",
+                model: "moonshotai/kimi-k2.5",
+                data: createOpenAIMockResponse("moonshotai/kimi-k2.5"),
+                expects: openrouterAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle error from OpenRouter", () =>
+        runGatewayTest({
+          model: "kimi-k2.5/openrouter",
+          expected: {
+            providers: [
+              {
+                url: "https://openrouter.ai/api/v1/chat/completions",
+                response: "failure",
+                statusCode: 500,
+                errorMessage: "Internal server error",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+    });
+
+    describe("kimi-k2.5 with Novita", () => {
+      it("should handle novita provider", () =>
+        runGatewayTest({
+          model: "kimi-k2.5/novita",
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "moonshotai/kimi-k2.5",
+                data: createOpenAIMockResponse("moonshotai/kimi-k2.5"),
+                expects: novitaAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle tool calls with novita provider", () =>
+        runGatewayTest({
+          model: "kimi-k2.5/novita",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "Analyze this image" }],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "analyze_image",
+                    description: "Analyze image content",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        url: { type: "string" },
+                      },
+                      required: ["url"],
+                    },
+                  },
+                },
+              ],
+              tool_choice: "auto",
+              temperature: 0.7,
+              max_tokens: 1000,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "success",
+                model: "moonshotai/kimi-k2.5",
+                data: createOpenAIMockResponse("moonshotai/kimi-k2.5"),
+                expects: novitaAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle rate limit from Novita", () =>
+        runGatewayTest({
+          model: "kimi-k2.5/novita",
+          expected: {
+            providers: [
+              {
+                url: "https://api.novita.ai/openai/v1/chat/completions",
+                response: "failure",
+                statusCode: 429,
+                errorMessage: "Rate limit exceeded",
+              },
+            ],
+            finalStatus: 429,
+          },
+        }));
+    });
+  });
 });
