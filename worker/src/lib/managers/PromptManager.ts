@@ -36,6 +36,23 @@ export class PromptManager {
     return `prompt_version_${params.prompt_id}_${scope}_${orgId}`;
   }
 
+  private buildPromptModelCacheKey(
+    params: HeliconePromptParams,
+    orgId: string
+  ): string | null {
+    if (!params.prompt_id) {
+      return null;
+    }
+
+    const scope = params.environment
+      ? `env:${params.environment}`
+      : params.version_id
+      ? `version:${params.version_id}`
+      : "prod";
+
+    return `prompt_model_${params.prompt_id}_${scope}_${orgId}`;
+  }
+
   private buildPromptBodyCacheKey(
     promptId: string,
     versionId: string,
@@ -58,6 +75,31 @@ export class PromptManager {
       this.env,
       async () => {
         return this.promptStore.getPromptVersionId(params, orgId);
+      },
+      300,
+      false
+    );
+  }
+
+  /**
+   * Gets the model associated with a prompt version, with caching.
+   * This allows requests to omit the model field when using a prompt_id,
+   * as the model will be fetched from the stored prompt version.
+   */
+  async getModelFromPrompt(
+    params: HeliconePromptParams,
+    orgId: string
+  ): Promise<Result<string, string>> {
+    const cacheKey = this.buildPromptModelCacheKey(params, orgId);
+    if (!cacheKey) {
+      return this.promptStore.getModelFromPrompt(params, orgId);
+    }
+
+    return await getAndStoreInCache(
+      cacheKey,
+      this.env,
+      async () => {
+        return this.promptStore.getModelFromPrompt(params, orgId);
       },
       300,
       false
