@@ -245,11 +245,27 @@ function buildResponseFormatConfig(
 }
 
 /**
- * Checks if the model supports thinkingLevel (Gemini 3+ models).
+ * Checks if the model is an image generation model that doesn't support thinking.
+ * Image generation models like gemini-3-pro-image-preview don't support thinkingLevel.
+ */
+function isImageGenerationModel(model: string): boolean {
+  const modelLower = model.toLowerCase();
+  return modelLower.includes("-image") || modelLower.includes("image-");
+}
+
+/**
+ * Checks if the model supports thinkingLevel (Gemini 3+ models, excluding image generation models).
  * Gemini 2.5 models only support thinkingBudget.
+ * Image generation models don't support thinking at all.
  */
 function supportsThinkingLevel(model: string): boolean {
   const modelLower = model.toLowerCase();
+
+  // Image generation models don't support thinking
+  if (isImageGenerationModel(modelLower)) {
+    return false;
+  }
+
   const geminiMatch = modelLower.match(/gemini-(\d+)/);
   if (geminiMatch) {
     const majorVersion = parseInt(geminiMatch[1], 10);
@@ -305,11 +321,12 @@ function buildThinkingConfig(
     return thinkingConfig;
   }
 
-  // Determine if this is a Gemini 3+ model
-  const isGemini3Plus = /gemini-3/.test(model.toLowerCase());
+  // Determine if this is a Gemini 3+ model that supports thinking (excludes image generation models)
+  const isGemini3PlusWithThinking =
+    /gemini-3/.test(model.toLowerCase()) && !isImageGenerationModel(model);
 
-  // Default to "low" for Gemini 3+ models, otherwise require explicit reasoning_effort
-  const reasoningEffort = body.reasoning_effort ?? (isGemini3Plus ? "low" : undefined);
+  // Default to "low" for Gemini 3+ models (excluding image models), otherwise require explicit reasoning_effort
+  const reasoningEffort = body.reasoning_effort ?? (isGemini3PlusWithThinking ? "low" : undefined);
 
   // If no reasoning_effort and not a reasoning model, disable thinking
   if (!reasoningEffort) {
