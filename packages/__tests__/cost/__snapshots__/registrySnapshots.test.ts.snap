@@ -2169,6 +2169,65 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "google/gemini-2.5-flash-image": {
+    "gemini-2.5-flash-image:google-ai-studio": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65535,
+      "modelId": "gemini-2.5-flash-image",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "google-ai-studio",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-2.5-flash-image:openrouter": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65535,
+      "modelId": "google/gemini-2.5-flash-image",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-2.5-flash-image:vertex": {
+      "context": 1048576,
+      "crossRegion": true,
+      "maxTokens": 65535,
+      "modelId": "gemini-2.5-flash-image",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "top_p",
+      ],
+      "provider": "vertex",
+      "ptbEnabled": false,
+      "regions": [
+        "global",
+      ],
+    },
+  },
   "google/gemini-2.5-flash-lite": {
     "gemini-2.5-flash-lite:google-ai-studio": {
       "context": 1048576,
@@ -6714,6 +6773,11 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "vertex",
   ],
+  "google/gemini-2.5-flash-image": [
+    "google-ai-studio",
+    "openrouter",
+    "vertex",
+  ],
   "google/gemini-2.5-flash-lite": [
     "google-ai-studio",
     "openrouter",
@@ -8029,6 +8093,51 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "google/gemini-2.5-flash-image": {
+    "google-ai-studio": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.25,
+          "write5m": 1,
+        },
+        "cacheStoragePerHour": 0.000001,
+        "image": {
+          "input": 3e-7,
+          "output": 0.0000025,
+        },
+        "input": 3e-7,
+        "output": 0.0000025,
+        "threshold": 0,
+      },
+    ],
+    "openrouter": [
+      {
+        "image": {
+          "input": 3.2e-7,
+          "output": 0.00000264,
+        },
+        "input": 3.2e-7,
+        "output": 0.00000264,
+        "threshold": 0,
+      },
+    ],
+    "vertex": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.25,
+          "write5m": 1,
+        },
+        "cacheStoragePerHour": 0.000001,
+        "image": {
+          "input": 3e-7,
+          "output": 0.0000025,
+        },
+        "input": 3e-7,
+        "output": 0.0000025,
+        "threshold": 0,
+      },
+    ],
+  },
   "google/gemini-2.5-flash-lite": {
     "google-ai-studio": [
       {
@@ -9093,6 +9202,14 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "gemini-2.5-flash-image",
+      "providers": [
+        "google-ai-studio",
+        "openrouter",
+        "vertex",
+      ],
+    },
+    {
       "model": "gemini-2.5-flash-lite",
       "providers": [
         "google-ai-studio",
@@ -9747,7 +9864,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "fireworks",
     },
     {
-      "modelCount": 7,
+      "modelCount": 8,
       "provider": "google-ai-studio",
     },
     {
@@ -9775,7 +9892,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "openai",
     },
     {
-      "modelCount": 67,
+      "modelCount": 68,
       "provider": "openrouter",
     },
     {
@@ -9783,7 +9900,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "perplexity",
     },
     {
-      "modelCount": 19,
+      "modelCount": 20,
       "provider": "vertex",
     },
     {
@@ -9904,8 +10021,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 297,
-  "totalModelProviderConfigs": 297,
+  "totalEndpoints": 300,
+  "totalModelProviderConfigs": 300,
   "totalModelsWithPtb": 102,
   "totalProviders": 21,
 }
