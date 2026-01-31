@@ -260,12 +260,22 @@ function supportsThinkingLevel(model: string): boolean {
 
 /**
  * Maps OpenAI reasoning_effort to Google thinkingLevel.
+ * Gemini 3 Flash supports minimal/low/medium/high.
+ * Gemini 3 Pro only supports low/high, so "medium" falls back to "low".
  */
 function mapReasoningEffortToThinkingLevel(
-  effort: "low" | "medium" | "high"
-): "low" | "high" {
-  // Google only supports "low" and "high", so map "medium" to "low"
-  return effort === "high" ? "high" : "low";
+  effort: "low" | "medium" | "high",
+  model: string
+): "low" | "medium" | "high" {
+  // Gemini 3 Flash supports "medium" thinking level
+  const isGemini3Flash = /gemini-3.*flash/i.test(model);
+
+  if (effort === "medium" && !isGemini3Flash) {
+    // Gemini 3 Pro doesn't support "medium", fall back to "low"
+    return "low";
+  }
+
+  return effort;
 }
 
 /**
@@ -328,7 +338,8 @@ function buildThinkingConfig(
   if (modelSupportsThinkingLevel) {
     // Gemini 3+ models: use thinkingLevel
     thinkingConfig.thinkingLevel = mapReasoningEffortToThinkingLevel(
-      reasoningEffort as "low" | "medium" | "high"
+      reasoningEffort as "low" | "medium" | "high",
+      model
     );
   } else {
     // Gemini 2.5 models: use dynamic thinkingBudget (-1)

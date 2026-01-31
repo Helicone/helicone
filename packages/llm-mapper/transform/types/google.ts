@@ -37,7 +37,7 @@ export type GeminiTool = {
 
 export type GeminiThinkingConfig = {
   includeThoughts?: boolean;
-  thinkingLevel?: "low" | "high";
+  thinkingLevel?: "minimal" | "low" | "medium" | "high";
   thinkingBudget?: number;
 };
 
@@ -157,10 +157,12 @@ export interface GoogleThinkingConfig {
   includeThoughts?: boolean;
   /**
    * Thinking level for Gemini 3+ models
-   * - "low" for faster, less detailed reasoning
-   * - "high" for more detailed reasoning
+   * - "minimal" (Gemini 3 Flash only): minimizes latency, may not think
+   * - "low": basic reasoning, fast
+   * - "medium" (Gemini 3 Flash only): balanced thinking for standard tasks
+   * - "high": maximum reasoning depth (default)
    */
-  thinkingLevel?: "low" | "high";
+  thinkingLevel?: "minimal" | "low" | "medium" | "high";
   /**
    * Token budget for thinking (for Gemini 2.5 models)
    * - Specific token values (e.g., 1024)

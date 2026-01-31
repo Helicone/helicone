@@ -36,7 +36,23 @@ describe("Google Reasoning/Thinking Support", () => {
       });
     });
 
-    it("should map reasoning_effort 'medium' to thinkingLevel 'low'", () => {
+    it("should map reasoning_effort 'medium' to thinkingLevel 'medium' for Gemini 3 Flash", () => {
+      const openAIRequest: HeliconeChatCreateParams = {
+        model: "gemini-3-flash-preview",
+        messages: [{ role: "user", content: "Test" }],
+        reasoning_effort: "medium",
+      };
+
+      const googleRequest = toGoogle(openAIRequest);
+
+      // Gemini 3 Flash supports "medium" thinking level
+      expect(googleRequest.generationConfig?.thinkingConfig).toEqual({
+        includeThoughts: true,
+        thinkingLevel: "medium",
+      });
+    });
+
+    it("should map reasoning_effort 'medium' to thinkingLevel 'low' for Gemini 3 Pro", () => {
       const openAIRequest: HeliconeChatCreateParams = {
         model: "gemini-3-pro",
         messages: [{ role: "user", content: "Test" }],
@@ -45,7 +61,7 @@ describe("Google Reasoning/Thinking Support", () => {
 
       const googleRequest = toGoogle(openAIRequest);
 
-      // Google only supports low/high, so medium maps to low
+      // Gemini 3 Pro doesn't support "medium", so it falls back to "low"
       expect(googleRequest.generationConfig?.thinkingConfig).toEqual({
         includeThoughts: true,
         thinkingLevel: "low",
