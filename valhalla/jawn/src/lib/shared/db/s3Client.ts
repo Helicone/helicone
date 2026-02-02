@@ -361,6 +361,46 @@ export class S3Client {
     return `organizations/${orgId}/prompts/${promptId}/versions/${promptVersionId}/prompt_body`;
   }
 
+  async getPromptBody(
+    promptId: string,
+    promptVersionId: string,
+    orgId: string
+  ): Promise<Result<unknown, string>> {
+    try {
+      const key = this.getPromptKey(promptId, promptVersionId, orgId);
+      const signedUrl = await this.getSignedUrl(key);
+      if (signedUrl.error || !signedUrl.data) {
+        return err(signedUrl.error || "Failed to get signed URL");
+      }
+
+      const contentResponse = await retry(
+        async () => {
+          return getLimiter.schedule(() => fetch(signedUrl.data!));
+        },
+        {
+          retries: 3,
+          factor: 2,
+          minTimeout: 350,
+          maxTimeout: 1050,
+        }
+      );
+
+      if (!contentResponse.ok) {
+        if (contentResponse.status === 404) {
+          return err("Prompt body not found in S3");
+        }
+        return err(`Error fetching prompt body from S3: ${contentResponse.statusText}`);
+      }
+
+      const text = await contentResponse.text();
+      const promptBody = JSON.parse(text);
+      return ok(promptBody);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return err(`Error fetching prompt body: ${errorMessage}`);
+    }
+  }
+
   getRequestResponseImageKey = (
     requestId: string,
     orgId: string,

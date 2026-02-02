@@ -287,6 +287,7 @@ export class Prompt2025Manager extends BaseManager {
 
   async getPromptProductionVersion(params: {
     promptId: string;
+    includePromptBody?: boolean;
   }): Promise<Result<Prompt2025Version, string>> {
     const result = await dbExecute<Prompt2025Version>(
       `
@@ -322,6 +323,19 @@ export class Prompt2025Manager extends BaseManager {
       return err(s3UrlResult.error);
     }
     promptVersion.s3_url = s3UrlResult.data ?? undefined;
+
+    // Optionally fetch and include the full prompt body
+    if (params.includePromptBody) {
+      const promptBodyResult = await this.s3Client.getPromptBody(
+        promptVersion.prompt_id,
+        promptVersion.id,
+        this.authParams.organizationId
+      );
+      if (promptBodyResult.error) {
+        return err(promptBodyResult.error);
+      }
+      promptVersion.prompt_body = promptBodyResult.data as Prompt2025Version['prompt_body'];
+    }
 
     return ok(promptVersion);
   }
@@ -361,6 +375,7 @@ export class Prompt2025Manager extends BaseManager {
   async getPromptVersionWithBodyByEnvironment(params: {
     promptId: string;
     environment: string;
+    includePromptBody?: boolean;
   }): Promise<Result<Prompt2025Version, string>> {
     const result = await dbExecute<Prompt2025Version>(
       `
@@ -396,11 +411,25 @@ export class Prompt2025Manager extends BaseManager {
     }
     promptVersion.s3_url = s3UrlResult.data ?? undefined;
 
+    // Optionally fetch and include the full prompt body
+    if (params.includePromptBody) {
+      const promptBodyResult = await this.s3Client.getPromptBody(
+        promptVersion.prompt_id,
+        promptVersion.id,
+        this.authParams.organizationId
+      );
+      if (promptBodyResult.error) {
+        return err(promptBodyResult.error);
+      }
+      promptVersion.prompt_body = promptBodyResult.data as Prompt2025Version['prompt_body'];
+    }
+
     return ok(promptVersion);
   }
 
   async getPromptVersionWithBody(params: {
     promptVersionId: string;
+    includePromptBody?: boolean;
   }): Promise<Result<Prompt2025Version, string>> {
     const result = await dbExecute<Prompt2025Version>(
       `
@@ -436,6 +465,19 @@ export class Prompt2025Manager extends BaseManager {
       return err(s3UrlResult.error);
     }
     promptVersion.s3_url = s3UrlResult.data ?? undefined;
+
+    // Optionally fetch and include the full prompt body
+    if (params.includePromptBody) {
+      const promptBodyResult = await this.s3Client.getPromptBody(
+        promptVersion.prompt_id,
+        promptVersion.id,
+        this.authParams.organizationId
+      );
+      if (promptBodyResult.error) {
+        return err(promptBodyResult.error);
+      }
+      promptVersion.prompt_body = promptBodyResult.data as Prompt2025Version['prompt_body'];
+    }
 
     return ok(promptVersion);
   }
