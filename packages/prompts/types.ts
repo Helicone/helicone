@@ -39,6 +39,44 @@ export interface SubstitutionResult {
   errors?: ValidationError[];
 }
 
+export interface Prompt2025VersionPromptBody {
+  model?: string;
+  messages?: {
+    role: string;
+    content:
+      | string
+      | Array<{
+          type: string;
+          text?: string;
+          image_url?: { url: string };
+        }>
+      | null;
+    name?: string;
+    tool_call_id?: string;
+    tool_calls?: {
+      id: string;
+      function: {
+        name: string;
+        arguments: string;
+      };
+      type: "function";
+    }[];
+  }[];
+  temperature?: number;
+  top_p?: number;
+  max_tokens?: number;
+  tools?: {
+    type: "function";
+    function: {
+      name: string;
+      description: string;
+      parameters: Record<string, unknown>;
+    };
+  }[];
+  tool_choice?: string | { type: string; function?: { type: "function"; name: string } };
+  [key: string]: unknown;
+}
+
 export interface Prompt2025Version {
   id: string;
   model: string;
@@ -51,6 +89,12 @@ export interface Prompt2025Version {
   created_at: string;
 
   s3_url?: string;
+
+  /**
+   * The full prompt body including messages. Only included when explicitly requested
+   * via the `includePromptBody` parameter to avoid unnecessary data transfer.
+   */
+  prompt_body?: Prompt2025VersionPromptBody;
 
   // TODO: add another type for the user that created
   // it and union with this one for the info.
