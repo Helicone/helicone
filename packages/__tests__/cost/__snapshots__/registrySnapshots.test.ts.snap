@@ -3540,6 +3540,89 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "moonshotai/kimi-k2.5": {
+    "kimi-k2.5:fireworks": {
+      "context": 262144,
+      "crossRegion": false,
+      "maxTokens": 262144,
+      "modelId": "accounts/fireworks/models/kimi-k2p5",
+      "parameters": [
+        "frequency_penalty",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "fireworks",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "kimi-k2.5:novita": {
+      "context": 262144,
+      "crossRegion": false,
+      "maxTokens": 262144,
+      "modelId": "moonshotai/kimi-k2.5",
+      "parameters": [
+        "frequency_penalty",
+        "functions",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "kimi-k2.5:openrouter": {
+      "context": 262144,
+      "crossRegion": false,
+      "maxTokens": 262144,
+      "modelId": "moonshotai/kimi-k2.5",
+      "parameters": [
+        "frequency_penalty",
+        "logprobs",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
   "openai/gpt-4.1": {
     "gpt-4.1-mini:azure": {
       "context": 1047576,
@@ -5142,6 +5225,29 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "gpt-5.2:azure": {
+      "context": 400000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "gpt-5.2",
+      "parameters": [
+        "logprobs",
+        "max_completion_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+        "verbosity",
+      ],
+      "provider": "azure",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-5.2:openai": {
       "context": 400000,
       "crossRegion": false,
@@ -6373,6 +6479,96 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "glm-4.7:canopywave": {
+      "context": 198000,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "zai/glm-4.7",
+      "parameters": [
+        "frequency_penalty",
+        "functions",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "reasoning",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "canopywave",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "glm-4.7:fireworks": {
+      "context": 198000,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "accounts/fireworks/models/glm-4p7",
+      "parameters": [
+        "frequency_penalty",
+        "functions",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "reasoning",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "fireworks",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "glm-4.7:novita": {
+      "context": 204800,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "zai-org/glm-4.7",
+      "parameters": [
+        "frequency_penalty",
+        "functions",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "reasoning",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
   },
 }
 `;
@@ -6600,6 +6796,11 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "openrouter",
   ],
+  "moonshotai/kimi-k2.5": [
+    "fireworks",
+    "novita",
+    "openrouter",
+  ],
   "openai/gpt-4.1": [
     "azure",
     "azure",
@@ -6687,6 +6888,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
   ],
   "openai/gpt-5.2": [
+    "azure",
     "openai",
     "openai",
     "openai",
@@ -6761,6 +6963,9 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   ],
   "zai/glm-4": [
     "canopywave",
+    "canopywave",
+    "fireworks",
+    "novita",
     "novita",
   ],
 }
@@ -8205,6 +8410,32 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "moonshotai/kimi-k2.5": {
+    "fireworks": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.5,
+        },
+        "input": 0.0000012,
+        "output": 0.0000012,
+        "threshold": 0,
+      },
+    ],
+    "novita": [
+      {
+        "input": 6e-7,
+        "output": 0.000003,
+        "threshold": 0,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.000001266,
+        "output": 0.000003165,
+        "threshold": 0,
+      },
+    ],
+  },
   "openai/gpt-4.1": {
     "azure": [
       {
@@ -8388,6 +8619,17 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "openai/gpt-5.2": {
+    "azure": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+        },
+        "input": 0.00000175,
+        "output": 0.000014,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
     "openai": [
       {
         "cacheMultipliers": {
@@ -8608,13 +8850,26 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
   "zai/glm-4": {
     "canopywave": [
       {
-        "input": 4.5e-7,
-        "output": 0.0000015,
+        "input": 4.3e-7,
+        "output": 0.00000175,
+        "threshold": 0,
+      },
+    ],
+    "fireworks": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.5,
+        },
+        "input": 6e-7,
+        "output": 0.0000022,
         "threshold": 0,
       },
     ],
     "novita": [
       {
+        "cacheMultipliers": {
+          "cachedInput": 0.183,
+        },
         "input": 6e-7,
         "output": 0.0000022,
         "threshold": 0,
@@ -8898,6 +9153,14 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "glm-4.7",
+      "providers": [
+        "canopywave",
+        "fireworks",
+        "novita",
+      ],
+    },
+    {
       "model": "gpt-4.1",
       "providers": [
         "azure",
@@ -9074,6 +9337,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "gpt-5.2",
       "providers": [
+        "azure",
         "openai",
         "openrouter",
       ],
@@ -9213,6 +9477,14 @@ exports[`Registry Snapshots verify registry state 1`] = `
         "deepinfra",
         "fireworks",
         "novita",
+      ],
+    },
+    {
+      "model": "kimi-k2.5",
+      "providers": [
+        "fireworks",
+        "novita",
+        "openrouter",
       ],
     },
     {
@@ -9439,7 +9711,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "anthropic",
     },
     {
-      "modelCount": 15,
+      "modelCount": 16,
       "provider": "azure",
     },
     {
@@ -9451,7 +9723,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "bedrock",
     },
     {
-      "modelCount": 4,
+      "modelCount": 5,
       "provider": "canopywave",
     },
     {
@@ -9471,7 +9743,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "deepseek",
     },
     {
-      "modelCount": 2,
+      "modelCount": 4,
       "provider": "fireworks",
     },
     {
@@ -9495,7 +9767,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "nebius",
     },
     {
-      "modelCount": 20,
+      "modelCount": 22,
       "provider": "novita",
     },
     {
@@ -9503,7 +9775,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "openai",
     },
     {
-      "modelCount": 66,
+      "modelCount": 67,
       "provider": "openrouter",
     },
     {
@@ -9551,6 +9823,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "gemma-3-12b-it",
     "gemma2-9b-it",
     "glm-4.6",
+    "glm-4.7",
     "gpt-4.1",
     "gpt-4.1-mini",
     "gpt-4.1-nano",
@@ -9588,6 +9861,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "kimi-k2-0711",
     "kimi-k2-0905",
     "kimi-k2-thinking",
+    "kimi-k2.5",
     "llama-3.1-8b-instant",
     "llama-3.1-8b-instruct",
     "llama-3.1-8b-instruct-turbo",
@@ -9630,9 +9904,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 290,
-  "totalModelProviderConfigs": 290,
-  "totalModelsWithPtb": 100,
+  "totalEndpoints": 297,
+  "totalModelProviderConfigs": 297,
+  "totalModelsWithPtb": 102,
   "totalProviders": 21,
 }
 `;

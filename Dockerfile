@@ -151,8 +151,16 @@ ENV CLICKHOUSE_HOST=http://localhost:8123
 ENV MINIO_ROOT_USER=minioadmin
 ENV MINIO_ROOT_PASSWORD=minioadmin
 
+# Default environment variables for supervisord (can be overridden at runtime with -e)
+# These are read by supervisord.conf using %(ENV_VAR)s syntax
+ENV NEXT_PUBLIC_HELICONE_JAWN_SERVICE=http://localhost:8585
+ENV S3_ENDPOINT=http://localhost:9080
+ENV S3_ACCESS_KEY=minioadmin
+ENV S3_SECRET_KEY=minioadmin
+ENV S3_BUCKET_NAME=request-response-storage
+ENV S3_PROMPT_BUCKET_NAME=prompt-body-storage
+ENV BETTER_AUTH_SECRET=change-me-in-production
 
-# Use supervisord as entrypoint
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 
 # --------------------------------------------------------------------------------------------------------------------

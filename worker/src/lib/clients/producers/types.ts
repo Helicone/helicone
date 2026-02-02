@@ -32,6 +32,9 @@ export type HeliconeMeta = {
   gatewayModel?: string; // registry format
   providerModelId?: string; // provider format
   aiGatewayBodyMapping?: BodyMappingType; // body mapping type
+
+  // Free tier limit
+  freeLimitExceeded?: boolean;
 };
 export type MessageData = {
   id: string;
@@ -76,5 +79,15 @@ export type Log = {
     delayMs: number;
     cachedLatency?: number;
     cost?: number;
+    // Token usage (extracted from response for cases where body isn't stored)
+    promptTokens?: number;
+    completionTokens?: number;
+    promptCacheReadTokens?: number;
+    promptCacheWriteTokens?: number;
+    promptAudioTokens?: number;
+    completionAudioTokens?: number;
+    reasoningTokens?: number;
+    // Model (extracted from response for cases where body isn't stored)
+    model?: string;
   };
 };

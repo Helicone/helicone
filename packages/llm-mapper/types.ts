@@ -272,6 +272,7 @@ type HeliconeMetadata = {
   promptVersion?: string | null;
   targetUrl?: string | null;
   requestReferrer?: string | null;
+  storageLocation?: string | null;
 };
 
 // UNORGANZIED

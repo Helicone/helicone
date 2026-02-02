@@ -35,14 +35,22 @@ describe("mapDalleRequest", () => {
         json_schema: {},
       },
       size: "1024x1024",
+      messages: [
+        {
+          role: "user",
+          content: "A beautiful image of a cat",
+          _type: "message",
+        },
+      ],
     });
 
     // Test response schema
     expect(result.schema.response!.messages![0]).toEqual({
+      role: "assistant",
       content:
         "Render a detailed image of a majestic cat poised gracefully on a sun-dappled garden path...",
       _type: "image",
-      image_url: "iVB=",
+      image_url: "data:image/png;base64,iVB=",
     });
 
     // Test preview
@@ -61,7 +69,7 @@ describe("mapDalleRequest", () => {
         "Render a detailed image of a majestic cat poised gracefully on a sun-dappled garden path...",
       role: "assistant",
       _type: "image",
-      image_url: "iVB=",
+      image_url: "data:image/png;base64,iVB=",
     });
   });
 
@@ -98,6 +106,7 @@ describe("mapDalleRequest", () => {
     expect(result.preview.request).toBe("");
     expect(result.preview.response).toBe("");
     expect(result.schema.response!.messages![0]).toEqual({
+      role: "assistant",
       content: "",
       _type: "image",
       image_url: "",

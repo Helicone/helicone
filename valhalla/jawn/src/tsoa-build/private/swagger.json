@@ -7064,6 +7064,9 @@
 			},
 			"HeliconeMeta": {
 				"properties": {
+					"freeLimitExceeded": {
+						"type": "boolean"
+					},
 					"aiGatewayBodyMapping": {
 						"$ref": "#/components/schemas/BodyMappingType"
 					},
@@ -7166,6 +7169,37 @@
 				"properties": {
 					"response": {
 						"properties": {
+							"model": {
+								"type": "string"
+							},
+							"reasoningTokens": {
+								"type": "number",
+								"format": "double"
+							},
+							"completionAudioTokens": {
+								"type": "number",
+								"format": "double"
+							},
+							"promptAudioTokens": {
+								"type": "number",
+								"format": "double"
+							},
+							"promptCacheWriteTokens": {
+								"type": "number",
+								"format": "double"
+							},
+							"promptCacheReadTokens": {
+								"type": "number",
+								"format": "double"
+							},
+							"completionTokens": {
+								"type": "number",
+								"format": "double"
+							},
+							"promptTokens": {
+								"type": "number",
+								"format": "double"
+							},
 							"cost": {
 								"type": "number",
 								"format": "double"

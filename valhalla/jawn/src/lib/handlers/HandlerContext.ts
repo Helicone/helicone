@@ -16,7 +16,7 @@ export class HandlerContext extends SetOnce {
   public legacyUsage: Usage;
   public usage?: ModelUsage;
   public costBreakdown?: CostBreakdown;
-  public storageLocation?: "s3" | "clickhouse";
+  public storageLocation?: "s3" | "clickhouse" | "not_stored_exceeded_free";
   public sizeBytes?: number;
   public rawLog: RawLog;
   public processedLog: ProcessedLog;
@@ -70,6 +70,16 @@ export type Log = {
     delayMs: number;
     cachedLatency?: number;
     cost?: number;
+    // Token usage (from Worker when body isn't stored)
+    promptTokens?: number;
+    completionTokens?: number;
+    promptCacheReadTokens?: number;
+    promptCacheWriteTokens?: number;
+    promptAudioTokens?: number;
+    completionAudioTokens?: number;
+    reasoningTokens?: number;
+    // Model (from Worker when body isn't stored)
+    model?: string;
   };
 };
 
@@ -80,6 +90,7 @@ export type Usage = {
   promptAudioTokens?: number;
   completionTokens?: number;
   completionAudioTokens?: number;
+  reasoningTokens?: number;
 
   // anthropic cache control
   promptCacheWrite5m?: number;
@@ -139,6 +150,9 @@ export type HeliconeMeta = {
   gatewayModel?: string; // registry format
   providerModelId?: string; // provider format
   aiGatewayBodyMapping?: BodyMappingType; // body mapping type
+
+  // Free tier limit
+  freeLimitExceeded?: boolean;
 };
 
 export type KafkaMessageContents = {
