@@ -1608,8 +1608,9 @@ Json: JsonObject;
       stop?: string[] | string;
       tools?: {
           function: {
-            parameters: components["schemas"]["Record_string.any_"];
-            description: string;
+            strict?: boolean;
+            parameters?: components["schemas"]["Record_string.any_"];
+            description?: string;
             name: string;
           };
           /** @enum {string} */
@@ -1965,8 +1966,9 @@ Json: JsonObject;
     };
     Tool: {
       name: string;
-      description: string;
+      description?: string;
       parameters?: components["schemas"]["Record_string.any_"];
+      strict?: boolean;
     };
     HeliconeEventTool: {
       /** @enum {string} */

@@ -1220,8 +1220,9 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "name": {"dataType":"string","required":true},
-            "description": {"dataType":"string","required":true},
+            "description": {"dataType":"string"},
             "parameters": {"ref":"Record_string.any_"},
+            "strict": {"dataType":"boolean"},
         },
         "additionalProperties": false,
     },
