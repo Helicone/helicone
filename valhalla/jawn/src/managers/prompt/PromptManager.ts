@@ -482,6 +482,44 @@ export class Prompt2025Manager extends BaseManager {
     return ok(promptVersion);
   }
 
+  async getPromptBody(params: {
+    promptVersionId: string;
+  }): Promise<Result<Prompt2025Version['prompt_body'], string>> {
+    // First verify the version exists and belongs to this org
+    const result = await dbExecute<{ id: string; prompt_id: string }>(
+      `
+      SELECT id, prompt_id
+      FROM prompts_2025_versions
+      WHERE id = $1
+      AND organization = $2 AND soft_delete is false
+      LIMIT 1
+      `,
+      [params.promptVersionId, this.authParams.organizationId]
+    );
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    if (!result.data?.[0]) {
+      return err("Prompt version not found");
+    }
+
+    const { id, prompt_id } = result.data[0];
+
+    const promptBodyResult = await this.s3Client.getPromptBody(
+      prompt_id,
+      id,
+      this.authParams.organizationId
+    );
+
+    if (promptBodyResult.error) {
+      return err(promptBodyResult.error);
+    }
+
+    return ok(promptBodyResult.data as Prompt2025Version['prompt_body']);
+  }
+
   async createPrompt(params: {
     name: string,
     tags: string[],
