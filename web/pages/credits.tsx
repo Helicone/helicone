@@ -817,8 +817,8 @@ const Credits: NextPageWithLayout<void> = () => {
                       {invoices.map((invoice) => (
                         <TableRow key={invoice.id}>
                           <TableCell className="font-medium">
-                            {new Date(invoice.startDate).toLocaleDateString()} -{" "}
-                            {new Date(invoice.endDate).toLocaleDateString()}
+                            {invoice.startDate.replace("T", " ").slice(0, 16)} -{" "}
+                            {invoice.endDate.replace("T", " ").slice(0, 16)}
                           </TableCell>
                           <TableCell className="text-muted-foreground">
                             {new Date(invoice.createdAt).toLocaleDateString()}
