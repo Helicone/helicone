@@ -273,6 +273,19 @@ export interface paths {
   "/v1/prompt-2025/query/total-versions": {
     post: operations["GetPrompt2025TotalVersions"];
   };
+  "/v1/prompt-2025/{promptVersionId}/prompt-body": {
+    /** @description Get the full prompt body (messages, tools, etc.) for a specific prompt version. */
+    get: operations["GetPrompt2025VersionBody"];
+  };
+  "/v2/prompt-2025/query/version": {
+    post: operations["GetPrompt2025Version"];
+  };
+  "/v2/prompt-2025/query/environment-version": {
+    post: operations["GetPrompt2025EnvironmentVersion"];
+  };
+  "/v2/prompt-2025/query/production-version": {
+    post: operations["GetPrompt2025ProductionVersion"];
+  };
   "/v1/request/count/query": {
     post: operations["GetRequestCount"];
   };
@@ -1678,6 +1691,58 @@ Json: JsonObject;
       error: null;
     };
     "Result_Prompt2025-Array.string_": components["schemas"]["ResultSuccess_Prompt2025-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.unknown_": {
+      [key: string]: unknown;
+    };
+    Prompt2025VersionPromptBody: {
+      model?: string;
+      messages?: ({
+          tool_calls?: {
+              /** @enum {string} */
+              type: "function";
+              function: {
+                arguments: string;
+                name: string;
+              };
+              id: string;
+            }[];
+          tool_call_id?: string;
+          name?: string;
+          content: (string | {
+              image_url?: {
+                url: string;
+              };
+              text?: string;
+              type: string;
+            }[]) | null;
+          role: string;
+        })[];
+      /** Format: double */
+      temperature?: number;
+      /** Format: double */
+      top_p?: number;
+      /** Format: double */
+      max_tokens?: number;
+      tools?: {
+          function: {
+            parameters: components["schemas"]["Record_string.unknown_"];
+            description: string;
+            name: string;
+          };
+          /** @enum {string} */
+          type: "function";
+        }[];
+      tool_choice?: string | {
+        function?: {
+          name: string;
+          /** @enum {string} */
+          type: "function";
+        };
+        type: string;
+      };
+      [key: string]: unknown;
+    };
     Prompt2025Version: {
       id: string;
       model: string;
@@ -1690,6 +1755,11 @@ Json: JsonObject;
       environments?: string[];
       created_at: string;
       s3_url?: string;
+      /**
+       * @description The full prompt body including messages. Only included when explicitly requested
+       * via the `includePromptBody` parameter to avoid unnecessary data transfer.
+       */
+      prompt_body?: components["schemas"]["Prompt2025VersionPromptBody"];
     };
     ResultSuccess_Prompt2025Version_: {
       data: components["schemas"]["Prompt2025Version"];
@@ -1715,6 +1785,12 @@ Json: JsonObject;
       error: null;
     };
     "Result_PromptVersionCounts.string_": components["schemas"]["ResultSuccess_PromptVersionCounts_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_Prompt2025Version_91_prompt_body_93__: {
+      data: components["schemas"]["Prompt2025VersionPromptBody"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025Version_91_prompt_body_93_.string_": components["schemas"]["ResultSuccess_Prompt2025Version_91_prompt_body_93__"] | components["schemas"]["ResultError_string_"];
     /** @description Make all properties in T optional */
     Partial_TextOperators_: {
       "not-equals"?: string;
@@ -18460,6 +18536,22 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_PromptVersionCounts.string_"];
+        };
+      };
+    };
+  };
+  /** @description Get the full prompt body (messages, tools, etc.) for a specific prompt version. */
+  GetPrompt2025VersionBody: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025Version_91_prompt_body_93_.string_"];
         };
       };
     };

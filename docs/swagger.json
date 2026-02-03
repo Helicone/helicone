@@ -1628,6 +1628,203 @@
 					}
 				]
 			},
+			"Record_string.unknown_": {
+				"properties": {},
+				"additionalProperties": {},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
+			"Prompt2025VersionPromptBody": {
+				"properties": {
+					"model": {
+						"type": "string"
+					},
+					"messages": {
+						"items": {
+							"properties": {
+								"tool_calls": {
+									"items": {
+										"properties": {
+											"type": {
+												"type": "string",
+												"enum": [
+													"function"
+												],
+												"nullable": false
+											},
+											"function": {
+												"properties": {
+													"arguments": {
+														"type": "string"
+													},
+													"name": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"arguments",
+													"name"
+												],
+												"type": "object"
+											},
+											"id": {
+												"type": "string"
+											}
+										},
+										"required": [
+											"type",
+											"function",
+											"id"
+										],
+										"type": "object"
+									},
+									"type": "array"
+								},
+								"tool_call_id": {
+									"type": "string"
+								},
+								"name": {
+									"type": "string"
+								},
+								"content": {
+									"anyOf": [
+										{
+											"type": "string"
+										},
+										{
+											"items": {
+												"properties": {
+													"image_url": {
+														"properties": {
+															"url": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"url"
+														],
+														"type": "object"
+													},
+													"text": {
+														"type": "string"
+													},
+													"type": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"type"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										}
+									],
+									"nullable": true
+								},
+								"role": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"content",
+								"role"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"temperature": {
+						"type": "number",
+						"format": "double"
+					},
+					"top_p": {
+						"type": "number",
+						"format": "double"
+					},
+					"max_tokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"tools": {
+						"items": {
+							"properties": {
+								"function": {
+									"properties": {
+										"parameters": {
+											"$ref": "#/components/schemas/Record_string.unknown_"
+										},
+										"description": {
+											"type": "string"
+										},
+										"name": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"parameters",
+										"description",
+										"name"
+									],
+									"type": "object"
+								},
+								"type": {
+									"type": "string",
+									"enum": [
+										"function"
+									],
+									"nullable": false
+								}
+							},
+							"required": [
+								"function",
+								"type"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"tool_choice": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"properties": {
+									"function": {
+										"properties": {
+											"name": {
+												"type": "string"
+											},
+											"type": {
+												"type": "string",
+												"enum": [
+													"function"
+												],
+												"nullable": false
+											}
+										},
+										"required": [
+											"name",
+											"type"
+										],
+										"type": "object"
+									},
+									"type": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"type"
+								],
+								"type": "object"
+							}
+						]
+					}
+				},
+				"type": "object",
+				"additionalProperties": {}
+			},
 			"Prompt2025Version": {
 				"properties": {
 					"id": {
@@ -1661,6 +1858,10 @@
 					},
 					"s3_url": {
 						"type": "string"
+					},
+					"prompt_body": {
+						"$ref": "#/components/schemas/Prompt2025VersionPromptBody",
+						"description": "The full prompt body including messages. Only included when explicitly requested\nvia the `includePromptBody` parameter to avoid unnecessary data transfer."
 					}
 				},
 				"required": [
@@ -1780,6 +1981,36 @@
 				"anyOf": [
 					{
 						"$ref": "#/components/schemas/ResultSuccess_PromptVersionCounts_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess_Prompt2025Version_91_prompt_body_93__": {
+				"properties": {
+					"data": {
+						"$ref": "#/components/schemas/Prompt2025VersionPromptBody"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_Prompt2025Version_91_prompt_body_93_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_Prompt2025Version_91_prompt_body_93__"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -6755,12 +6986,6 @@
 				],
 				"type": "object",
 				"additionalProperties": false
-			},
-			"Record_string.unknown_": {
-				"properties": {},
-				"additionalProperties": {},
-				"type": "object",
-				"description": "Construct a type with a set of properties K of type T"
 			},
 			"TypedProviderRequest": {
 				"properties": {
@@ -16706,6 +16931,178 @@
 				},
 				"tags": [
 					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"promptId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"promptId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/prompt-2025/{promptVersionId}/prompt-body": {
+			"get": {
+				"operationId": "GetPrompt2025VersionBody",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Prompt2025Version_91_prompt_body_93_.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get the full prompt body (messages, tools, etc.) for a specific prompt version.",
+				"tags": [
+					"Prompt2025"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "promptVersionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v2/prompt-2025/query/version": {
+			"post": {
+				"operationId": "GetPrompt2025Version",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Prompt2025Version.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025V2"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"promptVersionId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"promptVersionId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v2/prompt-2025/query/environment-version": {
+			"post": {
+				"operationId": "GetPrompt2025EnvironmentVersion",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Prompt2025Version.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025V2"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"environment": {
+										"type": "string"
+									},
+									"promptId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"environment",
+									"promptId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v2/prompt-2025/query/production-version": {
+			"post": {
+				"operationId": "GetPrompt2025ProductionVersion",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_Prompt2025Version.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Prompt2025V2"
 				],
 				"security": [
 					{

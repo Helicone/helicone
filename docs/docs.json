@@ -357,6 +357,7 @@
               "rest/prompts/post-v1prompt-2025-query-production-version",
               "rest/prompts/post-v1prompt-2025-query-total-versions",
               "rest/prompts/get-v1prompt-2025-id-promptid-versionid-inputs",
+              "rest/prompts/get-v1prompt-2025-promptversionid-prompt-body",
               "rest/prompts/get-v1prompt-2025-tags",
               "rest/prompts/get-v1prompt-2025-environments",
               "rest/prompts/get-v1prompt-2025-count"

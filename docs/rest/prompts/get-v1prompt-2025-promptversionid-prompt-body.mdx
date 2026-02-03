@@ -1,0 +1,104 @@
+---
+title: "Get Prompt Body"
+api: "GET https://api.helicone.ai/v1/prompt-2025/{promptVersionId}/prompt-body"
+description: "Retrieve the full prompt body (messages, tools, etc.) for a specific prompt version"
+---
+
+Retrieves the complete prompt body content for a specific prompt version, including messages, model configuration, tools, and other parameters. The prompt body is stored in S3 and contains the actual template content.
+
+### Path Parameters
+
+<ParamField path="promptVersionId" type="string" required>
+  The unique identifier (UUID) of the prompt version to retrieve
+</ParamField>
+
+### Response
+
+<ResponseField name="model" type="string">
+  The model specified in the prompt (e.g., "gpt-4o-mini", "claude-3-opus")
+</ResponseField>
+
+<ResponseField name="messages" type="array">
+  Array of message objects that make up the prompt template
+  <Expandable title="Message Object">
+    <ResponseField name="role" type="string">
+      The role of the message (e.g., "system", "user", "assistant")
+    </ResponseField>
+    <ResponseField name="content" type="string">
+      The content of the message, may include template variables like `{{ hc:variableName:type }}`
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="temperature" type="number" optional>
+  The temperature setting for the model (if configured)
+</ResponseField>
+
+<ResponseField name="max_tokens" type="number" optional>
+  The maximum number of tokens to generate (if configured)
+</ResponseField>
+
+<ResponseField name="tools" type="array" optional>
+  Array of tool/function definitions (if configured)
+</ResponseField>
+
+<RequestExample>
+
+```bash cURL
+curl -X GET "https://api.helicone.ai/v1/prompt-2025/6739b412-5fbb-498e-ab99-68ef21eb7df8/prompt-body" \
+  -H "Authorization: Bearer $HELICONE_API_KEY"
+```
+
+```typescript TypeScript
+const response = await fetch('https://api.helicone.ai/v1/prompt-2025/6739b412-5fbb-498e-ab99-68ef21eb7df8/prompt-body', {
+  method: 'GET',
+  headers: {
+    'Authorization': `Bearer ${HELICONE_API_KEY}`,
+  },
+});
+
+const promptBody = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    'https://api.helicone.ai/v1/prompt-2025/6739b412-5fbb-498e-ab99-68ef21eb7df8/prompt-body',
+    headers={
+        'Authorization': f'Bearer {HELICONE_API_KEY}',
+    }
+)
+
+prompt_body = response.json()
+```
+
+</RequestExample>
+
+<ResponseExample>
+
+```json Response
+{
+  "data": {
+    "model": "gpt-4o-mini",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a helpful AI assistant.\n\nYou are speaking to {{ hc:name:string }}"
+      }
+    ],
+    "temperature": 0.7,
+    "max_tokens": 1000
+  },
+  "error": null
+}
+```
+
+</ResponseExample>
+
+### Notes
+
+- This endpoint returns the full prompt body content, unlike other endpoints that only return metadata
+- The `promptVersionId` must be a UUID, not the 6-character prompt ID
+- Template variables in the format `{{ hc:variableName:type }}` can be used for dynamic content
+- Use the `/v1/prompt-2025/query/versions` endpoint to get the version UUID from a prompt ID
