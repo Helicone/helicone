@@ -192,6 +192,7 @@ const ImageContent: React.FC<{
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   let imageSrc = message.image_url;
+
   if (message.content && message.mime_type?.startsWith("image/")) {
     imageSrc = `data:${message.mime_type};base64,${message.content}`;
   } else if (message.content && !message.mime_type) {
@@ -830,8 +831,9 @@ export default function ChatMessage({
           <div className="flex flex-col gap-4">
             {message.contentArray?.map((content, index) => {
               const contentType = getMessageType(content);
+              // Images have data in image_url, not content
               const shouldShowContent =
-                chatMode === "PLAYGROUND_INPUT" || content.content;
+                chatMode === "PLAYGROUND_INPUT" || content.content || content.image_url || (content._type === "image");
 
               return shouldShowContent ? (
                 <div key={index}>

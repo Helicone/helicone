@@ -57,12 +57,13 @@ const anthropicMessageToMessage = (message: any, role?: string): Message => {
     const imageUrl = message.image_url?.url;
     const base64Data = message.source?.data;
     const mimeType = message.source?.media_type || "image/png";
+    const generatedImageUrl = imageUrl || (base64Data ? `data:${mimeType};base64,${base64Data}` : undefined);
 
     return {
       content: base64Data || "",
       role: messageRole,
       _type: "image",
-      image_url: imageUrl || (base64Data ? `data:${mimeType};base64,${base64Data}` : undefined),
+      image_url: generatedImageUrl,
       mime_type: mimeType,
       id: randomId(),
     };
