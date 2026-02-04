@@ -191,6 +191,16 @@ const ImageContent: React.FC<{
 }> = ({ message, options = {} }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // [CONEX DEBUG] Log incoming message data
+  console.log("[CONEX DEBUG] ImageContent received:", {
+    _type: message._type,
+    hasImageUrl: !!message.image_url,
+    imageUrlPrefix: message.image_url?.substring(0, 50),
+    hasContent: !!message.content,
+    contentPrefix: typeof message.content === 'string' ? message.content.substring(0, 30) : null,
+    mimeType: message.mime_type,
+  });
+
   let imageSrc = message.image_url;
   if (message.content && message.mime_type?.startsWith("image/")) {
     imageSrc = `data:${message.mime_type};base64,${message.content}`;
@@ -204,7 +214,15 @@ const ImageContent: React.FC<{
     imageSrc = `data:image/png;base64,${message.content}`;
   }
 
-  if (!imageSrc) return null;
+  console.log("[CONEX DEBUG] imageSrc computed:", {
+    hasImageSrc: !!imageSrc,
+    imageSrcPrefix: imageSrc?.substring(0, 50),
+  });
+
+  if (!imageSrc) {
+    console.log("[CONEX DEBUG] ImageContent returning null - no imageSrc");
+    return null;
+  }
 
   const processedImageSrc = imageSrc.includes("base64,")
     ? base64UrlToBase64(imageSrc)
@@ -212,8 +230,19 @@ const ImageContent: React.FC<{
       ? imageSrc
       : null;
 
-  if (!processedImageSrc) return null;
+  console.log("[CONEX DEBUG] processedImageSrc:", {
+    hasProcessedSrc: !!processedImageSrc,
+    processedPrefix: processedImageSrc?.substring(0, 50),
+  });
 
+  if (!processedImageSrc) {
+    console.log("[CONEX DEBUG] ImageContent returning null - no processedImageSrc");
+    return null;
+  }
+
+  // Use unoptimized for data URLs to avoid Next.js image optimization issues
+  const isDataUrl = processedImageSrc.startsWith("data:");
+  
   const imageElement = (
     <div className="relative w-full max-w-md">
       <Image
@@ -225,6 +254,7 @@ const ImageContent: React.FC<{
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         onClick={() => setIsModalOpen(true)}
         title="Click to view full size"
+        unoptimized={isDataUrl}
       />
     </div>
   );
