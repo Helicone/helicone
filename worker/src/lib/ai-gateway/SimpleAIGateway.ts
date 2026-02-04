@@ -365,6 +365,15 @@ export class SimpleAIGateway {
     const rawBody = await this.requestWrapper.unsafeGetBodyText();
     const parsedBody: any = tryJSONParse(rawBody ?? "{}");
 
+    // If prompt_id is provided but model is not, fetch the model from the prompt
+    if (parsedBody && !parsedBody.model && this.hasPromptFields(parsedBody)) {
+      const modelResult = await this.getModelFromPromptFields(parsedBody);
+      if (isErr(modelResult)) {
+        return err(modelResult.error);
+      }
+      parsedBody.model = modelResult.data;
+    }
+
     if (!parsedBody || !parsedBody.model) {
       return err(
         new Response(
@@ -452,6 +461,59 @@ export class SimpleAIGateway {
       body.version_id ||
       body.inputs
     );
+  }
+
+  /**
+   * Fetches the model from a prompt when the request has prompt fields but no model specified.
+   * This allows users to run prompts without explicitly providing the model in the request,
+   * as the model will be pulled from the stored prompt version.
+   */
+  private async getModelFromPromptFields(
+    parsedBody: any
+  ): Promise<Result<string, Response>> {
+    // Only prompt_id is required to fetch the model
+    if (!parsedBody.prompt_id) {
+      return err(
+        new Response(
+          JSON.stringify({
+            error:
+              "prompt_id is required to fetch model from prompt. Either provide a model or a prompt_id.",
+          }),
+          { status: 400, headers: { "Content-Type": "application/json" } }
+        )
+      );
+    }
+
+    const promptManager = new PromptManager(
+      new HeliconePromptManager({
+        apiKey: this.apiKey,
+        baseUrl: this.env.VALHALLA_URL,
+      }),
+      new PromptStore(this.supabaseClient),
+      this.env
+    );
+
+    const modelResult = await promptManager.getModelFromPrompt(
+      {
+        prompt_id: parsedBody.prompt_id,
+        version_id: parsedBody.version_id,
+        environment: parsedBody.environment,
+      },
+      this.orgId
+    );
+
+    if (isErr(modelResult)) {
+      return err(
+        new Response(
+          JSON.stringify({
+            error: `Failed to fetch model from prompt: ${modelResult.error}`,
+          }),
+          { status: 400, headers: { "Content-Type": "application/json" } }
+        )
+      );
+    }
+
+    return ok(modelResult.data);
   }
 
   // reasoning_options reserved for providers with custom reasoning logic
