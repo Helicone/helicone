@@ -3262,6 +3262,9 @@
 							"properties": {
 								"function": {
 									"properties": {
+										"strict": {
+											"type": "boolean"
+										},
 										"parameters": {
 											"$ref": "#/components/schemas/Record_string.any_"
 										},
@@ -3273,8 +3276,6 @@
 										}
 									},
 									"required": [
-										"parameters",
-										"description",
 										"name"
 									],
 									"type": "object"
@@ -4750,11 +4751,13 @@
 					},
 					"parameters": {
 						"$ref": "#/components/schemas/Record_string.any_"
+					},
+					"strict": {
+						"type": "boolean"
 					}
 				},
 				"required": [
-					"name",
-					"description"
+					"name"
 				],
 				"type": "object",
 				"additionalProperties": false

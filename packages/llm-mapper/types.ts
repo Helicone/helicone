@@ -225,8 +225,9 @@ export type Response = {
 /* -------------------------------------------------------------------------- */
 export interface Tool {
   name: string;
-  description: string;
+  description?: string;
   parameters?: Record<string, any>; // Strict JSON Schema type ("parameters" in OPENAI, "input_schema" in ANTHROPIC)
+  strict?: boolean; // OpenAI's strict mode for function calling
 }
 export interface FunctionCall {
   id?: string;
