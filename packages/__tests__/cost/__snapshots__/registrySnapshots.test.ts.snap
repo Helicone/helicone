@@ -5129,6 +5129,21 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "openai/gpt-5.2": {
+    "gpt-5.2-chat-latest:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "pa/gpt-5.2-chat-latest",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-5.2-chat-latest:openai": {
       "context": 128000,
       "crossRegion": false,
@@ -5172,6 +5187,21 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "verbosity",
       ],
       "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.2-pro:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5.2-pro",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "helicone",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -5244,6 +5274,21 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
       "provider": "azure",
       "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
+    "gpt-5.2:helicone": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 32768,
+      "modelId": "pa/gpt-5.2",
+      "parameters": [
+        "max_completion_tokens",
+        "stop",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
       "regions": [
         "*",
       ],
@@ -6889,6 +6934,9 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   ],
   "openai/gpt-5.2": [
     "azure",
+    "helicone",
+    "helicone",
+    "helicone",
     "openai",
     "openai",
     "openai",
@@ -8630,6 +8678,14 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "web_search": 0.01,
       },
     ],
+    "helicone": [
+      {
+        "input": 0.000021,
+        "output": 0.000168,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
     "openai": [
       {
         "cacheMultipliers": {
@@ -9338,6 +9394,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "gpt-5.2",
       "providers": [
         "azure",
+        "helicone",
         "openai",
         "openrouter",
       ],
@@ -9345,6 +9402,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "gpt-5.2-chat-latest",
       "providers": [
+        "helicone",
         "openai",
         "openrouter",
       ],
@@ -9352,6 +9410,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "gpt-5.2-pro",
       "providers": [
+        "helicone",
         "openai",
         "openrouter",
       ],
@@ -9755,7 +9814,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "groq",
     },
     {
-      "modelCount": 43,
+      "modelCount": 46,
       "provider": "helicone",
     },
     {
@@ -9904,8 +9963,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 297,
-  "totalModelProviderConfigs": 297,
+  "totalEndpoints": 300,
+  "totalModelProviderConfigs": 300,
   "totalModelsWithPtb": 102,
   "totalProviders": 21,
 }

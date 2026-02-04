@@ -80,8 +80,7 @@ export const endpoints = {
       "top_logprobs",
       "verbosity",
     ],
-    unsupportedParameters: [
-    ],
+    unsupportedParameters: [],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
@@ -161,8 +160,7 @@ export const endpoints = {
       "top_logprobs",
       "verbosity",
     ],
-    unsupportedParameters: [
-    ],
+    unsupportedParameters: [],
     ptbEnabled: true,
     endpointConfigs: {
       "*": {},
@@ -246,7 +244,103 @@ export const endpoints = {
       "top_logprobs",
       "verbosity",
     ],
+    unsupportedParameters: [],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "gpt-5.2-chat-latest:helicone": {
+    provider: "helicone",
+    author: "openai",
+    providerModelId: "pa/gpt-5.2-chat-latest",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000175, // $1.75 per 1M tokens
+        output: 0.000014, // $14.00 per 1M tokens
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
+        cacheMultipliers: {
+          cachedInput: 0.1, // $0.175 per 1M tokens
+        },
+      },
+    ],
+    contextLength: 128000,
+    maxCompletionTokens: 16384,
+    supportedParameters: ["max_completion_tokens", "stop"],
     unsupportedParameters: [
+      "temperature",
+      "top_p",
+      "presence_penalty",
+      "frequency_penalty",
+      "logprobs",
+      "top_logprobs",
+      "logit_bias",
+      "max_tokens",
+      "n",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "gpt-5.2:helicone": {
+    provider: "helicone",
+    author: "openai",
+    providerModelId: "pa/gpt-5.2",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000175, // $1.75 per 1M tokens
+        output: 0.000014, // $14.00 per 1M tokens
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
+        cacheMultipliers: {
+          cachedInput: 0.1, // $0.175 per 1M tokens
+        },
+      },
+    ],
+    contextLength: 128000,
+    maxCompletionTokens: 32768,
+    supportedParameters: ["max_completion_tokens", "stop"],
+    unsupportedParameters: [
+      "temperature",
+      "top_p",
+      "presence_penalty",
+      "frequency_penalty",
+      "logprobs",
+      "top_logprobs",
+      "logit_bias",
+      "max_tokens",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "gpt-5.2-pro:helicone": {
+    provider: "helicone",
+    author: "openai",
+    providerModelId: "pa/gpt-5.2-pro",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000021_00, // $21.00 per 1M tokens
+        output: 0.000168_00, // $168.00 per 1M tokens
+        web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
+      },
+    ],
+    contextLength: 128000,
+    maxCompletionTokens: 32768,
+    supportedParameters: ["max_completion_tokens", "stop"],
+    unsupportedParameters: [
+      "temperature",
+      "top_p",
+      "presence_penalty",
+      "frequency_penalty",
+      "logprobs",
+      "top_logprobs",
+      "logit_bias",
+      "max_tokens",
     ],
     ptbEnabled: true,
     endpointConfigs: {
