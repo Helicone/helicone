@@ -277,6 +277,7 @@ describe("mapAnthropicRequest", () => {
       role: "user",
       _type: "image",
       image_url: "data:image/1",
+      mime_type: "image/png",
       id: expect.any(String),
     });
     expect(contentArray[2]).toEqual({
@@ -290,6 +291,7 @@ describe("mapAnthropicRequest", () => {
       role: "user",
       _type: "image",
       image_url: "data:image/2",
+      mime_type: "image/png",
       id: expect.any(String),
     });
 
