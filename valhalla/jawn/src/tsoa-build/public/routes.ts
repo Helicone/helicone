@@ -10,6 +10,8 @@ import { EvaluatorController } from './../../controllers/public/evaluatorControl
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { Prompt2025Controller } from './../../controllers/public/prompt2025Controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { Prompt2025V2Controller } from './../../controllers/public/prompt2025Controller';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { PromptController } from './../../controllers/public/promptController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ExperimentV2Controller } from './../../controllers/public/experimentV2Controller';
@@ -565,6 +567,25 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_Prompt2025-Array_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Record_string.unknown_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"any"},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Prompt2025VersionPromptBody": {
+        "dataType": "refObject",
+        "properties": {
+            "model": {"dataType":"string"},
+            "messages": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"tool_calls":{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"type":{"dataType":"enum","enums":["function"],"required":true},"function":{"dataType":"nestedObjectLiteral","nestedProperties":{"arguments":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}},"required":true},"id":{"dataType":"string","required":true}}}},"tool_call_id":{"dataType":"string"},"name":{"dataType":"string"},"content":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"image_url":{"dataType":"nestedObjectLiteral","nestedProperties":{"url":{"dataType":"string","required":true}}},"text":{"dataType":"string"},"type":{"dataType":"string","required":true}}}},{"dataType":"enum","enums":[null]}],"required":true},"role":{"dataType":"string","required":true}}}},
+            "temperature": {"dataType":"double"},
+            "top_p": {"dataType":"double"},
+            "max_tokens": {"dataType":"double"},
+            "tools": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"function":{"dataType":"nestedObjectLiteral","nestedProperties":{"parameters":{"ref":"Record_string.unknown_","required":true},"description":{"dataType":"string","required":true},"name":{"dataType":"string","required":true}},"required":true},"type":{"dataType":"enum","enums":["function"],"required":true}}}},
+            "tool_choice": {"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"nestedObjectLiteral","nestedProperties":{"function":{"dataType":"nestedObjectLiteral","nestedProperties":{"name":{"dataType":"string","required":true},"type":{"dataType":"enum","enums":["function"],"required":true}}},"type":{"dataType":"string","required":true}}}]},
+        },
+        "additionalProperties": {"dataType":"any"},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Prompt2025Version": {
         "dataType": "refObject",
         "properties": {
@@ -577,6 +598,7 @@ const models: TsoaRoute.Models = {
             "environments": {"dataType":"array","array":{"dataType":"string"}},
             "created_at": {"dataType":"string","required":true},
             "s3_url": {"dataType":"string"},
+            "prompt_body": {"ref":"Prompt2025VersionPromptBody"},
         },
         "additionalProperties": false,
     },
@@ -630,6 +652,20 @@ const models: TsoaRoute.Models = {
     "Result_PromptVersionCounts.string_": {
         "dataType": "refAlias",
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_PromptVersionCounts_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess_Prompt2025Version_91_prompt_body_93__": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"ref":"Prompt2025VersionPromptBody","required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result_Prompt2025Version_91_prompt_body_93_.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_Prompt2025Version_91_prompt_body_93__"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ResultSuccess__hasPrompts-boolean__": {
@@ -2157,11 +2193,6 @@ const models: TsoaRoute.Models = {
             "errors": {"dataType":"array","array":{"dataType":"refObject","ref":"ValidationError"},"required":true},
         },
         "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Record_string.unknown_": {
-        "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"any"},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "TypedProviderRequest": {
@@ -6257,6 +6288,134 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getPrompt2025TotalVersions',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsPrompt2025Controller_getPrompt2025VersionBody: Record<string, TsoaRoute.ParameterSchema> = {
+                promptVersionId: {"in":"path","name":"promptVersionId","required":true,"dataType":"string"},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.get('/v1/prompt-2025/:promptVersionId/prompt-body',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(Prompt2025Controller)),
+            ...(fetchMiddlewares<RequestHandler>(Prompt2025Controller.prototype.getPrompt2025VersionBody)),
+
+            async function Prompt2025Controller_getPrompt2025VersionBody(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsPrompt2025Controller_getPrompt2025VersionBody, request, response });
+
+                const controller = new Prompt2025Controller();
+
+              await templateService.apiHandler({
+                methodName: 'getPrompt2025VersionBody',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsPrompt2025V2Controller_getPrompt2025Version: Record<string, TsoaRoute.ParameterSchema> = {
+                requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"promptVersionId":{"dataType":"string","required":true}}},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.post('/v2/prompt-2025/query/version',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(Prompt2025V2Controller)),
+            ...(fetchMiddlewares<RequestHandler>(Prompt2025V2Controller.prototype.getPrompt2025Version)),
+
+            async function Prompt2025V2Controller_getPrompt2025Version(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsPrompt2025V2Controller_getPrompt2025Version, request, response });
+
+                const controller = new Prompt2025V2Controller();
+
+              await templateService.apiHandler({
+                methodName: 'getPrompt2025Version',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsPrompt2025V2Controller_getPrompt2025EnvironmentVersion: Record<string, TsoaRoute.ParameterSchema> = {
+                requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"environment":{"dataType":"string","required":true},"promptId":{"dataType":"string","required":true}}},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.post('/v2/prompt-2025/query/environment-version',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(Prompt2025V2Controller)),
+            ...(fetchMiddlewares<RequestHandler>(Prompt2025V2Controller.prototype.getPrompt2025EnvironmentVersion)),
+
+            async function Prompt2025V2Controller_getPrompt2025EnvironmentVersion(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsPrompt2025V2Controller_getPrompt2025EnvironmentVersion, request, response });
+
+                const controller = new Prompt2025V2Controller();
+
+              await templateService.apiHandler({
+                methodName: 'getPrompt2025EnvironmentVersion',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsPrompt2025V2Controller_getPrompt2025ProductionVersion: Record<string, TsoaRoute.ParameterSchema> = {
+                requestBody: {"in":"body","name":"requestBody","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"promptId":{"dataType":"string","required":true}}},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.post('/v2/prompt-2025/query/production-version',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(Prompt2025V2Controller)),
+            ...(fetchMiddlewares<RequestHandler>(Prompt2025V2Controller.prototype.getPrompt2025ProductionVersion)),
+
+            async function Prompt2025V2Controller_getPrompt2025ProductionVersion(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsPrompt2025V2Controller_getPrompt2025ProductionVersion, request, response });
+
+                const controller = new Prompt2025V2Controller();
+
+              await templateService.apiHandler({
+                methodName: 'getPrompt2025ProductionVersion',
                 controller,
                 response,
                 next,
