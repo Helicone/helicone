@@ -27,7 +27,8 @@ export class HeliconeProvider extends BaseProvider {
     const isResponsesEndpoint =
       requestParams.bodyMapping === "RESPONSES" ||
       endpoint.providerModelId.includes("gpt-5-pro") ||
-      endpoint.providerModelId.includes("gpt-5-codex");
+      endpoint.providerModelId.includes("gpt-5-codex") ||
+      endpoint.providerModelId.includes("gpt-5.2-pro");
 
     const path = isResponsesEndpoint ? "/responses" : "/chat/completions";
     return `${this.baseUrl}/openai/v1${path}`;
