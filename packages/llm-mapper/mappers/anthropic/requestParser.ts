@@ -58,7 +58,7 @@ const anthropicMessageToMessage = (message: any, role?: string): Message => {
     const base64Data = message.source?.data;
     const mimeType = message.source?.media_type || "image/png";
 
-    return {
+    const result = {
       content: base64Data || "",
       role: messageRole,
       _type: "image",
@@ -66,6 +66,12 @@ const anthropicMessageToMessage = (message: any, role?: string): Message => {
       mime_type: mimeType,
       id: randomId(),
     };
+    console.log("[CONEX DEBUG] Anthropic image message mapped:", { 
+      hasImageUrl: !!result.image_url,
+      imageUrlPrefix: result.image_url?.substring(0, 30),
+      _type: result._type 
+    });
+    return result;
   }
   if (message.type === "tool_use") {
     return {
