@@ -19,6 +19,7 @@ import { models as claudeSonnet4520250929Models } from "./claude-sonnet-4-5-2025
 import { models as claudeHaiku4520251001Models } from "./claude-haiku-4-5-20251001/model";
 import { models as claudeOpus4120250805Models } from "./claude-opus-4-1-20250805/model";
 import { models as claudeOpus45Models } from "./claude-4.5-opus/model";
+import { models as claudeOpus46Models } from "./claude-4.6-opus/model";
 
 // Import endpoints
 import { endpoints as claudeOpus41Endpoints } from "./claude-opus-4-1/endpoints";
@@ -34,6 +35,7 @@ import { endpoints as claudeSonnet4520250929Endpoints } from "./claude-sonnet-4-
 import { endpoints as claudeHaiku4520251001Endpoints } from "./claude-haiku-4-5-20251001/endpoints";
 import { endpoints as claudeOpus4120250805Endpoints } from "./claude-opus-4-1-20250805/endpoints";
 import { endpoints as claudeOpus45Endpoints } from "./claude-4.5-opus/endpoints";
+import { endpoints as claudeOpus46Endpoints } from "./claude-4.6-opus/endpoints";
 
 // Aggregate models
 export const anthropicModels = {
@@ -50,6 +52,7 @@ export const anthropicModels = {
   ...claudeHaiku4520251001Models,
   ...claudeOpus4120250805Models,
   ...claudeOpus45Models,
+  ...claudeOpus46Models,
 } satisfies Record<string, ModelConfig>;
 
 // Aggregate endpoints
@@ -67,4 +70,5 @@ export const anthropicEndpointConfig = {
   ...claudeHaiku4520251001Endpoints,
   ...claudeOpus4120250805Endpoints,
   ...claudeOpus45Endpoints,
+  ...claudeOpus46Endpoints,
 } satisfies Record<string, ModelProviderConfig>;
