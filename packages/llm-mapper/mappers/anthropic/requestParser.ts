@@ -64,7 +64,7 @@ const anthropicMessageToMessage = (message: any, role?: string): Message => {
       role: messageRole,
       _type: "image",
       image_url: generatedImageUrl,
-      mime_type: mimeType,
+      ...(base64Data && { mime_type: mimeType }),
       id: randomId(),
     };
   }
