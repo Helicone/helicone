@@ -54,14 +54,17 @@ const anthropicMessageToMessage = (message: any, role?: string): Message => {
     };
   }
   if (message.type === "image" || message.type === "image_url") {
+    const imageUrl = message.image_url?.url;
+    const base64Data = message.source?.data;
+    const mimeType = message.source?.media_type || "image/png";
+    const generatedImageUrl = imageUrl || (base64Data ? `data:${mimeType};base64,${base64Data}` : undefined);
+
     return {
-      content: getMessageContent(message),
+      content: base64Data || "",
       role: messageRole,
       _type: "image",
-      image_url:
-        message.type === "image" || message.type === "image_url"
-          ? message.image_url?.url || message.source?.data
-          : undefined,
+      image_url: generatedImageUrl,
+      ...(base64Data && { mime_type: mimeType }),
       id: randomId(),
     };
   }

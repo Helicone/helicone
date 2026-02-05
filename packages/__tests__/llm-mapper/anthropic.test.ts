@@ -302,6 +302,56 @@ describe("mapAnthropicRequest", () => {
     });
   });
 
+  it("should handle images with base64 source data and include mime_type", () => {
+    const result = mapAnthropicRequest({
+      request: {
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "What's in this image?",
+              },
+              {
+                type: "image",
+                source: {
+                  type: "base64",
+                  media_type: "image/jpeg",
+                  data: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+                },
+              },
+            ],
+          },
+        ],
+      },
+      response: {
+        type: "message",
+        role: "assistant",
+        content: [
+          {
+            type: "text",
+            text: "I see an image",
+          },
+        ],
+      },
+      statusCode: 200,
+      model: "claude-3-sonnet",
+    });
+
+    const contentArray = result.schema.request.messages![0].contentArray!;
+    expect(contentArray).toHaveLength(2);
+
+    // Image with base64 source should include mime_type
+    expect(contentArray[1]).toMatchObject({
+      role: "user",
+      _type: "image",
+      content: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+      mime_type: "image/jpeg",
+      image_url: "data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+    });
+  });
+
   it("should handle streamed responses with undefined values", () => {
     const result = mapAnthropicRequest({
       request: {
