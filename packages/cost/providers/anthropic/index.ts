@@ -245,6 +245,21 @@ export const costs: ModelRow[] = [
     },
     showInPlayground: true,
   },
+  {
+    model: {
+      operator: "includes",
+      value: "claude-opus-4-6",
+    },
+    cost: {
+      prompt_token: 0.000005, // $5 / MTok
+      completion_token: 0.000025, // $25 / MTok
+      prompt_cache_write_token: 0.00000625, // 5m cache write: $6.25 / MTok
+      prompt_cache_read_token: 0.0000005, // Cache hits/refreshes: $0.5 / MTok
+      prompt_cache_creation_5m: 0.00000625, // $6.25 / MTok
+      prompt_cache_creation_1h: 0.00001, // 1h cache write: $10 / MTok
+    },
+    showInPlayground: true,
+  },
 ];
 
 export const modelDetails: ModelDetailsMap = {
@@ -674,6 +689,65 @@ export const modelDetails: ModelDetailsMap = {
         "Complex data analysis and extraction",
         "Vision and multimodal processing",
         "Enterprise-critical applications",
+      ],
+    },
+  },
+  "claude-opus-4-6": {
+    matches: ["claude-opus-4-6-20260205", "claude-opus-4-6"],
+    searchTerms: ["claude 4.6 opus", "claude-opus-4-6", "opus 4.6", "claude-opus-4-6-20260205"],
+    info: {
+      maxTokens: 1000000,
+      releaseDate: "2026-02-05",
+      description:
+        "Claude Opus 4.6 is Anthropic's most capable model to date, released February 2026. Building on the intelligence of Opus 4.5, it brings new levels of reliability and precision to coding, agents, and enterprise workflows. Features a 1M context window, hybrid reasoning with extended thinking, and state-of-the-art performance (65.4% on Terminal-Bench 2.0, 72.7% on OSWorld).",
+      tradeOffs: [
+        "Premium pricing for flagship capabilities",
+        "State-of-the-art coding and agentic performance",
+        "1M context window (5x increase from 4.5)",
+        "Hybrid reasoning with instant or extended thinking",
+      ],
+      benchmarks: {
+        terminal_bench_2: 0.654,
+        osworld: 0.727,
+        biglaw_bench: 0.902,
+      },
+      capabilities: [
+        "Hybrid reasoning (instant or extended thinking)",
+        "1M token context window",
+        "Complex multi-step problem solving",
+        "Advanced code generation and analysis",
+        "Vision processing (text and image inputs)",
+        "Multilingual capabilities",
+        "Tool and function calling",
+        "JSON mode support",
+        "Maximum output up to 64k tokens",
+        "Web search integration",
+        "Multi-agent orchestration",
+      ],
+      strengths: [
+        "Industry-leading coding performance",
+        "Best computer-use model (72.7% OSWorld)",
+        "1M context window",
+        "Superior agentic task handling",
+        "Strong multi-step reasoning",
+        "Excellent code review and debugging",
+        "Reliable for enterprise workflows",
+        "Self-corrects errors autonomously",
+      ],
+      weaknesses: [
+        "Premium pricing model",
+        "Higher latency due to advanced capabilities",
+        "Resource-intensive processing",
+      ],
+      recommendations: [
+        "Production-ready code generation",
+        "Complex agentic workflows",
+        "Enterprise document processing",
+        "Large codebase migrations",
+        "Multi-agent orchestration",
+        "Long-context analysis",
+        "Cybersecurity investigations",
+        "Legal reasoning tasks",
       ],
     },
   },
