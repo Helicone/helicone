@@ -234,7 +234,15 @@ export function toChatCompletions(
     logit_bias: body.logit_bias,
     logprobs: body.logprobs,
     top_logprobs: body.top_logprobs,
-    response_format: body.response_format,
+    // Convert Responses API text.format to Chat Completions response_format
+    response_format: body.text?.format
+      ? {
+          type: body.text.format.type,
+          ...(body.text.format.json_schema && {
+            json_schema: body.text.format.json_schema,
+          }),
+        }
+      : undefined,
     seed: body.seed,
     user: body.user,
     service_tier: body.service_tier,

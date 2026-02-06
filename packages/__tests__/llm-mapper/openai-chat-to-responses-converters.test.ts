@@ -351,6 +351,122 @@ describe("OpenAI Chat -> Responses converters", () => {
         expect(textPart).toMatchObject({ type: "text", text: "Hi there" });
       }
     });
+
+    it("maps text.format json_schema to response_format", () => {
+      const req: ResponsesRequestBody = {
+        model: "gpt-4o-mini",
+        input: "Generate a JSON object with name and age",
+        text: {
+          format: {
+            type: "json_schema",
+            json_schema: {
+              name: "person",
+              description: "A person object",
+              schema: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  age: { type: "number" },
+                },
+                required: ["name", "age"],
+              },
+              strict: true,
+            },
+          },
+        },
+      };
+      const oai = toChatCompletions(req);
+      expect(oai.response_format).toBeDefined();
+      expect(oai.response_format?.type).toBe("json_schema");
+      expect((oai.response_format as any)?.json_schema).toEqual({
+        name: "person",
+        description: "A person object",
+        schema: {
+          type: "object",
+          properties: {
+            name: { type: "string" },
+            age: { type: "number" },
+          },
+          required: ["name", "age"],
+        },
+        strict: true,
+      });
+    });
+
+    it("maps text.format json_object to response_format", () => {
+      const req: ResponsesRequestBody = {
+        model: "gpt-4o-mini",
+        input: "Generate a JSON response",
+        text: {
+          format: {
+            type: "json_object",
+          },
+        },
+      };
+      const oai = toChatCompletions(req);
+      expect(oai.response_format).toBeDefined();
+      expect(oai.response_format?.type).toBe("json_object");
+      expect((oai.response_format as any)?.json_schema).toBeUndefined();
+    });
+
+    it("maps text.format text type to response_format", () => {
+      const req: ResponsesRequestBody = {
+        model: "gpt-4o-mini",
+        input: "Hello",
+        text: {
+          format: {
+            type: "text",
+          },
+        },
+      };
+      const oai = toChatCompletions(req);
+      expect(oai.response_format).toBeDefined();
+      expect(oai.response_format?.type).toBe("text");
+    });
+
+    it("does not set response_format when text.format is not provided", () => {
+      const req: ResponsesRequestBody = {
+        model: "gpt-4o-mini",
+        input: "Hello",
+        text: {
+          verbosity: "high",
+        },
+      };
+      const oai = toChatCompletions(req);
+      expect(oai.response_format).toBeUndefined();
+    });
+
+    it("does not set response_format when text is not provided", () => {
+      const req: ResponsesRequestBody = {
+        model: "gpt-4o-mini",
+        input: "Hello",
+      };
+      const oai = toChatCompletions(req);
+      expect(oai.response_format).toBeUndefined();
+    });
+
+    it("preserves text.verbosity separately from text.format", () => {
+      const req: ResponsesRequestBody = {
+        model: "gpt-4o-mini",
+        input: "Generate JSON",
+        text: {
+          format: {
+            type: "json_schema",
+            json_schema: {
+              name: "test",
+              schema: { type: "object" },
+            },
+          },
+          verbosity: "medium",
+        },
+      };
+      const oai = toChatCompletions(req);
+      // response_format should be set from text.format
+      expect(oai.response_format).toBeDefined();
+      expect(oai.response_format?.type).toBe("json_schema");
+      // Note: verbosity is not directly mapped to Chat Completions API
+      // but the response_format should still work correctly
+    });
   });
 
   describe("fromChatCompletions (request mapping)", () => {
