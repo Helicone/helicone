@@ -49330,6 +49330,90 @@
 					}
 				]
 			},
+			"ResultSuccess__message-string--subscriptionId-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"subscriptionId": {
+								"type": "string"
+							},
+							"message": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"subscriptionId",
+							"message"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__message-string--subscriptionId-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__message-string--subscriptionId-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ResultSuccess__message-string--newTier-string__": {
+				"properties": {
+					"data": {
+						"properties": {
+							"newTier": {
+								"type": "string"
+							},
+							"message": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"newTier",
+							"message"
+						],
+						"type": "object"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__message-string--newTier-string_.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__message-string--newTier-string__"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"CreditBalanceResponse": {
 				"properties": {
 					"totalCreditsPurchased": {
@@ -61240,6 +61324,51 @@
 										"organizations": {
 											"items": {
 												"properties": {
+													"next_invoice_amount": {
+														"type": "number",
+														"format": "double",
+														"nullable": true
+													},
+													"next_invoice_date": {
+														"type": "number",
+														"format": "double",
+														"nullable": true
+													},
+													"subscription_items": {
+														"items": {
+															"properties": {
+																"recurring_interval": {
+																	"type": "string",
+																	"nullable": true
+																},
+																"unit_amount": {
+																	"type": "number",
+																	"format": "double",
+																	"nullable": true
+																},
+																"price_id": {
+																	"type": "string"
+																},
+																"product_name": {
+																	"type": "string",
+																	"nullable": true
+																}
+															},
+															"required": [
+																"recurring_interval",
+																"unit_amount",
+																"price_id",
+																"product_name"
+															],
+															"type": "object"
+														},
+														"type": "array"
+													},
+													"trial_end": {
+														"type": "number",
+														"format": "double",
+														"nullable": true
+													},
 													"member_count": {
 														"type": "number",
 														"format": "double"
@@ -61278,6 +61407,10 @@
 													}
 												},
 												"required": [
+													"next_invoice_amount",
+													"next_invoice_date",
+													"subscription_items",
+													"trial_end",
 													"member_count",
 													"created_at",
 													"stripe_status",
@@ -61422,6 +61555,13 @@
 						"application/json": {
 							"schema": {
 								"properties": {
+									"targetTier": {
+										"type": "string",
+										"enum": [
+											"pro",
+											"team"
+										]
+									},
 									"storageBytesOverride": {
 										"type": "number",
 										"format": "double"
@@ -61503,6 +61643,58 @@
 										"organizations": {
 											"items": {
 												"properties": {
+													"next_invoice_amount": {
+														"type": "number",
+														"format": "double",
+														"nullable": true
+													},
+													"next_invoice_date": {
+														"type": "number",
+														"format": "double",
+														"nullable": true
+													},
+													"subscription_items": {
+														"items": {
+															"properties": {
+																"recurring_interval": {
+																	"type": "string",
+																	"nullable": true
+																},
+																"unit_amount": {
+																	"type": "number",
+																	"format": "double",
+																	"nullable": true
+																},
+																"price_id": {
+																	"type": "string"
+																},
+																"product_name": {
+																	"type": "string",
+																	"nullable": true
+																}
+															},
+															"required": [
+																"recurring_interval",
+																"unit_amount",
+																"price_id",
+																"product_name"
+															],
+															"type": "object"
+														},
+														"type": "array"
+													},
+													"trial_end": {
+														"type": "number",
+														"format": "double",
+														"nullable": true
+													},
+													"stripe_status": {
+														"type": "string",
+														"nullable": true
+													},
+													"created_at": {
+														"type": "string"
+													},
 													"subscription_status": {
 														"type": "string",
 														"nullable": true
@@ -61530,6 +61722,12 @@
 													}
 												},
 												"required": [
+													"next_invoice_amount",
+													"next_invoice_date",
+													"subscription_items",
+													"trial_end",
+													"stripe_status",
+													"created_at",
 													"subscription_status",
 													"stripe_subscription_id",
 													"stripe_customer_id",
@@ -61737,6 +61935,299 @@
 						}
 					}
 				]
+			}
+		},
+		"/v1/admin/pricing-migration/cancel-subscription/{orgId}": {
+			"post": {
+				"operationId": "CancelSubscription",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__message-string--subscriptionId-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Cancel a Stripe subscription for an organization (for unpaid/problematic subscriptions)",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/v1/admin/pricing-migration/audit": {
+			"post": {
+				"operationId": "AuditSubscriptions",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"summary": {
+											"properties": {
+												"byIssue": {
+													"$ref": "#/components/schemas/Record_string.number_"
+												},
+												"filteredOutEuUsers": {
+													"type": "number",
+													"format": "double"
+												},
+												"totalMismatches": {
+													"type": "number",
+													"format": "double"
+												},
+												"totalActiveSubscriptions": {
+													"type": "number",
+													"format": "double"
+												}
+											},
+											"required": [
+												"byIssue",
+												"filteredOutEuUsers",
+												"totalMismatches",
+												"totalActiveSubscriptions"
+											],
+											"type": "object"
+										},
+										"mismatches": {
+											"items": {
+												"properties": {
+													"isInAuthUsers": {
+														"type": "boolean"
+													},
+													"userOrgs": {
+														"items": {
+															"properties": {
+																"tier": {
+																	"type": "string"
+																},
+																"name": {
+																	"type": "string"
+																},
+																"id": {
+																	"type": "string"
+																}
+															},
+															"required": [
+																"tier",
+																"name",
+																"id"
+															],
+															"type": "object"
+														},
+														"type": "array"
+													},
+													"issue": {
+														"type": "string"
+													},
+													"orgHasSubscriptionId": {
+														"type": "boolean"
+													},
+													"orgHasCustomerId": {
+														"type": "boolean"
+													},
+													"orgSubscriptionStatus": {
+														"type": "string",
+														"nullable": true
+													},
+													"orgTier": {
+														"type": "string",
+														"nullable": true
+													},
+													"orgName": {
+														"type": "string",
+														"nullable": true
+													},
+													"orgId": {
+														"type": "string",
+														"nullable": true
+													},
+													"stripeStatus": {
+														"type": "string"
+													},
+													"customerEmail": {
+														"type": "string",
+														"nullable": true
+													},
+													"customerId": {
+														"type": "string"
+													},
+													"subscriptionId": {
+														"type": "string"
+													}
+												},
+												"required": [
+													"isInAuthUsers",
+													"userOrgs",
+													"issue",
+													"orgHasSubscriptionId",
+													"orgHasCustomerId",
+													"orgSubscriptionStatus",
+													"orgTier",
+													"orgName",
+													"orgId",
+													"stripeStatus",
+													"customerEmail",
+													"customerId",
+													"subscriptionId"
+												],
+												"type": "object"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"summary",
+										"mismatches"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"description": "Audit Stripe subscriptions vs organization table\nFinds active Stripe subscriptions that don't match our database state",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/v1/admin/pricing-migration/fix-tier/{orgId}": {
+			"post": {
+				"operationId": "FixOrgTier",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__message-string--newTier-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Fix org tier based on Stripe subscription\nSets the org to pro-20251210 or team-20251210 based on the subscription products",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"subscriptionId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"subscriptionId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/admin/pricing-migration/fix-metadata/{orgId}": {
+			"post": {
+				"operationId": "FixOrgMetadata",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__message-string_.string_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Fix org Stripe metadata - updates customer_id and subscription_id",
+				"tags": [
+					"Admin"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orgId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"subscriptionId": {
+										"type": "string"
+									},
+									"customerId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"subscriptionId",
+									"customerId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/v1/credits/balance": {
