@@ -52,6 +52,15 @@ describe("AnthropicProvider", () => {
       expect(result.headers["x-api-key"]).toBe("test-api-key");
       expect(result.headers["anthropic-beta"]).toBe("context-management-2025-06-27");
     });
+
+    it("should include User-Agent header set to helicone", () => {
+      const result = provider.authenticate(
+        { apiKey: "test-api-key" },
+        { providerModelId: "claude-3-haiku" } as any
+      );
+
+      expect(result.headers["User-Agent"]).toBe("helicone");
+    });
   });
 
   describe("provider metadata", () => {
