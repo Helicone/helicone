@@ -358,17 +358,8 @@ export default function ChatOnlyView({ mappedRequest }: ChatOnlyViewProps) {
     (item) => item.type === "message"
   ).length;
 
-  if (messageCount === 0) {
-    return (
-      <div className="flex h-full items-center justify-center p-8">
-        <p className="text-sm text-muted-foreground">
-          No user or assistant messages found in this request.
-        </p>
-      </div>
-    );
-  }
-
   // Group consecutive tool calls together
+  // NOTE: This useMemo must be called BEFORE any early returns to comply with React's rules of hooks
   const groupedItems = useMemo(() => {
     const result: (
       | { type: "message"; message: Message; isUser: boolean }
@@ -397,6 +388,16 @@ export default function ChatOnlyView({ mappedRequest }: ChatOnlyViewProps) {
 
     return result;
   }, [chatItems]);
+
+  if (messageCount === 0) {
+    return (
+      <div className="flex h-full items-center justify-center p-8">
+        <p className="text-sm text-muted-foreground">
+          No user or assistant messages found in this request.
+        </p>
+      </div>
+    );
+  }
 
   let messageIndex = 0;
 
