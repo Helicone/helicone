@@ -45,7 +45,20 @@ interface OpenAIResponseRequest {
   reasoning?: {
     effort?: "low" | "medium" | "high" | "minimal";
   };
+  /**
+   * Text output configuration including format for structured output.
+   * In the Responses API, `text.format` replaces `response_format` from Chat Completions.
+   */
   text?: {
+    format?: {
+      type: "text" | "json_schema" | "json_object";
+      json_schema?: {
+        name: string;
+        description?: string;
+        schema: Record<string, any>;
+        strict?: boolean;
+      };
+    };
     verbosity?: "low" | "medium" | "high";
   };
   store?: boolean;
@@ -73,7 +86,6 @@ interface OpenAIResponseRequest {
   logprobs?: boolean;
   top_logprobs?: number;
   n?: number;
-  response_format?: { type: string; json_schema?: any };
   seed?: number;
   service_tier?: string;
   stream_options?: any;
