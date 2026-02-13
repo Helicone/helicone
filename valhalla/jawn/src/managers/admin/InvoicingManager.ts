@@ -108,7 +108,7 @@ export class InvoicingManager {
   async createInvoice(
     startDate: Date,
     endDate: Date,
-    daysUntilDue: number = 30
+    daysUntilDue: number = 7
   ): Promise<Result<CreateInvoiceResponse, string>> {
     try {
       // 1. Get org's Stripe customer ID
@@ -174,8 +174,8 @@ export class InvoicingManager {
       });
 
       // 5. Create the invoice (in draft mode)
-      const periodStart = startDate.toISOString().split("T")[0];
-      const periodEnd = endDate.toISOString().split("T")[0];
+      const periodStart = startDate.toISOString().replace("T", " ").slice(0, 16);
+      const periodEnd = endDate.toISOString().replace("T", " ").slice(0, 16);
 
       const invoice = await stripe.invoices.create({
         customer: stripeCustomerId,
@@ -189,6 +189,9 @@ export class InvoicingManager {
           type: "ptb_usage",
         },
         pending_invoice_items_behavior: "exclude",
+        payment_settings: {
+          payment_method_types: ["ach_debit", "us_bank_account"],
+        },
       });
 
       // 6. Create invoice items with discounts applied
