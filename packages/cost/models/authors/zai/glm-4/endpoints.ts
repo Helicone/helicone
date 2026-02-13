@@ -275,6 +275,44 @@ export const endpoints = {
       "*": {},
     },
   },
+  "glm-4.7:cerebras": {
+    providerModelId: "zai-glm-4.7",
+    provider: "cerebras",
+    author: "zai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000225, // $2.25/M tokens
+        output: 0.00000275, // $2.75/M tokens
+      },
+    ],
+    quantization: "bf16",
+    contextLength: 131_072,
+    maxCompletionTokens: 40_000,
+    supportedParameters: [
+      "functions",
+      "structured_outputs",
+      "reasoning",
+      "tool_choice",
+      "tools",
+      "response_format",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "top_k",
+      "min_p",
+      "repetition_penalty",
+      "logit_bias"
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<
     `${ZaiModelName}:${ModelProviderName}` | ZaiModelName,

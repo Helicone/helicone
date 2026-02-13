@@ -6698,6 +6698,36 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "glm-4.7:cerebras": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 40000,
+      "modelId": "zai-glm-4.7",
+      "parameters": [
+        "frequency_penalty",
+        "functions",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "reasoning",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "cerebras",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "glm-4.7:fireworks": {
       "context": 198000,
       "crossRegion": false,
@@ -7164,6 +7194,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "baseten",
     "canopywave",
     "canopywave",
+    "cerebras",
     "fireworks",
     "novita",
     "novita",
@@ -9117,6 +9148,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 0,
       },
     ],
+    "cerebras": [
+      {
+        "input": 0.00000225,
+        "output": 0.00000275,
+        "threshold": 0,
+      },
+    ],
     "fireworks": [
       {
         "cacheMultipliers": {
@@ -9429,6 +9467,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "providers": [
         "baseten",
         "canopywave",
+        "cerebras",
         "fireworks",
         "novita",
       ],
@@ -10003,7 +10042,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "canopywave",
     },
     {
-      "modelCount": 1,
+      "modelCount": 2,
       "provider": "cerebras",
     },
     {
@@ -10181,8 +10220,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 306,
-  "totalModelProviderConfigs": 306,
+  "totalEndpoints": 307,
+  "totalModelProviderConfigs": 307,
   "totalModelsWithPtb": 103,
   "totalProviders": 21,
 }
