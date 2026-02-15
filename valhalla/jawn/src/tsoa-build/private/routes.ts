@@ -1433,6 +1433,20 @@ const models: TsoaRoute.Models = {
         "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess_HeliconeRequest_"},{"ref":"ResultError_string_"}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ResultSuccess__inputs-Record_string.any_--prompt_id-string--version_id-string--environment-string-or-null_-or-null_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"dataType":"union","subSchemas":[{"dataType":"nestedObjectLiteral","nestedProperties":{"environment":{"dataType":"union","subSchemas":[{"dataType":"string"},{"dataType":"enum","enums":[null]}],"required":true},"version_id":{"dataType":"string","required":true},"prompt_id":{"dataType":"string","required":true},"inputs":{"ref":"Record_string.any_","required":true}}},{"dataType":"enum","enums":[null]}],"required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Result__inputs-Record_string.any_--prompt_id-string--version_id-string--environment-string-or-null_-or-null.string_": {
+        "dataType": "refAlias",
+        "type": {"dataType":"union","subSchemas":[{"ref":"ResultSuccess__inputs-Record_string.any_--prompt_id-string--version_id-string--environment-string-or-null_-or-null_"},{"ref":"ResultError_string_"}],"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "HeliconeRequestAsset": {
         "dataType": "refObject",
         "properties": {
@@ -18694,6 +18708,38 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getRequestById',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsRequestController_getRequestInputs: Record<string, TsoaRoute.ParameterSchema> = {
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                requestId: {"in":"path","name":"requestId","required":true,"dataType":"string"},
+        };
+        app.get('/v1/request/:requestId/inputs',
+            authenticateMiddleware([{"api_key":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(RequestController)),
+            ...(fetchMiddlewares<RequestHandler>(RequestController.prototype.getRequestInputs)),
+
+            async function RequestController_getRequestInputs(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsRequestController_getRequestInputs, request, response });
+
+                const controller = new RequestController();
+
+              await templateService.apiHandler({
+                methodName: 'getRequestInputs',
                 controller,
                 response,
                 next,

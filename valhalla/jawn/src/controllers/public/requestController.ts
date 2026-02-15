@@ -179,6 +179,31 @@ export class RequestController extends Controller {
     return returnRequest;
   }
 
+  @Get("/{requestId}/inputs")
+  public async getRequestInputs(
+    @Request() request: JawnAuthenticatedRequest,
+    @Path() requestId: string
+  ): Promise<
+    Result<
+      {
+        inputs: Record<string, any>;
+        prompt_id: string;
+        version_id: string;
+        environment: string | null;
+      } | null,
+      string
+    >
+  > {
+    const reqManager = new RequestManager(request.authParams);
+    const result = await reqManager.getRequestInputs(requestId);
+    if (result.error) {
+      this.setStatus(500);
+    } else {
+      this.setStatus(200);
+    }
+    return result;
+  }
+
   @Post("/query-ids")
   public async getRequestsByIds(
     @Body() requestBody: { requestIds: string[] },
