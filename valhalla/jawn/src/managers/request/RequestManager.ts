@@ -625,4 +625,43 @@ export class RequestManager extends BaseManager {
       /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     return uuidRegex.test(uuid);
   }
+
+  async getRequestInputs(
+    requestId: string
+  ): Promise<
+    Result<
+      {
+        inputs: Record<string, any>;
+        prompt_id: string;
+        version_id: string;
+        environment: string | null;
+      } | null,
+      string
+    >
+  > {
+    const result = await dbExecute<{
+      inputs: Record<string, any>;
+      prompt_id: string;
+      version_id: string;
+      environment: string | null;
+    }>(
+      `SELECT
+        pi.inputs,
+        pv.prompt_id,
+        pi.version_id,
+        pi.environment
+      FROM prompts_2025_inputs pi
+      JOIN prompts_2025_versions pv ON pv.id = pi.version_id
+      WHERE pi.request_id = $1
+        AND pv.organization = $2
+      LIMIT 1`,
+      [requestId, this.authParams.organizationId]
+    );
+
+    if (result.error) {
+      return err(result.error);
+    }
+
+    return ok(result.data?.[0] ?? null);
+  }
 }

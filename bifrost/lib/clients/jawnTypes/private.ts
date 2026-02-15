@@ -298,6 +298,9 @@ export interface paths {
   "/v1/request/{requestId}": {
     get: operations["GetRequestById"];
   };
+  "/v1/request/{requestId}/inputs": {
+    get: operations["GetRequestInputs"];
+  };
   "/v1/request/query-ids": {
     post: operations["GetRequestsByIds"];
   };
@@ -2267,6 +2270,17 @@ Json: JsonObject;
       error: null;
     };
     "Result_HeliconeRequest.string_": components["schemas"]["ResultSuccess_HeliconeRequest_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__inputs-Record_string.any_--prompt_id-string--version_id-string--environment-string-or-null_-or-null_": {
+      data: ({
+        environment: string | null;
+        version_id: string;
+        prompt_id: string;
+        inputs: components["schemas"]["Record_string.any_"];
+      }) | null;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__inputs-Record_string.any_--prompt_id-string--version_id-string--environment-string-or-null_-or-null.string_": components["schemas"]["ResultSuccess__inputs-Record_string.any_--prompt_id-string--version_id-string--environment-string-or-null_-or-null_"] | components["schemas"]["ResultError_string_"];
     HeliconeRequestAsset: {
       assetUrl: string;
     };
@@ -18617,6 +18631,21 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_HeliconeRequest.string_"];
+        };
+      };
+    };
+  };
+  GetRequestInputs: {
+    parameters: {
+      path: {
+        requestId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__inputs-Record_string.any_--prompt_id-string--version_id-string--environment-string-or-null_-or-null.string_"];
         };
       };
     };

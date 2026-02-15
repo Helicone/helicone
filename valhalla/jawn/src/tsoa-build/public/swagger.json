@@ -5769,6 +5769,58 @@
 					}
 				]
 			},
+			"ResultSuccess__inputs-Record_string.any_--prompt_id-string--version_id-string--environment-string-or-null_-or-null_": {
+				"properties": {
+					"data": {
+						"properties": {
+							"environment": {
+								"type": "string",
+								"nullable": true
+							},
+							"version_id": {
+								"type": "string"
+							},
+							"prompt_id": {
+								"type": "string"
+							},
+							"inputs": {
+								"$ref": "#/components/schemas/Record_string.any_"
+							}
+						},
+						"required": [
+							"environment",
+							"version_id",
+							"prompt_id",
+							"inputs"
+						],
+						"type": "object",
+						"nullable": true
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result__inputs-Record_string.any_--prompt_id-string--version_id-string--environment-string-or-null_-or-null.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess__inputs-Record_string.any_--prompt_id-string--version_id-string--environment-string-or-null_-or-null_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"HeliconeRequestAsset": {
 				"properties": {
 					"assetUrl": {
@@ -20423,6 +20475,41 @@
 						"schema": {
 							"default": false,
 							"type": "boolean"
+						}
+					}
+				]
+			}
+		},
+		"/v1/request/{requestId}/inputs": {
+			"get": {
+				"operationId": "GetRequestInputs",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result__inputs-Record_string.any_--prompt_id-string--version_id-string--environment-string-or-null_-or-null.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Request"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "requestId",
+						"required": true,
+						"schema": {
+							"type": "string"
 						}
 					}
 				]
