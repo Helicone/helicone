@@ -6,6 +6,7 @@ import { ChevronLeft, Server } from "lucide-react";
 import { ModelUsageChart } from "../../ModelUsageChart";
 import { ModelLeaderboard } from "../../ModelLeaderboard";
 import { getJawnClient } from "@/lib/clients/jawn";
+import { UptimeStatusBar, UptimeDataPoint } from "@/components/stats/UptimeStatusBar";
 
 type LeaderboardTimeFrame = "24h" | "7d" | "30d";
 
@@ -88,6 +89,37 @@ export function ProviderStatsPage({ provider }: ProviderStatsPageProps) {
   const [leaderboardData, setLeaderboardData] = useState<ProviderStatsResponse | null>(null);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
 
+  // Uptime data
+  const [uptimeData, setUptimeData] = useState<UptimeDataPoint[]>([]);
+  const [uptimeLoading, setUptimeLoading] = useState(true);
+  const [overallUptime, setOverallUptime] = useState<number | null>(null);
+
+  // Fetch uptime data (1 year) on mount
+  // Note: Using direct fetch until types are regenerated
+  useEffect(() => {
+    const fetchUptimeData = async () => {
+      try {
+        setUptimeLoading(true);
+        const baseUrl = process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE || "http://localhost:8585";
+        const response = await fetch(
+          `${baseUrl}/v1/public/stats/providers/${encodeURIComponent(provider)}/uptime?timeframe=1y`
+        );
+        const result = await response.json();
+
+        if (result.data) {
+          setUptimeData(result.data.uptime as UptimeDataPoint[]);
+          setOverallUptime(result.data.overallSuccessRate);
+        }
+      } catch (error) {
+        console.error("Failed to load provider uptime:", error);
+      } finally {
+        setUptimeLoading(false);
+      }
+    };
+
+    fetchUptimeData();
+  }, [provider]);
+
   // Fetch chart data (1 year) on mount
   useEffect(() => {
     const fetchChartData = async () => {
@@ -161,6 +193,33 @@ export function ProviderStatsPage({ provider }: ProviderStatsPageProps) {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* Uptime Status Bar */}
+      <div className="px-4 lg:px-6 py-4">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Uptime (Last Year)
+          </h2>
+          {overallUptime !== null && !uptimeLoading && (
+            <span
+              className={`text-sm font-medium ${
+                overallUptime >= 99
+                  ? "text-green-600 dark:text-green-400"
+                  : overallUptime >= 95
+                  ? "text-amber-600 dark:text-amber-400"
+                  : "text-red-600 dark:text-red-400"
+              }`}
+            >
+              {overallUptime.toFixed(2)}%
+            </span>
+          )}
+        </div>
+        <UptimeStatusBar
+          data={uptimeData}
+          isLoading={uptimeLoading}
+          variant="full"
+        />
       </div>
 
       <div className="px-4 lg:px-6">
