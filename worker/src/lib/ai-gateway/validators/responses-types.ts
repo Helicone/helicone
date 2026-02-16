@@ -300,6 +300,7 @@ const ResponseProperties = z
     model: ModelIdsResponses,
     reasoning: z.union([Reasoning, z.null()]),
     reasoning_options: ReasoningOptions.optional(),
+    disable_reasoning: z.boolean().optional(),
     // background was removed
     max_output_tokens: z.union([z.number(), z.null()]),
     max_tool_calls: z.union([z.number(), z.null()]),
