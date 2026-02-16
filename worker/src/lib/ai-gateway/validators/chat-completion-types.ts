@@ -342,6 +342,7 @@ const CreateChatCompletionRequest = z
     verbosity: Verbosity.optional(),
     reasoning_effort: ReasoningEffort.optional(),
     reasoning_options: ReasoningOptions.optional(),
+    disable_reasoning: z.boolean().optional(),
     max_completion_tokens: z.number().int().nullish(),
     frequency_penalty: z.number().gte(-2).lte(2).nullish().default(0),
     presence_penalty: z.number().gte(-2).lte(2).nullish().default(0),
