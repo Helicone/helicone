@@ -37,7 +37,7 @@ export type GeminiTool = {
 
 export type GeminiThinkingConfig = {
   includeThoughts?: boolean;
-  thinkingLevel?: "low" | "high";
+  thinkingLevel?: "low" | "medium" | "high";
   thinkingBudget?: number;
 };
 
@@ -87,8 +87,8 @@ export type ChatCompletionMessage =
 export interface GoogleReasoningOptions {
   /** Token budget for thinking (Gemini 2.5 models) */
   budget_tokens?: number;
-  /** Thinking level (Gemini 3+ models) */
-  thinking_level?: "low" | "high";
+  /** Thinking level (Gemini 3+ models): minimal (Flash only), low, medium (Flash only), high */
+  thinking_level?: "minimal" | "low" | "medium" | "high";
 }
 // === RESPONSE TYPES ===
 export interface GoogleFunctionCall {

@@ -36,19 +36,19 @@ describe("Google Reasoning/Thinking Support", () => {
       });
     });
 
-    it("should map reasoning_effort 'medium' to thinkingLevel 'low'", () => {
+    it("should pass through reasoning_effort 'medium' as thinkingLevel 'medium'", () => {
       const openAIRequest: HeliconeChatCreateParams = {
-        model: "gemini-3-pro",
+        model: "gemini-3-flash-preview",
         messages: [{ role: "user", content: "Test" }],
         reasoning_effort: "medium",
       };
 
       const googleRequest = toGoogle(openAIRequest);
 
-      // Google only supports low/high, so medium maps to low
+      // Pass through reasoning_effort directly as thinkingLevel
       expect(googleRequest.generationConfig?.thinkingConfig).toEqual({
         includeThoughts: true,
-        thinkingLevel: "low",
+        thinkingLevel: "medium",
       });
     });
 
