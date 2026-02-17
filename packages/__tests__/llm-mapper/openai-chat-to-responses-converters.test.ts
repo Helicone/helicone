@@ -373,6 +373,51 @@ describe("OpenAI Chat -> Responses converters", () => {
       expect(assistant2.tool_calls?.[0].id).toBe("call_c");
     });
 
+    it("truncates long tool_call_ids to 40 characters for Azure compatibility", () => {
+      const longId = "call_1234567890abcdefghij1234567890abcdefghij1234567890"; // 54 chars
+      const req = {
+        model: "gpt-4o-mini",
+        input: [
+          { role: "user", content: "Hello" },
+          { type: "function_call", call_id: longId, name: "my_func", arguments: "{}" },
+          { type: "function_call_output", call_id: longId, output: "result" },
+        ],
+      } as unknown as ResponsesRequestBody;
+
+      const oai = toChatCompletions(req);
+
+      // Check assistant message tool_call id is truncated
+      const assistant = oai.messages?.[1] as any;
+      expect(assistant.tool_calls?.[0].id.length).toBeLessThanOrEqual(40);
+
+      // Check tool response tool_call_id is truncated
+      const toolResponse = oai.messages?.[2] as any;
+      expect(toolResponse.tool_call_id.length).toBeLessThanOrEqual(40);
+
+      // Both should have the same truncated ID (deterministic)
+      expect(assistant.tool_calls?.[0].id).toBe(toolResponse.tool_call_id);
+    });
+
+    it("preserves short tool_call_ids unchanged", () => {
+      const shortId = "call_abc123"; // < 40 chars
+      const req = {
+        model: "gpt-4o-mini",
+        input: [
+          { role: "user", content: "Hello" },
+          { type: "function_call", call_id: shortId, name: "my_func", arguments: "{}" },
+          { type: "function_call_output", call_id: shortId, output: "result" },
+        ],
+      } as unknown as ResponsesRequestBody;
+
+      const oai = toChatCompletions(req);
+
+      const assistant = oai.messages?.[1] as any;
+      expect(assistant.tool_calls?.[0].id).toBe(shortId);
+
+      const toolResponse = oai.messages?.[2] as any;
+      expect(toolResponse.tool_call_id).toBe(shortId);
+    });
+
     it("maps Responses tools (flattened) to Chat tools (nested)", () => {
       const req = {
         model: "gpt-4o-mini",
