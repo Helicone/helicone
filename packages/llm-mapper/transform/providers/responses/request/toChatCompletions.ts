@@ -52,9 +52,26 @@ function convertContentParts(
   });
 }
 
+/**
+ * Collects consecutive items of a specific type from the input array.
+ * Returns the collected items and the index after the last collected item.
+ */
+function collectConsecutiveByType<T extends ResponsesInputItem>(
+  input: ResponsesInputItem[],
+  startIndex: number,
+  type: string
+): { items: T[]; endIndex: number } {
+  const items: T[] = [];
+  let index = startIndex;
+  while (index < input.length && input[index].type === type) {
+    items.push(input[index] as T);
+    index++;
+  }
+  return { items, endIndex: index };
+}
+
 function convertInputToMessages(input: ResponsesRequestBody["input"]) {
   const messages: NonNullable<HeliconeChatCreateParams["messages"]> = [];
-  // emit an assistant message for each function_call item to simplify typing
   if (typeof input === "string") {
     messages.push({ role: "user", content: input });
     return messages;
@@ -63,22 +80,29 @@ function convertInputToMessages(input: ResponsesRequestBody["input"]) {
   for (let i = 0; i < input.length; i++) {
     const item: ResponsesInputItem = input[i];
 
+    // Handle function_call: group consecutive function_call items into a single assistant message
+    // with multiple tool_calls. This is required by Chat Completions format for parallel tool calls.
     if (item.type === "function_call") {
-      const fc = item;
+      const { items: functionCalls, endIndex } = collectConsecutiveByType<
+        Extract<ResponsesInputItem, { type: "function_call" }>
+      >(input, i, "function_call");
+
+      const toolCalls = functionCalls.map((fc, idx) => ({
+        id: fc.id || fc.call_id || `call_${i + idx}`,
+        type: "function" as const,
+        function: {
+          name: fc.name,
+          arguments: fc.arguments ?? "{}",
+        },
+      }));
+
       messages.push({
         role: "assistant",
         content: "",
-        tool_calls: [
-          {
-            id: fc.id || fc.call_id || `call_${i}`,
-            type: "function",
-            function: {
-              name: fc.name,
-              arguments: fc.arguments ?? "{}",
-            },
-          },
-        ],
+        tool_calls: toolCalls,
       });
+
+      i = endIndex - 1;
       continue;
     }
 
