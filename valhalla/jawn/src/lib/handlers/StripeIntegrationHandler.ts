@@ -20,6 +20,8 @@ const AVAILABLE_MODELS_IN_STRIPE = [
   "anthropic/claude-opus-4-1",
   "anthropic/claude-sonnet-4",
   "anthropic/claude-sonnet-4-above200k",
+  "anthropic/claude-sonnet-4-6",
+  "anthropic/claude-sonnet-4-6-above200k",
   "google/gemini-2.0-flash",
   "google/gemini-2.0-flash-lite",
   "google/gemini-2.5-flash",

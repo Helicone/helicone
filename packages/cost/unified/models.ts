@@ -321,6 +321,27 @@ export const modelMapping: CreatorModelMapping = {
         },
       ],
     },
+    "Claude Sonnet 4.6": {
+      defaultTokenCost: {
+        input: 0,
+        output: 0,
+      },
+      defaultParameters: {
+        max_tokens: 8192,
+        stop: [],
+        response_format: false,
+      },
+      providers: [
+        {
+          provider: "ANTHROPIC",
+          modelString: "claude-sonnet-4-6-20260217",
+        },
+        {
+          provider: "BEDROCK",
+          modelString: "anthropic.claude-sonnet-4-6-20260217-v1:0",
+        },
+      ],
+    },
   },
   Google: {
     "Gemini 2.0 Flash": {
