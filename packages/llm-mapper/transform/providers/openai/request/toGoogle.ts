@@ -259,16 +259,6 @@ function supportsThinkingLevel(model: string): boolean {
 }
 
 /**
- * Maps OpenAI reasoning_effort to Google thinkingLevel.
- */
-function mapReasoningEffortToThinkingLevel(
-  effort: "low" | "medium" | "high"
-): "low" | "high" {
-  // Google only supports "low" and "high", so map "medium" to "low"
-  return effort === "high" ? "high" : "low";
-}
-
-/**
  * Builds the Google thinking configuration from OpenAI reasoning parameters.
  *
  * IMPORTANT: For Google models, reasoning_effort is REQUIRED to enable thinking.
@@ -326,10 +316,9 @@ function buildThinkingConfig(
 
   // Handle reasoning_effort
   if (modelSupportsThinkingLevel) {
-    // Gemini 3+ models: use thinkingLevel
-    thinkingConfig.thinkingLevel = mapReasoningEffortToThinkingLevel(
-      reasoningEffort as "low" | "medium" | "high"
-    );
+    // Gemini 3+ models: pass through reasoning_effort as thinkingLevel
+    // Google supports "low", "medium", "high" (Flash also supports "minimal" via reasoning_options)
+    thinkingConfig.thinkingLevel = reasoningEffort as "low" | "medium" | "high";
   } else {
     // Gemini 2.5 models: use dynamic thinkingBudget (-1)
     thinkingConfig.thinkingBudget = -1;

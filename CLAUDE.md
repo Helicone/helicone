@@ -169,6 +169,18 @@ className="bg-background text-foreground border-border"
 - Test in both light and dark modes
 - when making changes to /packages run the tests npx jest **tests**/ in /packages to make sure nothing else is broken
 
+### TypeScript Type Changes
+
+When modifying TypeScript types (interfaces, type aliases, union types):
+
+1. **Run type checking before committing**: `npx tsc --noEmit` in the relevant package to catch type errors (Jest tests alone won't catch all type mismatches)
+2. **Search for related types**: When updating union types (e.g., `"low" | "medium" | "high"`), grep for similar patterns to ensure all related types are updated:
+   ```bash
+   grep -r "thinkingLevel" packages/  # Find all usages of similar type
+   ```
+3. **Check cross-package dependencies**: Types in `/packages/` are often used across multiple packages (llm-mapper, prompts, cost). Verify changes don't break consumers.
+4. **Run the full build**: For `/packages/` changes, run `cd web && yarn build` or check Vercel preview to catch type errors across the monorepo.
+
 # Helicone Design System Guidelines
 
 ## Core Principles
