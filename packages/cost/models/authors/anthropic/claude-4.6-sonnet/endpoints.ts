@@ -4,10 +4,9 @@ import { ClaudeSonnet46ModelName } from "./model";
 
 export const endpoints = {
   "claude-4.6-sonnet:anthropic": {
-    providerModelId: "claude-sonnet-4-6-20260217",
+    providerModelId: "claude-sonnet-4-6",
     provider: "anthropic",
     author: "anthropic",
-    version: "20260217",
     pricing: [
       {
         threshold: 0,
@@ -46,10 +45,9 @@ export const endpoints = {
   },
 
   "claude-4.6-sonnet:vertex": {
-    providerModelId: "claude-sonnet-4-6@20260217",
+    providerModelId: "claude-sonnet-4-6@20260217", // Vertex uses dated format
     provider: "vertex",
     author: "anthropic",
-    version: "vertex-2023-10-16",
     ptbEnabled: true,
     crossRegion: true,
     pricing: [

@@ -205,7 +205,7 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "claude-sonnet-4-6-20260217",
+      value: "claude-sonnet-4-6",
     },
     cost: {
       prompt_token: 0.000003, // $3 / MTok

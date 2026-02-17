@@ -334,7 +334,7 @@ export const modelMapping: CreatorModelMapping = {
       providers: [
         {
           provider: "ANTHROPIC",
-          modelString: "claude-sonnet-4-6-20260217",
+          modelString: "claude-sonnet-4-6",
         },
         {
           provider: "BEDROCK",
