@@ -158,9 +158,10 @@ export interface GoogleThinkingConfig {
   /**
    * Thinking level for Gemini 3+ models
    * - "low" for faster, less detailed reasoning
+   * - "medium" for balanced reasoning (Flash only)
    * - "high" for more detailed reasoning
    */
-  thinkingLevel?: "low" | "high";
+  thinkingLevel?: "low" | "medium" | "high";
   /**
    * Token budget for thinking (for Gemini 2.5 models)
    * - Specific token values (e.g., 1024)
