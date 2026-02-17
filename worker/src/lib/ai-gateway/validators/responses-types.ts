@@ -686,7 +686,7 @@ const CreateResponse = CreateModelResponseProperties.merge(ResponseProperties)
       input: InputParam,
       include: z.union([z.array(IncludeEnum), z.null()]),
       parallel_tool_calls: z.union([z.boolean(), z.null()]),
-      // store was removed
+      store: z.boolean().optional(),
       instructions: z.union([z.string(), z.null()]),
       stream: z.union([z.boolean(), z.null()]),
       stream_options: ResponseStreamOptions,
