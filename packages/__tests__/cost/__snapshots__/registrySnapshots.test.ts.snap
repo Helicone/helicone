@@ -2579,6 +2579,30 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "gemini-3-flash-preview:helicone": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "pa/gemini-3-flash-preview",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gemini-3-flash-preview:openrouter": {
       "context": 1048576,
       "crossRegion": false,
@@ -7050,6 +7074,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   ],
   "google/gemini-3-flash-preview": [
     "google-ai-studio",
+    "helicone",
     "openrouter",
     "vertex",
   ],
@@ -8612,6 +8637,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 0,
       },
     ],
+    "helicone": [
+      {
+        "input": 5e-7,
+        "output": 0.000003,
+        "threshold": 0,
+      },
+    ],
     "openrouter": [
       {
         "input": 5.275e-7,
@@ -9589,6 +9621,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "gemini-3-flash-preview",
       "providers": [
         "google-ai-studio",
+        "helicone",
         "openrouter",
         "vertex",
       ],
@@ -10239,7 +10272,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "groq",
     },
     {
-      "modelCount": 47,
+      "modelCount": 48,
       "provider": "helicone",
     },
     {
@@ -10390,8 +10423,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 311,
-  "totalModelProviderConfigs": 311,
+  "totalEndpoints": 312,
+  "totalModelProviderConfigs": 312,
   "totalModelsWithPtb": 104,
   "totalProviders": 21,
 }
