@@ -114,8 +114,8 @@ When both billing methods fail, the gateway returns the **most actionable error*
 ```
 
 **Solutions**:
-1. Add Helicone credits at `/credits`
-2. Configure provider keys in `/settings/providers`
+1. Add Helicone credits at [Credits](https://us.helicone.ai/credits)
+2. Configure provider keys in [Settings > Providers](https://us.helicone.ai/settings/providers)
 3. Enable [automatic retries](/features/advanced-usage/retries) with `Helicone-Retry-Enabled: true` to handle transient failures
 
 <Info>
@@ -131,11 +131,11 @@ When both billing methods fail, the gateway returns the **most actionable error*
 When you see an error, you can determine which billing method it came from:
 
 **PTB Errors**:
-- 429: "Insufficient credits" → Add credits at `/credits`
+- 429: "Insufficient credits" → Add credits at [Credits](https://us.helicone.ai/credits)
 - 403: "Wallet suspended" → Contact support
 
 **BYOK Errors**:
-- 401: "Invalid API key" → Check provider keys in `/settings/providers`
+- 401: "Invalid API key" → Check provider keys in [Settings > Providers](https://us.helicone.ai/settings/providers)
 - 500: "Provider error" → Check provider status
 - 503: "Service unavailable" → Provider having issues
 
