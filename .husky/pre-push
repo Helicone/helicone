@@ -1,0 +1,11 @@
+#!/bin/bash
+protected_branch='main'
+current_branch=$(git symbolic-ref HEAD | sed -e 's,.*/\(.*\),\1,')
+
+if [ "$current_branch" = "$protected_branch" ]; then
+    echo "🚫 Direct push to main blocked!"
+    echo "Create a feature branch and open a PR instead."
+    exit 1
+fi
+
+exit 0
