@@ -1061,6 +1061,70 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "anthropic/claude-4.6-sonnet": {
+    "claude-4.6-sonnet:anthropic": {
+      "context": 1000000,
+      "crossRegion": false,
+      "maxTokens": 64000,
+      "modelId": "claude-sonnet-4-6",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "anthropic",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "claude-4.6-sonnet:bedrock": {
+      "context": 1000000,
+      "crossRegion": true,
+      "maxTokens": 64000,
+      "modelId": "anthropic.claude-sonnet-4-6-20260217-v1:0",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "bedrock",
+      "ptbEnabled": true,
+      "regions": [
+        "us-east-1",
+      ],
+    },
+    "claude-4.6-sonnet:vertex": {
+      "context": 1000000,
+      "crossRegion": true,
+      "maxTokens": 64000,
+      "modelId": "claude-sonnet-4-6@20260217",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "vertex",
+      "ptbEnabled": true,
+      "regions": [
+        "global",
+      ],
+    },
+  },
   "anthropic/claude-haiku-4-5-20251001": {
     "claude-haiku-4-5-20251001:anthropic": {
       "context": 200000,
@@ -2420,6 +2484,30 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "gemini-3-pro-preview:novita": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "google/gemini-3-pro-preview",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "gemini-3-pro-preview:openrouter": {
       "context": 1048576,
       "crossRegion": false,
@@ -2486,6 +2574,30 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "google-ai-studio",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-3-flash-preview:novita": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "google/gemini-3-flash-preview",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "novita",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -6862,6 +6974,11 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "vertex",
   ],
+  "anthropic/claude-4.6-sonnet": [
+    "anthropic",
+    "bedrock",
+    "vertex",
+  ],
   "anthropic/claude-haiku-4-5-20251001": [
     "anthropic",
     "bedrock",
@@ -6951,11 +7068,13 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   ],
   "google/gemini-3": [
     "google-ai-studio",
+    "novita",
     "openrouter",
     "vertex",
   ],
   "google/gemini-3-flash-preview": [
     "google-ai-studio",
+    "novita",
     "openrouter",
     "vertex",
   ],
@@ -7707,6 +7826,60 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "anthropic/claude-4.6-sonnet": {
+    "anthropic": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+      {
+        "input": 0.000006,
+        "output": 0.0000225,
+        "threshold": 200000,
+      },
+    ],
+    "bedrock": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+      {
+        "input": 0.000006,
+        "output": 0.0000225,
+        "threshold": 200000,
+      },
+    ],
+    "vertex": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write5m": 1.25,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+      {
+        "input": 0.000006,
+        "output": 0.0000225,
+        "threshold": 200000,
+      },
+    ],
+  },
   "anthropic/claude-haiku-4-5-20251001": {
     "anthropic": [
       {
@@ -8408,6 +8581,18 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 200000,
       },
     ],
+    "novita": [
+      {
+        "input": 0.000002,
+        "output": 0.000012,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000004,
+        "output": 0.000018,
+        "threshold": 200000,
+      },
+    ],
     "openrouter": [
       {
         "input": 0.00000211,
@@ -8447,6 +8632,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "cacheMultipliers": {
           "cachedInput": 0.1,
         },
+        "input": 5e-7,
+        "output": 0.000003,
+        "threshold": 0,
+      },
+    ],
+    "novita": [
+      {
         "input": 5e-7,
         "output": 0.000003,
         "threshold": 0,
@@ -9267,6 +9459,14 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "claude-4.6-sonnet",
+      "providers": [
+        "anthropic",
+        "bedrock",
+        "vertex",
+      ],
+    },
+    {
       "model": "claude-haiku-4-5-20251001",
       "providers": [
         "anthropic",
@@ -9421,6 +9621,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "gemini-3-flash-preview",
       "providers": [
         "google-ai-studio",
+        "novita",
         "openrouter",
         "vertex",
       ],
@@ -9437,6 +9638,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "gemini-3-pro-preview",
       "providers": [
         "google-ai-studio",
+        "novita",
         "openrouter",
         "vertex",
       ],
@@ -10022,7 +10224,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
   ],
   "providerBreakdown": [
     {
-      "modelCount": 14,
+      "modelCount": 15,
       "provider": "anthropic",
     },
     {
@@ -10034,7 +10236,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "baseten",
     },
     {
-      "modelCount": 13,
+      "modelCount": 14,
       "provider": "bedrock",
     },
     {
@@ -10082,7 +10284,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "nebius",
     },
     {
-      "modelCount": 22,
+      "modelCount": 24,
       "provider": "novita",
     },
     {
@@ -10098,7 +10300,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "perplexity",
     },
     {
-      "modelCount": 20,
+      "modelCount": 21,
       "provider": "vertex",
     },
     {
@@ -10116,6 +10318,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-4.5-opus",
     "claude-4.5-sonnet",
     "claude-4.6-opus",
+    "claude-4.6-sonnet",
     "claude-haiku-4-5-20251001",
     "claude-opus-4",
     "claude-opus-4-1",
@@ -10220,9 +10423,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 307,
-  "totalModelProviderConfigs": 307,
-  "totalModelsWithPtb": 103,
+  "totalEndpoints": 312,
+  "totalModelProviderConfigs": 312,
+  "totalModelsWithPtb": 104,
   "totalProviders": 21,
 }
 `;

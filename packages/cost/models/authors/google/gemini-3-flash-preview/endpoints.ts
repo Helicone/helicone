@@ -116,6 +116,37 @@ export const endpoints = {
       "*": {},
     },
   },
+  "gemini-3-flash-preview:novita": {
+    provider: "novita",
+    author: "google",
+    providerModelId: "google/gemini-3-flash-preview",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000005, // $0.50/1M tokens (same as Google)
+        output: 0.000003, // $3/1M tokens (same as Google)
+      },
+    ],
+    contextLength: 1_048_576,
+    maxCompletionTokens: 65_536,
+    supportedParameters: [
+      "include_reasoning",
+      "max_tokens",
+      "reasoning",
+      "response_format",
+      "seed",
+      "stop",
+      "structured_outputs",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_p",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${Gemini3FlashPreviewModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;
