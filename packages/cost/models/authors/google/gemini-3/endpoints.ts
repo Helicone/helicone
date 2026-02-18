@@ -125,10 +125,10 @@ export const endpoints = {
       "*": {},
     },
   },
-  "gemini-3-pro-preview:novita": {
-    provider: "novita",
+  "gemini-3-pro-preview:helicone": {
+    provider: "helicone",
     author: "google",
-    providerModelId: "google/gemini-3-pro-preview",
+    providerModelId: "pa/gemini-3-pro-preview",
     pricing: [
       {
         threshold: 0,

@@ -116,10 +116,10 @@ export const endpoints = {
       "*": {},
     },
   },
-  "gemini-3-flash-preview:novita": {
-    provider: "novita",
+  "gemini-3-flash-preview:helicone": {
+    provider: "helicone",
     author: "google",
-    providerModelId: "google/gemini-3-flash-preview",
+    providerModelId: "pa/gemini-3-flash-preview",
     pricing: [
       {
         threshold: 0,

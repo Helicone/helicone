@@ -2484,11 +2484,11 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
-    "gemini-3-pro-preview:novita": {
+    "gemini-3-pro-preview:helicone": {
       "context": 1048576,
       "crossRegion": false,
       "maxTokens": 65536,
-      "modelId": "google/gemini-3-pro-preview",
+      "modelId": "pa/gemini-3-pro-preview",
       "parameters": [
         "include_reasoning",
         "max_tokens",
@@ -2502,7 +2502,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
         "top_p",
       ],
-      "provider": "novita",
+      "provider": "helicone",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -2579,11 +2579,11 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
-    "gemini-3-flash-preview:novita": {
+    "gemini-3-flash-preview:helicone": {
       "context": 1048576,
       "crossRegion": false,
       "maxTokens": 65536,
-      "modelId": "google/gemini-3-flash-preview",
+      "modelId": "pa/gemini-3-flash-preview",
       "parameters": [
         "include_reasoning",
         "max_tokens",
@@ -2597,7 +2597,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
         "top_p",
       ],
-      "provider": "novita",
+      "provider": "helicone",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -7068,13 +7068,13 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   ],
   "google/gemini-3": [
     "google-ai-studio",
-    "novita",
+    "helicone",
     "openrouter",
     "vertex",
   ],
   "google/gemini-3-flash-preview": [
     "google-ai-studio",
-    "novita",
+    "helicone",
     "openrouter",
     "vertex",
   ],
@@ -8581,7 +8581,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 200000,
       },
     ],
-    "novita": [
+    "helicone": [
       {
         "input": 0.000002,
         "output": 0.000012,
@@ -8637,7 +8637,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 0,
       },
     ],
-    "novita": [
+    "helicone": [
       {
         "input": 5e-7,
         "output": 0.000003,
@@ -9621,7 +9621,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "gemini-3-flash-preview",
       "providers": [
         "google-ai-studio",
-        "novita",
+        "helicone",
         "openrouter",
         "vertex",
       ],
@@ -9638,7 +9638,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "gemini-3-pro-preview",
       "providers": [
         "google-ai-studio",
-        "novita",
+        "helicone",
         "openrouter",
         "vertex",
       ],
@@ -10272,7 +10272,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "groq",
     },
     {
-      "modelCount": 46,
+      "modelCount": 48,
       "provider": "helicone",
     },
     {
@@ -10284,7 +10284,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "nebius",
     },
     {
-      "modelCount": 24,
+      "modelCount": 22,
       "provider": "novita",
     },
     {
