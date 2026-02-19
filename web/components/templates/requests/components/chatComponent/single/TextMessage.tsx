@@ -1,3 +1,4 @@
+import { stripDangerousHtml } from "@/lib/sanitizeContent";
 import { MappedLLMRequest, Message } from "@helicone-package/llm-mapper/types";
 import { isJson } from "../ChatMessage";
 import { JsonRenderer } from "./JsonRenderer";
@@ -124,7 +125,7 @@ export default function TextMessage({
         <>
           <div className="w-full whitespace-pre-wrap break-words text-sm">
             <Streamdown shikiTheme={shikiTheme}>
-              {preserveLineBreaksForMarkdown(displayContent)}
+              {preserveLineBreaksForMarkdown(stripDangerousHtml(displayContent))}
             </Streamdown>
           </div>
           {annotations && annotations.length > 0 && (
