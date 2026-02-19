@@ -62,16 +62,25 @@ interface CostQueryResult {
 export class ModelComparisonManager {
   constructor() {}
 
+  private buildModelNameParams(
+    names: string[],
+    offset: number
+  ): { placeholders: string; params: string[] } {
+    const placeholders = names
+      .map((_, i) => `{val_${offset + i}:String}`)
+      .join(", ");
+    return { placeholders: `(${placeholders})`, params: [...names] };
+  }
+
   public async getModelComparison(
     modelsToCompare: ModelsToCompare[]
   ): Promise<Result<Model[], string>> {
     // Map over all models to get their info in parallel
     const modelResults = await Promise.all(
       modelsToCompare.map((model) => {
-        const formattedModelNames = `('${model.names.join("','")}')`;
         return this.getModelInfo(
           model.parent,
-          formattedModelNames,
+          model.names,
           model.provider
         );
       })
@@ -90,10 +99,18 @@ export class ModelComparisonManager {
 
   private async getModelInfo(
     model: string,
-    formattedModelNames: string,
+    modelNames: string[],
     provider: string
   ): Promise<Result<Model, string>> {
     const normalizedProvider = provider.toUpperCase();
+
+    // Each query uses params [modelName0, ..., modelNameN, provider]
+    // Provider is always the last parameter
+    const providerParamIndex = modelNames.length;
+    const { placeholders: modelPlaceholders, params: modelParams } =
+      this.buildModelNameParams(modelNames, 0);
+    const providerPlaceholder = `{val_${providerParamIndex}:String}`;
+    const queryParams: string[] = [...modelParams, normalizedProvider];
 
     const [
       metricsResult,
@@ -103,24 +120,24 @@ export class ModelComparisonManager {
       geoTtftResult,
     ] = await Promise.all([
       clickhouseDb.dbQuery<ModelMetricsQueryResult>(
-        this.getModelMetricsQuery(formattedModelNames, normalizedProvider),
-        []
+        this.getModelMetricsQuery(modelPlaceholders, providerPlaceholder),
+        queryParams
       ),
       clickhouseDb.dbQuery<GeographicLatencyQueryResult>(
-        this.getGeographicLatencyQuery(formattedModelNames, normalizedProvider),
-        []
+        this.getGeographicLatencyQuery(modelPlaceholders, providerPlaceholder),
+        queryParams
       ),
       clickhouseDb.dbQuery<TimeSeriesQueryResult>(
-        this.getTimeSeriesQuery(formattedModelNames, normalizedProvider),
-        []
+        this.getTimeSeriesQuery(modelPlaceholders, providerPlaceholder),
+        queryParams
       ),
       clickhouseDb.dbQuery<CostQueryResult>(
-        this.getCostQuery(formattedModelNames, normalizedProvider),
-        []
+        this.getCostQuery(modelPlaceholders, providerPlaceholder),
+        queryParams
       ),
       clickhouseDb.dbQuery<GeographicTtftQueryResult>(
-        this.getGeographicTtftQuery(formattedModelNames, normalizedProvider),
-        []
+        this.getGeographicTtftQuery(modelPlaceholders, providerPlaceholder),
+        queryParams
       ),
     ]);
 
@@ -210,14 +227,14 @@ export class ModelComparisonManager {
   }
 
   private getModelMetricsQuery(
-    formattedModelNames: string,
-    provider: string
+    modelPlaceholders: string,
+    providerPlaceholder: string
   ): string {
     return `
       SELECT
         model,
         provider,
-        
+
         -- Latency stats
         avg(if(latency > 0 AND completion_tokens > 0, latency / completion_tokens * 1000, null)) as average_latency_per_1000_tokens,
         median(if(latency > 0 AND completion_tokens > 0, latency / completion_tokens * 1000, null)) as median_latency_per_1000_tokens,
@@ -227,7 +244,7 @@ export class ModelComparisonManager {
         quantile(0.95)(if(latency > 0 AND completion_tokens > 0, latency / completion_tokens * 1000, null)) as p95_latency_per_1000_tokens,
         quantile(0.99)(if(latency > 0 AND completion_tokens > 0, latency / completion_tokens * 1000, null)) as p99_latency_per_1000_tokens,
         countIf(latency > 0 AND completion_tokens > 0) as valid_latency_count,
-        
+
         -- TTFT stats
         avg(if(time_to_first_token > 0, time_to_first_token, null)) as average_ttft,
         median(if(time_to_first_token > 0, time_to_first_token, null)) as median_ttft,
@@ -246,20 +263,20 @@ export class ModelComparisonManager {
 
         -- Feedback counts
         countIf(has(scores, 'helicone-score-feedback')) as total_feedback,
-        coalesce(countIf(has(scores, 'helicone-score-feedback') AND scores['helicone-score-feedback'] = 1) / 
+        coalesce(countIf(has(scores, 'helicone-score-feedback') AND scores['helicone-score-feedback'] = 1) /
           nullIf(total_feedback, 0), 0) as positive_percentage,
-        coalesce(countIf(has(scores, 'helicone-score-feedback') AND scores['helicone-score-feedback'] = 0) / 
+        coalesce(countIf(has(scores, 'helicone-score-feedback') AND scores['helicone-score-feedback'] = 0) /
           nullIf(total_feedback, 0), 0) as negative_percentage
       FROM request_response_rmt
-      WHERE model IN ${formattedModelNames}
-        AND upper(provider) = '${provider}'
+      WHERE model IN ${modelPlaceholders}
+        AND upper(provider) = ${providerPlaceholder}
         AND request_created_at >= now() - INTERVAL 30 DAY
       GROUP BY model, provider`;
   }
 
   private getGeographicLatencyQuery(
-    formattedModelNames: string,
-    provider: string
+    modelPlaceholders: string,
+    providerPlaceholder: string
   ): string {
     return `
       SELECT
@@ -273,8 +290,8 @@ export class ModelComparisonManager {
         quantile(0.99)(if(completion_tokens > 0, latency / completion_tokens * 1000, null)) as p99_latency_per_1000_tokens,
         median(if(completion_tokens > 0, (latency / completion_tokens) * 1000, null)) as median_latency_per_1000_tokens
       FROM request_response_rmt
-      WHERE model IN ${formattedModelNames}
-        AND upper(provider) = '${provider}'
+      WHERE model IN ${modelPlaceholders}
+        AND upper(provider) = ${providerPlaceholder}
         AND request_created_at >= now() - INTERVAL 30 DAY
         AND country_code != ''
         AND latency > 0
@@ -282,16 +299,16 @@ export class ModelComparisonManager {
   }
 
   private getGeographicTtftQuery(
-    formattedModelNames: string,
-    provider: string
+    modelPlaceholders: string,
+    providerPlaceholder: string
   ): string {
     return `
       SELECT
         country_code,
         median(time_to_first_token) as median_ttft
       FROM request_response_rmt
-      WHERE model IN ${formattedModelNames}
-        AND upper(provider) = '${provider}'
+      WHERE model IN ${modelPlaceholders}
+        AND upper(provider) = ${providerPlaceholder}
         AND request_created_at >= now() - INTERVAL 30 DAY
         AND country_code != ''
         AND time_to_first_token > 0
@@ -299,8 +316,8 @@ export class ModelComparisonManager {
   }
 
   private getTimeSeriesQuery(
-    formattedModelNames: string,
-    provider: string
+    modelPlaceholders: string,
+    providerPlaceholder: string
   ): string {
     return `
       WITH daily_stats AS (
@@ -312,8 +329,8 @@ export class ModelComparisonManager {
           countIf(status < 500) / count(*) as success_rate,
           countIf(status >= 500) / count(*) as error_rate
         FROM request_response_rmt
-        WHERE model IN ${formattedModelNames}
-          AND upper(provider) = '${provider}'
+        WHERE model IN ${modelPlaceholders}
+          AND upper(provider) = ${providerPlaceholder}
           AND request_created_at >= now() - INTERVAL 30 DAY
         GROUP BY timestamp
         HAVING total_requests >= 100
@@ -332,14 +349,17 @@ export class ModelComparisonManager {
         STEP INTERVAL 1 DAY`;
   }
 
-  private getCostQuery(formattedModelNames: string, provider: string): string {
+  private getCostQuery(
+    modelPlaceholders: string,
+    providerPlaceholder: string
+  ): string {
     return `
       SELECT
         avg(prompt_tokens) as avg_input_tokens,
         avg(completion_tokens) as avg_output_tokens
       FROM request_response_rmt
-      WHERE model IN ${formattedModelNames}
-        AND upper(provider) = '${provider}'
+      WHERE model IN ${modelPlaceholders}
+        AND upper(provider) = ${providerPlaceholder}
         AND request_created_at >= now() - INTERVAL 30 DAY`;
   }
 }
