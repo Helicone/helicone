@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import DOMPurify from "dompurify";
 import { $JAWN_API } from "../../../lib/clients/jawn";
 import { Button } from "@/components/ui/button";
 import { H1, P, Lead, Small } from "@/components/ui/typography";
@@ -400,7 +401,7 @@ const AdminSettings = () => {
                         <div className="flex items-center">
                           <p
                             className="font-sans m-0 text-base font-medium leading-7 text-[hsl(var(--foreground))]"
-                            dangerouslySetInnerHTML={{ __html: displayName }}
+                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(displayName) }}
                           />
                           {isSensitive && (
                             <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-800 dark:bg-amber-900 dark:text-amber-100">

@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { H2, P } from "@/components/ui/typography";
+import DOMPurify from "dompurify";
 import {
   Archive,
   Bell,
@@ -311,7 +312,7 @@ const ShikiHighlightedCode: React.FC<{
     <div className="w-full overflow-hidden rounded-lg">
       <div
         className={`overflow-x-auto rounded-lg bg-[#24292e] p-4 text-left max-w-${maxWidth} mx-auto`}
-        dangerouslySetInnerHTML={{ __html: highlightedCode }}
+        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(highlightedCode) }}
       />
     </div>
   );
