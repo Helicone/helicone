@@ -111,6 +111,22 @@ const TIME_CONFIG = {
 
 export class ModelUsageStatsManager {
   /**
+   * Build parameterized IN clause placeholders and params for ClickHouse queries.
+   * Returns placeholders like ({val_0:String}, {val_1:String}, ...) and the corresponding params array.
+   */
+  private buildInClauseParams(
+    values: string[],
+    offset: number = 0
+  ): { placeholders: string; params: string[] } {
+    if (values.length === 0) {
+      return { placeholders: "('')", params: [] };
+    }
+    const placeholders = values
+      .map((_, i) => `{val_${offset + i}:String}`)
+      .join(", ");
+    return { placeholders: `(${placeholders})`, params: [...values] };
+  }
+  /**
    * Get model usage: top 9 models + "other" with time series and leaderboard.
    */
   async getModelUsage(
@@ -136,16 +152,15 @@ export class ModelUsageStatsManager {
 
     const top9Data = top9Result.data ?? [];
     const top9Set = new Set(top9Data.map((r) => r.model));
-    const inClause = top9Data.length > 0 
-      ? top9Data.map((r) => `'${r.model}'`).join(",") 
-      : "''";
+    const { placeholders: modelInClause, params: modelParams } =
+      this.buildInClauseParams(top9Data.map((r) => r.model));
 
     // Step 2: Get "other" total + previous period data + time series (parallel)
     const otherQuery = `
       SELECT sum(${TOTAL_TOKENS_EXPR}) as total_tokens
       FROM request_stats
       WHERE hour >= now() - ${interval} AND ${BASE_WHERE_CLAUSE}
-        AND model NOT IN (${inClause})
+        AND model NOT IN ${modelInClause}
     `;
 
     const prevTop9Query = `
@@ -154,7 +169,7 @@ export class ModelUsageStatsManager {
       WHERE hour >= now() - ${interval} - ${interval} 
         AND hour < now() - ${interval} 
         AND ${BASE_WHERE_CLAUSE}
-        AND model IN (${inClause})
+        AND model IN ${modelInClause}
       GROUP BY model
     `;
 
@@ -164,7 +179,7 @@ export class ModelUsageStatsManager {
       WHERE hour >= now() - ${interval} - ${interval} 
         AND hour < now() - ${interval} 
         AND ${BASE_WHERE_CLAUSE}
-        AND model NOT IN (${inClause})
+        AND model NOT IN ${modelInClause}
     `;
 
     const timeSeriesQuery = `
@@ -179,9 +194,9 @@ export class ModelUsageStatsManager {
 
     const [otherResult, prevTop9Result, prevOtherResult, timeSeriesResult] =
       await Promise.all([
-        clickhouseDb.dbQuery<{ total_tokens: number }>(otherQuery, []),
-        clickhouseDb.dbQuery<{ model: string; total_tokens: number }>(prevTop9Query, []),
-        clickhouseDb.dbQuery<{ total_tokens: number }>(prevOtherQuery, []),
+        clickhouseDb.dbQuery<{ total_tokens: number }>(otherQuery, modelParams),
+        clickhouseDb.dbQuery<{ model: string; total_tokens: number }>(prevTop9Query, modelParams),
+        clickhouseDb.dbQuery<{ total_tokens: number }>(prevOtherQuery, modelParams),
         clickhouseDb.dbQuery<{ time_bucket: string; model: string; total_tokens: number }>(timeSeriesQuery, []),
       ]);
 
@@ -424,15 +439,14 @@ export class ModelUsageStatsManager {
 
     const top9Data = top9Result.data ?? [];
     const top9Set = new Set(top9Data.map((r) => r.provider));
-    const inClause = top9Data.length > 0
-      ? top9Data.map((r) => `'${r.provider}'`).join(",")
-      : "''";
+    const { placeholders: providerInClause, params: providerParams } =
+      this.buildInClauseParams(top9Data.map((r) => r.provider));
 
     const otherQuery = `
       SELECT sum(${TOTAL_TOKENS_EXPR}) as total_tokens
       FROM request_stats
       WHERE hour >= now() - ${interval} AND ${BASE_WHERE_CLAUSE}
-        AND provider NOT IN (${inClause})
+        AND provider NOT IN ${providerInClause}
     `;
 
     const prevTop9Query = `
@@ -441,7 +455,7 @@ export class ModelUsageStatsManager {
       WHERE hour >= now() - ${interval} - ${interval}
         AND hour < now() - ${interval}
         AND ${BASE_WHERE_CLAUSE}
-        AND provider IN (${inClause})
+        AND provider IN ${providerInClause}
       GROUP BY provider
     `;
 
@@ -451,7 +465,7 @@ export class ModelUsageStatsManager {
       WHERE hour >= now() - ${interval} - ${interval}
         AND hour < now() - ${interval}
         AND ${BASE_WHERE_CLAUSE}
-        AND provider NOT IN (${inClause})
+        AND provider NOT IN ${providerInClause}
     `;
 
     const timeSeriesQuery = `
@@ -466,9 +480,9 @@ export class ModelUsageStatsManager {
 
     const [otherResult, prevTop9Result, prevOtherResult, timeSeriesResult] =
       await Promise.all([
-        clickhouseDb.dbQuery<{ total_tokens: number }>(otherQuery, []),
-        clickhouseDb.dbQuery<{ provider: string; total_tokens: number }>(prevTop9Query, []),
-        clickhouseDb.dbQuery<{ total_tokens: number }>(prevOtherQuery, []),
+        clickhouseDb.dbQuery<{ total_tokens: number }>(otherQuery, providerParams),
+        clickhouseDb.dbQuery<{ provider: string; total_tokens: number }>(prevTop9Query, providerParams),
+        clickhouseDb.dbQuery<{ total_tokens: number }>(prevOtherQuery, providerParams),
         clickhouseDb.dbQuery<{ time_bucket: string; provider: string; total_tokens: number }>(timeSeriesQuery, []),
       ]);
 
@@ -672,13 +686,15 @@ export class ModelUsageStatsManager {
     timeframe: StatsTimeFrame
   ): Promise<Result<ProviderStatsResponse, string>> {
     const { interval, bucket } = TIME_CONFIG[timeframe];
-    const escapedProvider = provider.replace(/'/g, "''");
+
+    // Provider param is val_0
+    const providerPlaceholder = `{val_0:String}`;
 
     const top9Query = `
       SELECT model, sum(${TOTAL_TOKENS_EXPR}) as total_tokens
       FROM request_stats
       WHERE hour >= now() - ${interval} AND ${BASE_WHERE_CLAUSE}
-        AND provider = '${escapedProvider}'
+        AND provider = ${providerPlaceholder}
       GROUP BY model
       ORDER BY total_tokens DESC
       LIMIT 9
@@ -687,7 +703,7 @@ export class ModelUsageStatsManager {
     const top9Result = await clickhouseDb.dbQuery<{
       model: string;
       total_tokens: number;
-    }>(top9Query, []);
+    }>(top9Query, [provider]);
     if (top9Result.error) return err(top9Result.error);
 
     const top9Data = top9Result.data ?? [];
@@ -701,21 +717,24 @@ export class ModelUsageStatsManager {
     }
 
     const top9Set = new Set(top9Data.map((r) => r.model));
-    const inClause = top9Data.map((r) => `'${r.model}'`).join(",");
+    // Model params start at offset 1 (provider is val_0)
+    const { placeholders: modelInClause, params: modelParams } =
+      this.buildInClauseParams(top9Data.map((r) => r.model), 1);
+    const allParams = [provider, ...modelParams];
 
     const otherQuery = `
       SELECT sum(${TOTAL_TOKENS_EXPR}) as total_tokens
       FROM request_stats
       WHERE hour >= now() - ${interval} AND ${BASE_WHERE_CLAUSE}
-        AND provider = '${escapedProvider}'
-        AND model NOT IN (${inClause})
+        AND provider = ${providerPlaceholder}
+        AND model NOT IN ${modelInClause}
     `;
 
     const totalQuery = `
       SELECT sum(${TOTAL_TOKENS_EXPR}) as total_tokens
       FROM request_stats
       WHERE hour >= now() - ${interval} AND ${BASE_WHERE_CLAUSE}
-        AND provider = '${escapedProvider}'
+        AND provider = ${providerPlaceholder}
     `;
 
     const prevTop9Query = `
@@ -724,8 +743,8 @@ export class ModelUsageStatsManager {
       WHERE hour >= now() - ${interval} - ${interval}
         AND hour < now() - ${interval}
         AND ${BASE_WHERE_CLAUSE}
-        AND provider = '${escapedProvider}'
-        AND model IN (${inClause})
+        AND provider = ${providerPlaceholder}
+        AND model IN ${modelInClause}
       GROUP BY model
     `;
 
@@ -735,8 +754,8 @@ export class ModelUsageStatsManager {
       WHERE hour >= now() - ${interval} - ${interval}
         AND hour < now() - ${interval}
         AND ${BASE_WHERE_CLAUSE}
-        AND provider = '${escapedProvider}'
-        AND model NOT IN (${inClause})
+        AND provider = ${providerPlaceholder}
+        AND model NOT IN ${modelInClause}
     `;
 
     const timeSeriesQuery = `
@@ -746,17 +765,17 @@ export class ModelUsageStatsManager {
         sum(${TOTAL_TOKENS_EXPR}) as total_tokens
       FROM request_stats
       WHERE hour >= now() - ${interval} AND ${BASE_WHERE_CLAUSE}
-        AND provider = '${escapedProvider}'
+        AND provider = ${providerPlaceholder}
       GROUP BY time_bucket, model
     `;
 
     const [otherResult, totalResult, prevTop9Result, prevOtherResult, timeSeriesResult] =
       await Promise.all([
-        clickhouseDb.dbQuery<{ total_tokens: number }>(otherQuery, []),
-        clickhouseDb.dbQuery<{ total_tokens: number }>(totalQuery, []),
-        clickhouseDb.dbQuery<{ model: string; total_tokens: number }>(prevTop9Query, []),
-        clickhouseDb.dbQuery<{ total_tokens: number }>(prevOtherQuery, []),
-        clickhouseDb.dbQuery<{ time_bucket: string; model: string; total_tokens: number }>(timeSeriesQuery, []),
+        clickhouseDb.dbQuery<{ total_tokens: number }>(otherQuery, allParams),
+        clickhouseDb.dbQuery<{ total_tokens: number }>(totalQuery, [provider]),
+        clickhouseDb.dbQuery<{ model: string; total_tokens: number }>(prevTop9Query, allParams),
+        clickhouseDb.dbQuery<{ total_tokens: number }>(prevOtherQuery, allParams),
+        clickhouseDb.dbQuery<{ time_bucket: string; model: string; total_tokens: number }>(timeSeriesQuery, [provider]),
       ]);
 
     if (otherResult.error) return err(otherResult.error);
@@ -833,13 +852,13 @@ export class ModelUsageStatsManager {
     timeframe: StatsTimeFrame
   ): Promise<Result<ModelStatsResponse, string>> {
     const { interval, bucket } = TIME_CONFIG[timeframe];
-    const escapedModel = model.replace(/'/g, "''");
+    const modelPlaceholder = `{val_0:String}`;
 
     const totalQuery = `
       SELECT sum(${TOTAL_TOKENS_EXPR}) as total_tokens
       FROM request_stats
       WHERE hour >= now() - ${interval} AND ${BASE_WHERE_CLAUSE}
-        AND model = '${escapedModel}'
+        AND model = ${modelPlaceholder}
     `;
 
     const timeSeriesQuery = `
@@ -848,14 +867,14 @@ export class ModelUsageStatsManager {
         sum(${TOTAL_TOKENS_EXPR}) as total_tokens
       FROM request_stats
       WHERE hour >= now() - ${interval} AND ${BASE_WHERE_CLAUSE}
-        AND model = '${escapedModel}'
+        AND model = ${modelPlaceholder}
       GROUP BY time_bucket
       ORDER BY time_bucket
     `;
 
     const [totalResult, timeSeriesResult] = await Promise.all([
-      clickhouseDb.dbQuery<{ total_tokens: number }>(totalQuery, []),
-      clickhouseDb.dbQuery<{ time_bucket: string; total_tokens: number }>(timeSeriesQuery, []),
+      clickhouseDb.dbQuery<{ total_tokens: number }>(totalQuery, [model]),
+      clickhouseDb.dbQuery<{ time_bucket: string; total_tokens: number }>(timeSeriesQuery, [model]),
     ]);
 
     if (totalResult.error) return err(totalResult.error);
