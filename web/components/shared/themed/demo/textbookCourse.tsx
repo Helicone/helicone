@@ -8,6 +8,7 @@ import "prismjs/components/prism-clike";
 import "prismjs/components/prism-javascript";
 import "prismjs/components/prism-json";
 import { Course } from "./types";
+import DOMPurify from "dompurify";
 import Link from "next/link";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/solid";
 import { SESSION_NAME } from "./courseGenerator";
@@ -74,7 +75,7 @@ const TextbookCourse: React.FC<TextbookCourseProps> = ({
     const html = marked.parse(content) as string;
     return (
       <div
-        dangerouslySetInnerHTML={{ __html: html }}
+        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html) }}
         className="prose prose-indigo max-w-none"
         style={{
           fontFamily: '"Fira Code", "Fira Mono", monospace',
