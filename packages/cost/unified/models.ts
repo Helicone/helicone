@@ -478,6 +478,30 @@ export const modelMapping: CreatorModelMapping = {
         },
       ],
     },
+    "Gemini 3.1 Pro Preview": {
+      defaultTokenCost: {
+        input: 0,
+        output: 0,
+      },
+      defaultParameters: {
+        stop: [],
+        response_format: true,
+      },
+      providers: [
+        {
+          provider: "GOOGLE_GEMINI",
+          modelString: "gemini-3.1-pro-preview",
+        },
+        {
+          provider: "GOOGLE_VERTEXAI",
+          modelString: "gemini-3.1-pro-preview",
+        },
+        {
+          provider: "OPENROUTER",
+          modelString: "google/gemini-3.1-pro-preview",
+        },
+      ],
+    },
   },
   Meta: {
     "Llama 3.3 70B Instruct": {
