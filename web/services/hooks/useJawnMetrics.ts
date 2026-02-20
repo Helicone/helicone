@@ -87,6 +87,56 @@ export function useTokensOverTime(params: JawnMetricsParams, isLive?: boolean) {
   );
 }
 
+export function useDetailedTokensOverTime(
+  params: JawnMetricsParams,
+  isLive?: boolean
+) {
+  return $JAWN_API.useQuery(
+    "post",
+    "/v1/metrics/detailedTokensOverTime",
+    {
+      body: {
+        filter: params.userFilters as JawnFilterNode,
+        timeFilter: {
+          start: params.timeFilter.start.toISOString(),
+          end: params.timeFilter.end.toISOString(),
+        },
+        dbIncrement: params.dbIncrement ?? "hour",
+        timeZoneDifference: params.timeZoneDifference,
+      },
+    },
+    {
+      refetchOnWindowFocus: false,
+      refetchInterval: isLive ? 5_000 : undefined,
+    }
+  );
+}
+
+export function useModelUsageOverTime(
+  params: JawnMetricsParams,
+  isLive?: boolean
+) {
+  return $JAWN_API.useQuery(
+    "post",
+    "/v1/metrics/modelUsageOverTime",
+    {
+      body: {
+        filter: params.userFilters as JawnFilterNode,
+        timeFilter: {
+          start: params.timeFilter.start.toISOString(),
+          end: params.timeFilter.end.toISOString(),
+        },
+        dbIncrement: params.dbIncrement ?? "hour",
+        timeZoneDifference: params.timeZoneDifference,
+      },
+    },
+    {
+      refetchOnWindowFocus: false,
+      refetchInterval: isLive ? 5_000 : undefined,
+    }
+  );
+}
+
 export function useLatencyOverTime(
   params: JawnMetricsParams,
   isLive?: boolean

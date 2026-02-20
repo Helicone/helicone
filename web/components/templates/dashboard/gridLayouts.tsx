@@ -132,11 +132,28 @@ export const INITIAL_LAYOUT: ReactGridLayout.Layout[] = [
     h: 3,
     static: true,
   },
-  // Row 13-15: Scores
+  // Row 13-15: Detailed Token Usage, Model Usage Over Time
+  {
+    i: "detailed-token-usage",
+    x: 0,
+    y: 13,
+    w: 6,
+    h: 3,
+    static: true,
+  },
+  {
+    i: "model-usage-over-time",
+    x: 6,
+    y: 13,
+    w: 6,
+    h: 3,
+    static: true,
+  },
+  // Row 16-18: Scores
   {
     i: "scores",
     x: 0,
-    y: 13,
+    y: 16,
     w: 6,
     h: 3,
     static: true,
@@ -144,16 +161,16 @@ export const INITIAL_LAYOUT: ReactGridLayout.Layout[] = [
   {
     i: "scores-bool",
     x: 6,
-    y: 13,
+    y: 16,
     w: 6,
     h: 3,
     static: true,
   },
-  // Row 16-18: Threats, Request New Graph
+  // Row 19-21: Threats, Request New Graph
   {
     i: "threats",
     x: 0,
-    y: 16,
+    y: 19,
     w: 6,
     h: 3,
     static: true,
@@ -161,7 +178,7 @@ export const INITIAL_LAYOUT: ReactGridLayout.Layout[] = [
   {
     i: "suggest-more-graphs",
     x: 6,
-    y: 16,
+    y: 19,
     w: 6,
     h: 3,
     static: true,
@@ -294,9 +311,8 @@ export const SMALL_LAYOUT: ReactGridLayout.Layout[] = [
     h: 3,
     static: true,
   },
-  // Lower priority
   {
-    i: "countries",
+    i: "detailed-token-usage",
     x: 0,
     y: 45,
     w: 12,
@@ -304,9 +320,26 @@ export const SMALL_LAYOUT: ReactGridLayout.Layout[] = [
     static: true,
   },
   {
-    i: "threats",
+    i: "model-usage-over-time",
     x: 0,
     y: 48,
+    w: 12,
+    h: 3,
+    static: true,
+  },
+  // Lower priority
+  {
+    i: "countries",
+    x: 0,
+    y: 51,
+    w: 12,
+    h: 3,
+    static: true,
+  },
+  {
+    i: "threats",
+    x: 0,
+    y: 54,
     w: 12,
     h: 3,
     static: true,
@@ -314,7 +347,7 @@ export const SMALL_LAYOUT: ReactGridLayout.Layout[] = [
   {
     i: "suggest-more-graphs",
     x: 0,
-    y: 51,
+    y: 57,
     w: 12,
     h: 3,
     static: true,
@@ -323,7 +356,7 @@ export const SMALL_LAYOUT: ReactGridLayout.Layout[] = [
   {
     i: "scores",
     x: 0,
-    y: 54,
+    y: 60,
     w: 12,
     h: 3,
     static: true,
@@ -331,7 +364,7 @@ export const SMALL_LAYOUT: ReactGridLayout.Layout[] = [
   {
     i: "scores-bool",
     x: 0,
-    y: 57,
+    y: 63,
     w: 12,
     h: 3,
     static: true,

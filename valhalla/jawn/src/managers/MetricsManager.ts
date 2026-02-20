@@ -60,6 +60,22 @@ export interface TokensOverTime {
   completion_tokens: number;
 }
 
+export interface DetailedTokensOverTime {
+  time: Date;
+  prompt_tokens: number;
+  completion_tokens: number;
+  reasoning_tokens: number;
+  prompt_cache_read_tokens: number;
+  prompt_cache_write_tokens: number;
+}
+
+export interface ModelUsageOverTime {
+  time: Date;
+  model: string;
+  request_count: number;
+  total_tokens: number;
+}
+
 export interface LatencyOverTime {
   time: Date;
   duration: number;
@@ -559,6 +575,99 @@ export class MetricsManager extends BaseManager {
         time: new Date(d.created_at_trunc),
         prompt_tokens: Number(d.prompt_tokens),
         completion_tokens: Number(d.completion_tokens),
+      })),
+    );
+  }
+
+  async getDetailedTokensOverTime(
+    data: MetricsDataOverTimeRequest,
+  ): Promise<Result<DetailedTokensOverTime[], string>> {
+    const res = await this.getXOverTime<{
+      prompt_tokens: number;
+      completion_tokens: number;
+      reasoning_tokens: number;
+      prompt_cache_read_tokens: number;
+      prompt_cache_write_tokens: number;
+    }>(
+      data,
+      `sum(request_response_rmt.prompt_tokens) AS prompt_tokens,
+       sum(request_response_rmt.completion_tokens) AS completion_tokens,
+       sum(request_response_rmt.reasoning_tokens) AS reasoning_tokens,
+       sum(request_response_rmt.prompt_cache_read_tokens) AS prompt_cache_read_tokens,
+       sum(request_response_rmt.prompt_cache_write_tokens) AS prompt_cache_write_tokens`,
+    );
+    return resultMap(res, (resData) =>
+      resData.map((d) => ({
+        time: new Date(d.created_at_trunc),
+        prompt_tokens: Number(d.prompt_tokens),
+        completion_tokens: Number(d.completion_tokens),
+        reasoning_tokens: Number(d.reasoning_tokens),
+        prompt_cache_read_tokens: Number(d.prompt_cache_read_tokens),
+        prompt_cache_write_tokens: Number(d.prompt_cache_write_tokens),
+      })),
+    );
+  }
+
+  async getModelUsageOverTime(
+    data: MetricsDataOverTimeRequest,
+  ): Promise<Result<ModelUsageOverTime[], string>> {
+    const startDate = new Date(data.timeFilter.start);
+    const endDate = new Date(data.timeFilter.end);
+    const timeFilterNode: FilterNode = {
+      left: {
+        request_response_rmt: {
+          request_created_at: { gte: startDate },
+        },
+      },
+      right: {
+        request_response_rmt: {
+          request_created_at: { lte: endDate },
+        },
+      },
+      operator: "and",
+    };
+    const filter: FilterNode = {
+      left: timeFilterNode,
+      right: data.userFilter,
+      operator: "and",
+    };
+
+    const { filter: builtFilter, argsAcc: builtFilterArgsAcc } =
+      await buildFilterWithAuthClickHouse({
+        org_id: this.authParams.organizationId,
+        filter,
+        argsAcc: [],
+      });
+    const dateTrunc = buildDateTrunc(
+      data.dbIncrement,
+      data.timeZoneDifference,
+      "request_created_at",
+    );
+    const query = `
+    SELECT
+      ${dateTrunc} as created_at_trunc,
+      request_response_rmt.model as model,
+      count(*) AS request_count,
+      sum(request_response_rmt.prompt_tokens + request_response_rmt.completion_tokens) AS total_tokens
+    FROM request_response_rmt
+    WHERE (${builtFilter})
+    GROUP BY model, ${dateTrunc}
+    ORDER BY ${dateTrunc} ASC
+    `;
+
+    const res = await dbQueryClickhouse<{
+      created_at_trunc: Date;
+      model: string;
+      request_count: number;
+      total_tokens: number;
+    }>(query, builtFilterArgsAcc);
+
+    return resultMap(res, (resData) =>
+      resData.map((d) => ({
+        time: new Date(d.created_at_trunc),
+        model: String(d.model || "unknown"),
+        request_count: Number(d.request_count),
+        total_tokens: Number(d.total_tokens),
       })),
     );
   }
