@@ -1160,6 +1160,17 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "google/gemini-3.1-pro-preview",
+    },
+    cost: {
+      prompt_token: 2.11e-6, // $2.11/1M tokens (OpenRouter markup)
+      completion_token: 1.266e-5, // $12.66/1M tokens
+      prompt_cache_read_token: 2.11e-7, // $0.211/1M tokens
+    },
+  },
+  {
+    model: {
+      operator: "equals",
       value: "moonshotai/kimi-dev-72b:free",
     },
     cost: {

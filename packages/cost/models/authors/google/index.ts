@@ -13,6 +13,8 @@ import { model as gemini25FlashLiteModel } from "./gemini-2.5-flash-lite/model";
 import { endpoints as gemini25FlashLiteEndpoints } from "./gemini-2.5-flash-lite/endpoints";
 import { model as gemini3ProPreviewModel } from "./gemini-3/model";
 import { endpoints as gemini3ProPreviewEndpoints } from "./gemini-3/endpoints";
+import { model as gemini31ProPreviewModel } from "./gemini-3.1-pro-preview/model";
+import { endpoints as gemini31ProPreviewEndpoints } from "./gemini-3.1-pro-preview/endpoints";
 import { model as gemini3FlashPreviewModel } from "./gemini-3-flash-preview/model";
 import { endpoints as gemini3FlashPreviewEndpoints } from "./gemini-3-flash-preview/endpoints";
 import { model as gemini3ProImagePreviewModel } from "./gemini-3-pro-image/model";
@@ -31,6 +33,7 @@ export const googleModels = {
   ...gemini25FlashModel,
   ...gemini25FlashLiteModel,
   ...gemini3ProPreviewModel,
+  ...gemini31ProPreviewModel,
   ...gemini3FlashPreviewModel,
   ...gemini3ProImagePreviewModel,
   ...gemini31ProPreviewModel,
@@ -44,6 +47,7 @@ export const googleEndpointConfig = {
   ...gemini25FlashEndpoints,
   ...gemini25FlashLiteEndpoints,
   ...gemini3ProPreviewEndpoints,
+  ...gemini31ProPreviewEndpoints,
   ...gemini3FlashPreviewEndpoints,
   ...gemini3ProImagePreviewEndpoints,
   ...gemini31ProPreviewEndpoints,
