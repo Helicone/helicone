@@ -157,25 +157,48 @@ export class HeliconeSqlController extends Controller {
     @Body() requestBody: ExecuteSqlRequest,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<ExecuteSqlResponse, string>> {
+    console.log("[executeSql] called", {
+      organizationId: request.authParams.organizationId,
+      sqlLength: requestBody.sql?.length,
+      sqlPreview: requestBody.sql?.substring(0, 100),
+    });
+
     // Feature flag
     const featureFlagResult = await checkFeatureFlag(
       request.authParams.organizationId,
       HQL_FEATURE_FLAG
     );
+    console.log("[executeSql] featureFlagResult", {
+      isError: isError(featureFlagResult),
+      error: isError(featureFlagResult) ? featureFlagResult.error : undefined,
+    });
     if (isError(featureFlagResult)) {
       const error = createHqlError(HqlErrorCode.FEATURE_NOT_ENABLED);
+      console.log("[executeSql] feature flag denied, returning 403", error);
+      this.setStatus(403);
       return err(formatHqlError(error));
     }
 
     // Validate input
     if (!requestBody.sql?.trim()) {
       const error = createHqlError(HqlErrorCode.MISSING_QUERY_SQL);
+      console.log("[executeSql] missing SQL, returning 400", error);
+      this.setStatus(400);
       return err(formatHqlError(error));
     }
 
     const heliconeSqlManager = new HeliconeSqlManager(request.authParams);
+    console.log("[executeSql] executing SQL...");
     const result = await heliconeSqlManager.executeSql(requestBody.sql);
+    console.log("[executeSql] executeSql result", {
+      isError: isError(result),
+      error: isError(result) ? result.error : undefined,
+      rowCount: !isError(result) ? result.data?.rowCount : undefined,
+    });
     if (isError(result)) {
+      const statusCode = result.error.statusCode || 500;
+      console.log(`[executeSql] manager error, returning ${statusCode}`, result.error);
+      this.setStatus(statusCode);
       return err(formatHqlError(result.error));
     }
     return ok(result.data);

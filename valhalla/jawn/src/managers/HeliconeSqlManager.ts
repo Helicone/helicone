@@ -41,37 +41,52 @@ const describeRowSchema = z.object({
   ttl_expression: z.string().optional(),
 });
 
+// Strip SQL comments (both -- line comments and /* block comments */)
+function stripSqlComments(sql: string): string {
+  return sql
+    .replace(/--[^\n]*/g, " ")
+    .replace(/\/\*[\s\S]*?\*\//g, " ");
+}
+
 function validateSql(sql: string): Result<null, HqlError> {
-  try {
-    const tables = parser.tableList(sql, { database: "Postgresql" });
+  const stripped = stripSqlComments(sql).trim();
 
-    // type::DB::table
-    const invalidTable = tables.find((table) => {
-      const [type, _, tableName] = table.split("::");
-      return type !== "select" || !CLICKHOUSE_TABLES.includes(tableName);
-    });
-
-    if (invalidTable) {
-      const [type, _, tableName] = invalidTable.split("::");
-      if (type !== "select") {
-        return hqlError(
-          HqlErrorCode.INVALID_STATEMENT,
-          `Found ${type.toUpperCase()} statement`
-        );
-      }
-      return hqlError(
-        HqlErrorCode.INVALID_TABLE,
-        `Table '${tableName}' is not allowed. Allowed tables: ${CLICKHOUSE_TABLES.join(', ')}`
-      );
-    }
-
-    return ok(null);
-  } catch (e) {
+  // Must start with SELECT (after stripping comments/whitespace)
+  if (!/^SELECT\b/i.test(stripped)) {
+    const firstWord = stripped.match(/^\w+/)?.[0]?.toUpperCase() ?? "unknown";
     return hqlError(
-      HqlErrorCode.SYNTAX_ERROR,
-      String(e)
+      HqlErrorCode.INVALID_STATEMENT,
+      `Found ${firstWord} statement`
     );
   }
+
+  // Reject any DML/DDL keywords that shouldn't appear in read-only queries
+  const forbidden = /\b(INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|TRUNCATE|REPLACE|MERGE|EXEC|EXECUTE|GRANT|REVOKE)\b/i;
+  const forbiddenMatch = stripped.match(forbidden);
+  if (forbiddenMatch) {
+    return hqlError(
+      HqlErrorCode.INVALID_STATEMENT,
+      `Found ${forbiddenMatch[0].toUpperCase()} statement`
+    );
+  }
+
+  // Extract all table references from FROM and JOIN clauses
+  // Matches: FROM table, JOIN table, FROM (subquery) — skip subqueries (start with SELECT or opening paren)
+  const tableRefPattern = /\b(?:FROM|JOIN)\s+([a-zA-Z_][a-zA-Z0-9_]*)/gi;
+  let match;
+  while ((match = tableRefPattern.exec(stripped)) !== null) {
+    const tableName = match[1];
+    // Skip SQL keywords that can follow FROM/JOIN (e.g. FROM (subquery))
+    if (/^(SELECT|WITH|WHERE|ON|AS)$/i.test(tableName)) continue;
+    if (!CLICKHOUSE_TABLES.includes(tableName)) {
+      return hqlError(
+        HqlErrorCode.INVALID_TABLE,
+        `Table '${tableName}' is not allowed. Allowed tables: ${CLICKHOUSE_TABLES.join(", ")}`
+      );
+    }
+  }
+
+  return ok(null);
 }
 
 function addLimit(ast: AST, limit: number): AST {
@@ -209,44 +224,29 @@ export class HeliconeSqlManager {
   ): Promise<Result<ExecuteSqlResponse, HqlError>> {
     withActiveSpan()?.setTag("sql.query", sql.substring(0, 200));
     try {
-      // Parse SQL to validate and add limit
-      let ast;
-      try {
-        ast = parser.astify(sql, { database: "Postgresql" });
-      } catch (parseError) {
-        withActiveSpan()?.setTag("error.type", "SYNTAX_ERROR");
-        withActiveSpan()?.setTag("error.phase", "parsing");
-        const errorMessage = parseError instanceof Error ? parseError.message : String(parseError);
-        withActiveSpan()?.setTag("error.message", errorMessage);
-        return hqlError(HqlErrorCode.SYNTAX_ERROR, errorMessage);
-      }
-      
-      // Always get first statement to prevent SQL injection
-      const normalizedAst = normalizeAst(ast)[0];
-      
-      // Add limit to prevent excessive data retrieval
-      let limitedAst;
-      try {
-        limitedAst = addLimit(normalizedAst, limit);
-      } catch (limitError) {
-        withActiveSpan()?.setTag("error.type", "SYNTAX_ERROR");
-        withActiveSpan()?.setTag("error.phase", "limit_application");
-        const errorMessage = `Failed to apply limit: ${limitError instanceof Error ? limitError.message : String(limitError)}`;
-        withActiveSpan()?.setTag("error.message", errorMessage);
-        return hqlError(HqlErrorCode.SYNTAX_ERROR, errorMessage);
-      }
-      
-      const firstSql = parser.sqlify(limitedAst, { database: "Postgresql" });
-      withActiveSpan()?.setTag("sql.processed", firstSql.substring(0, 200));
-
-      // Validate SQL for security
-      const validatedSql = validateSql(firstSql);
-      if (isError(validatedSql)) {
-        withActiveSpan()?.setTag("error.type", validatedSql.error.code);
+      // Validate SQL for security first (regex-based, handles ClickHouse syntax)
+      const validatedSqlEarly = validateSql(sql);
+      if (isError(validatedSqlEarly)) {
+        withActiveSpan()?.setTag("error.type", validatedSqlEarly.error.code);
         withActiveSpan()?.setTag("error.phase", "validation");
-        withActiveSpan()?.setTag("error.message", validatedSql.error.message);
-        return validatedSql;
+        withActiveSpan()?.setTag("error.message", validatedSqlEarly.error.message);
+        return validatedSqlEarly;
       }
+
+      // Apply LIMIT: try AST-based first (more precise), fall back to string manipulation
+      // for ClickHouse-specific syntax that node-sql-parser can't handle
+      let firstSql: string;
+      try {
+        const ast = parser.astify(sql, { database: "Postgresql" });
+        const normalizedAst = normalizeAst(ast)[0];
+        const limitedAst = addLimit(normalizedAst, limit);
+        firstSql = parser.sqlify(limitedAst, { database: "Postgresql" });
+      } catch {
+        // node-sql-parser can't handle ClickHouse-specific syntax (map subscripts,
+        // arrayJoin, etc.) — fall back to appending/clamping LIMIT in raw SQL
+        firstSql = applyLimitToRawSql(sql, limit);
+      }
+      withActiveSpan()?.setTag("sql.processed", firstSql.substring(0, 200));
 
       const start = Date.now();
 
@@ -318,44 +318,26 @@ export class HeliconeSqlManager {
     withActiveSpan()?.setTag("sql.query", sql.substring(0, 200));
     withActiveSpan()?.setTag("admin_query", true);
     try {
-      // Parse SQL to validate and add limit
-      let ast;
-      try {
-        ast = parser.astify(sql, { database: "Postgresql" });
-      } catch (parseError) {
-        withActiveSpan()?.setTag("error.type", "SYNTAX_ERROR");
-        withActiveSpan()?.setTag("error.phase", "parsing");
-        const errorMessage = parseError instanceof Error ? parseError.message : String(parseError);
-        withActiveSpan()?.setTag("error.message", errorMessage);
-        return hqlError(HqlErrorCode.SYNTAX_ERROR, errorMessage);
-      }
-
-      // Always get first statement to prevent SQL injection
-      const normalizedAst = normalizeAst(ast)[0];
-
-      // Add limit to prevent excessive data retrieval
-      let limitedAst;
-      try {
-        limitedAst = addLimit(normalizedAst, limit);
-      } catch (limitError) {
-        withActiveSpan()?.setTag("error.type", "SYNTAX_ERROR");
-        withActiveSpan()?.setTag("error.phase", "limit_application");
-        const errorMessage = `Failed to apply limit: ${limitError instanceof Error ? limitError.message : String(limitError)}`;
-        withActiveSpan()?.setTag("error.message", errorMessage);
-        return hqlError(HqlErrorCode.SYNTAX_ERROR, errorMessage);
-      }
-
-      const firstSql = parser.sqlify(limitedAst, { database: "Postgresql" });
-      withActiveSpan()?.setTag("sql.processed", firstSql.substring(0, 200));
-
-      // Validate SQL for security
-      const validatedSql = validateSql(firstSql);
-      if (isError(validatedSql)) {
-        withActiveSpan()?.setTag("error.type", validatedSql.error.code);
+      // Validate SQL for security first (regex-based, handles ClickHouse syntax)
+      const validatedSqlEarly = validateSql(sql);
+      if (isError(validatedSqlEarly)) {
+        withActiveSpan()?.setTag("error.type", validatedSqlEarly.error.code);
         withActiveSpan()?.setTag("error.phase", "validation");
-        withActiveSpan()?.setTag("error.message", validatedSql.error.message);
-        return validatedSql;
+        withActiveSpan()?.setTag("error.message", validatedSqlEarly.error.message);
+        return validatedSqlEarly;
       }
+
+      // Apply LIMIT: try AST-based first, fall back to string manipulation
+      let firstSql: string;
+      try {
+        const ast = parser.astify(sql, { database: "Postgresql" });
+        const normalizedAst = normalizeAst(ast)[0];
+        const limitedAst = addLimit(normalizedAst, limit);
+        firstSql = parser.sqlify(limitedAst, { database: "Postgresql" });
+      } catch {
+        firstSql = applyLimitToRawSql(sql, limit);
+      }
+      withActiveSpan()?.setTag("sql.processed", firstSql.substring(0, 200));
 
       const start = Date.now();
 
