@@ -16,6 +16,8 @@ export interface ChartConfigState {
   chartType: ChartType;
   xAxis: string;
   yAxis: string[];
+  /** When set, pivot rows so each unique value of this column becomes its own series */
+  groupBy?: string;
 }
 
 interface ChartConfigProps {
@@ -133,6 +135,15 @@ export function ChartConfig({
       ...config,
       xAxis,
       yAxis: newYAxis.length > 0 ? newYAxis : config.yAxis,
+      groupBy: config.groupBy === xAxis ? undefined : config.groupBy,
+    });
+  };
+
+  const handleGroupByChange = (groupBy: string) => {
+    if (!config) return;
+    onConfigChange({
+      ...config,
+      groupBy: groupBy === "__none__" ? undefined : groupBy,
     });
   };
 
@@ -240,7 +251,7 @@ export function ChartConfig({
               )}
             </Badge>
           ))}
-          {unselectedYColumns.length > 0 && config.chartType !== "pie" && (
+          {unselectedYColumns.length > 0 && config.chartType !== "pie" && !config.groupBy && (
             <Select value="" onValueChange={handleAddYAxis}>
               <SelectTrigger className="h-6 w-[80px] border-dashed">
                 <span className="text-xs text-muted-foreground">+ Add</span>
@@ -261,6 +272,36 @@ export function ChartConfig({
           )}
         </div>
       </div>
+
+      {/* Group By */}
+      {config.chartType !== "pie" && config.chartType !== "scatter" && (
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-medium text-muted-foreground">Group By</span>
+          <Select
+            value={config.groupBy ?? "__none__"}
+            onValueChange={handleGroupByChange}
+          >
+            <SelectTrigger className="h-8 w-[150px]">
+              <SelectValue placeholder="None" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__">None</SelectItem>
+              {columns
+                .filter((col) => col !== "__rowNum" && col !== config.xAxis && !config.yAxis.includes(col))
+                .map((col) => (
+                  <SelectItem key={col} value={col}>
+                    <span className="flex items-center gap-2">
+                      {col}
+                      <span className="text-xs text-muted-foreground">
+                        ({columnTypes.get(col)})
+                      </span>
+                    </span>
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
     </div>
   );

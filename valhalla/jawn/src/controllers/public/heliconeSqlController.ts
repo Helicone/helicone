@@ -12,9 +12,8 @@ import {
   Security,
 } from "tsoa";
 import { err, ok, Result, isError } from "../../packages/common/result";
-import { 
-  HqlError, 
-  HqlErrorCode, 
+import {
+  HqlErrorCode,
   createHqlError
 } from "../../lib/errors/HqlErrors";
 import { HeliconeSqlManager } from "../../managers/HeliconeSqlManager";
@@ -24,7 +23,7 @@ import {
   HQL_FEATURE_FLAG,
 } from "../../lib/utils/featureFlags";
 import { HqlQueryManager } from "../../managers/HqlQueryManager";
-import { TracedController, withActiveSpan } from "../../lib/decorators/tracing";
+import { TracedController } from "../../lib/decorators/tracing";
 
 // --- Response Types ---
 export interface ClickHouseTableSchema {
@@ -164,18 +163,21 @@ export class HeliconeSqlController extends Controller {
     );
     if (isError(featureFlagResult)) {
       const error = createHqlError(HqlErrorCode.FEATURE_NOT_ENABLED);
+      this.setStatus(403);
       return err(formatHqlError(error));
     }
 
     // Validate input
     if (!requestBody.sql?.trim()) {
       const error = createHqlError(HqlErrorCode.MISSING_QUERY_SQL);
+      this.setStatus(400);
       return err(formatHqlError(error));
     }
 
     const heliconeSqlManager = new HeliconeSqlManager(request.authParams);
     const result = await heliconeSqlManager.executeSql(requestBody.sql);
     if (isError(result)) {
+      this.setStatus(result.error.statusCode || 500);
       return err(formatHqlError(result.error));
     }
     return ok(result.data);
