@@ -132,6 +132,28 @@ function normalizeAst(ast: AST | AST[]): AST[] {
   return [ast];
 }
 
+/**
+ * Fallback for when node-sql-parser can't parse ClickHouse-specific syntax.
+ * Appends or clamps a LIMIT clause directly on the raw SQL string.
+ */
+function applyLimitToRawSql(sql: string, limit: number): string {
+  const trimmed = sql.trimEnd().replace(/;+$/, "").trimEnd();
+
+  // Check if there's already a LIMIT clause (handles: LIMIT N, LIMIT N,M, LIMIT M OFFSET N)
+  const limitMatch = trimmed.match(/\bLIMIT\s+(\d+)(?:\s*,\s*(\d+))?(?:\s+OFFSET\s+\d+)?\s*$/i);
+  if (limitMatch) {
+    // There's a limit — clamp it
+    const existingLimit = parseInt(limitMatch[2] ?? limitMatch[1], 10);
+    if (existingLimit <= limit) return trimmed;
+    // Replace just the number portion
+    const numToReplace = limitMatch[2] ?? limitMatch[1];
+    const lastIndex = trimmed.lastIndexOf(numToReplace);
+    return trimmed.slice(0, lastIndex) + String(limit) + trimmed.slice(lastIndex + numToReplace.length);
+  }
+
+  return `${trimmed} LIMIT ${limit}`;
+}
+
 export class HeliconeSqlManager {
   private readonly hqlStore: HqlStore;
   private readonly s3Client: S3Client;

@@ -12,9 +12,8 @@ import {
   Security,
 } from "tsoa";
 import { err, ok, Result, isError } from "../../packages/common/result";
-import { 
-  HqlError, 
-  HqlErrorCode, 
+import {
+  HqlErrorCode,
   createHqlError
 } from "../../lib/errors/HqlErrors";
 import { HeliconeSqlManager } from "../../managers/HeliconeSqlManager";
@@ -24,7 +23,7 @@ import {
   HQL_FEATURE_FLAG,
 } from "../../lib/utils/featureFlags";
 import { HqlQueryManager } from "../../managers/HqlQueryManager";
-import { TracedController, withActiveSpan } from "../../lib/decorators/tracing";
+import { TracedController } from "../../lib/decorators/tracing";
 
 // --- Response Types ---
 export interface ClickHouseTableSchema {
