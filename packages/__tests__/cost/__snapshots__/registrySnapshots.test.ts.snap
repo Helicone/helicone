@@ -4949,25 +4949,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
-    "codex-mini-latest:openrouter": {
-      "context": 200000,
-      "crossRegion": false,
-      "maxTokens": 100000,
-      "modelId": "openai/codex-mini-latest",
-      "parameters": [
-        "max_completion_tokens",
-        "response_format",
-        "seed",
-        "stop",
-        "tool_choice",
-        "tools",
-      ],
-      "provider": "openrouter",
-      "ptbEnabled": true,
-      "regions": [
-        "*",
-      ],
-    },
     "gpt-5.1-2025-11-13:azure": {
       "context": 400000,
       "crossRegion": false,
@@ -5081,7 +5062,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "context": 128000,
       "crossRegion": false,
       "maxTokens": 16384,
-      "modelId": "openai/gpt-5.1-chat-latest",
+      "modelId": "openai/gpt-5.1-chat",
       "parameters": [
         "max_completion_tokens",
         "response_format",
@@ -5252,7 +5233,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "context": 128000,
       "crossRegion": false,
       "maxTokens": 16384,
-      "modelId": "openai/gpt-5.2-chat-latest",
+      "modelId": "openai/gpt-5.2-chat",
       "parameters": [
         "frequency_penalty",
         "logit_bias",
@@ -7105,7 +7086,6 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openai",
     "openai",
     "openai",
-    "openrouter",
     "openrouter",
     "openrouter",
     "openrouter",
@@ -9330,7 +9310,6 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "codex-mini-latest",
       "providers": [
         "openai",
-        "openrouter",
       ],
     },
     {
@@ -10090,7 +10069,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "openai",
     },
     {
-      "modelCount": 68,
+      "modelCount": 67,
       "provider": "openrouter",
     },
     {
@@ -10220,8 +10199,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 307,
-  "totalModelProviderConfigs": 307,
+  "totalEndpoints": 306,
+  "totalModelProviderConfigs": 306,
   "totalModelsWithPtb": 103,
   "totalProviders": 21,
 }
