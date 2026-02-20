@@ -337,6 +337,10 @@ export const modelMapping: CreatorModelMapping = {
           modelString: "claude-sonnet-4-6",
         },
         {
+          provider: "ANTHROPIC",
+          modelString: "claude-sonnet-4-6-20260217",
+        },
+        {
           provider: "BEDROCK",
           modelString: "anthropic.claude-sonnet-4-6-20260217-v1:0",
         },
