@@ -2752,6 +2752,101 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "google/gemini-3.1-pro": {
+    "gemini-3.1-pro-preview:google-ai-studio": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "gemini-3.1-pro-preview",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "google-ai-studio",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-3.1-pro-preview:helicone": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "pa/gemini-3.1-pro-preview",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "helicone",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-3.1-pro-preview:openrouter": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "google/gemini-3.1-pro-preview",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "seed",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "gemini-3.1-pro-preview:vertex": {
+      "context": 1048576,
+      "crossRegion": true,
+      "maxTokens": 65536,
+      "modelId": "gemini-3.1-pro-preview",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "vertex",
+      "ptbEnabled": true,
+      "regions": [
+        "global",
+      ],
+    },
+  },
   "google/gemma": {
     "gemma2-9b-it:chutes": {
       "context": 8192,
@@ -7129,6 +7224,12 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "vertex",
   ],
+  "google/gemini-3.1-pro": [
+    "google-ai-studio",
+    "helicone",
+    "openrouter",
+    "vertex",
+  ],
   "google/gemma": [
     "chutes",
     "openrouter",
@@ -8798,6 +8899,64 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "google/gemini-3.1-pro": {
+    "google-ai-studio": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+        },
+        "cacheStoragePerHour": 0.0000045,
+        "input": 0.000002,
+        "output": 0.000012,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000004,
+        "output": 0.000018,
+        "threshold": 200000,
+      },
+    ],
+    "helicone": [
+      {
+        "input": 0.000002,
+        "output": 0.000012,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000004,
+        "output": 0.000018,
+        "threshold": 200000,
+      },
+    ],
+    "openrouter": [
+      {
+        "input": 0.00000211,
+        "output": 0.00001266,
+        "threshold": 0,
+      },
+      {
+        "input": 0.00000422,
+        "output": 0.00001899,
+        "threshold": 200000,
+      },
+    ],
+    "vertex": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+        },
+        "cacheStoragePerHour": 0.0000045,
+        "input": 0.000002,
+        "output": 0.000012,
+        "threshold": 0,
+      },
+      {
+        "input": 0.000004,
+        "output": 0.000018,
+        "threshold": 200000,
+      },
+    ],
+  },
   "google/gemma": {
     "chutes": [
       {
@@ -9716,6 +9875,15 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "gemini-3.1-pro-preview",
+      "providers": [
+        "google-ai-studio",
+        "helicone",
+        "openrouter",
+        "vertex",
+      ],
+    },
+    {
       "model": "gemma-3-12b-it",
       "providers": [
         "deepinfra",
@@ -10336,7 +10504,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "fireworks",
     },
     {
-      "modelCount": 7,
+      "modelCount": 8,
       "provider": "google-ai-studio",
     },
     {
@@ -10344,7 +10512,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "groq",
     },
     {
-      "modelCount": 50,
+      "modelCount": 51,
       "provider": "helicone",
     },
     {
@@ -10364,7 +10532,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "openai",
     },
     {
-      "modelCount": 68,
+      "modelCount": 69,
       "provider": "openrouter",
     },
     {
@@ -10372,7 +10540,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "perplexity",
     },
     {
-      "modelCount": 21,
+      "modelCount": 22,
       "provider": "vertex",
     },
     {
@@ -10411,6 +10579,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "gemini-3-flash-preview",
     "gemini-3-pro-image-preview",
     "gemini-3-pro-preview",
+    "gemini-3.1-pro-preview",
     "gemma-3-12b-it",
     "gemma2-9b-it",
     "glm-4.6",
@@ -10495,9 +10664,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 314,
-  "totalModelProviderConfigs": 314,
-  "totalModelsWithPtb": 104,
+  "totalEndpoints": 318,
+  "totalModelProviderConfigs": 318,
+  "totalModelsWithPtb": 105,
   "totalProviders": 21,
 }
 `;
