@@ -82,6 +82,14 @@ export function toGoogle(
     });
   }
 
+  // Google Gemini requires at least one item in contents (system messages go to system_instruction)
+  if (contents.length === 0) {
+    throw new Error(
+      "Gemini requires at least one non-system message. The request only contains system/developer messages, " +
+      "which are converted to system_instruction. Add a user message to the request."
+    );
+  }
+
   const geminiBody: GeminiGenerateContentRequest = {
     contents,
   };

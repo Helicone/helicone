@@ -2753,30 +2753,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "google/gemini-3.1-pro-preview": {
-    "gemini-3.1-pro-preview:google-ai-studio": {
-      "context": 1048576,
-      "crossRegion": false,
-      "maxTokens": 65536,
-      "modelId": "gemini-3.1-pro-preview",
-      "parameters": [
-        "include_reasoning",
-        "max_tokens",
-        "reasoning",
-        "response_format",
-        "seed",
-        "stop",
-        "structured_outputs",
-        "temperature",
-        "tool_choice",
-        "tools",
-        "top_p",
-      ],
-      "provider": "google-ai-studio",
-      "ptbEnabled": true,
-      "regions": [
-        "*",
-      ],
-    },
     "gemini-3.1-pro-preview:helicone": {
       "context": 1048576,
       "crossRegion": false,
@@ -2796,26 +2772,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "helicone",
-      "ptbEnabled": true,
-      "regions": [
-        "*",
-      ],
-    },
-    "gemini-3.1-pro-preview:novita": {
-      "context": 1048576,
-      "crossRegion": false,
-      "maxTokens": 65536,
-      "modelId": "pa/gemini-3.1-pro-preview",
-      "parameters": [
-        "frequency_penalty",
-        "max_tokens",
-        "presence_penalty",
-        "seed",
-        "stop",
-        "temperature",
-        "top_p",
-      ],
-      "provider": "novita",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -7245,9 +7201,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "vertex",
   ],
   "google/gemini-3.1-pro-preview": [
-    "google-ai-studio",
     "helicone",
-    "novita",
     "openrouter",
     "vertex",
   ],
@@ -8921,25 +8875,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "google/gemini-3.1-pro-preview": {
-    "google-ai-studio": [
-      {
-        "cacheMultipliers": {
-          "cachedInput": 0.1,
-        },
-        "cacheStoragePerHour": 0.0000045,
-        "input": 0.000002,
-        "output": 0.000012,
-        "threshold": 0,
-      },
-      {
-        "cacheMultipliers": {
-          "cachedInput": 0.1,
-        },
-        "input": 0.000004,
-        "output": 0.000018,
-        "threshold": 200000,
-      },
-    ],
     "helicone": [
       {
         "input": 0.000002,
@@ -8949,18 +8884,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       {
         "input": 0.000004,
         "output": 0.000018,
-        "threshold": 200000,
-      },
-    ],
-    "novita": [
-      {
-        "input": 0.0000014,
-        "output": 0.0000084,
-        "threshold": 0,
-      },
-      {
-        "input": 0.0000028,
-        "output": 0.0000126,
         "threshold": 200000,
       },
     ],
@@ -9916,9 +9839,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "gemini-3.1-pro-preview",
       "providers": [
-        "google-ai-studio",
         "helicone",
-        "novita",
         "openrouter",
         "vertex",
       ],
@@ -10544,7 +10465,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "fireworks",
     },
     {
-      "modelCount": 8,
+      "modelCount": 7,
       "provider": "google-ai-studio",
     },
     {
@@ -10564,7 +10485,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "nebius",
     },
     {
-      "modelCount": 23,
+      "modelCount": 22,
       "provider": "novita",
     },
     {
@@ -10704,8 +10625,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 319,
-  "totalModelProviderConfigs": 319,
+  "totalEndpoints": 317,
+  "totalModelProviderConfigs": 317,
   "totalModelsWithPtb": 105,
   "totalProviders": 21,
 }

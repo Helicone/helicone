@@ -260,4 +260,36 @@ describe("toGoogle response_format transformation", () => {
       type: "string",
     });
   });
+
+  it("should throw error when request only has system messages", () => {
+    const openAIRequest = {
+      model: "gemini-2.5-flash",
+      messages: [
+        {
+          role: "system" as const,
+          content: "You are a helpful assistant.",
+        },
+        {
+          role: "system" as const,
+          content: "Additional context here.",
+        },
+      ],
+      response_format: {
+        type: "json_schema" as const,
+        json_schema: {
+          name: "result",
+          schema: {
+            type: "object",
+            properties: {
+              feedback: { type: "string" },
+            },
+          },
+        },
+      },
+    };
+
+    expect(() => toGoogle(openAIRequest)).toThrow(
+      "Gemini requires at least one non-system message"
+    );
+  });
 });
