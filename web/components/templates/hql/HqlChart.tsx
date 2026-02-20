@@ -63,6 +63,51 @@ function prepareChartData(
   });
 }
 
+/**
+ * Pivot rows by groupBy column so each unique group value becomes its own series key.
+ * Returns { chartData, seriesKeys } where chartData rows are keyed by xAxis
+ * and each series key maps to the numeric yAxis value for that group.
+ *
+ * Example: rows like { prop_key: "env", prop_value: "prod", total_cost: 5 }
+ * become { prop_value: "prod", env: 5, subdomain: 2, ... }
+ */
+function pivotByGroup(
+  data: Record<string, any>[],
+  config: ChartConfigState & { groupBy: string }
+): { chartData: Record<string, any>[]; seriesKeys: string[] } {
+  const { xAxis, yAxis, groupBy } = config;
+  const yCol = yAxis[0]; // For grouped charts, only the first Y column is used
+
+  // Collect all unique group values (limit to top 20 by total value to avoid clutter)
+  const groupTotals = new Map<string, number>();
+  for (const row of data) {
+    const group = String(row[groupBy] ?? "Unknown");
+    const value = typeof row[yCol] === "number" ? row[yCol] : Number(row[yCol]) || 0;
+    groupTotals.set(group, (groupTotals.get(group) || 0) + value);
+  }
+  const seriesKeys = Array.from(groupTotals.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 20)
+    .map(([k]) => k);
+
+  // Build pivoted rows keyed by xAxis value
+  const pivoted = new Map<string, Record<string, any>>();
+  for (const row of data) {
+    const xVal = String(row[xAxis] ?? "");
+    const group = String(row[groupBy] ?? "Unknown");
+    if (!seriesKeys.includes(group)) continue;
+
+    if (!pivoted.has(xVal)) {
+      pivoted.set(xVal, { [xAxis]: row[xAxis] });
+    }
+    const pivotRow = pivoted.get(xVal)!;
+    const value = typeof row[yCol] === "number" ? row[yCol] : Number(row[yCol]) || 0;
+    pivotRow[group] = (pivotRow[group] || 0) + value;
+  }
+
+  return { chartData: Array.from(pivoted.values()), seriesKeys };
+}
+
 // Prepare data for pie chart (aggregate by X-axis)
 function preparePieData(
   data: Record<string, any>[],
@@ -136,7 +181,11 @@ export function HqlChart({ data, config }: HqlChartProps) {
     );
   }
 
-  const chartData = prepareChartData(data, config);
+  // When groupBy is set, pivot the data so each group becomes its own series
+  const isGrouped = !!config.groupBy;
+  const { chartData, seriesKeys } = isGrouped
+    ? pivotByGroup(data, config as ChartConfigState & { groupBy: string })
+    : { chartData: prepareChartData(data, config), seriesKeys: config.yAxis };
 
   const commonProps = {
     data: chartData,
@@ -165,10 +214,10 @@ export function HqlChart({ data, config }: HqlChartProps) {
             />
             <Tooltip content={<CustomTooltip />} />
             <Legend />
-            {config.yAxis.map((yCol, index) => (
+            {seriesKeys.map((key, index) => (
               <Bar
-                key={yCol}
-                dataKey={yCol}
+                key={key}
+                dataKey={key}
                 fill={getColor(index)}
                 radius={[4, 4, 0, 0]}
                 isAnimationActive={false}
@@ -197,11 +246,11 @@ export function HqlChart({ data, config }: HqlChartProps) {
             />
             <Tooltip content={<CustomTooltip />} />
             <Legend />
-            {config.yAxis.map((yCol, index) => (
+            {seriesKeys.map((key, index) => (
               <Line
-                key={yCol}
+                key={key}
                 type="monotone"
-                dataKey={yCol}
+                dataKey={key}
                 stroke={getColor(index)}
                 strokeWidth={2}
                 dot={{ r: 3 }}
@@ -232,11 +281,11 @@ export function HqlChart({ data, config }: HqlChartProps) {
             />
             <Tooltip content={<CustomTooltip />} />
             <Legend />
-            {config.yAxis.map((yCol, index) => (
+            {seriesKeys.map((key, index) => (
               <Area
-                key={yCol}
+                key={key}
                 type="monotone"
-                dataKey={yCol}
+                dataKey={key}
                 stroke={getColor(index)}
                 fill={getColor(index)}
                 fillOpacity={0.3}
