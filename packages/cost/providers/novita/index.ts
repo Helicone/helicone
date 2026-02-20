@@ -356,4 +356,15 @@ export const costs: ModelRow[] = [
       completion_token: 0.000000054,
     },
   },
+  {
+    model: {
+      operator: "equals",
+      value: "pa/gemini-3.1-pro-preview",
+    },
+    cost: {
+      // Novita pricing with 30% discount from Google's $2/$12
+      prompt_token: 0.0000014, // $1.40/1M tokens
+      completion_token: 0.0000084, // $8.40/1M tokens
+    },
+  },
 ];
