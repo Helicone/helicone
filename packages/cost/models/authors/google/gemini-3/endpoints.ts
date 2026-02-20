@@ -125,6 +125,42 @@ export const endpoints = {
       "*": {},
     },
   },
+  "gemini-3-pro-preview:helicone": {
+    provider: "helicone",
+    author: "google",
+    providerModelId: "pa/gemini-3-pro-preview",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000002, // $2/1M tokens (same as Google)
+        output: 0.000012, // $12/1M tokens (same as Google)
+      },
+      {
+        threshold: 200000,
+        input: 0.000004, // $4/1M tokens (over 200K context)
+        output: 0.000018, // $18/1M tokens (over 200K context)
+      },
+    ],
+    contextLength: 1_048_576,
+    maxCompletionTokens: 65_536,
+    supportedParameters: [
+      "include_reasoning",
+      "max_tokens",
+      "reasoning",
+      "response_format",
+      "seed",
+      "stop",
+      "structured_outputs",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_p",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${Gemini3ProPreviewModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

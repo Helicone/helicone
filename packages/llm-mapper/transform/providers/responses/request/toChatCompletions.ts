@@ -11,6 +11,33 @@ import {
 } from "@helicone-package/prompts/types";
 import { ResponsesToolDefinition } from "../../../types/responses";
 
+/**
+ * Azure has a 40 character limit on tool_call_id.
+ * This function truncates long IDs deterministically so that:
+ * 1. IDs <= 40 chars are unchanged
+ * 2. IDs > 40 chars are shortened to prefix + hash suffix
+ * The same input always produces the same output, ensuring tool_calls
+ * and their corresponding tool responses match.
+ */
+const AZURE_TOOL_CALL_ID_LIMIT = 40;
+
+function truncateToolCallId(id: string): string {
+  if (id.length <= AZURE_TOOL_CALL_ID_LIMIT) {
+    return id;
+  }
+  // Use a simple deterministic hash for the suffix
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    const char = id.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  const hashStr = Math.abs(hash).toString(36);
+  // Keep prefix + underscore + hash, ensuring total <= 40 chars
+  const prefixLength = AZURE_TOOL_CALL_ID_LIMIT - hashStr.length - 1;
+  return `${id.substring(0, prefixLength)}_${hashStr}`;
+}
+
 function mapRole(role: string): "system" | "user" | "assistant" | "tool" | "function" {
   if (role === "developer") return "system";
   if (role === "system" || role === "user" || role === "assistant") return role;
@@ -52,9 +79,26 @@ function convertContentParts(
   });
 }
 
+/**
+ * Collects consecutive items of a specific type from the input array.
+ * Returns the collected items and the index after the last collected item.
+ */
+function collectConsecutiveByType<T extends ResponsesInputItem>(
+  input: ResponsesInputItem[],
+  startIndex: number,
+  type: string
+): { items: T[]; endIndex: number } {
+  const items: T[] = [];
+  let index = startIndex;
+  while (index < input.length && input[index].type === type) {
+    items.push(input[index] as T);
+    index++;
+  }
+  return { items, endIndex: index };
+}
+
 function convertInputToMessages(input: ResponsesRequestBody["input"]) {
   const messages: NonNullable<HeliconeChatCreateParams["messages"]> = [];
-  // emit an assistant message for each function_call item to simplify typing
   if (typeof input === "string") {
     messages.push({ role: "user", content: input });
     return messages;
@@ -63,22 +107,29 @@ function convertInputToMessages(input: ResponsesRequestBody["input"]) {
   for (let i = 0; i < input.length; i++) {
     const item: ResponsesInputItem = input[i];
 
+    // Handle function_call: group consecutive function_call items into a single assistant message
+    // with multiple tool_calls. This is required by Chat Completions format for parallel tool calls.
     if (item.type === "function_call") {
-      const fc = item;
+      const { items: functionCalls, endIndex } = collectConsecutiveByType<
+        Extract<ResponsesInputItem, { type: "function_call" }>
+      >(input, i, "function_call");
+
+      const toolCalls = functionCalls.map((fc, idx) => ({
+        id: truncateToolCallId(fc.id || fc.call_id || `call_${i + idx}`),
+        type: "function" as const,
+        function: {
+          name: fc.name,
+          arguments: fc.arguments ?? "{}",
+        },
+      }));
+
       messages.push({
         role: "assistant",
         content: "",
-        tool_calls: [
-          {
-            id: fc.id || fc.call_id || `call_${i}`,
-            type: "function",
-            function: {
-              name: fc.name,
-              arguments: fc.arguments ?? "{}",
-            },
-          },
-        ],
+        tool_calls: toolCalls,
       });
+
+      i = endIndex - 1;
       continue;
     }
 
@@ -86,7 +137,7 @@ function convertInputToMessages(input: ResponsesRequestBody["input"]) {
       const fco = item;
       messages.push({
         role: "tool",
-        tool_call_id: fco.call_id,
+        tool_call_id: truncateToolCallId(fco.call_id),
         content: fco.output ?? "",
       });
       continue;

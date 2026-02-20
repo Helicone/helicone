@@ -297,6 +297,127 @@ describe("OpenAI Chat -> Responses converters", () => {
       expect(tool.content).toBe("4");
     });
 
+    it("groups parallel function_call items into a single assistant message with multiple tool_calls", () => {
+      const req: ResponsesRequestBody = {
+        model: "gpt-4o-mini",
+        input: [
+          { type: "message", role: "user", content: "Search for healthcare and finance projects" },
+          { type: "function_call", call_id: "fc_call1", name: "search_projects", arguments: "{\"queries\": [\"healthcare\"]}" },
+          { type: "function_call", call_id: "fc_call2", name: "search_projects", arguments: "{\"queries\": [\"finance\"]}" },
+          { type: "function_call_output", call_id: "fc_call1", output: "{\"projects\": [{\"name\": \"Healthcare Strategy\"}]}" },
+          { type: "function_call_output", call_id: "fc_call2", output: "{\"projects\": [{\"name\": \"Finance Overview\"}]}" },
+        ],
+      };
+      const oai = toChatCompletions(req);
+
+      // Should have: user message, ONE assistant message with 2 tool_calls, 2 tool messages
+      expect(oai.messages?.length).toBe(4);
+
+      // First message: user
+      expect(oai.messages?.[0]).toMatchObject({ role: "user", content: "Search for healthcare and finance projects" });
+
+      // Second message: assistant with BOTH tool_calls in a single message
+      const assistant = oai.messages?.[1] as any;
+      expect(assistant.role).toBe("assistant");
+      expect(assistant.tool_calls?.length).toBe(2);
+      expect(assistant.tool_calls?.[0]).toMatchObject({
+        id: "fc_call1",
+        type: "function",
+        function: { name: "search_projects", arguments: "{\"queries\": [\"healthcare\"]}" }
+      });
+      expect(assistant.tool_calls?.[1]).toMatchObject({
+        id: "fc_call2",
+        type: "function",
+        function: { name: "search_projects", arguments: "{\"queries\": [\"finance\"]}" }
+      });
+
+      // Third and fourth messages: tool responses
+      const tool1 = oai.messages?.[2] as any;
+      expect(tool1.role).toBe("tool");
+      expect(tool1.tool_call_id).toBe("fc_call1");
+
+      const tool2 = oai.messages?.[3] as any;
+      expect(tool2.role).toBe("tool");
+      expect(tool2.tool_call_id).toBe("fc_call2");
+    });
+
+    it("handles multiple separate tool call rounds correctly", () => {
+      const req: ResponsesRequestBody = {
+        model: "gpt-4o-mini",
+        input: [
+          { type: "message", role: "user", content: "Do two things" },
+          // First round: 2 parallel calls
+          { type: "function_call", call_id: "call_a", name: "func_a", arguments: "{}" },
+          { type: "function_call", call_id: "call_b", name: "func_b", arguments: "{}" },
+          { type: "function_call_output", call_id: "call_a", output: "result_a" },
+          { type: "function_call_output", call_id: "call_b", output: "result_b" },
+          // Second round: 1 call
+          { type: "function_call", call_id: "call_c", name: "func_c", arguments: "{}" },
+          { type: "function_call_output", call_id: "call_c", output: "result_c" },
+        ],
+      };
+      const oai = toChatCompletions(req);
+
+      // Should have: user, assistant (2 calls), tool, tool, assistant (1 call), tool
+      expect(oai.messages?.length).toBe(6);
+
+      // First assistant message should have 2 tool_calls
+      const assistant1 = oai.messages?.[1] as any;
+      expect(assistant1.role).toBe("assistant");
+      expect(assistant1.tool_calls?.length).toBe(2);
+
+      // Second assistant message should have 1 tool_call
+      const assistant2 = oai.messages?.[4] as any;
+      expect(assistant2.role).toBe("assistant");
+      expect(assistant2.tool_calls?.length).toBe(1);
+      expect(assistant2.tool_calls?.[0].id).toBe("call_c");
+    });
+
+    it("truncates long tool_call_ids to 40 characters for Azure compatibility", () => {
+      const longId = "call_1234567890abcdefghij1234567890abcdefghij1234567890"; // 54 chars
+      const req = {
+        model: "gpt-4o-mini",
+        input: [
+          { role: "user", content: "Hello" },
+          { type: "function_call", call_id: longId, name: "my_func", arguments: "{}" },
+          { type: "function_call_output", call_id: longId, output: "result" },
+        ],
+      } as unknown as ResponsesRequestBody;
+
+      const oai = toChatCompletions(req);
+
+      // Check assistant message tool_call id is truncated
+      const assistant = oai.messages?.[1] as any;
+      expect(assistant.tool_calls?.[0].id.length).toBeLessThanOrEqual(40);
+
+      // Check tool response tool_call_id is truncated
+      const toolResponse = oai.messages?.[2] as any;
+      expect(toolResponse.tool_call_id.length).toBeLessThanOrEqual(40);
+
+      // Both should have the same truncated ID (deterministic)
+      expect(assistant.tool_calls?.[0].id).toBe(toolResponse.tool_call_id);
+    });
+
+    it("preserves short tool_call_ids unchanged", () => {
+      const shortId = "call_abc123"; // < 40 chars
+      const req = {
+        model: "gpt-4o-mini",
+        input: [
+          { role: "user", content: "Hello" },
+          { type: "function_call", call_id: shortId, name: "my_func", arguments: "{}" },
+          { type: "function_call_output", call_id: shortId, output: "result" },
+        ],
+      } as unknown as ResponsesRequestBody;
+
+      const oai = toChatCompletions(req);
+
+      const assistant = oai.messages?.[1] as any;
+      expect(assistant.tool_calls?.[0].id).toBe(shortId);
+
+      const toolResponse = oai.messages?.[2] as any;
+      expect(toolResponse.tool_call_id).toBe(shortId);
+    });
+
     it("maps Responses tools (flattened) to Chat tools (nested)", () => {
       const req = {
         model: "gpt-4o-mini",

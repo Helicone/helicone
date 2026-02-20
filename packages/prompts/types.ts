@@ -295,10 +295,12 @@ export interface HeliconeReasoningOptions {
 
     /**
      * Thinking level for Google Gemini 3+ models.
+     * - "minimal" for minimal thinking (Flash only)
      * - "low" for faster, less detailed reasoning
+     * - "medium" for balanced reasoning (Flash only)
      * - "high" for more detailed reasoning
      */
-    thinking_level?: "low" | "high";
+    thinking_level?: "minimal" | "low" | "medium" | "high";
   };
 }
 

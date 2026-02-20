@@ -1,6 +1,7 @@
 import AssistantToolCall from "./AssistantToolCall";
 
 import MarkdownEditor from "@/components/shared/markdownEditor";
+import { stripDangerousHtml } from "@/lib/sanitizeContent";
 import { cn } from "@/lib/utils";
 import {
   FunctionCall,
@@ -67,7 +68,7 @@ export default function AssistantToolCalls({
         content && (
           <div className="w-full whitespace-pre-wrap break-words p-2 text-xs">
             <Streamdown shikiTheme={shikiTheme}>
-              {preserveLineBreaksForMarkdown(content)}
+              {preserveLineBreaksForMarkdown(stripDangerousHtml(content))}
             </Streamdown>
           </div>
         )

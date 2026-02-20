@@ -324,6 +324,7 @@
               "rest/request/post-v1requestquery-clickhouse",
               "rest/request/post-v1requestquery",
               "rest/request/get-v1request",
+              "rest/request/get-v1request-inputs",
               "rest/request/post-v1requestquery-ids",
               "rest/request/post-v1request-feedback",
               "rest/request/put-v1request-property",

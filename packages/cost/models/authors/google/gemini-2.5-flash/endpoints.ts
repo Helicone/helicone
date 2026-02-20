@@ -120,6 +120,37 @@ export const endpoints = {
       "*": {},
     },
   },
+  "gemini-2.5-flash:helicone": {
+    provider: "helicone",
+    author: "google",
+    providerModelId: "pa/gmn-2.5-fls-lt-pw-06-17",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000003, // $0.30/1M tokens (same as Google)
+        output: 0.0000025, // $2.50/1M tokens (same as Google)
+      },
+    ],
+    contextLength: 1_048_576,
+    maxCompletionTokens: 65_535,
+    supportedParameters: [
+      "include_reasoning",
+      "max_tokens",
+      "reasoning",
+      "response_format",
+      "seed",
+      "stop",
+      "structured_outputs",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_p",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${Gemini25FlashModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

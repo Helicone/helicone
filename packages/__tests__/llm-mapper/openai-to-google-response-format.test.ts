@@ -184,4 +184,80 @@ describe("toGoogle response_format transformation", () => {
     });
     expect(result.generationConfig?.responseSchema?.additionalProperties).toBeUndefined();
   });
+
+  it("should strip $schema from json_schema when converting", () => {
+    const openAIRequest = {
+      model: "gemini-2.5-flash",
+      messages: [
+        {
+          role: "user" as const,
+          content: "Generate structured output",
+        },
+      ],
+      response_format: {
+        type: "json_schema" as const,
+        json_schema: {
+          name: "result",
+          schema: {
+            $schema: "http://json-schema.org/draft-07/schema#",
+            type: "object",
+            properties: {
+              name: { type: "string" },
+            },
+            additionalProperties: false,
+          },
+        },
+      },
+    };
+
+    const result = toGoogle(openAIRequest);
+
+    expect(result.generationConfig?.responseSchema).toBeDefined();
+    // $schema should be stripped
+    expect(result.generationConfig?.responseSchema?.$schema).toBeUndefined();
+    expect(result.generationConfig?.responseSchema?.type).toBe("object");
+  });
+
+  it("should convert array type with null to nullable for Gemini", () => {
+    const openAIRequest = {
+      model: "gemini-2.5-flash",
+      messages: [
+        {
+          role: "user" as const,
+          content: "Generate structured output",
+        },
+      ],
+      response_format: {
+        type: "json_schema" as const,
+        json_schema: {
+          name: "result",
+          schema: {
+            type: "object",
+            properties: {
+              name: { type: "string" },
+              nickname: { type: ["string", "null"] },
+              age: { type: ["number", "null"] },
+            },
+          },
+        },
+      },
+    };
+
+    const result = toGoogle(openAIRequest);
+
+    expect(result.generationConfig?.responseSchema).toBeDefined();
+    // Array types should be converted to single type with nullable
+    expect(result.generationConfig?.responseSchema?.properties?.nickname).toEqual({
+      type: "string",
+      nullable: true,
+    });
+    expect(result.generationConfig?.responseSchema?.properties?.age).toEqual({
+      type: "number",
+      nullable: true,
+    });
+    // Non-nullable field should remain unchanged
+    expect(result.generationConfig?.responseSchema?.properties?.name).toEqual({
+      type: "string",
+    });
+  });
 });
