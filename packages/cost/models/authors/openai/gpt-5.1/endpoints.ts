@@ -304,7 +304,7 @@ export const endpoints = {
   "gpt-5.1-chat-latest:openrouter": {
     provider: "openrouter",
     author: "openai",
-    providerModelId: "openai/gpt-5.1-chat-latest",
+    providerModelId: "openai/gpt-5.1-chat",
     pricing: [
       {
         threshold: 0,
@@ -361,44 +361,6 @@ export const endpoints = {
       tpm: 180000000,
       tpd: 15000000000,
     },
-    supportedParameters: [
-      "tools",
-      "tool_choice",
-      "seed",
-      "max_completion_tokens",
-      "response_format",
-      "stop",
-    ],
-    unsupportedParameters: [
-      "temperature",
-      "top_p",
-      "presence_penalty",
-      "frequency_penalty",
-      "logprobs",
-      "top_logprobs",
-      "logit_bias",
-      "max_tokens",
-      "verbosity",
-    ],
-    ptbEnabled: true,
-    endpointConfigs: {
-      "*": {},
-    },
-  },
-  "codex-mini-latest:openrouter": {
-    provider: "openrouter",
-    author: "openai",
-    providerModelId: "openai/codex-mini-latest",
-    pricing: [
-      {
-        threshold: 0,
-        input: 0.00000158, // $1.58/1M - worst-case: $1.50/1M (OpenAI) * 1.055
-        output: 0.00000633, // $6.33/1M - worst-case: $6.00/1M (OpenAI) * 1.055
-        web_search: 0.01, // $10 per 1000 searches
-      },
-    ],
-    contextLength: 200_000,
-    maxCompletionTokens: 100_000,
     supportedParameters: [
       "tools",
       "tool_choice",

@@ -216,7 +216,7 @@ export const endpoints = {
   "gpt-5.2-chat-latest:openrouter": {
     provider: "openrouter",
     author: "openai",
-    providerModelId: "openai/gpt-5.2-chat-latest",
+    providerModelId: "openai/gpt-5.2-chat",
     pricing: [
       {
         threshold: 0,

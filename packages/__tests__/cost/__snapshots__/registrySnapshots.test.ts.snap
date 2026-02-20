@@ -2752,101 +2752,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
-  "google/gemini-3.1-pro": {
-    "gemini-3.1-pro-preview:google-ai-studio": {
-      "context": 1048576,
-      "crossRegion": false,
-      "maxTokens": 65536,
-      "modelId": "gemini-3.1-pro-preview",
-      "parameters": [
-        "include_reasoning",
-        "max_tokens",
-        "reasoning",
-        "response_format",
-        "seed",
-        "stop",
-        "structured_outputs",
-        "temperature",
-        "tool_choice",
-        "tools",
-        "top_p",
-      ],
-      "provider": "google-ai-studio",
-      "ptbEnabled": true,
-      "regions": [
-        "*",
-      ],
-    },
-    "gemini-3.1-pro-preview:helicone": {
-      "context": 1048576,
-      "crossRegion": false,
-      "maxTokens": 65536,
-      "modelId": "pa/gemini-3.1-pro-preview",
-      "parameters": [
-        "include_reasoning",
-        "max_tokens",
-        "reasoning",
-        "response_format",
-        "seed",
-        "stop",
-        "structured_outputs",
-        "temperature",
-        "tool_choice",
-        "tools",
-        "top_p",
-      ],
-      "provider": "helicone",
-      "ptbEnabled": true,
-      "regions": [
-        "*",
-      ],
-    },
-    "gemini-3.1-pro-preview:openrouter": {
-      "context": 1048576,
-      "crossRegion": false,
-      "maxTokens": 65536,
-      "modelId": "google/gemini-3.1-pro-preview",
-      "parameters": [
-        "max_tokens",
-        "response_format",
-        "seed",
-        "stop",
-        "temperature",
-        "tool_choice",
-        "tools",
-        "top_p",
-      ],
-      "provider": "openrouter",
-      "ptbEnabled": true,
-      "regions": [
-        "*",
-      ],
-    },
-    "gemini-3.1-pro-preview:vertex": {
-      "context": 1048576,
-      "crossRegion": true,
-      "maxTokens": 65536,
-      "modelId": "gemini-3.1-pro-preview",
-      "parameters": [
-        "include_reasoning",
-        "max_tokens",
-        "reasoning",
-        "response_format",
-        "seed",
-        "stop",
-        "structured_outputs",
-        "temperature",
-        "tool_choice",
-        "tools",
-        "top_p",
-      ],
-      "provider": "vertex",
-      "ptbEnabled": true,
-      "regions": [
-        "global",
-      ],
-    },
-  },
   "google/gemini-3.1-pro-preview": {
     "gemini-3.1-pro-preview:helicone": {
       "context": 1048576,
@@ -5271,25 +5176,6 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
-    "codex-mini-latest:openrouter": {
-      "context": 200000,
-      "crossRegion": false,
-      "maxTokens": 100000,
-      "modelId": "openai/codex-mini-latest",
-      "parameters": [
-        "max_completion_tokens",
-        "response_format",
-        "seed",
-        "stop",
-        "tool_choice",
-        "tools",
-      ],
-      "provider": "openrouter",
-      "ptbEnabled": true,
-      "regions": [
-        "*",
-      ],
-    },
     "gpt-5.1-2025-11-13:azure": {
       "context": 400000,
       "crossRegion": false,
@@ -5403,7 +5289,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "context": 128000,
       "crossRegion": false,
       "maxTokens": 16384,
-      "modelId": "openai/gpt-5.1-chat-latest",
+      "modelId": "openai/gpt-5.1-chat",
       "parameters": [
         "max_completion_tokens",
         "response_format",
@@ -5574,7 +5460,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "context": 128000,
       "crossRegion": false,
       "maxTokens": 16384,
-      "modelId": "openai/gpt-5.2-chat-latest",
+      "modelId": "openai/gpt-5.2-chat",
       "parameters": [
         "frequency_penalty",
         "logit_bias",
@@ -7295,12 +7181,6 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "vertex",
   ],
-  "google/gemini-3.1-pro": [
-    "google-ai-studio",
-    "helicone",
-    "openrouter",
-    "vertex",
-  ],
   "google/gemini-3.1-pro-preview": [
     "helicone",
     "openrouter",
@@ -7447,7 +7327,6 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openai",
     "openai",
     "openai",
-    "openrouter",
     "openrouter",
     "openrouter",
     "openrouter",
@@ -8975,64 +8854,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
-  "google/gemini-3.1-pro": {
-    "google-ai-studio": [
-      {
-        "cacheMultipliers": {
-          "cachedInput": 0.1,
-        },
-        "cacheStoragePerHour": 0.0000045,
-        "input": 0.000002,
-        "output": 0.000012,
-        "threshold": 0,
-      },
-      {
-        "input": 0.000004,
-        "output": 0.000018,
-        "threshold": 200000,
-      },
-    ],
-    "helicone": [
-      {
-        "input": 0.000002,
-        "output": 0.000012,
-        "threshold": 0,
-      },
-      {
-        "input": 0.000004,
-        "output": 0.000018,
-        "threshold": 200000,
-      },
-    ],
-    "openrouter": [
-      {
-        "input": 0.00000211,
-        "output": 0.00001266,
-        "threshold": 0,
-      },
-      {
-        "input": 0.00000422,
-        "output": 0.00001899,
-        "threshold": 200000,
-      },
-    ],
-    "vertex": [
-      {
-        "cacheMultipliers": {
-          "cachedInput": 0.1,
-        },
-        "cacheStoragePerHour": 0.0000045,
-        "input": 0.000002,
-        "output": 0.000012,
-        "threshold": 0,
-      },
-      {
-        "input": 0.000004,
-        "output": 0.000018,
-        "threshold": 200000,
-      },
-    ],
-  },
   "google/gemini-3.1-pro-preview": {
     "helicone": [
       {
@@ -9881,7 +9702,6 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "codex-mini-latest",
       "providers": [
         "openai",
-        "openrouter",
       ],
     },
     {
@@ -9998,7 +9818,6 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "gemini-3.1-pro-preview",
       "providers": [
-        "google-ai-studio",
         "helicone",
         "openrouter",
         "vertex",
@@ -10625,7 +10444,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "fireworks",
     },
     {
-      "modelCount": 8,
+      "modelCount": 7,
       "provider": "google-ai-studio",
     },
     {
@@ -10653,7 +10472,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "openai",
     },
     {
-      "modelCount": 69,
+      "modelCount": 68,
       "provider": "openrouter",
     },
     {
@@ -10785,8 +10604,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 318,
-  "totalModelProviderConfigs": 318,
+  "totalEndpoints": 316,
+  "totalModelProviderConfigs": 316,
   "totalModelsWithPtb": 105,
   "totalProviders": 21,
 }
