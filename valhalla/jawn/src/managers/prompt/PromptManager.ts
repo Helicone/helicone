@@ -1,4 +1,5 @@
 // src/users/usersService.ts
+import crypto from "crypto";
 import { autoFillInputs } from "@helicone/prompts";
 import {
   CreatePromptResponse,
@@ -68,9 +69,10 @@ export class Prompt2025Manager extends BaseManager {
 
   private generateRandomPromptId(): string {
     const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const randomBytes = crypto.randomBytes(PROMPT_ID_LENGTH);
     let result = '';
     for (let i = 0; i < PROMPT_ID_LENGTH; i++) {
-      result += chars[Math.floor(Math.random() * chars.length)];
+      result += chars[randomBytes[i] % chars.length];
     }
     return result;
   }
