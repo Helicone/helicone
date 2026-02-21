@@ -33,6 +33,11 @@ async function runWithRetry(
     promptVersionId,
     isOriginalRequest,
   } = props;
+  // Validate URL to prevent SSRF
+  if (!["https:", "http:"].includes(url.protocol)) {
+    return err(`Invalid URL protocol: ${url.protocol}`);
+  }
+
   const heliconeOnHeliconeApiKey = await GET_KEY(
     "key:helicone_on_helicone_key"
   );

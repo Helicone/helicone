@@ -149,6 +149,15 @@ export function buildDynamicUpdateQuery(options: {
   };
 }): { query: string; params: any[] } {
   const { from, set, where } = options;
+
+  // Validate table and field names to prevent SQL injection
+  if (!/^[a-zA-Z0-9_]+$/.test(from)) {
+    throw new Error(`Invalid table name: ${from}`);
+  }
+  if (!/^[a-zA-Z0-9_]+$/.test(where.field)) {
+    throw new Error(`Invalid where field name: ${where.field}`);
+  }
+
   const queryParts: string[] = [];
   const params: any[] = [];
   let paramCounter = 1;

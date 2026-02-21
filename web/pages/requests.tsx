@@ -6,31 +6,28 @@ import { SortDirection } from "../services/lib/sorts/requests/sorts";
 import { logger } from "@/lib/telemetry/logger";
 
 // Got this ugly hack from https://stackoverflow.com/questions/21926083/failed-to-execute-removechild-on-node
-const jsToRun = `
-if (typeof Node === 'function' && Node.prototype) {
-  const originalRemoveChild = Node.prototype.removeChild;
-  Node.prototype.removeChild = function(child) {
-    if (child.parentNode !== this) {
-      if (console) {
-        logger.error({ child: child.toString(), parent: this.toString() }, 'Cannot remove a child from a different parent');
+function applyGoogleTranslateFix() {
+  if (typeof Node === "function" && Node.prototype) {
+    const originalRemoveChild = Node.prototype.removeChild;
+    Node.prototype.removeChild = function (child: any) {
+      if (child.parentNode !== this) {
+        return child;
       }
-      return child;
-    }
-    return originalRemoveChild.apply(this, arguments);
-  }
+      return originalRemoveChild.apply(this, arguments as any);
+    };
 
-  const originalInsertBefore = Node.prototype.insertBefore;
-  Node.prototype.insertBefore = function(newNode, referenceNode) {
-    if (referenceNode && referenceNode.parentNode !== this) {
-      if (console) {
-        logger.error({ referenceNode: referenceNode.toString(), parent: this.toString() }, 'Cannot insert before a reference node from a different parent');
+    const originalInsertBefore = Node.prototype.insertBefore;
+    Node.prototype.insertBefore = function (
+      newNode: any,
+      referenceNode: any
+    ) {
+      if (referenceNode && referenceNode.parentNode !== this) {
+        return newNode;
       }
-      return newNode;
-    }
-    return originalInsertBefore.apply(this, arguments);
+      return originalInsertBefore.apply(this, arguments as any);
+    };
   }
 }
-`;
 
 interface RequestsV2Props {
   currentPage: number;
@@ -49,7 +46,7 @@ const RequestsV2 = (props: RequestsV2Props) => {
   useEffect(() => {
     var observer = new MutationObserver(function () {
       if (document.documentElement.className.match("translated")) {
-        eval(jsToRun);
+        applyGoogleTranslateFix();
       } else {
         logger.info("Page untranslate");
       }
