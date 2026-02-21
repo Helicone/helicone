@@ -108,6 +108,8 @@ export class HeliconeDatasetManager extends BaseManager {
   }
 
   async query(datasetId: string, params: { offset: number; limit: number }) {
+    const limit = Math.max(1, Math.min(Math.floor(Number(params.limit) || 50), 10000));
+    const offset = Math.max(0, Math.floor(Number(params.offset) || 0));
     const query = `
       SELECT 
         hdr.id,
@@ -120,8 +122,8 @@ export class HeliconeDatasetManager extends BaseManager {
       AND hdr.organization_id = $2
       AND hd.deleted_at IS NULL
       ORDER BY hdr.created_at DESC
-      LIMIT ${params.limit}
-      OFFSET ${params.offset}
+      LIMIT ${limit}
+      OFFSET ${offset}
     `;
 
     const result = await dbExecute<HeliconeDatasetRow>(query, [

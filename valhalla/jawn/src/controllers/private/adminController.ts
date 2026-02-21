@@ -208,8 +208,8 @@ export class AdminController extends Controller {
   }> {
     await authCheckThrow(request.authParams.userId);
 
-    const limit = body.limit ?? 10;
-    const minRequests = body.minRequests ?? 1_000_000;
+    const limit = Math.max(1, Math.min(Math.floor(Number(body.limit) || 10), 1000));
+    const minRequests = Math.max(0, Math.floor(Number(body.minRequests) || 1_000_000));
 
     // Fetch top organizations by usage in the past month
     const topOrgsQuery = `

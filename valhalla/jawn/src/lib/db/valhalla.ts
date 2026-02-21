@@ -109,7 +109,7 @@ class ValhallaDB implements IValhallaDB {
     try {
       client = await this.pool.connect();
     } catch (thrownErr) {
-      console.error("Error in query", query, thrownErr);
+      console.error("Error in query", query);
       return err(JSON.stringify(thrownErr));
     }
 
@@ -118,7 +118,7 @@ class ValhallaDB implements IValhallaDB {
       client.release();
       return ok(result);
     } catch (thrownErr) {
-      console.error("Error in query", query, thrownErr);
+      console.error("Error in query", query);
       client.release();
       return err(JSON.stringify(thrownErr));
     }
