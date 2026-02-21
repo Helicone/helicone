@@ -51,7 +51,15 @@ const AuthForm = (props: AuthFormProps) => {
       const urlParam = fullUrl.substring(startIndex + 4);
       const decodedUrl = decodeURIComponent(urlParam);
 
-      window.location.href = decodedUrl as string;
+      // Validate redirect URL to prevent open redirect attacks
+      try {
+        const redirectUrl = new URL(decodedUrl, window.location.origin);
+        if (redirectUrl.origin === window.location.origin) {
+          window.location.href = redirectUrl.href;
+        }
+      } catch {
+        // Invalid URL, ignore redirect
+      }
     }
   }, [router.query, router.asPath]);
 
