@@ -67,7 +67,7 @@ import ModelsPanel from "./panels/modelsPanel";
 import ModelsByCostPanel from "./panels/modelsByCostPanel";
 import TopProvidersPanel from "./panels/topProvidersPanel";
 import ErrorsPanel from "./panels/errorsPanel";
-import DetailedTokenUsagePanel from "./panels/detailedTokensPanel";
+import DetailedTokenUsagePanel from "./panels/detailedTokenUsagePanel";
 import ModelUsageOverTimePanel from "./panels/modelUsageOverTimePanel";
 import { QuantilesGraph } from "./quantilesGraph";
 import SuggestionModal from "./suggestionsModal";
