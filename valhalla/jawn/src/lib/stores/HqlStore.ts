@@ -2,6 +2,7 @@ import { createArrayCsvWriter } from "csv-writer";
 import { err, ok, Result } from "../../packages/common/result";
 import { S3Client } from "../shared/db/s3Client";
 import fs from "fs";
+import path from "path";
 
 const HQL_STORE_BUCKET = process.env.HQL_STORE_BUCKET || "hql-store";
 
@@ -24,7 +25,12 @@ export class HqlStore {
     rows: Record<string, any>[]
   ): Promise<Result<string, string>> {
     // if result is ok, if over 100k store in s3 and return url
-    const key = `${organizationId}/${fileName}`;
+    // Validate fileName to prevent path traversal
+    const baseName = path.basename(fileName);
+    if (baseName !== fileName || fileName.includes("..")) {
+      return err("Invalid file name");
+    }
+    const key = `${organizationId}/${baseName}`;
     // Determine column order from keys of first row
     if (rows.length === 0) {
       return err("No data to export");
