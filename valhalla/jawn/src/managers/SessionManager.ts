@@ -344,13 +344,17 @@ export class SessionManager {
   ): Promise<Result<SessionResult[], string>> {
     const {
       timezoneDifference,
-      offset = 0,
-      limit = 50,
+      offset: rawOffset = 0,
+      limit: rawLimit = 50,
     } = requestBody;
 
     if (!isValidTimeZoneDifference(timezoneDifference)) {
       return err("Invalid timezone difference");
     }
+
+    // Validate and clamp numeric values to prevent SQL injection
+    const limit = Math.max(0, Math.min(Math.floor(Number(rawLimit) || 50), 1000));
+    const offset = Math.max(0, Math.floor(Number(rawOffset) || 0));
 
     const { builtFilter, havingFilter } = await this.buildSessionFilters(requestBody);
 

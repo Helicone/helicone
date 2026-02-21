@@ -53,16 +53,25 @@ export class AlertStore {
     private clickhouseClient: ClickhouseClientWrapper
   ) {}
 
+  private static readonly SAFE_IDENTIFIER = /^[a-zA-Z0-9_]+$/;
+
   private buildGroupByColumn(alert: Alert): string {
     if (!alert.grouping) return "";
 
     if (alert.grouping_is_property) {
-      return `properties['${alert.grouping}']`;
+      // Sanitize property name: escape single quotes to prevent injection
+      const sanitized = alert.grouping.replace(/'/g, "\\'");
+      return `properties['${sanitized}']`;
     }
 
-    return (
-      AlertStore.STANDARD_GROUPING_MAP[alert.grouping] || alert.grouping
-    );
+    const mapped = AlertStore.STANDARD_GROUPING_MAP[alert.grouping];
+    if (!mapped) {
+      // Reject unknown grouping values that aren't in the whitelist
+      if (!AlertStore.SAFE_IDENTIFIER.test(alert.grouping)) {
+        throw new Error(`Invalid grouping column: ${alert.grouping}`);
+      }
+    }
+    return mapped || alert.grouping;
   }
 
   private async applyAlertFilter(
@@ -114,11 +123,23 @@ export class AlertStore {
   ): string {
     if (!alert.grouping) return query;
 
+    // Validate numeric values to prevent injection
+    const threshold = Number(alert.threshold);
+    if (isNaN(threshold)) {
+      throw new Error(`Invalid threshold value: ${alert.threshold}`);
+    }
+
     query += ` GROUP BY groupValue`;
-    query += ` HAVING ${thresholdColumn} >= ${alert.threshold}`;
+    query += ` HAVING ${thresholdColumn} >= ${threshold}`;
 
     if (alert.minimum_request_count) {
-      query += ` AND requestCount >= ${alert.minimum_request_count}`;
+      const minCount = Number(alert.minimum_request_count);
+      if (isNaN(minCount)) {
+        throw new Error(
+          `Invalid minimum_request_count: ${alert.minimum_request_count}`
+        );
+      }
+      query += ` AND requestCount >= ${minCount}`;
     }
 
     return query;
