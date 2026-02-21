@@ -85,12 +85,17 @@ export default async function handler(
 
     const payload = JSON.stringify(req.body);
 
-    // Debug: Log incoming webhook data
-
-    // Verify webhook signature (temporarily disabled for testing)
-    // if (signature && !verifyIntercomWebhook(payload, signature.replace("sha256=", ""), intercomSecret)) {
-    //   return res.status(401).json({ error: "Invalid signature" });
-    // }
+    // Verify webhook signature
+    if (
+      !signature ||
+      !verifyIntercomWebhook(
+        payload,
+        signature.replace("sha256=", ""),
+        intercomSecret
+      )
+    ) {
+      return res.status(401).json({ error: "Invalid signature" });
+    }
 
     const webhookData = req.body as IntercomWebhookPayload;
     const service = new IntercomSlackService();

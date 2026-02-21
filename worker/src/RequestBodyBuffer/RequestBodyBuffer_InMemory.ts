@@ -50,8 +50,15 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private static readonly DANGEROUS_KEYS = new Set([
+    "__proto__",
+    "constructor",
+    "prototype",
+  ]);
+
   private applyOverride(body: any, override: object): object {
     for (const [key, value] of Object.entries(override)) {
+      if (RequestBodyBuffer_InMemory.DANGEROUS_KEYS.has(key)) continue;
       if (typeof value !== "object" || value === null || Array.isArray(value)) {
         body[key] = value;
       } else {

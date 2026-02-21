@@ -226,8 +226,10 @@ export function createApp(config: AppConfig, logger: any): FastifyInstance {
     try {
       const bodyJson = JSON.parse(entry.data.toString("utf8"));
 
+      const DANGEROUS_KEYS = new Set(["__proto__", "constructor", "prototype"]);
       const applyOverride = (body: any, override: object): object => {
         for (const [key, value] of Object.entries(override)) {
+          if (DANGEROUS_KEYS.has(key)) continue;
           if (typeof value !== "object" || value === null || Array.isArray(value)) {
             body[key] = value;
           } else {
