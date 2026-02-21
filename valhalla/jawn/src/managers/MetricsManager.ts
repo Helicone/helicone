@@ -723,6 +723,8 @@ export class MetricsManager extends BaseManager {
     if (isNaN(offset) || isNaN(limit)) {
       return { data: null, error: "Invalid offset or limit" };
     }
+    offset = Math.max(0, Math.floor(offset));
+    limit = Math.max(1, Math.min(Math.floor(limit), 10000));
 
     const builtFilter = await buildFilterWithAuthClickHouse({
       org_id: this.authParams.organizationId,
@@ -790,6 +792,8 @@ export class MetricsManager extends BaseManager {
     if (isNaN(offset) || isNaN(limit)) {
       return { data: null, error: "Invalid offset or limit" };
     }
+    offset = Math.max(0, Math.floor(offset));
+    limit = Math.max(1, Math.min(Math.floor(limit), 10000));
 
     const builtFilter = await buildFilterWithAuthClickHouse({
       org_id: this.authParams.organizationId,

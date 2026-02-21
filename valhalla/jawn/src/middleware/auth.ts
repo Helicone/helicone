@@ -68,7 +68,18 @@ export const authMiddleware = async (
   res: Response,
   next: NextFunction
 ) => {
-  if (req.path.startsWith("/v1/public")) {
+  // Public routes — explicitly whitelisted to prevent accidental exposure
+  const PUBLIC_ROUTE_PREFIXES = [
+    "/v1/public/model-registry",
+    "/v1/public/stats",
+    "/v1/public/security",
+    "/v1/public/alert-banner",
+    "/v1/public/status/provider",
+    "/v1/public/pi",
+    "/v1/public/compare",
+    "/v1/public/waitlist",
+  ];
+  if (PUBLIC_ROUTE_PREFIXES.some((prefix) => req.path.startsWith(prefix))) {
     next();
     return;
   }

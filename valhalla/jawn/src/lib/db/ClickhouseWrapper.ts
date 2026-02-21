@@ -101,7 +101,7 @@ export class ClickhouseClientWrapper {
       }
       return { data: validated.data, error: null };
     } catch (err) {
-      console.error("Error executing Clickhouse query: ", query, parameters);
+      console.error("Error executing Clickhouse query: ", query);
       console.error(err);
       // Extract error message properly - Error objects don't stringify well
       const errorMessage = err instanceof Error ? err.message : String(err);
