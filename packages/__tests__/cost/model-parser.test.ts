@@ -115,6 +115,63 @@ describe("parseModelString", () => {
     });
   });
 
+  describe("unknown model handling", () => {
+    it("should reject unknown model without provider", () => {
+      const result = parseModelString("unknown-model-12345");
+
+      expect(result.error).toContain("Unknown model");
+      expect(result.error).toContain("Please specify a provider");
+      expect(result.data).toBeNull();
+    });
+
+    it("should allow unknown model with valid provider (passthrough)", () => {
+      const result = parseModelString("gpt-5-turbo-preview/openai");
+
+      expect(result.error).toBeNull();
+      expect(result.data).toEqual({
+        modelName: "gpt-5-turbo-preview",
+        provider: "openai",
+        isOnline: false,
+      });
+    });
+
+    it("should allow unknown Anthropic model with provider (passthrough)", () => {
+      const result = parseModelString("claude-4-opus-20250301/anthropic");
+
+      expect(result.error).toBeNull();
+      expect(result.data).toEqual({
+        modelName: "claude-4-opus-20250301",
+        provider: "anthropic",
+        isOnline: false,
+      });
+    });
+
+    it("should allow unknown model with provider and customUid (passthrough)", () => {
+      const result = parseModelString(
+        "unknown-model-version/openai/custom-uid-123"
+      );
+
+      expect(result.error).toBeNull();
+      expect(result.data).toEqual({
+        modelName: "unknown-model-version",
+        provider: "openai",
+        customUid: "custom-uid-123",
+        isOnline: false,
+      });
+    });
+
+    it("should allow unknown model with :online suffix and provider (passthrough)", () => {
+      const result = parseModelString("new-model-v2:online/anthropic");
+
+      expect(result.error).toBeNull();
+      expect(result.data).toEqual({
+        modelName: "new-model-v2",
+        provider: "anthropic",
+        isOnline: true,
+      });
+    });
+  });
+
   describe("model name mappings for backward compatibility", () => {
     it("should map gemini-1.5-flash to gemini-2.5-flash-lite", () => {
       const result = parseModelString("gemini-1.5-flash");
