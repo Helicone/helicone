@@ -276,6 +276,25 @@ function getModelProviderConfigByVersion(
   return ok(archivedConfig || null);
 }
 
+/**
+ * Find the canonical model ID from a provider model ID.
+ * This is useful when a request uses a provider-specific model ID (e.g., "zai-glm-4.7")
+ * and we need to find the canonical model ID (e.g., "glm-4.7").
+ *
+ * @param providerModelId - The provider-specific model ID (e.g., "zai-glm-4.7", "accounts/fireworks/models/glm-4p7")
+ * @returns The canonical model ID if found, null otherwise
+ */
+function findCanonicalModelId(providerModelId: string): string | null {
+  // First check if it's already a canonical model ID
+  if (allModels[providerModelId as keyof typeof allModels]) {
+    return providerModelId;
+  }
+
+  // Look up in the reverse mapping
+  const canonical = indexes.providerModelIdToCanonicalModelId.get(providerModelId);
+  return canonical ?? null;
+}
+
 export const registry = {
   getAllModelIds,
   getAllModelsWithIds,
@@ -294,4 +313,5 @@ export const registry = {
   getModelProviderEntry,
   getModelProviderConfigByVersion,
   getAuthorByModel,
+  findCanonicalModelId,
 };

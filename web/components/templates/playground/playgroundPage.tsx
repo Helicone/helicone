@@ -226,8 +226,10 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
   const { initializeColorMap } = useVariableColorMapStore();
 
   // Model registry for validating supported models
-  const { data: playgroundModels, isLoading: modelsLoading } =
+  const { data: modelRegistryData, isLoading: modelsLoading } =
     useModelRegistry();
+  const playgroundModels = modelRegistryData?.models ?? [];
+  const providerModelIdMap = modelRegistryData?.providerModelIdMap ?? {};
 
   // Track unsupported model warning
   const [unsupportedModelWarning, setUnsupportedModelWarning] = useState<{
@@ -279,30 +281,50 @@ const PlaygroundPage = (props: PlaygroundPageProps) => {
 
   // Effect to validate model when registry loads or original model changes
   useEffect(() => {
-    if (modelsLoading || !playgroundModels || playgroundModels.length === 0) {
+    if (modelsLoading || playgroundModels.length === 0) {
       return;
     }
 
     // If we have an original model from data that needs validation
     if (originalModelFromData) {
+      // First check if the model is directly supported
       const isModelSupported = playgroundModels.some(
-        (m) => m.id === originalModelFromData,
+        (m) => m.id === originalModelFromData
       );
 
-      if (!isModelSupported) {
-        setUnsupportedModelWarning({
-          originalModel: originalModelFromData,
-          fallbackModel: DEFAULT_FALLBACK_MODEL,
-        });
-        setSelectedModel(DEFAULT_FALLBACK_MODEL);
-      } else {
+      if (isModelSupported) {
         setUnsupportedModelWarning(null);
         setSelectedModel(originalModelFromData);
+        setOriginalModelFromData(null);
+        return;
       }
-      // Clear the original model after processing
+
+      // Try to find canonical model ID (for provider-specific model IDs like "zai-glm-4.7")
+      const canonicalModelId = providerModelIdMap[originalModelFromData];
+
+      if (canonicalModelId) {
+        const isCanonicalSupported = playgroundModels.some(
+          (m) => m.id === canonicalModelId
+        );
+
+        if (isCanonicalSupported) {
+          // Found a supported canonical model
+          setUnsupportedModelWarning(null);
+          setSelectedModel(canonicalModelId);
+          setOriginalModelFromData(null);
+          return;
+        }
+      }
+
+      // Neither original nor canonical model is supported, fall back
+      setUnsupportedModelWarning({
+        originalModel: originalModelFromData,
+        fallbackModel: DEFAULT_FALLBACK_MODEL,
+      });
+      setSelectedModel(DEFAULT_FALLBACK_MODEL);
       setOriginalModelFromData(null);
     }
-  }, [modelsLoading, playgroundModels, originalModelFromData]);
+  }, [modelsLoading, playgroundModels, providerModelIdMap, originalModelFromData]);
 
   const [defaultContent, setDefaultContent] = useState<MappedLLMRequest | null>(
     null,

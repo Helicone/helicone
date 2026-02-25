@@ -38,6 +38,7 @@ export const PROVIDER_PRIORITIES: Record<ModelProviderName, number> = {
   perplexity: 4,
   vertex: 4,
   xai: 4,
+  zai: 4,
 
   // Priority 5: Secondary primary providers
   "google-ai-studio": 5,

@@ -19,6 +19,7 @@ import { OpenRouterProvider } from "./openrouter";
 import { PerplexityProvider } from "./perplexity";
 import { VertexProvider } from "./vertex";
 import { XAIProvider } from "./xai";
+import { ZaiProvider } from "./zai";
 
 // Create singleton instances (stateless, so safe to share)
 export const providers = {
@@ -42,7 +43,8 @@ export const providers = {
   openrouter: new OpenRouterProvider(),
   perplexity: new PerplexityProvider(),
   vertex: new VertexProvider(),
-  xai: new XAIProvider()
+  xai: new XAIProvider(),
+  zai: new ZaiProvider(),
 } as const;
 
 export type ModelProviderName = keyof typeof providers;
@@ -87,6 +89,7 @@ export const ResponsesAPIEnabledProviders: ModelProviderName[] = [
   "xai",
   "baseten",
   "fireworks",
+  "zai",
 
   // anthropic and chat completions provider
   "vertex"
