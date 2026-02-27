@@ -4,21 +4,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { fetchRequests, fetchSessions, useAiGateway } from "./lib/helicone-client.js";
 import { requestFilterNodeSchema, sortLeafRequestSchema, sessionFilterNodeSchema } from "./types/generated-zod.js";
-
-/**
- * Wraps a Zod schema with a preprocessing step that parses JSON strings.
- * Some MCP clients (e.g. Claude Code) serialize complex object parameters
- * as JSON strings rather than native objects. This ensures validation
- * still works regardless of how the client sends the data.
- */
-function jsonPreprocess<T extends z.ZodTypeAny>(schema: T) {
-	return z.preprocess((val) => {
-		if (typeof val === "string" && val !== "all") {
-			try { return JSON.parse(val); } catch { return val; }
-		}
-		return val;
-	}, schema);
-}
+import { jsonPreprocess } from "./lib/json-preprocess.js";
 
 const HELICONE_API_KEY = process.env.HELICONE_API_KEY;
 
