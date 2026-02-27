@@ -5,6 +5,21 @@ import { z } from "zod";
 import { fetchRequests, fetchSessions, useAiGateway } from "./lib/helicone-client.js";
 import { requestFilterNodeSchema, sortLeafRequestSchema, sessionFilterNodeSchema } from "./types/generated-zod.js";
 
+/**
+ * Wraps a Zod schema with a preprocessing step that parses JSON strings.
+ * Some MCP clients (e.g. Claude Code) serialize complex object parameters
+ * as JSON strings rather than native objects. This ensures validation
+ * still works regardless of how the client sends the data.
+ */
+function jsonPreprocess<T extends z.ZodTypeAny>(schema: T) {
+	return z.preprocess((val) => {
+		if (typeof val === "string" && val !== "all") {
+			try { return JSON.parse(val); } catch { return val; }
+		}
+		return val;
+	}, schema);
+}
+
 const HELICONE_API_KEY = process.env.HELICONE_API_KEY;
 
 if (!HELICONE_API_KEY) {
@@ -21,10 +36,10 @@ server.tool(
 	"query_requests",
 	"Query Helicone requests with filters, pagination, sorting, and optional body content",
 	{
-		filter: requestFilterNodeSchema.optional().describe("Filter criteria for requests"),
+		filter: jsonPreprocess(requestFilterNodeSchema).optional().describe("Filter criteria for requests"),
 		offset: z.number().optional().describe("Pagination offset (default: 0)"),
 		limit: z.number().optional().describe("Maximum number of results to return (default: 100)"),
-		sort: sortLeafRequestSchema.optional().describe("Sort criteria"),
+		sort: jsonPreprocess(sortLeafRequestSchema).optional().describe("Sort criteria"),
 		includeBodies: z.boolean().optional().describe("Fetch and include request/response bodies (default: false). If true, fetches content from signed URLs."),
 	},
 	async (params: any) => {
@@ -70,7 +85,7 @@ server.tool(
 		endTimeUnixMs: z.number().describe("End time for session query (Unix timestamp in milliseconds)"),
 		nameEquals: z.string().optional().describe("Filter sessions by exact name match"),
 		timezoneDifference: z.number().describe("Timezone difference in hours (e.g., -5 for EST)"),
-		filter: sessionFilterNodeSchema.optional().describe("Advanced filter criteria"),
+		filter: jsonPreprocess(sessionFilterNodeSchema).optional().describe("Advanced filter criteria"),
 		offset: z.number().optional().describe("Pagination offset (default: 0)"),
 		limit: z.number().optional().describe("Maximum number of results to return (default: 100)"),
 	},
