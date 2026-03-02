@@ -55,7 +55,7 @@ const tabOptions: {
           </p>
           <Link
             className="w-fit rounded-lg border border-white bg-violet-500 px-4 py-2 text-sm font-bold hover:bg-violet-500"
-            href={"/signup"}
+            href={"/contact"}
           >
             Start Monitoring
           </Link>
@@ -114,7 +114,7 @@ const tabOptions: {
             key vault, and much more...
           </p>
           <Link
-            href="/signup"
+            href="/contact"
             className="w-fit rounded-lg border border-black bg-green-400 px-4 py-2 text-sm font-bold hover:bg-green-500"
           >
             Get integrated in minutes
@@ -168,7 +168,7 @@ const tabOptions: {
             models
           </p>
           <Link
-            href="/signup"
+            href="/contact"
             className="w-fit rounded-lg border border-black bg-orange-400 px-4 py-2 text-sm font-bold hover:bg-orange-500"
           >
             Start Collecting Data
@@ -205,7 +205,7 @@ const tabOptions: {
             costs.
           </p>
           <Link
-            href="/signup"
+            href="/contact"
             className="w-fit rounded-lg border border-white bg-red-600 px-4 py-2 text-sm font-bold hover:bg-red-500"
           >
             Start Fine-tuning

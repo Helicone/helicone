@@ -118,7 +118,7 @@ const ENTERPRISE_TABS: {
     ],
     cta: (
       <Link
-        href="/signup"
+        href="/contact"
         className="flex w-fit items-center gap-1 rounded-lg border-2 border-violet-700 bg-violet-500 px-4 py-2 font-bold text-white shadow-lg duration-500 ease-in-out hover:bg-violet-600"
       >
         Get Started
@@ -136,7 +136,7 @@ const ENTERPRISE_TABS: {
     bullets: [],
     cta: (
       <Link
-        href="/signup"
+        href="/contact"
         className="flex w-fit items-center gap-1 rounded-lg border-2 border-violet-700 bg-violet-500 px-4 py-2 font-bold text-white shadow-lg duration-500 ease-in-out hover:bg-violet-600"
       >
         Get Started

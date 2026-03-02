@@ -104,10 +104,10 @@ const NavBarV2 = (props: NavBarV2Props) => {
                   Sign In
                 </Link>
                 <Link
-                  href="/signup"
+                  href="/contact"
                   className="whitespace-nowrap rounded-md border-2 border-sky-700 bg-sky-500 px-4 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-sky-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                 >
-                  Sign up for free
+                  Contact Us
                 </Link>
               </>
             )}
