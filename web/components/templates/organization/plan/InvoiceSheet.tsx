@@ -27,6 +27,7 @@ export const InvoiceSheet: React.FC = () => {
 
       return invoice;
     },
+    enabled: !!org?.currentOrg?.id,
   });
 
   const formatCurrency = (amount: number) => {
@@ -52,7 +53,7 @@ export const InvoiceSheet: React.FC = () => {
             Details of your next billing cycle
           </SheetDescription>
         </SheetHeader>
-        <div className="mt-6 space-y-6">
+        <div className="mt-6 flex flex-col gap-6">
           {upcomingInvoice.isLoading ? (
             <p>Loading invoice details...</p>
           ) : upcomingInvoice.error ? (
@@ -71,7 +72,7 @@ export const InvoiceSheet: React.FC = () => {
                   )}
                 </span>
               </div>
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-muted-foreground">
                 Due Date:{" "}
                 {new Date(
                   upcomingInvoice.data.data.next_payment_attempt! * 1000,
@@ -79,7 +80,7 @@ export const InvoiceSheet: React.FC = () => {
               </div>
               <div className="border-t pt-4">
                 <h3 className="mb-2 font-semibold">Line Items:</h3>
-                <div className="space-y-3">
+                <div className="flex flex-col gap-3">
                   {upcomingInvoice.data.data.lines?.data.map(
                     (item: any, index: number) => (
                       <div
@@ -167,7 +168,7 @@ export const InvoiceSheet: React.FC = () => {
                   </div>
                 </div>
               )}
-              <div className="space-y-2 border-t pt-4">
+              <div className="flex flex-col gap-2 border-t pt-4">
                 <div className="flex items-center justify-between text-sm">
                   <span>Subtotal:</span>
                   <span>

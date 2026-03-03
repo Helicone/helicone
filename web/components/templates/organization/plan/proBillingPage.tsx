@@ -31,6 +31,7 @@ const useProSubscription = () => {
       const subscription = await jawn.GET("/v1/stripe/subscription");
       return subscription;
     },
+    enabled: !!org?.currentOrg?.id,
   });
 
   const manageSubscriptionPaymentLink = useMutation({
@@ -120,11 +121,11 @@ export const ProPlanCard = () => {
             </Badge>
           </div>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="flex flex-col gap-6">
           {subscription.data?.data?.current_period_start &&
             subscription.data?.data?.current_period_end && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <CalendarIcon className="h-4 w-4" />
+                <CalendarIcon size={16} />
                 <span>Current billing period: {getBillingCycleDates()}</span>
               </div>
             )}
@@ -276,11 +277,11 @@ export const LegacyProPlanCard = () => {
             </Badge>
           </div>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="flex flex-col gap-6">
           {subscription.data?.data?.current_period_start &&
             subscription.data?.data?.current_period_end && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <CalendarIcon className="h-4 w-4" />
+                <CalendarIcon size={16} />
                 <span>Current billing period: {getBillingCycleDates()}</span>
               </div>
             )}
@@ -295,7 +296,7 @@ export const LegacyProPlanCard = () => {
             </div>
           )}
 
-          <div className="space-y-4">
+          <div className="flex flex-col gap-4">
             <p className="text-sm text-muted-foreground">
               $20/seat/month + usage-based request billing
             </p>
@@ -303,11 +304,11 @@ export const LegacyProPlanCard = () => {
             {/* Add-ons Section */}
             <div className="rounded-lg border p-4">
               <h3 className="mb-3 text-sm font-medium">Active Add-ons</h3>
-              <div className="space-y-2">
+              <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div
-                      className={`h-2 w-2 rounded-full ${hasPromptsAddon ? "bg-green-500" : "bg-gray-300"}`}
+                      className={`h-2 w-2 rounded-full ${hasPromptsAddon ? "bg-green-500" : "bg-muted"}`}
                     />
                     <span className="text-sm">Prompts</span>
                   </div>
