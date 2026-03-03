@@ -4,6 +4,77 @@ import { PromiseGenericResult, ok, err } from "../../packages/common/result";
 import { WebhookConfig } from "../shared/types";
 import { randomUUID } from "crypto";
 
+/**
+ * Validates that a webhook destination URL does not point to private/internal networks.
+ * Prevents SSRF attacks by blocking requests to localhost, private IPs, and metadata endpoints.
+ */
+function isPrivateOrReservedHostname(hostname: string): boolean {
+  const lower = hostname.toLowerCase();
+
+  // Block localhost variants
+  if (
+    lower === "localhost" ||
+    lower === "127.0.0.1" ||
+    lower === "[::1]" ||
+    lower === "0.0.0.0"
+  ) {
+    return true;
+  }
+
+  // Block cloud metadata endpoints (AWS, GCP, Azure)
+  if (lower === "169.254.169.254" || lower === "metadata.google.internal") {
+    return true;
+  }
+
+  // Block private IPv4 ranges
+  const parts = hostname.split(".");
+  if (parts.length === 4 && parts.every((p) => /^\d+$/.test(p))) {
+    const octets = parts.map(Number);
+    // 10.0.0.0/8
+    if (octets[0] === 10) return true;
+    // 172.16.0.0/12
+    if (octets[0] === 172 && octets[1] >= 16 && octets[1] <= 31) return true;
+    // 192.168.0.0/16
+    if (octets[0] === 192 && octets[1] === 168) return true;
+    // 169.254.0.0/16 (link-local)
+    if (octets[0] === 169 && octets[1] === 254) return true;
+    // 127.0.0.0/8
+    if (octets[0] === 127) return true;
+    // 0.0.0.0/8
+    if (octets[0] === 0) return true;
+  }
+
+  // Block .local, .internal, .corp domains
+  if (
+    lower.endsWith(".local") ||
+    lower.endsWith(".internal") ||
+    lower.endsWith(".corp") ||
+    lower.endsWith(".lan")
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+function validateWebhookDestination(destination: string): string | null {
+  if (!destination || typeof destination !== "string") {
+    return "Invalid destination URL";
+  }
+  if (!destination.startsWith("https://")) {
+    return "Destination must use HTTPS";
+  }
+  try {
+    const url = new URL(destination);
+    if (isPrivateOrReservedHostname(url.hostname)) {
+      return "Destination cannot point to private or internal networks";
+    }
+  } catch {
+    return "Invalid destination URL format";
+  }
+  return null;
+}
+
 export type WebhookPayload = {
   payload: {
     signedUrl?: string;
@@ -76,12 +147,9 @@ export async function sendToWebhook(
       return ok(`Skipping webhook due to property filter`);
     }
 
-    if (
-      !webhook.destination ||
-      typeof webhook.destination !== "string" ||
-      !webhook.destination.startsWith("https://")
-    ) {
-      return ok(`Skipping webhook due to invalid destination`);
+    const destinationError = validateWebhookDestination(webhook.destination);
+    if (destinationError) {
+      return ok(`Skipping webhook: ${destinationError}`);
     }
 
     const MAX_BODY_SIZE = 10 * 1024; // 10 KB limit
@@ -270,12 +338,9 @@ export async function sendTestWebhook(
     
     const includeData = config.includeData !== false;
 
-    if (
-      !webhook.destination ||
-      typeof webhook.destination !== "string" ||
-      !webhook.destination.startsWith("https://")
-    ) {
-      return err(`Invalid destination URL. Must start with https://`);
+    const destinationError = validateWebhookDestination(webhook.destination);
+    if (destinationError) {
+      return err(destinationError);
     }
 
     // Generate mock data

@@ -87,6 +87,8 @@ export async function dbExecute<T>(
   } catch (err) {
     console.error("Error executing query: ", query);
     console.error(err);
-    return { data: null, error: JSON.stringify(err) };
+    const safeMessage =
+      err instanceof Error ? err.message : "Database query failed";
+    return { data: null, error: safeMessage };
   }
 }
