@@ -175,6 +175,27 @@ export class OrganizationController extends Controller {
     @Path() resellerId: string,
     @Request() request: JawnAuthenticatedRequest
   ) {
+    // Verify the requesting user's organization is the reseller
+    const orgId = request.authParams.organizationId;
+    const resellerCheck = await dbExecute<{ reseller_id: string }>(
+      `SELECT reseller_id FROM organization WHERE id = $1 AND soft_delete = false`,
+      [orgId]
+    );
+    if (
+      !resellerCheck.data?.length ||
+      resellerCheck.data[0].reseller_id !== resellerId
+    ) {
+      // Only allow access if the user's org is the reseller org itself
+      const isReseller = await dbExecute<{ id: string }>(
+        `SELECT id FROM organization WHERE id = $1 AND reseller_id = $2 AND soft_delete = false`,
+        [orgId, resellerId]
+      );
+      if (!isReseller.data?.length) {
+        this.setStatus(403);
+        return err("Not authorized to access this reseller's organizations");
+      }
+    }
+
     const result = await dbExecute<
       Database["public"]["Tables"]["organization"]["Row"]
     >(

@@ -98,12 +98,19 @@ export const authMiddleware = async (
 
     const authParams = await authFromRequest(req);
 
+    const isWriteMethod = ["POST", "PUT", "PATCH", "DELETE"].includes(
+      req.method
+    );
+    const requiredPermission = isWriteMethod ? "w" : "r";
+    // The /v1/log/request endpoint uses write permission "w" for logging
+    const isLogEndpoint = req.path === "/v1/log/request";
+
     if (
       authParams.error ||
       !authParams.data?.organizationId ||
       (authParams.data.keyPermissions &&
-        !authParams.data?.keyPermissions?.includes("r") &&
-        req.path !== "/v1/log/request") // For local testing
+        !authParams.data?.keyPermissions?.includes(requiredPermission) &&
+        !(isLogEndpoint && authParams.data?.keyPermissions?.includes("w")))
     ) {
       res.status(401).json({
         error: authParams.error,

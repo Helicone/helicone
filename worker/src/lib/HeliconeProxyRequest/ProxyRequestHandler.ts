@@ -62,7 +62,6 @@ async function getProviderResponse(
             "helicone-message": "Unable to connect to the provider",
             support:
               "Please reach out on our discord or email us at help@helicone.ai, we'd love to help!",
-            "error-trace": "" + e.message + " " + e.name + " " + e.stack,
           }),
           {
             status: 502, // Bad Gateway
@@ -79,7 +78,6 @@ async function getProviderResponse(
             "helicone-message": "The request to the provider timed out",
             support:
               "Please reach out on our discord or email us at help@helicone.ai, we'd love to help!",
-            "error-trace": "" + e.message + " " + e.name + " " + e.stack,
           }),
           {
             status: 504, // Gateway Timeout
@@ -95,7 +93,6 @@ async function getProviderResponse(
         "helicone-message": "An unknown error occurred",
         support:
           "Please reach out on our discord or email us at help@helicone.ai, we'd love to help!",
-        "error-trace": JSON.stringify(e),
       }),
       { status: 500, headers: { "content-type": "application/json" } }
     );
