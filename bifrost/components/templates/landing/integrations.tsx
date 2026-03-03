@@ -3,6 +3,7 @@
 import { ISLAND_WIDTH } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { ClipboardIcon } from "@heroicons/react/24/outline";
+import DOMPurify from "dompurify";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
@@ -333,7 +334,7 @@ response = client.chat.completions.create(
           </div>
           <div
             className="p-2 md:p-4 bg-[#24292e] overflow-x-auto text-xs md:text-sm"
-            dangerouslySetInnerHTML={{ __html: highlightedCode }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(highlightedCode) }}
           />
         </div>
         <Toaster />

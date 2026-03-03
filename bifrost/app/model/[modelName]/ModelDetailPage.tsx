@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import DOMPurify from "dompurify";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -709,7 +710,7 @@ completion = client.chat.completions.create(
               {highlightedCode ? (
                 <div
                   className="overflow-x-auto rounded-lg bg-gray-900 text-gray-100 [&_pre]:!p-4"
-                  dangerouslySetInnerHTML={{ __html: highlightedCode }}
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(highlightedCode) }}
                 />
               ) : (
                 <div className="bg-gray-900 rounded-lg h-40 animate-pulse" />

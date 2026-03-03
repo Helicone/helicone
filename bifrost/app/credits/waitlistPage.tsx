@@ -3,6 +3,7 @@
 import { CreditsWaitlistForm } from "./CreditsWaitlist";
 import { Col } from "@/components/common/col";
 import { ArrowUpRight } from "lucide-react";
+import DOMPurify from "dompurify";
 import {
   Accordion,
   AccordionContent,
@@ -288,7 +289,7 @@ const response = await client.chat.completions.create({
                   {highlightedCode ? (
                     <div 
                       className="rounded-lg overflow-hidden max-w-2xl [&_pre]:!m-0 [&_pre]:!p-4"
-                      dangerouslySetInnerHTML={{ __html: highlightedCode }}
+                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(highlightedCode) }}
                     />
                   ) : (
                     <div className="bg-[#24292e] rounded-lg overflow-hidden max-w-2xl">
