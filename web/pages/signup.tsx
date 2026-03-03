@@ -32,13 +32,9 @@ const SignUp = () => {
 
             <div className="flex flex-col items-center text-center gap-4">
               <h2 className="text-2xl font-semibold text-gray-900">
-                We&apos;ll be right back
+                Sign ups are disabled
               </h2>
               <p className="text-sm text-gray-600">
-                New account registration is not available right now. Please check
-                back soon.
-              </p>
-              <p className="mt-4 text-sm text-gray-600">
                 Already have an account?{" "}
                 <Link
                   href={"/signin"}
