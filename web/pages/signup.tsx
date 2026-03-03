@@ -1,42 +1,11 @@
-import { InboxArrowDownIcon } from "@heroicons/react/24/outline";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import useNotification from "../components/shared/notification/useNotification";
-import ThemedModal from "../components/shared/themed/themedModal";
-import AuthForm from "../components/templates/auth/authForm";
-import { DEMO_EMAIL } from "../lib/constants";
 import PublicMetaData from "../components/layout/public/publicMetaData";
 import { GetServerSidePropsContext } from "next";
-import { InfoBanner } from "../components/shared/themed/themedDemoBanner";
 import { env } from "next-runtime-env";
-import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
-import { logger } from "@/lib/telemetry/logger";
+import Link from "next/link";
+import Image from "next/image";
+import { AuthBrandingPanel } from "../components/templates/auth/AuthBrandingPanel";
 
 const SignUp = () => {
-  const heliconeAuthClient = useHeliconeAuthClient();
-  const { setNotification } = useNotification();
-  const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
-  const router = useRouter();
-  const { demo = "false" } = router.query;
-
-  useEffect(() => {
-    const { demo } = router.query;
-    if (demo === "true") {
-      localStorage.setItem("openDemo", "true");
-    }
-  }, [router.query]);
-
-  useEffect(() => {
-    if (
-      heliconeAuthClient.user &&
-      heliconeAuthClient.user.id &&
-      heliconeAuthClient.user.email &&
-      heliconeAuthClient.user.email !== DEMO_EMAIL
-    ) {
-      router.push(`/welcome`);
-    }
-  }, [heliconeAuthClient.user, router]);
-
   return (
     <PublicMetaData
       description={
@@ -44,83 +13,44 @@ const SignUp = () => {
       }
       ogImageUrl={"https://www.helicone.ai/static/helicone-og.webp"}
     >
-      {demo === "true" && <InfoBanner />}
+      <div className="flex h-screen w-full">
+        <AuthBrandingPanel />
 
-      <AuthForm
-        handleEmailSubmit={async (email: string, password: string) => {
-          const origin = window.location.origin;
-          logger.info({ email, origin }, "User signing up with email");
+        <div className="flex w-full flex-col items-center justify-center bg-white p-6 md:w-1/2 md:p-12">
+          <div className="w-full max-w-md">
+            <div className="mb-8 flex justify-center md:hidden">
+              <Link href="https://www.helicone.ai/" className="flex">
+                <Image
+                  src={"/static/logo.svg"}
+                  alt="Helicone"
+                  height={80}
+                  width={80}
+                  priority={true}
+                />
+              </Link>
+            </div>
 
-          const { error } = await heliconeAuthClient.signUp({
-            email: email,
-            password: password,
-            options: {
-              emailRedirectTo: `${origin}/onboarding`,
-            },
-          });
-
-          if (error) {
-            setNotification(
-              "Error creating your account. Please try again.",
-              "error",
-            );
-            logger.error({ error, email }, "Email sign up failed");
-            return;
-          }
-
-          setShowEmailConfirmation(true);
-        }}
-        handleGoogleSubmit={async () => {
-          const { error } = await heliconeAuthClient.signInWithOAuth({
-            provider: "google",
-            options: {
-              redirectTo: `${origin}/onboarding`,
-            },
-          });
-          if (error) {
-            setNotification(
-              "Error creating your account. Please try again.",
-              "error",
-            );
-            logger.error({ error }, "Google OAuth sign up failed");
-            return;
-          }
-        }}
-        handleGithubSubmit={async () => {
-          const { error } = await heliconeAuthClient.signInWithOAuth({
-            provider: "github",
-            options: {
-              redirectTo: `${origin}/onboarding`,
-            },
-          });
-          if (error) {
-            setNotification(
-              "Error creating your account. Please try again.",
-              "error",
-            );
-            logger.error({ error }, "GitHub OAuth sign up failed");
-            return;
-          }
-        }}
-        showSSOButton={true}
-        authFormType={"signup"}
-      />
-      <ThemedModal
-        open={showEmailConfirmation}
-        setOpen={setShowEmailConfirmation}
-      >
-        <div className="flex w-full min-w-[300px] flex-col items-center justify-center space-y-4 p-2 text-center">
-          <h1 className="text-2xl font-semibold text-gray-900">
-            Confirm your email
-          </h1>
-          <p className="mt-2 text-sm text-gray-500">
-            Please check your email for a confirmation link.
-          </p>
-          <div className="pt-4">
-            <InboxArrowDownIcon className="h-16 w-16 text-gray-700" />
+            <div className="flex flex-col items-center text-center gap-4">
+              <h2 className="text-2xl font-semibold text-gray-900">
+                We&apos;ll be right back
+              </h2>
+              <p className="text-sm text-gray-600">
+                New account registration is not available right now. Please check
+                back soon.
+              </p>
+              <p className="mt-4 text-sm text-gray-600">
+                Already have an account?{" "}
+                <Link
+                  href={"/signin"}
+                  className="text-sky-500 hover:text-sky-700"
+                >
+                  Sign in here.
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
-      </ThemedModal>
+      </div>
     </PublicMetaData>
   );
 };

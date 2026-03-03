@@ -152,17 +152,7 @@ const AuthForm = (props: AuthFormProps) => {
                   Sign in here.
                 </Link>
               </p>
-            ) : (
-              <p className="mt-2 text-sm text-gray-600">
-                New to Helicone?{" "}
-                <Link
-                  href={"/signup"}
-                  className="text-sky-500 hover:text-sky-700"
-                >
-                  Create an account here.
-                </Link>
-              </p>
-            )}
+            ) : null}
           </div>
 
           <form
