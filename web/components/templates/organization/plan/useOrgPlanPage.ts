@@ -51,8 +51,8 @@ const useOrgPlanPage = ({
     return x.isLoading || x.isFetching;
   }
 
-  const isAnyLoading = false;
-  Object.values(overTimeData).some(isLoading) ||
+  const isAnyLoading =
+    Object.values(overTimeData).some(isLoading) ||
     Object.values(metrics).some(isLoading);
 
   return {

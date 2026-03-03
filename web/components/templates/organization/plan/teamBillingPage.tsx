@@ -32,6 +32,7 @@ const useTeamSubscription = () => {
       const subscription = await jawn.GET("/v1/stripe/subscription");
       return subscription;
     },
+    enabled: !!org?.currentOrg?.id,
   });
 
   const manageSubscriptionPaymentLink = useMutation({
@@ -103,7 +104,7 @@ export const TeamPlanCard = () => {
             All features included in the Team plan
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="flex flex-col gap-6">
           {isTrialActive && (
             <InfoBox icon={() => <></>}>
               <p>
@@ -117,7 +118,7 @@ export const TeamPlanCard = () => {
 
           {subscription.data?.data?.current_period_start &&
             subscription.data?.data?.current_period_end && (
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-muted-foreground">
                 <p>
                   Current billing period:{" "}
                   {new Date(
@@ -141,7 +142,7 @@ export const TeamPlanCard = () => {
 
           <div className="flex flex-col gap-2">
             <div className="flex items-start gap-2 text-sm">
-              <CheckIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-green-500" />
+              <CheckIcon size={16} className="mt-0.5 flex-shrink-0 text-confirmative" />
               <span>
                 Unlimited seats, 5 organizations (
                 <a
@@ -160,12 +161,12 @@ export const TeamPlanCard = () => {
               "Data export",
             ].map((feature) => (
               <div key={feature} className="flex items-start gap-2 text-sm">
-                <CheckIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-green-500" />
+                <CheckIcon size={16} className="mt-0.5 flex-shrink-0 text-confirmative" />
                 <span>{feature}</span>
               </div>
             ))}
             <div className="flex items-start gap-2 text-sm">
-              <CheckIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-green-500" />
+              <CheckIcon size={16} className="mt-0.5 flex-shrink-0 text-confirmative" />
               <a
                 href="https://trust.helicone.ai"
                 target="_blank"
@@ -220,7 +221,7 @@ export const TeamPlanCard = () => {
             <InvoiceSheet />
             <Link
               href="https://helicone.ai/pricing"
-              className="text-sm text-gray-500 underline"
+              className="text-sm text-muted-foreground underline"
             >
               View pricing page
             </Link>
@@ -228,7 +229,7 @@ export const TeamPlanCard = () => {
         </CardContent>
       </Card>
 
-      <div className="w-full space-y-6 lg:w-[450px]">
+      <div className="w-full flex flex-col gap-6 lg:w-[450px]">
         <PlanFeatureCard
           title="Learn about our Enterprise plan"
           description="Built for companies looking to scale. Includes everything in Team, plus dedicated support and custom SLAs."
@@ -280,7 +281,7 @@ export const LegacyTeamPlanCard = () => {
             $200/month + usage-based request billing
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="flex flex-col gap-6">
           {isTrialActive && (
             <InfoBox icon={() => <></>}>
               <p>
@@ -294,7 +295,7 @@ export const LegacyTeamPlanCard = () => {
 
           {subscription.data?.data?.current_period_start &&
             subscription.data?.data?.current_period_end && (
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-muted-foreground">
                 <p>
                   Current billing period:{" "}
                   {new Date(
@@ -326,7 +327,7 @@ export const LegacyTeamPlanCard = () => {
               "Data export",
             ].map((feature) => (
               <div key={feature} className="flex items-start gap-2 text-sm">
-                <CheckIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-green-500" />
+                <CheckIcon size={16} className="mt-0.5 flex-shrink-0 text-confirmative" />
                 <span>{feature}</span>
               </div>
             ))}
@@ -372,7 +373,7 @@ export const LegacyTeamPlanCard = () => {
             <InvoiceSheet />
             <Link
               href="https://helicone.ai/pricing"
-              className="text-sm text-gray-500 underline"
+              className="text-sm text-muted-foreground underline"
             >
               View pricing page
             </Link>
@@ -380,7 +381,7 @@ export const LegacyTeamPlanCard = () => {
         </CardContent>
       </Card>
 
-      <div className="w-full space-y-6 lg:w-[450px]">
+      <div className="w-full flex flex-col gap-6 lg:w-[450px]">
         <PlanFeatureCard
           title="Learn about our Enterprise plan"
           description="Built for companies looking to scale. Includes everything in Team, plus dedicated support and custom SLAs."

@@ -13,6 +13,7 @@ export function useUpgradePlan() {
       const subscription = await jawn.GET("/v1/stripe/subscription");
       return subscription;
     },
+    enabled: !!org?.currentOrg?.id,
   });
 
   const upgradeToTeamBundle = useMutation({

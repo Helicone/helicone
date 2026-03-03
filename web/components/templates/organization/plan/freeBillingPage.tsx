@@ -39,6 +39,7 @@ export const FreePlanCard = () => {
       const invoice = await jawn.GET("/v1/stripe/subscription/free/usage");
       return invoice;
     },
+    enabled: !!org?.currentOrg?.id,
   });
 
   const getBillingCycleDates = () => {
@@ -71,16 +72,16 @@ export const FreePlanCard = () => {
             </span>
           </div>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground text-slate-500">
-            <CalendarIcon className="h-4 w-4" />
+        <CardContent className="flex flex-col gap-6">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <CalendarIcon size={16} />
             <span>Current billing period: {getBillingCycleDates()}</span>
           </div>
 
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between text-sm">
               <span>Requests used</span>
-              <span className="text-slate-500">
+              <span className="text-muted-foreground">
                 {freeUsage.data?.data?.toLocaleString()} / 10,000
               </span>
             </div>
@@ -95,7 +96,7 @@ export const FreePlanCard = () => {
             <Card className="flex max-w-[500px] flex-col">
               <CardHeader>
                 <CardTitle>
-                  <div className="space-y-2">
+                  <div className="flex flex-col gap-2">
                     <h3 className="text-xl font-bold">Pro Plan</h3>
                     <div className="flex items-baseline gap-1">
                       <span className="text-3xl font-bold">$79</span>
@@ -104,14 +105,14 @@ export const FreePlanCard = () => {
                   </div>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="flex-1 space-y-4">
-                <p className="text-sm text-slate-500">
+              <CardContent className="flex-1 flex flex-col gap-4">
+                <p className="text-sm text-muted-foreground">
                   Unlimited seats, tiered usage-based billing
                 </p>
-                <ul className="space-y-2.5">
+                <ul className="flex flex-col gap-2.5">
                   {proFeatures.slice(0, 4).map((feature) => (
                     <li key={feature.title} className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-sky-500" />
+                      <Check size={16} className="text-sky-500" />
                       <span className="text-sm">{feature.title}</span>
                     </li>
                   ))}
@@ -132,7 +133,7 @@ export const FreePlanCard = () => {
             <Card className="flex max-w-[500px] flex-col">
               <CardHeader>
                 <CardTitle>
-                  <div className="space-y-2">
+                  <div className="flex flex-col gap-2">
                     <h3 className="text-xl font-bold">Team Bundle</h3>
                     <div className="flex items-baseline gap-1">
                       <span className="text-3xl font-bold">$799</span>
@@ -141,12 +142,12 @@ export const FreePlanCard = () => {
                   </div>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="flex-1 space-y-4">
+              <CardContent className="flex-1 flex flex-col gap-4">
                 <p className="text-sm font-medium">Unlimited seats, 5 orgs</p>
-                <ul className="space-y-2.5">
+                <ul className="flex flex-col gap-2.5">
                   {teamBundleFeatures.map((feature) => (
                     <li key={feature} className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-sky-500" />
+                      <Check size={16} className="text-sky-500" />
                       <span className="text-sm">{feature}</span>
                     </li>
                   ))}
@@ -188,12 +189,12 @@ export const FreePlanCard = () => {
                       className="group rounded-lg p-4 transition-colors hover:bg-muted/5"
                     >
                       <div className="flex gap-3">
-                        <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-primary" />
+                        <Check size={20} className="mt-0.5 flex-shrink-0 text-primary" />
                         <div>
                           <h4 className="text-sm font-medium transition-colors group-hover:text-primary">
                             {feature.title}
                           </h4>
-                          <p className="mt-1 text-sm text-slate-500">
+                          <p className="mt-1 text-sm text-muted-foreground">
                             {feature.description}
                           </p>
                         </div>
@@ -210,16 +211,16 @@ export const FreePlanCard = () => {
           <CollapsibleTrigger asChild>
             <Button
               variant="ghost"
-              className="text-slate-500 hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground"
             >
               {isComparisonOpen ? (
                 <>
-                  <ChevronUpIcon className="mr-2 h-4 w-4" />
+                  <ChevronUpIcon size={16} className="mr-2" />
                   Show fewer features
                 </>
               ) : (
                 <>
-                  <ChevronDownIcon className="mr-2 h-4 w-4" />
+                  <ChevronDownIcon size={16} className="mr-2" />
                   See all Pro features
                 </>
               )}
