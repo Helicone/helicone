@@ -65,6 +65,8 @@ export interface ModelIndexes {
   providerModelIdToConfig: Map<string, ModelProviderConfig>;
   providerModelIdAliasToConfig: Map<string, ModelProviderConfig>;
   modelToArchivedEndpointConfigs: Map<string, ModelProviderConfig>;
+  // Reverse lookup: provider model ID -> canonical model ID (without needing to know the provider)
+  providerModelIdToCanonicalModelId: Map<string, ModelName>;
 }
 
 export function buildIndexes(
@@ -92,6 +94,7 @@ export function buildIndexes(
     new Map();
   const modelToArchivedEndpointConfigs: Map<string, ModelProviderConfig> =
     new Map();
+  const providerModelIdToCanonicalModelId: Map<string, ModelName> = new Map();
 
   for (const [configKey, config] of Object.entries(modelProviderConfigs)) {
     const typedConfigKey = configKey as ModelProviderConfigId;
@@ -112,6 +115,15 @@ export function buildIndexes(
       for (const alias of config.providerModelIdAliases) {
         const aliasKey = `${alias}:${config.provider}`;
         providerModelIdAliasToConfig.set(aliasKey, config);
+      }
+    }
+
+    // Store reverse lookup: providerModelId -> canonical model ID
+    // This allows finding the canonical model from any provider model ID
+    providerModelIdToCanonicalModelId.set(config.providerModelId, modelName);
+    if (config.providerModelIdAliases) {
+      for (const alias of config.providerModelIdAliases) {
+        providerModelIdToCanonicalModelId.set(alias, modelName);
       }
     }
 
@@ -219,5 +231,6 @@ export function buildIndexes(
     providerModelIdToConfig,
     providerModelIdAliasToConfig,
     modelToArchivedEndpointConfigs,
+    providerModelIdToCanonicalModelId,
   };
 }

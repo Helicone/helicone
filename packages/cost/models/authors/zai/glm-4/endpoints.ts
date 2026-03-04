@@ -313,6 +313,62 @@ export const endpoints = {
       "*": {},
     },
   },
+  "glm-4.6:zai": {
+    providerModelId: "glm-4-plus",
+    provider: "zai",
+    author: "zai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000714, // 0.05 CNY/1K tokens ≈ $0.00714/1K
+        output: 0.00000714,
+      },
+    ],
+    contextLength: 128_000,
+    maxCompletionTokens: 4_096,
+    supportedParameters: [
+      "functions",
+      "tool_choice",
+      "tools",
+      "response_format",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "glm-4.7:zai": {
+    providerModelId: "glm-4-plus",
+    provider: "zai",
+    author: "zai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000714, // 0.05 CNY/1K tokens ≈ $0.00714/1K
+        output: 0.00000714,
+      },
+    ],
+    contextLength: 128_000,
+    maxCompletionTokens: 4_096,
+    supportedParameters: [
+      "functions",
+      "tool_choice",
+      "tools",
+      "response_format",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<
     `${ZaiModelName}:${ModelProviderName}` | ZaiModelName,

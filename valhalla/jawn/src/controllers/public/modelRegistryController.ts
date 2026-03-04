@@ -73,6 +73,9 @@ interface ModelRegistryResponse {
     authors: string[];
     capabilities: ModelCapability[];
   };
+  // Map of provider model IDs to canonical model IDs
+  // Useful for resolving provider-specific model names (e.g., "zai-glm-4.7" -> "glm-4.7")
+  providerModelIdMap?: Record<string, string>;
 }
 
 @Route("/v1/public/model-registry")
@@ -400,6 +403,7 @@ export class ModelRegistryController extends Controller {
       const availableProviders = new Set<string>();
       const availableAuthors = new Set<string>();
       const availableCapabilities = new Set<ModelCapability>();
+      const providerModelIdMap: Record<string, string> = {};
 
       models.forEach((model) => {
         availableAuthors.add(model.author);
@@ -421,6 +425,10 @@ export class ModelRegistryController extends Controller {
           ) {
             availableCapabilities.add("caching");
           }
+          // Build provider model ID to canonical model ID mapping
+          if (ep.endpoint?.providerModelId) {
+            providerModelIdMap[ep.endpoint.providerModelId] = model.id;
+          }
         });
       });
       const providersWithDisplayNames = Array.from(availableProviders)
@@ -439,6 +447,7 @@ export class ModelRegistryController extends Controller {
           authors: Array.from(availableAuthors).sort(),
           capabilities: Array.from(availableCapabilities).sort(),
         },
+        providerModelIdMap,
       });
     } catch (error) {
       console.error("Error fetching model registry:", error);
@@ -446,4 +455,5 @@ export class ModelRegistryController extends Controller {
       return err("Internal server error while fetching model registry");
     }
   }
+
 }

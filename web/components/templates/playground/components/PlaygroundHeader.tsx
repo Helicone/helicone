@@ -85,11 +85,12 @@ const PlaygroundHeader = ({
   onDismissUnsupportedModelWarning,
 }: PlaygroundHeaderProps) => {
   const [modelListOpen, setModelListOpen] = useState<boolean>(false);
-  const { data: playgroundModels, isLoading: modelsLoading } =
+  const { data: modelRegistryData, isLoading: modelsLoading } =
     useModelRegistry();
+  const playgroundModels = modelRegistryData?.models ?? [];
 
   // Get display name for selected model
-  const selectedModelData = playgroundModels?.find(
+  const selectedModelData = playgroundModels.find(
     (m) => m.id === selectedModel,
   );
   const displayName =

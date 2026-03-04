@@ -6866,6 +6866,27 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "glm-4.6:zai": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 4096,
+      "modelId": "glm-4-plus",
+      "parameters": [
+        "functions",
+        "max_tokens",
+        "response_format",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "zai",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
     "glm-4.7:baseten": {
       "context": 200000,
       "crossRegion": false,
@@ -7011,6 +7032,27 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "top_p",
       ],
       "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "glm-4.7:zai": {
+      "context": 128000,
+      "crossRegion": false,
+      "maxTokens": 4096,
+      "modelId": "glm-4-plus",
+      "parameters": [
+        "functions",
+        "max_tokens",
+        "response_format",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "zai",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -7440,6 +7482,8 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "fireworks",
     "novita",
     "novita",
+    "zai",
+    "zai",
   ],
 }
 `;
@@ -9572,6 +9616,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 0,
       },
     ],
+    "zai": [
+      {
+        "input": 0.00000714,
+        "output": 0.00000714,
+        "threshold": 0,
+      },
+    ],
   },
 }
 `;
@@ -9877,6 +9928,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
         "baseten",
         "canopywave",
         "novita",
+        "zai",
       ],
     },
     {
@@ -9887,6 +9939,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
         "cerebras",
         "fireworks",
         "novita",
+        "zai",
       ],
     },
     {
@@ -10522,6 +10575,10 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "modelCount": 8,
       "provider": "xai",
     },
+    {
+      "modelCount": 2,
+      "provider": "zai",
+    },
   ],
   "ptbEnabledModels": [
     "chatgpt-4o-latest",
@@ -10639,9 +10696,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 317,
-  "totalModelProviderConfigs": 317,
+  "totalEndpoints": 319,
+  "totalModelProviderConfigs": 319,
   "totalModelsWithPtb": 105,
-  "totalProviders": 21,
+  "totalProviders": 22,
 }
 `;
