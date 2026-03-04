@@ -1,0 +1,1478 @@
+# Helicone AI Gateway: The Complete AI Agent Integration Guide
+
+Helicone is the best AI Gateway for building production-ready AI agents thanks to its embedded complete observability platform. Use one unified OpenAI-compatible API to access 100+ LLM providers with intelligent routing, automatic fallbacks, and complete observability.
+
+## Why Helicone is Perfect for AI Agents
+
+AI agents require robust infrastructure to handle complex workflows, multiple provider interactions, and comprehensive monitoring. Helicone provides:
+
+- **Unified API Access**: Use OpenAI SDK format to access GPT, Claude, Gemini, and 100+ other models
+- **Zero Rate Limits**: Skip provider tier restrictions with credits
+- **Always Online**: Automatic failover across providers keeps agents running
+- **Complete Observability**: Track every step of your agent workflows with sessions, custom properties, and feedback
+- **Advanced Features**: Caching, prompt management, user tracking, and enterprise security
+
+---
+
+# AI Gateway Overview
+
+## What is the AI Gateway?
+
+Helicone AI Gateway provides a unified API for 100+ LLM providers through the OpenAI SDK format. Instead of learning different SDKs and APIs for each provider, use one familiar interface to access any model with intelligent routing, automatic fallbacks, and complete observability built-in.
+
+## How It Works
+
+The AI Gateway sits between your application and LLM providers, acting as a unified translation layer:
+
+1. **You make one request** - Use the OpenAI SDK format, regardless of which provider you want
+2. **We translate & route** - Helicone converts your request to the correct provider format (Anthropic, Google, etc.)
+3. **Provider responds** - The LLM provider processes your request
+4. **We log & return** - You get the response back while we capture metrics, costs, and errors
+
+All through a single endpoint: `https://ai-gateway.helicone.ai`
+
+## Quick Example
+
+Add two lines to your existing OpenAI code to unlock 100+ models with automatic observability:
+
+```typescript
+import { OpenAI } from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai", // [!code ++]
+  apiKey: process.env.HELICONE_API_KEY, // [!code ++]
+});
+
+const response = await client.chat.completions.create({
+  model: "gpt-4o",  // Or: claude-sonnet-4, gemini-2.0-flash, etc - any model from https://helicone.ai/models
+  messages: [{ role: "user", content: "Hello!" }]
+});
+```
+
+## Helicone vs OpenRouter
+
+Helicone offers a complete platform for production AI applications, while OpenRouter focuses on simple model access.
+
+| Feature | Helicone | OpenRouter |
+|---------|----------|------------|
+| **Observability** | Full-featured (sessions, users, custom properties, cost tracking) | Basic (requests/costs per model only) |
+| **Session Tracking** | ✅ | ❌ |
+| **Prompt Management** | ✅ | ❌ |
+| **Caching** | ✅ | ❌ |
+| **Custom Rate Limits** | ✅ | ❌ |
+| **Open Source** | ✅ | ❌ |
+| **BYOK** | ✅ | ✅ |
+| **Automatic Fallbacks** | ✅ | ✅ |
+
+---
+
+# How to integrate Helicone
+
+## Overview
+
+The AI Gateway serves as a unified entry point for all traffic, regardless of your provider. It enables you to dispatch requests to any provider through a single endpoint. This provides you with the advantage of utilizing all of Helicone's features such as Caching, Monitoring, Rate Limiting, Vaults, Feedback, and many more for any provider.
+
+## How to Use the AI Gateway
+
+### Python Example
+
+```python
+import openai
+
+client = OpenAI(
+    base_url="https://ai-gateway.helicone.ai",
+    api_key=os.environ.get("HELICONE_API_KEY"),
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Hello world"}]
+)
+```
+
+### Node.js Example
+
+```typescript
+import { OpenAI } from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
+});
+
+const response = await client.chat.completions.create({
+  model: "gpt-4o-mini",
+  messages: [{ role: "user", content: "Hello world" }]
+});
+```
+
+### Legacy Implementation: Using Specific Providers
+
+You can target specific providers using the legacy gateway approach. We don't recommend using this integration unless the AI gateway doesn't work for you for some reason.
+
+```typescript
+const client = new OpenAI({
+  baseURL: "https://gateway.helicone.ai",
+  defaultHeaders: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+    "Helicone-Target-Url": "https://api.anthropic.com",
+  },
+});
+```
+
+## Supported Providers
+
+| Provider | Domain | Cost Support | Helicone Dedicated Domain |
+|----------|--------|--------------|------------------|
+| OpenAI | `api.openai.com` | ✅ | `oai.helicone.ai` |
+| Anthropic | `api.anthropic.com` | ✅ | `anthropic.helicone.ai` |
+| Google Gemini | `generativelanguage.googleapis.com` | ✅ | ❌ |
+| Google Vertex AI | `aiplatform.googleapis.com` | ✅ | ❌ |
+| Together-AI | `api.together.xyz` | ✅ | `together.helicone.ai` |
+| OpenRouter | `openrouter.ai` | ✅ | `openrouter.helicone.ai` |
+| Fireworks | `api.fireworks.ai` | ✅ | `fireworks.helicone.ai` |
+| Azure | `openai.azure.com` | ✅ | ❌ |
+| Groq | `api.groq.com` | ✅ | `groq.helicone.ai` |
+| Perplexity | `api.perplexity.ai` | ✅ | `perplexity.helicone.ai` |
+| Mistral | `api.mistral.ai` | ✅ | `mistral.helicone.ai` |
+| DeepSeek | `api.deepseek.com` | ✅ | `deepseek.helicone.ai` |
+| X.AI | `api.x.ai` | ✅ | `x.helicone.ai` |
+
+---
+
+# Sessions: Track Complete AI Agent Workflows
+
+When building AI agents or complex workflows, your application often makes multiple LLM calls, vector database queries, and tool calls to complete a single task. Sessions group these related requests together, letting you trace the entire agent flow from initial user input to final response in one unified view.
+
+## Why use Sessions
+
+- **Debug AI agent flows**: See the entire agent workflow in one view, from initial request to final response
+- **Track multi-step conversations**: Reconstruct the complete flow of chatbot interactions and complex tasks
+- **Analyze performance**: Measure outcomes across entire interaction sequences, not just individual requests
+
+## Quick Start
+
+### Step 1: Add Session Headers
+
+Include three required headers in your LLM requests:
+
+```typescript
+{
+  "Helicone-Session-Id": "unique-session-id",
+  "Helicone-Session-Path": "/trace-path",
+  "Helicone-Session-Name": "Session Name"
+}
+```
+
+### Step 2: Structure Your Paths
+
+Use path syntax to represent parent-child relationships:
+
+```typescript
+"/abstract"                    // Top-level trace
+"/abstract/outline"           // Child trace
+"/abstract/outline/lesson-1"  // Grandchild trace
+```
+
+### Step 3: Make Your Request
+
+Execute your LLM request with the session headers included:
+
+```typescript
+const response = await client.chat.completions.create(
+  {
+    messages: [{ role: "user", content: "Hello" }],
+    model: "gpt-4o-mini"
+  },
+  {
+    headers: {
+      "Helicone-Session-Id": sessionId,
+      "Helicone-Session-Path": "/greeting",
+      "Helicone-Session-Name": "User Conversation"
+    }
+  }
+);
+```
+
+## Understanding Sessions
+
+### What Sessions Can Track
+
+Sessions can group together all types of requests in your AI workflow:
+- **LLM calls** - OpenAI, Anthropic, and other model requests
+- **Vector database queries** - Embeddings, similarity searches, and retrievals
+- **Tool calls** - Function executions, API calls, and custom tools
+- **Any logged request** - Anything sent through Helicone's logging
+
+This gives you a complete view of your AI agent's behavior, not just the LLM interactions.
+
+### Session IDs
+
+The session ID is a unique identifier that groups all related requests together. Think of it as a conversation thread ID.
+
+**What to use:**
+- **UUIDs** (recommended): `550e8400-e29b-41d4-a716-446655440000`
+- **Unique strings**: `user_123_conversation_456`
+
+**Why it matters:**
+- Same ID = requests get grouped together in the dashboard
+- Different IDs = separate sessions, even if they're related
+- Reusing IDs across different workflows will mix unrelated requests
+
+```typescript
+// ✅ Good - unique per conversation
+const sessionId = randomUUID(); // Different for each user conversation
+
+// ❌ Bad - reuses same ID
+const sessionId = "chat_session"; // All users get mixed together
+```
+
+### Session Paths
+
+Paths create the hierarchy within your session, showing how requests relate to each other.
+
+**Path Naming Philosophy:**
+
+Think of session paths as **conceptual groupings** rather than chronological order. Requests with the same path represent the same "type" of work, even if they happen at different times.
+
+**Path Structure Rules:**
+- Start with `/` (forward slash)
+- Use `/` to separate levels: `/parent/child/grandchild`
+- Keep names descriptive: `/analyze_request/fetch_data/process_results`
+- **Group by function, not by time** - same conceptual work = same path
+
+**Path Design Patterns:**
+```typescript
+// Workflow pattern - good for AI agents
+"/task"
+"/task/research"
+"/task/research/web_search"
+"/task/generate"
+
+// Conversation pattern - good for chatbots
+"/session"
+"/session/question_1"
+"/session/answer_1"
+"/session/question_2"
+
+// Pipeline pattern - good for data processing
+"/process"
+"/process/extract"
+"/process/transform"
+"/process/load"
+```
+
+### Session Names
+
+The session name is a high-level grouping that makes it easy to filter and organize similar types of sessions in the dashboard.
+
+**Good session names:**
+- `"Customer Support"` - All support sessions use this name
+- `"Content Generation"` - All content creation sessions use this name
+- `"Trip Planning Agent"` - All trip planning workflows use this name
+
+## Example: Code Generation Assistant
+
+Track a complete code generation workflow with clarifications and refinements:
+
+```typescript
+import { randomUUID } from "crypto";
+import { OpenAI } from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
+});
+
+const sessionId = randomUUID();
+
+// Initial feature request
+const response1 = await client.chat.completions.create(
+  {
+    messages: [{ role: "user", content: "Create a React component for user authentication with email and password" }],
+    model: "gpt-4o-mini",
+  },
+  {
+    headers: {
+      "Helicone-Session-Id": sessionId,
+      "Helicone-Session-Path": "/request",
+      "Helicone-Session-Name": "Code Generation Assistant",
+    },
+  }
+);
+
+// User asks for clarification
+const response2 = await client.chat.completions.create(
+  {
+    messages: [
+      { role: "user", content: "Create a React component for user authentication with email and password" },
+      { role: "assistant", content: response1.choices[0].message.content },
+      { role: "user", content: "Can you add form validation and error handling?" }
+    ],
+    model: "gpt-4o-mini",
+  },
+  {
+    headers: {
+      "Helicone-Session-Id": sessionId,
+      "Helicone-Session-Path": "/request/validation",
+      "Helicone-Session-Name": "Code Generation Assistant",
+    },
+  }
+);
+
+// User requests TypeScript version
+const response3 = await client.chat.completions.create(
+  {
+    messages: [
+      { role: "user", content: "Convert this to TypeScript with proper interfaces" }
+    ],
+    model: "gpt-4o-mini",
+  },
+  {
+    headers: {
+      "Helicone-Session-Id": sessionId,
+      "Helicone-Session-Path": "/request/validation/typescript",
+      "Helicone-Session-Name": "Code Generation Assistant",
+    },
+  }
+);
+```
+
+---
+
+# Custom Properties: Advanced Request Metadata
+
+When building AI applications, you often need to track and analyze requests by different dimensions like project, feature, or workflow stage. Custom Properties let you tag LLM requests with metadata, enabling advanced filtering, cost analysis per user or feature, and performance tracking across different parts of your application.
+
+## Why use Custom Properties
+
+- **Track unit economics**: Calculate cost per user, conversation, or feature to understand your application's profitability
+- **Debug complex workflows**: Group related requests in multi-step AI processes for easier troubleshooting
+- **Analyze performance by segment**: Compare latency and costs across different user types, features, or environments
+
+## Quick Start
+
+Use headers to add Custom Properties to your LLM requests.
+
+### Step 1: Define the Header
+
+Name your header in the format `Helicone-Property-[Name]` where `Name` is the name of your custom property.
+
+### Step 2: Define the Value
+
+The value is a string that labels your request for this custom property:
+
+```typescript
+import { OpenAI } from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
+  defaultHeaders: {
+    "Helicone-Property-Conversation": "support_issue_2",
+    "Helicone-Property-App": "mobile",
+    "Helicone-Property-Environment": "production",
+  },
+});
+
+const response = await client.chat.completions.create({
+  model: "gpt-4o-mini",
+  messages: [{ role: "user", content: "Hello, how are you?" }]
+});
+```
+
+## Use Cases
+
+### Environment & Deployment Tracking
+
+Track performance and costs across different environments and deployments:
+
+```typescript
+import { OpenAI } from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
+});
+
+// Production deployment
+const response = await client.chat.completions.create(
+  {
+    model: "gpt-4o-mini",
+    messages: [{ role: "user", content: "Process this customer request" }]
+  },
+  {
+    headers: {
+      "Helicone-Property-Environment": "production",
+      "Helicone-Property-Version": "v2.1.0",
+      "Helicone-Property-Region": "us-east-1"
+    }
+  }
+);
+
+// Staging deployment with different version
+const testResponse = await client.chat.completions.create(
+  {
+    model: "gpt-4o-mini",
+    messages: [{ role: "user", content: "Test new feature" }]
+  },
+  {
+    headers: {
+      "Helicone-Property-Environment": "staging",
+      "Helicone-Property-Version": "v2.2.0-beta",
+      "Helicone-Property-Region": "us-west-2"
+    }
+  }
+);
+```
+
+### Customer Support Bot
+
+Track support interactions by ticket ID and case details for debugging and cost analysis:
+
+```typescript
+// Initial customer inquiry
+const response = await client.chat.completions.create(
+  {
+    model: "gpt-4o-mini",
+    messages: [
+      { role: "system", content: "You are a helpful customer support agent." },
+      { role: "user", content: "My order hasn't arrived yet, what should I do?" }
+    ]
+  },
+  {
+    headers: {
+      "Helicone-Property-TicketId": "TICKET-12345",
+      "Helicone-Property-Category": "shipping",
+      "Helicone-Property-Priority": "medium",
+      "Helicone-Property-Channel": "chat"
+    }
+  }
+);
+
+// Follow-up question in same ticket
+const followUp = await client.chat.completions.create(
+  {
+    model: "gpt-4o-mini",
+    messages: [
+      { role: "system", content: "You are a helpful customer support agent." },
+      { role: "user", content: "Can you help me track the package?" }
+    ]
+  },
+  {
+    headers: {
+      "Helicone-Property-TicketId": "TICKET-12345",
+      "Helicone-Property-Category": "shipping",
+      "Helicone-Property-Priority": "high",  // Escalated priority
+      "Helicone-Property-Channel": "chat"
+    }
+  }
+);
+```
+
+## Configuration Reference
+
+### Header Format
+
+Custom properties use a simple header-based format:
+
+- `Helicone-Property-[Name]`: Any custom metadata you want to track. Replace `[Name]` with your property name.
+  Example: `Helicone-Property-Environment: staging`
+
+- `Helicone-User-Id`: Special reserved property for user tracking. Enables per-user cost analytics and usage metrics.
+  Example: `Helicone-User-Id: user-123`
+
+### Updating Properties After Request
+
+You can update properties after a request is made using the REST API:
+
+```typescript
+// Get the request ID from the response
+const { data, response } = await client.chat.completions
+  .create({ /* your request */ })
+  .withResponse();
+
+const requestId = response.headers.get("helicone-id");
+
+// Update properties via API
+await fetch(`https://api.helicone.ai/v1/request/${requestId}/property`, {
+  method: "PUT",
+  headers: {
+    "Authorization": `Bearer ${HELICONE_API_KEY}`,
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    "Environment": "production",
+    "PostProcessed": "true"
+  })
+});
+```
+
+---
+
+# User Feedback: Improve AI Response Quality
+
+When building AI applications, you need real-world signals about response quality to improve prompts, catch regressions, and understand what users find helpful. User Feedback lets you collect positive/negative ratings on LLM responses, enabling data-driven improvements to your AI systems based on actual user satisfaction.
+
+## Why use User Feedback
+
+- **Improve response quality**: Identify patterns in poorly-rated responses to refine prompts and model selection
+- **Catch regressions early**: Monitor feedback trends to detect when changes negatively impact user experience
+- **Build training datasets**: Use highly-rated responses as examples for fine-tuning or few-shot prompting
+
+## Quick Start
+
+### Step 1: Make a request and capture the ID
+
+Capture the Helicone request ID from your LLM response:
+
+```typescript
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
+});
+
+// Use a custom request ID for feedback tracking
+const customId = crypto.randomUUID();
+
+const response = await openai.chat.completions.create({
+  model: "gpt-4o-mini",
+  messages: [{ role: "user", content: "Explain quantum computing" }]
+}, {
+  headers: {
+    "Helicone-Request-Id": customId
+  }
+});
+
+// Use your custom ID for feedback
+const heliconeId = customId;
+```
+
+### Step 2: Submit feedback rating
+
+Send a positive or negative rating for the response:
+
+```typescript
+const feedback = await fetch(
+  `https://api.helicone.ai/v1/request/${heliconeId}/feedback`,
+  {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${process.env.HELICONE_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      rating: true  // true = positive, false = negative
+    }),
+  }
+);
+```
+
+### Step 3: View feedback analytics
+
+Access feedback metrics in your Helicone dashboard to analyze response quality trends and identify areas for improvement.
+
+## Configuration Options
+
+| Parameter | Type | Description | Example |
+|-----------|------|-------------|---------|
+| `rating` | `boolean` | User's feedback on the response | `true` (positive) or `false` (negative) |
+| `helicone-id` | `string` | Request ID to attach feedback to | UUID |
+
+## Use Cases
+
+### Chat Application Quality
+
+Track user satisfaction with AI assistant responses:
+
+```typescript
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
+});
+
+// In your chat handler
+async function handleChatMessage(userId: string, message: string) {
+  const requestId = crypto.randomUUID();
+
+  const response = await openai.chat.completions.create(
+    {
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: "You are a helpful assistant." },
+        { role: "user", content: message }
+      ]
+    },
+    {
+      headers: {
+        "Helicone-Request-Id": requestId,
+        "Helicone-User-Id": userId,
+        "Helicone-Property-Feature": "chat"
+      }
+    }
+  );
+
+  // Store request ID for later feedback
+  await storeRequestMapping(userId, requestId, response.id);
+
+  return response;
+}
+
+// When user clicks thumbs up/down
+async function handleUserFeedback(userId: string, responseId: string, isPositive: boolean) {
+  const requestId = await getRequestId(userId, responseId);
+
+  await fetch(
+    `https://api.helicone.ai/v1/request/${requestId}/feedback`,
+    {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.HELICONE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ rating: isPositive }),
+    }
+  );
+}
+```
+
+### Implicit Feedback Patterns
+
+**Explicit feedback** is when users directly rate responses (thumbs up/down, star ratings). While valuable, it has low response rates since users must take deliberate action.
+
+**Implicit feedback** is derived from user behavior and is much more valuable since it reflects actual usage patterns:
+
+```typescript
+// Code completion acceptance (like Cursor)
+async function trackCodeCompletion(requestId: string, suggestion: string) {
+  // Monitor if user accepts the completion
+  const accepted = await waitForUserAction(suggestion);
+
+  await fetch(`https://api.helicone.ai/v1/request/${requestId}/feedback`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${process.env.HELICONE_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      rating: accepted // true if accepted, false if rejected/ignored
+    }),
+  });
+}
+
+// Chat engagement patterns
+async function trackChatEngagement(requestId: string, response: string) {
+  // Track user behavior after response
+  const userActions = await monitorUserBehavior(60000); // 1 minute
+
+  const implicitRating =
+    userActions.continuedConversation || // User asked follow-up
+    userActions.copiedResponse ||        // User copied the answer
+    userActions.sharedResponse ||        // User shared/saved
+    userActions.timeSpent > 30;          // User read for >30 seconds
+
+  await submitFeedback(requestId, implicitRating);
+}
+```
+
+---
+
+# LLM Caching: Reduce Costs and Latency
+
+When developing and testing LLM applications, you often make the same requests repeatedly during debugging and iteration. Helicone caching stores complete responses on Cloudflare's edge network, eliminating redundant API calls and reducing both latency and costs.
+
+## Why Helicone Caching
+
+- **Save Money**: Avoid repeated charges for identical requests while testing and debugging
+- **Instant Responses**: Serve cached responses immediately instead of waiting for LLM providers
+- **Handle Traffic Spikes**: Protect against rate limits and maintain performance during high usage
+
+## How It Works
+
+Helicone's caching system stores LLM responses on Cloudflare's edge network, providing globally distributed, low-latency access to cached data.
+
+### Cache Key Generation
+
+Helicone generates unique cache keys by hashing:
+- **Cache seed** - Optional namespace identifier (if specified)
+- **Request URL** - The full endpoint URL
+- **Request body** - Complete request payload including all parameters
+- **Relevant headers** - Authorization and cache-specific headers
+- **Bucket index** - For multi-response caching
+
+Any change in these components creates a new cache entry:
+
+```typescript
+// ✅ Cache hit - identical requests
+const request1 = { model: "gpt-4o-mini", messages: [{ role: "user", content: "Hello" }] };
+const request2 = { model: "gpt-4o-mini", messages: [{ role: "user", content: "Hello" }] };
+
+// ❌ Cache miss - different content
+const request3 = { model: "gpt-4o-mini", messages: [{ role: "user", content: "Hi" }] };
+
+// ❌ Cache miss - different parameters
+const request4 = { model: "gpt-4o-mini", messages: [{ role: "user", content: "Hello" }], temperature: 0.5 };
+```
+
+## Quick Start
+
+### Step 1: Enable caching
+
+Add the `Helicone-Cache-Enabled` header to your requests:
+
+```typescript
+{
+  "Helicone-Cache-Enabled": "true"
+}
+```
+
+### Step 2: Make your request
+
+Execute your LLM request - the first call will be cached:
+
+```typescript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
+});
+
+const response = await client.chat.completions.create(
+  {
+    model: "gpt-4o-mini",
+    messages: [{ role: "user", content: "Hello world" }]
+  },
+  {
+    headers: {
+      "Helicone-Cache-Enabled": "true"
+    }
+  }
+);
+```
+
+### Step 3: Verify caching works
+
+Make the same request again - it should return instantly from cache:
+
+```typescript
+// This exact same request will return a cached response
+const cachedResponse = await client.chat.completions.create(
+  {
+    model: "gpt-4o-mini",
+    messages: [{ role: "user", content: "Hello world" }]
+  },
+  {
+    headers: {
+      "Helicone-Cache-Enabled": "true"
+    }
+  }
+);
+```
+
+## Configuration
+
+- `Helicone-Cache-Enabled` (string, required): Enable or disable caching for the request. Example: `"true"`
+
+- `Cache-Control` (string): Set cache duration using standard HTTP cache control directives. Default: `"max-age=604800"` (7 days). Example: `"max-age=3600"` for 1 hour cache
+
+- `Helicone-Cache-Bucket-Max-Size` (string): Number of different responses to store for the same request. Useful for non-deterministic prompts. Default: `"1"` (single response cached). Example: `"3"` to cache up to 3 different responses
+
+- `Helicone-Cache-Seed` (string): Create separate cache namespaces for different users or contexts. Example: `"user-123"` to maintain user-specific cache
+
+- `Helicone-Cache-Ignore-Keys` (string): Comma-separated JSON keys to exclude from cache key generation. Example: `"request_id,timestamp"` to ignore these fields when generating cache keys
+
+All header values must be strings. For example, `"Helicone-Cache-Bucket-Max-Size": "10"`.
+
+## Examples
+
+### Development Testing
+
+Avoid repeated charges while debugging and iterating on prompts:
+
+```typescript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
+  defaultHeaders: {
+    "Helicone-Cache-Enabled": "true",
+    "Cache-Control": "max-age=86400" // Cache for 1 day during development
+  },
+});
+
+// This request will be cached - works with any model
+const response = await client.chat.completions.create({
+  model: "gpt-4o-mini",  // or "claude-3.5-sonnet", "gemini-2.5-flash", etc.
+  messages: [{ role: "user", content: "Explain quantum computing" }]
+});
+
+// Subsequent identical requests return cached response instantly
+```
+
+### User-Specific Caching
+
+Cache responses separately for different users or contexts:
+
+```typescript
+const userId = "user-123";
+
+const response = await client.chat.completions.create(
+  {
+    model: "claude-3.5-sonnet",
+    messages: [{
+      role: "user",
+      content: "What are my account settings?"
+    }]
+  },
+  {
+    headers: {
+      "Helicone-Cache-Enabled": "true",
+      "Helicone-Cache-Seed": userId,           // User-specific cache
+      "Cache-Control": "max-age=3600"          // Cache for 1 hour
+    }
+  }
+);
+
+// Each user gets their own cached responses
+```
+
+### Cache Duration
+
+Set how long responses stay cached using the `Cache-Control` header:
+
+```typescript
+{
+  "Cache-Control": "max-age=3600"  // 1 hour
+}
+```
+
+**Common durations:**
+- 1 hour: `max-age=3600`
+- 1 day: `max-age=86400`
+- 7 days: `max-age=604800` (default)
+- 30 days: `max-age=2592000`
+
+Maximum cache duration is 365 days (`max-age=31536000`)
+
+### Cache Buckets
+
+Control how many different responses are stored for the same request:
+
+```typescript
+{
+  "Helicone-Cache-Bucket-Max-Size": "3"
+}
+```
+
+With bucket size 3, the same request can return one of 3 different cached responses randomly:
+
+```
+openai.completion("give me a random number") -> "42"  # Cache Miss
+openai.completion("give me a random number") -> "47"  # Cache Miss
+openai.completion("give me a random number") -> "17"  # Cache Miss
+
+openai.completion("give me a random number") -> "42" | "47" | "17"  # Cache Hit
+```
+
+**Behavior by bucket size:**
+- **Size 1 (default)**: Same request always returns same cached response (deterministic)
+- **Size > 1**: Same request can return different cached responses (useful for creative prompts)
+- Response chosen randomly from bucket
+
+Maximum bucket size is 20. Enterprise plans support larger buckets.
+
+### Cache Seeds
+
+Create separate cache namespaces using seeds:
+
+```typescript
+{
+  "Helicone-Cache-Seed": "user-123"
+}
+```
+
+Different seeds maintain separate cache states:
+
+```
+# Seed: "user-123"
+openai.completion("random number") -> "42"
+openai.completion("random number") -> "42"  # Same response
+
+# Seed: "user-456"
+openai.completion("random number") -> "17"  # Different response
+openai.completion("random number") -> "17"  # Consistent per seed
+```
+
+Change the seed value to effectively clear your cache for testing.
+
+### Ignore Keys
+
+Exclude specific JSON fields from cache key generation:
+
+```typescript
+{
+  "Helicone-Cache-Ignore-Keys": "request_id,timestamp,session_id"
+}
+```
+
+When these fields are ignored, requests with different values for these fields will still hit the same cache entry:
+
+```typescript
+// First request
+const response1 = await openai.chat.completions.create(
+  {
+    model: "gpt-4o-mini",
+    messages: [{ role: "user", content: "Hello" }],
+    request_id: "req-123",
+    timestamp: "2024-01-01T00:00:00Z"
+  },
+  {
+    headers: {
+      "Helicone-Cache-Enabled": "true",
+      "Helicone-Cache-Ignore-Keys": "request_id,timestamp"
+    }
+  }
+);
+
+// Second request with different request_id and timestamp
+// This will hit the cache despite different values
+const response2 = await openai.chat.completions.create(
+  {
+    model: "gpt-4o-mini",
+    messages: [{ role: "user", content: "Hello" }],
+    request_id: "req-456",  // Different ID
+    timestamp: "2024-02-02T00:00:00Z"  // Different timestamp
+  },
+  {
+    headers: {
+      "Helicone-Cache-Enabled": "true",
+      "Helicone-Cache-Ignore-Keys": "request_id,timestamp"
+    }
+  }
+);
+// response2 returns cached response from response1
+```
+
+This feature only works with JSON request bodies. Non-JSON bodies will use the original text for cache key generation.
+
+**Common use cases:**
+- Ignore tracking IDs that don't affect the response
+- Exclude timestamps for time-independent queries
+- Remove session or user metadata when caching shared content
+- Ignore `prompt_cache_key` when using provider caching alongside Helicone caching
+
+---
+
+# Provider Routing: Automatic Failover and Reliability
+
+Never worry about provider outages again. The AI Gateway automatically routes your requests to the best available provider, with instant failover when things go wrong.
+
+## The Problem
+
+- **Provider Outages**: Provider downtime breaks your app and frustrates users
+- **Rate Limits**: Hit provider quotas and block your users from accessing your service
+- **Regional Restrictions**: Limited availability in certain regions reduces your global reach
+- **Vendor Lock-in**: Tied to one provider prevents cost optimization and flexibility
+
+## The Solution
+
+Provider routing gives you access to the same model across multiple providers. When OpenAI goes down, your app automatically switches to Azure or AWS Bedrock using Helicone's managed keys. When you hit rate limits, traffic flows to another provider. All without setup or code changes.
+
+## Using Provider Routing
+
+Zero configuration required. Just request a model:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: "gpt-4o-mini",
+  messages: [{ role: "user", content: "Hello!" }]
+});
+```
+
+That's it. The gateway automatically:
+- Finds all providers offering this model
+- Routes to the cheapest available provider
+- Fails over instantly if a provider has issues
+
+Your request succeeds even when providers fail.
+
+## How It Works
+
+The gateway uses the Model Registry to find all providers supporting your requested model, then applies smart routing:
+
+**Routing Priority:**
+1. Your provider keys (BYOK) if configured
+2. Helicone's managed keys (credits) - automatic fallback
+
+**Selection:** Routes to the cheapest provider first. Equal-cost providers are load balanced.
+
+**Failover:** Instantly tries the next provider on errors (rate limits, timeouts, server errors, etc.)
+
+**Credits** let you access 100+ LLM providers without signing up for each one. Add funds to your Helicone account and we manage all the provider API keys for you. Avoid provider rate limits.
+
+## Advanced: Customizing Routing
+
+The default routing handles most use cases. Customize only if you need specific control:
+
+### Lock to Specific Provider
+
+Force requests to only use one provider by adding the provider name after a slash:
+
+```typescript
+model: "gpt-4o-mini/openai"  // Only route through OpenAI
+```
+
+**When to use:** Compliance requirements mandate a specific provider, or you're testing provider-specific features.
+
+**What happens:** The gateway only attempts this provider. No automatic failover to other providers.
+
+### Use Your Own Deployment
+
+Target a specific deployment you've configured in Provider Settings:
+
+```typescript
+model: "gpt-4o-mini/azure/clm1a2b3c"  // Your Azure deployment ID
+```
+
+**When to use:** Regional data residency (e.g., EU GDPR compliance requires data to stay in EU regions), or you want to use provider credits.
+
+**What happens:** Requests only go through your configured deployment. The deployment ID (CUID) is shown in your Provider Settings.
+
+### Manual Fallback Chain
+
+Specify exactly which providers to try, in order:
+
+```typescript
+model: "gpt-4o-mini/azure,gpt-4o-mini/openai,gpt-4o-mini"
+```
+
+**When to use:** You want to prioritize your Azure credits, fall back to OpenAI if Azure fails, then try all other providers.
+
+**What happens:** Gateway tries each provider in the exact order you specify.
+
+### Bring Your Own Keys (BYOK)
+
+Add your provider API keys in Provider Settings:
+
+**What happens:** Your keys are always tried first, then Helicone's managed keys as fallback. This gives you control over provider accounts while maintaining reliability.
+
+**Benefits:** Use provider credits, meet compliance requirements, or maintain direct provider relationships while still getting automatic failover.
+
+The gateway forwards **any** model/provider combination, even models not yet in our registry. Unknown models only route through your BYOK deployments.
+
+### Exclude Specific Providers
+
+Prevent automatic routing from using specific providers:
+
+```typescript
+model: "!openai,gpt-4o-mini"  // Use any provider EXCEPT OpenAI
+```
+
+**When to use:** Known provider issues, compliance restrictions, or testing without certain providers.
+
+**What happens:** The gateway tries all available providers except those you've excluded. Exclude multiple providers with commas: `"!openai,!anthropic,gpt-4o-mini"`.
+
+## Failover Triggers
+
+The gateway automatically tries the next provider when encountering these errors:
+
+| Error | Description |
+|-------|-------------|
+| 429 | Rate limit errors |
+| 401 | Authentication errors |
+| 400 | Context length errors |
+| 408 | Timeout errors |
+| 500+ | Server errors |
+
+## Real World Examples
+
+### Scenario: OpenAI Outage
+
+Your production app uses GPT-4. OpenAI goes down at 3am.
+
+```typescript
+// Your code doesn't change
+const response = await client.chat.completions.create({
+  model: "gpt-4o-mini",
+  messages: [{ role: "user", content: "Process this customer request" }]
+});
+```
+
+**What happens:** Gateway automatically fails over to Azure OpenAI, then AWS Bedrock if needed. Your app stays online, customers never notice.
+
+### Scenario: Using Azure Credits
+
+Your company has $100k in Azure credits to burn before year-end.
+
+```typescript
+// Prioritize Azure but keep fallback for reliability
+const response = await client.chat.completions.create({
+  model: "gpt-4o-mini/azure,gpt-4o-mini",
+  messages: messages
+});
+```
+
+**What happens:** Tries your Azure deployment first (using credits), but falls back to other providers if Azure fails. Balances credit usage with reliability.
+
+### Scenario: EU Compliance Requirements
+
+GDPR requires EU customer data to stay in EU regions.
+
+```typescript
+// Use your custom EU deployment
+await client.chat.completions.create({
+  model: "gpt-4o/azure/eu-frankfurt-deployment",  // Your CUID
+  messages: messages
+});
+```
+
+**What happens:** Requests ONLY go through your Frankfurt deployment. No data leaves the EU.
+
+### Scenario: Avoiding Provider Issues
+
+You notice one provider is experiencing higher latency or errors today.
+
+```typescript
+// Exclude the problematic provider from automatic routing
+const response = await client.chat.completions.create({
+  model: "!openai,gpt-4o-mini",
+  messages: [{ role: "user", content: "Analyze this data" }]
+});
+```
+
+**What happens:** Gateway automatically routes to all available providers except OpenAI. If you also want to exclude another provider, use `"!openai,!anthropic,gpt-4o-mini"`.
+
+---
+
+# Prompt Management Through the Gateway
+
+Helicone's AI Gateway integrates directly with our prompt management system without the need for custom packages or code changes.
+
+## Why Use Prompt Integration?
+
+Instead of hardcoding prompts in your application, reference them by ID:
+
+### Before: Hardcoded Prompts
+
+```typescript
+// ❌ Prompt hardcoded in your app
+const response = await client.chat.completions.create({
+  model: "gpt-4o-mini",
+  messages: [
+    {
+      role: "system",
+      content: "You are a helpful customer support agent for TechCorp. Be friendly and solution-oriented."
+    },
+    {
+      role: "user",
+      content: `Customer ${customerName} is asking about ${issueType}`
+    }
+  ]
+});
+```
+
+### After: Managed Prompts
+
+```typescript
+// ✅ Prompt managed in Helicone dashboard
+const response = await client.chat.completions.create({
+  model: "gpt-4o-mini",
+  prompt_id: "customer_support_id",
+  inputs: {
+    customer_name: customerName,
+    issue_type: issueType
+  }
+});
+// The prompt template lives in Helicone, not your code. Your team can easily modify the prompt, passing it variables without ever touching code.
+```
+
+## Gateway vs SDK Integration
+
+Without the AI Gateway, using managed prompts requires multiple steps:
+
+### SDK Approach (More complex)
+
+```typescript
+// 1. Install package
+npm install @helicone/helpers
+
+// 2. Initialize prompt manager
+const promptManager = new HeliconePromptManager({
+  apiKey: "your-helicone-api-key"
+});
+
+// 3. Fetch and compile prompt (separate API call)
+const { body, errors } = await promptManager.getPromptBody({
+  prompt_id: "abc123",
+  inputs: { customer_name: "John", ... }
+});
+
+// 4. Handle errors manually
+if (errors.length > 0) {
+  console.warn("Validation errors:", errors);
+}
+
+// 5. Finally make the LLM call
+const response = await openai.chat.completions.create(body);
+```
+
+### AI Gateway Approach (Simple)
+
+```typescript
+// Just reference the prompt ID from your dashboard - AI gateway handles everything
+const response = await client.chat.completions.create({
+  prompt_id: "abc123",
+  inputs: { customer_name: "John", ... }
+});
+```
+
+**Why the gateway is better:**
+- **No extra packages** - Works with your existing OpenAI SDK
+- **Single API call** - Gateway fetches and compiles automatically
+- **Lower latency** - Everything happens server-side in one request
+- **Automatic error handling** - Invalid inputs return clear error messages
+- **Cleaner code** - No prompt management logic in your application
+
+## Integration Steps
+
+1. **Create prompts in Helicone**: Build and test prompts with variables in the dashboard
+2. **Use prompt_id in your code**: Replace `messages` with `prompt_id` and `inputs` in your gateway calls
+
+## API Parameters
+
+Use these parameters in your chat completions request to integrate with saved prompts:
+
+- `prompt_id` (string, required): The ID of your saved prompt from the Helicone dashboard
+- `environment` (string, default "production"): Which environment version to use: `development`, `staging`, or `production`
+- `inputs` (object, required): Variables to fill in your prompt template (e.g., `{"customer_name": "John", "issue_type": "billing"}`)
+- `model` (string, required): Any supported model - works with the unified gateway format
+
+## Example Usage
+
+```typescript
+const response = await client.chat.completions.create({
+  model: "gpt-4o-mini",
+  prompt_id: "customer_support_v2",
+  environment: "production",
+  inputs: {
+    customer_name: "Sarah Johnson",
+    issue_type: "billing",
+    customer_message: "I was charged twice this month"
+  }
+});
+```
+
+---
+
+# Complete AI Agent Example
+
+Here's a comprehensive example showing how to build an AI agent using all the Helicone features together:
+
+```typescript
+import { OpenAI } from "openai";
+import { randomUUID } from "crypto";
+
+const client = new OpenAI({
+  baseURL: "https://ai-gateway.helicone.ai",
+  apiKey: process.env.HELICONE_API_KEY,
+});
+
+class CustomerSupportAgent {
+  private sessionId: string;
+  private userId: string;
+  private ticketId: string;
+
+  constructor(userId: string, ticketId: string) {
+    this.sessionId = randomUUID();
+    this.userId = userId;
+    this.ticketId = ticketId;
+  }
+
+  async processCustomerInquiry(customerMessage: string) {
+    // Step 1: Analyze the customer's message
+    const analysisResponse = await client.chat.completions.create(
+      {
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: "Analyze customer messages and categorize the type of issue and urgency level."
+          },
+          {
+            role: "user",
+            content: `Analyze this customer message: "${customerMessage}"`
+          }
+        ]
+      },
+      {
+        headers: {
+          // Session tracking for complete workflow visibility
+          "Helicone-Session-Id": this.sessionId,
+          "Helicone-Session-Path": "/analysis",
+          "Helicone-Session-Name": "Customer Support Agent",
+
+          // Custom properties for filtering and cost analysis
+          "Helicone-Property-TicketId": this.ticketId,
+          "Helicone-Property-UserId": this.userId,
+          "Helicone-Property-Feature": "support-analysis",
+          "Helicone-Property-Environment": "production",
+
+          // User tracking for per-user analytics
+          "Helicone-User-Id": this.userId,
+
+          // Caching to avoid re-analyzing identical messages
+          "Helicone-Cache-Enabled": "true",
+          "Cache-Control": "max-age=3600", // Cache analysis for 1 hour
+        }
+      }
+    );
+
+    const analysis = analysisResponse.choices[0].message.content;
+
+    // Step 2: Generate appropriate response using managed prompt
+    const supportResponse = await client.chat.completions.create(
+      {
+        model: "gpt-4o-mini/openai,claude-3.5-sonnet", // Try OpenAI first, fallback to Claude
+        prompt_id: "customer_support_response", // Managed prompt
+        inputs: {
+          customer_message: customerMessage,
+          analysis_result: analysis,
+          customer_id: this.userId
+        }
+      },
+      {
+        headers: {
+          // Continue the same session
+          "Helicone-Session-Id": this.sessionId,
+          "Helicone-Session-Path": "/analysis/response",
+          "Helicone-Session-Name": "Customer Support Agent",
+
+          // Track this step with properties
+          "Helicone-Property-TicketId": this.ticketId,
+          "Helicone-Property-UserId": this.userId,
+          "Helicone-Property-Feature": "support-response",
+          "Helicone-Property-Environment": "production",
+          "Helicone-User-Id": this.userId,
+
+          // Cache responses for similar issues
+          "Helicone-Cache-Enabled": "true",
+          "Helicone-Cache-Seed": "support-responses",
+          "Cache-Control": "max-age=1800", // Cache for 30 minutes
+        }
+      }
+    );
+
+    // Step 3: Check if escalation is needed
+    const escalationCheck = await client.chat.completions.create(
+      {
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: "Determine if this customer issue requires human escalation based on complexity, sentiment, or business impact."
+          },
+          {
+            role: "user",
+            content: `Customer message: "${customerMessage}"\nAnalysis: ${analysis}\nProposed response: ${supportResponse.choices[0].message.content}`
+          }
+        ]
+      },
+      {
+        headers: {
+          "Helicone-Session-Id": this.sessionId,
+          "Helicone-Session-Path": "/analysis/response/escalation",
+          "Helicone-Session-Name": "Customer Support Agent",
+          "Helicone-Property-TicketId": this.ticketId,
+          "Helicone-Property-UserId": this.userId,
+          "Helicone-Property-Feature": "escalation-check",
+          "Helicone-Property-Environment": "production",
+          "Helicone-User-Id": this.userId,
+        }
+      }
+    );
+
+    const needsEscalation = escalationCheck.choices[0].message.content.toLowerCase().includes('yes');
+
+    return {
+      response: supportResponse.choices[0].message.content,
+      needsEscalation,
+      sessionId: this.sessionId,
+      analysis
+    };
+  }
+
+  async collectFeedback(requestId: string, wasHelpful: boolean) {
+    // Submit user feedback
+    await fetch(`https://api.helicone.ai/v1/request/${requestId}/feedback`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.HELICONE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ rating: wasHelpful }),
+    });
+  }
+}
+
+// Usage example
+async function handleCustomerSupport() {
+  const agent = new CustomerSupportAgent("user-12345", "TICKET-67890");
+
+  const result = await agent.processCustomerInquiry(
+    "Hi, I've been trying to cancel my subscription for weeks but keep getting charged. This is really frustrating and I want a refund!"
+  );
+
+  console.log("AI Response:", result.response);
+  console.log("Needs Escalation:", result.needsEscalation);
+  console.log("Session ID for tracking:", result.sessionId);
+
+  // Simulate user feedback (in real app, this would come from user interaction)
+  setTimeout(() => {
+    agent.collectFeedback("some-request-id", true); // User found it helpful
+  }, 5000);
+}
+
+handleCustomerSupport();
+```
+
+This example demonstrates:
+
+1. **Session Tracking**: Groups all related LLM calls under one session for workflow visibility
+2. **Custom Properties**: Tags requests for filtering, cost analysis, and performance tracking
+3. **User Tracking**: Associates requests with specific users for per-user analytics
+4. **Caching**: Avoids redundant API calls for similar analyses and responses
+5. **Provider Routing**: Uses fallback providers for reliability
+6. **Prompt Management**: Uses managed prompts instead of hardcoded ones
+7. **Feedback Collection**: Gathers user satisfaction data for continuous improvement
+
+## Key Benefits for AI Agents
+
+1. **Complete Visibility**: See every step of your agent's decision-making process
+2. **Cost Control**: Track spending per user, feature, and workflow
+3. **Reliability**: Automatic provider failover keeps agents online
+4. **Performance**: Caching and edge distribution reduce latency
+5. **Iteration**: Managed prompts enable rapid experimentation
+6. **Analytics**: Rich data for improving agent performance over time
+
+---
+
+# Getting Started Checklist
+
+1. **Sign up** for Helicone at https://helicone.ai
+2. **Get your API key** from the dashboard - if in [US](https://us.helicone.ai/settings/api-keys) or in [EU](https://eu.helicone.ai/settings/api-keys)
+3. **Update your OpenAI client** to use `https://ai-gateway.helicone.ai`
+4. **Add session headers** to track agent workflows
+5. **Include custom properties** for filtering and analysis
+6. **Enable caching** during development and testing
+7. **Set up feedback collection** for continuous improvement
+8. **Create managed prompts** for easier iteration
+
+Start with the basic integration and gradually add more advanced features as your AI agent grows in complexity. Helicone scales with you from prototype to production.
+
+For more information, visit https://docs.helicone.ai
