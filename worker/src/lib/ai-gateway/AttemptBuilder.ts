@@ -41,7 +41,8 @@ export class AttemptBuilder {
     orgId: string,
     bodyMapping: BodyMappingType = "OPENAI",
     plugins?: Plugin[],
-    globalIgnoreProviders?: Set<ModelProviderName>
+    globalIgnoreProviders?: Set<ModelProviderName>,
+    inlineApiKey?: string
   ): Promise<Attempt[]> {
     const allAttempts: Attempt[] = [];
 
@@ -61,7 +62,8 @@ export class AttemptBuilder {
           modelSpec.data,
           orgId,
           bodyMapping,
-          plugins
+          plugins,
+          inlineApiKey
         );
         // Sort this model's attempts (BYOK first), but preserve order relative to other models
         allAttempts.push(...sortAttemptsByPriority(providerAttempts));
@@ -72,7 +74,8 @@ export class AttemptBuilder {
           orgId,
           bodyMapping,
           plugins,
-          globalIgnoreProviders
+          globalIgnoreProviders,
+          inlineApiKey
         );
         allAttempts.push(...sortAttemptsByPriority(attempts));
       }
@@ -93,7 +96,8 @@ export class AttemptBuilder {
     orgId: string,
     bodyMapping: BodyMappingType = "OPENAI",
     plugins?: Plugin[],
-    globalIgnoreProviders?: Set<ModelProviderName>
+    globalIgnoreProviders?: Set<ModelProviderName>,
+    inlineApiKey?: string
   ): Promise<Attempt[]> {
     // Get all provider data in one query
     const providerDataResult = registry.getModelProviderEntriesByModel(
@@ -129,7 +133,8 @@ export class AttemptBuilder {
           data,
           orgId,
           bodyMapping,
-          plugins
+          plugins,
+          inlineApiKey
         );
 
         // Always build PTB attempts (feature flag removed)
@@ -152,7 +157,8 @@ export class AttemptBuilder {
     modelSpec: ModelSpec,
     orgId: string,
     bodyMapping: BodyMappingType = "OPENAI",
-    plugins?: Plugin[]
+    plugins?: Plugin[],
+    inlineApiKey?: string
   ): Promise<Attempt[]> {
     // Get provider data once
     const providerDataResult = registry.getModelProviderEntry(
@@ -179,7 +185,8 @@ export class AttemptBuilder {
         providerData,
         orgId,
         bodyMapping,
-        plugins
+        plugins,
+        inlineApiKey
       ),
       this.buildPtbAttempts(modelSpec, providerData, bodyMapping, plugins),
     ]);
@@ -192,7 +199,8 @@ export class AttemptBuilder {
     providerData: ModelProviderEntry,
     orgId: string,
     bodyMapping: BodyMappingType = "OPENAI",
-    plugins?: Plugin[]
+    plugins?: Plugin[],
+    inlineApiKey?: string
   ): Promise<Attempt[]> {
     // Get user's provider key
     const keySpan = this.traceContext?.sampled
@@ -208,7 +216,7 @@ export class AttemptBuilder {
         )
       : null;
 
-    const userKey = await this.providerKeysManager.getProviderKeyWithFetch(
+    let userKey = await this.providerKeysManager.getProviderKeyWithFetch(
       providerData.provider,
       modelSpec.modelName,
       orgId,
@@ -216,6 +224,19 @@ export class AttemptBuilder {
     );
 
     this.tracer.finishSpan(keySpan);
+
+    // If no stored key, fall back to inline API key from request Authorization header
+    if ((!userKey || !this.isByokEnabled(userKey)) && inlineApiKey) {
+      userKey = {
+        provider: providerData.provider,
+        org_id: orgId,
+        decrypted_provider_key: inlineApiKey,
+        decrypted_provider_secret_key: null,
+        auth_type: "key",
+        byok_enabled: true,
+        config: null,
+      };
+    }
 
     if (!userKey || !this.isByokEnabled(userKey)) {
       return []; // No BYOK available
