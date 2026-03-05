@@ -79,6 +79,37 @@ function convertContentParts(
   });
 }
 
+function mapTextFormatToChatResponseFormat(
+  textFormat: NonNullable<ResponsesRequestBody["text"]>["format"]
+): HeliconeChatCreateParams["response_format"] {
+  if (!textFormat) {
+    return undefined;
+  }
+
+  if (textFormat.type === "json_schema" && "schema" in textFormat) {
+    return {
+      type: "json_schema",
+      json_schema: {
+        name: textFormat.name,
+        description: textFormat.description,
+        schema: textFormat.schema,
+        strict: textFormat.strict,
+      },
+    } as HeliconeChatCreateParams["response_format"];
+  }
+
+  return textFormat as HeliconeChatCreateParams["response_format"];
+}
+
+function resolveFunctionCallLinkId(
+  item: Extract<ResponsesInputItem, { type: "function_call" }>,
+  fallbackId: string
+): string {
+  // `call_id` is the canonical linkage field used by function_call_output.
+  // Prefer it over opaque item `id` to avoid mismatches in multi-turn tool chains.
+  return item.call_id || item.id || fallbackId;
+}
+
 /**
  * Collects consecutive items of a specific type from the input array.
  * Returns the collected items and the index after the last collected item.
@@ -115,7 +146,7 @@ function convertInputToMessages(input: ResponsesRequestBody["input"]) {
       >(input, i, "function_call");
 
       const toolCalls = functionCalls.map((fc, idx) => ({
-        id: truncateToolCallId(fc.id || fc.call_id || `call_${i + idx}`),
+        id: truncateToolCallId(resolveFunctionCallLinkId(fc, `call_${i + idx}`)),
         type: "function" as const,
         function: {
           name: fc.name,
@@ -267,6 +298,10 @@ export function toChatCompletions(
     reasoning_effort = body.reasoning.effort === "minimal" ? "low" : body.reasoning.effort;
   }
 
+  const responseFormat =
+    body.response_format ??
+    mapTextFormatToChatResponseFormat(body.text?.format);
+
   const heliconeBody: HeliconeChatCreateParams = {
     model: body.model,
     messages,
@@ -285,7 +320,7 @@ export function toChatCompletions(
     logit_bias: body.logit_bias,
     logprobs: body.logprobs,
     top_logprobs: body.top_logprobs,
-    response_format: body.response_format,
+    response_format: responseFormat,
     seed: body.seed,
     user: body.user,
     service_tier: body.service_tier,
