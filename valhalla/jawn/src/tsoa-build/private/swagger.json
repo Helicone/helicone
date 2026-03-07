@@ -9586,12 +9586,12 @@
 						"format": "double"
 					},
 					"filter": {
-						"allOf": [
+						"anyOf": [
 							{
 								"$ref": "#/components/schemas/FilterExpression"
-							}
-						],
-						"nullable": true
+							},
+							{}
+						]
 					}
 				},
 				"required": [

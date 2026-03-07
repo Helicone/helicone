@@ -2824,7 +2824,7 @@ const models: TsoaRoute.Models = {
             "emails": {"dataType":"array","array":{"dataType":"string"},"required":true},
             "slack_channels": {"dataType":"array","array":{"dataType":"string"},"required":true},
             "minimum_request_count": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"undefined"}],"required":true},
-            "filter": {"dataType":"union","subSchemas":[{"ref":"FilterExpression"},{"dataType":"enum","enums":[null]}],"required":true},
+            "filter": {"dataType":"union","subSchemas":[{"ref":"FilterExpression"},{"dataType":"any"}],"required":true},
         },
         "additionalProperties": false,
     },

@@ -22,7 +22,8 @@ export interface AlertRequest {
   emails: string[];
   slack_channels: string[];
   minimum_request_count: number | undefined;
-  filter: FilterExpression | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  filter: FilterExpression | any;
 }
 
 export interface AlertHistory {
