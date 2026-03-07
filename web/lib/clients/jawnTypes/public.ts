@@ -601,6 +601,12 @@ export interface paths {
   "/v1/metrics/tokensOverTime": {
     post: operations["GetTokensOverTime"];
   };
+  "/v1/metrics/detailedTokensOverTime": {
+    post: operations["GetDetailedTokensOverTime"];
+  };
+  "/v1/metrics/modelUsageOverTime": {
+    post: operations["GetModelUsageOverTime"];
+  };
   "/v1/metrics/latencyOverTime": {
     post: operations["GetLatencyOverTime"];
   };
@@ -4080,6 +4086,41 @@ export interface components {
       error: null;
     };
     "Result_TokensOverTime-Array.string_": components["schemas"]["ResultSuccess_TokensOverTime-Array_"] | components["schemas"]["ResultError_string_"];
+    DetailedTokensOverTime: {
+      /** Format: date-time */
+      time: string;
+      /** Format: double */
+      prompt_tokens: number;
+      /** Format: double */
+      completion_tokens: number;
+      /** Format: double */
+      reasoning_tokens: number;
+      /** Format: double */
+      prompt_cache_read_tokens: number;
+      /** Format: double */
+      prompt_cache_write_tokens: number;
+    };
+    "ResultSuccess_DetailedTokensOverTime-Array_": {
+      data: components["schemas"]["DetailedTokensOverTime"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_DetailedTokensOverTime-Array.string_": components["schemas"]["ResultSuccess_DetailedTokensOverTime-Array_"] | components["schemas"]["ResultError_string_"];
+    ModelUsageOverTime: {
+      /** Format: date-time */
+      time: string;
+      model: string;
+      /** Format: double */
+      request_count: number;
+      /** Format: double */
+      total_tokens: number;
+    };
+    "ResultSuccess_ModelUsageOverTime-Array_": {
+      data: components["schemas"]["ModelUsageOverTime"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_ModelUsageOverTime-Array.string_": components["schemas"]["ResultSuccess_ModelUsageOverTime-Array_"] | components["schemas"]["ResultError_string_"];
     LatencyOverTime: {
       /** Format: date-time */
       time: string;
@@ -8162,6 +8203,36 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_TokensOverTime-Array.string_"];
+        };
+      };
+    };
+  };
+  GetDetailedTokensOverTime: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MetricsOverTimeBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_DetailedTokensOverTime-Array.string_"];
+        };
+      };
+    };
+  };
+  GetModelUsageOverTime: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["MetricsOverTimeBody"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_ModelUsageOverTime-Array.string_"];
         };
       };
     };

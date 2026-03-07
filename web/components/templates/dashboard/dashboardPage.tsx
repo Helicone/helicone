@@ -67,6 +67,8 @@ import ModelsPanel from "./panels/modelsPanel";
 import ModelsByCostPanel from "./panels/modelsByCostPanel";
 import TopProvidersPanel from "./panels/topProvidersPanel";
 import ErrorsPanel from "./panels/errorsPanel";
+import DetailedTokenUsagePanel from "./panels/detailedTokenUsagePanel";
+import ModelUsageOverTimePanel from "./panels/modelUsageOverTimePanel";
 import { QuantilesGraph } from "./quantilesGraph";
 import SuggestionModal from "./suggestionsModal";
 import { useDashboardPage } from "./useDashboardPage";
@@ -1287,6 +1289,20 @@ const DashboardPage = (props: DashboardPageProps) => {
                       )}
                     </div>
                   </div>
+                </div>
+                <div key="detailed-token-usage">
+                  <DetailedTokenUsagePanel
+                    data={overTimeData.detailedTokens.data}
+                    isLoading={overTimeData.detailedTokens.isLoading}
+                    timeIncrement={timeIncrement}
+                  />
+                </div>
+                <div key="model-usage-over-time">
+                  <ModelUsageOverTimePanel
+                    data={overTimeData.modelUsage.data}
+                    isLoading={overTimeData.modelUsage.isLoading}
+                    timeIncrement={timeIncrement}
+                  />
                 </div>
               </ResponsiveGridLayout>
               <div className="relative">
