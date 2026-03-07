@@ -139,11 +139,6 @@ type FieldSpec =
       column: keyof RequestResponseRMT;
     })
   | (BaseFieldSpec & {
-      table: "request_response_rmt";
-      column: string;
-      subtype: "property";
-    })
-  | (BaseFieldSpec & {
       table: "sessions_request_response_rmt";
       column: keyof Views["session_metrics"];
     })
