@@ -201,11 +201,20 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
     // Create updated condition with new field and default operator
     const updated: ConditionExpression = {
       ...condition,
-      field: {
-        column: fieldId as any, // Use 'any' to bypass type checking temporarily
-        subtype: filterDef.subType,
-        table: filterDef.table,
-      },
+      field:
+        filterDef.subType === "property"
+          ? {
+              column: "properties" as any,
+              subtype: "property",
+              valueMode: "value",
+              key: fieldId,
+              table: filterDef.table,
+            }
+          : {
+              column: fieldId as any,
+              subtype: filterDef.subType,
+              table: filterDef.table,
+            },
       operator: defaultOperator,
       value: defaultValue, // Reset value since field changed
     };
@@ -240,7 +249,12 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
   };
 
   // Find the filter definition for this field
-  const filterDef = filterDefs.find((def) => def.id === condition.field.column);
+  // For property fields, the property name is stored in `key`, not `column`
+  const filterDef = filterDefs.find((def) =>
+    condition.field.subtype === "property" && condition.field.key
+      ? def.id === condition.field.key
+      : def.id === condition.field.column
+  );
 
   // Get available operators
   const operators = filterDef?.operators || [];
@@ -302,7 +316,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
       <div className="flex items-center justify-between border border-amber-300 bg-amber-50 p-2 dark:border-amber-800 dark:bg-amber-950">
         <div className="flex flex-col">
           <span className="text-xs font-medium text-amber-800 dark:text-amber-300">
-            Invalid field: &quot;{condition.field.column || "empty"}&quot;
+            Invalid field: &quot;{condition.field.key || condition.field.column || "empty"}&quot;
           </span>
           <span className="text-[10px] text-amber-600 dark:text-amber-400">
             Please select a valid field or remove
@@ -410,7 +424,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
     >
       <SearchableSelect
         options={fieldOptions}
-        value={condition.field.column}
+        value={condition.field.subtype === "property" && condition.field.key ? condition.field.key : condition.field.column}
         onValueChange={handleFieldChange}
         placeholder="Select field"
         searchPlaceholder="Search field..."

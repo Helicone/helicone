@@ -9,8 +9,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Small } from "@/components/ui/typography";
 import { useFilterAST } from "@/filterAST/context/filterContext";
-import { Check, ChevronDown, Trash2 } from "lucide-react";
+import { Check, ChevronDown, Search, Trash2 } from "lucide-react";
 import React, { useState } from "react";
+import { Input } from "@/components/ui/input";
 
 interface SavedFiltersDropdownProps { }
 
@@ -18,6 +19,7 @@ export const SavedFiltersDropdown: React.FC<
   SavedFiltersDropdownProps
 > = ({ }) => {
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
   const { crud, helpers, store } = useFilterAST();
 
   const handleSelectFilter = (filterId: string) => {
@@ -31,7 +33,7 @@ export const SavedFiltersDropdown: React.FC<
   };
 
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
+    <DropdownMenu open={open} onOpenChange={(v) => { setOpen(v); if (!v) setSearch(""); }}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="glass"
@@ -56,48 +58,81 @@ export const SavedFiltersDropdown: React.FC<
         </div>
         <DropdownMenuSeparator />
 
-        {crud.isLoading ? (
-          <div className="p-2 text-center">
-            <Small className="text-muted-foreground">Loading...</Small>
-          </div>
-        ) : crud.savedFilters.length === 0 ? (
-          <div className="p-2 text-center">
-            <Small className="text-muted-foreground">No saved filters</Small>
-          </div>
-        ) : (
-          <div className="max-h-[300px] overflow-y-auto py-1">
-            {crud.savedFilters.map((filter) => (
-              <DropdownMenuItem
-                key={filter.id}
-                className="flex cursor-pointer items-center justify-between px-2 py-2"
-                onClick={() => handleSelectFilter(filter.id || "")}
-              >
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium">{filter.name}</span>
-                  <Small className="text-[10px] text-muted-foreground">
-                    {filter.createdAt
-                      ? new Date(filter.createdAt).toLocaleDateString()
-                      : "Unknown date"}
-                  </Small>
-                </div>
-                <div className="flex items-center gap-1">
-                  {store.activeFilterId === filter.id && (
-                    <Check size={14} className="text-primary" />
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 opacity-50 hover:bg-destructive/10 hover:opacity-100"
-                    onClick={(e) => handleDeleteFilter(e, filter.id || "")}
-                    disabled={crud.isDeleting}
-                  >
-                    <Trash2 size={14} className="text-destructive" />
-                  </Button>
-                </div>
-              </DropdownMenuItem>
-            ))}
+        {crud.savedFilters.length > 5 && (
+          <div className="px-2 py-1.5">
+            <div className="relative">
+              <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search filters..."
+                className="h-7 pl-7 text-xs"
+                onKeyDown={(e) => e.stopPropagation()}
+              />
+            </div>
           </div>
         )}
+
+        {(() => {
+          if (crud.isLoading) {
+            return (
+              <div className="p-2 text-center">
+                <Small className="text-muted-foreground">Loading...</Small>
+              </div>
+            );
+          }
+          if (crud.savedFilters.length === 0) {
+            return (
+              <div className="p-2 text-center">
+                <Small className="text-muted-foreground">No saved filters</Small>
+              </div>
+            );
+          }
+          const filtered = crud.savedFilters.filter((f) =>
+            f.name.toLowerCase().includes(search.toLowerCase())
+          );
+          if (filtered.length === 0) {
+            return (
+              <div className="p-2 text-center">
+                <Small className="text-muted-foreground">No matching filters</Small>
+              </div>
+            );
+          }
+          return (
+            <div className="max-h-[300px] overflow-y-auto py-1">
+              {filtered.map((filter) => (
+                <DropdownMenuItem
+                  key={filter.id}
+                  className="flex cursor-pointer items-center justify-between px-2 py-2"
+                  onClick={() => handleSelectFilter(filter.id || "")}
+                >
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">{filter.name}</span>
+                    <Small className="text-[10px] text-muted-foreground">
+                      {filter.createdAt
+                        ? new Date(filter.createdAt).toLocaleDateString()
+                        : "Unknown date"}
+                    </Small>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {store.activeFilterId === filter.id && (
+                      <Check size={14} className="text-primary" />
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 opacity-50 hover:bg-destructive/10 hover:opacity-100"
+                      onClick={(e) => handleDeleteFilter(e, filter.id || "")}
+                      disabled={crud.isDeleting}
+                    >
+                      <Trash2 size={14} className="text-destructive" />
+                    </Button>
+                  </div>
+                </DropdownMenuItem>
+              ))}
+            </div>
+          );
+        })()}
       </DropdownMenuContent>
     </DropdownMenu>
   );
