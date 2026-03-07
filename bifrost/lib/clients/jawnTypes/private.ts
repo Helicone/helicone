@@ -1195,50 +1195,8 @@ Json: JsonObject;
       error: null;
     };
     "Result_Database-at-public_91_Tables_93_-at-organization_91_Row_93_.string_": components["schemas"]["ResultSuccess_Database-at-public_91_Tables_93_-at-organization_91_Row_93__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--default_time_filter-string--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_": {
-      data: {
-          tier: string;
-          subscription_status: string;
-          stripe_subscription_item_id: string;
-          stripe_subscription_id: string;
-          stripe_metadata: components["schemas"]["Json"];
-          stripe_customer_id: string;
-          soft_delete: boolean;
-          size: string;
-          /** Format: double */
-          request_limit: number;
-          referral: string;
-          playground_helicone: boolean;
-          /** Format: double */
-          percent_to_log: number;
-          owner: string;
-          organization_type: string;
-          org_provider_key: string;
-          onboarding_status: components["schemas"]["Json"];
-          name: string;
-          limits: components["schemas"]["Json"];
-          is_personal: boolean;
-          is_main_org: boolean;
-          id: string;
-          icon: string;
-          has_onboarded: boolean;
-          has_integrated: boolean;
-          governance_settings: components["schemas"]["Json"];
-          gateway_discount_enabled: boolean;
-          domain: string;
-          default_time_filter: string;
-          /** Format: double */
-          credit_limit: number;
-          created_at: string;
-          color: string;
-          allow_negative_balance: boolean;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--default_time_filter-string--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_": components["schemas"]["ResultSuccess__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--default_time_filter-string--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--default_time_filter-string--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__": {
-      data: components["schemas"]["Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--default_time_filter-string--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_"];
+    ResultSuccess_unknown_: {
+      data: unknown;
       /** @enum {number|null} */
       error: null;
     };
@@ -1247,7 +1205,6 @@ Json: JsonObject;
       data: null;
       error: unknown;
     };
-    "Result_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--default_time_filter-string--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_": components["schemas"]["ResultSuccess_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--default_time_filter-string--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string__"] | components["schemas"]["ResultError_unknown_"];
     ResultSuccess_string_: {
       data: string;
       /** @enum {number|null} */
@@ -2808,11 +2765,6 @@ Json: JsonObject;
       authorization: string;
     };
     ResultSuccess_any_: {
-      data: unknown;
-      /** @enum {number|null} */
-      error: null;
-    };
-    ResultSuccess_unknown_: {
       data: unknown;
       /** @enum {number|null} */
       error: null;
@@ -17728,7 +17680,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_Result__allow_negative_balance-boolean--color-string--created_at-string--credit_limit-number--default_time_filter-string--domain-string--gateway_discount_enabled-boolean--governance_settings-Json--has_integrated-boolean--has_onboarded-boolean--icon-string--id-string--is_main_org-boolean--is_personal-boolean--limits-Json--name-string--onboarding_status-Json--org_provider_key-string--organization_type-string--owner-string--percent_to_log-number--playground_helicone-boolean--referral-string--request_limit-number--size-string--soft_delete-boolean--stripe_customer_id-string--stripe_metadata-Json--stripe_subscription_id-string--stripe_subscription_item_id-string--subscription_status-string--tier-string_-Array.string_.unknown_"];
+          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_unknown_"];
         };
       };
     };
@@ -19621,7 +19573,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["ResultError_unknown_"] | components["schemas"]["ResultSuccess_unknown_"];
+          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_unknown_"];
         };
       };
     };
@@ -19656,7 +19608,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["ResultError_unknown_"] | components["schemas"]["ResultSuccess_unknown_"];
+          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_unknown_"];
         };
       };
     };
@@ -19666,7 +19618,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["ResultError_unknown_"] | components["schemas"]["ResultSuccess_unknown_"];
+          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_unknown_"];
         };
       };
     };
