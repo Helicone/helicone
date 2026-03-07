@@ -12,7 +12,8 @@ A Model Context Protocol (MCP) server for querying Helicone observability platfo
       "command": "npx",
       "args": ["@helicone/mcp@latest"],
       "env": {
-        "HELICONE_API_KEY": "sk-helicone-xxxxxxx-xxxxxxx-xxxxxxx-xxxxxxx"
+        "HELICONE_API_KEY": "sk-helicone-xxxxxxx-xxxxxxx-xxxxxxx-xxxxxxx",
+        "HELICONE_BASE_URL": "https://api.helicone.ai"
       }
     }
   }
@@ -66,6 +67,36 @@ Query sessions with search, time range filtering, and advanced filters.
 
 Both tools support full filter capabilities including model/provider, status/error, time, cost/latency, custom properties, and complex AND/OR combinations.
 
-## API Key
+## Configuration
+
+### API Key
 
 Get your API key from [Settings → API Keys](https://us.helicone.ai/settings/api-keys) (or for [EU](https://eu.helicone.ai/settings/api-keys)) and set it as `HELICONE_API_KEY` in your MCP configuration.
+
+### Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `HELICONE_API_KEY` | *(required)* | Your Helicone API key |
+| `HELICONE_BASE_URL` | `https://api.helicone.ai` | Base URL for the Helicone API. Set to `https://eu.api.helicone.ai` for EU users. |
+| `HELICONE_AI_GATEWAY_BASE_URL` | `https://ai-gateway.helicone.ai` | Base URL for the AI Gateway. |
+
+### EU Configuration
+
+For EU users, set `HELICONE_BASE_URL` to point to the EU API endpoint:
+
+```json
+{
+  "mcpServers": {
+    "helicone": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@helicone/mcp@latest"],
+      "env": {
+        "HELICONE_API_KEY": "sk-helicone-eu-xxxxxxx-xxxxxxx-xxxxxxx-xxxxxxx",
+        "HELICONE_BASE_URL": "https://eu.api.helicone.ai"
+      }
+    }
+  }
+}
+```
