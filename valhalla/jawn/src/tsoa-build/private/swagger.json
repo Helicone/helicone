@@ -9336,6 +9336,40 @@
 							},
 							{
 								"properties": {
+									"subtype": {
+										"type": "string",
+										"enum": [
+											"property"
+										],
+										"nullable": false
+									},
+									"column": {
+										"type": "string"
+									},
+									"table": {
+										"type": "string",
+										"enum": [
+											"request_response_rmt"
+										],
+										"nullable": false
+									}
+								},
+								"required": [
+									"subtype",
+									"column",
+									"table"
+								],
+								"type": "object"
+							}
+						]
+					},
+					{
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/BaseFieldSpec"
+							},
+							{
+								"properties": {
 									"column": {
 										"type": "string",
 										"enum": [
