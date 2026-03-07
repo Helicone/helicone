@@ -199,15 +199,17 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
     })();
 
     // Create updated condition with new field and default operator
+    const needsKey = filterDef.subType === "property" || filterDef.subType === "score";
     const updated: ConditionExpression = {
       ...condition,
       field: {
-        column: fieldId as any, // Use 'any' to bypass type checking temporarily
+        column: (filterDef.column ?? fieldId) as any,
         subtype: filterDef.subType,
         table: filterDef.table,
+        ...(needsKey && { key: fieldId, valueMode: "value" as const }),
       },
       operator: defaultOperator,
-      value: defaultValue, // Reset value since field changed
+      value: defaultValue,
     };
 
     filterStore.updateFilterExpression(path, updated);
@@ -239,8 +241,9 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
     filterStore.removeFilterExpression(path);
   };
 
-  // Find the filter definition for this field
-  const filterDef = filterDefs.find((def) => def.id === condition.field.column);
+  // Find the filter definition - use key for properties/scores, column otherwise
+  const filterDefId = condition.field.key || condition.field.column;
+  const filterDef = filterDefs.find((def) => def.id === filterDefId);
 
   // Get available operators
   const operators = filterDef?.operators || [];
@@ -410,7 +413,7 @@ export const FilterConditionNode: React.FC<FilterConditionNodeProps> = ({
     >
       <SearchableSelect
         options={fieldOptions}
-        value={condition.field.column}
+        value={filterDefId}
         onValueChange={handleFieldChange}
         placeholder="Select field"
         searchPlaceholder="Search field..."
