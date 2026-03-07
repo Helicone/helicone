@@ -84,6 +84,7 @@ export const useFilterUIDefinitions = () => {
                 property.property.toLowerCase() as keyof typeof KNOWN_HELICONE_PROPERTIES
               ].label
             : property.property,
+        column: "properties",
         type: "searchable",
         operators: ["contains", "not-contains", "eq", "neq", "like", "ilike", "in"],
         onSearch: (searchTerm) => {

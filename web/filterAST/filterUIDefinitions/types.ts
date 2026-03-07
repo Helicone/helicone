@@ -5,6 +5,7 @@ export interface FilterUIDefinition {
   id: string;
   label: string;
   table: FieldSpec["table"];
+  column?: string; // The actual DB column. Defaults to id if not set.
   type: "string" | "number" | "boolean" | "datetime" | "select" | "searchable";
   subType?: "property" | "score" | "sessions" | "user";
   operators: FilterOperator[];
