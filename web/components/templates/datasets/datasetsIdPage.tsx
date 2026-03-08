@@ -408,8 +408,7 @@ const DatasetIdPage = (props: DatasetIdPageProps) => {
           count={count || 0}
           onPageChange={(n) => handlePageChange(n)}
           onPageSizeChange={handlePageSizeChange}
-          pageSizeOptions={[25, 50, 100, 250, 500]}
-        />
+pageSizeOptions={[25, 50, 100, 250, 500]}        />
       </div>
       <DatasetDrawerV2
         open={open}

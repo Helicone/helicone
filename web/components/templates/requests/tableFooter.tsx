@@ -38,17 +38,31 @@ export default function TableFooter(props: TableFooterProps) {
     pageSizeOptions,
     showCount = false,
   } = props;
-
-  const totalPages = Math.ceil(count / pageSize);
+  // Total pages = Math.ceil(count / pageSize)
+  const totalPages = pageSize > 0 ? Math.ceil(count / pageSize) : 0;
   const [page, setPage] = useState<number>(currentPage);
 
   const debouncedPage = useDebounce(page, 1200);
 
+  // Sync local page state with prop changes
+  useEffect(() => {
+    setPage(currentPage);
+  }, [currentPage]);
+
+  // Notify parent of page changes
   useEffect(() => {
     if (debouncedPage !== currentPage) {
       onPageChange(debouncedPage);
     }
   }, [debouncedPage, currentPage, onPageChange]);
+
+  // Reset to page 1 if current page exceeds new total pages
+  useEffect(() => {
+    if (page > totalPages && totalPages > 0) {
+      setPage(1);
+      onPageChange(1);
+    }
+  }, [totalPages, page, onPageChange]);
   return (
     <footer className="flex w-full flex-row items-center justify-between gap-4 border-t border-border bg-slate-100 px-4 py-2 text-xs dark:bg-slate-900">
       {/* Left Actions */}
@@ -57,7 +71,7 @@ export default function TableFooter(props: TableFooterProps) {
           Rows
         </p>
         <Select
-          defaultValue={pageSize.toString()}
+          value={pageSize.toString()}
           onValueChange={(value) => onPageSizeChange(parseInt(value, 10))}
         >
           <SelectTrigger className="h-7 w-[4.5rem]">
@@ -79,7 +93,7 @@ export default function TableFooter(props: TableFooterProps) {
           variant="outline"
           size="icon"
           className="hidden h-7 w-7 sm:inline-flex"
-          disabled={isCountLoading || currentPage <= 1}
+          disabled={isCountLoading && currentPage <= 1}
           onClick={() => setPage(1)}
         >
           <ChevronFirst className="h-3 w-3" />
@@ -88,7 +102,7 @@ export default function TableFooter(props: TableFooterProps) {
           variant="outline"
           size="icon"
           className="h-7 w-7"
-          disabled={isCountLoading || currentPage <= 1}
+          disabled={isCountLoading && currentPage <= 1}
           onClick={() => setPage(currentPage - 1)}
         >
           <ChevronLeft className="h-3 w-3" />
@@ -130,7 +144,7 @@ export default function TableFooter(props: TableFooterProps) {
           variant="outline"
           size="icon"
           className="h-7 w-7"
-          disabled={isCountLoading || currentPage >= totalPages}
+          disabled={isCountLoading && currentPage >= totalPages}
           onClick={() => setPage(currentPage + 1)}
         >
           <ChevronRight className="h-3 w-3" />
@@ -139,7 +153,7 @@ export default function TableFooter(props: TableFooterProps) {
           variant="outline"
           size="icon"
           className="hidden h-7 w-7 sm:inline-flex"
-          disabled={isCountLoading || currentPage >= totalPages}
+          disabled={isCountLoading && currentPage >= totalPages}
           onClick={() => setPage(totalPages)}
         >
           <ChevronLast className="h-3 w-3" />
