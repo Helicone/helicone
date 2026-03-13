@@ -162,6 +162,9 @@ export class AttemptBuilder {
 
     if (!providerDataResult.data) {
       // No registry data - try passthrough for unknown models
+      console.log(
+        `Model "${modelSpec.modelName}" not found in registry, attempting passthrough to ${modelSpec.provider}`
+      );
       return this.buildPassthroughAttempt(
         modelSpec,
         orgId,
@@ -272,6 +275,9 @@ export class AttemptBuilder {
     );
 
     if (!userKey || !this.isByokEnabled(userKey)) {
+      console.warn(
+        `No BYOK key available for passthrough to ${modelSpec.provider} for model ${modelSpec.modelName}`
+      );
       return []; // No BYOK available for passthrough
     }
 
@@ -289,6 +295,10 @@ export class AttemptBuilder {
     );
 
     if (!isErr(passthroughResult) && passthroughResult.data) {
+      console.log(
+        `Created passthrough endpoint for unknown model: ${modelSpec.modelName}/${modelSpec.provider}`
+      );
+      
       // Process plugins using PluginHandler
       const processedPlugins = this.pluginHandler.processPlugins(
         modelSpec,
@@ -308,6 +318,10 @@ export class AttemptBuilder {
       ];
     }
 
+    console.error(
+      `Failed to create passthrough endpoint for ${modelSpec.modelName}/${modelSpec.provider}:`,
+      passthroughResult.error
+    );
     return [];
   }
 
