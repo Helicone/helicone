@@ -385,18 +385,6 @@ export interface paths {
   "/v1/webhooks/{webhookId}/test": {
     post: operations["TestWebhook"];
   };
-  "/v1/public/waitlist/feature": {
-    post: operations["AddToWaitlist"];
-  };
-  "/v1/public/waitlist/feature/status": {
-    get: operations["IsOnWaitlist"];
-  };
-  "/v1/public/waitlist/feature/count": {
-    get: operations["GetWaitlistCount"];
-  };
-  "/v1/public/waitlist/feature/share": {
-    post: operations["TrackShare"];
-  };
   "/v1/vault/add": {
     post: operations["AddKey"];
   };
@@ -435,48 +423,6 @@ export interface paths {
   };
   "/v1/test/gateway-request": {
     post: operations["SendTestRequest"];
-  };
-  "/v1/public/stats/model-usage": {
-    /**
-     * @description Get model usage statistics for the AI Gateway.
-     * Returns time series data and a leaderboard of top models by total tokens.
-     */
-    get: operations["GetModelUsage"];
-  };
-  "/v1/public/stats/market-share": {
-    /**
-     * @description Get market share statistics by model author for the AI Gateway.
-     * Returns time series data (100% stacked) and a leaderboard of top 9 authors + others.
-     */
-    get: operations["GetMarketShare"];
-  };
-  "/v1/public/stats/provider-usage": {
-    /**
-     * @description Get provider usage statistics for the AI Gateway.
-     * Returns time series data and a leaderboard of top 9 providers + others.
-     */
-    get: operations["GetProviderUsage"];
-  };
-  "/v1/public/stats/authors/{author}": {
-    /**
-     * @description Get statistics for a specific model author.
-     * Returns time series data and a leaderboard of top models by that author.
-     */
-    get: operations["GetAuthorStats"];
-  };
-  "/v1/public/stats/providers/{provider}": {
-    /**
-     * @description Get statistics for a specific inference provider.
-     * Returns time series data and a leaderboard of top models on that provider.
-     */
-    get: operations["GetProviderStats"];
-  };
-  "/v1/public/stats/models/{model}": {
-    /**
-     * @description Get usage statistics for a specific model.
-     * Returns time series data showing token usage over time.
-     */
-    get: operations["GetModelStats"];
   };
   "/v1/session/query": {
     post: operations["GetSessions"];
@@ -829,10 +775,6 @@ export interface paths {
   };
   "/v1/credits/discounts": {
     get: operations["GetDiscounts"];
-  };
-  "/v1/public/alert-banner": {
-    get: operations["GetAlertBanners"];
-    patch: operations["UpdateAlertBannerActive"];
   };
   "/v1/agent/generate": {
     post: operations["Generate"];
@@ -2473,46 +2415,6 @@ export interface components {
       error: null;
     };
     "Result__success-boolean--message-string_.string_": components["schemas"]["ResultSuccess__success-boolean--message-string__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array__": {
-      data: {
-        sharedPlatforms?: string[];
-        alreadyOnList?: boolean;
-        /** Format: double */
-        position?: number;
-        success: boolean;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array_.string_": components["schemas"]["ResultSuccess__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__isOnWaitlist-boolean__": {
-      data: {
-        isOnWaitlist: boolean;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__isOnWaitlist-boolean_.string_": components["schemas"]["ResultSuccess__isOnWaitlist-boolean__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__count-number__": {
-      data: {
-        /** Format: double */
-        count: number;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__count-number_.string_": components["schemas"]["ResultSuccess__count-number__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__success-boolean--newPosition_63_-number--message-string__": {
-      data: {
-        message: string;
-        /** Format: double */
-        newPosition?: number;
-        success: boolean;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__success-boolean--newPosition_63_-number--message-string_.string_": components["schemas"]["ResultSuccess__success-boolean--newPosition_63_-number--message-string__"] | components["schemas"]["ResultError_string_"];
     AddVaultKeyParams: {
       key: string;
       provider: string;
@@ -2756,142 +2658,6 @@ export interface components {
     SendTestRequestRequest: {
       apiKey: string;
     };
-    ModelTokens: {
-      model: string;
-      /** Format: double */
-      totalTokens: number;
-    };
-    ModelUsageTimeSeriesDataPoint: {
-      time: string;
-      models: components["schemas"]["ModelTokens"][];
-    };
-    ModelUsageLeaderboardEntry: {
-      /** Format: double */
-      rank: number;
-      model: string;
-      author: string;
-      /** Format: double */
-      totalTokens: number;
-      /** Format: double */
-      percentChange: number | null;
-    };
-    ModelUsageResponse: {
-      timeSeries: components["schemas"]["ModelUsageTimeSeriesDataPoint"][];
-      leaderboard: components["schemas"]["ModelUsageLeaderboardEntry"][];
-    };
-    ResultSuccess_ModelUsageResponse_: {
-      data: components["schemas"]["ModelUsageResponse"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ModelUsageResponse.string_": components["schemas"]["ResultSuccess_ModelUsageResponse_"] | components["schemas"]["ResultError_string_"];
-    /** @enum {string} */
-    StatsTimeFrame: "24h" | "7d" | "30d" | "3m" | "1y";
-    AuthorTokens: {
-      author: string;
-      /** Format: double */
-      totalTokens: number;
-      /** Format: double */
-      percentage: number;
-    };
-    MarketShareTimeSeriesDataPoint: {
-      time: string;
-      authors: components["schemas"]["AuthorTokens"][];
-    };
-    MarketShareLeaderboardEntry: {
-      /** Format: double */
-      rank: number;
-      author: string;
-      /** Format: double */
-      totalTokens: number;
-      /** Format: double */
-      marketShare: number;
-      /** Format: double */
-      rankChange: number | null;
-      /** Format: double */
-      marketShareChange: number | null;
-    };
-    MarketShareResponse: {
-      timeSeries: components["schemas"]["MarketShareTimeSeriesDataPoint"][];
-      leaderboard: components["schemas"]["MarketShareLeaderboardEntry"][];
-    };
-    ResultSuccess_MarketShareResponse_: {
-      data: components["schemas"]["MarketShareResponse"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_MarketShareResponse.string_": components["schemas"]["ResultSuccess_MarketShareResponse_"] | components["schemas"]["ResultError_string_"];
-    ProviderTokens: {
-      provider: string;
-      /** Format: double */
-      totalTokens: number;
-    };
-    ProviderUsageTimeSeriesDataPoint: {
-      time: string;
-      providers: components["schemas"]["ProviderTokens"][];
-    };
-    ProviderUsageLeaderboardEntry: {
-      /** Format: double */
-      rank: number;
-      provider: string;
-      /** Format: double */
-      totalTokens: number;
-      /** Format: double */
-      percentChange: number | null;
-    };
-    ProviderUsageResponse: {
-      timeSeries: components["schemas"]["ProviderUsageTimeSeriesDataPoint"][];
-      leaderboard: components["schemas"]["ProviderUsageLeaderboardEntry"][];
-    };
-    ResultSuccess_ProviderUsageResponse_: {
-      data: components["schemas"]["ProviderUsageResponse"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ProviderUsageResponse.string_": components["schemas"]["ResultSuccess_ProviderUsageResponse_"] | components["schemas"]["ResultError_string_"];
-    AuthorStatsResponse: {
-      author: string;
-      /** Format: double */
-      totalTokens: number;
-      timeSeries: components["schemas"]["ModelUsageTimeSeriesDataPoint"][];
-      leaderboard: components["schemas"]["ModelUsageLeaderboardEntry"][];
-    };
-    ResultSuccess_AuthorStatsResponse_: {
-      data: components["schemas"]["AuthorStatsResponse"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_AuthorStatsResponse.string_": components["schemas"]["ResultSuccess_AuthorStatsResponse_"] | components["schemas"]["ResultError_string_"];
-    ProviderStatsResponse: {
-      provider: string;
-      /** Format: double */
-      totalTokens: number;
-      timeSeries: components["schemas"]["ModelUsageTimeSeriesDataPoint"][];
-      leaderboard: components["schemas"]["ModelUsageLeaderboardEntry"][];
-    };
-    ResultSuccess_ProviderStatsResponse_: {
-      data: components["schemas"]["ProviderStatsResponse"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ProviderStatsResponse.string_": components["schemas"]["ResultSuccess_ProviderStatsResponse_"] | components["schemas"]["ResultError_string_"];
-    ModelStatsTimeSeriesDataPoint: {
-      time: string;
-      /** Format: double */
-      totalTokens: number;
-    };
-    ModelStatsResponse: {
-      model: string;
-      /** Format: double */
-      totalTokens: number;
-      timeSeries: components["schemas"]["ModelStatsTimeSeriesDataPoint"][];
-    };
-    ResultSuccess_ModelStatsResponse_: {
-      data: components["schemas"]["ModelStatsResponse"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ModelStatsResponse.string_": components["schemas"]["ResultSuccess_ModelStatsResponse_"] | components["schemas"]["ResultError_string_"];
     SessionResult: {
       created_at: string;
       latest_request_created_at: string;
@@ -4842,20 +4608,6 @@ export interface components {
       error: null;
     };
     "Result_OrgDiscount-Array.string_": components["schemas"]["ResultSuccess_OrgDiscount-Array_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array_": {
-      data: {
-          updated_at: string;
-          created_at: string;
-          message: string;
-          title: string;
-          active: boolean;
-          /** Format: double */
-          id: number;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array.string_": components["schemas"]["ResultSuccess__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array_"] | components["schemas"]["ResultError_string_"];
     InAppThread: {
       id: string;
       chat: unknown;
@@ -7134,75 +6886,6 @@ export interface operations {
       };
     };
   };
-  AddToWaitlist: {
-    requestBody: {
-      content: {
-        "application/json": {
-          feature: string;
-          email: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__success-boolean--position_63_-number--alreadyOnList_63_-boolean--sharedPlatforms_63_-string-Array_.string_"];
-        };
-      };
-    };
-  };
-  IsOnWaitlist: {
-    parameters: {
-      query: {
-        email: string;
-        feature: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__isOnWaitlist-boolean_.string_"];
-        };
-      };
-    };
-  };
-  GetWaitlistCount: {
-    parameters: {
-      query: {
-        feature: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__count-number_.string_"];
-        };
-      };
-    };
-  };
-  TrackShare: {
-    requestBody: {
-      content: {
-        "application/json": {
-          /** @enum {string} */
-          platform: "twitter" | "linkedin";
-          feature: string;
-          email: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__success-boolean--newPosition_63_-number--message-string_.string_"];
-        };
-      };
-    };
-  };
   AddKey: {
     requestBody: {
       content: {
@@ -7394,138 +7077,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["SendTestRequestResponse"];
-        };
-      };
-    };
-  };
-  /**
-   * @description Get model usage statistics for the AI Gateway.
-   * Returns time series data and a leaderboard of top models by total tokens.
-   */
-  GetModelUsage: {
-    parameters: {
-      query?: {
-        /** @description Time range: "24h", "7d", "30d", "3m", or "1y" */
-        timeframe?: components["schemas"]["StatsTimeFrame"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ModelUsageResponse.string_"];
-        };
-      };
-    };
-  };
-  /**
-   * @description Get market share statistics by model author for the AI Gateway.
-   * Returns time series data (100% stacked) and a leaderboard of top 9 authors + others.
-   */
-  GetMarketShare: {
-    parameters: {
-      query?: {
-        /** @description Time range: "24h", "7d", "30d", "3m", or "1y" */
-        timeframe?: components["schemas"]["StatsTimeFrame"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_MarketShareResponse.string_"];
-        };
-      };
-    };
-  };
-  /**
-   * @description Get provider usage statistics for the AI Gateway.
-   * Returns time series data and a leaderboard of top 9 providers + others.
-   */
-  GetProviderUsage: {
-    parameters: {
-      query?: {
-        /** @description Time range: "24h", "7d", "30d", "3m", or "1y" */
-        timeframe?: components["schemas"]["StatsTimeFrame"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ProviderUsageResponse.string_"];
-        };
-      };
-    };
-  };
-  /**
-   * @description Get statistics for a specific model author.
-   * Returns time series data and a leaderboard of top models by that author.
-   */
-  GetAuthorStats: {
-    parameters: {
-      query?: {
-        /** @description Time range: "24h", "7d", "30d", "3m", or "1y" */
-        timeframe?: components["schemas"]["StatsTimeFrame"];
-      };
-      path: {
-        /** @description The author identifier (e.g., "openai", "anthropic") */
-        author: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_AuthorStatsResponse.string_"];
-        };
-      };
-    };
-  };
-  /**
-   * @description Get statistics for a specific inference provider.
-   * Returns time series data and a leaderboard of top models on that provider.
-   */
-  GetProviderStats: {
-    parameters: {
-      query?: {
-        /** @description Time range: "24h", "7d", "30d", "3m", or "1y" */
-        timeframe?: components["schemas"]["StatsTimeFrame"];
-      };
-      path: {
-        /** @description The provider identifier (e.g., "openai", "anthropic") */
-        provider: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ProviderStatsResponse.string_"];
-        };
-      };
-    };
-  };
-  /**
-   * @description Get usage statistics for a specific model.
-   * Returns time series data showing token usage over time.
-   */
-  GetModelStats: {
-    parameters: {
-      query?: {
-        /** @description Time range: "24h", "7d", "30d", "3m", or "1y" */
-        timeframe?: components["schemas"]["StatsTimeFrame"];
-      };
-      path: {
-        /** @description The model identifier (e.g., "gpt-4", "claude-3-opus") */
-        model: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ModelStatsResponse.string_"];
         };
       };
     };
@@ -9298,35 +8849,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_OrgDiscount-Array.string_"];
-        };
-      };
-    };
-  };
-  GetAlertBanners: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__id-number--active-boolean--title-string--message-string--created_at-string--updated_at-string_-Array.string_"];
-        };
-      };
-    };
-  };
-  UpdateAlertBannerActive: {
-    requestBody: {
-      content: {
-        "application/json": {
-          active: boolean;
-          /** Format: double */
-          id: number;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_void.string_"];
         };
       };
     };
