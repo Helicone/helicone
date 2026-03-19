@@ -8266,11 +8266,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "threshold": 0,
         "web_search": 0.01,
       },
-      {
-        "input": 0.000006,
-        "output": 0.0000225,
-        "threshold": 200000,
-      },
     ],
     "bedrock": [
       {
@@ -8282,11 +8277,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "output": 0.000015,
         "threshold": 0,
         "web_search": 0.01,
-      },
-      {
-        "input": 0.000006,
-        "output": 0.0000225,
-        "threshold": 200000,
       },
     ],
     "helicone": [
@@ -8300,11 +8290,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "output": 0.000015,
         "threshold": 0,
       },
-      {
-        "input": 0.000006,
-        "output": 0.0000225,
-        "threshold": 200000,
-      },
     ],
     "vertex": [
       {
@@ -8316,11 +8301,6 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "output": 0.000015,
         "threshold": 0,
         "web_search": 0.01,
-      },
-      {
-        "input": 0.000006,
-        "output": 0.0000225,
-        "threshold": 200000,
       },
     ],
   },
