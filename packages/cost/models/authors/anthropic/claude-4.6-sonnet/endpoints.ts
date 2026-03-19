@@ -19,11 +19,6 @@ export const endpoints = {
           write1h: 2.0, // $6.00 / MTok (200% of $3)
         },
       },
-      {
-        threshold: 200000,
-        input: 0.000006, // $6 / MTok
-        output: 0.0000225, // $22.50 / MTok
-      },
     ],
     contextLength: 1000000,
     maxCompletionTokens: 64000,
@@ -60,11 +55,6 @@ export const endpoints = {
           cachedInput: 0.1, // $0.30 / MTok (10% of $3)
           write5m: 1.25, // $3.75 / MTok (125% of $3)
         },
-      },
-      {
-        threshold: 200000,
-        input: 0.000006, // $6 / MTok
-        output: 0.0000225, // $22.50 / MTok
       },
     ],
     contextLength: 1000000,
@@ -103,11 +93,6 @@ export const endpoints = {
           write5m: 1.25, // $3.75 / MTok (125% of $3)
         },
       },
-      {
-        threshold: 200000,
-        input: 0.000006, // $6 / MTok
-        output: 0.0000225, // $22.50 / MTok
-      },
     ],
     contextLength: 1000000,
     maxCompletionTokens: 64000,
@@ -143,11 +128,6 @@ export const endpoints = {
           write5m: 1.25, // $3.75 / MTok (125% of $3)
           write1h: 2.0, // $6.00 / MTok (200% of $3)
         },
-      },
-      {
-        threshold: 200000,
-        input: 0.000006, // $6 / MTok
-        output: 0.0000225, // $22.50 / MTok
       },
     ],
     contextLength: 1000000,
