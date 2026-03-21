@@ -27,6 +27,7 @@ export const AUTHORS = [
   "alibaba",
   "zai",
   "baidu",
+  "minimax",
 ] as const;
 
 export type AuthorName = (typeof AUTHORS)[number] | "passthrough";
@@ -56,7 +57,8 @@ export type Tokenizer =
   | "Grok"
   | "Tekken"
   | "Zai"
-  | "Baidu";
+  | "Baidu"
+  | "MiniMax";
 
 export type StandardParameter =
   | "max_tokens"
