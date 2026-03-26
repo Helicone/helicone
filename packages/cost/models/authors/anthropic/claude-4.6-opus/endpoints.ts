@@ -118,6 +118,10 @@ export const endpoints = {
     provider: "openrouter",
     author: "anthropic",
     providerModelId: "anthropic/claude-opus-4.6",
+    providerModelIdAliases: [
+      "anthropic/claude-4.6-opus-20260205",
+      "anthropic/claude-opus-4.6-20260205",
+    ],
     pricing: [
       {
         threshold: 0,
