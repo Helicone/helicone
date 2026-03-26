@@ -769,6 +769,36 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "anthropic/claude-opus-4.6",
+    },
+    cost: {
+      prompt_token: 5.275e-6,
+      completion_token: 2.6375e-5,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "anthropic/claude-4.6-opus-20260205",
+    },
+    cost: {
+      prompt_token: 5.275e-6,
+      completion_token: 2.6375e-5,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "anthropic/claude-opus-4.6-20260205",
+    },
+    cost: {
+      prompt_token: 5.275e-6,
+      completion_token: 2.6375e-5,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
       value: "mistralai/codestral-2508",
     },
     cost: {
