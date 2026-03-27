@@ -77,12 +77,13 @@ export class AnthropicToOpenAIStreamConverter {
       case "message_start":
         this.messageId = event.message.id;
         this.model = event.message.model;
-        this.inputTokens = event.message.usage.input_tokens ?? 0;
+        // usage may be missing (e.g. extended thinking streams on Claude 4.6)
+        this.inputTokens = event.message.usage?.input_tokens ?? 0;
         this.cacheReadInputTokens =
-          event.message.usage.cache_read_input_tokens ?? 0;
+          event.message.usage?.cache_read_input_tokens ?? 0;
         this.cacheCreationInputTokens =
-          event.message.usage.cache_creation_input_tokens ?? 0;
-        this.cacheCreationDetails = event.message.usage.cache_creation
+          event.message.usage?.cache_creation_input_tokens ?? 0;
+        this.cacheCreationDetails = event.message.usage?.cache_creation
           ? {
               ephemeral_5m_input_tokens:
                 event.message.usage.cache_creation.ephemeral_5m_input_tokens ??
@@ -303,20 +304,26 @@ export class AnthropicToOpenAIStreamConverter {
         this.finalizePendingToolCalls(chunks);
 
         // Cache tokens may come from message_start (stored in instance vars) or message_delta
+        // usage may be missing (e.g. extended thinking streams on Claude 4.6)
         const cachedTokens =
-          event.usage.cache_read_input_tokens ?? this.cacheReadInputTokens;
+          event.usage?.cache_read_input_tokens ?? this.cacheReadInputTokens;
         const cacheWriteTokens =
-          event.usage.cache_creation_input_tokens ??
+          event.usage?.cache_creation_input_tokens ??
           this.cacheCreationInputTokens;
         const webSearchRequests =
-          event.usage.server_tool_use?.web_search_requests ?? 0;
+          event.usage?.server_tool_use?.web_search_requests ?? 0;
+
+        // Prefer message_delta input_tokens (cumulative/final) over message_start value
+        const finalInputTokens =
+          event.usage?.input_tokens ?? this.inputTokens;
+        const finalOutputTokens = event.usage?.output_tokens ?? 0;
 
         this.finalUsage = {
-          prompt_tokens: event.usage.input_tokens ?? this.inputTokens,
-          completion_tokens: event.usage.output_tokens,
+          prompt_tokens: finalInputTokens,
+          completion_tokens: finalOutputTokens,
           total_tokens:
-            (event.usage.input_tokens ?? this.inputTokens) +
-            event.usage.output_tokens +
+            finalInputTokens +
+            finalOutputTokens +
             (cachedTokens ?? 0) +
             (cacheWriteTokens ?? 0),
           ...((cachedTokens > 0 || cacheWriteTokens > 0) && {
