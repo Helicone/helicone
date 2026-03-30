@@ -27,6 +27,7 @@ export function getUsageProcessor(
     case "fireworks":
     case "cerebras":
     case "perplexity":
+    case "relaxai":
       return new OpenAIUsageProcessor();
     case "anthropic":
       return new AnthropicUsageProcessor();

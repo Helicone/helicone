@@ -21,6 +21,12 @@ const nebiusAuthExpectations = {
   },
 };
 
+const relaxaiAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
 describe("Meta Llama Registry Tests", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -5744,6 +5750,157 @@ describe("Meta Llama Registry Tests", () => {
               expects: {
                 ...deepinfraAuthExpectations,
                 bodyContains: ["user", "Test"],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+  });
+
+  describe("llama-4-maverick with relaxai", () => {
+    it("should handle relaxai provider", () =>
+      runGatewayTest({
+        model: "llama-4-maverick/relaxai",
+        expected: {
+          providers: [
+            {
+              url: "https://api.relax.ai/v1/chat/completions",
+              response: "success",
+              model: "Llama-4-Maverick-17B-128E",
+              data: createOpenAIMockResponse("Llama-4-Maverick-17B-128E"),
+              expects: relaxaiAuthExpectations,
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle functions parameter with relaxai provider", () =>
+      runGatewayTest({
+        model: "llama-4-maverick/relaxai",
+        request: {
+          body: {
+            messages: [
+              { role: "user", content: "What's the weather in London?" },
+            ],
+            functions: [
+              {
+                name: "get_current_weather",
+                description: "Get the current weather in a given location",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    location: {
+                      type: "string",
+                      description: "The city and state, e.g. London, UK",
+                    },
+                    unit: { type: "string", enum: ["celsius", "fahrenheit"] },
+                  },
+                  required: ["location"],
+                },
+              },
+            ],
+            function_call: "auto",
+            temperature: 0.7,
+            max_tokens: 1500,
+          },
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.relax.ai/v1/chat/completions",
+              response: "success",
+              model: "Llama-4-Maverick-17B-128E",
+              data: createOpenAIMockResponse("Llama-4-Maverick-17B-128E"),
+              expects: {
+                ...relaxaiAuthExpectations,
+                bodyContains: [
+                  "functions",
+                  "function_call",
+                  "get_current_weather",
+                  "temperature",
+                  "max_tokens",
+                ],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle tool calls with relaxai provider", () =>
+      runGatewayTest({
+        model: "llama-4-maverick/relaxai",
+        request: {
+          body: {
+            messages: [{ role: "user", content: "What's the weather in Paris?" }],
+            tools: [
+              {
+                type: "function",
+                function: {
+                  name: "get_weather",
+                  description: "Get current weather",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      location: { type: "string" },
+                      unit: { type: "string", enum: ["celsius", "fahrenheit"] },
+                    },
+                    required: ["location"],
+                  },
+                },
+              },
+            ],
+            tool_choice: "auto",
+            temperature: 0.7,
+            max_tokens: 4000,
+          },
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.relax.ai/v1/chat/completions",
+              response: "success",
+              model: "Llama-4-Maverick-17B-128E",
+              data: createOpenAIMockResponse("Llama-4-Maverick-17B-128E"),
+              expects: {
+                ...relaxaiAuthExpectations,
+                bodyContains: [
+                  "tools",
+                  "tool_choice",
+                  "get_weather",
+                  "temperature",
+                  "max_tokens",
+                ],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle response format with relaxai provider", () =>
+      runGatewayTest({
+        model: "llama-4-maverick/relaxai",
+        request: {
+          body: {
+            messages: [{ role: "user", content: "List 3 UK cities as JSON" }],
+            response_format: { type: "json_object" },
+            temperature: 0.3,
+            max_tokens: 500,
+          },
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.relax.ai/v1/chat/completions",
+              response: "success",
+              model: "Llama-4-Maverick-17B-128E",
+              data: createOpenAIMockResponse("Llama-4-Maverick-17B-128E"),
+              expects: {
+                ...relaxaiAuthExpectations,
+                bodyContains: ["response_format", "json_object"],
               },
             },
           ],
