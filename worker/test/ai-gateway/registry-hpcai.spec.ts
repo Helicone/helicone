@@ -32,4 +32,23 @@ describe("HPC-AI Registry Tests", () => {
         },
       }));
   });
+
+  describe("BYOK Tests - Kimi K2.5", () => {
+    it("should handle hpcai provider for kimi-k2.5", () =>
+      runGatewayTest({
+        model: "kimi-k2.5/hpcai",
+        expected: {
+          providers: [
+            {
+              url: "https://api.hpc-ai.com/inference/v1/chat/completions",
+              response: "success",
+              model: "moonshotai/kimi-k2.5",
+              data: createOpenAIMockResponse("moonshotai/kimi-k2.5"),
+              expects: hpcaiAuthExpectations,
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+  });
 });
