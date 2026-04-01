@@ -115,7 +115,7 @@ Helicone is comprised of five services:
 | Hyperbolic | [JS/TS, Python](https://www.helicone.ai/models?providers=hyperbolic)   | Inference provider                                                                                                                                | High-performance AI inference platform                |
 | Groq                                                                                   | [JS/TS, Python](https://www.helicone.ai/models?providers=groq)                  | High-performance models                               |
 | DeepInfra     | [JS/TS, Python](https://www.helicone.ai/models?providers=deepinfra)                                                                                                                                | Serverless AI inference for various models            |       |
-| HPC-AI        | [Docs](https://docs.helicone.ai/getting-started/integration-method/hpc-ai)                                                                                                                         | OpenAI-compatible inference (api.hpc-ai.com)          |
+| HPC-AI        | [Docs](https://docs.helicone.ai/getting-started/integration-method/hpc-ai)                                                                                                                         | Accelerating Al to power the future of Intelligence          |
 | Fireworks AI  | [JS/TS, Python](https://www.helicone.ai/models?providers=fireworks)                                                                                                                                | Fast inference API for open-source LLMs               |
 
 ### Frameworks
