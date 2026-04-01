@@ -108,6 +108,7 @@ const providerDisplayName = (provider: string): string => {
     MISTRAL: "Mistral",
     OPENROUTER: "OpenRouter",
     DEEPINFRA: "DeepInfra",
+    HPC_AI: "HPC-AI",
     PERPLEXITY: "Perplexity",
     BEDROCK: "Bedrock",
   };

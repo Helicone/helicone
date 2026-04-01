@@ -1,0 +1,42 @@
+---
+title: "HPC-AI Integration"
+sidebarTitle: "HPC-AI"
+description: "Connect Helicone with HPC-AI OpenAI-compatible inference at api.hpc-ai.com. Use the dedicated Helicone gateway subdomain and standard OpenAI client paths."
+"twitter:title": "HPC-AI Integration - Helicone OSS LLM Observability"
+---
+
+import LegacyWarning from "/snippets/legacy-provider-warning.mdx";
+
+<LegacyWarning />
+
+You can integrate Helicone with [HPC-AI](https://hpc-ai.com) inference using the same OpenAI-compatible API shape. Requests are proxied to `https://api.hpc-ai.com/inference/v1` while you use a normal OpenAI client and `/v1/...` paths on the Helicone side.
+
+The setup mirrors the [proxy approach](/getting-started/integration-method/openai-proxy). Point your client's `base_url` at the dedicated endpoint **`https://hpcai.helicone.ai/v1`** and send your **HPC-AI API key** as the provider credential (e.g. OpenAI client `api_key`). Use your [Helicone API key](https://helicone.ai/developer) in the `Helicone-Auth` header as described in [Helicone Auth](/helicone-headers/helicone-auth).
+
+<Steps>
+  <Step title="Create an account + generate API keys">
+    Create a [Helicone](https://www.helicone.ai) account and generate a [Helicone API key](https://helicone.ai/developer). Obtain your inference key from HPC-AI.
+
+    <Note>
+      Prefer a [write-only Helicone API key](helicone-headers/helicone-auth) when possible.
+    </Note>
+
+  </Step>
+  <Step title="Configure base_url">
+
+    Set `base_url` to `https://hpcai.helicone.ai/v1` (or the URL-with-key variant your client expects, consistent with other Helicone gateway providers). Your HPC-AI key is passed as the OpenAI-compatible `api_key`; Helicone authentication uses `Helicone-Auth`.
+
+  <CodeGroup>
+
+```python example.py
+# Example: OpenAI SDK — adjust to your client's base_url option
+base_url = "https://hpcai.helicone.ai/v1"
+```
+
+  </CodeGroup>
+
+    Direct access without the Helicone proxy is also available at `https://api.hpc-ai.com/inference/v1` using your HPC-AI key only (no Helicone logging).
+
+  </Step>
+
+</Steps>

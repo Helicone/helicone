@@ -23,6 +23,7 @@ export const AUTHORS = [
   "qwen",
   "xai",
   "moonshotai",
+  "minimax",
   "perplexity",
   "alibaba",
   "zai",

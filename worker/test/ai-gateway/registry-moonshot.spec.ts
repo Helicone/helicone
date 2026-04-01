@@ -45,6 +45,12 @@ const canopywaveAuthExpectations = {
   },
 };
 
+const hpcaiAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
 describe("Moonshot AI Registry Tests", () => {
   beforeEach(() => {
     // Clear all mocks between tests
@@ -3107,6 +3113,25 @@ describe("Moonshot AI Registry Tests", () => {
               },
             ],
             finalStatus: 429,
+          },
+        }));
+    });
+
+    describe("kimi-k2.5 with HPC-AI", () => {
+      it("should handle hpcai provider", () =>
+        runGatewayTest({
+          model: "kimi-k2.5/hpcai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.hpc-ai.com/inference/v1/chat/completions",
+                response: "success",
+                model: "moonshotai/kimi-k2.5",
+                data: createOpenAIMockResponse("moonshotai/kimi-k2.5"),
+                expects: hpcaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
           },
         }));
     });

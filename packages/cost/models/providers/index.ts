@@ -10,6 +10,7 @@ import { DeepSeekProvider } from "./deepseek";
 import { FireworksProvider } from "./fireworks";
 import { GoogleProvider } from "./google";
 import { GroqProvider } from "./groq";
+import { HpcAiProvider } from "./hpcai";
 import { HeliconeProvider } from "./helicone";
 import { MistralProvider } from "./mistral";
 import { NebiusProvider } from "./nebius";
@@ -34,6 +35,7 @@ export const providers = {
   fireworks: new FireworksProvider(),
   "google-ai-studio": new GoogleProvider(),
   groq: new GroqProvider(),
+  hpcai: new HpcAiProvider(),
   helicone: new HeliconeProvider(),
   mistral: new MistralProvider(),
   nebius: new NebiusProvider(),
