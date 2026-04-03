@@ -804,6 +804,35 @@ export class DBLoggable {
     const { body: rawResponseBody, endTime: responseEndTime } =
       await this.response.getResponseBody();
 
+    // DEBUG: Log raw response before any processing
+    try {
+      const rawText = rawResponseBody.join("");
+      // For streaming, just grab the last few lines (where usage lives)
+      const lines = rawText.split("\n").filter((l: string) => l.trim());
+      const lastLines = lines.slice(-5);
+      console.log("[RAW_RESPONSE] isStream:", this.request.isStream, "provider:", this.request.provider);
+      console.log("[RAW_RESPONSE] last lines:", lastLines.map((l: string) => l.substring(0, 500)).join("\n"));
+      // Try to extract usage from the raw response
+      try {
+        const parsed = JSON.parse(rawText);
+        if (parsed?.usage) {
+          console.log("[RAW_RESPONSE] usage:", JSON.stringify(parsed.usage));
+        }
+      } catch {
+        // Streaming - look for usage in last data lines
+        for (const line of lastLines) {
+          if (line.includes('"usage"') && line.startsWith("data:")) {
+            try {
+              const chunk = JSON.parse(line.replace("data: ", ""));
+              if (chunk?.usage) console.log("[RAW_RESPONSE] stream usage chunk:", JSON.stringify(chunk.usage));
+            } catch {}
+          }
+        }
+      }
+    } catch (e) {
+      console.log("[RAW_RESPONSE] failed to log raw response:", e);
+    }
+
     // Extract usage and model from response body (needed for cases where body isn't stored)
     let extractedUsage: {
       prompt_tokens?: number;
@@ -864,7 +893,7 @@ export class DBLoggable {
               const bodyMapping = this.request.attempt?.endpoint.userConfig?.gatewayMapping;
 
               // Normalize response and convert to user's requested format (OPENAI or RESPONSES)
-              openAIResponse = await normalizeAIGatewayResponse({
+              const normParams = {
                 responseText: providerResponse,
                 isStream: this.request.isStream,
                 provider: this.request.attempt?.endpoint.provider ?? "openai",
@@ -874,7 +903,26 @@ export class DBLoggable {
                   this.request.attempt?.endpoint.modelConfig.responseFormat ??
                   "OPENAI",
                 bodyMapping: bodyMapping ?? "OPENAI",
-              });
+              };
+              console.log("[NORMALIZE] params:", JSON.stringify({ isStream: normParams.isStream, provider: normParams.provider, responseFormat: normParams.responseFormat, bodyMapping: normParams.bodyMapping }));
+              openAIResponse = await normalizeAIGatewayResponse(normParams);
+              // Log the normalized usage
+              try {
+                if (normParams.isStream) {
+                  // For streams, find the last chunk with usage
+                  const normLines = openAIResponse.split("\n").filter((l: string) => l.startsWith("data: ") && l.includes('"usage"'));
+                  const lastUsageLine = normLines[normLines.length - 1];
+                  if (lastUsageLine) {
+                    const chunk = JSON.parse(lastUsageLine.replace("data: ", ""));
+                    console.log("[NORMALIZED] stream usage:", JSON.stringify(chunk.usage || chunk.response?.usage));
+                  }
+                } else {
+                  const normParsed = JSON.parse(openAIResponse);
+                  console.log("[NORMALIZED] usage:", JSON.stringify(normParsed.usage));
+                }
+              } catch (e) {
+                console.log("[NORMALIZED] failed to log:", e);
+              }
             } catch (e) {
               console.error("Failed to normalize AI Gateway response:", e);
               openAIResponse = providerResponse;

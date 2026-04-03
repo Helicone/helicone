@@ -425,8 +425,14 @@ export class ChatToResponsesStreamConverter {
         input_tokens: c.usage.prompt_tokens,
         output_tokens: c.usage.completion_tokens,
         total_tokens: c.usage.total_tokens,
-        input_tokens_details: c.usage.prompt_tokens_details?.cached_tokens
-          ? { cached_tokens: c.usage.prompt_tokens_details.cached_tokens }
+        input_tokens_details: (c.usage.prompt_tokens_details?.cached_tokens || c.usage.prompt_tokens_details?.cache_write_tokens)
+          ? {
+              cached_tokens: c.usage.prompt_tokens_details?.cached_tokens ?? 0,
+              ...(c.usage.prompt_tokens_details?.cache_write_tokens && {
+                cache_write_tokens: c.usage.prompt_tokens_details.cache_write_tokens,
+                cache_write_details: c.usage.prompt_tokens_details.cache_write_details,
+              }),
+            }
           : undefined,
         output_tokens_details: c.usage.completion_tokens_details?.reasoning_tokens
           ? {

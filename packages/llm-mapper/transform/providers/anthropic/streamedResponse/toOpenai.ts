@@ -311,11 +311,12 @@ export class AnthropicToOpenAIStreamConverter {
         const webSearchRequests =
           event.usage.server_tool_use?.web_search_requests ?? 0;
 
+        const inputTokens = event.usage.input_tokens ?? this.inputTokens;
         this.finalUsage = {
-          prompt_tokens: event.usage.input_tokens ?? this.inputTokens,
+          prompt_tokens: inputTokens + (cachedTokens ?? 0),
           completion_tokens: event.usage.output_tokens,
           total_tokens:
-            (event.usage.input_tokens ?? this.inputTokens) +
+            inputTokens +
             event.usage.output_tokens +
             (cachedTokens ?? 0) +
             (cacheWriteTokens ?? 0),

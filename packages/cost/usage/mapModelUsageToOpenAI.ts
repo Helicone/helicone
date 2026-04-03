@@ -28,6 +28,7 @@ export function mapModelUsageToOpenAI(modelUsage: ModelUsage): OpenAIUsage {
     modelUsage.input + (modelUsage.cacheDetails?.cachedInput ?? 0);
   const completionTokens = modelUsage.output + (modelUsage.thinking ?? 0);
 
+
   const usage: OpenAIUsage = {
     prompt_tokens: promptTokens,
     completion_tokens: completionTokens,

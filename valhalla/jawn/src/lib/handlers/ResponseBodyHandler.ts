@@ -74,6 +74,7 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     });
 
     try {
+      console.log("Processing response body for request:", context.message.log.request);
       const processedResponseBody = await this.processBody(context);
       if (processedResponseBody.data?.statusOverride) {
         context.message.log.response.status =
@@ -269,15 +270,15 @@ export class ResponseBodyHandler extends AbstractLogHandler {
         parse_response_error: processedResponseBody.error,
         body: omitResponseLog
           ? {
-              model: responseModel, // Put response model here, not calculated model
-            }
+            model: responseModel, // Put response model here, not calculated model
+          }
           : (processedResponseBody.data?.processedBody ?? undefined),
       };
     } else {
       return omitResponseLog
         ? {
-            model: responseModel, // Put response model here, not calculated model
-          }
+          model: responseModel, // Put response model here, not calculated model
+        }
         : (processedResponseBody.data.processedBody ?? undefined);
     }
   }
@@ -293,6 +294,8 @@ export class ResponseBodyHandler extends AbstractLogHandler {
 
     let responseBody = context.rawLog.rawResponseBody;
     const requestBody = context.rawLog.rawRequestBody;
+    console.log("[RAW_RESONSE_BODY]", responseBody);
+    console.log("[RAW_REQUEST_BODY]", requestBody);
 
     if (!responseBody) {
       console.log("No response body found");
