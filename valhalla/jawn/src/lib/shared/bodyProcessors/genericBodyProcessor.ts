@@ -78,8 +78,7 @@ export class GenericBodyProcessor implements IBodyProcessor {
     };
 
     // OpenAI charges for input, input cache read, output, output audio, input audio.
-    // If cached > prompt_tokens, the data follows Anthropic convention where
-    // prompt_tokens is already the non-cached input count. Don't subtract.
+    // Guard: if cached > prompt_tokens, data is already non-cached (Anthropic convention)
     const usage = response.usage;
     const gPromptToks = usage?.prompt_tokens ?? usage?.input_tokens ?? 0;
     const gCachedToks = usage?.prompt_tokens_details?.cached_tokens ?? usage?.input_tokens_details?.cached_tokens ?? 0;

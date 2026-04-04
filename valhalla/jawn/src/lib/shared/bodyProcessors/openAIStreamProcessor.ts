@@ -102,6 +102,7 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
         let usage;
         if (usageData) {
           // Responses API uses input_tokens/output_tokens
+          // Guard: if cached > input_tokens, data is already non-cached (Anthropic convention)
           const rInputToks = usageData.input_tokens ?? 0;
           const rCachedToks = usageData.input_tokens_details?.cached_tokens ?? 0;
           const effectivePromptTokens = rCachedToks > rInputToks
@@ -151,8 +152,7 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
 
       let usage;
       if (usageData) {
-        // If cached > prompt_tokens, the data follows Anthropic convention where
-        // prompt_tokens is already the non-cached input count. Don't subtract.
+        // Guard: if cached > prompt_tokens, data is already non-cached (Anthropic convention)
         const promptToks = usageData.prompt_tokens ?? usageData.input_tokens ?? 0;
         const cachedToks = usageData.prompt_tokens_details?.cached_tokens
           ?? usageData.input_tokens_details?.cached_tokens ?? 0;

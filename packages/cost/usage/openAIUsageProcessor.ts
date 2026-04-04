@@ -163,9 +163,7 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     const cacheWrite5mTokens = cacheWriteDetails?.write_5m_tokens ?? cacheWriteTokensTotal;
     const cacheWrite1hTokens = cacheWriteDetails?.write_1h_tokens ?? 0;
 
-    // If cached > prompt_tokens, the data follows Anthropic convention where
-    // prompt_tokens is already the non-cached input count. Don't subtract.
-    // Otherwise assume OpenAI convention where prompt_tokens includes cached.
+    // Guard: if cached > prompt_tokens, data is already non-cached (Anthropic convention)
     const effectivePromptTokens = cachedTokens > promptTokens
       ? Math.max(0, promptTokens - promptAudioTokens)
       : Math.max(0, promptTokens - cachedTokens - promptAudioTokens);
