@@ -235,7 +235,11 @@ export interface ResponsesUsage {
   total_tokens?: number;
   input_tokens_details?: {
     cached_tokens?: number;
-    // provider-specific extension points could appear here
+    cache_write_tokens?: number;
+    cache_write_details?: {
+      write_5m_tokens?: number;
+      write_1h_tokens?: number;
+    };
   };
   output_tokens_details?: {
     reasoning_tokens?: number;

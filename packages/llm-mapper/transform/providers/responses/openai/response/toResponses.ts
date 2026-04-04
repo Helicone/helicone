@@ -96,8 +96,14 @@ export function toResponses(body: OpenAIResponseBody): ResponsesResponseBody {
         input_tokens: body.usage.prompt_tokens,
         output_tokens: body.usage.completion_tokens,
         total_tokens: body.usage.total_tokens,
-        input_tokens_details: body.usage.prompt_tokens_details?.cached_tokens
-          ? { cached_tokens: body.usage.prompt_tokens_details.cached_tokens }
+        input_tokens_details: (body.usage.prompt_tokens_details?.cached_tokens || body.usage.prompt_tokens_details?.cache_write_tokens)
+          ? {
+              cached_tokens: body.usage.prompt_tokens_details?.cached_tokens ?? 0,
+              ...(body.usage.prompt_tokens_details?.cache_write_tokens && {
+                cache_write_tokens: body.usage.prompt_tokens_details.cache_write_tokens,
+                cache_write_details: body.usage.prompt_tokens_details.cache_write_details,
+              }),
+            }
           : undefined,
         output_tokens_details: body.usage.completion_tokens_details?.reasoning_tokens
           ? {

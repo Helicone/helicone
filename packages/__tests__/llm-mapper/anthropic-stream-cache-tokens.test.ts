@@ -76,7 +76,8 @@ data: {"type":"message_stop"}`;
     const usageChunk = chunks.find((c) => c.usage);
     expect(usageChunk).toBeDefined();
 
-    expect(usageChunk.usage.prompt_tokens).toBe(4);
+    // prompt_tokens should include input_tokens + cache_read_input_tokens (OpenAI convention)
+    expect(usageChunk.usage.prompt_tokens).toBe(4 + 51713);
     expect(usageChunk.usage.total_tokens).toBe(4 + 51713 + 100);
     expect(usageChunk.usage.prompt_tokens_details?.cached_tokens).toBe(51713);
   });

@@ -102,11 +102,12 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
         let usage;
         if (usageData) {
           // Responses API uses input_tokens/output_tokens
-          const effectivePromptTokens = Math.max(
-            0,
-            (usageData.input_tokens ?? 0) -
-              (usageData.input_tokens_details?.cached_tokens ?? 0)
-          );
+          // Guard: if cached > input_tokens, data is already non-cached (Anthropic convention)
+          const rInputToks = usageData.input_tokens ?? 0;
+          const rCachedToks = usageData.input_tokens_details?.cached_tokens ?? 0;
+          const effectivePromptTokens = rCachedToks > rInputToks
+            ? rInputToks
+            : Math.max(0, rInputToks - rCachedToks);
 
           const effectiveCompletionTokens = Math.max(
             0,
@@ -151,19 +152,14 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
 
       let usage;
       if (usageData) {
-        const effectivePromptTokens =
-          usageData?.prompt_tokens !== undefined
-            ? Math.max(
-                0,
-                (usageData.prompt_tokens ?? 0) -
-                  (usageData.prompt_tokens_details?.cached_tokens ?? 0) -
-                  (usageData.prompt_tokens_details?.audio_tokens ?? 0)
-              )
-            : Math.max(
-                0,
-                (usageData.input_tokens ?? 0) -
-                  (usageData.input_tokens_details?.cached_tokens ?? 0)
-              );
+        // Guard: if cached > prompt_tokens, data is already non-cached (Anthropic convention)
+        const promptToks = usageData.prompt_tokens ?? usageData.input_tokens ?? 0;
+        const cachedToks = usageData.prompt_tokens_details?.cached_tokens
+          ?? usageData.input_tokens_details?.cached_tokens ?? 0;
+        const audioToks = usageData.prompt_tokens_details?.audio_tokens ?? 0;
+        const effectivePromptTokens = cachedToks > promptToks
+          ? Math.max(0, promptToks - audioToks)
+          : Math.max(0, promptToks - cachedToks - audioToks);
 
         const effectiveCompletionTokens =
           usageData?.completion_tokens !== undefined
