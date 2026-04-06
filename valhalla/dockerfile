@@ -143,43 +143,11 @@ RUN echo "deb https://deb.debian.org/debian testing main" > /etc/apt/sources.lis
 ENV FFMPEG_PATH="/usr/bin/ffmpeg"
 ENV FFPROBE_PATH="/usr/bin/ffprobe"
 
-# Fix additional medium-priority system library vulnerabilities
-# CVE-2025-3576: krb5 vulnerability - update Kerberos libraries
-# CVE-2023-53154: cjson vulnerability - already fixed with libcjson-dev update above
-# CVE-2025-45582: tar vulnerability - update tar package
-# CVE-2025-8114: libssh vulnerability - update SSH libraries
-# CVE-2024-13176, CVE-2024-9143: OpenSSL vulnerabilities - update OpenSSL
-# CVE-2025-50952: openjpeg2 vulnerability - update JPEG2000 libraries
-RUN echo "Applying additional medium-priority security patches..." && \
-    # Add testing repo for latest packages
-    echo "deb https://deb.debian.org/debian testing main" > /etc/apt/sources.list.d/medium-security.list && \
-    apt-get update && \
-    # Remove conflicting libssl3 first, then install new versions (skip if not installed)
-    (dpkg -l | grep -q "libssl3 " && apt-get remove -y libssl3 || echo "libssl3 not installed, skipping removal") && \
-    # Update system packages to fix medium-priority CVEs
-    apt-get install -y -t testing \
-        krb5-user \
-        libkrb5-3 \
-        libkrb5-dev \
-        tar \
-        libssh-4 \
-        libssh-dev \
-        openssl \
-        libssl3t64 \
-        libssl-dev \
-        libopenjp2-7 \
-        libopenjp2-7-dev && \
-    # Clean up testing repo
-    rm /etc/apt/sources.list.d/medium-security.list && \
-    apt-get update && \
-    echo "Medium-priority system library vulnerabilities patched"
-
-# Reinstall Python after testing repo packages broke it (libssl3t64 transition)
-# The venv created earlier may be broken due to Python/lib upgrades from testing repos
+# Upgrade all installed packages to latest available in bookworm-stable/security
 RUN apt-get update && \
-    apt-get install -y --reinstall python3 python3-venv python3-pip && \
-    rm -rf venv && python3 -m venv venv && \
-    . venv/bin/activate && pip3 install --upgrade pip>=23.3 setuptools>=70.0.0
+    apt-get upgrade -y && \
+    apt-get clean
+
 
 COPY ./valhalla/prompt_security/requirements.txt ./
 # Fix critical torch vulnerabilities CVE-2025-32434, CVE-2024-48063
