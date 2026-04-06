@@ -155,7 +155,7 @@ RUN echo "Applying additional medium-priority security patches..." && \
     echo "deb https://deb.debian.org/debian testing main" > /etc/apt/sources.list.d/medium-security.list && \
     apt-get update && \
     # Remove conflicting libssl3 first, then install new versions (skip if not installed)
-    (dpkg -l | grep -q "libssl3 " && apt-get remove -y libssl3 || echo "libssl3 not installed, skipping removal") && \
+    (dpkg-query -W -f='${Status}' libssl3 2>/dev/null | grep -q "install ok installed" && apt-get remove -y libssl3 || echo "libssl3 not installed, skipping removal") && \
     # Update system packages to fix medium-priority CVEs
     apt-get install -y -t testing \
         krb5-user \
