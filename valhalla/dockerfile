@@ -143,16 +143,7 @@ RUN echo "deb https://deb.debian.org/debian testing main" > /etc/apt/sources.lis
 ENV FFMPEG_PATH="/usr/bin/ffmpeg"
 ENV FFPROBE_PATH="/usr/bin/ffprobe"
 
-# Fix additional medium-priority system library vulnerabilities
-# CVE-2025-3576: krb5 vulnerability - update Kerberos libraries
-# CVE-2023-53154: cjson vulnerability - already fixed with libcjson-dev update above
-# CVE-2025-45582: tar vulnerability - update tar package
-# CVE-2025-8114: libssh vulnerability - update SSH libraries
-# CVE-2024-13176, CVE-2024-9143: OpenSSL vulnerabilities - update OpenSSL
-# CVE-2025-50952: openjpeg2 vulnerability - update JPEG2000 libraries
-# Fix medium-priority system library vulnerabilities via in-place upgrade
-# CVE-2025-3576 (krb5), CVE-2025-45582 (tar), CVE-2025-8114 (libssh),
-# CVE-2024-13176/CVE-2024-9143 (OpenSSL), CVE-2025-50952 (openjpeg2)
+# Upgrade all installed packages to latest available in bookworm-stable/security
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get clean
