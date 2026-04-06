@@ -155,8 +155,7 @@ ENV FFPROBE_PATH="/usr/bin/ffprobe"
 # CVE-2024-13176/CVE-2024-9143 (OpenSSL), CVE-2025-50952 (openjpeg2)
 RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get clean
 
 
 COPY ./valhalla/prompt_security/requirements.txt ./
