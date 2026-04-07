@@ -108,6 +108,48 @@ export const endpoints = {
       "*": {},
     },
   },
+  "kimi-k2.5:relaxai": {
+    provider: "relaxai",
+    author: "moonshotai",
+    providerModelId: "moonshotai/kimi-k2.5",
+    quantization: "fp4",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000049, // $0.49/1M (£0.37/1M converted to USD on 30-03-26)
+        output: 0.00000246, // $2.46/1M (£1.86/1M converted to USD on 30-03-26)
+      },
+    ],
+    contextLength: 262_144,
+    maxCompletionTokens: 262_144,
+    supportedParameters: [
+      "frequency_penalty",
+      "function_call",
+      "functions",
+      "logit_bias",
+      "logprobs",
+      "max_completion_tokens",
+      "max_tokens",
+      "min_p",
+      "n",
+      "presence_penalty",
+      "repetition_penalty",
+      "response_format",
+      "seed",
+      "stop",
+      "stream",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_k",
+      "top_logprobs",
+      "top_p",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${KimiK25ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

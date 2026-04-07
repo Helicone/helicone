@@ -40,6 +40,12 @@ const cerebrasAuthExpectations = {
   },
 };
 
+const relaxaiAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
 describe("OpenAI Registry Tests", () => {
   beforeEach(() => {
     // Clear all mocks between tests
@@ -2043,6 +2049,97 @@ describe("OpenAI Registry Tests", () => {
               expects: {
                 ...novitaAuthExpectations,
                 bodyContains: ["reasoning", "max_tokens"],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+  });
+
+  describe("gpt-oss-120b with relaxai provider", () => {
+    it("should handle relaxai provider", () =>
+      runGatewayTest({
+        model: "gpt-oss-120b/relaxai",
+        expected: {
+          providers: [
+            {
+              url: "https://api.relax.ai/v1/chat/completions",
+              response: "success",
+              model: "openai/gpt-oss-120b",
+              data: createOpenAIMockResponse("openai/gpt-oss-120b"),
+              expects: relaxaiAuthExpectations,
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle tool calls with relaxai provider", () =>
+      runGatewayTest({
+        model: "gpt-oss-120b/relaxai",
+        request: {
+          body: {
+            messages: [{ role: "user", content: "What's the weather in Paris?" }],
+            tools: [
+              {
+                type: "function",
+                function: {
+                  name: "get_weather",
+                  description: "Get current weather",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      location: { type: "string" },
+                    },
+                    required: ["location"],
+                  },
+                },
+              },
+            ],
+            tool_choice: "auto",
+            temperature: 0.7,
+            max_tokens: 1000,
+          },
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.relax.ai/v1/chat/completions",
+              response: "success",
+              model: "openai/gpt-oss-120b",
+              data: createOpenAIMockResponse("openai/gpt-oss-120b"),
+              expects: {
+                ...relaxaiAuthExpectations,
+                bodyContains: ["tools", "tool_choice", "get_weather", "temperature", "max_tokens"],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle response format with relaxai provider", () =>
+      runGatewayTest({
+        model: "gpt-oss-120b/relaxai",
+        request: {
+          body: {
+            messages: [{ role: "user", content: "List 3 UK cities as JSON" }],
+            response_format: { type: "json_object" },
+            temperature: 0.3,
+            max_tokens: 500,
+          },
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.relax.ai/v1/chat/completions",
+              response: "success",
+              model: "openai/gpt-oss-120b",
+              data: createOpenAIMockResponse("openai/gpt-oss-120b"),
+              expects: {
+                ...relaxaiAuthExpectations,
+                bodyContains: ["response_format", "json_object"],
               },
             },
           ],
