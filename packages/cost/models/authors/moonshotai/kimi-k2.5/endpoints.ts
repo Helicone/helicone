@@ -108,6 +108,44 @@ export const endpoints = {
       "*": {},
     },
   },
+  "kimi-k2.5:hpcai": {
+    provider: "hpcai",
+    author: "moonshotai",
+    providerModelId: "moonshotai/kimi-k2.5",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000021, // $0.21/1M uncached input
+        output: 0.000001, // $1.00/1M output
+        cacheMultipliers: {
+          cachedInput: 0.03 / 0.21, // $0.03/1M cached input
+        },
+      },
+    ],
+    contextLength: 262_144,
+    maxCompletionTokens: 262_144,
+    supportedParameters: [
+      "structured_outputs",
+      "functions",
+      "tool_choice",
+      "tools",
+      "response_format",
+      "max_tokens",
+      "temperature",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "top_k",
+      "min_p",
+      "repetition_penalty",
+      "logit_bias",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${KimiK25ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

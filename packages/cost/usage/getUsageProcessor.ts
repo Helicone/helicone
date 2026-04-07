@@ -32,6 +32,8 @@ export function getUsageProcessor(
       return new AnthropicUsageProcessor();
     case "groq":
       return new GroqUsageProcessor();
+    case "hpcai":
+      return new OpenAIUsageProcessor();
     case "xai":
       return new XAIUsageProcessor();
     case "openrouter":
