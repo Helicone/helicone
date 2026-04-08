@@ -32,6 +32,22 @@ export interface AnthropicRequestBody {
    * @see https://docs.anthropic.com/en/docs/build-with-claude/context-editing
    */
   context_management?: AnthropicContextManagement;
+  /**
+   * Structured output configuration for JSON schema-constrained responses.
+   * @see https://docs.anthropic.com/en/docs/build-with-claude/structured-output
+   */
+  output_config?: AnthropicOutputConfig;
+}
+
+export interface AnthropicOutputConfig {
+  format: {
+    type: "json_schema";
+    json_schema: {
+      schema: Record<string, unknown>;
+      name?: string;
+      description?: string;
+    };
+  };
 }
 
 export type AnthropicThinkingConfig = {
