@@ -173,12 +173,23 @@ export class SimpleAIGateway {
           this.traceContext
         )
       : null;
+    // Pass the user's inline API key (from Authorization header) so it can be
+    // used as a fallback when no stored BYOK key exists in the database.
+    // Only pass if it's not a Helicone key (those are for Helicone auth, not provider auth).
+    const inlineApiKey =
+      this.apiKey &&
+      !this.apiKey.startsWith("sk-helicone-") &&
+      !this.apiKey.startsWith("pk-helicone-")
+        ? this.apiKey
+        : undefined;
+
     let attempts = await this.attemptBuilder.buildAttempts(
       modelStrings,
       this.orgId,
       bodyMapping,
       plugins,
-      globalIgnoreProviders
+      globalIgnoreProviders,
+      inlineApiKey
     );
     this.tracer.finishSpan(buildSpan);
 
