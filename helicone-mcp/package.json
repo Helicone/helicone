@@ -19,6 +19,7 @@
 		"dev": "tsx src/index.ts",
 		"format": "biome format --write",
 		"lint:fix": "biome lint --fix",
+		"test": "vitest run",
 		"type-check": "tsc --noEmit",
 		"flatten-types": "tsx flatten-types.ts",
 		"generate-zod": "npm run flatten-types && ts-to-zod src/types/flat.ts src/types/generated-zod.ts && npm run build"
@@ -45,8 +46,9 @@
 	"devDependencies": {
 		"@biomejs/biome": "^2.2.5",
 		"@types/node": "^24.9.2",
+		"tsx": "^4.7.0",
 		"typescript": "5.9.3",
-		"tsx": "^4.7.0"
+		"vitest": "^4.0.18"
 	},
 	"publishConfig": {
 		"access": "public"
