@@ -108,6 +108,16 @@ export const costs: ModelRow[] = [
       completion_token: 0.00000059,
     },
   },
+  {
+    model: {
+      operator: "equals",
+      value: "openai/gpt-oss-safeguard-20b",
+    },
+    cost: {
+      prompt_token: 0.000000075,
+      completion_token: 0.0000003,
+    },
+  },
   // Legacy models (keeping for backward compatibility)
   {
     model: {
