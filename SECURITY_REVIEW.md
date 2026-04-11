@@ -23,7 +23,15 @@
 
 ## Executive Summary
 
-_To be finalized once all section reviews complete._
+See the **[detailed executive summary](#executive-summary-1)** and **[Remediation Priority](#remediation-priority)** at the bottom of this document.
+
+**Headline findings:**
+
+- **3 Critical** — one IDOR that hands out `rw` API keys for any org whose PI session UUID is known (§2.1), and two SSRF bypasses in the worker that let callers make the proxy fetch arbitrary URLs (§3.1, §3.2).
+- **10 High** — unsalted SHA-256 as the only hash protecting stored API keys (§2.2), BYOK provider keys written plaintext before a DB trigger encrypts them (§1.3), a `BETTER_AUTH_SECRET` fallback to a literal in Docker (§1.2), default credentials scattered through deployment config (§1.1), no HTTP security headers on the Next.js dashboard (§4.1), cache-bucket entries picked via `Math.random()` (§3.4), `/v1/log/*` effectively unthrottled with a spoofable IP fallback (§2.3), Authorization headers forwarded (and loggable) to downstream pipelines (§3.3), and 289 open Dependabot alerts (9 critical, 134 high) on the default branch (§7.1).
+- **Positive:** organization scoping is enforced consistently in Jawn, filter/query construction is parameterized by default, webhook signature verification uses constant-time compare across Stripe/Slack/Intercom, outbound webhook SSRF prevention is thorough, S3 keys always include `orgId`, DOMPurify is used correctly at every `dangerouslySetInnerHTML` site, and public API routes are wrapped in `withAuth`.
+
+None of the critical findings require a rewrite. §2.1 needs a small design change (bind session UUIDs to the creator); §3.1 and §3.2 are one-line `validateApiConfiguration` calls away from being fixed.
 
 ---
 
@@ -892,7 +900,283 @@ These are module-level constants today, so there's no injection *today*. Called 
 
 ## 6. Storage, Uploads, Webhooks & Outbound HTTP
 
-_Pending agent completion._
+This section is largely positive. Helicone has clearly paid attention to webhook SSRF and constant-time signature verification; the remaining issues are around server-side file processing and DoS-shaped resource limits.
+
+### 6.1 [MEDIUM] Audio ingest path decodes base64 to disk and hands it to ffmpeg with no size or format check
+
+**File:** `valhalla/jawn/src/controllers/private/AudioController.ts:48-223`
+
+```ts
+const inputBuffer = Buffer.from(audioData, "base64");
+if (inputBuffer.length === 0) {
+  return { data: null, error: "Input audio data is empty..." };
+}
+
+const tempDir = os.tmpdir();
+const tempFilename = `helicone-audio-input-${randomUUID()}`;
+const tempInputPath = path.join(tempDir, tempFilename);
+pathToClean = tempInputPath;
+await fs.writeFile(tempInputPath, inputBuffer);
+// …ffmpeg/ffprobe processing…
+```
+
+No `Content-Length` guard, no max-buffer cap, no format allow-list. Two concrete risks:
+
+1. **Disk-exhaustion DoS.** A single request body can be arbitrarily large; the decoded buffer is materialised in memory and then written to tmp on the Jawn node. Repeated uploads fill `/tmp` and OOM the process.
+2. **ffmpeg parser exposure.** `fluent-ffmpeg` invokes the system `ffmpeg`/`ffprobe` binaries. These parsers have a long CVE history for malformed container files. Without a format/size check, any vulnerable codec path is reachable by an authenticated user.
+
+**Fix.**
+- Cap `audioData.length` and `inputBuffer.length` at e.g. 25 MiB before `fs.writeFile`.
+- Validate magic bytes against an allow-list (`mp3`, `wav`, `webm`, `ogg`, `flac`) before handing off to ffmpeg.
+- Run ffmpeg in a sandbox (separate process with `ulimit -v`, or a container, or move to a managed transcription API).
+- Restrict ffmpeg to specific demuxers: `ffmpeg -f <allowed_format>` instead of relying on content sniffing.
+
+---
+
+### 6.2 [LOW] HQL CSV export creates a local temp file in the process working directory
+
+**File:** `valhalla/jawn/src/lib/stores/HqlStore.ts:28-33`
+
+```ts
+const baseName = path.basename(fileName);
+if (baseName !== fileName || fileName.includes("..")) {
+  return err("Invalid file name");
+}
+const key = `${organizationId}/${baseName}`;
+// …
+await csvWriter.writeRecords(records);
+const csvBuffer = fs.readFileSync(fileName);
+```
+
+The basename check does prevent `../` traversal. Two soft spots remain:
+
+- `fileName` is written to the process's current working directory (not `os.tmpdir()`). On concurrent requests for the same org two callers can collide on filename, and `fs.readFileSync` may race the previous writer.
+- `fs.readFileSync` on a path you just wrote should really be a random temp file with `randomUUID()` in `os.tmpdir()`, not whatever CWD happens to be.
+
+**Fix.** Generate a random temp path under `os.tmpdir()` and clean up in `finally`.
+
+---
+
+### 6.3 [LOW] Outbound webhook hostname check is resolved-once (DNS rebinding)
+
+**File:** `valhalla/jawn/src/lib/clients/webhookSender.ts:8-76`
+
+The allow-list correctly blocks literal private/reserved IPs and reserved TLDs (see positive note 6.4). The one gap is **DNS rebinding**: the hostname is string-checked *before* `fetch` resolves it, so an attacker who controls a domain can serve a public IP at validation time and 127.0.0.1 at fetch time.
+
+Practical exploitability is low (fetch impl, HTTPS cert pinning, short TTLs matter), but it's the standard SSRF follow-on.
+
+**Fix.** Resolve the hostname once, validate the resolved IP, then pass that IP into the request with a `Host` header override. Or use a pinned socket factory (`lookup` callback) to block RFC1918 at connect time.
+
+---
+
+### 6.4 [POS] S3 object keys are consistently prefixed with `orgId`
+
+**File:** `valhalla/jawn/src/lib/shared/db/s3Client.ts:348-362`
+
+```ts
+getRawRequestResponseKey = (requestId: string, orgId: string) =>
+  `organizations/${orgId}/requests/${requestId}/raw_request_response_body`;
+
+getDatasetKey = (datasetId: string, requestId: string, orgId: string) =>
+  `organizations/${orgId}/datasets/${datasetId}/requests/${requestId}/request_response_body`;
+
+getPromptKey = (promptId: string, promptVersionId: string, orgId: string) =>
+  `organizations/${orgId}/prompts/${promptId}/versions/${promptVersionId}/prompt_body`;
+```
+
+Every helper takes `orgId` as a first-class parameter and bakes it into the key. With a matching presigned-URL check that only fetches keys scoped to the caller's org, path traversal between orgs is structurally impossible.
+
+### 6.5 [POS] Presigned GET URLs expire in 24h; expiry is a parameter, not a constant
+
+**File:** `valhalla/jawn/src/lib/shared/db/s3Client.ts:214-230`
+
+```ts
+const signedUrl = await getSignedUrl(this.awsClient, command, {
+  expiresIn: 60 * 60 * 24, // 1 day
+});
+```
+
+Plus a `putObjectSignedUrlWithExpiration` variant for caller-controlled expiry.
+
+### 6.6 [POS] Outbound webhook SSRF prevention is thorough
+
+`webhookSender.ts:8-76` (`isPrivateOrReservedHostname`) blocks:
+- `localhost`, `127.0.0.1`, `[::1]`, `0.0.0.0`
+- `169.254.169.254` and `metadata.google.internal`
+- 10/8, 172.16/12, 192.168/16, 169.254/16, 127/8, 0/8
+- `.local`, `.internal`, `.corp`, `.lan` TLDs
+- HTTPS-only enforcement
+
+(Cross-reference: §2.4 — this is undone whenever a webhook row has a null/empty `hmac_key`.)
+
+### 6.7 [POS] Inbound webhook signatures use constant-time comparison across three providers
+
+- **Stripe** — `web/pages/api/stripe/event_webhook/index.ts:1152-1160` uses `stripe.webhooks.constructEvent()`, which does constant-time internally.
+- **Slack** — `web/pages/api/slack-events.ts:7-25` uses `crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(expectedHash, 'hex'))`.
+- **Intercom** — `web/pages/api/intercom.ts:5-18` uses `crypto.timingSafeEqual(...)`.
+
+All three paths hash with HMAC-SHA256 over the canonical payload with a signing secret. This is the pattern you want.
+
+### 6.8 [POS] Outbound webhook payloads are signed with HMAC-SHA256
+
+**File:** `valhalla/jawn/src/lib/clients/webhookSender.ts:197-214`
+
+```ts
+const hmac = createHmac("sha256", hmacKey);
+hmac.update(webHookPayload);
+const hash = hmac.digest("hex");
+// …
+headers: { "Content-Type": "application/json", "Helicone-Signature": hash }
+```
+
+Customers can verify authenticity — but see §2.4 for the empty-key gap.
+
+### 6.9 [POS] Webhook payloads are truncated to 10 KiB
+
+**File:** `valhalla/jawn/src/lib/clients/webhookSender.ts:155-159`
+
+```ts
+const MAX_BODY_SIZE = 10 * 1024;
+const truncateBody = (body: string): string =>
+  typeof body === "string" && body.length > MAX_BODY_SIZE
+    ? "Body too large for webhook, please fetch the full request and response from Helicone"
+    : body;
+```
+
+Prevents webhook receivers from being flooded by huge log payloads and limits the cross-trust blast radius.
+
+### 6.10 [POS] Temp files in the audio path use `randomUUID()` and `finally`-clean up
+
+**File:** `valhalla/jawn/src/controllers/private/AudioController.ts:58-221` — temp filenames are `helicone-audio-input-${randomUUID()}` and unlinked in a `finally` block with swallowed cleanup errors. (The remaining gap is size limits — §6.1.)
+
+### 6.11 [POS] No XML parsing in the repo
+
+A search for `xml2js`, `libxmljs`, `fast-xml-parser`, `parseXml` returned nothing. There's no XXE attack surface.
+
+### 6.12 [POS] No `sharp` / `jimp` / `pdf-parse` in dependencies
+
+Image / PDF parsers that have historically shipped CVEs are not present. Audio is the only binary-format surface and it's ffmpeg (§6.1).
+
+---
+
+## Dependency / Supply-Chain Posture
+
+### 7.1 [HIGH] 289 open Dependabot alerts on `main` (9 critical, 134 high, 111 moderate, 35 low)
+
+Observed in the remote response when pushing this branch:
+
+```
+remote: GitHub found 289 vulnerabilities on Helicone/helicone's default branch
+remote: (9 critical, 134 high, 111 moderate, 35 low).
+```
+
+This wasn't part of the source-code review, but it's a first-class finding and should be prioritized alongside the critical code-level issues. Without an audit of which alerts are in the dependency graph of the worker/aigateway vs. docs/examples, it's impossible to map each one to user-reachable code — but 9 criticals on `main` is a lot of unknown unknowns.
+
+**Fix.**
+- Triage the 9 critical + 134 high alerts first: for each, mark whether the vulnerable package is reachable from the runtime services (jawn, worker, aigateway, web) or only from docs/examples/tests.
+- Enable Dependabot auto-PR for critical/high and require security reviews on them.
+- Add `cargo audit` to the aigateway CI and `npm audit --production --audit-level=high` to the other services.
+
+---
+
+## Executive Summary
+
+**Overall posture.** Helicone has the ingredients of a solid security program: organization scoping is enforced consistently in Jawn, parameterized queries are the norm, BYOK provider keys are encrypted at rest with `pgsodium`, most webhook code uses constant-time signature comparison, S3 object keys bake in the org ID so cross-tenant path traversal is structurally impossible, and outbound webhooks have a carefully maintained SSRF allow-list.
+
+The serious issues cluster in three places:
+
+1. **Two unauthenticated / loosely-authenticated code paths give an attacker a privileged identity.** The PI session API mints a fresh `rw` Helicone API key for any org whose session UUID is known (§2.1). The proxy has two SSRF bypasses — `baseURLOverride` (§3.1) and `helicone-fallbacks` (§3.2) — that let a caller cause the worker to fetch arbitrary URLs on their behalf, with attacker-controlled headers.
+
+2. **Crypto and key hygiene are softer than they should be for a company whose product is API keys.** `hashAuth()` is plain SHA-256 with a fixed string "salt" (§2.2), `BETTER_AUTH_SECRET` falls back to a literal in Docker (§1.2), BYOK provider keys travel to Postgres in plaintext before a trigger encrypts them (§1.3), and webhook HMAC keys may be empty (§2.4). None of these are immediately exploitable on their own, but any of them multiplies the damage of a DB exposure.
+
+3. **The deployment surface is noisy.** `docker/docker-compose.yml`, `Dockerfile`, and `supervisord.conf` all contain literal default credentials / secrets and run every service as root (§1.1, §1.6). 289 open Dependabot alerts on `main` (§7.1) — 9 critical — suggest that the dependency layer has not had a recent sweep.
+
+The frontend is the cleanest area: DOMPurify is used correctly at every `dangerouslySetInnerHTML` site, `withAuth` wraps API routes, there are no open redirects, and no `postMessage` handlers. The biggest frontend gap is a missing HTTP security-header policy (§4.1).
+
+**Nothing in this review is "safe to deploy in production for untrusted users as-is" but most of the high-severity items are small, localized fixes.** The three SSRF/IDOR issues are the only findings where a single code-level fix is not obviously sufficient — §2.1 in particular needs a design change, not a one-line patch.
+
+---
+
+## Remediation Priority
+
+Ranked by (impact × exploit ease). File references are the primary locations only.
+
+### Immediate (fix this week)
+
+| # | Finding | File |
+|---|---|---|
+| §2.1 | **[CRIT]** PI session → API key minting IDOR | `jawn/src/controllers/public/piPublicController.ts` |
+| §3.1 | **[CRIT]** SSRF via `baseURLOverride` bypass | `worker/src/lib/models/HeliconeProxyRequest.ts:219` |
+| §3.2 | **[CRIT]** SSRF via `helicone-fallbacks` target URL | `worker/src/lib/models/HeliconeHeaders.ts:229` |
+| §1.3 | **[HIGH]** BYOK provider keys sent plaintext to Postgres | `jawn/src/managers/apiKeys/KeyManager.ts:334` |
+| §7.1 | **[HIGH]** 289 Dependabot alerts (9 crit / 134 high) | repo-wide |
+
+### Short-term (this sprint)
+
+| # | Finding | File |
+|---|---|---|
+| §1.1 | **[HIGH]** Default creds in production-shaped config | `docker/docker-compose.yml`, `Dockerfile`, `supervisord.conf` |
+| §1.2 | **[HIGH]** `BETTER_AUTH_SECRET` fallback to `"your-secret-key"` | `docker/docker-compose.yml:165`, `Dockerfile:162` |
+| §2.2 | **[HIGH]** Bare SHA-256 API-key hashing | `jawn/src/lib/db/hash.ts` |
+| §2.3 | **[HIGH]** `/v1/log/*` rate limit at 10M; spoofable IP fallback | `jawn/src/middleware/ratelimitter.ts` |
+| §3.3 | **[HIGH]** Authorization header forwarded & loggable | `worker/src/lib/clients/ProviderClient.ts:36` |
+| §3.4 | **[HIGH]** Cache bucket uses `Math.random()` for entry selection | `worker/src/lib/util/cache/cacheFunctions.ts` |
+| §4.1 | **[HIGH]** No HTTP security headers (CSP, HSTS, XFO) | `web/next.config.js` |
+| §6.1 | **[MED]** Audio upload → ffmpeg, no size/format check | `jawn/src/controllers/private/AudioController.ts` |
+
+### Next (before next release)
+
+| # | Finding | File |
+|---|---|---|
+| §1.4 | `Math.random()` for prompt IDs and probabilistic auth decisions | multiple |
+| §1.5 | TLS verification disabled for any `NODE_ENV=development` | `web/lib/auth.ts:27` |
+| §1.6 | Supervisord + services as root | `supervisord.conf` |
+| §2.4 | Empty webhook HMAC keys allowed | `jawn/src/lib/clients/webhookSender.ts:126` |
+| §2.5 | Reseller customer-list authz pattern | `jawn/src/controllers/private/organizationController.ts:173` |
+| §2.6 | Client-supplied `orgId` in JWT auth flow | `jawn/.../BetterAuthWrapper.ts:141` |
+| §3.5 | SSE parser unbounded lines | `worker/src/lib/dbLogger/streamParsers/openAIStreamParser.ts` |
+| §3.6 | No per-request `messages[]` count / cumulative body cap | `worker/src/RequestBodyBuffer/RequestBodyBufferBuilder.ts` |
+| §4.2 | ReactMarkdown custom components do not validate `href`/`src` | `web/components/templates/agent/MessageRenderer.tsx` |
+| §4.3 | Unvalidated image URLs in agent message renderer | same |
+| §5.1 | Regex-based HQL keyword blocking | `jawn/src/lib/db/ClickhouseWrapper.ts:131` |
+| §5.2 | ORDER BY column allow-list relies on TS types | `jawn/src/managers/UserManager.ts:87` |
+| §5.3 | `timeGrain` interpolated without runtime allow-list | `jawn/src/managers/UsageLimitManager.ts:30` |
+| §5.4 | `SECURITY DEFINER` without `SET search_path` | `supabase/migrations/20230803235603_key_management.sql` |
+| §6.3 | Webhook DNS rebinding (resolve-once) | `jawn/src/lib/clients/webhookSender.ts` |
+
+### Hardening backlog
+
+| # | Finding | Notes |
+|---|---|---|
+| §1.7 | API-key hashing consistency (use `pgsodium.crypto_pwhash_str` everywhere) | cosmetic until §2.2 is fixed |
+| §2.7 | Base32 → base64url for key encoding | cosmetic |
+| §2.8 | CORS `allow no-origin` branch | document & scope |
+| §4.4 | ESLint disabled at build | re-enable security rules |
+| §5.5 | `USING (true)` on `system_config` | narrow to owner role |
+| §5.6 | Regex-based HQL table allow-list | move to AST-based |
+| §5.7 | Template-literal SQL with compile-time constants | refactor to `sql\`\`` tag |
+| §6.2 | HQL CSV export temp file location | move to `os.tmpdir()` |
+
+---
+
+## Methodology
+
+This review was conducted by static analysis across the monorepo on commit
+`a15cb7f…` of branch `claude/security-review-helicone-BGyoG`. Six parallel
+investigation passes covered: secrets/logging, authentication & authorization,
+worker/AI-gateway proxy, Next.js frontend, SQL/ClickHouse queries, and
+storage/uploads/webhooks. No dynamic testing, no runtime fuzzing, and no
+authenticated endpoint probing was performed. The dependency count in §7.1
+was observed passively from the `git push` response, not from an audit run.
+
+Severity labels:
+
+- **Critical** — remote exploitation / cross-tenant access / credential theft achievable by an unauthenticated or low-privileged user.
+- **High** — exploitation requires a condition (e.g. prior DB compromise, specific config) but the impact is org-wide.
+- **Medium** — exploitation requires access or is limited to a single user/org; includes bad defaults and soft defense patterns.
+- **Low** — defense-in-depth, hardening, or fragile patterns that aren't directly exploitable today.
+- **Info / [POS]** — positive observation or neutral note.
+
 
 ---
 
