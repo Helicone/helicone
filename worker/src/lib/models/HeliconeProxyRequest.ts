@@ -156,15 +156,16 @@ export class HeliconeProxyRequestMapper {
         isStream || targetUrl.pathname.includes("invoke-with-response-stream");
     }
 
-    // Apply token limit exception handler before fetching the body so we
-    // only materialize the stream once. Fetching twice with a Remote buffer
-    // leaks a ReadableStream from the container DO on every request.
-    await this.request.applyTokenLimitExceptionHandler(this.provider);
-
-    // NOTE: `body` is kept on HeliconeProxyRequest for loggable wiring but
-    // must NOT be consumed here by callers — callProvider fetches a fresh
-    // body via getBody() so retries get a new stream each attempt.
     let body: ValidRequestBody;
+    try {
+      body = await this.request.safelyGetBody();
+    } catch (e) {
+      body = await this.request.unsafeGetBodyText();
+    }
+
+    // Apply token limit exception handler
+    await this.request.applyTokenLimitExceptionHandler(this.provider);
+    // Re-fetch body after potential modification
     try {
       body = await this.request.safelyGetBody();
     } catch (e) {
