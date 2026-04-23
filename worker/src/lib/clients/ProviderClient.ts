@@ -10,7 +10,10 @@ export interface CallProps {
   headers: Headers;
   method: string;
   apiBase: string;
-  body: ValidRequestBody;
+  // Factory returning a fresh body for each fetch attempt. ReadableStream
+  // bodies can only be consumed once, so retries must re-fetch the body
+  // from the buffer rather than reuse a stored reference.
+  getBody: () => Promise<ValidRequestBody>;
   increaseTimeout: boolean;
   originalUrl: URL;
   extraHeaders: Headers | null;
@@ -22,7 +25,13 @@ export function callPropsFromProxyRequest(
 ): CallProps {
   return {
     apiBase: proxyRequest.api_base,
-    body: proxyRequest.body,
+    getBody: async () => {
+      try {
+        return await proxyRequest.requestWrapper.safelyGetBody();
+      } catch (e) {
+        return await proxyRequest.requestWrapper.unsafeGetBodyText();
+      }
+    },
     headers: proxyRequest.requestWrapper.getHeaders(),
     method: proxyRequest.requestWrapper.getMethod(),
     increaseTimeout:
@@ -101,7 +110,7 @@ async function callWithMapper(
 }
 
 export async function callProvider(props: CallProps): Promise<Response> {
-  const { headers, method, apiBase, body, increaseTimeout, originalUrl, env } =
+  const { headers, method, apiBase, increaseTimeout, originalUrl, env } =
     props;
 
   const mockResponseHeader = headers.get("__helicone-mock-response");
@@ -156,7 +165,13 @@ export async function callProvider(props: CallProps): Promise<Response> {
   }
 
   const baseInit = { method, headers: headersWithExtra };
-  const init = method === "GET" ? { ...baseInit } : { ...baseInit, body };
+  // Fetch a fresh body per attempt: a ReadableStream can only be consumed
+  // once, so sharing the same body reference across retries triggers
+  // "Body has already been used" on the second attempt.
+  const init =
+    method === "GET"
+      ? { ...baseInit }
+      : { ...baseInit, body: await props.getBody() };
 
   let response: Response;
   if (increaseTimeout) {
