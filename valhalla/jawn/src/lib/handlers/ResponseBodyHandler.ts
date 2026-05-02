@@ -294,8 +294,6 @@ export class ResponseBodyHandler extends AbstractLogHandler {
 
     let responseBody = context.rawLog.rawResponseBody;
     const requestBody = context.rawLog.rawRequestBody;
-    console.log("[RAW_RESONSE_BODY]", responseBody);
-    console.log("[RAW_REQUEST_BODY]", requestBody);
 
     if (!responseBody) {
       console.log("No response body found");
