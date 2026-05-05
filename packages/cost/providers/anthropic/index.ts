@@ -288,6 +288,21 @@ export const costs: ModelRow[] = [
     },
     showInPlayground: true,
   },
+  {
+    model: {
+      operator: "includes",
+      value: "claude-opus-4-7",
+    },
+    cost: {
+      prompt_token: 0.000005, // $5 / MTok
+      completion_token: 0.000025, // $25 / MTok
+      prompt_cache_write_token: 0.00000625, // 5m cache write: $6.25 / MTok
+      prompt_cache_read_token: 0.0000005, // Cache hits/refreshes: $0.5 / MTok
+      prompt_cache_creation_5m: 0.00000625, // $6.25 / MTok
+      prompt_cache_creation_1h: 0.00001, // 1h cache write: $10 / MTok
+    },
+    showInPlayground: true,
+  },
 ];
 
 export const modelDetails: ModelDetailsMap = {
@@ -717,6 +732,58 @@ export const modelDetails: ModelDetailsMap = {
         "Complex data analysis and extraction",
         "Vision and multimodal processing",
         "Enterprise-critical applications",
+      ],
+    },
+  },
+  "claude-opus-4-7": {
+    matches: ["claude-opus-4-7-20260416", "claude-opus-4-7"],
+    searchTerms: ["claude 4.7 opus", "claude-opus-4-7", "opus 4.7", "claude-opus-4-7-20260416"],
+    info: {
+      maxTokens: 1000000,
+      releaseDate: "2026-04-16",
+      description:
+        "Claude Opus 4.7 is Anthropic's flagship model released April 2026, building on Opus 4.6 with continued advances in coding, agentic tasks, and enterprise workflows. Features a 1M context window, hybrid reasoning with extended thinking, and a new tokenizer.",
+      tradeOffs: [
+        "Premium pricing for flagship capabilities",
+        "State-of-the-art coding and agentic performance",
+        "1M context window",
+        "Hybrid reasoning with instant or extended thinking",
+        "New tokenizer may produce more tokens for the same input",
+      ],
+      benchmarks: {},
+      capabilities: [
+        "Hybrid reasoning (instant or extended thinking)",
+        "1M token context window",
+        "Complex multi-step problem solving",
+        "Advanced code generation and analysis",
+        "Vision processing (text and image inputs)",
+        "Multilingual capabilities",
+        "Tool and function calling",
+        "JSON mode support",
+        "Maximum output up to 64k tokens",
+        "Web search integration",
+        "Multi-agent orchestration",
+      ],
+      strengths: [
+        "Industry-leading coding performance",
+        "1M context window",
+        "Superior agentic task handling",
+        "Strong multi-step reasoning",
+        "Excellent code review and debugging",
+        "Reliable for enterprise workflows",
+      ],
+      weaknesses: [
+        "Premium pricing model",
+        "Higher latency due to advanced capabilities",
+        "Resource-intensive processing",
+      ],
+      recommendations: [
+        "Production-ready code generation",
+        "Complex agentic workflows",
+        "Enterprise document processing",
+        "Large codebase migrations",
+        "Multi-agent orchestration",
+        "Long-context analysis",
       ],
     },
   },
