@@ -37,6 +37,10 @@ import {
   perplexityModels,
   perplexityEndpointConfig,
 } from "./authors/perplexity/sonar";
+import {
+  hpcaiHostedModels,
+  hpcaiHostedEndpointConfig,
+} from "./authors/hpcai-hosted";
 
 // Combine all models
 const allModels = {
@@ -52,6 +56,7 @@ const allModels = {
   ...zaiModels,
   ...baiduModels,
   ...perplexityModels,
+  ...hpcaiHostedModels,
 } satisfies Record<string, ModelConfig>;
 
 // Combine all endpoint configs
@@ -68,6 +73,7 @@ const modelProviderConfigs = {
   ...zaiEndpointConfig,
   ...baiduEndpointConfig,
   ...perplexityEndpointConfig,
+  ...hpcaiHostedEndpointConfig,
 } satisfies Record<string, ModelProviderConfig>;
 
 // Combine all archived endpoints

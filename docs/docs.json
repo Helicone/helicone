@@ -144,6 +144,7 @@
                     ]
                   },
                   "getting-started/integration-method/deepinfra",
+                  "getting-started/integration-method/hpc-ai",
                   "getting-started/integration-method/deepseek",
                   {
                     "group": "Gemini",
