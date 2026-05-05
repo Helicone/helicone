@@ -5,8 +5,8 @@ type SessionQueryParams = components["schemas"]["SessionQueryParams"];
 type HeliconeRequest = components["schemas"]["HeliconeRequest"];
 type SessionResult = components["schemas"]["SessionResult"];
 
-const HELICONE_API_BASE = "https://api.helicone.ai";
-const HELICONE_AI_GATEWAY_BASE = "https://ai-gateway.helicone.ai";
+const HELICONE_API_BASE = process.env.HELICONE_BASE_URL || "https://api.helicone.ai";
+const HELICONE_AI_GATEWAY_BASE = process.env.HELICONE_AI_GATEWAY_URL || "https://ai-gateway.helicone.ai";
 const REQUEST_BODY_CACHE = new Map<string, { request?: any; response?: any }>();
 const CACHE_MAX_SIZE = 10000;
 
@@ -257,4 +257,3 @@ export async function useAiGateway(
     );
   }
 }
-
