@@ -327,12 +327,12 @@ const ContributingSection = () => (
         <li>
           Visit our GitHub repository:{" "}
           <a
-            href="https://github.com/Helicone/helicone/tree/main/costs"
+            href="https://github.com/Helicone/helicone/tree/main"
             className="underline"
             target="_blank"
             rel="noopener noreferrer"
           >
-            Helicone Costs
+            Helicone
           </a>
         </li>
         <li>
