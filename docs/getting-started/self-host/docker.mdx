@@ -128,8 +128,41 @@ docker exec -u postgres helicone psql -d helicone_test -c \
 
 - OpenAI: `http://YOUR_IP:8585/v1/gateway/oai/v1/chat/completions`
 - Anthropic: `http://YOUR_IP:8585/v1/gateway/anthropic/v1/messages`
+- Any OpenAI-compatible upstream via the generic passthrough gateway (see below).
 
-Other providers (Vertex AI, AWS Bedrock, Azure OpenAI) are not supported in the self-hosted version.
+### Generic passthrough gateway
+
+`POST /v1/gateway/passthrough/<upstream-path>` forwards a request to any
+HTTP(S) origin specified via the `Helicone-Target-URL` header, mirroring the
+behaviour of `gateway.helicone.ai` on Helicone Cloud. The request is logged
+through the same pipeline as the native OpenAI/Anthropic gateways.
+
+Conventions:
+
+- `Helicone-Target-URL` must be an origin only (`https://host[:port]`) — no
+  path/query/hash. The upstream path comes from the request URL after the
+  `/v1/gateway/passthrough` prefix.
+- `Helicone-Auth: Bearer <helicone_key>` is required for logging attribution.
+- `Authorization` and any other non-`Helicone-*` headers are forwarded to the
+  upstream as-is.
+
+Example — OpenRouter:
+
+```bash
+curl --location 'http://localhost:8585/v1/gateway/passthrough/api/v1/chat/completions' \
+--header "Content-Type: application/json" \
+--header "Authorization: Bearer $OPENROUTER_API_KEY" \
+--header "Helicone-Auth: Bearer $HELICONE_API_KEY" \
+--header "Helicone-Target-URL: https://openrouter.ai" \
+--data '{
+    "model": "openai/gpt-4o-mini",
+    "messages": [{"role": "user", "content": "Hello"}]
+  }'
+```
+
+Self-hosted operators are responsible for fronting Jawn with their own
+auth/network policies if they need stricter SSRF controls — the endpoint
+accepts any HTTP(S) origin.
 
 ## Important Notes
 
