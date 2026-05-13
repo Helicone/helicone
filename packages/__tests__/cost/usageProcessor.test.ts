@@ -54,6 +54,11 @@ describe("getUsageProcessor", () => {
     expect(processor).toBeInstanceOf(OpenAIUsageProcessor);
   });
 
+  it("should return OpenAIUsageProcessor for saladcloud provider", () => {
+    const processor = getUsageProcessor("saladcloud");
+    expect(processor).toBeInstanceOf(OpenAIUsageProcessor);
+  });
+
   it("should return null for unsupported provider", () => {
     const processor = getUsageProcessor("unsupported-provider" as any);
     expect(processor).toBeNull();

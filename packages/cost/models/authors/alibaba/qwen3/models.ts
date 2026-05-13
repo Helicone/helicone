@@ -12,6 +12,39 @@ export const models = {
     modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "GPT",
   },
+  "qwen3.6-35b-a3b": {
+    name: "Qwen3.6 35B A3B",
+    author: "qwen",
+    description:
+      "Qwen3.6 35B A3B is a Mixture-of-Experts model available through SaladCloud AI Gateway, recommended for agentic tasks, complex multi-step reasoning, code generation, and instruction following.",
+    contextLength: 131_072,
+    maxOutputTokens: 16_384,
+    created: "2026-03-26T07:00:00.000Z",
+    modality: { inputs: ["text"], outputs: ["text"] },
+    tokenizer: "Qwen",
+  },
+  "qwen3.6-27b": {
+    name: "Qwen3.6 27B",
+    author: "qwen",
+    description:
+      "Qwen3.6 27B is a dense general-purpose model available through SaladCloud AI Gateway, balancing capability and speed for chat and assistant workloads.",
+    contextLength: 131_072,
+    maxOutputTokens: 16_384,
+    created: "2026-03-26T07:00:00.000Z",
+    modality: { inputs: ["text"], outputs: ["text"] },
+    tokenizer: "Qwen",
+  },
+  "qwen3.5-9b": {
+    name: "Qwen3.5 9B",
+    author: "qwen",
+    description:
+      "Qwen3.5 9B is a fast, lightweight model available through SaladCloud AI Gateway for high-volume queries, simple Q&A, and low-latency responses.",
+    contextLength: 131_072,
+    maxOutputTokens: 8_192,
+    created: "2026-03-26T07:00:00.000Z",
+    modality: { inputs: ["text"], outputs: ["text"] },
+    tokenizer: "Qwen",
+  },
   "qwen3-30b-a3b": {
     name: "Qwen3 30B A3B",
     author: "qwen",

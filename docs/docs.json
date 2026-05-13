@@ -220,6 +220,7 @@
                   },
                   "getting-started/integration-method/openrouter",
                   "getting-started/integration-method/perplexity",
+                  "getting-started/integration-method/saladcloud",
                   "getting-started/integration-method/together",
                   {
                     "group": "xAI",

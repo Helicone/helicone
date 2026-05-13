@@ -175,6 +175,16 @@ export const providers: Provider[] = [
     relevanceScore: 40,
   },
   {
+    id: "saladcloud",
+    name: "SaladCloud",
+    logoUrl: "/assets/home/providers/saladcloud.svg",
+    description: "Configure your SaladCloud AI Gateway API keys",
+    docsUrl: "https://docs.salad.com/ai-gateway/explanation/overview",
+    apiKeyLabel: "SaladCloud API Key",
+    apiKeyPlaceholder: "...",
+    relevanceScore: 38,
+  },
+  {
     id: "openrouter",
     name: "OpenRouter",
     logoUrl: "/assets/home/providers/openrouter.jpg",
