@@ -6,24 +6,12 @@ export const models = {
     name: "OpenAI GPT-5.5",
     author: "openai",
     description:
-      "GPT-5.5 is our frontier model for complex professional work. Reasoning.effort supports: none (default), low, medium, high and xhigh. Features a 1.05M context window and 128K max output tokens with improvements in general intelligence, instruction following, accuracy, multimodality, code generation, tool calling, and context management over GPT-5.2.",
+      "GPT-5.5 is our newest frontier model for the most complex professional work. Learn more in our latest model guide. Reasoning.effort supports: none, low, medium (default), high and xhigh.",
     contextLength: 1_050_000,
     maxOutputTokens: 128_000,
-    created: "2026-03-05T00:00:00.000Z",
+    created: "2026-04-23T00:00:00.000Z",
     modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "GPT",
-  },
-  "gpt-5.4-2026-03-05": {
-    name: "OpenAI GPT-5.4",
-    author: "openai",
-    description:
-      "GPT-5.4 is our frontier model for complex professional work. Reasoning.effort supports: none (default), low, medium, high and xhigh. Features a 1.05M context window and 128K max output tokens with improvements in general intelligence, instruction following, accuracy, multimodality, code generation, tool calling, and context management over GPT-5.2.",
-    contextLength: 1_050_000,
-    maxOutputTokens: 128_000,
-    created: "2026-03-05T00:00:00.000Z",
-    modality: { inputs: ["text", "image"], outputs: ["text"] },
-    tokenizer: "GPT",
-    pinnedVersionOfModel: "gpt-5.4",
   },
 } satisfies Record<string, ModelConfig>;
 
