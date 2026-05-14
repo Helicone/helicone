@@ -1,6 +1,6 @@
 import { ModelProviderName } from "../../../providers";
 import type { ModelProviderConfig } from "../../../types";
-import { GPT54ModelName } from "./models";
+import { GPT55ModelName } from "./models";
 
 export const endpoints = {
   "gpt-5.5:openai": {
@@ -97,5 +97,5 @@ export const endpoints = {
     },
   },
 } satisfies Partial<
-  Record<`${GPT54ModelName}:${ModelProviderName}`, ModelProviderConfig>
+  Record<`${GPT55ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

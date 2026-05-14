@@ -15,4 +15,4 @@ export const models = {
   },
 } satisfies Record<string, ModelConfig>;
 
-export type GPT54ModelName = keyof typeof models;
+export type GPT55ModelName = keyof typeof models;
