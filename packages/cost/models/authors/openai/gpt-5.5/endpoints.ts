@@ -19,7 +19,7 @@ export const endpoints = {
       },
       {
         threshold: 272000,
-        input: 0.000010, // $5.00 per 1M tokens (2x for >272K context)
+        input: 0.000010, // $10.00 per 1M tokens (2x for >272K context)
         output: 0.000045, // $45.00 per 1M tokens (1.5x for >272K context)
       },
     ],
