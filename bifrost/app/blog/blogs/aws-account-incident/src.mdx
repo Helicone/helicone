@@ -3,9 +3,13 @@
 
 From Thursday, May 14 until midday Monday, May 18, Helicone was degraded. Requests were not being processed and the dashboard returned errors for most of that window. That is about four days, and we are not going to pretend it was shorter. This is what happened and what it means for your data.
 
+## The proxy stayed up the whole time
+
+The most important part first: the Helicone proxy was fully functional for the entire outage. If your app sends traffic through our gateway, those requests kept flowing to your providers and your users were not affected. This was an observability outage, not a traffic outage. Your production apps did not go down because of this.
+
 ## What broke
 
-AWS flagged one of our Amazon Bedrock API keys as possibly compromised and locked our entire AWS account. The lock did not stop at that one key. It blocked our ECS tasks from starting at all, and those tasks run log ingestion and the dashboard backend. On your side that showed up as failed auth, a dashboard that would not load, and logs sitting unprocessed.
+AWS flagged one of our Amazon Bedrock API keys as possibly compromised and locked our entire AWS account. The lock did not stop at that one key. It blocked our ECS tasks from starting at all, and those tasks run log ingestion and the dashboard backend. The proxy runs separately and kept serving. What broke was everything behind it: log processing, the dashboard, and auth for the dashboard. On your side that showed up as failed dashboard logins, a dashboard that would not load, and logs sitting unprocessed.
 
 ## Your data is safe
 
