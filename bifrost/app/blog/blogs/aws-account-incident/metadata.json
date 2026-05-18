@@ -4,7 +4,7 @@
   "title2": "What happened during our AWS outage",
   "description": "AWS locked our account for four days over a Bedrock API key it thought was compromised. It wasn't. Here is what happened, what it meant for your data, and what we did about it.",
   "shortDescription": "AWS locked our account for four days over a Bedrock key it thought was compromised. It wasn't. No data was lost.",
-  "images": "/static/new-open-graph.png",
+  "images": "/static/logo.png",
   "time": "2-minute read",
   "author": "Cole Gottdank",
   "date": "May 18, 2026",
