@@ -1,7 +1,7 @@
 
 ![Helicone AWS incident update](/static/new-open-graph.png)
 
-For a few hours on May 18, Helicone stopped processing requests and the dashboard returned errors. This is what happened, and what it means for your data.
+From Thursday, May 14 until midday Monday, May 18, Helicone was degraded. Requests were not being processed and the dashboard returned errors for most of that window. That is about four days, and we are not going to pretend it was shorter. This is what happened and what it means for your data.
 
 ## What broke
 
@@ -9,11 +9,11 @@ AWS flagged one of our Amazon Bedrock API keys as possibly compromised and locke
 
 ## Your data is safe
 
-We did not lose any data. Requests that arrived during the window were queued, not dropped, and they are being processed now. Gaps you saw fill in as the backlog drains.
+We did not lose any data. Requests that arrived during the outage were queued, not dropped, and they are being processed now. Because the backlog covers roughly four days, it will take time to fully drain. Your historical data will keep filling in over the coming hours rather than all at once.
 
-## What took so long
+## Why it lasted four days
 
-The slow part was not the fix, it was the wait. We opened a support case the moment the account was locked and spent most of the outage waiting to hear back from AWS. We could not bring our infrastructure back up until they lifted the block, and that timing was out of our hands.
+The slow part was not the fix, it was the wait. We opened a support case the moment the account was locked and spent most of those four days waiting on AWS to respond and lift the block. We could not bring our infrastructure back up until they did, and that timing was out of our hands. We escalated repeatedly. It still took until Monday.
 
 ## The key was never compromised
 
@@ -21,6 +21,6 @@ Once we could investigate, we confirmed the Bedrock key AWS flagged was not comp
 
 ## Where things stand
 
-The account is unblocked and our services are healthy. No data was lost and the backlog is draining. Every key and secret has been rotated as a precaution, even though we found no sign of compromise.
+The account is unblocked and our services are healthy again as of Monday, May 18. No data was lost. The four-day backlog is draining and will catch up over the next while. Every key and secret has been rotated as a precaution, even though we found no sign of compromise.
 
-Sorry for the disruption. If your data still looks short a few hours from now, email us at support@helicone.ai and we will check your org directly.
+This was a long outage and the wait on AWS made it worse than it should have been. Sorry. If your data still looks incomplete after the backlog has had time to drain, email us at support@helicone.ai and we will check your org directly.
