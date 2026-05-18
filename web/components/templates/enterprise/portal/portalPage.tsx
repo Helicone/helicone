@@ -17,12 +17,15 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
+import { Database } from "../../../../db/database.types";
 import usePortalPage from "../../../../services/hooks/enterprise/portal/usePortalPage";
 import ThemedDrawer from "../../../shared/themed/themedDrawer";
 import CreateOrgForm from "../../organization/createOrgForm";
 import CustomerRow from "./customerRow";
 
 interface PortalPageProps {}
+
+type OrgRow = Database["public"]["Tables"]["organization"]["Row"];
 
 const PortalPage = (props: PortalPageProps) => {
   const {} = props;
@@ -32,7 +35,10 @@ const PortalPage = (props: PortalPageProps) => {
 
   const { data, isLoading, refetch } = usePortalPage();
 
-  const filteredData = data?.data?.data?.filter((org) => {
+  const orgs = ((data?.data as { data?: OrgRow[] } | undefined)?.data ??
+    []) as OrgRow[];
+
+  const filteredData = orgs.filter((org) => {
     if (currentSearch === null) {
       return true;
     }
@@ -80,7 +86,7 @@ const PortalPage = (props: PortalPageProps) => {
                   </button>
                 </div>
               </div>
-              {data?.data?.data?.length === 0 ? (
+              {orgs.length === 0 ? (
                 <div className="flex h-96 w-full flex-col items-center justify-center">
                   <div className="flex w-2/5 flex-col">
                     <UserGroupIcon className="h-12 w-12 rounded-lg border border-gray-300 bg-white p-2 text-gray-900 dark:border-gray-700 dark:bg-black dark:text-gray-100" />
