@@ -1,0 +1,12 @@
+{
+  "title": "What happened during our AWS outage",
+  "title1": "What happened during our AWS outage",
+  "title2": "What happened during our AWS outage",
+  "description": "AWS locked our account over a Bedrock API key it thought was compromised. It wasn't. Here is what happened, what it meant for your data, and what we did about it.",
+  "shortDescription": "AWS locked our account over a Bedrock key it thought was compromised. It wasn't. No data was lost.",
+  "images": "/static/new-open-graph.png",
+  "time": "2-minute read",
+  "author": "Cole Gottdank",
+  "date": "May 18, 2026",
+  "badge": "Company"
+}

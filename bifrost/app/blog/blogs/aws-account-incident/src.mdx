@@ -1,0 +1,26 @@
+
+![Helicone AWS incident update](/static/new-open-graph.png)
+
+For a few hours on May 18, Helicone stopped processing requests and the dashboard returned errors. This is what happened, and what it means for your data.
+
+## What broke
+
+AWS flagged one of our Amazon Bedrock API keys as possibly compromised and locked our entire AWS account. The lock did not stop at that one key. It blocked our ECS tasks from starting at all, and those tasks run log ingestion and the dashboard backend. On your side that showed up as failed auth, a dashboard that would not load, and logs sitting unprocessed.
+
+## Your data is safe
+
+We did not lose any data. Requests that arrived during the window were queued, not dropped, and they are being processed now. Gaps you saw fill in as the backlog drains.
+
+## What took so long
+
+The slow part was not the fix, it was the wait. We opened a support case the moment the account was locked and spent most of the outage waiting to hear back from AWS. We could not bring our infrastructure back up until they lifted the block, and that timing was out of our hands.
+
+## The key was never compromised
+
+Once we could investigate, we confirmed the Bedrock key AWS flagged was not compromised. No breach, no unauthorized usage. We rotated every credential anyway. When a provider raises that kind of flag you assume the worst and rotate regardless of what you find, so that is what we did.
+
+## Where things stand
+
+The account is unblocked and our services are healthy. No data was lost and the backlog is draining. Every key and secret has been rotated as a precaution, even though we found no sign of compromise.
+
+Sorry for the disruption. If your data still looks short a few hours from now, email us at support@helicone.ai and we will check your org directly.
