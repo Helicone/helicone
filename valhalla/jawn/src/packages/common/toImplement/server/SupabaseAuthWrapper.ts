@@ -13,6 +13,7 @@ import { AuthParams } from "../../auth/types";
 import { OrgParams } from "../../auth/types";
 import { HeliconeUserResult } from "../../auth/types";
 import { createClient } from "@supabase/supabase-js";
+import WebSocket from "ws";
 import { KVCache } from "../../../../lib/cache/kvCache";
 import { Database } from "../../../../lib/db/database.types";
 import { SupabaseClient } from "@supabase/supabase-js";
@@ -51,7 +52,16 @@ export class SupabaseConnector {
     }
     const staticClient: SupabaseClient<Database> = createClient(
       supabaseURL,
-      supabaseServiceRoleKey
+      supabaseServiceRoleKey,
+      {
+        // Node 20 (see valhalla/dockerfile: node:20.19.4) has no global
+        // WebSocket. @supabase/realtime-js >=2.15 throws at client
+        // construction time without a transport, which breaks all auth.
+        // Provide the `ws` implementation explicitly.
+        realtime: {
+          transport: WebSocket as unknown as typeof globalThis.WebSocket,
+        },
+      }
     );
 
     this.client = staticClient;
