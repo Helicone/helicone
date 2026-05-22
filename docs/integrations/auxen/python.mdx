@@ -1,0 +1,117 @@
+---
+title: "Auxen Python SDK Integration"
+sidebarTitle: "Python"
+description: "Use Auxen's private AI model instances with Helicone observability via the OpenAI-compatible API."
+"twitter:title": "Auxen Python SDK Integration - Helicone OSS LLM Observability"
+icon: "python"
+iconType: "solid"
+---
+
+[Auxen](https://auxen.ai) provisions private AI model endpoints on dedicated GPUs (Llama, Qwen, Mistral, Gemma, Phi-3, Mixtral). Each instance is OpenAI-compatible and has its own base URL, so Helicone proxies through the generic `gateway.helicone.ai` endpoint using the `Helicone-Target-URL` header.
+
+<Note>
+
+Auxen issues a **per-instance** base URL (`https://api.auxen.ai/v1/inst_xxx`) and API key (`auxk_...`) at provision time. Set those as environment variables before configuring Helicone.
+
+</Note>
+
+<Steps>
+  <Step title="Create a Helicone account + Generate an API Key">
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you can generate an [API key](https://helicone.ai/developer).
+  </Step>
+
+  <Step title="Provision an Auxen instance">
+    Sign up at [auxen.ai/dashboard](https://auxen.ai/dashboard), provision a model, and copy the **endpoint URL** + **API key** Auxen returns.
+  </Step>
+
+  <Step title="Set environment variables">
+```bash
+export HELICONE_API_KEY=<your-helicone-api-key>
+export AUXEN_BASE_URL=https://api.auxen.ai/v1/inst_xxx     # from the Auxen dashboard
+export AUXEN_API_KEY=auxk_...                              # from the Auxen dashboard
+```
+  </Step>
+
+  <Step title="Use the OpenAI SDK with the Helicone gateway + Auxen target">
+<CodeGroup>
+
+```python OpenAI SDK
+import os
+from openai import OpenAI
+
+auxen = OpenAI(
+    api_key=os.environ["AUXEN_API_KEY"],
+    base_url="https://gateway.helicone.ai/v1",
+    default_headers={
+        "Helicone-Auth": f"Bearer {os.environ['HELICONE_API_KEY']}",
+        "Helicone-Target-URL": os.environ["AUXEN_BASE_URL"],
+    },
+)
+
+response = auxen.chat.completions.create(
+    model="llama-3.1-8b",
+    messages=[{"role": "user", "content": "Hello"}],
+)
+
+print(response.choices[0].message.content)
+```
+
+```python auxen SDK (with Helicone headers)
+import os
+from auxen import Auxen
+
+# Route the Auxen Python SDK through Helicone via base_url override
+auxen = Auxen(
+    api_key=os.environ["AUXEN_API_KEY"],
+    base_url="https://gateway.helicone.ai/v1",
+    default_headers={
+        "Helicone-Auth": f"Bearer {os.environ['HELICONE_API_KEY']}",
+        "Helicone-Target-URL": os.environ["AUXEN_BASE_URL"],
+    },
+)
+
+response = auxen.chat.completions.create(
+    model="llama-3.1-8b",
+    messages=[{"role": "user", "content": "Hello"}],
+)
+```
+
+</CodeGroup>
+  </Step>
+</Steps>
+
+## Async + streaming
+
+Helicone passes through OpenAI's standard async + streaming behavior — no extra config needed.
+
+```python
+import asyncio
+import os
+from openai import AsyncOpenAI
+
+async def main():
+    auxen = AsyncOpenAI(
+        api_key=os.environ["AUXEN_API_KEY"],
+        base_url="https://gateway.helicone.ai/v1",
+        default_headers={
+            "Helicone-Auth": f"Bearer {os.environ['HELICONE_API_KEY']}",
+            "Helicone-Target-URL": os.environ["AUXEN_BASE_URL"],
+        },
+    )
+
+    stream = await auxen.chat.completions.create(
+        model="llama-3.1-8b",
+        messages=[{"role": "user", "content": "Tell me a story"}],
+        stream=True,
+    )
+    async for chunk in stream:
+        print(chunk.choices[0].delta.content or "", end="")
+
+asyncio.run(main())
+```
+
+## Related
+
+- [Auxen homepage](https://auxen.ai)
+- [Auxen Python SDK](https://github.com/auxen-ai/auxen-python) (`pip install auxen`)
+- [Auxen MCP server](https://github.com/auxen-ai/mcp-server)

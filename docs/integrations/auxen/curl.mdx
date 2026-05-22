@@ -1,0 +1,67 @@
+---
+title: "Auxen cURL Integration"
+sidebarTitle: "cURL"
+description: "Use Auxen's private AI model instances with Helicone observability via cURL."
+"twitter:title": "Auxen cURL Integration - Helicone OSS LLM Observability"
+icon: "terminal"
+iconType: "solid"
+---
+
+[Auxen](https://auxen.ai) provisions private AI model endpoints on dedicated GPUs. Each instance is OpenAI-compatible, so any cURL call you'd make to an Auxen instance directly can route through Helicone with two headers added.
+
+<Steps>
+  <Step title="Generate Helicone + Auxen credentials">
+    - **Helicone API key**: from [helicone.ai/developer](https://helicone.ai/developer)
+    - **Auxen endpoint URL + API key**: from [auxen.ai/dashboard](https://auxen.ai/dashboard) after provisioning a model
+  </Step>
+
+  <Step title="Send a chat completion through the gateway">
+
+```bash
+curl -X POST https://gateway.helicone.ai/v1/chat/completions \
+  -H "Authorization: Bearer $AUXEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Helicone-Auth: Bearer $HELICONE_API_KEY" \
+  -H "Helicone-Target-URL: $AUXEN_BASE_URL" \
+  -d '{
+    "model": "llama-3.1-8b",
+    "messages": [
+      {"role": "user", "content": "Hello"}
+    ]
+  }'
+```
+
+Where:
+- `AUXEN_BASE_URL`: your per-instance Auxen URL, e.g. `https://api.auxen.ai/v1/inst_abc123`
+- `AUXEN_API_KEY`: your per-instance Auxen key, starts with `auxk_`
+- `HELICONE_API_KEY`: your Helicone API key
+
+  </Step>
+
+  <Step title="Verify the request appeared in Helicone">
+    Open the [Helicone dashboard](https://helicone.ai/requests). The request should appear within a few seconds with full token counts, latency, and request/response bodies.
+  </Step>
+</Steps>
+
+## Streaming
+
+Add `"stream": true` to the JSON body and Helicone will forward the SSE stream from Auxen unchanged:
+
+```bash
+curl -N -X POST https://gateway.helicone.ai/v1/chat/completions \
+  -H "Authorization: Bearer $AUXEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Helicone-Auth: Bearer $HELICONE_API_KEY" \
+  -H "Helicone-Target-URL: $AUXEN_BASE_URL" \
+  -d '{
+    "model": "llama-3.1-8b",
+    "messages": [{"role": "user", "content": "Tell me a story"}],
+    "stream": true
+  }'
+```
+
+## Related
+
+- [Auxen homepage](https://auxen.ai)
+- [Auxen docs](https://auxen.ai/docs)
+- [Auxen MCP server](https://github.com/auxen-ai/mcp-server)
