@@ -1,4 +1,3 @@
-import retry from "async-retry";
 import { HeliconeProxyRequest, RetryOptions } from "./HeliconeProxyRequest";
 import fetch from "node-fetch";
 import { Headers, Response } from "node-fetch";
@@ -12,7 +11,7 @@ export interface CallProps {
 }
 
 export function callPropsFromProxyRequest(
-  proxyRequest: HeliconeProxyRequest
+  proxyRequest: HeliconeProxyRequest,
 ): CallProps {
   return {
     apiBase: proxyRequest.api_base,
@@ -60,50 +59,92 @@ export function buildTargetUrl(originalUrl: URL, apiBase: string): URL {
   const apiBaseUrl = new URL(apiBase.replace(/\/$/, ""));
   const pathname = originalUrl.pathname.replace(
     /^\/v1\/gateway(\/[^\/]+)?/,
-    ""
+    "",
   );
 
   return new URL(`${apiBaseUrl.origin}${pathname}${originalUrl.search}`);
 }
 
+export function retryAfterMs(headers: Headers): number | null {
+  const retryAfter = headers.get("retry-after");
+  if (retryAfter === null) {
+    return null;
+  }
+
+  const retryAfterSeconds = Number(retryAfter);
+  if (!Number.isNaN(retryAfterSeconds)) {
+    return Math.max(0, retryAfterSeconds * 1000);
+  }
+
+  const retryAfterDate = Date.parse(retryAfter);
+  if (!Number.isNaN(retryAfterDate)) {
+    return Math.max(0, retryAfterDate - Date.now());
+  }
+
+  return null;
+}
+
+export function exponentialDelayMs(
+  attempt: number,
+  retryOptions: RetryOptions,
+): number {
+  const baseDelay =
+    retryOptions.minTimeout * Math.pow(retryOptions.factor, attempt - 1);
+
+  return Math.min(baseDelay, retryOptions.maxTimeout);
+}
+
+export function retryDelayMs(
+  attempt: number,
+  response: Response,
+  retryOptions: RetryOptions,
+): number {
+  const fallbackDelay = exponentialDelayMs(attempt, retryOptions);
+  const providerDelay =
+    response.status === 429 ? retryAfterMs(response.headers) : null;
+
+  return Math.max(fallbackDelay, providerDelay ?? 0);
+}
+
+export function isRetryableProviderResponse(response: Response): boolean {
+  return (
+    response.status === 429 ||
+    response.status === 500 ||
+    response.status === 522
+  );
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export async function callProviderWithRetry(
   callProps: CallProps,
-  retryOptions: RetryOptions
+  retryOptions: RetryOptions,
 ): Promise<Response> {
   let lastResponse;
 
   try {
-    // Use async-retry to call the forwardRequestToOpenAi function with exponential backoff
-    await retry(
-      async (bail, attempt) => {
-        try {
-          const res = await callProvider(callProps);
+    for (let attempt = 1; attempt <= retryOptions.retries; attempt++) {
+      const res = await callProvider(callProps);
 
-          lastResponse = res;
-          // Throw an error if the status code is 429
-          if (res.status === 429 || res.status === 500 || res.status === 522) {
-            throw new Error(`Status code ${res.status}`);
-          }
-          return res;
-        } catch (e) {
-          // If we reach the maximum number of retries, bail with the error
-          if (attempt >= retryOptions.retries) {
-            bail(e as Error);
-          }
-          // Otherwise, retry with exponential backoff
-          throw e;
-        }
-      },
-      {
-        ...retryOptions,
-        onRetry: (error, attempt) => {
-          console.log(`Retry attempt ${attempt}. Error: ${error}`);
-        },
+      lastResponse = res;
+      if (
+        !isRetryableProviderResponse(res) ||
+        attempt >= retryOptions.retries
+      ) {
+        break;
       }
-    );
+
+      const delay = retryDelayMs(attempt, res, retryOptions);
+      console.log(
+        `Retry attempt ${attempt}. Status code: ${res.status}. Waiting ${delay}ms`,
+      );
+      await sleep(delay);
+    }
   } catch (e) {
     console.warn(
-      `Retried ${retryOptions.retries} times but still failed. Error: ${e}`
+      `Retried ${retryOptions.retries} times but still failed. Error: ${e}`,
     );
   }
 
