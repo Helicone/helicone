@@ -12,7 +12,7 @@ export const costs: ModelRow[] = [
       value: "Bge_M3_FP16",
     },
     cost: {
-      prompt_token: 0.00000013,
+      prompt_token: 0.000000068,
       completion_token: 0,
     },
   },
