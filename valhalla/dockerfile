@@ -195,6 +195,7 @@ WORKDIR /usr/src/app
 COPY ./shared ./shared
 COPY ./packages ./packages
 COPY ./package.json ./package.json
+COPY ./yarn.lock ./yarn.lock
 
 
 WORKDIR /usr/src/app/valhalla/jawn
@@ -206,7 +207,7 @@ RUN find /usr/src/app/valhalla/jawn -name ".env.*" -exec rm {} \;
 #yarn workspace jawn serve
 ENV PORT=8585
 
-RUN yarn
+RUN yarn --frozen-lockfile
 
 RUN yarn build
 COPY ./valhalla/prompt_security/main.py /usr/src/app/valhalla/prompt_security/main.py
