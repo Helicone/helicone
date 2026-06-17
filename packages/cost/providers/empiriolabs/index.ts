@@ -19,11 +19,31 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "qwen3-7-plus",
+    },
+    cost: {
+      prompt_token: 0.0000004,
+      completion_token: 0.0000016,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
       value: "deepseek-v4-flash",
     },
     cost: {
       prompt_token: 0.00000014,
       completion_token: 0.00000028,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "deepseek-v4-pro",
+    },
+    cost: {
+      prompt_token: 0.00000165,
+      completion_token: 0.0000033,
     },
   },
   {
@@ -54,6 +74,84 @@ export const costs: ModelRow[] = [
     cost: {
       prompt_token: 0.0000003,
       completion_token: 0.0000012,
+    },
+  },
+  // Image generation models (per image)
+  {
+    model: {
+      operator: "equals",
+      value: "flux-2-klein-4b",
+    },
+    cost: {
+      prompt_token: 0,
+      completion_token: 0,
+      per_image: 0.0085,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "amazon-nova-canvas",
+    },
+    cost: {
+      prompt_token: 0,
+      completion_token: 0,
+      per_image: 0.12,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "hunyuan-image-3",
+    },
+    cost: {
+      prompt_token: 0,
+      completion_token: 0,
+      per_image: 0.13,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "janus-pro-deepseek",
+    },
+    cost: {
+      prompt_token: 0,
+      completion_token: 0,
+      per_image: 0.03,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "qwen-image-2-0",
+    },
+    cost: {
+      prompt_token: 0,
+      completion_token: 0,
+      per_image: 0.0322,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "seedream-5-0-lite",
+    },
+    cost: {
+      prompt_token: 0,
+      completion_token: 0,
+      per_image: 0.035,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "wan2-7-image",
+    },
+    cost: {
+      prompt_token: 0,
+      completion_token: 0,
+      per_image: 0.03,
     },
   },
 ];
