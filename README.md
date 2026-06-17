@@ -17,6 +17,7 @@
   <a href='https://github.com/helicone/helicone/pulse'><img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/m/helicone/helicone?style=flat-square"/></a>
   <a href='https://github.com/helicone/helicone/issues?q=is%3Aissue+is%3Aclosed'><img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/helicone/helicone?style=flat-square"/></a>
   <a href='https://www.ycombinator.com/companies/helicone'><img alt="Y Combinator" src="https://img.shields.io/badge/Y%20Combinator-Helicone-orange?style=flat-square"/></a>
+  <a href="https://www.aiflowlearn.net/en/codex/helicone"><img alt="Sagerbuddy Repo Guide" src="https://img.shields.io/badge/Sagerbuddy-Repo%20Guide-00B8A9?style=flat-square&logo=readthedocs&logoColor=white" /></a>
 </p>
 <p align="center">
   <a href="https://docs.helicone.ai/">Docs</a> • <a href="https://www.helicone.ai/changelog">Changelog</a> • <a href="https://github.com/helicone/helicone/issues">Bug reports</a> • <a href="https://helicone.ai/demo">See Helicone in Action! (Free)</a>
