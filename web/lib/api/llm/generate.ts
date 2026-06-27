@@ -184,6 +184,8 @@ export async function generate<T extends object | undefined = undefined>(
     `${env("NEXT_PUBLIC_HELICONE_JAWN_SERVICE")}/v1/${apiEndpoint}/generate`,
     {
       method: "POST",
+      credentials: "include",
+      signal: params.signal,
       body: JSON.stringify({
         messages: params.messages,
         stream: !!params.stream,
