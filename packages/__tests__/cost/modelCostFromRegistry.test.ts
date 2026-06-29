@@ -56,6 +56,25 @@ describe("modelCostBreakdownFromRegistry", () => {
     }
   });
 
+  it("should calculate cost for Starveri gpt-5.4 usage", () => {
+    const modelUsage: ModelUsage = {
+      input: 1_000_000,
+      output: 1_000_000,
+    };
+
+    const breakdown = modelCostBreakdownFromRegistry({
+      modelUsage,
+      providerModelId: "gpt-5.4",
+      provider: "starveri" as ModelProviderName,
+    });
+
+    expect(breakdown).not.toBeNull();
+    if (breakdown) {
+      // $0.33/1M input + $1.67/1M output
+      expect(breakdown.totalCost).toBeCloseTo(2.0, 10);
+    }
+  });
+
   it("should return null for non-existent model", () => {
     const modelUsage: ModelUsage = {
       input: 100,
