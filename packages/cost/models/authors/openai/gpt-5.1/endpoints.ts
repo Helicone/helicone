@@ -585,6 +585,47 @@ export const endpoints = {
       "*": {},
     },
   },
+  "gpt-5.1-codex:starveri": {
+    providerModelId: "gpt-5.1-codex",
+    provider: "starveri",
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000004166666666667, // $0.4167 per 1M tokens
+        output: 0.0000033333333333335, // $3.33 per 1M tokens
+        web_search: 0.0033333333333333335, // $3.33 per 1000 searches
+        cacheMultipliers: {
+          cachedInput: 0.1, // $0.0417 per 1M tokens
+        },
+      },
+    ],
+    contextLength: 400000,
+    maxCompletionTokens: 128000,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_completion_tokens",
+      "response_format",
+      "stop",
+    ],
+    unsupportedParameters: [
+      "temperature",
+      "top_p",
+      "presence_penalty",
+      "frequency_penalty",
+      "logprobs",
+      "top_logprobs",
+      "logit_bias",
+      "max_tokens",
+      "verbosity",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${GPT51ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;
