@@ -24,6 +24,7 @@ export function getUsageProcessor(
     case "mistral":
     case "nebius":
     case "novita":
+    case "starveri":
     case "fireworks":
     case "cerebras":
     case "perplexity":
