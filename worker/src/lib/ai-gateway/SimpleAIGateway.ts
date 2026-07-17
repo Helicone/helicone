@@ -111,8 +111,6 @@ export class SimpleAIGateway {
     await this.requestWrapper.applyTokenLimitExceptionHandler("CUSTOM");
 
     // Step 1: Parse and prepare request
-    const bodyMapping: BodyMappingType =
-      this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping;
     const parseSpan = this.traceContext?.sampled
       ? this.tracer.startSpan(
           "ai_gateway.gateway.parse_request",
@@ -132,6 +130,7 @@ export class SimpleAIGateway {
       body: parsedBody,
       plugins,
       globalIgnoreProviders,
+      bodyMapping,
     } = parseResult.data;
 
     const requestParams: RequestParams = {
@@ -253,25 +252,8 @@ export class SimpleAIGateway {
         });
         continue;
       }
-      if (
-        attempt.authType === "ptb" &&
-        (bodyMapping === "OPENAI" || bodyMapping === "RESPONSES")
-      ) {
-        let validationResult: Result<void, string>;
-        if (bodyMapping === "RESPONSES") {
-          validationResult = validateOpenAIResponsePayload(finalBody);
-        } else {
-          validationResult = validateOpenAIChatPayload(finalBody);
-        }
-        if (isErr(validationResult)) {
-          errors.push({
-            type: "invalid_format",
-            statusCode: 400,
-            message: validationResult.error,
-          });
-          continue;
-        }
-      }
+      // OpenAI request validation runs once in parseAndPrepareRequest so
+      // both PTB and BYOK attempts are covered by the same schema check.
 
       // Check disallow list (only for PTB attempts)
       if (
@@ -356,6 +338,7 @@ export class SimpleAIGateway {
         body: any;
         plugins?: Plugin[];
         globalIgnoreProviders?: Set<ModelProviderName>;
+        bodyMapping: BodyMappingType;
       },
       Response
     >
@@ -383,11 +366,44 @@ export class SimpleAIGateway {
       );
     }
 
+    // Resolve the effective body mapping. When the caller didn't explicitly
+    // opt in via Helicone-Gateway-Body-Mapping, detect Responses-API-shaped
+    // bodies (has `input` without `messages`) so SDKs that post Responses
+    // bodies to /v1/chat/completions (Cursor, agent SDKs) get routed to
+    // /v1/responses automatically.
+    let bodyMapping: BodyMappingType =
+      this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping;
+    if (bodyMapping === "OPENAI" && isResponsesApiShape(parsedBody)) {
+      bodyMapping = "RESPONSES";
+    }
+
+    // Run the OpenAI schema validator once per request, regardless of
+    // whether the caller is PTB or BYOK. Previously BYOK bypassed this
+    // step, which let malformed bodies (e.g. Responses bodies sent to
+    // /v1/chat/completions) reach OpenAI and surface as opaque upstream
+    // errors.
+    if (bodyMapping === "OPENAI" || bodyMapping === "RESPONSES") {
+      const validationResult =
+        bodyMapping === "RESPONSES"
+          ? validateOpenAIResponsePayload(parsedBody)
+          : validateOpenAIChatPayload(parsedBody);
+      if (isErr(validationResult)) {
+        return err(
+          new Response(
+            JSON.stringify({
+              error: validationResult.error,
+            }),
+            {
+              status: 400,
+              headers: { "content-type": "application/json" },
+            }
+          )
+        );
+      }
+    }
+
     // Forces usage data for streaming requests
-    if (
-      parsedBody.stream === true &&
-      this.requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping === "OPENAI"
-    ) {
+    if (parsedBody.stream === true && bodyMapping === "OPENAI") {
       parsedBody.stream_options = {
         ...(parsedBody.stream_options || {}),
         include_usage: true,
@@ -451,6 +467,7 @@ export class SimpleAIGateway {
         globalIgnoreProvidersSet.size > 0
           ? globalIgnoreProvidersSet
           : undefined,
+      bodyMapping,
     });
   }
 
@@ -720,7 +737,10 @@ export class SimpleAIGateway {
       }
 
       // Output now is in Chat Completions format
-      if (bodyMapping === "RESPONSES" && !nativelySupportsResponsesAPI(provider, providerModelId)) {
+      if (
+        bodyMapping === "RESPONSES" &&
+        !nativelySupportsResponsesAPI(provider, providerModelId)
+      ) {
         if (isStream) {
           finalMappedResponse =
             oaiChat2responsesStreamResponse(finalMappedResponse);
@@ -838,4 +858,30 @@ export class SimpleAIGateway {
 
     return errorResponse;
   }
+}
+
+/**
+ * Detect a Responses-API-shaped body. Cursor and several agent SDKs default
+ * to posting Responses-API bodies (input + tools, no messages) to
+ * /v1/chat/completions. Without this detection the gateway forwards the
+ * body to OpenAI's /v1/chat/completions and OpenAI rejects it with
+ * "Missing required parameter: 'messages'". When the body matches the
+ * Responses shape and the caller did not explicitly opt in to OPENAI
+ * mapping via Helicone-Gateway-Body-Mapping, the gateway upgrades the
+ * effective mapping to RESPONSES so the body hits /v1/responses.
+ */
+function isResponsesApiShape(parsedBody: any): boolean {
+  if (!parsedBody || typeof parsedBody !== "object") {
+    return false;
+  }
+  // Chat Completions bodies always include `messages`; the presence of
+  // `messages` wins so callers that mix fields keep the chat-completions
+  // path.
+  if (parsedBody.messages !== undefined) {
+    return false;
+  }
+  // Responses bodies accept either a string or an array for `input`. An
+  // absent `input` is ambiguous and is left alone; the validator will
+  // surface a clearer error downstream.
+  return parsedBody.input !== undefined;
 }
