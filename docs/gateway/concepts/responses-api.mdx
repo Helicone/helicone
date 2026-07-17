@@ -57,9 +57,15 @@ curl https://ai-gateway.helicone.ai/v1/responses \
 </CodeGroup>
 
 <Note>
-For Chat Completions usage and more background on the AI Gateway, see the
+    For Chat Completions usage and more background on the AI Gateway, see the
 [AI Gateway Overview](/gateway/overview).
 </Note>
+
+## Auto-detection for third-party SDKs
+
+Some third-party clients (Cursor IDE and several agent SDKs) post Responses-API-shaped bodies to `/v1/chat/completions` instead of `/v1/responses`. The gateway detects that shape (`input` present, `messages` absent) and upgrades the effective mapping to the Responses path so the body is routed to OpenAI's `/v1/responses` endpoint with the Responses schema intact.
+
+If you want to force the chat-completions path for a non-standard body, set `Helicone-Gateway-Body-Mapping: NO_MAPPING` and the gateway will forward the body verbatim without auto-detection or schema validation.
 
 ## References
 
