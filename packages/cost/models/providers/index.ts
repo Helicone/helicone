@@ -16,6 +16,7 @@ import { NebiusProvider } from "./nebius";
 import { NovitaProvider } from "./novita";
 import { OpenAIProvider } from "./openai";
 import { OpenRouterProvider } from "./openrouter";
+import { StarveriProvider } from "./starveri";
 import { PerplexityProvider } from "./perplexity";
 import { VertexProvider } from "./vertex";
 import { XAIProvider } from "./xai";
@@ -40,6 +41,7 @@ export const providers = {
   novita: new NovitaProvider(),
   openai: new OpenAIProvider(),
   openrouter: new OpenRouterProvider(),
+  starveri: new StarveriProvider(),
   perplexity: new PerplexityProvider(),
   vertex: new VertexProvider(),
   xai: new XAIProvider()

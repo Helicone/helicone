@@ -24,6 +24,17 @@ export const models = {
     tokenizer: "GPT",
     pinnedVersionOfModel: "gpt-5.4",
   },
+  "gpt-5.4-mini": {
+    name: "OpenAI GPT-5.4 Mini",
+    author: "openai",
+    description:
+      "A smaller GPT-5.4 variant for lower-latency workloads with a reduced context window.",
+    contextLength: 1_050_000,
+    maxOutputTokens: 128_000,
+    created: "2026-03-05T00:00:00.000Z",
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
+    tokenizer: "GPT",
+  },
 } satisfies Record<string, ModelConfig>;
 
 export type GPT54ModelName = keyof typeof models;

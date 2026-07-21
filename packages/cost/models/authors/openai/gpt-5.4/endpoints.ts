@@ -365,6 +365,88 @@ export const endpoints = {
       "*": {},
     },
   },
+  "gpt-5.4:starveri": {
+    providerModelId: "gpt-5.4",
+    provider: "starveri",
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000003333333333333, // $0.33 per 1M tokens
+        output: 0.0000016666666666667, // $1.67 per 1M tokens
+        web_search: 0.0033333333333333335,
+        cacheMultipliers: {
+          cachedInput: 0.1, // $0.033 per 1M tokens
+        },
+      },
+    ],
+    contextLength: 1_050_000,
+    maxCompletionTokens: 128_000,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_completion_tokens",
+      "response_format",
+      "stop",
+      "verbosity",
+      "temperature",
+      "top_p",
+      "logprobs",
+    ],
+    unsupportedParameters: [
+      "presence_penalty",
+      "frequency_penalty",
+      "top_logprobs",
+      "logit_bias",
+      "max_tokens",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "gpt-5.4-mini:starveri": {
+    providerModelId: "gpt-5.4-mini",
+    provider: "starveri",
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000025, // $0.25 per 1M tokens
+        output: 0.0000011666666666667, // $1.17 per 1M tokens
+        web_search: 0.0033333333333333335,
+        cacheMultipliers: {
+          cachedInput: 0.1, // $0.025 per 1M tokens
+        },
+      },
+    ],
+    contextLength: 1_050_000,
+    maxCompletionTokens: 128_000,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "seed",
+      "max_completion_tokens",
+      "response_format",
+      "stop",
+      "verbosity",
+      "temperature",
+      "top_p",
+      "logprobs",
+    ],
+    unsupportedParameters: [
+      "presence_penalty",
+      "frequency_penalty",
+      "top_logprobs",
+      "logit_bias",
+      "max_tokens",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${GPT54ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;
