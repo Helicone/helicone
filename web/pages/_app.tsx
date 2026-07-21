@@ -23,7 +23,6 @@ import { env } from "next-runtime-env";
 import { FilterProvider } from "@/filterAST/context/filterContext";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { captureAttributionParams } from "@helicone-package/common";
-import AWSIssueBanner from "../components/layout/AWSIssueBanner";
 
 // Use system font stack for faster builds - Inter is loaded via CSS
 const inter = {
@@ -119,7 +118,6 @@ export default function MyApp({ Component, pageProps }: AppPropsWithLayout) {
                     <ThemeProvider attribute="class" defaultTheme="light">
                       <TooltipProvider>
                         <div className={inter.className}>
-                          <AWSIssueBanner />
                           {getLayout(<Component {...pageProps} />)}
                         </div>
                       </TooltipProvider>
