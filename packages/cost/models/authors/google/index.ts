@@ -19,6 +19,8 @@ import { model as gemini3FlashPreviewModel } from "./gemini-3-flash-preview/mode
 import { endpoints as gemini3FlashPreviewEndpoints } from "./gemini-3-flash-preview/endpoints";
 import { model as gemini3ProImagePreviewModel } from "./gemini-3-pro-image/model";
 import { endpoints as gemini3ProImagePreviewEndpoints } from "./gemini-3-pro-image/endpoints";
+import { model as gemini31FlashLiteModel } from "./gemini-3.1-flash-lite/model";
+import { endpoints as gemini31FlashLiteEndpoints } from "./gemini-3.1-flash-lite/endpoints";
 import { model as gemini31FlashLitePreviewModel } from "./gemini-3.1-flash-lite-preview/model";
 import { endpoints as gemini31FlashLitePreviewEndpoints } from "./gemini-3.1-flash-lite-preview/endpoints";
 import { model as gemma29bModel } from "./gemma/model";
@@ -36,6 +38,7 @@ export const googleModels = {
   ...gemini31ProPreviewModel,
   ...gemini3FlashPreviewModel,
   ...gemini3ProImagePreviewModel,
+  ...gemini31FlashLiteModel,
   ...gemini31FlashLitePreviewModel,
   ...gemma29bModel,
   ...gemma3Model,
@@ -50,6 +53,7 @@ export const googleEndpointConfig = {
   ...gemini31ProPreviewEndpoints,
   ...gemini3FlashPreviewEndpoints,
   ...gemini3ProImagePreviewEndpoints,
+  ...gemini31FlashLiteEndpoints,
   ...gemini31FlashLitePreviewEndpoints,
   ...gemma29bEndpoints,
   ...gemma3Endpoints,
