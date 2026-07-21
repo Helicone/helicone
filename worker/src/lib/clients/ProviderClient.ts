@@ -33,7 +33,10 @@ export function callPropsFromProxyRequest(
   };
 }
 
-function removeHeliconeHeaders(request: Headers, removeAuth: boolean = false): Headers {
+function removeHeliconeHeaders(
+  request: Headers,
+  removeAuth: boolean = false
+): Headers {
   const newHeaders = new Headers();
   for (const [key, value] of request.entries()) {
     const lowerKey = key.toLowerCase();
@@ -64,14 +67,14 @@ async function callWithMapper(
   targetUrl: URL,
   init:
     | {
-      method: string;
-      headers: Headers;
-    }
+        method: string;
+        headers: Headers;
+      }
     | {
-      body: string;
-      method: string;
-      headers: Headers;
-    }
+        body: string;
+        method: string;
+        headers: Headers;
+      }
 ): Promise<Response> {
   if (targetUrl.host === "gateway.llmmapper.com") {
     try {
@@ -181,6 +184,45 @@ export function buildTargetUrl(originalUrl: URL, apiBase: string): URL {
   );
 }
 
+// Hard cap so a hostile or misconfigured provider cannot make the proxy wait
+// for an unbounded amount of time before retrying.
+const MAX_RETRY_AFTER_MS = 60_000;
+
+/**
+ * Parse an RFC 7231 `Retry-After` header value into milliseconds.
+ *
+ * Accepts either a non-negative integer number of seconds or an HTTP-date.
+ * Returns `null` when the header is absent, malformed, or already in the past.
+ * In that case the caller should fall back to its default backoff strategy.
+ * The returned value is clamped to {@link MAX_RETRY_AFTER_MS} to prevent abuse.
+ */
+export function parseRetryAfter(
+  value: string | null | undefined,
+  now: number = Date.now()
+): number | null {
+  if (!value) return null;
+  const trimmed = value.trim();
+  if (trimmed === "") return null;
+
+  // delta-seconds form (RFC 7231 §7.1.3 first alternative)
+  if (/^\d+$/.test(trimmed)) {
+    const seconds = Number.parseInt(trimmed, 10);
+    if (Number.isNaN(seconds) || seconds < 0) return null;
+    return Math.min(seconds * 1000, MAX_RETRY_AFTER_MS);
+  }
+
+  // HTTP-date form (RFC 7231 §7.1.3 second alternative)
+  const date = Date.parse(trimmed);
+  if (Number.isNaN(date)) return null;
+  const delta = date - now;
+  if (delta <= 0) return null;
+  return Math.min(delta, MAX_RETRY_AFTER_MS);
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export async function callProviderWithRetry(
   callProps: CallProps,
   retryOptions: RetryOptions
@@ -197,6 +239,18 @@ export async function callProviderWithRetry(
           lastResponse = res;
           // Throw an error if the status code is 429 or 5xx
           if (res.status === 429 || (res.status < 600 && res.status >= 500)) {
+            // For 429 the provider can explicitly tell us how long to wait via
+            // the Retry-After header. Honour it as a minimum delay before the
+            // next retry kicks in; async-retry's exponential backoff still
+            // applies on top, so this only ever lengthens the wait.
+            if (res.status === 429) {
+              const retryAfterMs = parseRetryAfter(
+                res.headers.get("retry-after")
+              );
+              if (retryAfterMs !== null && retryAfterMs > 0) {
+                await sleep(retryAfterMs);
+              }
+            }
             throw new Error(`Status code ${res.status}`);
           }
           return res;
