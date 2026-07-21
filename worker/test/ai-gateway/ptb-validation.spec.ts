@@ -38,27 +38,30 @@ describe("PTB request validation", () => {
     );
   });
 
-  it("allows BYOK requests with the same payload", async () => {
+  it("validates BYOK requests the same way as PTB", async () => {
     setSupabaseTestCase({ byokEnabled: true, creditsEnabled: false });
 
-    const { calls } = await runGatewayTest({
+    // BYOK previously bypassed validation and forwarded the raw body to
+    // OpenAI, which would surface OpenAI's own validation errors to the
+    // caller. After the fix the gateway runs the same Zod schema for both
+    // PTB and BYOK so malformed bodies are caught locally with a clear
+    // error message.
+    const { response } = await runGatewayTest({
       model: "gpt-4o-mini/openai",
       request: {
         messages: [],
       },
       expected: {
-        providers: [
-          {
-            url: "https://api.openai.com/v1/chat/completions",
-            response: "success",
-            model: "gpt-4o-mini",
-          },
-        ],
-        finalStatus: 200,
+        providers: [],
+        finalStatus: 400,
       },
     });
 
-    expect(calls[0]?.targetProps?.escrowInfo).toBeUndefined();
+    const body = (await response.json()) as any;
+    expect(body.error).toContain("messages");
+    expect(body.error).toContain(
+      "https://docs.helicone.ai/rest/ai-gateway/post-v1-chat-completions"
+    );
   });
 
   it("accepts valid PTB payloads", async () => {
