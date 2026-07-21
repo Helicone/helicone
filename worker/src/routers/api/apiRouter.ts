@@ -429,6 +429,18 @@ function getAPIRouterV1(
     }
   );
 
+  router.post(
+    "/x/v1/log",
+    async (
+      _,
+      requestWrapper: RequestWrapper,
+      env: Env,
+      ctx: ExecutionContext
+    ) => {
+      return await logAsync(requestWrapper, env, ctx, "X");
+    }
+  );
+
   router.put(
     "/v1/request/:id/property",
     async (

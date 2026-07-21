@@ -27,10 +27,11 @@ export class HeliconeManualLogger {
     const providerRoutes = new Map([
       ['OPENAI', 'oai'],
       ['ANTHROPIC', 'anthropic'],
-      ['GOOGLE', 'googleapis']
+      ['GOOGLE', 'googleapis'],
+      ['X', 'x']
     ]);
     const route = key ? (providerRoutes.get(key) || 'custom') : 'custom';
-    const knownRouteRegex = /(\/(custom|oai|anthropic|googleapis)\/v1\/log)$/;
+    const knownRouteRegex = /(\/(custom|oai|anthropic|googleapis|x)\/v1\/log)$/;
     return knownRouteRegex.test(endpoint)
       ? endpoint.replace(knownRouteRegex, `/${route}/v1/log`)
       : endpoint.replace(/\/$/, "") + `/${route}/v1/log`;
