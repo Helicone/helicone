@@ -317,40 +317,44 @@ export class LoggingHandler extends AbstractLogHandler {
   }
 
   async uploadToS3(): PromiseGenericResult<string> {
-    const uploadPromises = this.batchPayload.s3Records.map(async (s3Record) => {
-      if (s3Record.location === "clickhouse") {
-        return ok(
-          `Skipping S3 upload for request ID ${s3Record.requestId} as location is clickhouse`
+    const uploadPromises = this.batchPayload.s3Records.map(
+      async (s3Record): Promise<Result<string, string>> => {
+        if (s3Record.location === "clickhouse") {
+          return ok(
+            `Skipping S3 upload for request ID ${s3Record.requestId} as location is clickhouse`
+          );
+        }
+        const key = this.s3Client.getRequestResponseKey(
+          s3Record.requestId,
+          s3Record.organizationId
         );
-      }
-      const key = this.s3Client.getRequestResponseKey(
-        s3Record.requestId,
-        s3Record.organizationId
-      );
 
-      // Upload request and response body
-      const uploadRes = await this.s3Client.store(
-        key,
-        JSON.stringify({
-          request: s3Record.requestBody,
-          response: s3Record.responseBody,
-        })
-      );
-
-      if (uploadRes.error) {
-        return err(
-          `Failed to store request body for request ID ${s3Record.requestId}: ${uploadRes.error}`
+        // Upload request and response body
+        const uploadRes = await this.s3Client.store(
+          key,
+          JSON.stringify({
+            request: s3Record.requestBody,
+            response: s3Record.responseBody,
+          })
         );
+
+        if (uploadRes.error) {
+          return err(
+            `Failed to store request body for request ID ${s3Record.requestId}: ${uploadRes.error}`
+          );
+        }
+
+        // Note: Assets are no longer uploaded to S3, they remain in request/response bodies as raw data
+
+        return ok(`S3 upload successful for request ID ${s3Record.requestId}`);
       }
+    );
 
-      // Note: Assets are no longer uploaded to S3, they remain in request/response bodies as raw data
-
-      return ok(`S3 upload successful for request ID ${s3Record.requestId}`);
-    });
-
-    await Promise.all(uploadPromises);
-
-    // TODO: How to handle errors here?
+    const results = await Promise.all(uploadPromises);
+    const failed = results.find((result) => result.error !== null);
+    if (failed && failed.error !== null) {
+      return err(failed.error);
+    }
 
     return ok("All S3 uploads successful");
   }
