@@ -142,9 +142,13 @@ function getThresholdValueFunction(provider: ModelProviderName): (usage: ModelUs
         switch (field) {
           case "inputCost":
           case "outputCost":
-            return usage.input + 
-              (usage.cacheDetails?.cachedInput ?? 0) + 
-              (usage.cacheDetails?.write5m ?? 0) + 
+          // Anthropic's long-context tier is chosen by the size of the whole
+          // prompt, so a cache read on a >threshold request is billed at the
+          // same higher tier as the input it belongs to.
+          case "cachedInputCost":
+            return usage.input +
+              (usage.cacheDetails?.cachedInput ?? 0) +
+              (usage.cacheDetails?.write5m ?? 0) +
               (usage.cacheDetails?.write1h ?? 0);
           default:
             return 0;

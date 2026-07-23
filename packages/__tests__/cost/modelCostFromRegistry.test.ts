@@ -317,8 +317,37 @@ describe("modelCostBreakdownFromRegistry", () => {
         // Higher tier: $6/M input, $22.50/M output (multipliers inherited from base tier)
         expect(breakdown.inputCost).toBe(250000 * 0.000006);
         expect(breakdown.outputCost).toBe(50000 * 0.0000225);
-        expect(breakdown.cachedInputCost).toBe(10000 * 0.000003 * 0.1);
+        // The cache read belongs to a prompt that is over the threshold, so it
+        // bills at the same higher tier as the input - matching how the Gemini
+        // case below prices its cache read.
+        expect(breakdown.cachedInputCost).toBe(10000 * 0.000006 * 0.1);
+        // Cache writes still use the base tier: calculateModelCostBreakdown
+        // prices those from basePricing directly, for every provider.
         expect(breakdown.cacheWrite5mCost).toBe(5000 * 0.000003 * 1.25);
+      }
+    });
+
+    it("should tier a Claude cache read by the whole prompt size", () => {
+      // Regression: the cache read was priced from tier 0 regardless of prompt
+      // size, because the anthropic threshold function returned 0 for
+      // cachedInputCost. A mostly-cached long prompt was billed at half rate.
+      const modelUsage: ModelUsage = {
+        input: 10000,
+        output: 100,
+        cacheDetails: {
+          cachedInput: 240000, // prompt totals 250K, over the 200K threshold
+        },
+      };
+
+      const breakdown = modelCostBreakdownFromRegistry({
+        modelUsage,
+        providerModelId: "claude-sonnet-4-20250514",
+        provider: "anthropic" as ModelProviderName,
+      });
+
+      expect(breakdown).not.toBeNull();
+      if (breakdown) {
+        expect(breakdown.cachedInputCost).toBe(240000 * 0.000006 * 0.1);
       }
     });
 
