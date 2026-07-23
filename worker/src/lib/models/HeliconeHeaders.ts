@@ -247,26 +247,32 @@ export class HeliconeHeaders implements IHeliconeHeaders {
       }
 
       if (
-        typeof fb.headers !== "object" &&
-        fb.headers.entries.every(
-          ([key, value]: [object, object]) =>
+        typeof fb.headers !== "object" ||
+        fb.headers === null ||
+        !Object.entries(fb.headers).every(
+          ([key, value]) =>
             typeof key === "string" && typeof value === "string"
         )
       ) {
-        throw new Error("helicone-fallbacks headers must be an object");
+        throw new Error(
+          "helicone-fallbacks headers must be an object of string keys and string values"
+        );
       }
 
       if (
-        !Array.isArray(fb.onCodes) &&
-        fb.onCodes.every(
+        !Array.isArray(fb.onCodes) ||
+        !fb.onCodes.every(
           (x: HeliconeFallbackCode) =>
             typeof x === "number" ||
             (typeof x === "object" &&
+              x !== null &&
               typeof x.from === "number" &&
               typeof x.to === "number")
         )
       ) {
-        throw new Error("helicone-fallbacks onCodes must be an array");
+        throw new Error(
+          "helicone-fallbacks onCodes must be an array of numbers or {from, to} objects"
+        );
       }
 
       return {
