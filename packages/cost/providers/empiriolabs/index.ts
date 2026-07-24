@@ -75,8 +75,8 @@ export const costs: ModelRow[] = [
       value: "fugu-ultra-v1-1",
     },
     cost: {
-      prompt_token: 0.0000075,
-      completion_token: 0.000045,
+      prompt_token: 0.000005,
+      completion_token: 0.00003,
     },
   },
   {
