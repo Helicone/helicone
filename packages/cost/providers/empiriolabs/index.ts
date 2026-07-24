@@ -62,6 +62,26 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "fugu-ultra-v1-0",
+    },
+    cost: {
+      prompt_token: 0.0000075,
+      completion_token: 0.000045,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "fugu-ultra-v1-1",
+    },
+    cost: {
+      prompt_token: 0.0000075,
+      completion_token: 0.000045,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
       value: "gemma-3-27b",
     },
     cost: {
@@ -77,16 +97,6 @@ export const costs: ModelRow[] = [
     cost: {
       prompt_token: 0.00000005,
       completion_token: 0.00000029,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "gemma-4-e4b",
-    },
-    cost: {
-      prompt_token: 0,
-      completion_token: 0,
     },
   },
   {
@@ -172,6 +182,16 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "kimi-k3",
+    },
+    cost: {
+      prompt_token: 0.000003,
+      completion_token: 0.000015,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
       value: "magistral-medium-2509-thinking",
     },
     cost: {
@@ -197,16 +217,6 @@ export const costs: ModelRow[] = [
     cost: {
       prompt_token: 0.000002175,
       completion_token: 0.00000435,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "mimo-v2-flash",
-    },
-    cost: {
-      prompt_token: 0.0000005,
-      completion_token: 0.0000015,
     },
   },
   {
@@ -277,6 +287,16 @@ export const costs: ModelRow[] = [
     cost: {
       prompt_token: 0.00000015,
       completion_token: 0.0000006,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "muse-spark-1-1",
+    },
+    cost: {
+      prompt_token: 0.00000125,
+      completion_token: 0.00000425,
     },
   },
   {
@@ -559,6 +579,56 @@ export const costs: ModelRow[] = [
       completion_token: 0.00000379,
     },
   },
+  {
+    model: {
+      operator: "equals",
+      value: "seed-2-1-turbo",
+    },
+    cost: {
+      prompt_token: 0.00000063,
+      completion_token: 0.00000313,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "step-3-5-flash",
+    },
+    cost: {
+      prompt_token: 0.0000001,
+      completion_token: 0.0000003,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "step-3-5-flash-2603",
+    },
+    cost: {
+      prompt_token: 0.0000001,
+      completion_token: 0.0000003,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "step-3-7-flash",
+    },
+    cost: {
+      prompt_token: 0.0000002,
+      completion_token: 0.00000115,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "stepaudio-2-5-chat",
+    },
+    cost: {
+      prompt_token: 0.00000143,
+      completion_token: 0.00000357,
+    },
+  },
   // Image generation models (per image)
   {
     model: {
@@ -624,6 +694,28 @@ export const costs: ModelRow[] = [
       prompt_token: 0,
       completion_token: 0,
       per_image: 0.035,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "seedream-5-0-pro",
+    },
+    cost: {
+      prompt_token: 0,
+      completion_token: 0,
+      per_image: 0.075,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "step-image-edit-2",
+    },
+    cost: {
+      prompt_token: 0,
+      completion_token: 0,
+      per_image: 0.003,
     },
   },
   {
