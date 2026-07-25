@@ -16,6 +16,8 @@ import { alibabaEndpointConfig, alibabaModels } from "./authors/alibaba";
 import { metaEndpointConfig, metaModels } from "./authors/meta";
 import { zaiEndpointConfig, zaiModels } from "./authors/zai";
 import { baiduEndpointConfig, baiduModels } from "./authors/baidu";
+import { moonshotaiEndpointConfig, moonshotaiModels } from "./authors/moonshotai";
+import { perplexityEndpointConfig, perplexityModels } from "./authors/perplexity/sonar";
 
 // Combine all models for type derivation
 const allModels = {
@@ -28,7 +30,9 @@ const allModels = {
   ...alibabaModels,
   ...metaModels,
   ...baiduModels,
-  ...zaiModels
+  ...zaiModels,
+  ...moonshotaiModels,
+  ...perplexityModels
 };
 
 export type ModelName = keyof typeof allModels;
@@ -44,7 +48,9 @@ const modelProviderConfigs = {
   ...alibabaEndpointConfig,
   ...metaEndpointConfig,
   ...baiduEndpointConfig,
-  ...zaiEndpointConfig
+  ...zaiEndpointConfig,
+  ...moonshotaiEndpointConfig,
+  ...perplexityEndpointConfig
 };
 
 export type ModelProviderConfigId = keyof typeof modelProviderConfigs;
