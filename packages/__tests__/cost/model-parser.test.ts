@@ -15,13 +15,11 @@ describe("parseModelString", () => {
     });
 
     it("should strip :online suffix with provider", () => {
-      const result = parseModelString(
-        "claude-3-5-sonnet-20241022:online/anthropic"
-      );
+      const result = parseModelString("claude-sonnet-4-5-20250929:online/anthropic");
 
       expect(result).toEqual({
         data: {
-          modelName: "claude-3-5-sonnet-20241022",
+          modelName: "claude-sonnet-4-5-20250929",
           provider: "anthropic",
           isOnline: true,
         },
@@ -31,12 +29,12 @@ describe("parseModelString", () => {
 
     it("should strip :online suffix with provider and customUid", () => {
       const result = parseModelString(
-        "claude-3-5-sonnet-20241022:online/anthropic/custom123"
+        "claude-sonnet-4-5-20250929:online/anthropic/custom123"
       );
 
       expect(result).toEqual({
         data: {
-          modelName: "claude-3-5-sonnet-20241022",
+          modelName: "claude-sonnet-4-5-20250929",
           provider: "anthropic",
           customUid: "custom123",
           isOnline: true,
@@ -78,11 +76,11 @@ describe("parseModelString", () => {
 
   describe("standard model parsing", () => {
     it("should parse model with provider", () => {
-      const result = parseModelString("claude-3-5-sonnet-20241022/anthropic");
+      const result = parseModelString("claude-sonnet-4-5-20250929/anthropic");
 
       expect(result).toEqual({
         data: {
-          modelName: "claude-3-5-sonnet-20241022",
+          modelName: "claude-sonnet-4-5-20250929",
           provider: "anthropic",
           isOnline: false,
         },
@@ -92,12 +90,12 @@ describe("parseModelString", () => {
 
     it("should parse model with provider and customUid", () => {
       const result = parseModelString(
-        "claude-3-5-sonnet-20241022/anthropic/custom123"
+        "claude-sonnet-4-5-20250929/anthropic/custom123"
       );
 
       expect(result).toEqual({
         data: {
-          modelName: "claude-3-5-sonnet-20241022",
+          modelName: "claude-sonnet-4-5-20250929",
           provider: "anthropic",
           customUid: "custom123",
           isOnline: false,
@@ -108,7 +106,7 @@ describe("parseModelString", () => {
 
     it("should handle invalid provider", () => {
       const result = parseModelString(
-        "claude-3-5-sonnet-20241022/invalid-provider"
+        "claude-sonnet-4-5-20250929/invalid-provider"
       );
 
       expect(result.error).toContain("Invalid provider: invalid-provider");
