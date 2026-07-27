@@ -411,6 +411,169 @@ describe("modelCostBreakdownFromRegistry", () => {
       }
     });
 
+    it("should use higher tier pricing for OpenAI GPT-5.4 over 272K tokens", () => {
+      const modelUsage: ModelUsage = {
+        input: 300000, // over the 272K threshold
+        output: 50000,
+      };
+
+      const breakdown = modelCostBreakdownFromRegistry({
+        modelUsage,
+        providerModelId: "gpt-5.4",
+        provider: "openai" as ModelProviderName,
+      });
+
+      expect(breakdown).not.toBeNull();
+      if (breakdown) {
+        // Higher tier: $5/M input, $22.50/M output
+        expect(breakdown.inputCost).toBe(300000 * 0.000005);
+        expect(breakdown.outputCost).toBe(50000 * 0.0000225);
+        expect(breakdown.totalCost).toBeCloseTo(2.625, 10);
+      }
+    });
+
+    it("should keep base tier pricing for OpenAI GPT-5.4 under 272K tokens", () => {
+      const modelUsage: ModelUsage = {
+        input: 200000,
+        output: 50000,
+        cacheDetails: {
+          cachedInput: 10000,
+        },
+      };
+
+      const breakdown = modelCostBreakdownFromRegistry({
+        modelUsage,
+        providerModelId: "gpt-5.4",
+        provider: "openai" as ModelProviderName,
+      });
+
+      expect(breakdown).not.toBeNull();
+      if (breakdown) {
+        // Base tier: $2.50/M input, $15/M output, cachedInput multiplier 0.1
+        expect(breakdown.inputCost).toBe(200000 * 0.0000025);
+        expect(breakdown.outputCost).toBe(50000 * 0.000015);
+        expect(breakdown.cachedInputCost).toBe(10000 * 0.0000025 * 0.1);
+      }
+    });
+
+    it("should count cached input toward the GPT-5.4 threshold", () => {
+      const modelUsage: ModelUsage = {
+        input: 200000,
+        output: 1000,
+        cacheDetails: {
+          // input alone is under 272K; input + cachedInput is over it
+          cachedInput: 100000,
+        },
+      };
+
+      const breakdown = modelCostBreakdownFromRegistry({
+        modelUsage,
+        providerModelId: "gpt-5.4",
+        provider: "openai" as ModelProviderName,
+      });
+
+      expect(breakdown).not.toBeNull();
+      if (breakdown) {
+        expect(breakdown.inputCost).toBe(200000 * 0.000005);
+        expect(breakdown.outputCost).toBe(1000 * 0.0000225);
+        expect(breakdown.cachedInputCost).toBe(100000 * 0.000005 * 0.1);
+      }
+    });
+
+    it.each([
+      ["azure", 0.000005, 0.0000225],
+      ["helicone", 0.000005, 0.0000225],
+      ["openrouter", 0.000005_275, 0.000023_7375],
+    ])(
+      "should use higher tier pricing for GPT-5.4 on %s over 272K tokens",
+      (provider, inputRate, outputRate) => {
+        const modelUsage: ModelUsage = {
+          input: 300000,
+          output: 50000,
+        };
+
+        const breakdown = modelCostBreakdownFromRegistry({
+          modelUsage,
+          providerModelId:
+            provider === "openrouter" ? "openai/gpt-5.4" : provider === "helicone" ? "pa/gpt-5.4" : "gpt-5.4",
+          provider: provider as ModelProviderName,
+        });
+
+        expect(breakdown).not.toBeNull();
+        if (breakdown) {
+          expect(breakdown.inputCost).toBeCloseTo(300000 * inputRate, 10);
+          expect(breakdown.outputCost).toBeCloseTo(50000 * outputRate, 10);
+        }
+      }
+    );
+
+    it("should apply the Anthropic threshold rule to Claude Sonnet 4 on Bedrock", () => {
+      const modelUsage: ModelUsage = {
+        input: 150000,
+        output: 10000,
+        cacheDetails: {
+          // Anthropic counts cache writes as prompt, so 150K + 30K + 40K is over 200K
+          cachedInput: 30000,
+          write5m: 40000,
+        },
+      };
+
+      const breakdown = modelCostBreakdownFromRegistry({
+        modelUsage,
+        providerModelId: "anthropic.claude-sonnet-4-20250514-v1:0",
+        provider: "bedrock" as ModelProviderName,
+      });
+
+      expect(breakdown).not.toBeNull();
+      if (breakdown) {
+        // Higher tier: $6/M input, $22.50/M output
+        expect(breakdown.inputCost).toBe(150000 * 0.000006);
+        expect(breakdown.outputCost).toBe(10000 * 0.0000225);
+      }
+    });
+
+    it("should keep base tier pricing for a Bedrock request under the threshold", () => {
+      const modelUsage: ModelUsage = {
+        input: 100000,
+        output: 10000,
+        cacheDetails: {
+          cachedInput: 10000,
+        },
+      };
+
+      const breakdown = modelCostBreakdownFromRegistry({
+        modelUsage,
+        providerModelId: "anthropic.claude-sonnet-4-20250514-v1:0",
+        provider: "bedrock" as ModelProviderName,
+      });
+
+      expect(breakdown).not.toBeNull();
+      if (breakdown) {
+        expect(breakdown.inputCost).toBe(100000 * 0.000003);
+        expect(breakdown.outputCost).toBe(10000 * 0.000015);
+        expect(breakdown.cachedInputCost).toBe(10000 * 0.000003 * 0.1);
+      }
+    });
+
+    it("should leave single-tier model pricing unchanged", () => {
+      const modelUsage: ModelUsage = {
+        input: 500000,
+        output: 1000,
+      };
+
+      const breakdown = modelCostBreakdownFromRegistry({
+        modelUsage,
+        providerModelId: "gpt-4o",
+        provider: "openai" as ModelProviderName,
+      });
+
+      expect(breakdown).not.toBeNull();
+      if (breakdown) {
+        expect(breakdown.inputCost).toBe(500000 * 0.0000025);
+        expect(breakdown.outputCost).toBe(1000 * 0.00001);
+      }
+    });
+
     it("should handle Vertex Gemini 3 Pro with threshold pricing", () => {
       const modelUsage: ModelUsage = {
         input: 250000, // Over 200K threshold
