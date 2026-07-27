@@ -8,6 +8,7 @@ import { RequestWrapper } from "../lib/RequestWrapper";
 import { getAnthropicProxyRouter } from "./anthropicProxyRouter";
 import { getAPIRouter } from "./api/apiRouter";
 import { getOpenAIProxyRouter } from "./openaiProxyRouter";
+import { getVapiProxyRouter } from "./vapiProxyRouter";
 import { handleFeedback } from "../lib/managers/FeedbackManager";
 import { getGatewayAPIRouter } from "./gatewayRouter";
 import { getGenerateRouter } from "./generateRouter";
@@ -26,9 +27,7 @@ export type BaseOpenAPIRouter = OpenAPIRouterType<
 const WORKER_MAP = {
   ANTHROPIC_PROXY: getAnthropicProxyRouter,
   OPENAI_PROXY: getOpenAIProxyRouter,
-  VAPI_PROXY: () => {
-    throw new Error("VAPI_PROXY not implemented");
-  },
+  VAPI_PROXY: getVapiProxyRouter,
   HELICONE_API: getAPIRouter,
   GATEWAY_API: getGatewayAPIRouter,
   GENERATE_API: getGenerateRouter,
