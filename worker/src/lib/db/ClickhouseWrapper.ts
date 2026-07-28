@@ -20,59 +20,6 @@ export class ClickhouseClientWrapper {
     });
   }
 
-  // TODO dead code
-  async dbInsertClickhouse<T extends keyof ClickhouseDB["Tables"]>(
-    table: T,
-    values: ClickhouseDB["Tables"][T][]
-  ): Promise<Result<string, string>> {
-    try {
-      const queryResult = await this.clickHouseClient.insert({
-        table: table,
-        values: values,
-        format: "JSONEachRow",
-        // Recommended for cluster usage to avoid situations
-        // where a query processing error occurred after the response code
-        // and HTTP headers were sent to the client.
-        // See https://clickhouse.com/docs/en/interfaces/http/#response-buffering
-        clickhouse_settings: {
-          async_insert: 1,
-          wait_end_of_query: 1,
-        },
-      });
-      return { data: queryResult.query_id, error: null };
-    } catch (err) {
-      console.error("dbInsertClickhouseError", err);
-      return {
-        data: null,
-        error: JSON.stringify(err),
-      };
-    }
-  }
-
-  // TODO dead code
-  async dbUpdateClickhouse(query: string): Promise<Result<string, string>> {
-    try {
-      const commandResult = await this.clickHouseClient.command({
-        query,
-        // Recommended for cluster usage to avoid situations
-        // where a query processing error occurred after the response code
-        // and HTTP headers were sent to the client.
-        // See https://clickhouse.com/docs/en/interfaces/http/#response-buffering
-        clickhouse_settings: {
-          wait_end_of_query: 1,
-        },
-      });
-
-      return { data: commandResult.query_id, error: null };
-    } catch (error: unknown) {
-      console.error("dbUpdateClickhouseError", error);
-      return {
-        data: null,
-        error: JSON.stringify(error),
-      };
-    }
-  }
-
   async dbQuery<T>(
     query: string,
     parameters: (number | string | boolean | Date)[]
