@@ -4049,6 +4049,68 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "moonshotai/kimi-k3": {
+    "kimi-k3:novita": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 1048576,
+      "modelId": "moonshotai/kimi-k3",
+      "parameters": [
+        "frequency_penalty",
+        "functions",
+        "logit_bias",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+      ],
+      "provider": "novita",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "kimi-k3:openrouter": {
+      "context": 1048576,
+      "crossRegion": false,
+      "maxTokens": 1048576,
+      "modelId": "moonshotai/kimi-k3",
+      "parameters": [
+        "frequency_penalty",
+        "include_reasoning",
+        "logit_bias",
+        "logprobs",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "reasoning",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_logprobs",
+        "top_p",
+      ],
+      "provider": "openrouter",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
   "openai/gpt-4.1": {
     "gpt-4.1-mini:azure": {
       "context": 1047576,
@@ -7550,6 +7612,10 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "novita",
     "openrouter",
   ],
+  "moonshotai/kimi-k3": [
+    "novita",
+    "openrouter",
+  ],
   "openai/gpt-4.1": [
     "azure",
     "azure",
@@ -9428,6 +9494,28 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "moonshotai/kimi-k3": {
+    "novita": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
+      },
+    ],
+    "openrouter": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+        },
+        "input": 0.000003,
+        "output": 0.000015,
+        "threshold": 0,
+      },
+    ],
+  },
   "openai/gpt-4.1": {
     "azure": [
       {
@@ -10627,6 +10715,13 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "kimi-k3",
+      "providers": [
+        "novita",
+        "openrouter",
+      ],
+    },
+    {
       "model": "llama-3.1-8b-instant",
       "providers": [
         "groq",
@@ -10906,7 +11001,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "nebius",
     },
     {
-      "modelCount": 22,
+      "modelCount": 23,
       "provider": "novita",
     },
     {
@@ -10914,7 +11009,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "openai",
     },
     {
-      "modelCount": 71,
+      "modelCount": 72,
       "provider": "openrouter",
     },
     {
@@ -11007,6 +11102,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "kimi-k2-0905",
     "kimi-k2-thinking",
     "kimi-k2.5",
+    "kimi-k3",
     "llama-3.1-8b-instant",
     "llama-3.1-8b-instruct",
     "llama-3.1-8b-instruct-turbo",
@@ -11049,9 +11145,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 329,
-  "totalModelProviderConfigs": 329,
-  "totalModelsWithPtb": 108,
+  "totalEndpoints": 331,
+  "totalModelProviderConfigs": 331,
+  "totalModelsWithPtb": 109,
   "totalProviders": 21,
 }
 `;
