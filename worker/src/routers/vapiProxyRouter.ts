@@ -36,7 +36,7 @@ export const getVapiProxyRouter = (router: BaseRouter) => {
       env: Env,
       ctx: ExecutionContext
     ) => {
-      return await proxyForwarder(requestWrapper, env, ctx, "VAPI" as any);
+      return await proxyForwarder(requestWrapper, env, ctx, "VAPI");
     }
   );
 
