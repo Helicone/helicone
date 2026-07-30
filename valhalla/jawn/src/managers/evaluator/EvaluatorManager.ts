@@ -343,6 +343,9 @@ export class EvaluatorManager extends BaseManager {
     }
 
     const evaluators = await this.getEvaluatorsForExperiment(experimentId);
+    if (evaluators.error) {
+      return err(evaluators.error);
+    }
 
     const experimentData =
       await experimentManager.getExperimentOutputForScores(experimentId);
@@ -375,6 +378,11 @@ export class EvaluatorManager extends BaseManager {
         return Promise.all(evaluationPromises);
       }) ?? []
     );
+
+    const failedEvaluation = x.flat().find((result) => result.error);
+    if (failedEvaluation?.error) {
+      return err(failedEvaluation.error);
+    }
 
     return ok(null);
   }
