@@ -107,7 +107,7 @@ describe("Helicone provider", () => {
       const result = await buildRequestBody(endpointResult.data!, {
         parsedBody: responsesApiBody,
         bodyMapping: "RESPONSES",
-        toAnthropic: (body: any, modelId: string) => ({
+        toAnthropic: (body: any, modelId?: string) => ({
           ...body,
           model: modelId,
         }),

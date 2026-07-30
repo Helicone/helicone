@@ -87,6 +87,8 @@ describe("getMapperTypeFromHeliconeRequest", () => {
       target_url: "/v1/models/gemini-pro:generateContent",
       cache_reference_id: null,
       cache_enabled: false,
+      reasoning_tokens: null,
+      ai_gateway_body_mapping: null,
     };
 
     const result = getMapperTypeFromHeliconeRequest(heliconeRequest, "unknown");
