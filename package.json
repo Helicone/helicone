@@ -25,6 +25,8 @@
     "@peculiar/x509": "1.13.0"
   },
   "devDependencies": {
+    "@types/glob": "^7.2.0",
+    "@types/minimatch": "^5.0.0",
     "husky": "^9.1.7",
     "ts-jest": "^29.4.1"
   }
