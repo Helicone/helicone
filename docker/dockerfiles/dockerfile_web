@@ -15,10 +15,10 @@ COPY bifrost/package.json ./bifrost/
 
 ENV NODE_OPTIONS="--dns-result-order=ipv4first"
 
-RUN yarn install --frozen-lockfile --network-timeout 300000
-
 COPY packages/ ./packages/
 COPY web/ ./web/
+
+RUN yarn install --frozen-lockfile --network-timeout 300000
 
 RUN cd web && yarn build
 
