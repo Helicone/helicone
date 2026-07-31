@@ -175,9 +175,15 @@ export function getWalletRouter(
 
       try {
         // Parse pagination parameters
-        const pageNum = Math.max(0, page ? parseInt(page as string) : 0);
+        const pageNum = Math.max(
+          0,
+          page ? parseInt(page as string, 10) || 0 : 0
+        );
         const pageSizeNum = Math.min(
-          Math.max(1, pageSize ? parseInt(pageSize as string) : 50),
+          Math.max(
+            1,
+            pageSize ? parseInt(pageSize as string, 10) || 50 : 50
+          ),
           1000
         );
 
