@@ -52,6 +52,16 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "deepseek-v4-flash-0731",
+    },
+    cost: {
+      prompt_token: 0.00000014,
+      completion_token: 0.00000028,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
       value: "deepseek-v4-pro",
     },
     cost: {
