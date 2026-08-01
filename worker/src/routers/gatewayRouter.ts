@@ -36,7 +36,7 @@ async function rateLimitUnapprovedDomains(
     const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
     const rlKey = `gateway-rl-${url}-${today}`;
     const count = await rateLimitKV.get(rlKey);
-    if (count && parseInt(count) > MAX_REQUESTS_PER_DAY) {
+    if (count && parseInt(count, 10) > MAX_REQUESTS_PER_DAY) {
       return {
         rateLimited: true,
       };
@@ -44,7 +44,7 @@ async function rateLimitUnapprovedDomains(
       await safePut({
         key: rateLimitKV,
         keyName: rlKey,
-        value: (parseInt(count) + 1).toString(),
+        value: (parseInt(count, 10) + 1).toString(),
       });
     } else {
       const gatewayRlList = await rateLimitKV.get(`gateway-rl-list`);

@@ -371,10 +371,13 @@ export class HeliconeHeaders implements IHeliconeHeaders {
         cacheEnabled:
           this.headers.get("Helicone-Cache-Enabled") === "true" ? true : false,
         cacheSeed: this.headers.get("Helicone-Cache-Seed")
-          ? parseInt(this.headers.get("Helicone-Cache-Seed") ?? "0")
+          ? parseInt(this.headers.get("Helicone-Cache-Seed") ?? "0", 10)
           : null,
         cacheBucketMaxSize: this.headers.get("Helicone-Cache-Bucket-Max-Size")
-          ? parseInt(this.headers.get("Helicone-Cache-Bucket-Max-Size") ?? "0")
+          ? parseInt(
+              this.headers.get("Helicone-Cache-Bucket-Max-Size") ?? "0",
+              10
+            )
           : null,
         cacheControl: this.headers.get("Helicone-Cache-Control") ?? null,
         cacheIgnoreKeys: this.headers.get("Helicone-Cache-Ignore-Keys")

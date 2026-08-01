@@ -22,9 +22,9 @@ function buildCacheControl(cacheControl: string): string {
     let sMaxAgeInSeconds = 0;
     try {
       sMaxAgeInSeconds = sMaxAge
-        ? parseInt(sMaxAge)
+        ? parseInt(sMaxAge, 10)
         : maxAge
-          ? parseInt(maxAge)
+          ? parseInt(maxAge, 10)
           : 0;
     } catch (e) {
       console.error("Error parsing s-maxage or max-age", e);
@@ -55,7 +55,8 @@ function getCacheState(headers: Headers): CacheHeaders {
     cacheRead:
       (headers.get("Helicone-Cache-Read") ?? "").toLowerCase() === "true",
     cacheBucketMaxSize: parseInt(
-      headers.get("Helicone-Cache-Bucket-Max-Size") ?? "1"
+      headers.get("Helicone-Cache-Bucket-Max-Size") ?? "1",
+      10
     ),
     cacheSeed: headers.get("Helicone-Cache-Seed"),
   };

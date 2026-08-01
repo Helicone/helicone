@@ -88,7 +88,7 @@ async function trySaveToCache(options: SaveToCacheOptions): Promise<boolean> {
       cacheSeed,
     } = options;
     const expirationTtl = cacheControl.includes("max-age=")
-      ? parseInt(cacheControl.split("max-age=")[1])
+      ? parseInt(cacheControl.split("max-age=")[1], 10)
       : 0;
     const { freeIndexes } = await getMaxCachedResponses(
       request,
