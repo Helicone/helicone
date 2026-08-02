@@ -14,7 +14,7 @@ import {
 } from "@helicone-package/cost/models/types";
 import { parseModelString } from "@helicone-package/cost/models/provider-helpers";
 import { ProviderKeysManager } from "../managers/ProviderKeysManager";
-import { isErr } from "../util/results";
+import { isErr, Result, ok, err } from "../util/results";
 import { Attempt } from "./types";
 import { ProviderKey } from "../db/ProviderKeysStore";
 import { PluginHandler } from "./PluginHandler";
@@ -42,17 +42,15 @@ export class AttemptBuilder {
     bodyMapping: BodyMappingType = "OPENAI",
     plugins?: Plugin[],
     globalIgnoreProviders?: Set<ModelProviderName>
-  ): Promise<Attempt[]> {
+  ): Promise<Result<Attempt[], string>> {
     const allAttempts: Attempt[] = [];
 
     for (const modelString of modelStrings) {
       const modelSpec = parseModelString(modelString);
 
-      // Skip invalid model specs
-      // TODO: Return error
       if (isErr(modelSpec)) {
-        console.error(`Skipping invalid model: ${modelSpec.error}`);
-        continue;
+        console.error(`Invalid model string: ${modelSpec.error}`);
+        return err(modelSpec.error);
       }
 
       if (modelSpec.data.provider) {
@@ -80,12 +78,14 @@ export class AttemptBuilder {
 
     // Filter explicit provider routing attempts (not filtered in buildAttemptsForAllProviders)
     if (globalIgnoreProviders && globalIgnoreProviders.size > 0) {
-      return allAttempts.filter(
-        (attempt) => !globalIgnoreProviders.has(attempt.endpoint.provider)
+      return ok(
+        allAttempts.filter(
+          (attempt) => !globalIgnoreProviders.has(attempt.endpoint.provider)
+        )
       );
     }
 
-    return allAttempts;
+    return ok(allAttempts);
   }
 
   private async buildAttemptsForAllProviders(

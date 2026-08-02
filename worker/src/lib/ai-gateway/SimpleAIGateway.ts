@@ -173,7 +173,7 @@ export class SimpleAIGateway {
           this.traceContext
         )
       : null;
-    let attempts = await this.attemptBuilder.buildAttempts(
+    const attemptsResult = await this.attemptBuilder.buildAttempts(
       modelStrings,
       this.orgId,
       bodyMapping,
@@ -181,6 +181,18 @@ export class SimpleAIGateway {
       globalIgnoreProviders
     );
     this.tracer.finishSpan(buildSpan);
+
+    if (isErr(attemptsResult)) {
+      errors.push({
+        source: "Invalid model",
+        type: "request_failed",
+        message: attemptsResult.error,
+        statusCode: 400,
+      });
+      return this.createErrorResponse(errors);
+    }
+
+    let attempts = attemptsResult.data;
 
     // Filter out helicone provider attempts when x-stripe-customer-id is present
     // to ensure Stripe meter events are only sent for actual external provider usage
