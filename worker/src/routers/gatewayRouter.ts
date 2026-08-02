@@ -98,7 +98,7 @@ async function getProvider(
     );
   }
   if (!validateURL(targetBaseUrl)) {
-    err(
+    return err(
       new Response(`Invalid target base url "${targetBaseUrl}"`, {
         status: 400,
       })
@@ -107,7 +107,7 @@ async function getProvider(
   const targetBaseUrlHost = new URL(targetBaseUrl).origin;
 
   if (targetBaseUrlHost !== targetBaseUrl) {
-    err(
+    return err(
       new Response(
         `Target base url "${targetBaseUrl}" must not contain a path, got "${targetBaseUrlHost}"`,
         {
@@ -121,7 +121,7 @@ async function getProvider(
     rateLimitKV
   );
   if (rateLimited) {
-    err(
+    return err(
       new Response(
         `Rate limited unapproved domain! To get your target-url on the list of approved domains to surpase the rate limit please reach out to us at engineering@helicone.ai`,
         {
