@@ -202,16 +202,6 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "magistral-medium-2509-thinking",
-    },
-    cost: {
-      prompt_token: 0.0000026,
-      completion_token: 0.0000065,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
       value: "mimo-v2-5",
     },
     cost: {
@@ -472,6 +462,16 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "qwen3-6-35b-a3b",
+    },
+    cost: {
+      prompt_token: 0.00000007,
+      completion_token: 0.00000042,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
       value: "qwen3-6-flash",
     },
     cost: {
@@ -502,6 +502,16 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "qwen3-7-flash",
+    },
+    cost: {
+      prompt_token: 0.00000003,
+      completion_token: 0.00000013,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
       value: "qwen3-7-max",
     },
     cost: {
@@ -517,6 +527,16 @@ export const costs: ModelRow[] = [
     cost: {
       prompt_token: 0.0000004,
       completion_token: 0.0000016,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "qwen3-8-max",
+    },
+    cost: {
+      prompt_token: 0.000002,
+      completion_token: 0.000006,
     },
   },
   {
