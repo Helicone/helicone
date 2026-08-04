@@ -1,0 +1,37 @@
+---
+title: "SaladCloud Integration"
+sidebarTitle: "SaladCloud"
+description: "Use SaladCloud AI Gateway through Helicone AI Gateway."
+"twitter:title": "SaladCloud Integration - Helicone OSS LLM Observability"
+---
+
+SaladCloud AI Gateway is OpenAI-compatible. Route to SaladCloud through Helicone by saving your SaladCloud API key in Provider Keys and selecting the `qwen3.6-35b-a3b/saladcloud` model route.
+
+<Steps>
+  <Step title="Create your API keys">
+    Create a Helicone API key from the [Developer](https://helicone.ai/developer) page and a SaladCloud AI Gateway API key from the [SaladCloud portal](https://portal.salad.com/).
+  </Step>
+  <Step title="Add SaladCloud as a provider key">
+    In Helicone, add a new Provider Key for SaladCloud and paste your SaladCloud API key.
+  </Step>
+  <Step title="Call Helicone AI Gateway">
+
+```bash
+curl https://ai-gateway.helicone.ai/v1/chat/completions \
+  -H "Authorization: Bearer $HELICONE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "qwen3.6-35b-a3b/saladcloud",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Hello from SaladCloud through Helicone"
+      }
+    ]
+  }'
+```
+
+  </Step>
+</Steps>
+
+For current model and pricing details, see the [SaladCloud AI Gateway model reference](https://docs.salad.com/ai-gateway/reference/models) and [pricing reference](https://docs.salad.com/ai-gateway/reference/pricing).
