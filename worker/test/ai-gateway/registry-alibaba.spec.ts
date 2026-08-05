@@ -35,6 +35,12 @@ const canopywaveAuthExpectations = {
   },
 };
 
+const saladcloudAuthExpectations = {
+  headers: {
+    Authorization: "Bearer test-saladcloud-api-key",
+  },
+};
+
 describe("Alibaba Registry Tests", () => {
   beforeEach(() => {
     // Clear all mocks between tests
@@ -42,6 +48,85 @@ describe("Alibaba Registry Tests", () => {
   });
 
   describe("BYOK Tests - Qwen Models", () => {
+    describe("qwen3.6-35b-a3b", () => {
+      it("should route to SaladCloud with bearer authentication", () =>
+        runGatewayTest({
+          model: "qwen3.6-35b-a3b/saladcloud",
+          expected: {
+            providers: [
+              {
+                url: "https://ai.salad.cloud/v1/chat/completions",
+                response: "success",
+                model: "qwen3.6-35b-a3b",
+                data: createOpenAIMockResponse("qwen3.6-35b-a3b"),
+                expects: {
+                  ...saladcloudAuthExpectations,
+                  bodyDoesNotContain: ['"enable_thinking":false'],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should auto-select SaladCloud when no provider is specified", () =>
+        runGatewayTest({
+          model: "qwen3.6-35b-a3b",
+          expected: {
+            providers: [
+              {
+                url: "https://ai.salad.cloud/v1/chat/completions",
+                response: "success",
+                model: "qwen3.6-35b-a3b",
+                data: createOpenAIMockResponse("qwen3.6-35b-a3b"),
+                expects: saladcloudAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should preserve supported OpenAI-compatible request fields", () =>
+        runGatewayTest({
+          model: "qwen3.6-35b-a3b/saladcloud",
+          request: {
+            stream: true,
+            body: {
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "get_weather",
+                    description: "Get the weather",
+                    parameters: { type: "object", properties: {} },
+                  },
+                },
+              ],
+              chat_template_kwargs: { enable_thinking: true },
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://ai.salad.cloud/v1/chat/completions",
+                response: "success",
+                model: "qwen3.6-35b-a3b",
+                data: createOpenAIMockResponse("qwen3.6-35b-a3b"),
+                expects: {
+                  ...saladcloudAuthExpectations,
+                  bodyContains: [
+                    '"stream":true',
+                    '"tools"',
+                    '"chat_template_kwargs":{"enable_thinking":true}',
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
     describe("qwen3-30b-a3b", () => {
       it("should handle deepinfra provider", () =>
         runGatewayTest({
