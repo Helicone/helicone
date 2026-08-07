@@ -1,0 +1,97 @@
+---
+title: "Valkey"
+sidebarTitle: "Valkey"
+description: "Use Valkey as the Redis-compatible backend for Helicone's Jawn API server. Drop-in replacement requiring only a host configuration change."
+"twitter:title": "Valkey Backend Support - Helicone OSS LLM Observability"
+---
+
+## Overview
+
+Valkey is an officially supported, Redis-compatible backend for Helicone's Jawn API server. The `ioredis` client connects to Valkey with zero code changes. All five Redis subsystems' commands are verified compatible on both backends — the three core subsystems (KV Cache, Encrypted Key Cache, Proxy Rate Limiter) are imported and exercised directly in CI, while the remaining two (HTTP API Rate Limiter, Usage Limit Cache) have their command patterns verified. CI tests against Valkey 7.2 (the minimum supported version).
+
+## Configuration
+
+Set the `REDIS_HOST` environment variable to your Valkey endpoint:
+
+```bash
+REDIS_HOST=your-valkey-host.example.com
+```
+
+Jawn always connects with TLS enabled. Your Valkey instance must accept TLS connections. Most managed Valkey/Redis services (AWS ElastiCache, GCP Memorystore, etc.) enable TLS by default. For self-hosted deployments, configure Valkey with `--tls-port` and provide server certificates.
+
+<Note>
+  For local development without TLS, you can run Jawn without setting `REDIS_HOST` — it will
+  fall back to in-process memory caching (see Graceful Degradation below).
+</Note>
+
+## What's Verified
+
+The following table shows Valkey compatibility status for each Redis subsystem in Jawn:
+
+| Subsystem | File | Commands | Status |
+|-----------|------|----------|--------|
+| KV Cache | `src/lib/cache/kvCache.ts` | `GET`, `SET PX` | Verified in CI (subsystem imported) |
+| Encrypted Key Cache | `src/lib/cache/staticMemCache.ts` | `GET`, `SET EX` | Verified in CI (subsystem imported) |
+| Proxy Rate Limiter | `src/lib/proxy/RateLimiter.ts` | `GET`, `SET EX` | Verified in CI (subsystem imported) |
+| HTTP API Rate Limiter | `src/middleware/ratelimitter.ts` | `SCRIPT LOAD`, `EVALSHA`, `INCR`, `PTTL`, `PEXPIRE` | Commands verified in CI |
+| Usage Limit Cache | `src/managers/UsageLimitManager.ts` | `GET`, `SET EX` | Commands verified in CI |
+
+## Docker Compose Example
+
+```yaml
+services:
+  valkey:
+    image: valkey/valkey:7.2-alpine
+    command: >
+      valkey-server
+        --tls-port 6379
+        --port 0
+        --tls-cert-file /tls/server.crt
+        --tls-key-file /tls/server.key
+        --tls-auth-clients no
+    volumes:
+      - ./certs:/tls:ro
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "valkey-cli", "--tls", "--cert", "/tls/server.crt", "--key", "/tls/server.key", "--cacert", "/tls/server.crt", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  jawn:
+    image: helicone/jawn:latest
+    environment:
+      REDIS_HOST: valkey
+    depends_on:
+      valkey:
+        condition: service_healthy
+```
+
+<Warning>
+  This example uses `--tls-auth-clients no` for simplicity. For production deployments,
+  evaluate enabling mutual TLS (`--tls-auth-clients yes`) or rely on network-level isolation
+  (private subnets, security groups) to restrict access.
+</Warning>
+
+Generate self-signed certificates for local testing:
+
+```bash
+mkdir -p certs
+openssl req -x509 -newkey rsa:4096 -sha256 -days 365 \
+  -nodes -keyout certs/server.key -out certs/server.crt \
+  -subj "/CN=valkey" -addext "subjectAltName=DNS:valkey,DNS:localhost,IP:127.0.0.1"
+```
+
+## Migrating from Redis
+
+1. Update `REDIS_HOST` to point to your Valkey instance (must support TLS)
+2. Restart Jawn
+3. Existing cached data in Redis will naturally expire (all values have TTLs)
+
+## Graceful Degradation
+
+When `REDIS_HOST` is not set, Jawn operates without a cache backend using in-process memory caching only. This is useful for development or minimal deployments.
+
+## Requirements
+
+Valkey 7.2 or later (CI tests against 7.2). No modules or extensions required. TLS is required.
