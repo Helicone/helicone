@@ -740,17 +740,6 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "qwen-image-3-0-pro",
-    },
-    cost: {
-      prompt_token: 0,
-      completion_token: 0,
-      per_image: 0.04,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
       value: "seedream-5-0-lite",
     },
     cost: {
@@ -767,7 +756,7 @@ export const costs: ModelRow[] = [
     cost: {
       prompt_token: 0,
       completion_token: 0,
-      per_image: 0.075,
+      per_image: 0,
     },
   },
   {
