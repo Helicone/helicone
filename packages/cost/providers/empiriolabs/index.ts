@@ -22,16 +22,6 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "deepseek-prover-v2",
-    },
-    cost: {
-      prompt_token: 0,
-      completion_token: 0,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
       value: "deepseek-v3-2",
     },
     cost: {
@@ -293,6 +283,16 @@ export const costs: ModelRow[] = [
     model: {
       operator: "equals",
       value: "muse-spark-1-1",
+    },
+    cost: {
+      prompt_token: 0.00000125,
+      completion_token: 0.00000425,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "muse-spark-1-2",
     },
     cost: {
       prompt_token: 0.00000125,
@@ -685,6 +685,17 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "gpt-image-2",
+    },
+    cost: {
+      prompt_token: 0,
+      completion_token: 0,
+      per_image: 0.012,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
       value: "hunyuan-image-3",
     },
     cost: {
@@ -712,7 +723,29 @@ export const costs: ModelRow[] = [
     cost: {
       prompt_token: 0,
       completion_token: 0,
-      per_image: 0.0322,
+      per_image: 0.035,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "qwen-image-3-0",
+    },
+    cost: {
+      prompt_token: 0,
+      completion_token: 0,
+      per_image: 0.03,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "qwen-image-3-0-pro",
+    },
+    cost: {
+      prompt_token: 0,
+      completion_token: 0,
+      per_image: 0.04,
     },
   },
   {
@@ -746,6 +779,39 @@ export const costs: ModelRow[] = [
       prompt_token: 0,
       completion_token: 0,
       per_image: 0.003,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "wan2-1-image",
+    },
+    cost: {
+      prompt_token: 0,
+      completion_token: 0,
+      per_image: 0.025,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "wan2-2-image",
+    },
+    cost: {
+      prompt_token: 0,
+      completion_token: 0,
+      per_image: 0.05,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "wan2-5-image",
+    },
+    cost: {
+      prompt_token: 0,
+      completion_token: 0,
+      per_image: 0.03,
     },
   },
   {
