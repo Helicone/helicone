@@ -142,9 +142,14 @@ function getThresholdValueFunction(provider: ModelProviderName): (usage: ModelUs
         switch (field) {
           case "inputCost":
           case "outputCost":
-            return usage.input + 
-              (usage.cacheDetails?.cachedInput ?? 0) + 
-              (usage.cacheDetails?.write5m ?? 0) + 
+          // Cached reads are tiered by the same long-context threshold as input/output:
+          // above 200k prompt tokens Anthropic charges the higher input rate, and the
+          // cached-read price is a multiple of that rate. Without this case the field fell
+          // through to 0 and cached reads were always priced at the base tier.
+          case "cachedInputCost":
+            return usage.input +
+              (usage.cacheDetails?.cachedInput ?? 0) +
+              (usage.cacheDetails?.write5m ?? 0) +
               (usage.cacheDetails?.write1h ?? 0);
           default:
             return 0;
