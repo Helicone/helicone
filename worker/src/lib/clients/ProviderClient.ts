@@ -162,11 +162,15 @@ export async function callProvider(props: CallProps): Promise<Response> {
   if (increaseTimeout) {
     const controller = new AbortController();
     const signal = controller.signal;
-    setTimeout(() => controller.abort(), 1000 * 60 * 30);
-    response = await fetch(targetUrl.href, {
-      ...init,
-      signal,
-    });
+    const timeoutId = setTimeout(() => controller.abort(), 1000 * 60 * 30);
+    try {
+      response = await fetch(targetUrl.href, {
+        ...init,
+        signal,
+      });
+    } finally {
+      clearTimeout(timeoutId);
+    }
   } else {
     response = await callWithMapper(targetUrl, init);
   }

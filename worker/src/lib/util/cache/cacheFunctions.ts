@@ -148,23 +148,30 @@ export async function getCachedResponse(
   const CACHE_TIMEOUT = 2000;
 
   try {
-    const { requests: requestCaches, freeIndexes } = (await Promise.race([
-      getMaxCachedResponses(request, settings, cacheKv, cacheSeed),
-      new Promise((resolve, reject) =>
-        setTimeout(() => reject(new Error("Cache timeout")), CACHE_TIMEOUT)
-      ),
-    ])) as {
-      requests: {
-        headers: Record<string, string>;
-        latency: number;
-        body: string[];
-      }[];
-      freeIndexes: number[];
-    };
+    let timeoutReject: (err: Error) => void = () => {};
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timeoutReject = reject;
+    });
+    const timeoutId = setTimeout(
+      () => timeoutReject(new Error("Cache timeout")),
+      CACHE_TIMEOUT
+    );
+    try {
+      const { requests: requestCaches, freeIndexes } = (await Promise.race([
+        getMaxCachedResponses(request, settings, cacheKv, cacheSeed),
+        timeoutPromise,
+      ])) as {
+        requests: {
+          headers: Record<string, string>;
+          latency: number;
+          body: string[];
+        }[];
+        freeIndexes: number[];
+      };
 
-    if (freeIndexes.length > 0) {
-      return null;
-    } else {
+      if (freeIndexes.length > 0) {
+        return null;
+      } else {
       const cacheIdx = Math.floor(Math.random() * requestCaches.length);
       const randomCache = requestCaches[cacheIdx];
       const cachedResponseHeaders = new Headers(randomCache.headers);
@@ -203,6 +210,9 @@ export async function getCachedResponse(
       return new Response(cachedStream, {
         headers: cachedResponseHeaders,
       });
+    }
+    } finally {
+      clearTimeout(timeoutId);
     }
   } catch (error) {
     console.error("Error fetching cache:", error);
