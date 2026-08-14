@@ -17,6 +17,13 @@ const canopywaveAuthExpectations = {
   },
 };
 
+// Define auth expectations for SCX.ai provider
+const scxAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
 describe("Zai Registry Tests", () => {
   beforeEach(() => {
     // Clear all mocks between tests
@@ -841,6 +848,265 @@ describe("Zai Registry Tests", () => {
               data: createOpenAIMockResponse("zai/glm-4.6"),
               expects: {
                 ...canopywaveAuthExpectations,
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+  });
+
+  describe("BYOK Tests - glm-5.2", () => {
+    describe("glm-5.2", () => {
+      it("should handle scx provider", () =>
+        runGatewayTest({
+          model: "glm-5.2/scx",
+          expected: {
+            providers: [
+              {
+                url: "https://api.scx.ai/v1/chat/completions",
+                response: "success",
+                model: "GLM-5.2",
+                data: createOpenAIMockResponse("GLM-5.2"),
+                expects: scxAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle tool calls with scx provider", () =>
+        runGatewayTest({
+          model: "glm-5.2/scx",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "What's the weather?" }],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "get_weather",
+                    description: "Get current weather",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        location: { type: "string" },
+                      },
+                      required: ["location"],
+                    },
+                  },
+                },
+              ],
+              tool_choice: "auto",
+              temperature: 0.7,
+              max_tokens: 1000,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.scx.ai/v1/chat/completions",
+                response: "success",
+                model: "GLM-5.2",
+                data: createOpenAIMockResponse("GLM-5.2"),
+                expects: {
+                  ...scxAuthExpectations,
+                  bodyContains: ["tools", "tool_choice", "get_weather"],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle reasoning parameter with scx provider", () =>
+        runGatewayTest({
+          model: "glm-5.2/scx",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "Solve this problem" }],
+              reasoning: { type: "step_by_step" },
+              temperature: 0.7,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.scx.ai/v1/chat/completions",
+                response: "success",
+                model: "GLM-5.2",
+                data: createOpenAIMockResponse("GLM-5.2"),
+                expects: {
+                  ...scxAuthExpectations,
+                  bodyContains: ["reasoning", "step_by_step", "temperature"],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle all supported parameters with scx provider", () =>
+        runGatewayTest({
+          model: "glm-5.2/scx",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test comprehensive parameters" },
+              ],
+              max_tokens: 1000,
+              temperature: 0.8,
+              top_p: 0.95,
+              stop: ["STOP"],
+              frequency_penalty: 0.2,
+              presence_penalty: 0.1,
+              seed: 12345,
+              response_format: { type: "text" },
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.scx.ai/v1/chat/completions",
+                response: "success",
+                model: "GLM-5.2",
+                data: createOpenAIMockResponse("GLM-5.2"),
+                expects: {
+                  ...scxAuthExpectations,
+                  bodyContains: [
+                    "max_tokens",
+                    "temperature",
+                    "top_p",
+                    "stop",
+                    "frequency_penalty",
+                    "presence_penalty",
+                    "seed",
+                    "response_format",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+  });
+
+  describe("Error scenarios - glm-5.2 with SCX Provider", () => {
+    it("should handle SCX provider failure", () =>
+      runGatewayTest({
+        model: "glm-5.2/scx",
+        expected: {
+          providers: [
+            {
+              url: "https://api.scx.ai/v1/chat/completions",
+              response: "failure",
+              statusCode: 500,
+              errorMessage: "SCX service unavailable",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+
+    it("should handle rate limiting from SCX", () =>
+      runGatewayTest({
+        model: "glm-5.2/scx",
+        expected: {
+          providers: [
+            {
+              url: "https://api.scx.ai/v1/chat/completions",
+              response: "failure",
+              statusCode: 429,
+              errorMessage: "Rate limit exceeded",
+            },
+          ],
+          finalStatus: 429,
+        },
+      }));
+
+    it("should handle authentication failure from SCX", () =>
+      runGatewayTest({
+        model: "glm-5.2/scx",
+        expected: {
+          providers: [
+            {
+              url: "https://api.scx.ai/v1/chat/completions",
+              response: "failure",
+              statusCode: 401,
+              errorMessage: "Invalid API key",
+            },
+          ],
+          finalStatus: 401,
+        },
+      }));
+
+    it("should handle model not found error from SCX", () =>
+      runGatewayTest({
+        model: "glm-5.2/scx",
+        expected: {
+          providers: [
+            {
+              url: "https://api.scx.ai/v1/chat/completions",
+              response: "failure",
+              statusCode: 404,
+              errorMessage: "Model not found",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+
+    it("should handle timeout from SCX", () =>
+      runGatewayTest({
+        model: "glm-5.2/scx",
+        expected: {
+          providers: [
+            {
+              url: "https://api.scx.ai/v1/chat/completions",
+              response: "failure",
+              statusCode: 408,
+              errorMessage: "Request timeout",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+  });
+
+  describe("Provider validation - glm-5.2 with SCX", () => {
+    it("should handle provider model ID mapping correctly for SCX", () =>
+      runGatewayTest({
+        model: "glm-5.2/scx",
+        expected: {
+          providers: [
+            {
+              url: "https://api.scx.ai/v1/chat/completions",
+              response: "success",
+              model: "GLM-5.2", // Should map to the correct provider model ID
+              data: createOpenAIMockResponse("GLM-5.2"),
+              expects: scxAuthExpectations,
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+
+    it("should handle request body mapping for SCX", () =>
+      runGatewayTest({
+        model: "glm-5.2/scx",
+        request: {
+          bodyMapping: "NO_MAPPING",
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.scx.ai/v1/chat/completions",
+              response: "success",
+              model: "GLM-5.2",
+              data: createOpenAIMockResponse("GLM-5.2"),
+              expects: {
+                ...scxAuthExpectations,
               },
             },
           ],

@@ -35,6 +35,12 @@ const canopywaveAuthExpectations = {
   },
 };
 
+const scxAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
 describe("Alibaba Registry Tests", () => {
   beforeEach(() => {
     // Clear all mocks between tests
@@ -5564,5 +5570,197 @@ describe("Alibaba Registry Tests", () => {
         }));
     });
 
+  });
+
+  describe("BYOK Tests - qwen3.8-max", () => {
+    describe("qwen3.8-max", () => {
+      it("should handle scx provider", () =>
+        runGatewayTest({
+          model: "qwen3.8-max/scx",
+          expected: {
+            providers: [
+              {
+                url: "https://api.scx.ai/v1/chat/completions",
+                response: "success",
+                model: "Qwen3.8-Max",
+                data: createOpenAIMockResponse("Qwen3.8-Max"),
+                expects: scxAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle tool calls with scx provider", () =>
+        runGatewayTest({
+          model: "qwen3.8-max/scx",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "What's the weather?" }],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "get_weather",
+                    description: "Get current weather",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        location: { type: "string" },
+                      },
+                      required: ["location"],
+                    },
+                  },
+                },
+              ],
+              temperature: 0.7,
+              max_tokens: 1000,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.scx.ai/v1/chat/completions",
+                response: "success",
+                model: "Qwen3.8-Max",
+                data: createOpenAIMockResponse("Qwen3.8-Max"),
+                expects: {
+                  ...scxAuthExpectations,
+                  bodyContains: ["tools", "get_weather"],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle image input with scx provider", () =>
+        runGatewayTest({
+          model: "qwen3.8-max/scx",
+          request: {
+            body: {
+              messages: [
+                {
+                  role: "user",
+                  content: [
+                    { type: "text", text: "What is in this image?" },
+                    {
+                      type: "image_url",
+                      image_url: { url: "https://example.com/image.png" },
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.scx.ai/v1/chat/completions",
+                response: "success",
+                model: "Qwen3.8-Max",
+                data: createOpenAIMockResponse("Qwen3.8-Max"),
+                expects: {
+                  ...scxAuthExpectations,
+                  bodyContains: ["image_url"],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle all supported parameters with scx provider", () =>
+        runGatewayTest({
+          model: "qwen3.8-max/scx",
+          request: {
+            body: {
+              messages: [
+                { role: "user", content: "Test comprehensive parameters" },
+              ],
+              max_tokens: 1000,
+              temperature: 0.8,
+              top_p: 0.95,
+              stop: ["STOP"],
+              frequency_penalty: 0.2,
+              presence_penalty: 0.1,
+              response_format: { type: "text" },
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.scx.ai/v1/chat/completions",
+                response: "success",
+                model: "Qwen3.8-Max",
+                data: createOpenAIMockResponse("Qwen3.8-Max"),
+                expects: {
+                  ...scxAuthExpectations,
+                  bodyContains: [
+                    "max_tokens",
+                    "temperature",
+                    "top_p",
+                    "stop",
+                    "frequency_penalty",
+                    "presence_penalty",
+                    "response_format",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+  });
+
+  describe("Error scenarios - qwen3.8-max with SCX Provider", () => {
+    it("should handle SCX provider failure", () =>
+      runGatewayTest({
+        model: "qwen3.8-max/scx",
+        expected: {
+          providers: [
+            {
+              url: "https://api.scx.ai/v1/chat/completions",
+              response: "failure",
+              statusCode: 500,
+              errorMessage: "SCX service unavailable",
+            },
+          ],
+          finalStatus: 500,
+        },
+      }));
+
+    it("should handle rate limiting from SCX", () =>
+      runGatewayTest({
+        model: "qwen3.8-max/scx",
+        expected: {
+          providers: [
+            {
+              url: "https://api.scx.ai/v1/chat/completions",
+              response: "failure",
+              statusCode: 429,
+              errorMessage: "Rate limit exceeded",
+            },
+          ],
+          finalStatus: 429,
+        },
+      }));
+
+    it("should handle authentication failure from SCX", () =>
+      runGatewayTest({
+        model: "qwen3.8-max/scx",
+        expected: {
+          providers: [
+            {
+              url: "https://api.scx.ai/v1/chat/completions",
+              response: "failure",
+              statusCode: 401,
+              errorMessage: "Invalid API key",
+            },
+          ],
+          finalStatus: 401,
+        },
+      }));
   });
 });

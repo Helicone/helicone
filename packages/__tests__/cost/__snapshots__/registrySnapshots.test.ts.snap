@@ -299,6 +299,30 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "alibaba/qwen3.8": {
+    "qwen3.8-max:scx": {
+      "context": 1000000,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "Qwen3.8-Max",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "reasoning",
+        "response_format",
+        "stop",
+        "temperature",
+        "tools",
+        "top_p",
+      ],
+      "provider": "scx",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
   "anthropic/claude-3-haiku-20240307": {
     "claude-3-haiku-20240307:anthropic": {
       "context": 200000,
@@ -7292,6 +7316,34 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "zai/glm-5": {
+    "glm-5.2:scx": {
+      "context": 1000000,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "GLM-5.2",
+      "parameters": [
+        "frequency_penalty",
+        "functions",
+        "max_tokens",
+        "presence_penalty",
+        "reasoning",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "scx",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
 }
 `;
 
@@ -7311,6 +7363,9 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "novita",
     "novita",
     "openrouter",
+  ],
+  "alibaba/qwen3.8": [
+    "scx",
   ],
   "anthropic/claude-3-haiku-20240307": [
     "anthropic",
@@ -7732,6 +7787,9 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "novita",
     "novita",
   ],
+  "zai/glm-5": [
+    "scx",
+  ],
 }
 `;
 
@@ -7786,6 +7844,18 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       {
         "input": 4.22e-7,
         "output": 8.44e-7,
+        "threshold": 0,
+      },
+    ],
+  },
+  "alibaba/qwen3.8": {
+    "scx": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1157,
+        },
+        "input": 0.000001815,
+        "output": 0.0000054461,
         "threshold": 0,
       },
     ],
@@ -9953,6 +10023,18 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "zai/glm-5": {
+    "scx": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.25,
+        },
+        "input": 6.6e-7,
+        "output": 0.0000023106,
+        "threshold": 0,
+      },
+    ],
+  },
 }
 `;
 
@@ -10276,6 +10358,12 @@ exports[`Registry Snapshots verify registry state 1`] = `
         "cerebras",
         "fireworks",
         "novita",
+      ],
+    },
+    {
+      "model": "glm-5.2",
+      "providers": [
+        "scx",
       ],
     },
     {
@@ -10814,6 +10902,12 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "qwen3.8-max",
+      "providers": [
+        "scx",
+      ],
+    },
+    {
       "model": "sonar",
       "providers": [
         "perplexity",
@@ -10922,6 +11016,10 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "perplexity",
     },
     {
+      "modelCount": 2,
+      "provider": "scx",
+    },
+    {
       "modelCount": 23,
       "provider": "vertex",
     },
@@ -10967,6 +11065,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "gemma2-9b-it",
     "glm-4.6",
     "glm-4.7",
+    "glm-5.2",
     "gpt-4.1",
     "gpt-4.1-mini",
     "gpt-4.1-nano",
@@ -11034,6 +11133,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "qwen3-coder-30b-a3b-instruct",
     "qwen3-next-80b-a3b-instruct",
     "qwen3-vl-235b-a22b-instruct",
+    "qwen3.8-max",
     "sonar",
     "sonar-deep-research",
     "sonar-pro",
@@ -11049,9 +11149,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 329,
-  "totalModelProviderConfigs": 329,
-  "totalModelsWithPtb": 108,
-  "totalProviders": 21,
+  "totalEndpoints": 331,
+  "totalModelProviderConfigs": 331,
+  "totalModelsWithPtb": 110,
+  "totalProviders": 22,
 }
 `;
