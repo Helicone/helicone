@@ -38,6 +38,10 @@ import {
 } from "../../RequestBodyBuffer/IRequestBodyBuffer";
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
 import { BodyMappingType } from "@helicone-package/cost/models/types";
+import {
+  getCacheTokenUsage,
+  getEffectivePromptTokens,
+} from "@helicone-package/cost/usage/cacheTokenUtils";
 
 export interface DBLoggableProps {
   response: {
@@ -441,7 +445,9 @@ export class DBLoggable {
         prompt_tokens:
           usage?.prompt_tokens ?? usage?.input_tokens ?? usage?.inputTokens,
         completion_tokens:
-          usage?.completion_tokens ?? usage?.output_tokens ?? usage?.outputTokens,
+          usage?.completion_tokens ??
+          usage?.output_tokens ??
+          usage?.outputTokens,
       };
     }
 
@@ -495,6 +501,10 @@ export class DBLoggable {
             cached_tokens?: number;
             audio_tokens?: number;
           };
+          input_tokens_details?: {
+            cached_tokens?: number;
+            audio_tokens?: number;
+          };
           completion_tokens_details?: {
             reasoning_tokens?: number;
             audio_tokens?: number;
@@ -502,26 +512,33 @@ export class DBLoggable {
           // Anthropic cache usage
           cache_creation_input_tokens?: number;
           cache_read_input_tokens?: number;
+          // DeepSeek-compatible cache usage
+          prompt_cache_hit_tokens?: number;
+          prompt_cache_miss_tokens?: number;
         };
       };
       const usage = response.usage;
+      const {
+        promptTokens,
+        cachedTokens,
+        promptAudioTokens,
+        cacheWrite5mTokens,
+        cacheWrite1hTokens,
+      } = getCacheTokenUsage(usage);
 
       return {
-        prompt_tokens:
-          usage?.prompt_tokens ?? usage?.input_tokens,
-        completion_tokens:
-          usage?.completion_tokens ?? usage?.output_tokens,
-        prompt_cache_read_tokens:
-          usage?.prompt_tokens_details?.cached_tokens ??
-          usage?.cache_read_input_tokens,
+        prompt_tokens: getEffectivePromptTokens({
+          promptTokens,
+          cachedTokens,
+          promptAudioTokens,
+        }),
+        completion_tokens: usage?.completion_tokens ?? usage?.output_tokens,
+        prompt_cache_read_tokens: cachedTokens || undefined,
         prompt_cache_write_tokens:
-          usage?.cache_creation_input_tokens,
-        prompt_audio_tokens:
-          usage?.prompt_tokens_details?.audio_tokens,
-        completion_audio_tokens:
-          usage?.completion_tokens_details?.audio_tokens,
-        reasoning_tokens:
-          usage?.completion_tokens_details?.reasoning_tokens,
+          cacheWrite5mTokens + cacheWrite1hTokens || undefined,
+        prompt_audio_tokens: promptAudioTokens || undefined,
+        completion_audio_tokens: usage?.completion_tokens_details?.audio_tokens,
+        reasoning_tokens: usage?.completion_tokens_details?.reasoning_tokens,
       };
     }
 
@@ -821,7 +838,8 @@ export class DBLoggable {
       const parsedResponse = JSON.parse(responseText);
       extractedUsage = this.getDetailedUsage(parsedResponse);
       // Check if we actually got usage tokens
-      failedToGetUsage = !extractedUsage.prompt_tokens && !extractedUsage.completion_tokens;
+      failedToGetUsage =
+        !extractedUsage.prompt_tokens && !extractedUsage.completion_tokens;
       // Extract model from response (OpenAI format)
       if (
         typeof parsedResponse === "object" &&
@@ -861,7 +879,8 @@ export class DBLoggable {
           const responseStatus = await this.response.status();
           if (responseStatus < 400) {
             try {
-              const bodyMapping = this.request.attempt?.endpoint.userConfig?.gatewayMapping;
+              const bodyMapping =
+                this.request.attempt?.endpoint.userConfig?.gatewayMapping;
 
               // Normalize response and convert to user's requested format (OPENAI or RESPONSES)
               openAIResponse = await normalizeAIGatewayResponse({
@@ -925,7 +944,8 @@ export class DBLoggable {
 
       gatewayProvider = provider as ModelProviderName;
       gatewayModel = model as string;
-      aiGatewayBodyMapping = this.request.attempt?.endpoint.userConfig?.gatewayMapping ?? "OPENAI";
+      aiGatewayBodyMapping =
+        this.request.attempt?.endpoint.userConfig?.gatewayMapping ?? "OPENAI";
     }
 
     const kafkaMessage: MessageData = {
