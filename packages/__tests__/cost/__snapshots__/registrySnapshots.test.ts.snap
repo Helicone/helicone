@@ -300,7 +300,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "alibaba/qwen3.8": {
-    "qwen3.8-max:scx": {
+    "qwen3.8-max:scx-ai": {
       "context": 1000000,
       "crossRegion": false,
       "maxTokens": 131072,
@@ -316,7 +316,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
         "top_p",
       ],
-      "provider": "scx",
+      "provider": "scx-ai",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -7317,7 +7317,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "zai/glm-5": {
-    "glm-5.2:scx": {
+    "glm-5.2:scx-ai": {
       "context": 1000000,
       "crossRegion": false,
       "maxTokens": 131072,
@@ -7337,7 +7337,7 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "tools",
         "top_p",
       ],
-      "provider": "scx",
+      "provider": "scx-ai",
       "ptbEnabled": true,
       "regions": [
         "*",
@@ -7365,7 +7365,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
   ],
   "alibaba/qwen3.8": [
-    "scx",
+    "scx-ai",
   ],
   "anthropic/claude-3-haiku-20240307": [
     "anthropic",
@@ -7788,7 +7788,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "novita",
   ],
   "zai/glm-5": [
-    "scx",
+    "scx-ai",
   ],
 }
 `;
@@ -7849,7 +7849,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "alibaba/qwen3.8": {
-    "scx": [
+    "scx-ai": [
       {
         "cacheMultipliers": {
           "cachedInput": 0.1157,
@@ -10024,7 +10024,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
     ],
   },
   "zai/glm-5": {
-    "scx": [
+    "scx-ai": [
       {
         "cacheMultipliers": {
           "cachedInput": 0.25,
@@ -10363,7 +10363,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "glm-5.2",
       "providers": [
-        "scx",
+        "scx-ai",
       ],
     },
     {
@@ -10904,7 +10904,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "model": "qwen3.8-max",
       "providers": [
-        "scx",
+        "scx-ai",
       ],
     },
     {
@@ -11017,7 +11017,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
     },
     {
       "modelCount": 2,
-      "provider": "scx",
+      "provider": "scx-ai",
     },
     {
       "modelCount": 23,

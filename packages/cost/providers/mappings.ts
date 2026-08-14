@@ -95,7 +95,7 @@ const cerebras = /^https:\/\/api\.cerebras\.ai/;
 const canopywave = /^https:\/\/inference\.canopywave\.io/;
 
 // https://api.scx.ai
-const scx = /^https:\/\/api\.scx\.ai/;
+const scxAi = /^https:\/\/api\.scx\.ai/;
 
 export const providersNames = [
   "OPENAI",
@@ -331,7 +331,7 @@ export const providers: {
     costs: [],
   },
   {
-    pattern: scx,
+    pattern: scxAi,
     provider: "SCX",
     costs: [],
   }

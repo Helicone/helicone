@@ -265,9 +265,9 @@ export const providers: Provider[] = [
     relevanceScore: 4,
   },
   {
-    id: "scx",
+    id: "scx-ai",
     name: "SCX.ai",
-    logoUrl: "/assets/home/providers/scx.webp",
+    logoUrl: "/assets/home/providers/scx-ai.webp",
     description:
       "Configure your SCX.ai API keys for Australian sovereign, renewable-powered inference",
     docsUrl: "https://docs.helicone.ai/getting-started/integration-methods",

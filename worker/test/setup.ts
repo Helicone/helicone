@@ -234,10 +234,10 @@ vi.mock("@supabase/supabase-js", () => ({
             config: null,
             byok_enabled: isByokEnabled,
           },
-          scx: {
+          "scx-ai": {
             org_id: "test-org-id",
-            provider_name: "scx",
-            decrypted_provider_key: "test-scx-api-key",
+            provider_name: "scx-ai",
+            decrypted_provider_key: "test-scx-ai-api-key",
             decrypted_provider_secret_key: null,
             auth_type: "api_key",
             config: null,
@@ -437,10 +437,10 @@ vi.mock("@supabase/supabase-js", () => ({
             config: null,
             byok_enabled: true,
           },
-          scx: {
+          "scx-ai": {
             org_id: "0afe3a6e-d095-4ec0-bc1e-2af6f57bd2a5",
-            provider_name: "scx",
-            decrypted_provider_key: "helicone-scx-api-key",
+            provider_name: "scx-ai",
+            decrypted_provider_key: "helicone-scx-ai-api-key",
             decrypted_provider_secret_key: null,
             auth_type: "api_key",
             config: null,

@@ -79,8 +79,8 @@ describe('AI Gateway Tests', () => {
     'perplexity': {
       model: 'sonar/perplexity',
     },
-    'scx': {
-      model: 'glm-5.2/scx',
+    'scx-ai': {
+      model: 'glm-5.2/scx-ai',
     },
     'vertex': {
       model: 'gemini-2.5-flash-lite/vertex',

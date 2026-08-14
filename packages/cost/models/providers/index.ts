@@ -17,7 +17,7 @@ import { NovitaProvider } from "./novita";
 import { OpenAIProvider } from "./openai";
 import { OpenRouterProvider } from "./openrouter";
 import { PerplexityProvider } from "./perplexity";
-import { ScxProvider } from "./scx";
+import { ScxAiProvider } from "./scx-ai";
 import { VertexProvider } from "./vertex";
 import { XAIProvider } from "./xai";
 
@@ -42,7 +42,7 @@ export const providers = {
   openai: new OpenAIProvider(),
   openrouter: new OpenRouterProvider(),
   perplexity: new PerplexityProvider(),
-  scx: new ScxProvider(),
+  "scx-ai": new ScxAiProvider(),
   vertex: new VertexProvider(),
   xai: new XAIProvider()
 } as const;
@@ -75,7 +75,7 @@ export const ResponsesAPIEnabledProviders: ModelProviderName[] = [
   "chutes",
   "deepinfra",
   "deepseek",
-  "scx",
+  "scx-ai",
 
   // has known issues with returning structured JSONS
   // should be okay to enable, but its not stable enough to add without request

@@ -3,9 +3,9 @@ import type { ModelProviderConfig } from "../../../types";
 import { Glm5ModelName } from "./models";
 
 export const endpoints = {
-  "glm-5.2:scx": {
+  "glm-5.2:scx-ai": {
     providerModelId: "GLM-5.2",
-    provider: "scx",
+    provider: "scx-ai",
     author: "zai",
     pricing: [
       {

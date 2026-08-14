@@ -1,6 +1,6 @@
 import { BaseProvider } from "./base";
 
-export class ScxProvider extends BaseProvider {
+export class ScxAiProvider extends BaseProvider {
   readonly displayName = "SCX.ai";
   readonly baseUrl = "https://api.scx.ai/";
   readonly auth = "api-key" as const;

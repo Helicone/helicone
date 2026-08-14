@@ -35,7 +35,7 @@ const canopywaveAuthExpectations = {
   },
 };
 
-const scxAuthExpectations = {
+const scxAiAuthExpectations = {
   headers: {
     Authorization: /^Bearer /,
   },
@@ -5576,7 +5576,7 @@ describe("Alibaba Registry Tests", () => {
     describe("qwen3.8-max", () => {
       it("should handle scx provider", () =>
         runGatewayTest({
-          model: "qwen3.8-max/scx",
+          model: "qwen3.8-max/scx-ai",
           expected: {
             providers: [
               {
@@ -5584,7 +5584,7 @@ describe("Alibaba Registry Tests", () => {
                 response: "success",
                 model: "Qwen3.8-Max",
                 data: createOpenAIMockResponse("Qwen3.8-Max"),
-                expects: scxAuthExpectations,
+                expects: scxAiAuthExpectations,
               },
             ],
             finalStatus: 200,
@@ -5593,7 +5593,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle tool calls with scx provider", () =>
         runGatewayTest({
-          model: "qwen3.8-max/scx",
+          model: "qwen3.8-max/scx-ai",
           request: {
             body: {
               messages: [{ role: "user", content: "What's the weather?" }],
@@ -5625,7 +5625,7 @@ describe("Alibaba Registry Tests", () => {
                 model: "Qwen3.8-Max",
                 data: createOpenAIMockResponse("Qwen3.8-Max"),
                 expects: {
-                  ...scxAuthExpectations,
+                  ...scxAiAuthExpectations,
                   bodyContains: ["tools", "get_weather"],
                 },
               },
@@ -5636,7 +5636,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle image input with scx provider", () =>
         runGatewayTest({
-          model: "qwen3.8-max/scx",
+          model: "qwen3.8-max/scx-ai",
           request: {
             body: {
               messages: [
@@ -5661,7 +5661,7 @@ describe("Alibaba Registry Tests", () => {
                 model: "Qwen3.8-Max",
                 data: createOpenAIMockResponse("Qwen3.8-Max"),
                 expects: {
-                  ...scxAuthExpectations,
+                  ...scxAiAuthExpectations,
                   bodyContains: ["image_url"],
                 },
               },
@@ -5672,7 +5672,7 @@ describe("Alibaba Registry Tests", () => {
 
       it("should handle all supported parameters with scx provider", () =>
         runGatewayTest({
-          model: "qwen3.8-max/scx",
+          model: "qwen3.8-max/scx-ai",
           request: {
             body: {
               messages: [
@@ -5695,7 +5695,7 @@ describe("Alibaba Registry Tests", () => {
                 model: "Qwen3.8-Max",
                 data: createOpenAIMockResponse("Qwen3.8-Max"),
                 expects: {
-                  ...scxAuthExpectations,
+                  ...scxAiAuthExpectations,
                   bodyContains: [
                     "max_tokens",
                     "temperature",
@@ -5717,7 +5717,7 @@ describe("Alibaba Registry Tests", () => {
   describe("Error scenarios - qwen3.8-max with SCX Provider", () => {
     it("should handle SCX provider failure", () =>
       runGatewayTest({
-        model: "qwen3.8-max/scx",
+        model: "qwen3.8-max/scx-ai",
         expected: {
           providers: [
             {
@@ -5733,7 +5733,7 @@ describe("Alibaba Registry Tests", () => {
 
     it("should handle rate limiting from SCX", () =>
       runGatewayTest({
-        model: "qwen3.8-max/scx",
+        model: "qwen3.8-max/scx-ai",
         expected: {
           providers: [
             {
@@ -5749,7 +5749,7 @@ describe("Alibaba Registry Tests", () => {
 
     it("should handle authentication failure from SCX", () =>
       runGatewayTest({
-        model: "qwen3.8-max/scx",
+        model: "qwen3.8-max/scx-ai",
         expected: {
           providers: [
             {

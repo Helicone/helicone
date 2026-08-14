@@ -36,7 +36,7 @@ export const PROVIDER_PRIORITIES: Record<ModelProviderName, number> = {
   novita: 4,
 
   perplexity: 4,
-  scx: 4,
+  "scx-ai": 4,
   vertex: 4,
   xai: 4,
 

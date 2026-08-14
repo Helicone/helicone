@@ -18,7 +18,7 @@ const canopywaveAuthExpectations = {
 };
 
 // Define auth expectations for SCX.ai provider
-const scxAuthExpectations = {
+const scxAiAuthExpectations = {
   headers: {
     Authorization: /^Bearer /,
   },
@@ -860,7 +860,7 @@ describe("Zai Registry Tests", () => {
     describe("glm-5.2", () => {
       it("should handle scx provider", () =>
         runGatewayTest({
-          model: "glm-5.2/scx",
+          model: "glm-5.2/scx-ai",
           expected: {
             providers: [
               {
@@ -868,7 +868,7 @@ describe("Zai Registry Tests", () => {
                 response: "success",
                 model: "GLM-5.2",
                 data: createOpenAIMockResponse("GLM-5.2"),
-                expects: scxAuthExpectations,
+                expects: scxAiAuthExpectations,
               },
             ],
             finalStatus: 200,
@@ -877,7 +877,7 @@ describe("Zai Registry Tests", () => {
 
       it("should handle tool calls with scx provider", () =>
         runGatewayTest({
-          model: "glm-5.2/scx",
+          model: "glm-5.2/scx-ai",
           request: {
             body: {
               messages: [{ role: "user", content: "What's the weather?" }],
@@ -910,7 +910,7 @@ describe("Zai Registry Tests", () => {
                 model: "GLM-5.2",
                 data: createOpenAIMockResponse("GLM-5.2"),
                 expects: {
-                  ...scxAuthExpectations,
+                  ...scxAiAuthExpectations,
                   bodyContains: ["tools", "tool_choice", "get_weather"],
                 },
               },
@@ -921,7 +921,7 @@ describe("Zai Registry Tests", () => {
 
       it("should handle reasoning parameter with scx provider", () =>
         runGatewayTest({
-          model: "glm-5.2/scx",
+          model: "glm-5.2/scx-ai",
           request: {
             body: {
               messages: [{ role: "user", content: "Solve this problem" }],
@@ -937,7 +937,7 @@ describe("Zai Registry Tests", () => {
                 model: "GLM-5.2",
                 data: createOpenAIMockResponse("GLM-5.2"),
                 expects: {
-                  ...scxAuthExpectations,
+                  ...scxAiAuthExpectations,
                   bodyContains: ["reasoning", "step_by_step", "temperature"],
                 },
               },
@@ -948,7 +948,7 @@ describe("Zai Registry Tests", () => {
 
       it("should handle all supported parameters with scx provider", () =>
         runGatewayTest({
-          model: "glm-5.2/scx",
+          model: "glm-5.2/scx-ai",
           request: {
             body: {
               messages: [
@@ -972,7 +972,7 @@ describe("Zai Registry Tests", () => {
                 model: "GLM-5.2",
                 data: createOpenAIMockResponse("GLM-5.2"),
                 expects: {
-                  ...scxAuthExpectations,
+                  ...scxAiAuthExpectations,
                   bodyContains: [
                     "max_tokens",
                     "temperature",
@@ -995,7 +995,7 @@ describe("Zai Registry Tests", () => {
   describe("Error scenarios - glm-5.2 with SCX Provider", () => {
     it("should handle SCX provider failure", () =>
       runGatewayTest({
-        model: "glm-5.2/scx",
+        model: "glm-5.2/scx-ai",
         expected: {
           providers: [
             {
@@ -1011,7 +1011,7 @@ describe("Zai Registry Tests", () => {
 
     it("should handle rate limiting from SCX", () =>
       runGatewayTest({
-        model: "glm-5.2/scx",
+        model: "glm-5.2/scx-ai",
         expected: {
           providers: [
             {
@@ -1027,7 +1027,7 @@ describe("Zai Registry Tests", () => {
 
     it("should handle authentication failure from SCX", () =>
       runGatewayTest({
-        model: "glm-5.2/scx",
+        model: "glm-5.2/scx-ai",
         expected: {
           providers: [
             {
@@ -1043,7 +1043,7 @@ describe("Zai Registry Tests", () => {
 
     it("should handle model not found error from SCX", () =>
       runGatewayTest({
-        model: "glm-5.2/scx",
+        model: "glm-5.2/scx-ai",
         expected: {
           providers: [
             {
@@ -1059,7 +1059,7 @@ describe("Zai Registry Tests", () => {
 
     it("should handle timeout from SCX", () =>
       runGatewayTest({
-        model: "glm-5.2/scx",
+        model: "glm-5.2/scx-ai",
         expected: {
           providers: [
             {
@@ -1077,7 +1077,7 @@ describe("Zai Registry Tests", () => {
   describe("Provider validation - glm-5.2 with SCX", () => {
     it("should handle provider model ID mapping correctly for SCX", () =>
       runGatewayTest({
-        model: "glm-5.2/scx",
+        model: "glm-5.2/scx-ai",
         expected: {
           providers: [
             {
@@ -1085,7 +1085,7 @@ describe("Zai Registry Tests", () => {
               response: "success",
               model: "GLM-5.2", // Should map to the correct provider model ID
               data: createOpenAIMockResponse("GLM-5.2"),
-              expects: scxAuthExpectations,
+              expects: scxAiAuthExpectations,
             },
           ],
           finalStatus: 200,
@@ -1094,7 +1094,7 @@ describe("Zai Registry Tests", () => {
 
     it("should handle request body mapping for SCX", () =>
       runGatewayTest({
-        model: "glm-5.2/scx",
+        model: "glm-5.2/scx-ai",
         request: {
           bodyMapping: "NO_MAPPING",
         },
@@ -1106,7 +1106,7 @@ describe("Zai Registry Tests", () => {
               model: "GLM-5.2",
               data: createOpenAIMockResponse("GLM-5.2"),
               expects: {
-                ...scxAuthExpectations,
+                ...scxAiAuthExpectations,
               },
             },
           ],

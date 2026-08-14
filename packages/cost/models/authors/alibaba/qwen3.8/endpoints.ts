@@ -3,9 +3,9 @@ import type { ModelProviderConfig } from "../../../types";
 import { Qwen38ModelName } from "./models";
 
 export const endpoints = {
-  "qwen3.8-max:scx": {
+  "qwen3.8-max:scx-ai": {
     providerModelId: "Qwen3.8-Max",
-    provider: "scx",
+    provider: "scx-ai",
     author: "alibaba",
     pricing: [
       {
