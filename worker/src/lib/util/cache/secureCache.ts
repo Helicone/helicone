@@ -247,7 +247,7 @@ export async function getFromKVCacheOnly(
     key,
     env,
     useMemoryCache: false,
-    expirationTtl: 60, // 1 minute
+    expirationTtl,
   });
 }
 
@@ -262,7 +262,7 @@ export async function getAndStoreInCache<T, K>(
     key,
     env,
     useMemoryCache: false,
-    expirationTtl: 60, // 1 minute
+    expirationTtl,
   });
   if (cached !== null) {
     try {
