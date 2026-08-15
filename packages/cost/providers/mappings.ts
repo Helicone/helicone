@@ -8,6 +8,7 @@ import { costs as llamaCosts } from "./llama";
 import { costs as nvidiaCosts } from "./nvidia";
 import { costs as cohereCosts } from "./cohere";
 import { costs as deepseekCosts } from "./deepseek";
+import { costs as crusoeCosts } from "./crusoe";
 import { costs as fireworksAICosts } from "./fireworks";
 import { costs as groqCosts } from "./groq";
 import { costs as mistralCosts } from "./mistral";
@@ -73,6 +74,9 @@ const deepseek = /^https:\/\/api\.deepseek\.com/;
 const x = /^https:\/\/api\.x\.ai/;
 const avianPattern = /^https:\/\/api\.avian\.io/;
 
+// https://api.inference.crusoecloud.com
+const crusoe = /^https:\/\/api\.inference\.crusoecloud\.com/;
+
 //https://api.tokenfactory.nebius.com
 const nebius = /^https:\/\/api\.tokenfactory\.nebius\.com/;
 
@@ -122,6 +126,7 @@ export const providersNames = [
   "DEEPSEEK",
   "X",
   "AVIAN",
+  "CRUSOE",
   "NEBIUS",
   "NOVITA",
   "OPENPIPE",
@@ -170,6 +175,11 @@ export const providers: {
     pattern: azurePattern,
     provider: "AZURE",
     costs: [...azureCosts, ...openAIProvider.costs],
+  },
+  {
+    pattern: crusoe,
+    provider: "CRUSOE",
+    costs: crusoeCosts,
   },
   {
     pattern: nebius,
