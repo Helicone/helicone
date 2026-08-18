@@ -123,10 +123,14 @@ export const dbProviderToProvider = (
   if (provider === "groq" || provider === "Groq") {
     return "groq";
   }
-  if (provider === "google" || provider === "Google AI (Gemini)") {
+  if (
+    provider === "google" ||
+    provider === "google-ai-studio" ||
+    provider === "Google AI (Gemini)"
+  ) {
     return "google-ai-studio";
   }
-  if (provider === "Azure OpenAI") {
+  if (provider === "azure" || provider === "Azure OpenAI") {
     return "azure";
   }
   if (provider === "deepseek" || provider === "DeepSeek") {
@@ -158,6 +162,18 @@ export const dbProviderToProvider = (
   }
   if (provider === "nebius" || provider === "Nebius") {
     return "nebius";
+  }
+  if (provider === "xai" || provider === "XAI") {
+    return "xai";
+  }
+  if (provider === "perplexity" || provider === "Perplexity") {
+    return "perplexity";
+  }
+  if (provider === "mistral" || provider === "Mistral") {
+    return "mistral";
+  }
+  if (provider === "helicone" || provider === "Helicone") {
+    return "helicone";
   }
   return null;
 };
