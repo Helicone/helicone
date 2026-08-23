@@ -83,11 +83,13 @@ vi.mock("@supabase/supabase-js", () => ({
         chainObj.eq = vi.fn((field: string, value: any) => {
           if (field === "org_id") {
             const hasCredits = currentTestCase?.creditsEnabled === true;
+            const features =
+              currentTestCase?.featureFlags ?? (hasCredits ? ["credits"] : []);
             return {
               ...chainObj,
               then: (resolve: any) =>
                 resolve({
-                  data: hasCredits ? [{ feature: "credits" }] : [],
+                  data: features.map((feature) => ({ feature })),
                   error: null,
                 }),
             };
