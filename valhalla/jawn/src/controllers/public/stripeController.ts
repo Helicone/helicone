@@ -16,8 +16,8 @@ import type { JawnAuthenticatedRequest } from "../../types/request";
 import { isError } from "../../packages/common/result";
 import express from "express";
 import Stripe from "stripe";
-import { isPtbBlocked } from "../../lib/billing/ptbAccess";
-import { PTB_BLOCKED_MESSAGE } from "../../../../../packages/common/billing/ptbAccess";
+import { hasPtbAccess } from "../../lib/billing/ptbAccess";
+import { PTB_DISABLED_MESSAGE } from "../../../../../packages/common/billing/ptbAccess";
 
 export interface UpgradeToProRequest {
   addons?: {
@@ -200,18 +200,18 @@ export class StripeController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Body() body: CreateCloudGatewayCheckoutSessionRequest
   ): Promise<{ checkoutUrl: string }> {
-    const blockedResult = await isPtbBlocked(request.authParams.organizationId);
-    if (blockedResult.error) {
+    const accessResult = await hasPtbAccess(request.authParams.organizationId);
+    if (accessResult.error) {
       console.error(
         "Error checking pass-through billing access",
-        blockedResult.error
+        accessResult.error
       );
       this.setStatus(503);
       throw new Error("Unable to verify pass-through billing access");
     }
-    if (blockedResult.data) {
+    if (!accessResult.data) {
       this.setStatus(403);
-      throw new Error(PTB_BLOCKED_MESSAGE);
+      throw new Error(PTB_DISABLED_MESSAGE);
     }
 
     const stripeManager = new StripeManager(request.authParams);

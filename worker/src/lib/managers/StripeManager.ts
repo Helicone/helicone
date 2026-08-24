@@ -4,7 +4,6 @@ import { Wallet } from "../durable-objects/Wallet";
 import { createClient } from "@supabase/supabase-js";
 import { Database } from "../../../supabase/database.types";
 import { AutoTopoffManager } from "./AutoTopoffManager";
-import { FeatureFlagManager } from "./FeatureFlagManager";
 
 export class StripeManager {
   private webhookSecret: string;
@@ -175,14 +174,6 @@ export class StripeManager {
     const orgId = await getOrgIdFromStripeCustomerId(this.env, customerId);
     if (!orgId) {
       return err("Unable to get org id from payment intent");
-    }
-
-    const featureFlagManager = new FeatureFlagManager(this.env);
-    if (await featureFlagManager.isPtbBlocked(orgId)) {
-      console.error(
-        `Ignoring successful pass-through billing payment for blocked org ${orgId}: ${paymentIntent.id}`
-      );
-      return ok(undefined);
     }
 
     const walletId = this.wallet.idFromName(orgId);

@@ -85,7 +85,7 @@ vi.mock("@supabase/supabase-js", () => ({
             const hasCredits = currentTestCase?.creditsEnabled === true;
             const features =
               currentTestCase?.featureFlags ??
-              (hasCredits ? ["credits", "ptb_enabled"] : []);
+              (hasCredits ? ["credits", "ptb_enabled"] : ["ptb_enabled"]);
             return {
               ...chainObj,
               then: (resolve: any) =>

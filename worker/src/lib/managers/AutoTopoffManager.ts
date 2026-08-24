@@ -5,7 +5,10 @@ import Stripe from "stripe";
 import { getAndStoreInCache, removeFromCache } from "../util/cache/secureCache";
 import { randomUUID } from "crypto";
 import { FeatureFlagManager } from "./FeatureFlagManager";
-import { PTB_BLOCKED_MESSAGE } from "../../../../packages/common/billing/ptbAccess";
+import {
+  PTB_DISABLED_MESSAGE,
+  PTB_ENABLED_FEATURE,
+} from "../../../../packages/common/billing/ptbAccess";
 
 // Constants
 const CACHE_TTL_MS = 60 * 1000; // 1 minutes cache for auto-topoff settings
@@ -112,7 +115,7 @@ export class AutoTopoffManager {
     effectiveBalanceCents: number
   ): Promise<boolean> {
     const featureFlagManager = new FeatureFlagManager(this.env);
-    if (await featureFlagManager.isPtbBlocked(orgId)) {
+    if (!(await featureFlagManager.hasFeature(orgId, PTB_ENABLED_FEATURE))) {
       return false;
     }
 
@@ -194,8 +197,8 @@ export class AutoTopoffManager {
   async initiateTopoff(orgId: string): Promise<Result<string, string>> {
     try {
       const featureFlagManager = new FeatureFlagManager(this.env);
-      if (await featureFlagManager.isPtbBlocked(orgId)) {
-        return err(PTB_BLOCKED_MESSAGE);
+      if (!(await featureFlagManager.hasFeature(orgId, PTB_ENABLED_FEATURE))) {
+        return err(PTB_DISABLED_MESSAGE);
       }
 
       // Get settings

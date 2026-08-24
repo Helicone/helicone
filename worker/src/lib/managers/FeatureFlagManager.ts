@@ -2,10 +2,6 @@ import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { Database } from "../../../supabase/database.types";
 import { SecureCacheEnv, getAndStoreInCache } from "../util/cache/secureCache";
 import { Result, ok, err } from "../util/results";
-import {
-  PTB_BLOCKED_FEATURE,
-  PTB_ENABLED_FEATURE,
-} from "../../../../packages/common/billing/ptbAccess";
 
 export class FeatureFlagManager {
   private supabaseClient: SupabaseClient<Database>;
@@ -36,26 +32,6 @@ export class FeatureFlagManager {
       return false;
     }
     return features.data.includes(feature);
-  }
-
-  /**
-   * Billing access checks fail closed so a database or cache error cannot
-   * create charges or spend Helicone provider credits.
-   */
-  async isPtbBlocked(orgId: string): Promise<boolean> {
-    const features = await this.getFeatureFlags(orgId);
-    if (features.error || !features.data) {
-      console.error(
-        `Unable to verify pass-through billing access for org ${orgId}:`,
-        features.error
-      );
-      return true;
-    }
-
-    return (
-      features.data.includes(PTB_BLOCKED_FEATURE) ||
-      !features.data.includes(PTB_ENABLED_FEATURE)
-    );
   }
 
   /**
