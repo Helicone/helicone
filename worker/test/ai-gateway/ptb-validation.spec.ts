@@ -102,7 +102,29 @@ describe("PTB request validation", () => {
     setSupabaseTestCase({
       byokEnabled: false,
       creditsEnabled: true,
-      featureFlags: ["credits", "ptb_blocked"],
+      featureFlags: ["credits", "ptb_enabled", "ptb_blocked"],
+    });
+
+    const { response } = await runGatewayTest({
+      model: "gpt-4o-mini/openai",
+      request: {
+        messages: [{ role: "user", content: "Hello" }],
+      },
+      expected: {
+        providers: [],
+        finalStatus: 403,
+        responseContains: "Pass-through billing is disabled",
+      },
+    });
+
+    expect(response.status).toBe(403);
+  });
+
+  it("blocks PTB before calling a provider when the org is not allowlisted", async () => {
+    setSupabaseTestCase({
+      byokEnabled: false,
+      creditsEnabled: true,
+      featureFlags: ["credits"],
     });
 
     const { response } = await runGatewayTest({

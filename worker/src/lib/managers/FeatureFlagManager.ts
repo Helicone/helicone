@@ -2,7 +2,10 @@ import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { Database } from "../../../supabase/database.types";
 import { SecureCacheEnv, getAndStoreInCache } from "../util/cache/secureCache";
 import { Result, ok, err } from "../util/results";
-import { PTB_BLOCKED_FEATURE } from "../../../../packages/common/billing/ptbAccess";
+import {
+  PTB_BLOCKED_FEATURE,
+  PTB_ENABLED_FEATURE,
+} from "../../../../packages/common/billing/ptbAccess";
 
 export class FeatureFlagManager {
   private supabaseClient: SupabaseClient<Database>;
@@ -49,7 +52,10 @@ export class FeatureFlagManager {
       return true;
     }
 
-    return features.data.includes(PTB_BLOCKED_FEATURE);
+    return (
+      features.data.includes(PTB_BLOCKED_FEATURE) ||
+      !features.data.includes(PTB_ENABLED_FEATURE)
+    );
   }
 
   /**
