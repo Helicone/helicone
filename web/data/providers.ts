@@ -275,6 +275,17 @@ export const providers: Provider[] = [
     relevanceScore: 3,
   },
   {
+    id: "scalattice",
+    name: "Scalattice",
+    logoUrl: "/assets/home/providers/scalattice.svg",
+    description: "Configure your Scalattice API keys for OpenAI-compatible inference",
+    docsUrl:
+      "https://docs.helicone.ai/getting-started/integration-method/scalattice",
+    apiKeyLabel: "Scalattice API Key",
+    apiKeyPlaceholder: "slt_...",
+    relevanceScore: 3,
+  },
+  {
     id: "helicone",
     name: "Helicone Inference",
     logoUrl: "/assets/providers/openai.webp",
