@@ -367,6 +367,47 @@ export const endpoints = {
       "*": {},
     },
   },
+  "qwen3.8-27b:tiyuvta": {
+    providerModelId: "qwen/qwen3.8-27b",
+    provider: "tiyuvta",
+    author: "qwen",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000003,
+        output: 0.00000203,
+        cacheMultipliers: {
+          cachedInput: 1 / 3,
+        },
+      },
+    ],
+    quantization: "fp4",
+    contextLength: 262_144,
+    maxCompletionTokens: 262_144,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "seed",
+      "response_format",
+      "structured_outputs",
+      "tools",
+      "tool_choice",
+      "reasoning",
+      "reasoning_effort",
+      "include_reasoning",
+      "top_k",
+      "min_p",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${Qwen3ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

@@ -298,6 +298,36 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "qwen3.8-27b:tiyuvta": {
+      "context": 262144,
+      "crossRegion": false,
+      "maxTokens": 262144,
+      "modelId": "qwen/qwen3.8-27b",
+      "parameters": [
+        "frequency_penalty",
+        "include_reasoning",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "reasoning",
+        "reasoning_effort",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "tiyuvta",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
   },
   "anthropic/claude-3-haiku-20240307": {
     "claude-3-haiku-20240307:anthropic": {
@@ -6448,6 +6478,38 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "ornith-ai/ornith-1.5": {
+    "ornith-1.5-35b-a3b:tiyuvta": {
+      "context": 262144,
+      "crossRegion": false,
+      "maxTokens": 262144,
+      "modelId": "ornith-ai/ornith-1.5-35b-a3b",
+      "parameters": [
+        "frequency_penalty",
+        "include_reasoning",
+        "max_tokens",
+        "min_p",
+        "presence_penalty",
+        "reasoning",
+        "reasoning_effort",
+        "repetition_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_k",
+        "top_p",
+      ],
+      "provider": "tiyuvta",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
+  },
   "perplexity/sonar": {
     "sonar-deep-research:perplexity": {
       "context": 127000,
@@ -7311,6 +7373,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "novita",
     "novita",
     "openrouter",
+    "tiyuvta",
   ],
   "anthropic/claude-3-haiku-20240307": [
     "anthropic",
@@ -7693,6 +7756,9 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "openrouter",
   ],
+  "ornith-ai/ornith-1.5": [
+    "tiyuvta",
+  ],
   "perplexity/sonar": [
     "perplexity",
     "perplexity",
@@ -7786,6 +7852,16 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       {
         "input": 4.22e-7,
         "output": 8.44e-7,
+        "threshold": 0,
+      },
+    ],
+    "tiyuvta": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.3333333333333333,
+        },
+        "input": 3e-7,
+        "output": 0.00000203,
         "threshold": 0,
       },
     ],
@@ -9866,6 +9942,18 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "ornith-ai/ornith-1.5": {
+    "tiyuvta": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.36,
+        },
+        "input": 2.5e-7,
+        "output": 0.0000012,
+        "threshold": 0,
+      },
+    ],
+  },
   "perplexity/sonar": {
     "perplexity": [
       {
@@ -10763,6 +10851,12 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "ornith-1.5-35b-a3b",
+      "providers": [
+        "tiyuvta",
+      ],
+    },
+    {
       "model": "qwen2.5-coder-7b-fast",
       "providers": [
         "nebius",
@@ -10811,6 +10905,12 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "qwen3-vl-235b-a22b-instruct",
       "providers": [
         "novita",
+      ],
+    },
+    {
+      "model": "qwen3.8-27b",
+      "providers": [
+        "tiyuvta",
       ],
     },
     {
@@ -10920,6 +11020,10 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "modelCount": 5,
       "provider": "perplexity",
+    },
+    {
+      "modelCount": 2,
+      "provider": "tiyuvta",
     },
     {
       "modelCount": 23,
@@ -11049,9 +11153,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 329,
-  "totalModelProviderConfigs": 329,
+  "totalEndpoints": 331,
+  "totalModelProviderConfigs": 331,
   "totalModelsWithPtb": 108,
-  "totalProviders": 21,
+  "totalProviders": 22,
 }
 `;

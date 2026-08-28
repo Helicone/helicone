@@ -265,6 +265,16 @@ export const providers: Provider[] = [
     relevanceScore: 4,
   },
   {
+    id: "tiyuvta",
+    name: "Tiyuvta",
+    logoUrl: "/assets/home/providers/tiyuvta.webp",
+    description: "Configure your Tiyuvta API key",
+    docsUrl: "https://inference.tiyuvta.ai/quickstart?c=helicone-gateway",
+    apiKeyLabel: "Tiyuvta API Key",
+    apiKeyPlaceholder: "...",
+    relevanceScore: 4,
+  },
+  {
     id: "chutes",
     name: "Chutes",
     logoUrl: "/assets/home/providers/chutes.webp",
