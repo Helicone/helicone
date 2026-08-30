@@ -9,6 +9,8 @@ import {
   RequestsOverTime,
   CostOverTime,
   TokensOverTime,
+  DetailedTokensOverTime,
+  ModelUsageOverTime,
   LatencyOverTime,
   TimeToFirstTokenOverTime,
   UsersOverTime,
@@ -244,6 +246,42 @@ export class MetricsController extends Controller {
   ): Promise<Result<TokensOverTime[], string>> {
     const metricsManager = new MetricsManager(request.authParams);
     const result = await metricsManager.getTokensOverTime({
+      timeFilter: requestBody.timeFilter,
+      userFilter: requestBody.filter,
+      dbIncrement: requestBody.dbIncrement ?? "hour",
+      timeZoneDifference: requestBody.timeZoneDifference,
+    });
+    if (result.error) {
+      this.setStatus(500);
+    }
+    return result;
+  }
+
+  @Post("/detailedTokensOverTime")
+  public async getDetailedTokensOverTime(
+    @Body() requestBody: MetricsOverTimeBody,
+    @Request() request: JawnAuthenticatedRequest,
+  ): Promise<Result<DetailedTokensOverTime[], string>> {
+    const metricsManager = new MetricsManager(request.authParams);
+    const result = await metricsManager.getDetailedTokensOverTime({
+      timeFilter: requestBody.timeFilter,
+      userFilter: requestBody.filter,
+      dbIncrement: requestBody.dbIncrement ?? "hour",
+      timeZoneDifference: requestBody.timeZoneDifference,
+    });
+    if (result.error) {
+      this.setStatus(500);
+    }
+    return result;
+  }
+
+  @Post("/modelUsageOverTime")
+  public async getModelUsageOverTime(
+    @Body() requestBody: MetricsOverTimeBody,
+    @Request() request: JawnAuthenticatedRequest,
+  ): Promise<Result<ModelUsageOverTime[], string>> {
+    const metricsManager = new MetricsManager(request.authParams);
+    const result = await metricsManager.getModelUsageOverTime({
       timeFilter: requestBody.timeFilter,
       userFilter: requestBody.filter,
       dbIncrement: requestBody.dbIncrement ?? "hour",

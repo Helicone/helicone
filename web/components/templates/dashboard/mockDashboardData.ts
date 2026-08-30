@@ -406,6 +406,43 @@ export const getMockOverTimeData = (timeIncrement: TimeIncrement) => {
       refetch: () => {},
       remove: () => {},
     },
+    detailedTokens: {
+      data: {
+        data: Array(30)
+          .fill(0)
+          .map((_, i) => ({
+            time: new Date(Date.now() - (29 - i) * 24 * 60 * 60 * 1000),
+            prompt_tokens: Math.floor(Math.random() * 1000000 + 500000),
+            completion_tokens: Math.floor(Math.random() * 500000 + 100000),
+            reasoning_tokens: Math.floor(Math.random() * 200000),
+            prompt_cache_read_tokens: Math.floor(Math.random() * 800000),
+            prompt_cache_write_tokens: Math.floor(Math.random() * 100000),
+          })),
+        error: null,
+      },
+      isLoading: false,
+      isFetching: false,
+      refetch: () => Promise.resolve({} as any),
+    },
+    modelUsage: {
+      data: {
+        data: ["gpt-4o", "claude-sonnet-4", "gemini-2.5-flash"].flatMap(
+          (model) =>
+            Array(30)
+              .fill(0)
+              .map((_, i) => ({
+                time: new Date(Date.now() - (29 - i) * 24 * 60 * 60 * 1000),
+                model,
+                request_count: Math.floor(Math.random() * 1000 + 100),
+                total_tokens: Math.floor(Math.random() * 500000 + 50000),
+              })),
+        ),
+        error: null,
+      },
+      isLoading: false,
+      isFetching: false,
+      refetch: () => Promise.resolve({} as any),
+    },
   };
 };
 

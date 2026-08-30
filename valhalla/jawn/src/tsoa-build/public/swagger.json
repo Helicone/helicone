@@ -10889,6 +10889,137 @@
 					}
 				]
 			},
+			"DetailedTokensOverTime": {
+				"properties": {
+					"time": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"prompt_tokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"completion_tokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"reasoning_tokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"prompt_cache_read_tokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"prompt_cache_write_tokens": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"time",
+					"prompt_tokens",
+					"completion_tokens",
+					"reasoning_tokens",
+					"prompt_cache_read_tokens",
+					"prompt_cache_write_tokens"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_DetailedTokensOverTime-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/DetailedTokensOverTime"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_DetailedTokensOverTime-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_DetailedTokensOverTime-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
+			"ModelUsageOverTime": {
+				"properties": {
+					"time": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"model": {
+						"type": "string"
+					},
+					"request_count": {
+						"type": "number",
+						"format": "double"
+					},
+					"total_tokens": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"time",
+					"model",
+					"request_count",
+					"total_tokens"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_ModelUsageOverTime-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/ModelUsageOverTime"
+						},
+						"type": "array"
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Result_ModelUsageOverTime-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ModelUsageOverTime-Array_"
+					},
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
+			},
 			"LatencyOverTime": {
 				"properties": {
 					"time": {
@@ -22251,6 +22382,78 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/Result_TokensOverTime-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Metrics"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MetricsOverTimeBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/metrics/detailedTokensOverTime": {
+			"post": {
+				"operationId": "GetDetailedTokensOverTime",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_DetailedTokensOverTime-Array.string_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Metrics"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MetricsOverTimeBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1/metrics/modelUsageOverTime": {
+			"post": {
+				"operationId": "GetModelUsageOverTime",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Result_ModelUsageOverTime-Array.string_"
 								}
 							}
 						}

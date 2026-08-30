@@ -12,6 +12,8 @@ import {
   useRequestsOverTime,
   useCostOverTime,
   useTokensOverTime,
+  useDetailedTokensOverTime,
+  useModelUsageOverTime,
   useLatencyOverTime,
   useTimeToFirstTokenOverTime,
   useUsersOverTime,
@@ -105,6 +107,8 @@ export const useDashboardPage = ({
     isLive
   );
   const threatsOverTimeQuery = useThreatsOverTime(params, isLive);
+  const detailedTokensOverTimeQuery = useDetailedTokensOverTime(params, isLive);
+  const modelUsageOverTimeQuery = useModelUsageOverTime(params, isLive);
 
   // Aggregate metrics using Jawn endpoints
   const totalCostQuery = useTotalCost(params, isLive);
@@ -268,6 +272,44 @@ export const useDashboardPage = ({
       isLoading: threatsOverTimeQuery.isLoading,
       isFetching: threatsOverTimeQuery.isFetching,
       refetch: threatsOverTimeQuery.refetch,
+    },
+    detailedTokens: {
+      data: detailedTokensOverTimeQuery.data?.data
+        ? {
+            data: detailedTokensOverTimeQuery.data.data.map((d) => ({
+              prompt_tokens: +d.prompt_tokens,
+              completion_tokens: +d.completion_tokens,
+              reasoning_tokens: +d.reasoning_tokens,
+              prompt_cache_read_tokens: +d.prompt_cache_read_tokens,
+              prompt_cache_write_tokens: +d.prompt_cache_write_tokens,
+              time: new Date(d.time),
+            })),
+            error: null,
+          }
+        : detailedTokensOverTimeQuery.data?.error
+          ? { data: null, error: detailedTokensOverTimeQuery.data.error }
+          : undefined,
+      isLoading: detailedTokensOverTimeQuery.isLoading,
+      isFetching: detailedTokensOverTimeQuery.isFetching,
+      refetch: detailedTokensOverTimeQuery.refetch,
+    },
+    modelUsage: {
+      data: modelUsageOverTimeQuery.data?.data
+        ? {
+            data: modelUsageOverTimeQuery.data.data.map((d) => ({
+              model: d.model,
+              request_count: +d.request_count,
+              total_tokens: +d.total_tokens,
+              time: new Date(d.time),
+            })),
+            error: null,
+          }
+        : modelUsageOverTimeQuery.data?.error
+          ? { data: null, error: modelUsageOverTimeQuery.data.error }
+          : undefined,
+      isLoading: modelUsageOverTimeQuery.isLoading,
+      isFetching: modelUsageOverTimeQuery.isFetching,
+      refetch: modelUsageOverTimeQuery.refetch,
     },
   };
 
