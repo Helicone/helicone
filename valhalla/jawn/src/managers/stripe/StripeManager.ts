@@ -1268,9 +1268,12 @@ WHERE (${builtFilter.filter})`,
   /**
    * Internal helper to migrate a subscription to new pricing.
    * Handles both pro and team tier migrations.
+   * @param tierType - The target tier type ("pro" or "team")
+   * @param skipTierValidation - If true, skip checking if org is on a valid source tier (for cross-tier upgrades)
    */
   private async migrateToNewPricing(
-    tierType: "pro" | "team"
+    tierType: "pro" | "team",
+    skipTierValidation: boolean = false
   ): Promise<
     Result<{ previousTier: string; newTier: string; subscriptionId: string }, string>
   > {
@@ -1289,7 +1292,7 @@ WHERE (${builtFilter.filter})`,
       }
 
       const currentTier = org.data.tier;
-      if (!validTiers.includes(currentTier ?? "")) {
+      if (!skipTierValidation && !validTiers.includes(currentTier ?? "")) {
         return err(
           `Organization is not on a valid ${tierType} tier. Current tier: ${currentTier}`
         );
@@ -1387,11 +1390,14 @@ WHERE (${builtFilter.filter})`,
 
   /**
    * Migrate from legacy team tier (team-20250130) to new pricing (team-20251210)
+   * @param skipTierValidation - If true, allows upgrading from pro to team (cross-tier migration)
    */
-  public async migrateToNewTeamPricing(): Promise<
+  public async migrateToNewTeamPricing(
+    skipTierValidation: boolean = false
+  ): Promise<
     Result<{ previousTier: string; newTier: string; subscriptionId: string }, string>
   > {
-    return this.migrateToNewPricing("team");
+    return this.migrateToNewPricing("team", skipTierValidation);
   }
 
   public async getOrganization(): Promise<

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getJawnClient } from "@/lib/clients/jawn";
 import { useOrg } from "@/components/layout/org/organizationContext";
@@ -64,6 +64,13 @@ import {
   StopCircle,
   Play,
   Calendar,
+  ClipboardCheck,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  History,
+  Wrench,
+  Link,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
@@ -101,6 +108,36 @@ interface OrgDetails {
   member_count?: number;
 }
 
+interface AuditMismatch {
+  subscriptionId: string;
+  customerId: string;
+  customerEmail: string | null;
+  stripeStatus: string;
+  orgId: string | null;
+  orgName: string | null;
+  orgTier: string | null;
+  orgSubscriptionStatus: string | null;
+  orgHasCustomerId: boolean;
+  orgHasSubscriptionId: boolean;
+  issue: string;
+  userOrgs: Array<{ id: string; name: string; tier: string }>;
+  isInAuthUsers: boolean;
+}
+
+interface AuditResult {
+  mismatches: AuditMismatch[];
+  summary: {
+    totalActiveSubscriptions: number;
+    totalMismatches: number;
+    filteredOutEuUsers: number;
+    byIssue: Record<string, number>;
+  };
+  timestamp?: number;
+}
+
+type AuditSortKey = "subscriptionId" | "customerEmail" | "stripeStatus" | "orgName" | "issue";
+type SortDirection = "asc" | "desc";
+
 const getTierBadgeColor = (tier: string) => {
   if (tier.includes("team")) return "bg-purple-100 text-purple-800";
   if (tier.includes("pro")) return "bg-blue-100 text-blue-800";
@@ -132,7 +169,7 @@ const getStripeStatusBadge = (status: string | null | undefined) => {
 };
 
 const isCancelledOrMissing = (status: string | null | undefined) => {
-  return status === "canceled" || status === "not_found";
+  return status === "canceled" || status === "not_found" || status === "incomplete_expired";
 };
 
 function buildSubscriptionIdMap(
@@ -276,12 +313,14 @@ export default function AdminPricingMigration() {
     name: string;
     tier: string;
     migrationType: "instant" | "scheduled";
+    targetTier?: "pro" | "team";
   } | null>(null);
   const [confirmReapplyOrg, setConfirmReapplyOrg] = useState<{
     id: string;
     name: string;
     tier: string;
     migrationType: "instant" | "scheduled";
+    targetTier?: "pro" | "team";
   } | null>(null);
   const [confirmSwitchToFreeOrg, setConfirmSwitchToFreeOrg] = useState<{
     id: string;
@@ -319,9 +358,89 @@ export default function AdminPricingMigration() {
   const [pendingPage, setPendingPage] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [tierFilter, setTierFilter] = useState<string>("all");
+  const [stripeStatusFilter, setStripeStatusFilter] = useState<string>("all");
 
   // Debounce search to avoid too many API calls
   const debouncedSearch = useDebounce(searchQuery, 300);
+
+  // Audit state
+  const [auditResult, setAuditResult] = useState<AuditResult | null>(null);
+  const [showAuditResults, setShowAuditResults] = useState(false);
+  const [auditSortKey, setAuditSortKey] = useState<AuditSortKey>("issue");
+  const [auditSortDir, setAuditSortDir] = useState<SortDirection>("asc");
+
+  // Load cached audit from localStorage on mount
+  const loadCachedAudit = useCallback(() => {
+    try {
+      const cached = localStorage.getItem("admin-audit-result");
+      if (cached) {
+        const parsed = JSON.parse(cached) as AuditResult;
+        setAuditResult(parsed);
+        return parsed;
+      }
+    } catch {
+      // Ignore parse errors
+    }
+    return null;
+  }, []);
+
+  // Check if there's a cached audit
+  const hasCachedAudit = useMemo(() => {
+    try {
+      return !!localStorage.getItem("admin-audit-result");
+    } catch {
+      return false;
+    }
+  }, [showAuditResults]); // Re-check when panel closes
+
+  // Sort audit mismatches
+  const sortedMismatches = useMemo(() => {
+    if (!auditResult?.mismatches) return [];
+    return [...auditResult.mismatches].sort((a, b) => {
+      let aVal: string | null = null;
+      let bVal: string | null = null;
+
+      switch (auditSortKey) {
+        case "subscriptionId":
+          aVal = a.subscriptionId;
+          bVal = b.subscriptionId;
+          break;
+        case "customerEmail":
+          aVal = a.customerEmail;
+          bVal = b.customerEmail;
+          break;
+        case "stripeStatus":
+          aVal = a.stripeStatus;
+          bVal = b.stripeStatus;
+          break;
+        case "orgName":
+          aVal = a.orgName;
+          bVal = b.orgName;
+          break;
+        case "issue":
+          aVal = a.issue;
+          bVal = b.issue;
+          break;
+      }
+
+      // Handle nulls
+      if (aVal === null && bVal === null) return 0;
+      if (aVal === null) return auditSortDir === "asc" ? 1 : -1;
+      if (bVal === null) return auditSortDir === "asc" ? -1 : 1;
+
+      const cmp = aVal.localeCompare(bVal);
+      return auditSortDir === "asc" ? cmp : -cmp;
+    });
+  }, [auditResult?.mismatches, auditSortKey, auditSortDir]);
+
+  const handleAuditSort = (key: AuditSortKey) => {
+    if (auditSortKey === key) {
+      setAuditSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setAuditSortKey(key);
+      setAuditSortDir("asc");
+    }
+  };
 
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
@@ -330,6 +449,11 @@ export default function AdminPricingMigration() {
 
   const handleTierFilterChange = (value: string) => {
     setTierFilter(value);
+    setPendingPage(0); // Reset to first page on filter change
+  };
+
+  const handleStripeStatusFilterChange = (value: string) => {
+    setStripeStatusFilter(value);
     setPendingPage(0); // Reset to first page on filter change
   };
 
@@ -361,6 +485,15 @@ export default function AdminPricingMigration() {
     },
   });
 
+  // Filter pending organizations by stripe status (frontend filter)
+  const filteredPendingOrgs = useMemo(() => {
+    if (!pendingQuery.data?.organizations) return [];
+    if (stripeStatusFilter === "all") return pendingQuery.data.organizations;
+    return pendingQuery.data.organizations.filter(
+      (org) => org.stripe_status === stripeStatusFilter
+    );
+  }, [pendingQuery.data?.organizations, stripeStatusFilter]);
+
   // Fetch completed migrations
   const completedQuery = useQuery({
     queryKey: ["admin", "pricing-migration", "completed"],
@@ -376,25 +509,35 @@ export default function AdminPricingMigration() {
 
   // Migrate Instant mutation - updates immediately + backfills usage
   const migrateInstantMutation = useMutation({
-    mutationFn: async (orgId: string) => {
+    mutationFn: async ({
+      orgId,
+      targetTier,
+    }: {
+      orgId: string;
+      targetTier?: "pro" | "team";
+    }) => {
       const jawn = getJawnClient(org?.currentOrg?.id);
       const { data, error } = await jawn.POST(
         "/v1/admin/pricing-migration/migrate-instant/{orgId}",
         {
           params: { path: { orgId } },
-          body: {},
+          body: { targetTier },
         },
       );
       if (error) throw new Error(String(error));
+      // Check for business logic error in Result type
+      if (data && "error" in data && data.error) {
+        throw new Error(String(data.error));
+      }
       return data;
     },
-    onMutate: (orgId) => {
+    onMutate: ({ orgId }) => {
       setMigrationStates((prev) => ({
         ...prev,
         [orgId]: { status: "migrating" },
       }));
     },
-    onSuccess: (_, orgId) => {
+    onSuccess: (_, { orgId }) => {
       setMigrationStates((prev) => ({
         ...prev,
         [orgId]: { status: "success" },
@@ -403,7 +546,7 @@ export default function AdminPricingMigration() {
         queryKey: ["admin", "pricing-migration"],
       });
     },
-    onError: (error, orgId) => {
+    onError: (error, { orgId }) => {
       setMigrationStates((prev) => ({
         ...prev,
         [orgId]: {
@@ -425,6 +568,10 @@ export default function AdminPricingMigration() {
         },
       );
       if (error) throw new Error(String(error));
+      // Check for business logic error in Result type
+      if (data && "error" in data && data.error) {
+        throw new Error(String(data.error));
+      }
       return data;
     },
     onMutate: (orgId) => {
@@ -479,6 +626,10 @@ export default function AdminPricingMigration() {
             : String(error);
         throw new Error(errorMsg);
       }
+      // Check for business logic error in Result type
+      if (data && "error" in data && data.error) {
+        throw new Error(String(data.error));
+      }
       return data;
     },
     onSuccess: () => {
@@ -497,6 +648,10 @@ export default function AdminPricingMigration() {
         },
       );
       if (error) throw new Error(String(error));
+      // Check for business logic error in Result type
+      if (data && "error" in data && data.error) {
+        throw new Error(String(data.error));
+      }
       return data;
     },
     onMutate: (orgId) => {
@@ -526,13 +681,154 @@ export default function AdminPricingMigration() {
     },
   });
 
+  // Cancel subscription mutation
+  const cancelSubscriptionMutation = useMutation({
+    mutationFn: async (orgId: string) => {
+      const jawn = getJawnClient(org?.currentOrg?.id);
+      const { data, error } = await jawn.POST(
+        "/v1/admin/pricing-migration/cancel-subscription/{orgId}" as any,
+        {
+          params: { path: { orgId } },
+        },
+      );
+      if (error) throw new Error(String(error));
+      // Check for business logic error in Result type
+      if (data && "error" in data && data.error) {
+        throw new Error(String(data.error));
+      }
+      return data;
+    },
+    onMutate: (orgId) => {
+      setMigrationStates((prev) => ({
+        ...prev,
+        [orgId]: { status: "migrating" },
+      }));
+    },
+    onSuccess: (_, orgId) => {
+      setMigrationStates((prev) => ({
+        ...prev,
+        [orgId]: { status: "success" },
+      }));
+      queryClient.invalidateQueries({
+        queryKey: ["admin", "pricing-migration"],
+      });
+    },
+    onError: (error, orgId) => {
+      setMigrationStates((prev) => ({
+        ...prev,
+        [orgId]: {
+          status: "error",
+          error:
+            error instanceof Error ? error.message : "Cancel subscription failed",
+        },
+      }));
+    },
+  });
+
+  // Audit subscriptions mutation
+  const auditMutation = useMutation({
+    mutationFn: async () => {
+      const jawn = getJawnClient(org?.currentOrg?.id);
+      const { data, error } = await jawn.POST(
+        "/v1/admin/pricing-migration/audit" as any,
+      );
+      if (error) {
+        console.error("Audit error:", error);
+        throw new Error(typeof error === "object" ? JSON.stringify(error) : String(error));
+      }
+      return data as AuditResult;
+    },
+    onSuccess: (data) => {
+      const resultWithTimestamp = { ...data, timestamp: Date.now() };
+      setAuditResult(resultWithTimestamp);
+      // Cache to localStorage
+      try {
+        localStorage.setItem("admin-audit-result", JSON.stringify(resultWithTimestamp));
+      } catch {
+        // Ignore storage errors
+      }
+      setShowAuditResults(true);
+    },
+    onError: (error) => {
+      console.error("Audit mutation error:", error);
+      alert(`Audit failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+    },
+  });
+
+  // Fix tier mutation
+  const fixTierMutation = useMutation({
+    mutationFn: async ({
+      orgId,
+      subscriptionId,
+    }: {
+      orgId: string;
+      subscriptionId: string;
+    }) => {
+      const jawn = getJawnClient(org?.currentOrg?.id);
+      const { data, error } = await jawn.POST(
+        "/v1/admin/pricing-migration/fix-tier/{orgId}" as any,
+        {
+          params: { path: { orgId } },
+          body: { subscriptionId },
+        },
+      );
+      if (error) throw new Error(String(error));
+      if (data && "error" in data && data.error) {
+        throw new Error(String(data.error));
+      }
+      return data;
+    },
+    onSuccess: () => {
+      // Re-run audit to refresh data
+      auditMutation.mutate();
+    },
+    onError: (error) => {
+      alert(`Fix tier failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+    },
+  });
+
+  // Fix metadata mutation
+  const fixMetadataMutation = useMutation({
+    mutationFn: async ({
+      orgId,
+      customerId,
+      subscriptionId,
+    }: {
+      orgId: string;
+      customerId: string;
+      subscriptionId: string;
+    }) => {
+      const jawn = getJawnClient(org?.currentOrg?.id);
+      const { data, error } = await jawn.POST(
+        "/v1/admin/pricing-migration/fix-metadata/{orgId}" as any,
+        {
+          params: { path: { orgId } },
+          body: { customerId, subscriptionId },
+        },
+      );
+      if (error) throw new Error(String(error));
+      if (data && "error" in data && data.error) {
+        throw new Error(String(data.error));
+      }
+      return data;
+    },
+    onSuccess: () => {
+      // Re-run audit to refresh data
+      auditMutation.mutate();
+    },
+    onError: (error) => {
+      alert(`Fix metadata failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+    },
+  });
+
   const handleMigrate = (
     orgId: string,
     migrationType: "instant" | "scheduled",
+    targetTier?: "pro" | "team",
   ) => {
     setConfirmMigrateOrg(null);
     if (migrationType === "instant") {
-      migrateInstantMutation.mutate(orgId);
+      migrateInstantMutation.mutate({ orgId, targetTier });
     } else {
       migrateScheduledMutation.mutate(orgId);
     }
@@ -541,10 +837,11 @@ export default function AdminPricingMigration() {
   const handleReapply = (
     orgId: string,
     migrationType: "instant" | "scheduled",
+    targetTier?: "pro" | "team",
   ) => {
     setConfirmReapplyOrg(null);
     if (migrationType === "instant") {
-      migrateInstantMutation.mutate(orgId);
+      migrateInstantMutation.mutate({ orgId, targetTier });
     } else {
       migrateScheduledMutation.mutate(orgId);
     }
@@ -707,15 +1004,21 @@ export default function AdminPricingMigration() {
               ? "/v1/admin/pricing-migration/migrate-instant/{orgId}"
               : "/v1/admin/pricing-migration/migrate-scheduled/{orgId}";
 
-          const { error } = await jawn.POST(endpoint as any, {
+          const { data, error } = await jawn.POST(endpoint as any, {
             params: { path: { orgId } },
             body: migrationType === "instant" ? {} : undefined,
           });
 
+          // Check for HTTP-level error
           if (error) {
             throw new Error(
               typeof error === "object" ? JSON.stringify(error) : String(error)
             );
+          }
+
+          // Check for business logic error in Result type
+          if (data && "error" in data && data.error) {
+            throw new Error(String(data.error));
           }
 
           results.push({ orgId, success: true });
@@ -777,12 +1080,40 @@ export default function AdminPricingMigration() {
 
   return (
     <div className="flex flex-col gap-6 p-6">
-      <div>
-        <H2>Pricing Migration</H2>
-        <Muted>
-          Migrate organizations from legacy pricing to the new 2025-12-10
-          pricing model
-        </Muted>
+      <div className="flex items-start justify-between">
+        <div>
+          <H2>Pricing Migration</H2>
+          <Muted>
+            Migrate organizations from legacy pricing to the new 2025-12-10
+            pricing model
+          </Muted>
+        </div>
+        <div className="flex items-center gap-2">
+          {hasCachedAudit && (
+            <Button
+              variant="ghost"
+              onClick={() => {
+                loadCachedAudit();
+                setShowAuditResults(true);
+              }}
+            >
+              <History className="mr-2 h-4 w-4" />
+              View Last Audit
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            onClick={() => auditMutation.mutate()}
+            disabled={auditMutation.isPending}
+          >
+            {auditMutation.isPending ? (
+              <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <ClipboardCheck className="mr-2 h-4 w-4" />
+            )}
+            {auditMutation.isPending ? "Auditing..." : "Run Audit"}
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -925,6 +1256,26 @@ export default function AdminPricingMigration() {
                       ))}
                     </SelectContent>
                   </Select>
+                  <Select
+                    value={stripeStatusFilter}
+                    onValueChange={handleStripeStatusFilterChange}
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <Filter className="mr-2 h-4 w-4" />
+                      <SelectValue placeholder="Stripe status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Statuses</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="trialing">Trialing</SelectItem>
+                      <SelectItem value="past_due">Past Due</SelectItem>
+                      <SelectItem value="unpaid">Unpaid</SelectItem>
+                      <SelectItem value="canceled">Canceled</SelectItem>
+                      <SelectItem value="incomplete">Incomplete</SelectItem>
+                      <SelectItem value="incomplete_expired">Incomplete Expired</SelectItem>
+                      <SelectItem value="not_found">Not Found</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </CardHeader>
@@ -933,7 +1284,7 @@ export default function AdminPricingMigration() {
                 <div className="flex items-center justify-center py-8">
                   <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
                 </div>
-              ) : pendingQuery.data?.organizations?.length === 0 ? (
+              ) : filteredPendingOrgs.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
                   <CheckCircle className="mb-2 h-12 w-12" />
                   <P>All organizations have been migrated!</P>
@@ -954,7 +1305,7 @@ export default function AdminPricingMigration() {
                         migrationType,
                         "pending",
                         openStripeOnBatch,
-                        buildSubscriptionIdMap(pendingQuery.data?.organizations)
+                        buildSubscriptionIdMap(filteredPendingOrgs)
                       );
                     }}
                   />
@@ -964,14 +1315,14 @@ export default function AdminPricingMigration() {
                         <TableHead className="w-[40px]">
                           <Checkbox
                             checked={
-                              (pendingQuery.data?.organizations?.length ?? 0) > 0 &&
-                              pendingQuery.data?.organizations?.every((org) =>
+                              filteredPendingOrgs.length > 0 &&
+                              filteredPendingOrgs.every((org) =>
                                 selectedPendingIds.has(org.id)
                               )
                             }
                             onCheckedChange={() =>
                               toggleAllPending(
-                                pendingQuery.data?.organizations || []
+                                filteredPendingOrgs
                               )
                             }
                             disabled={batchProcessing?.isRunning}
@@ -980,15 +1331,18 @@ export default function AdminPricingMigration() {
                         <TableHead>Organization</TableHead>
                         <TableHead>Owner</TableHead>
                         <TableHead>Current Tier</TableHead>
+                        <TableHead>Created</TableHead>
+                        <TableHead>Trial</TableHead>
+                        <TableHead>Products</TableHead>
+                        <TableHead>Next Invoice</TableHead>
                         <TableHead>Stripe Status</TableHead>
                         <TableHead>Stripe</TableHead>
-                        <TableHead>Members</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead className="text-right">Action</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {pendingQuery.data?.organizations?.map((pendingOrg) => {
+                      {filteredPendingOrgs.map((pendingOrg) => {
                         const stripeStatus = getStripeStatusBadge(
                           pendingOrg.stripe_status,
                         );
@@ -1046,6 +1400,68 @@ export default function AdminPricingMigration() {
                               </Badge>
                             </TableCell>
                             <TableCell>
+                              <Small className="text-muted-foreground">
+                                {pendingOrg.created_at
+                                  ? new Date(pendingOrg.created_at).toLocaleDateString()
+                                  : "-"}
+                              </Small>
+                            </TableCell>
+                            <TableCell>
+                              {stripeStatus.label === "Trialing" || pendingOrg.trial_end ? (
+                                <Badge
+                                  variant="secondary"
+                                  className="bg-amber-100 text-amber-800"
+                                >
+                                  Trial
+                                  {pendingOrg.trial_end && (
+                                    <span className="ml-1">
+                                      → {new Date(pendingOrg.trial_end * 1000).toLocaleDateString()}
+                                    </span>
+                                  )}
+                                </Badge>
+                              ) : (
+                                <Small className="text-muted-foreground">-</Small>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {pendingOrg.subscription_items &&
+                              pendingOrg.subscription_items.length > 0 ? (
+                                <div className="flex flex-col gap-1">
+                                  {pendingOrg.subscription_items.map((item, idx) => (
+                                    <div
+                                      key={idx}
+                                      className="flex items-center gap-1 text-xs"
+                                    >
+                                      <span className="font-medium truncate max-w-[120px]" title={item.product_name ?? item.price_id}>
+                                        {item.product_name ?? "Unknown"}
+                                      </span>
+                                      <span className="text-muted-foreground font-mono text-[10px]">
+                                        ({item.price_id.slice(-8)})
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <Small className="text-muted-foreground">-</Small>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {pendingOrg.next_invoice_date ? (
+                                <div className="flex flex-col">
+                                  <Small>
+                                    {new Date(pendingOrg.next_invoice_date * 1000).toLocaleDateString()}
+                                  </Small>
+                                  {pendingOrg.next_invoice_amount !== null && (
+                                    <Small className="text-muted-foreground">
+                                      ${(pendingOrg.next_invoice_amount / 100).toFixed(2)}
+                                    </Small>
+                                  )}
+                                </div>
+                              ) : (
+                                <Small className="text-muted-foreground">-</Small>
+                              )}
+                            </TableCell>
+                            <TableCell>
                               <Badge
                                 variant="secondary"
                                 className={stripeStatus.color}
@@ -1071,12 +1487,6 @@ export default function AdminPricingMigration() {
                               ) : (
                                 <Small className="text-muted-foreground">-</Small>
                               )}
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-1">
-                                <Users className="h-3 w-3 text-muted-foreground" />
-                                <Small>{pendingOrg.member_count}</Small>
-                              </div>
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-2">
@@ -1111,6 +1521,32 @@ export default function AdminPricingMigration() {
                                     ? "Switching..."
                                     : "Switch to Free"}
                                 </Button>
+                              ) : pendingOrg.stripe_status === "unpaid" ? (
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (
+                                      confirm(
+                                        `Cancel subscription for "${pendingOrg.name}"? This will cancel the Stripe subscription.`
+                                      )
+                                    ) {
+                                      cancelSubscriptionMutation.mutate(
+                                        pendingOrg.id
+                                      );
+                                    }
+                                  }}
+                                  disabled={
+                                    migrationStates[pendingOrg.id]?.status ===
+                                    "migrating"
+                                  }
+                                >
+                                  {migrationStates[pendingOrg.id]?.status ===
+                                  "migrating"
+                                    ? "Cancelling..."
+                                    : "Cancel Sub"}
+                                </Button>
                               ) : (
                                 <div className="flex items-center gap-1">
                                   <Button
@@ -1133,6 +1569,27 @@ export default function AdminPricingMigration() {
                                     "migrating"
                                       ? "..."
                                       : "Now"}
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="secondary"
+                                    className="bg-purple-100 text-purple-800 hover:bg-purple-200"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setConfirmMigrateOrg({
+                                        id: pendingOrg.id,
+                                        name: pendingOrg.name,
+                                        tier: pendingOrg.tier,
+                                        migrationType: "instant",
+                                        targetTier: "team",
+                                      });
+                                    }}
+                                    disabled={
+                                      migrationStates[pendingOrg.id]?.status ===
+                                      "migrating"
+                                    }
+                                  >
+                                    Team
                                   </Button>
                                   <Button
                                     size="sm"
@@ -1263,7 +1720,10 @@ export default function AdminPricingMigration() {
                       <TableHead>Organization</TableHead>
                       <TableHead>Owner</TableHead>
                       <TableHead>Tier</TableHead>
-                      <TableHead>Stripe Customer</TableHead>
+                      <TableHead>Created</TableHead>
+                      <TableHead>Trial</TableHead>
+                      <TableHead>Products</TableHead>
+                      <TableHead>Next Invoice</TableHead>
                       <TableHead>Stripe Sub</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
@@ -1319,23 +1779,65 @@ export default function AdminPricingMigration() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          {completedOrg.stripe_customer_id ? (
-                            <Button
-                              variant="link"
-                              size="sm"
-                              className="h-auto p-0 font-mono text-xs"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openStripeCustomer(
-                                  completedOrg.stripe_customer_id!,
-                                );
-                              }}
+                          <Small className="text-muted-foreground">
+                            {completedOrg.created_at
+                              ? new Date(completedOrg.created_at).toLocaleDateString()
+                              : "-"}
+                          </Small>
+                        </TableCell>
+                        <TableCell>
+                          {completedOrg.stripe_status === "trialing" ? (
+                            <Badge
+                              variant="secondary"
+                              className="bg-amber-100 text-amber-800"
                             >
-                              {completedOrg.stripe_customer_id}
-                              <ExternalLink className="ml-1 h-3 w-3" />
-                            </Button>
+                              Trial
+                              {completedOrg.trial_end && (
+                                <span className="ml-1">
+                                  → {new Date(completedOrg.trial_end * 1000).toLocaleDateString()}
+                                </span>
+                              )}
+                            </Badge>
                           ) : (
-                            <Small>-</Small>
+                            <Small className="text-muted-foreground">-</Small>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {completedOrg.subscription_items &&
+                          completedOrg.subscription_items.length > 0 ? (
+                            <div className="flex flex-col gap-1">
+                              {completedOrg.subscription_items.map((item, idx) => (
+                                <div
+                                  key={idx}
+                                  className="flex items-center gap-1 text-xs"
+                                >
+                                  <span className="font-medium truncate max-w-[120px]" title={item.product_name ?? item.price_id}>
+                                    {item.product_name ?? "Unknown"}
+                                  </span>
+                                  <span className="text-muted-foreground font-mono text-[10px]">
+                                    ({item.price_id.slice(-8)})
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <Small className="text-muted-foreground">-</Small>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {completedOrg.next_invoice_date ? (
+                            <div className="flex flex-col">
+                              <Small>
+                                {new Date(completedOrg.next_invoice_date * 1000).toLocaleDateString()}
+                              </Small>
+                              {completedOrg.next_invoice_amount !== null && (
+                                <Small className="text-muted-foreground">
+                                  ${(completedOrg.next_invoice_amount / 100).toFixed(2)}
+                                </Small>
+                              )}
+                            </div>
+                          ) : (
+                            <Small className="text-muted-foreground">-</Small>
                           )}
                         </TableCell>
                         <TableCell>
@@ -1635,12 +2137,15 @@ export default function AdminPricingMigration() {
                 handleMigrate(
                   confirmMigrateOrg.id,
                   confirmMigrateOrg.migrationType,
+                  confirmMigrateOrg.targetTier,
                 )
               }
             >
-              {confirmMigrateOrg?.migrationType === "instant"
-                ? "Migrate Now"
-                : "Schedule Migration"}
+              {confirmMigrateOrg?.targetTier === "team"
+                ? "Migrate to Team Now"
+                : confirmMigrateOrg?.migrationType === "instant"
+                  ? "Migrate Now"
+                  : "Schedule Migration"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -1772,6 +2277,371 @@ export default function AdminPricingMigration() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Audit Results Sheet - Full width */}
+      <Sheet open={showAuditResults} onOpenChange={setShowAuditResults}>
+        <SheetContent className="w-full max-w-none sm:max-w-none overflow-y-auto" side="right">
+          <div className="mx-auto max-w-7xl">
+            <SheetHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <SheetTitle className="flex items-center gap-2">
+                    <ClipboardCheck className="h-5 w-5" />
+                    Subscription Audit Results
+                  </SheetTitle>
+                  <SheetDescription>
+                    Comparing Stripe subscriptions with organization database records
+                    {auditResult?.timestamp && (
+                      <span className="ml-2">
+                        • Last run: {new Date(auditResult.timestamp).toLocaleString()}
+                      </span>
+                    )}
+                  </SheetDescription>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => auditMutation.mutate()}
+                  disabled={auditMutation.isPending}
+                >
+                  {auditMutation.isPending ? (
+                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                  )}
+                  {auditMutation.isPending ? "Running..." : "Re-run Audit"}
+                </Button>
+              </div>
+            </SheetHeader>
+
+            {auditResult && (
+              <div className="mt-6 flex flex-col gap-6">
+                {/* Summary */}
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="rounded-lg border p-4">
+                    <Muted>Active Subscriptions</Muted>
+                    <div className="text-2xl font-bold">
+                      {auditResult.summary.totalActiveSubscriptions}
+                    </div>
+                  </div>
+                  <div className="rounded-lg border p-4">
+                    <Muted>Mismatches Found</Muted>
+                    <div className="text-2xl font-bold text-orange-600">
+                      {auditResult.summary.totalMismatches}
+                    </div>
+                  </div>
+                  <div className="rounded-lg border p-4">
+                    <Muted>Filtered (Legacy/Other)</Muted>
+                    <div className="text-2xl font-bold text-slate-400">
+                      {auditResult.summary.filteredOutEuUsers ?? 0}
+                    </div>
+                  </div>
+                  <div className="rounded-lg border p-4">
+                    <Muted>Match Rate</Muted>
+                    <div className="text-2xl font-bold text-green-600">
+                      {auditResult.summary.totalActiveSubscriptions > 0
+                        ? `${Math.round(
+                            ((auditResult.summary.totalActiveSubscriptions -
+                              auditResult.summary.totalMismatches -
+                              (auditResult.summary.filteredOutEuUsers ?? 0)) /
+                              auditResult.summary.totalActiveSubscriptions) *
+                              100
+                          )}%`
+                        : "N/A"}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Issues by type */}
+                {Object.keys(auditResult.summary.byIssue).length > 0 && (
+                  <div className="rounded-lg border p-4">
+                    <Small className="font-medium">Issues by Type</Small>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {Object.entries(auditResult.summary.byIssue).map(
+                        ([issue, count]) => (
+                          <Badge
+                            key={issue}
+                            variant="secondary"
+                            className="bg-orange-100 text-orange-800"
+                          >
+                            {issue}: {count}
+                          </Badge>
+                        )
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Mismatches table */}
+                {sortedMismatches.length > 0 ? (
+                  <div className="rounded-lg border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead
+                            className="cursor-pointer hover:bg-muted/50"
+                            onClick={() => handleAuditSort("subscriptionId")}
+                          >
+                            <div className="flex items-center gap-1">
+                              Subscription
+                              {auditSortKey === "subscriptionId" ? (
+                                auditSortDir === "asc" ? (
+                                  <ArrowUp className="h-3 w-3" />
+                                ) : (
+                                  <ArrowDown className="h-3 w-3" />
+                                )
+                              ) : (
+                                <ArrowUpDown className="h-3 w-3 opacity-30" />
+                              )}
+                            </div>
+                          </TableHead>
+                          <TableHead
+                            className="cursor-pointer hover:bg-muted/50"
+                            onClick={() => handleAuditSort("customerEmail")}
+                          >
+                            <div className="flex items-center gap-1">
+                              Customer
+                              {auditSortKey === "customerEmail" ? (
+                                auditSortDir === "asc" ? (
+                                  <ArrowUp className="h-3 w-3" />
+                                ) : (
+                                  <ArrowDown className="h-3 w-3" />
+                                )
+                              ) : (
+                                <ArrowUpDown className="h-3 w-3 opacity-30" />
+                              )}
+                            </div>
+                          </TableHead>
+                          <TableHead
+                            className="cursor-pointer hover:bg-muted/50"
+                            onClick={() => handleAuditSort("stripeStatus")}
+                          >
+                            <div className="flex items-center gap-1">
+                              Stripe Status
+                              {auditSortKey === "stripeStatus" ? (
+                                auditSortDir === "asc" ? (
+                                  <ArrowUp className="h-3 w-3" />
+                                ) : (
+                                  <ArrowDown className="h-3 w-3" />
+                                )
+                              ) : (
+                                <ArrowUpDown className="h-3 w-3 opacity-30" />
+                              )}
+                            </div>
+                          </TableHead>
+                          <TableHead
+                            className="cursor-pointer hover:bg-muted/50"
+                            onClick={() => handleAuditSort("orgName")}
+                          >
+                            <div className="flex items-center gap-1">
+                              Org
+                              {auditSortKey === "orgName" ? (
+                                auditSortDir === "asc" ? (
+                                  <ArrowUp className="h-3 w-3" />
+                                ) : (
+                                  <ArrowDown className="h-3 w-3" />
+                                )
+                              ) : (
+                                <ArrowUpDown className="h-3 w-3 opacity-30" />
+                              )}
+                            </div>
+                          </TableHead>
+                          <TableHead
+                            className="cursor-pointer hover:bg-muted/50"
+                            onClick={() => handleAuditSort("issue")}
+                          >
+                            <div className="flex items-center gap-1">
+                              Issue
+                              {auditSortKey === "issue" ? (
+                                auditSortDir === "asc" ? (
+                                  <ArrowUp className="h-3 w-3" />
+                                ) : (
+                                  <ArrowDown className="h-3 w-3" />
+                                )
+                              ) : (
+                                <ArrowUpDown className="h-3 w-3 opacity-30" />
+                              )}
+                            </div>
+                          </TableHead>
+                          <TableHead>User Orgs</TableHead>
+                          <TableHead>Metadata</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {sortedMismatches.map((mismatch) => (
+                          <TableRow key={mismatch.subscriptionId}>
+                            <TableCell>
+                              <Button
+                                variant="link"
+                                size="sm"
+                                className="h-auto p-0 font-mono text-xs"
+                                onClick={() =>
+                                  openStripeSubscription(mismatch.subscriptionId)
+                                }
+                              >
+                                {mismatch.subscriptionId.slice(-12)}
+                                <ExternalLink className="ml-1 h-3 w-3" />
+                              </Button>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex flex-col">
+                                <Small>{mismatch.customerEmail ?? "-"}</Small>
+                                <Muted className="font-mono text-[10px]">
+                                  {mismatch.customerId.slice(-12)}
+                                </Muted>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                variant="secondary"
+                                className={
+                                  getStripeStatusBadge(mismatch.stripeStatus).color
+                                }
+                              >
+                                {mismatch.stripeStatus}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {mismatch.orgId ? (
+                                <div className="flex flex-col">
+                                  <Small>{mismatch.orgName}</Small>
+                                  <div className="flex items-center gap-1">
+                                    <Badge
+                                      variant="secondary"
+                                      className={getTierBadgeColor(
+                                        mismatch.orgTier ?? ""
+                                      )}
+                                    >
+                                      {mismatch.orgTier}
+                                    </Badge>
+                                    <Muted className="text-[10px]">
+                                      ({mismatch.orgSubscriptionStatus})
+                                    </Muted>
+                                  </div>
+                                </div>
+                              ) : (
+                                <Muted>No org found</Muted>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <Small className="text-orange-600">
+                                {mismatch.issue}
+                              </Small>
+                            </TableCell>
+                            <TableCell>
+                              {mismatch.isInAuthUsers ? (
+                                <div className="flex flex-col gap-1">
+                                  {mismatch.userOrgs.length > 0 ? (
+                                    mismatch.userOrgs.map((uo, idx) => (
+                                      <div key={idx} className="flex items-center gap-1">
+                                        <Small className="max-w-[120px] truncate">
+                                          {uo.name}
+                                        </Small>
+                                        <Badge
+                                          variant="secondary"
+                                          className={`text-[10px] ${getTierBadgeColor(uo.tier)}`}
+                                        >
+                                          {uo.tier}
+                                        </Badge>
+                                      </div>
+                                    ))
+                                  ) : (
+                                    <Muted className="text-[10px]">No orgs</Muted>
+                                  )}
+                                </div>
+                              ) : (
+                                <Muted className="text-[10px]">Not in auth.users</Muted>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex flex-col gap-1">
+                                <div className="flex items-center gap-1">
+                                  <span
+                                    className={`h-2 w-2 rounded-full ${
+                                      mismatch.orgHasCustomerId
+                                        ? "bg-green-500"
+                                        : "bg-red-500"
+                                    }`}
+                                  />
+                                  <Muted className="text-[10px]">customer_id</Muted>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <span
+                                    className={`h-2 w-2 rounded-full ${
+                                      mismatch.orgHasSubscriptionId
+                                        ? "bg-green-500"
+                                        : "bg-red-500"
+                                    }`}
+                                  />
+                                  <Muted className="text-[10px]">subscription_id</Muted>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex flex-col gap-1">
+                                {/* Fix Tier button - show for "free tier but active sub" issue */}
+                                {mismatch.issue.includes("free tier") &&
+                                  mismatch.orgId && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="h-7 text-xs"
+                                      onClick={() =>
+                                        fixTierMutation.mutate({
+                                          orgId: mismatch.orgId!,
+                                          subscriptionId: mismatch.subscriptionId,
+                                        })
+                                      }
+                                      disabled={fixTierMutation.isPending}
+                                    >
+                                      <Wrench className="mr-1 h-3 w-3" />
+                                      Fix Tier
+                                    </Button>
+                                  )}
+                                {/* Fix Metadata button - show when org exists but missing IDs */}
+                                {mismatch.orgId &&
+                                  (!mismatch.orgHasCustomerId ||
+                                    !mismatch.orgHasSubscriptionId) && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="h-7 text-xs"
+                                      onClick={() =>
+                                        fixMetadataMutation.mutate({
+                                          orgId: mismatch.orgId!,
+                                          customerId: mismatch.customerId,
+                                          subscriptionId: mismatch.subscriptionId,
+                                        })
+                                      }
+                                      disabled={fixMetadataMutation.isPending}
+                                    >
+                                      <Link className="mr-1 h-3 w-3" />
+                                      Fix Metadata
+                                    </Button>
+                                  )}
+                                {/* Show nothing if no fix available */}
+                                {!mismatch.orgId && (
+                                  <Muted className="text-[10px]">No org to fix</Muted>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                    <CheckCircle className="mb-2 h-12 w-12 text-green-500" />
+                    <P>All subscriptions match database records!</P>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
