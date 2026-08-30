@@ -65,6 +65,48 @@ export const endpoints = {
       "*": {},
     },
   },
+  "llama-4-maverick:relaxai": {
+    providerModelId: "Llama-4-Maverick-17B-128E",
+    provider: "relaxai",
+    author: "meta-llama",
+    quantization: "fp4",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000002, // $0.20/1M (£0.15/1M converted to USD on 30-03-26)
+        output: 0.00000106, // $1.06/1M (£0.80/1M converted to USD on 30-03-26)
+      },
+    ],
+    contextLength: 500_000,
+    maxCompletionTokens: 500_000,
+    supportedParameters: [
+      "frequency_penalty",
+      "function_call",
+      "functions",
+      "logit_bias",
+      "logprobs",
+      "max_completion_tokens",
+      "max_tokens",
+      "min_p",
+      "n",
+      "presence_penalty",
+      "repetition_penalty",
+      "response_format",
+      "seed",
+      "stop",
+      "stream",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_k",
+      "top_logprobs",
+      "top_p",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
   "llama-4-maverick:novita": {
     providerModelId: "meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
     provider: "novita",

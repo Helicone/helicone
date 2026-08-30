@@ -110,7 +110,6 @@ export const providers: Provider[] = [
     apiKeyPlaceholder: "xai-...",
     relevanceScore: 68,
   },
-
   {
     id: "perplexity",
     name: "Perplexity",
@@ -171,6 +170,17 @@ export const providers: Provider[] = [
       "Configure your DeepInfra API keys for fast and affordable inference",
     docsUrl: "https://docs.helicone.ai/getting-started/integration-methods",
     apiKeyLabel: "DeepInfra API Key",
+    apiKeyPlaceholder: "...",
+    relevanceScore: 40,
+  },
+  {
+    id: "relaxai",
+    name: "relaxAI",
+    logoUrl: "/assets/home/providers/relaxai.png",
+    description:
+      "Configure your relaxAI API keys for UK sovereign AI inference",
+    docsUrl: "https://relax.ai/docs",
+    apiKeyLabel: "relaxAI API Key",
     apiKeyPlaceholder: "...",
     relevanceScore: 40,
   },

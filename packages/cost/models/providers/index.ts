@@ -17,6 +17,7 @@ import { NovitaProvider } from "./novita";
 import { OpenAIProvider } from "./openai";
 import { OpenRouterProvider } from "./openrouter";
 import { PerplexityProvider } from "./perplexity";
+import { RelaxAIProvider } from "./relaxai";
 import { VertexProvider } from "./vertex";
 import { XAIProvider } from "./xai";
 
@@ -41,6 +42,7 @@ export const providers = {
   openai: new OpenAIProvider(),
   openrouter: new OpenRouterProvider(),
   perplexity: new PerplexityProvider(),
+  relaxai: new RelaxAIProvider(),
   vertex: new VertexProvider(),
   xai: new XAIProvider()
 } as const;
@@ -87,6 +89,7 @@ export const ResponsesAPIEnabledProviders: ModelProviderName[] = [
   "xai",
   "baseten",
   "fireworks",
+  "relaxai",
 
   // anthropic and chat completions provider
   "vertex"

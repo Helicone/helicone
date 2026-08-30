@@ -94,6 +94,9 @@ const cerebras = /^https:\/\/api\.cerebras\.ai/;
 // https://inference.canopywave.io
 const canopywave = /^https:\/\/inference\.canopywave\.io/;
 
+// https://api.relax.ai
+const relaxai = /^https:\/\/api\.relax\.ai/;
+
 export const providersNames = [
   "OPENAI",
   "ANTHROPIC",
@@ -132,6 +135,7 @@ export const providersNames = [
   "CEREBRAS",
   "BASETEN",
   "CANOPYWAVE",
+  "RELAXAI",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -324,6 +328,11 @@ export const providers: {
   {
     pattern: canopywave,
     provider: "CANOPYWAVE",
+    costs: [],
+  },
+  {
+    pattern: relaxai,
+    provider: "RELAXAI",
     costs: [],
   }
 ];

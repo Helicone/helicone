@@ -280,6 +280,45 @@ export const endpoints = {
       "*": {},
     },
   },
+  "gpt-oss-120b:relaxai": {
+    providerModelId: "openai/gpt-oss-120b",
+    provider: "relaxai",
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000002, // $0.20/1M (£0.15/1M converted to USD on 30-03-26)
+        output: 0.00000106, // $1.06/1M (£0.80/1M converted to USD on 30-03-26)
+      },
+    ],
+    contextLength: 131_072,
+    maxCompletionTokens: 131_072,
+    supportedParameters: [
+      "frequency_penalty",
+      "include_reasoning",
+      "logit_bias",
+      "logprobs",
+      "max_completion_tokens",
+      "min_p",
+      "presence_penalty",
+      "reasoning",
+      "repetition_penalty",
+      "response_format",
+      "seed",
+      "stop",
+      "structured_outputs",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_k",
+      "top_logprobs",
+      "top_p",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${GPTOSSModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

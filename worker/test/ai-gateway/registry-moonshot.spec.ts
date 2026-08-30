@@ -3,6 +3,13 @@ import "../setup";
 import { runGatewayTest } from "./test-framework";
 import { createOpenAIMockResponse } from "../test-utils";
 
+// Define auth expectations for relaxai provider
+const relaxaiAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
 // Define auth expectations for Novita provider
 const novitaAuthExpectations = {
   headers: {
@@ -3107,6 +3114,97 @@ describe("Moonshot AI Registry Tests", () => {
               },
             ],
             finalStatus: 429,
+          },
+        }));
+    });
+
+    describe("kimi-k2.5 with relaxai", () => {
+      it("should handle relaxai provider", () =>
+        runGatewayTest({
+          model: "kimi-k2.5/relaxai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.relax.ai/v1/chat/completions",
+                response: "success",
+                model: "moonshotai/kimi-k2.5",
+                data: createOpenAIMockResponse("moonshotai/kimi-k2.5"),
+                expects: relaxaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle tool calls with relaxai provider", () =>
+        runGatewayTest({
+          model: "kimi-k2.5/relaxai",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "What's the weather in Paris?" }],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "get_weather",
+                    description: "Get current weather",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        location: { type: "string" },
+                      },
+                      required: ["location"],
+                    },
+                  },
+                },
+              ],
+              tool_choice: "auto",
+              temperature: 0.7,
+              max_tokens: 1000,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.relax.ai/v1/chat/completions",
+                response: "success",
+                model: "moonshotai/kimi-k2.5",
+                data: createOpenAIMockResponse("moonshotai/kimi-k2.5"),
+                expects: {
+                  ...relaxaiAuthExpectations,
+                  bodyContains: ["tools", "tool_choice", "get_weather", "temperature", "max_tokens"],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle response format with relaxai provider", () =>
+        runGatewayTest({
+          model: "kimi-k2.5/relaxai",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "List 3 UK cities as JSON" }],
+              response_format: { type: "json_object" },
+              temperature: 0.3,
+              max_tokens: 500,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.relax.ai/v1/chat/completions",
+                response: "success",
+                model: "moonshotai/kimi-k2.5",
+                data: createOpenAIMockResponse("moonshotai/kimi-k2.5"),
+                expects: {
+                  ...relaxaiAuthExpectations,
+                  bodyContains: ["response_format", "json_object"],
+                },
+              },
+            ],
+            finalStatus: 200,
           },
         }));
     });
