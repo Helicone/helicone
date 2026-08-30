@@ -174,10 +174,17 @@ export async function callProvider(props: CallProps): Promise<Response> {
 }
 
 export function buildTargetUrl(originalUrl: URL, apiBase: string): URL {
-  const apiBaseUrl = new URL(apiBase.replace(/\/$/, ""));
+  const trimmedBase = apiBase.replace(/\/$/, "");
+  const apiBaseUrl = new URL(trimmedBase);
+  let basePath = apiBaseUrl.pathname;
+  if (basePath === "/" || basePath === "") {
+    basePath = "";
+  } else {
+    basePath = basePath.replace(/\/$/, "");
+  }
 
   return new URL(
-    `${apiBaseUrl.origin}${originalUrl.pathname}${originalUrl.search}`
+    `${apiBaseUrl.origin}${basePath}${originalUrl.pathname}${originalUrl.search}`
   );
 }
 

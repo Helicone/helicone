@@ -4668,7 +4668,8 @@
 					"VERCEL",
 					"CEREBRAS",
 					"BASETEN",
-					"CANOPYWAVE"
+					"CANOPYWAVE",
+					"HPC_AI"
 				]
 			},
 			"ModelProviderName": {
@@ -4687,6 +4688,7 @@
 					"google-ai-studio",
 					"groq",
 					"helicone",
+					"hpcai",
 					"mistral",
 					"nebius",
 					"novita",

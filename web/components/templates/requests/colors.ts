@@ -41,6 +41,7 @@ const authorColorMapping: Partial<Record<AuthorName, ColorKey>> = {
   amazon: "cyan",
   nvidia: "green",
   moonshotai: "indigo",
+  minimax: "teal",
   perplexity: "yellow",
   passthrough: "gray",
 };
@@ -80,6 +81,7 @@ const providerNameColorMapping: Partial<Record<ProviderName, ColorKey>> = {
   NOVITA: "gray",
   OPENPIPE: "gray",
   CHUTES: "gray",
+  HPC_AI: "indigo",
 };
 
 const modelProviderNameColorMapping: Partial<
@@ -92,6 +94,7 @@ const modelProviderNameColorMapping: Partial<
   vertex: "teal",
   bedrock: "cyan",
   groq: "indigo",
+  hpcai: "indigo",
   deepinfra: "indigo",
   perplexity: "indigo",
   openrouter: "yellow",

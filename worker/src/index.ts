@@ -216,6 +216,18 @@ async function modifyEnvBasedOnPath(
         WORKER_TYPE: "GATEWAY_API",
         GATEWAY_TARGET: "https://api.deepinfra.com",
       };
+    } else if (hostParts[0].includes("hpcai")) {
+      if (isRootPath(url) && request.getMethod() === "GET") {
+        return {
+          ...env,
+          WORKER_DEFINED_REDIRECT_URL: "https://hpc-ai.com",
+        };
+      }
+      return {
+        ...env,
+        WORKER_TYPE: "GATEWAY_API",
+        GATEWAY_TARGET: "https://api.hpc-ai.com/inference",
+      };
     } else if (hostParts[0].includes("groq")) {
       if (isRootPath(url) && request.getMethod() === "GET") {
         return {

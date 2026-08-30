@@ -94,6 +94,9 @@ const cerebras = /^https:\/\/api\.cerebras\.ai/;
 // https://inference.canopywave.io
 const canopywave = /^https:\/\/inference\.canopywave\.io/;
 
+// https://api.hpc-ai.com
+const hpcAi = /^https:\/\/api\.hpc-ai\.com/;
+
 export const providersNames = [
   "OPENAI",
   "ANTHROPIC",
@@ -132,6 +135,7 @@ export const providersNames = [
   "CEREBRAS",
   "BASETEN",
   "CANOPYWAVE",
+  "HPC_AI",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -325,7 +329,11 @@ export const providers: {
     pattern: canopywave,
     provider: "CANOPYWAVE",
     costs: [],
-  }
+  },
+  {
+    pattern: hpcAi,
+    provider: "HPC_AI",
+  },
 ];
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

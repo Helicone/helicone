@@ -265,6 +265,18 @@ export const providers: Provider[] = [
     relevanceScore: 4,
   },
   {
+    id: "hpcai",
+    name: "HPC-AI",
+    logoUrl: "/assets/home/providers/hpc-ai.svg",
+    description:
+      "Configure your HPC-AI API keys for OpenAI-compatible inference",
+    docsUrl:
+      "https://docs.helicone.ai/getting-started/integration-method/hpc-ai",
+    apiKeyLabel: "HPC-AI API Key",
+    apiKeyPlaceholder: "...",
+    relevanceScore: 4,
+  },
+  {
     id: "chutes",
     name: "Chutes",
     logoUrl: "/assets/home/providers/chutes.webp",
