@@ -49,6 +49,7 @@ export class AudioController extends Controller {
   public async convertToWav(
     @Body() body: ConvertToWavRequestBody
   ): Promise<ConvertToWavResponse> {
+    return { data: null, error: "dead endpoint" };
     const { audioData } = body;
 
     if (!audioData) {
