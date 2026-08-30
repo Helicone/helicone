@@ -223,7 +223,7 @@ export async function callProviderWithRetry(
   }
 
   if (lastResponse === undefined) {
-    throw new Error("500 An error occured while retrying your requests");
+    throw new Error("500 An error occurred while retrying your requests");
   }
 
   return lastResponse;
