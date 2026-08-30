@@ -117,6 +117,41 @@ curl --request POST \
 }'
 ```
 
+### Optional: Gemini smoke test (manual self-host)
+
+If you are testing Google Gemini through your local Helicone proxy, send the
+request to the same local Helicone proxy (`localhost:8585`) and include the
+`Helicone-Auth` header.
+
+```bash
+export GOOGLE_API_KEY="<your-google-api-key>"
+export HELICONE_API_KEY="sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa"
+
+curl --request POST \
+  --url http://localhost:8585/v1beta/models/gemini-2.0-flash:generateContent \
+  --header "x-goog-api-key: $GOOGLE_API_KEY" \
+  --header "Helicone-Auth: Bearer $HELICONE_API_KEY" \
+  --header "Content-Type: application/json" \
+  --header "Accept-Encoding: identity" \
+  --data '{
+    "contents": [
+      {
+        "parts": [
+          {
+            "text": "Say hello from a self-hosted Helicone gateway."
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+For SDK-based Gemini examples, see the Gemini integration docs and reuse the
+same local Helicone proxy/base URL pattern:
+
+- [Gemini JavaScript SDK Integration](/integrations/gemini/api/javascript)
+- [Gemini Python SDK Integration](/integrations/gemini/api/python)
+
 You can login to Helicone at http://localhost:3000
 with the following credentials:
 
@@ -124,5 +159,23 @@ User: `test@helicone.ai`
 Password: `password`
 
 Change the Org to `Organization for Test` and then you should be able to see your requests!
+
+## Troubleshooting (manual self-host, including Linux)
+
+- If requests are not visible in the dashboard, first make sure you changed the
+  active org to `Organization for Test`.
+- Keep the `valhalla/jawn` terminal open and check logs while you send a test
+  request. This confirms whether the proxy is receiving traffic.
+- Confirm both services are running and reachable:
+  - Web dashboard on `http://localhost:3000`
+  - Proxy/backend on `http://localhost:8585`
+- If your application runs inside Docker on Linux, `localhost` inside the
+  container points to the container itself (not your host machine). Point your
+  app to the host IP, or add a host alias (for example
+  `--add-host=host.docker.internal:host-gateway`) and use that hostname.
+- Use `Accept-Encoding: identity` during curl smoke tests to simplify
+  debugging.
+- If a request succeeds but you still do not see it, refresh the dashboard and
+  re-check that the `HELICONE_API_KEY` matches the org you selected.
 
 Please do not hesitate to reach out on discord if you have any questions.
