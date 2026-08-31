@@ -5,6 +5,23 @@ import { resultMap } from "@/packages/common/result";
 import { dbQueryClickhouse } from "../db/dbExecute";
 import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
 
+const DEFAULT_LIMIT = 100;
+const MAX_LIMIT = 1000;
+
+/**
+ * Coerce a caller-supplied limit to a bounded positive integer before it is
+ * interpolated into the ClickHouse LIMIT clause. ClickHouse does not take a
+ * bound parameter in LIMIT, so the value must be made safe as a number.
+ * Anything that is not a plain integer >= 1 (strings with SQL, floats, NaN,
+ * arrays, objects, undefined) falls back to the default.
+ */
+export function safeLimit(raw: unknown): number {
+  const n = typeof raw === "string" ? Number(raw.trim()) : Number(raw);
+  if (typeof raw === "object" && raw !== null) return DEFAULT_LIMIT;
+  if (!Number.isInteger(n) || n < 1) return DEFAULT_LIMIT;
+  return Math.min(n, MAX_LIMIT);
+}
+
 export async function getAggregatedKeyMetrics(
   filter: FilterNode,
   timeFilter: {
@@ -63,7 +80,7 @@ export async function getAggregatedKeyMetrics(
   )
   GROUP BY value
   ${orderByClause}
-  LIMIT ${limit}
+  LIMIT ${safeLimit(limit)}
 `;
 
   const res = await dbQueryClickhouse<{
