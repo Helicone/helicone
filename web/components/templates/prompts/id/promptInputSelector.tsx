@@ -2,12 +2,12 @@ import { useEffect, useState, useMemo } from "react";
 import ThemedDrawer from "../../../shared/themed/themedDrawer";
 import { useJawnClient } from "../../../../lib/clients/jawnHook";
 import useNotification from "../../../shared/notification/useNotification";
-import PromptPropertyCard from "../id/promptPropertyCard";
+import PromptPropertyCard from "./promptPropertyCard";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 
-interface ExperimentInputSelectorProps {
+interface PromptInputSelectorProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   promptVersionId: string | undefined;
@@ -22,7 +22,7 @@ interface ExperimentInputSelectorProps {
   selectJustOne?: boolean;
 }
 
-const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
+const PromptInputSelector = (props: PromptInputSelectorProps) => {
   const {
     open,
     setOpen,
@@ -242,4 +242,4 @@ const ExperimentInputSelector = (props: ExperimentInputSelectorProps) => {
   );
 };
 
-export default ExperimentInputSelector;
+export default PromptInputSelector;

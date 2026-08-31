@@ -1,4 +1,4 @@
-import ExperimentInputSelector from "@/components/templates/prompts/experiments/experimentInputSelector";
+import PromptInputSelector from "@/components/templates/prompts/id/promptInputSelector";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -157,7 +157,7 @@ export default function VariablesPanel({
           ))}
         </div>
       )}
-      <ExperimentInputSelector
+      <PromptInputSelector
         open={openInputSelector}
         setOpen={setOpenInputSelector}
         promptVersionId={promptVersionId}

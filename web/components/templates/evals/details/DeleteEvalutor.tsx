@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useEvaluators } from "../EvaluatorHook";
-import { useEvaluatorDetails } from "./hooks";
 import { Evaluator } from "./types";
 
 export const DeleteEvaluator = ({
@@ -28,8 +27,6 @@ export const DeleteEvaluator = ({
   setShowDeleteModal: (showDeleteModal: boolean) => void;
   deleteEvaluator: ReturnType<typeof useEvaluators>["deleteEvaluator"];
 }) => {
-  const { experiments } = useEvaluatorDetails(evaluator, () => {});
-
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
   return (
     <>
@@ -54,12 +51,7 @@ export const DeleteEvaluator = ({
                 onChange={(e) => setDeleteConfirmation(e.target.value)}
                 placeholder={evaluator.name}
               />
-              <i>
-                This will remove the evaluator from all{" "}
-                {experiments.data?.data?.data?.length ?? 0} experiments. Your
-                scores will still be saved, but you will not be able to use this
-                evaluator in new experiments.
-              </i>
+              <i>Your scores will still be saved.</i>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

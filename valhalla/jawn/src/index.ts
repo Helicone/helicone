@@ -16,7 +16,6 @@ import {
 } from "./lib/clients/kafkaConsumers/constant";
 import { RequestWrapper } from "./lib/requestWrapper/requestWrapper";
 import { DelayedOperationService } from "./lib/shared/delayedOperationService";
-import { runLoopsOnce, runMainLoops } from "./mainLoops";
 import { authFromRequest, authMiddleware } from "./middleware/auth";
 import { IS_RATE_LIMIT_ENABLED, limiter } from "./middleware/ratelimitter";
 import { unauthorizedCacheMiddleware } from "./middleware/unauthorizedCache";
@@ -33,9 +32,6 @@ import { startDBListener } from "./controlPlane/dbListener";
 import { ValidateError } from "tsoa";
 import { SecretManager } from "@helicone-package/secrets/SecretManager";
 
-if (ENVIRONMENT === "production" || process.env.ENABLE_CRON_JOB === "true") {
-  runMainLoops();
-}
 const getAppUrlRegex = () => {
   const appUrl =
     process.env.APP_URL ||
@@ -150,16 +146,6 @@ app.get("/healthcheck", (req, res) => {
     status: "healthy :)",
   });
 });
-
-if (ENVIRONMENT !== "production") {
-  app.get("/run-loops/:index", async (req, res) => {
-    const index = parseInt(req.params.index);
-    await runLoopsOnce(index);
-    res.json({
-      status: "done",
-    });
-  });
-}
 
 initSentry(app);
 initLogs(app);

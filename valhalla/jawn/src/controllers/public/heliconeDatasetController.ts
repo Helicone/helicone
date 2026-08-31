@@ -11,10 +11,10 @@ import {
 } from "tsoa";
 import { Result, err, ok } from "../../packages/common/result";
 import { FilterLeafSubset } from "@helicone-package/filters/filterDefs";
-import { DatasetManager } from "../../managers/dataset/DatasetManager";
 import { type JawnAuthenticatedRequest } from "../../types/request";
 import {
   HeliconeDataset,
+  HeliconeDatasetManager,
   HeliconeDatasetRow,
   type MutateParams,
 } from "../../managers/dataset/HeliconeDatasetManager";
@@ -65,9 +65,9 @@ export class HeliconeDatasetController extends Controller {
       string
     >
   > {
-    const datasetManager = new DatasetManager(request.authParams);
+    const datasetManager = new HeliconeDatasetManager(request.authParams);
 
-    const result = await datasetManager.helicone.createDatasetWithRequests({
+    const result = await datasetManager.createDatasetWithRequests({
       name: requestBody.datasetName,
       requestIds: requestBody.requestIds,
       meta: requestBody.meta,
@@ -92,8 +92,8 @@ export class HeliconeDatasetController extends Controller {
     requestBody: MutateParams,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
-    const datasetManager = new DatasetManager(request.authParams);
-    const result = await datasetManager.helicone.mutate(datasetId, requestBody);
+    const datasetManager = new HeliconeDatasetManager(request.authParams);
+    const result = await datasetManager.mutate(datasetId, requestBody);
     if (result.error) {
       this.setStatus(500);
       return err(result.error);
@@ -114,8 +114,8 @@ export class HeliconeDatasetController extends Controller {
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<HeliconeDatasetRow[], string>> {
-    const datasetManager = new DatasetManager(request.authParams);
-    const result = await datasetManager.helicone.query(datasetId, requestBody);
+    const datasetManager = new HeliconeDatasetManager(request.authParams);
+    const result = await datasetManager.query(datasetId, requestBody);
     if (result.error) {
       this.setStatus(500);
       return err(result.error);
@@ -131,8 +131,8 @@ export class HeliconeDatasetController extends Controller {
     datasetId: string,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<number, string>> {
-    const datasetManager = new DatasetManager(request.authParams);
-    const result = await datasetManager.helicone.count(datasetId);
+    const datasetManager = new HeliconeDatasetManager(request.authParams);
+    const result = await datasetManager.count(datasetId);
     if (result.error) {
       this.setStatus(500);
       return err(result.error);
@@ -150,9 +150,9 @@ export class HeliconeDatasetController extends Controller {
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<HeliconeDataset[], string>> {
-    const datasetManager = new DatasetManager(request.authParams);
+    const datasetManager = new HeliconeDatasetManager(request.authParams);
 
-    const result = await datasetManager.helicone.getDatasets(requestBody);
+    const result = await datasetManager.getDatasets(requestBody);
     if (result.error || !result.data) {
       this.setStatus(500);
       return err(result.error);
@@ -171,8 +171,8 @@ export class HeliconeDatasetController extends Controller {
     @Body() requestBody: { requestBody: Json; responseBody: Json },
     @Request() request: JawnAuthenticatedRequest
   ) {
-    const datasetManager = new DatasetManager(request.authParams);
-    const result = await datasetManager.helicone.updateDatasetRequest(
+    const datasetManager = new HeliconeDatasetManager(request.authParams);
+    const result = await datasetManager.updateDatasetRequest(
       datasetId,
       requestId,
       requestBody
@@ -191,8 +191,8 @@ export class HeliconeDatasetController extends Controller {
     datasetId: string,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
-    const datasetManager = new DatasetManager(request.authParams);
-    const result = await datasetManager.helicone.deleteDataset(datasetId);
+    const datasetManager = new HeliconeDatasetManager(request.authParams);
+    const result = await datasetManager.deleteDataset(datasetId);
     if (result.error) {
       this.setStatus(500);
       return err(result.error);

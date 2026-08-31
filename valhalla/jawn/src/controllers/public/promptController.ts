@@ -417,43 +417,6 @@ export class PromptController extends Controller {
     return result;
   }
 
-  @Get("{promptId}/experiments")
-  public async getPromptExperiments(
-    @Request() request: JawnAuthenticatedRequest,
-    @Path() promptId: string
-  ) {
-    const result = await dbExecute<{
-      id: string;
-      created_at: string;
-      num_hypotheses: number;
-      dataset: string;
-      meta: Record<string, any>;
-    }>(
-      `
-      SELECT 
-        experiment_v2.id,
-        created_at,
-        (
-          SELECT count(*) from experiment_v2_hypothesis
-          WHERE experiment_v2_hypothesis.experiment_v2 = experiment_v2.id
-        ) as num_hypotheses,
-        dataset,
-        meta
-        FROM experiment_v2
-      WHERE experiment_v2.meta->>'prompt_id' = $1
-      AND experiment_v2.organization = $2
-      `,
-      [promptId, request.authParams.organizationId]
-    );
-    if (result.error || !result.data) {
-      console.error(result.error);
-      this.setStatus(500);
-    } else {
-      this.setStatus(200); // set return status 201
-    }
-    return result;
-  }
-
   @Post("{promptId}/versions/query")
   public async getPromptVersions(
     @Body()
