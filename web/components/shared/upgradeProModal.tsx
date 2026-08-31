@@ -14,7 +14,6 @@ import {
   ORGANIZATION_ICONS,
 } from "../templates/organization/orgConstants";
 import { SparklesIcon } from "lucide-react";
-import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 
 interface UpgradeProModalProps {
   open: boolean;
@@ -23,7 +22,6 @@ interface UpgradeProModalProps {
 
 const UpgradeProModal = (props: UpgradeProModalProps) => {
   const { open, setOpen } = props;
-  const heliconeAuthClient = useHeliconeAuthClient();
   const orgContext = useOrg();
 
   const [currentMonth, _setCurrentMonth] = useState(startOfMonth(new Date()));
@@ -62,16 +60,19 @@ const UpgradeProModal = (props: UpgradeProModalProps) => {
       return;
     }
 
+    // The org and user are derived server-side from the authenticated
+    // session; the endpoint does not accept them in the body.
     const res = await fetch("/api/stripe/create_growth_subscription", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        orgId: orgContext?.currentOrg?.id,
-        userEmail: heliconeAuthClient.user?.email,
-      }),
     });
+
+    if (!res.ok) {
+      logger.error(
+        { status: res.status },
+        "Failed to create growth checkout session",
+      );
+      return;
+    }
 
     const { sessionId } = await res.json();
 
