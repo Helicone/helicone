@@ -9,6 +9,7 @@ import { costs as nvidiaCosts } from "./nvidia";
 import { costs as cohereCosts } from "./cohere";
 import { costs as deepseekCosts } from "./deepseek";
 import { costs as fireworksAICosts } from "./fireworks";
+import { costs as gonkabrokerCosts } from "./gonkabroker";
 import { costs as groqCosts } from "./groq";
 import { costs as mistralCosts } from "./mistral";
 import { costs as nebiusCosts } from "./nebius";
@@ -82,6 +83,9 @@ const vercelGateway = /^https:\/\/ai-gateway\.vercel\.sh/;
 // https://api.novita.ai
 const novita = /^https:\/\/api\.novita\.ai/;
 
+// https://proxy.gonkabroker.com
+const gonkabroker = /^https:\/\/proxy\.gonkabroker\.com/;
+
 // api.openpipe.ai
 const openpipe = /^https:\/\/api\.openpipe\.ai/;
 
@@ -132,6 +136,7 @@ export const providersNames = [
   "CEREBRAS",
   "BASETEN",
   "CANOPYWAVE",
+  "GONKABROKER",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -300,6 +305,11 @@ export const providers: {
     pattern: novita,
     provider: "NOVITA",
     costs: novitaCosts,
+  },
+  {
+    pattern: gonkabroker,
+    provider: "GONKABROKER",
+    costs: gonkabrokerCosts,
   },
   {
     pattern: openpipe,
