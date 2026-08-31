@@ -81,6 +81,17 @@ export const models = {
     modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "Qwen",
   },
+  "qwen3.8-27b": {
+    name: "Qwen3.8 27B",
+    author: "qwen",
+    description:
+      "Qwen3.8-27B is a dense vision-language model for coding, professional work, research, and long-horizon agentic tasks. It supports image and video understanding, tool use, and per-request thinking control.",
+    contextLength: 262_144,
+    maxOutputTokens: 262_144,
+    created: "2026-08-05T00:00:00.000Z",
+    modality: { inputs: ["text", "image", "video"], outputs: ["text"] },
+    tokenizer: "Qwen",
+  },
 } satisfies Record<string, ModelConfig>;
 
 export type Qwen3ModelName = keyof typeof models;

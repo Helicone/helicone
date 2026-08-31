@@ -94,6 +94,9 @@ const cerebras = /^https:\/\/api\.cerebras\.ai/;
 // https://inference.canopywave.io
 const canopywave = /^https:\/\/inference\.canopywave\.io/;
 
+// https://api.tiyuvta.ai
+const tiyuvta = /^https:\/\/api\.tiyuvta\.ai/;
+
 export const providersNames = [
   "OPENAI",
   "ANTHROPIC",
@@ -132,6 +135,7 @@ export const providersNames = [
   "CEREBRAS",
   "BASETEN",
   "CANOPYWAVE",
+  "TIYUVTA",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -325,7 +329,12 @@ export const providers: {
     pattern: canopywave,
     provider: "CANOPYWAVE",
     costs: [],
-  }
+  },
+  {
+    pattern: tiyuvta,
+    provider: "TIYUVTA",
+    costs: [],
+  },
 ];
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
