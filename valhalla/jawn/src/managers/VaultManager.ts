@@ -118,9 +118,10 @@ export class VaultManager extends BaseManager {
         `SELECT id, org_id, decrypted_provider_key, provider_key_name, provider_name, provider_secret_key
          FROM decrypted_provider_keys_v2
          WHERE id = $1
+         AND org_id = $2
          AND soft_delete = false
          LIMIT 1`,
-        [providerKeyId]
+        [providerKeyId, this.authParams.organizationId]
       );
 
       if (result.error || !result.data || result.data.length === 0) {

@@ -94,8 +94,9 @@ export async function runOriginalExperiment(
         `SELECT * 
          FROM prompts_versions 
          WHERE id = $1 
+         AND organization = $2
          LIMIT 1`,
-        [promptVersionId]
+        [promptVersionId, experiment.organization]
       );
 
       if (
@@ -125,12 +126,14 @@ export async function run(
     return err(tempKey.error);
   }
 
+  // prompts_versions carries its own organization column, so scope directly.
   const promptVersionResult = await dbExecute<PromptVersion>(
     `SELECT * 
      FROM prompts_versions 
      WHERE id = $1 
+     AND organization = $2
      LIMIT 1`,
-    [promptVersionId]
+    [promptVersionId, organizationId]
   );
 
   if (
@@ -142,12 +145,17 @@ export async function run(
   }
   const promptVersion = promptVersionResult.data[0];
 
+  // prompt_input_record has no organization column; reach ownership through
+  // its prompt_version. Select pir.* explicitly so the joined prompts_versions
+  // columns (notably a second `id`) cannot collide with the record's own.
   const promptInputRecordResult = await dbExecute<PromptInputRecord>(
-    `SELECT * 
-     FROM prompt_input_record 
-     WHERE id = $1 
+    `SELECT pir.* 
+     FROM prompt_input_record pir
+     JOIN prompts_versions pv ON pv.id = pir.prompt_version
+     WHERE pir.id = $1 
+     AND pv.organization = $2
      LIMIT 1`,
-    [inputRecordId]
+    [inputRecordId, organizationId]
   );
 
   if (
