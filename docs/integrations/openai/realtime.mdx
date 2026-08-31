@@ -8,9 +8,12 @@ iconType: "solid"
 ---
 
 import { strings } from "/snippets/strings.mdx";
-import LegacyWarning from "/snippets/legacy-provider-warning.mdx";
-
-<LegacyWarning />
+<Warning>
+  **This integration has been removed.** The Helicone Realtime WebSocket proxy at
+  `wss://api.helicone.ai/v1/gateway/oai/realtime` is no longer served, and the
+  instructions below will not work. Use the [AI Gateway](/gateway/overview) for
+  LLM proxying and observability. This page is kept for reference only.
+</Warning>
 
 OpenAI's Realtime API enables low-latency, multi-modal conversational experiences with support for text and audio as both input and output.
 
