@@ -1,0 +1,31 @@
+name: Free disk space
+description: >-
+  Remove preinstalled toolchains this repo never uses so a full-workspace
+  `yarn install` plus Docker image pulls fit on a GitHub-hosted runner disk.
+  Private-repo runners have been failing with "No space left on device" partway
+  through install; this reclaims ~20-30 GB up front.
+runs:
+  using: composite
+  steps:
+    - name: Reclaim runner disk
+      shell: bash
+      run: |
+        echo "Disk before cleanup:"
+        df -h / | tail -1
+        sudo rm -rf \
+          /usr/share/dotnet \
+          /usr/local/lib/android \
+          /opt/ghc \
+          /usr/local/.ghcup \
+          /opt/hostedtoolcache/CodeQL \
+          /usr/local/share/boost \
+          /usr/share/swift \
+          /usr/local/share/powershell \
+          /usr/share/miniconda \
+          /opt/microsoft \
+          /usr/lib/jvm \
+          2>/dev/null || true
+        sudo docker image prune -af >/dev/null 2>&1 || true
+        sudo apt-get clean >/dev/null 2>&1 || true
+        echo "Disk after cleanup:"
+        df -h / | tail -1

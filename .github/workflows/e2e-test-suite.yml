@@ -19,6 +19,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Free disk space
+        uses: ./.github/actions/free-disk-space
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -49,11 +52,18 @@ jobs:
           cd worker
           yarn install
           mkdir -p logs
+          # Containers are disabled: two concurrent `wrangler dev` processes race
+          # building/inspecting the RequestBodyBuffer image and fail health checks.
+          # The worker falls back to the in-memory buffer when the container is
+          # unavailable (RequestBodyBufferBuilder), which is fine for e2e traffic.
+          echo "Starting OPENAI_PROXY worker on port 8787 (token-bucket suite targets it)..."
+          npx wrangler dev --var WORKER_TYPE:OPENAI_PROXY --port 8787 --inspector-port=9239 --enable-containers=false > logs/wrangler-openai-proxy.log 2>&1 &
+          echo $! > logs/wrangler-openai-proxy.pid
           echo "Starting HELICONE_API worker on port 8788..."
-          npx wrangler dev --var WORKER_TYPE:HELICONE_API --port 8788 --inspector-port=9240 > logs/wrangler-helicone-api.log 2>&1 &
+          npx wrangler dev --var WORKER_TYPE:HELICONE_API --port 8788 --inspector-port=9240 --enable-containers=false > logs/wrangler-helicone-api.log 2>&1 &
           echo $! > logs/wrangler-helicone-api.pid
           echo "Starting AI_GATEWAY_API worker on port 8793..."
-          npx wrangler dev --var WORKER_TYPE:AI_GATEWAY_API --var HELICONE_ORG_ID:"a75d76e3-02e7-4d02-8a2b-c65ed27c69b2" --port 8793 --inspector-port=9241 > logs/wrangler-ai-gateway.log 2>&1 &
+          npx wrangler dev --var WORKER_TYPE:AI_GATEWAY_API --var HELICONE_ORG_ID:"a75d76e3-02e7-4d02-8a2b-c65ed27c69b2" --port 8793 --inspector-port=9241 --enable-containers=false > logs/wrangler-ai-gateway.log 2>&1 &
           echo $! > logs/wrangler-ai-gateway.pid
           echo "Waiting for workers to start..."
           sleep 10
@@ -63,6 +73,22 @@ jobs:
           echo "Checking if workers are running..."
           MAX_RETRIES=30
           RETRY_DELAY=2
+
+          # Check OPENAI_PROXY worker (port 8787)
+          for i in $(seq 1 $MAX_RETRIES); do
+            if curl -f http://localhost:8787/healthcheck 2>/dev/null; then
+              echo "✓ OPENAI_PROXY worker is running on port 8787"
+              break
+            fi
+            if [ $i -eq $MAX_RETRIES ]; then
+              echo "✗ OPENAI_PROXY worker failed to start on port 8787"
+              echo "Last 50 lines of wrangler-openai-proxy.log:"
+              tail -50 worker/logs/wrangler-openai-proxy.log || true
+              exit 1
+            fi
+            echo "Waiting for OPENAI_PROXY worker... (attempt $i/$MAX_RETRIES)"
+            sleep $RETRY_DELAY
+          done
 
           # Check HELICONE_API worker (port 8788)
           for i in $(seq 1 $MAX_RETRIES); do
@@ -110,11 +136,17 @@ jobs:
         run: |
           cd e2e
           yarn install
-          yarn test
+          # tests/nightly needs live provider keys and runs in the nightly workflow
+          yarn test tests/on-push
 
       - name: Display Logs on Failure
         if: failure()
         run: |
+          echo "========================================="
+          echo "OPENAI_PROXY Worker Logs (last 100 lines)"
+          echo "========================================="
+          tail -100 worker/logs/wrangler-openai-proxy.log || echo "No logs found for OPENAI_PROXY worker"
+          echo ""
           echo "========================================="
           echo "HELICONE_API Worker Logs (last 100 lines)"
           echo "========================================="

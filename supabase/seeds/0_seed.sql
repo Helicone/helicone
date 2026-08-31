@@ -33,10 +33,13 @@ INSERT INTO public.admins (user_id, user_email) VALUES
 ('f76629c5-a070-4bbc-9918-64beaea48848', 'test@helicone.ai'),
 ('d9064bb5-1501-4ec9-bfee-21ab74d645b8', 'admin@helicone.ai');
 
--- Enable credits feature flag for test organization
+-- Feature flags for the e2e/test organizations.
+-- ptb_enabled gates pass-through billing in the AI gateway (AttemptExecutor.PTBPreCheck);
+-- without it the wallet e2e suite gets 403 "Pass-through billing is disabled".
 INSERT INTO public.feature_flags (org_id, feature)
 VALUES
-('83635a30-5ba6-41a8-8cc6-fb7df941b24a', 'credits')
+('83635a30-5ba6-41a8-8cc6-fb7df941b24a', 'credits'),
+('83635a30-5ba6-41a8-8cc6-fb7df941b24a', 'ptb_enabled')
 ON CONFLICT DO NOTHING;
 
 
