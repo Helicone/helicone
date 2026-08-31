@@ -254,32 +254,11 @@ export interface paths {
   "/v2/experiment/{experimentId}/{requestId}/{scoreKey}": {
     get: operations["GetExperimentScore"];
   };
-  "/v1/stripe/subscription/cost-for-prompts": {
-    get: operations["GetCostForPrompts"];
-  };
-  "/v1/stripe/subscription/cost-for-evals": {
-    get: operations["GetCostForEvals"];
-  };
-  "/v1/stripe/subscription/cost-for-experiments": {
-    get: operations["GetCostForExperiments"];
-  };
   "/v1/stripe/subscription/free/usage": {
     get: operations["GetFreeUsage"];
   };
   "/v1/stripe/cloud/checkout-session": {
     post: operations["CreateCloudGatewayCheckoutSession"];
-  };
-  "/v1/stripe/subscription/new-customer/upgrade-to-pro": {
-    post: operations["UpgradeToPro"];
-  };
-  "/v1/stripe/subscription/existing-customer/upgrade-to-pro": {
-    post: operations["UpgradeExistingCustomer"];
-  };
-  "/v1/stripe/subscription/new-customer/upgrade-to-team-bundle": {
-    post: operations["UpgradeToTeamBundle"];
-  };
-  "/v1/stripe/subscription/existing-customer/upgrade-to-team-bundle": {
-    post: operations["UpgradeExistingCustomerToTeamBundle"];
   };
   "/v1/stripe/subscription/manage-subscription": {
     post: operations["ManageSubscription"];
@@ -287,18 +266,11 @@ export interface paths {
   "/v1/stripe/subscription/undo-cancel-subscription": {
     post: operations["UndoCancelSubscription"];
   };
-  "/v1/stripe/subscription/add-ons/{productType}": {
-    post: operations["AddOns"];
-    delete: operations["DeleteAddOns"];
-  };
   "/v1/stripe/subscription/preview-invoice": {
     get: operations["PreviewInvoice"];
   };
   "/v1/stripe/subscription/cancel-subscription": {
     post: operations["CancelSubscription"];
-  };
-  "/v1/stripe/subscription/migrate-to-pro": {
-    post: operations["MigrateToPro"];
   };
   "/v1/stripe/payment-intents/search": {
     get: operations["SearchPaymentIntents"];
@@ -1670,22 +1642,6 @@ Json: JsonObject;
       /** Format: double */
       amount: number;
       returnUrl?: string;
-    };
-    UpgradeToProRequest: {
-      addons?: {
-        evals?: boolean;
-        experiments?: boolean;
-        prompts?: boolean;
-        alerts?: boolean;
-      };
-      /** Format: double */
-      seats?: number;
-      /** @enum {string} */
-      ui_mode?: "embedded" | "hosted";
-    };
-    UpgradeToTeamBundleRequest: {
-      /** @enum {string} */
-      ui_mode?: "embedded" | "hosted";
     };
     LLMUsage: {
       model: string;
@@ -6159,36 +6115,6 @@ export interface operations {
       };
     };
   };
-  GetCostForPrompts: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": number;
-        };
-      };
-    };
-  };
-  GetCostForEvals: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": number;
-        };
-      };
-    };
-  };
-  GetCostForExperiments: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": number;
-        };
-      };
-    };
-  };
   GetFreeUsage: {
     responses: {
       /** @description Ok */
@@ -6216,66 +6142,6 @@ export interface operations {
       };
     };
   };
-  UpgradeToPro: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpgradeToProRequest"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": string;
-        };
-      };
-    };
-  };
-  UpgradeExistingCustomer: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpgradeToProRequest"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": string;
-        };
-      };
-    };
-  };
-  UpgradeToTeamBundle: {
-    requestBody?: {
-      content: {
-        "application/json": components["schemas"]["UpgradeToTeamBundleRequest"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": string;
-        };
-      };
-    };
-  };
-  UpgradeExistingCustomerToTeamBundle: {
-    requestBody?: {
-      content: {
-        "application/json": components["schemas"]["UpgradeToTeamBundleRequest"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": string;
-        };
-      };
-    };
-  };
   ManageSubscription: {
     responses: {
       /** @description Ok */
@@ -6287,36 +6153,6 @@ export interface operations {
     };
   };
   UndoCancelSubscription: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": null;
-        };
-      };
-    };
-  };
-  AddOns: {
-    parameters: {
-      path: {
-        productType: "alerts" | "prompts" | "experiments" | "evals";
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": null;
-        };
-      };
-    };
-  };
-  DeleteAddOns: {
-    parameters: {
-      path: {
-        productType: "alerts" | "prompts" | "experiments" | "evals";
-      };
-    };
     responses: {
       /** @description Ok */
       200: {
@@ -6371,16 +6207,6 @@ export interface operations {
       200: {
         content: {
           "application/json": null;
-        };
-      };
-    };
-  };
-  MigrateToPro: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": unknown;
         };
       };
     };

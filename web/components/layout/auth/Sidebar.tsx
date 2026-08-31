@@ -19,12 +19,11 @@ import DesktopSidebar from "./DesktopSidebar";
 import { ChangelogItem, NavigationItem } from "./types";
 
 interface SidebarProps {
-  setOpen: (open: boolean) => void;
   changelog: ChangelogItem[];
   sidebarRef: React.RefObject<HTMLDivElement>;
 }
 
-const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
+const Sidebar = ({ changelog, sidebarRef }: SidebarProps) => {
   const router = useRouter();
   const { pathname } = router;
 
@@ -135,7 +134,6 @@ const Sidebar = ({ changelog, setOpen, sidebarRef }: SidebarProps) => {
       sidebarRef={sidebarRef}
       changelog={changelog}
       NAVIGATION={NAVIGATION}
-      setOpen={setOpen}
     />
   );
 };
