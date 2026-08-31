@@ -26,7 +26,6 @@ import { InfoBox } from "@/components/ui/helicone/infoBox";
 
 export const MigrateGrowthToPro = () => {
   const org = useOrg();
-  const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
 
   const subscription = useQuery({
@@ -39,14 +38,6 @@ export const MigrateGrowthToPro = () => {
     },
   });
 
-  const upgradeExistingCustomerToPro = useMutation({
-    mutationFn: async () => {
-      const jawn = getJawnClient(org?.currentOrg?.id);
-      const result = await jawn.POST("/v1/stripe/subscription/migrate-to-pro");
-      return result;
-    },
-  });
-
   const cancelSubscription = useMutation({
     mutationFn: async () => {
       const jawn = getJawnClient(org?.currentOrg?.id);
@@ -56,13 +47,6 @@ export const MigrateGrowthToPro = () => {
       return result;
     },
   });
-
-  const handleUpgrade = async () => {
-    const result = await upgradeExistingCustomerToPro.mutateAsync();
-    setIsUpgradeDialogOpen(false);
-    subscription.refetch();
-    window.location.reload();
-  };
 
   const handleCancel = async () => {
     await cancelSubscription.mutateAsync();
@@ -99,9 +83,9 @@ export const MigrateGrowthToPro = () => {
             </span>
           </CardTitle>
           <CardDescription>
-            We are discontinuing the Growth plan soon. Please{" "}
-            <b>upgrade to Pro</b> to keep 10k requests every month and access
-            all features or downgrade to Free plan.
+            The Growth plan is being discontinued. You can cancel your
+            subscription below to move to the Free plan, or contact us with any
+            questions.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -113,15 +97,6 @@ export const MigrateGrowthToPro = () => {
             {getBillingCycleDates()}
           </div>
           <Col className="gap-2">
-            <Button
-              onClick={() => setIsUpgradeDialogOpen(true)}
-              disabled={upgradeExistingCustomerToPro.isPending}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              {upgradeExistingCustomerToPro.isPending
-                ? "Upgrading..."
-                : "Upgrade to Pro"}
-            </Button>
             <Button
               variant="outline"
               onClick={() => setIsCancelDialogOpen(true)}
@@ -166,27 +141,6 @@ export const MigrateGrowthToPro = () => {
           buttonText="Contact us"
         />
       </div>
-
-      <Dialog open={isUpgradeDialogOpen} onOpenChange={setIsUpgradeDialogOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Upgrade to Pro Plan</DialogTitle>
-            <DialogDescription>
-              You are about to upgrade to the Pro plan. This will give you
-              access to all Pro features.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsUpgradeDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleUpgrade}>Confirm Upgrade</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
         <DialogContent className="max-w-lg">

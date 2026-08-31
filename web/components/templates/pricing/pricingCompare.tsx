@@ -2,11 +2,7 @@ import { CheckIcon } from "lucide-react";
 import { ContactCTA } from "./contactCTA";
 import { UpgradeToProCTA } from "./upgradeToProCTA";
 
-export const PricingCompare = ({
-  featureName = "",
-}: {
-  featureName: string;
-}) => {
+export const PricingCompare = (_props: { featureName?: string }) => {
   return (
     <>
       <p className="mb-4 text-sm text-gray-500">
@@ -55,10 +51,7 @@ export const PricingCompare = ({
           <a href="#" className="mt-2 block text-sm text-blue-600">
             See all features →
           </a>
-          <UpgradeToProCTA
-            defaultPrompts={featureName === "Prompts"}
-            showAddons={featureName === "Prompts"}
-          />
+          <UpgradeToProCTA />
         </div>
       </div>
       <ContactCTA />

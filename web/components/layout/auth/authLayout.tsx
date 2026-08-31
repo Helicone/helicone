@@ -15,7 +15,6 @@ import { Rocket } from "lucide-react";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useChangelog } from "../../../services/hooks/admin";
-import UpgradeProModal from "../../shared/upgradeProModal";
 import { Row } from "../common";
 import { useOrg } from "../org/organizationContext";
 import MetaData from "../public/authMetaData";
@@ -32,7 +31,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
   const router = useRouter();
   const { pathname } = router;
 
-  const [open, setOpen] = useState(false);
   const [chatWindowOpen, setChatWindowOpen] = useState(false);
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const agentChatPanelRef = useRef<any>(null);
@@ -191,7 +189,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
                       }))
                     : []
                 }
-                setOpen={setOpen}
               />
             </div>
 
@@ -238,7 +235,6 @@ const AuthLayout = (props: AuthLayoutProps) => {
           </Row>
         </div>
 
-        <UpgradeProModal open={open} setOpen={setOpen} />
         {/* <AcceptTermsModal /> */}
       </MetaData>
     </HeliconeAgentProvider>
