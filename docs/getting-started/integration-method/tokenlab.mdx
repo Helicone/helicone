@@ -1,0 +1,87 @@
+---
+title: "TokenLab Integration"
+sidebarTitle: "TokenLab"
+description: "Connect Helicone with TokenLab's OpenAI-compatible API and monitor requests across GPT, Claude, Gemini, DeepSeek, Qwen, Kimi, MiniMax, GLM, and Grok model families."
+"twitter:title": "TokenLab Integration - Helicone OSS LLM Observability"
+---
+
+[TokenLab](https://tokenlab.sh/) provides an OpenAI-compatible API for many frontier and open model families. You can route TokenLab requests through Helicone Gateway by keeping TokenLab as the target provider and adding Helicone observability headers.
+
+You can follow TokenLab's documentation here: [https://docs.tokenlab.sh/](https://docs.tokenlab.sh/)
+
+# Gateway Integration
+
+<Steps>
+  <Step title="Create a Helicone account">
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
+    can generate a [Helicone API key](https://helicone.ai/developer).
+  </Step>
+  <Step title="Create a TokenLab API key">
+    Log into [TokenLab](https://tokenlab.sh/dashboard) and generate an API key from your dashboard.
+  </Step>
+  <Step title="Set HELICONE_API_KEY and TOKENLAB_API_KEY as environment variables">
+```bash
+HELICONE_API_KEY=<your Helicone API key>
+TOKENLAB_API_KEY=<your TokenLab API key>
+```
+  </Step>
+  <Step title="Use Helicone Gateway with TokenLab as the target URL">
+    Send OpenAI-compatible requests to `https://gateway.helicone.ai/v1` and set
+    `Helicone-Target-Url` to `https://api.tokenlab.sh`.
+  </Step>
+</Steps>
+
+## Example
+
+```bash
+curl --request POST \
+  --url https://gateway.helicone.ai/v1/chat/completions \
+  --header "Authorization: Bearer $TOKENLAB_API_KEY" \
+  --header "Helicone-Auth: Bearer $HELICONE_API_KEY" \
+  --header "Helicone-Target-Url: https://api.tokenlab.sh" \
+  --header "Helicone-Target-Provider: TokenLab" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "model": "gpt-5.4-mini",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Say hello from TokenLab through Helicone."
+      }
+    ]
+  }'
+```
+
+## OpenAI SDK
+
+```typescript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: process.env.TOKENLAB_API_KEY,
+  baseURL: "https://gateway.helicone.ai/v1",
+  defaultHeaders: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+    "Helicone-Target-Url": "https://api.tokenlab.sh",
+    "Helicone-Target-Provider": "TokenLab",
+  },
+});
+
+const response = await client.chat.completions.create({
+  model: "claude-sonnet-5",
+  messages: [{ role: "user", content: "Write a one-sentence product summary." }],
+});
+```
+
+## Model Discovery
+
+TokenLab exposes an OpenAI-compatible model list at:
+
+```bash
+curl https://api.tokenlab.sh/v1/models \
+  --header "Authorization: Bearer $TOKENLAB_API_KEY"
+```
+
+Example model IDs include `gpt-5.5`, `claude-opus-4-8`, `gemini-3.5-flash`, `deepseek-v4-pro`, `qwen3.7-max`, `kimi-k2.7-code`, and `grok-4-fast`.
+
+TokenLab also supports native API families such as Responses, Anthropic Messages, and Gemini-compatible endpoints. Use the OpenAI-compatible `/v1` API shown above when sending requests through Helicone Gateway.
