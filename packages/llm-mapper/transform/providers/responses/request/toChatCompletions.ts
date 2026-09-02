@@ -285,7 +285,25 @@ export function toChatCompletions(
     logit_bias: body.logit_bias,
     logprobs: body.logprobs,
     top_logprobs: body.top_logprobs,
-    response_format: body.response_format,
+    response_format: body.text?.format
+      ? {
+          type: body.text.format.type,
+          ...(body.text.format.type === "json_schema"
+            ? {
+                json_schema: {
+                  name: body.text.format.name ?? "response",
+                  ...(body.text.format.description
+                    ? { description: body.text.format.description }
+                    : {}),
+                  schema: body.text.format.schema,
+                  ...(body.text.format.strict !== undefined
+                    ? { strict: body.text.format.strict }
+                    : {}),
+                },
+              }
+            : {}),
+        }
+      : body.response_format,
     seed: body.seed,
     user: body.user,
     service_tier: body.service_tier,
