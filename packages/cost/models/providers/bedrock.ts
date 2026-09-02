@@ -27,7 +27,9 @@ export class BedrockProvider extends BaseProvider {
     modelProviderConfig: ModelProviderConfig,
     userEndpointConfig: UserEndpointConfig
   ): string {
-    if (userEndpointConfig.crossRegion && userEndpointConfig.region) {
+    // crossRegion can be boolean true or string "true" from the UI
+    const isCrossRegion = userEndpointConfig.crossRegion === true || userEndpointConfig.crossRegion === "true";
+    if (isCrossRegion && userEndpointConfig.region) {
       const regionPrefix = userEndpointConfig.region.split("-")[0];
       return `${regionPrefix}.${modelProviderConfig.providerModelId}`;
     }
