@@ -288,6 +288,90 @@ export const costs: ModelRow[] = [
     },
     showInPlayground: true,
   },
+  {
+    model: {
+      operator: "equals",
+      value: "claude-opus-4-7",
+    },
+    cost: {
+      prompt_token: 0.000005, // $5 / MTok
+      completion_token: 0.000025, // $25 / MTok
+      prompt_cache_write_token: 0.00000625, // 5m cache write: $6.25 / MTok
+      prompt_cache_read_token: 0.0000005, // Cache hits/refreshes: $0.50 / MTok
+      prompt_cache_creation_5m: 0.00000625, // $6.25 / MTok
+      prompt_cache_creation_1h: 0.00001, // 1h cache write: $10 / MTok
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "claude-opus-4-8",
+    },
+    cost: {
+      prompt_token: 0.000005, // $5 / MTok
+      completion_token: 0.000025, // $25 / MTok
+      prompt_cache_write_token: 0.00000625, // 5m cache write: $6.25 / MTok
+      prompt_cache_read_token: 0.0000005, // Cache hits/refreshes: $0.50 / MTok
+      prompt_cache_creation_5m: 0.00000625, // $6.25 / MTok
+      prompt_cache_creation_1h: 0.00001, // 1h cache write: $10 / MTok
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "claude-opus-5",
+    },
+    cost: {
+      prompt_token: 0.000005, // $5 / MTok
+      completion_token: 0.000025, // $25 / MTok
+      prompt_cache_write_token: 0.00000625, // 5m cache write: $6.25 / MTok
+      prompt_cache_read_token: 0.0000005, // Cache hits/refreshes: $0.50 / MTok
+      prompt_cache_creation_5m: 0.00000625, // $6.25 / MTok
+      prompt_cache_creation_1h: 0.00001, // 1h cache write: $10 / MTok
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "claude-sonnet-5",
+    },
+    cost: {
+      prompt_token: 0.000002, // $2 / MTok
+      completion_token: 0.00001, // $10 / MTok
+      prompt_cache_write_token: 0.0000025, // 5m cache write: $2.50 / MTok
+      prompt_cache_read_token: 0.0000002, // Cache hits/refreshes: $0.20 / MTok
+      prompt_cache_creation_5m: 0.0000025, // $2.50 / MTok
+      prompt_cache_creation_1h: 0.000004, // 1h cache write: $4 / MTok
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "claude-fable-5",
+    },
+    cost: {
+      prompt_token: 0.00001, // $10 / MTok
+      completion_token: 0.00005, // $50 / MTok
+      prompt_cache_write_token: 0.0000125, // 5m cache write: $12.50 / MTok
+      prompt_cache_read_token: 0.000001, // Cache hits/refreshes: $1 / MTok
+      prompt_cache_creation_5m: 0.0000125, // $12.50 / MTok
+      prompt_cache_creation_1h: 0.00002, // 1h cache write: $20 / MTok
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "claude-fable-5-1",
+    },
+    cost: {
+      prompt_token: 0.00001, // $10 / MTok
+      completion_token: 0.00005, // $50 / MTok
+      prompt_cache_write_token: 0.0000125, // 5m cache write: $12.50 / MTok
+      prompt_cache_read_token: 0.00000025, // Cache hits/refreshes: $0.25 / MTok (0.025x on Fable 5.1)
+      prompt_cache_creation_5m: 0.0000125, // $12.50 / MTok
+      prompt_cache_creation_1h: 0.00002, // 1h cache write: $20 / MTok
+    },
+  },
 ];
 
 export const modelDetails: ModelDetailsMap = {
