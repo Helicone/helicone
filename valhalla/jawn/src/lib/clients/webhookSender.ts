@@ -6,46 +6,26 @@ import { randomUUID } from "crypto";
 
 /**
  * Validates that a webhook destination URL does not point to private/internal networks.
- * Prevents SSRF attacks by blocking requests to localhost, private IPs, and metadata endpoints.
+ * Prevents SSRF attacks by blocking requests to localhost, private IPs, and metadata
+ * endpoints, including obfuscated encodings (decimal/octal/hex/dotless IPv4, IPv6
+ * literals, and IPv4-mapped IPv6 addresses).
+ *
+ * Exported for unit testing.
  */
-function isPrivateOrReservedHostname(hostname: string): boolean {
+export function isPrivateOrReservedHostname(hostname: string): boolean {
   const lower = hostname.toLowerCase();
 
-  // Block localhost variants
+  // Reserved / internal hostnames
   if (
     lower === "localhost" ||
-    lower === "127.0.0.1" ||
-    lower === "[::1]" ||
-    lower === "0.0.0.0"
+    lower === "ip6-localhost" ||
+    lower === "ip6-loopback" ||
+    lower === "metadata.google.internal"
   ) {
     return true;
   }
-
-  // Block cloud metadata endpoints (AWS, GCP, Azure)
-  if (lower === "169.254.169.254" || lower === "metadata.google.internal") {
-    return true;
-  }
-
-  // Block private IPv4 ranges
-  const parts = hostname.split(".");
-  if (parts.length === 4 && parts.every((p) => /^\d+$/.test(p))) {
-    const octets = parts.map(Number);
-    // 10.0.0.0/8
-    if (octets[0] === 10) return true;
-    // 172.16.0.0/12
-    if (octets[0] === 172 && octets[1] >= 16 && octets[1] <= 31) return true;
-    // 192.168.0.0/16
-    if (octets[0] === 192 && octets[1] === 168) return true;
-    // 169.254.0.0/16 (link-local)
-    if (octets[0] === 169 && octets[1] === 254) return true;
-    // 127.0.0.0/8
-    if (octets[0] === 127) return true;
-    // 0.0.0.0/8
-    if (octets[0] === 0) return true;
-  }
-
-  // Block .local, .internal, .corp domains
   if (
+    lower.endsWith(".localhost") ||
     lower.endsWith(".local") ||
     lower.endsWith(".internal") ||
     lower.endsWith(".corp") ||
@@ -54,10 +34,233 @@ function isPrivateOrReservedHostname(hostname: string): boolean {
     return true;
   }
 
+  // IPv6 literals. WHATWG URL keeps the surrounding brackets in `hostname`.
+  if (lower.includes(":") || (lower.startsWith("[") && lower.endsWith("]"))) {
+    return isPrivateIPv6(lower);
+  }
+
+  // IPv4 in any encoding (dotted-decimal, decimal, octal, hex, dotless).
+  const v4 = parseIPv4Loose(lower);
+  if (v4) {
+    return isPrivateIPv4Octets(v4);
+  }
+
   return false;
 }
 
-function validateWebhookDestination(destination: string): string | null {
+/**
+ * Parses an IPv4 address in any of the encodings the URL/inet_aton family accepts:
+ * dotted-decimal ("127.0.0.1"), decimal ("2130706433"), hex ("0x7f000001",
+ * "0x7f.0.0.1"), octal ("0177.0.0.1") and dotless/short forms ("127.1").
+ * Returns the four octets, or null if `host` is not a valid IPv4 literal.
+ */
+function parseIPv4Loose(host: string): number[] | null {
+  const rawParts = host.split(".");
+  if (rawParts.length < 1 || rawParts.length > 4) {
+    return null;
+  }
+
+  const vals: number[] = [];
+  for (const part of rawParts) {
+    if (part.length === 0) {
+      return null;
+    }
+    let n: number;
+    if (/^0[x][0-9a-f]+$/.test(part)) {
+      n = parseInt(part.slice(2), 16);
+    } else if (/^0[0-7]+$/.test(part)) {
+      n = parseInt(part, 8);
+    } else if (/^(0|[1-9][0-9]*)$/.test(part)) {
+      n = parseInt(part, 10);
+    } else {
+      return null;
+    }
+    if (!Number.isFinite(n) || n < 0) {
+      return null;
+    }
+    vals.push(n);
+  }
+
+  const last = vals.length - 1;
+  for (let i = 0; i < last; i++) {
+    if (vals[i] > 255) {
+      return null;
+    }
+  }
+  // The final part absorbs all remaining octets (e.g. "127.1" -> 127.0.0.1).
+  const maxLast = Math.pow(256, 4 - last) - 1;
+  if (vals[last] > maxLast) {
+    return null;
+  }
+
+  let addr = 0;
+  for (let i = 0; i < last; i++) {
+    addr += vals[i] * Math.pow(256, 3 - i);
+  }
+  addr += vals[last];
+  if (addr < 0 || addr > 0xffffffff) {
+    return null;
+  }
+
+  return [
+    (addr >>> 24) & 0xff,
+    (addr >>> 16) & 0xff,
+    (addr >>> 8) & 0xff,
+    addr & 0xff,
+  ];
+}
+
+function isPrivateIPv4Octets(o: number[]): boolean {
+  if (!o || o.length !== 4) {
+    return false;
+  }
+  if (o.some((n) => !Number.isInteger(n) || n < 0 || n > 255)) {
+    return false;
+  }
+  // 0.0.0.0/8 (includes 0.0.0.0)
+  if (o[0] === 0) return true;
+  // 10.0.0.0/8
+  if (o[0] === 10) return true;
+  // 127.0.0.0/8 loopback
+  if (o[0] === 127) return true;
+  // 169.254.0.0/16 link-local (covers 169.254.169.254 metadata)
+  if (o[0] === 169 && o[1] === 254) return true;
+  // 172.16.0.0/12
+  if (o[0] === 172 && o[1] >= 16 && o[1] <= 31) return true;
+  // 192.168.0.0/16
+  if (o[0] === 192 && o[1] === 168) return true;
+  // 100.64.0.0/10 carrier-grade NAT
+  if (o[0] === 100 && o[1] >= 64 && o[1] <= 127) return true;
+  return false;
+}
+
+/**
+ * Expands an IPv6 literal (with or without brackets, optional zone id, and optional
+ * embedded IPv4 tail) into its eight 16-bit hextets. Returns null when the input is
+ * not a valid IPv6 address.
+ */
+function expandIPv6(input: string): number[] | null {
+  let s = input;
+  if (s.startsWith("[") && s.endsWith("]")) {
+    s = s.slice(1, -1);
+  }
+  const pct = s.indexOf("%");
+  if (pct >= 0) {
+    s = s.slice(0, pct);
+  }
+  if (s.indexOf(":") === -1) {
+    return null;
+  }
+
+  // Embedded IPv4 tail, e.g. ::ffff:127.0.0.1
+  let tailWords: number[] = [];
+  const lastColon = s.lastIndexOf(":");
+  const afterColon = s.slice(lastColon + 1);
+  if (afterColon.indexOf(".") !== -1) {
+    const v4 = parseIPv4Loose(afterColon);
+    if (!v4) {
+      return null;
+    }
+    tailWords = [(v4[0] << 8) | v4[1], (v4[2] << 8) | v4[3]];
+    s = s.slice(0, lastColon + 1);
+  }
+
+  const dbl = s.indexOf("::");
+  let head: string;
+  let tail: string | null;
+  if (dbl !== -1) {
+    head = s.slice(0, dbl);
+    tail = s.slice(dbl + 2);
+  } else {
+    head = s;
+    tail = null;
+  }
+
+  const toWords = (str: string): number[] => {
+    if (str === "") {
+      return [];
+    }
+    return str
+      .split(":")
+      .filter((x) => x !== "")
+      .map((x) => (/^[0-9a-f]{1,4}$/.test(x) ? parseInt(x, 16) : NaN));
+  };
+
+  let headW = toWords(head);
+  let tailW = tail === null ? [] : toWords(tail);
+  tailW = tailW.concat(tailWords);
+  if (tail === null && tailWords.length) {
+    headW = headW.concat(tailWords);
+  }
+  if (headW.some(Number.isNaN) || tailW.some(Number.isNaN)) {
+    return null;
+  }
+
+  let words: number[];
+  if (dbl !== -1) {
+    const missing = 8 - (headW.length + tailW.length);
+    if (missing < 0) {
+      return null;
+    }
+    words = headW.concat(new Array(missing).fill(0)).concat(tailW);
+  } else {
+    words = headW;
+  }
+
+  if (words.length !== 8) {
+    return null;
+  }
+  if (words.some((w) => !Number.isInteger(w) || w < 0 || w > 0xffff)) {
+    return null;
+  }
+  return words;
+}
+
+function isPrivateIPv6(input: string): boolean {
+  const w = expandIPv6(input);
+  if (!w) {
+    return false;
+  }
+
+  // :: unspecified
+  if (w.every((x) => x === 0)) {
+    return true;
+  }
+  // ::1 loopback
+  if (
+    w[0] === 0 &&
+    w[1] === 0 &&
+    w[2] === 0 &&
+    w[3] === 0 &&
+    w[4] === 0 &&
+    w[5] === 0 &&
+    w[6] === 0 &&
+    w[7] === 1
+  ) {
+    return true;
+  }
+  // fe80::/10 link-local
+  if ((w[0] & 0xffc0) === 0xfe80) {
+    return true;
+  }
+  // fc00::/7 unique local addresses
+  if ((w[0] & 0xfe00) === 0xfc00) {
+    return true;
+  }
+  // IPv4-mapped (::ffff:0:0/96) and IPv4-compatible (::/96) -> inspect embedded IPv4
+  const firstFiveZero =
+    w[0] === 0 && w[1] === 0 && w[2] === 0 && w[3] === 0 && w[4] === 0;
+  if (firstFiveZero && (w[5] === 0xffff || w[5] === 0)) {
+    const o = [(w[6] >> 8) & 0xff, w[6] & 0xff, (w[7] >> 8) & 0xff, w[7] & 0xff];
+    if (isPrivateIPv4Octets(o)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export function validateWebhookDestination(destination: string): string | null {
   if (!destination || typeof destination !== "string") {
     return "Invalid destination URL";
   }
@@ -74,7 +277,6 @@ function validateWebhookDestination(destination: string): string | null {
   }
   return null;
 }
-
 export type WebhookPayload = {
   payload: {
     signedUrl?: string;
