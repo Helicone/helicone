@@ -8,3 +8,526 @@ openapi: post /v1/session/query
 import EUAPIWarning from "/snippets/eu-api-warning.mdx";
 
 <EUAPIWarning />
+
+## Overview
+
+The Session Query API allows you to search and filter sessions with advanced criteria including time ranges, session names, custom properties, and full-text search. This is essential for debugging AI agent workflows, analyzing conversation patterns, and building custom analytics.
+
+## Quick Start
+
+### Basic Query
+
+Query all sessions within a time range:
+
+```bash
+curl --request POST \
+  --url https://api.helicone.ai/v1/session/query \
+  --header "Content-Type: application/json" \
+  --header "authorization: Bearer $HELICONE_API_KEY" \
+  --data '{
+  "startTimeUnixMs": 1704067200000,
+  "endTimeUnixMs": 1704153600000,
+  "timezoneDifference": 0,
+  "limit": 100
+}'
+```
+
+<Note>
+  **Required Parameters:**
+  - `startTimeUnixMs` - Start of time range (Unix timestamp in milliseconds)
+  - `endTimeUnixMs` - End of time range (Unix timestamp in milliseconds)
+  - `timezoneDifference` - Timezone offset in hours (e.g., -5 for EST, 0 for UTC)
+</Note>
+
+## Filter Examples
+
+### Filter by Session Name
+
+Find all sessions with a specific name:
+
+```bash
+curl --request POST \
+  --url https://api.helicone.ai/v1/session/query \
+  --header "Content-Type: application/json" \
+  --header "authorization: Bearer $HELICONE_API_KEY" \
+  --data '{
+  "startTimeUnixMs": 1704067200000,
+  "endTimeUnixMs": 1704153600000,
+  "timezoneDifference": 0,
+  "nameEquals": "Customer Support",
+  "limit": 100
+}'
+```
+
+### Search Sessions
+
+Search across session names and metadata:
+
+```bash
+curl --request POST \
+  --url https://api.helicone.ai/v1/session/query \
+  --header "Content-Type: application/json" \
+  --header "authorization: Bearer $HELICONE_API_KEY" \
+  --data '{
+  "startTimeUnixMs": 1704067200000,
+  "endTimeUnixMs": 1704153600000,
+  "timezoneDifference": 0,
+  "search": "authentication error",
+  "limit": 100
+}'
+```
+
+### Filter by Custom Properties
+
+<Warning>
+  **Important:** When filtering by custom properties, wrap the `properties` filter inside a `session` object. Each property condition must be a separate leaf node.
+</Warning>
+
+**Single property filter:**
+
+```bash
+curl --request POST \
+  --url https://api.helicone.ai/v1/session/query \
+  --header "Content-Type: application/json" \
+  --header "authorization: Bearer $HELICONE_API_KEY" \
+  --data '{
+  "startTimeUnixMs": 1704067200000,
+  "endTimeUnixMs": 1704153600000,
+  "timezoneDifference": 0,
+  "filter": {
+    "session": {
+      "properties": {
+        "environment": {
+          "equals": "production"
+        }
+      }
+    }
+  },
+  "limit": 100
+}'
+```
+
+**Multiple property filters (AND):**
+
+```bash
+curl --request POST \
+  --url https://api.helicone.ai/v1/session/query \
+  --header "Content-Type: application/json" \
+  --header "authorization: Bearer $HELICONE_API_KEY" \
+  --data '{
+  "startTimeUnixMs": 1704067200000,
+  "endTimeUnixMs": 1704153600000,
+  "timezoneDifference": 0,
+  "filter": {
+    "left": {
+      "session": {
+        "properties": {
+          "product": {
+            "equals": "ai-writer"
+          }
+        }
+      }
+    },
+    "operator": "and",
+    "right": {
+      "session": {
+        "properties": {
+          "source": {
+            "equals": "slack"
+          }
+        }
+      }
+    }
+  },
+  "limit": 100
+}'
+```
+
+**Multiple property filters (OR):**
+
+```bash
+curl --request POST \
+  --url https://api.helicone.ai/v1/session/query \
+  --header "Content-Type: application/json" \
+  --header "authorization: Bearer $HELICONE_API_KEY" \
+  --data '{
+  "startTimeUnixMs": 1704067200000,
+  "endTimeUnixMs": 1704153600000,
+  "timezoneDifference": 0,
+  "filter": {
+    "left": {
+      "session": {
+        "properties": {
+          "priority": {
+            "equals": "high"
+          }
+        }
+      }
+    },
+    "operator": "or",
+    "right": {
+      "session": {
+        "properties": {
+          "priority": {
+            "equals": "critical"
+          }
+        }
+      }
+    }
+  },
+  "limit": 100
+}'
+```
+
+### Combine Name and Properties
+
+Query sessions by name AND custom properties:
+
+```bash
+curl --request POST \
+  --url https://api.helicone.ai/v1/session/query \
+  --header "Content-Type: application/json" \
+  --header "authorization: Bearer $HELICONE_API_KEY" \
+  --data '{
+  "startTimeUnixMs": 1704067200000,
+  "endTimeUnixMs": 1704153600000,
+  "timezoneDifference": 0,
+  "nameEquals": "Code Generation Assistant",
+  "filter": {
+    "session": {
+      "properties": {
+        "environment": {
+          "equals": "production"
+        }
+      }
+    }
+  },
+  "limit": 100
+}'
+```
+
+## Common Use Cases
+
+### Debug User Sessions in Last 24 Hours
+
+Find all sessions from a specific user in the last day:
+
+```bash
+# Calculate timestamps (Unix time in milliseconds)
+END_TIME=$(date +%s)000
+START_TIME=$((END_TIME - 86400000))  # 24 hours ago
+
+curl --request POST \
+  --url https://api.helicone.ai/v1/session/query \
+  --header "Content-Type: application/json" \
+  --header "authorization: Bearer $HELICONE_API_KEY" \
+  --data "{
+  \"startTimeUnixMs\": $START_TIME,
+  \"endTimeUnixMs\": $END_TIME,
+  \"timezoneDifference\": 0,
+  \"filter\": {
+    \"session\": {
+      \"properties\": {
+        \"user-id\": {
+          \"equals\": \"user-123\"
+        }
+      }
+    }
+  },
+  \"limit\": 100
+}"
+```
+
+### Find Failed Sessions
+
+Query sessions with error status:
+
+```bash
+curl --request POST \
+  --url https://api.helicone.ai/v1/session/query \
+  --header "Content-Type: application/json" \
+  --header "authorization: Bearer $HELICONE_API_KEY" \
+  --data '{
+  "startTimeUnixMs": 1704067200000,
+  "endTimeUnixMs": 1704153600000,
+  "timezoneDifference": 0,
+  "filter": {
+    "session": {
+      "properties": {
+        "status": {
+          "equals": "error"
+        }
+      }
+    }
+  },
+  "limit": 100
+}'
+```
+
+### Production Sessions by Version
+
+Filter by environment and version:
+
+```bash
+curl --request POST \
+  --url https://api.helicone.ai/v1/session/query \
+  --header "Content-Type: application/json" \
+  --header "authorization: Bearer $HELICONE_API_KEY" \
+  --data '{
+  "startTimeUnixMs": 1704067200000,
+  "endTimeUnixMs": 1704153600000,
+  "timezoneDifference": 0,
+  "filter": {
+    "left": {
+      "session": {
+        "properties": {
+          "environment": {
+            "equals": "production"
+          }
+        }
+      }
+    },
+    "operator": "and",
+    "right": {
+      "session": {
+        "properties": {
+          "version": {
+            "equals": "v2.1.0"
+          }
+        }
+      }
+    }
+  },
+  "limit": 100
+}'
+```
+
+### Complex Multi-Property Filter
+
+Combine multiple conditions with AND/OR logic:
+
+```bash
+curl --request POST \
+  --url https://api.helicone.ai/v1/session/query \
+  --header "Content-Type: application/json" \
+  --header "authorization: Bearer $HELICONE_API_KEY" \
+  --data '{
+  "startTimeUnixMs": 1704067200000,
+  "endTimeUnixMs": 1704153600000,
+  "timezoneDifference": 0,
+  "filter": {
+    "left": {
+      "left": {
+        "session": {
+          "properties": {
+            "product": {
+              "equals": "ai-writer"
+            }
+          }
+        }
+      },
+      "operator": "and",
+      "right": {
+        "session": {
+          "properties": {
+            "source": {
+              "equals": "slack"
+            }
+          }
+        }
+      }
+    },
+    "operator": "and",
+    "right": {
+      "session": {
+        "properties": {
+          "environment": {
+            "equals": "production"
+          }
+        }
+      }
+    }
+  },
+  "limit": 100
+}'
+```
+
+## Pagination
+
+Use `offset` and `limit` to paginate through large result sets:
+
+```bash
+# First page (0-99)
+curl --request POST \
+  --url https://api.helicone.ai/v1/session/query \
+  --header "Content-Type: application/json" \
+  --header "authorization: Bearer $HELICONE_API_KEY" \
+  --data '{
+  "startTimeUnixMs": 1704067200000,
+  "endTimeUnixMs": 1704153600000,
+  "timezoneDifference": 0,
+  "offset": 0,
+  "limit": 100
+}'
+
+# Second page (100-199)
+curl --request POST \
+  --url https://api.helicone.ai/v1/session/query \
+  --header "Content-Type: application/json" \
+  --header "authorization: Bearer $HELICONE_API_KEY" \
+  --data '{
+  "startTimeUnixMs": 1704067200000,
+  "endTimeUnixMs": 1704153600000,
+  "timezoneDifference": 0,
+  "offset": 100,
+  "limit": 100
+}'
+```
+
+## Filter Structure
+
+The `filter` parameter uses an AST (Abstract Syntax Tree) structure where each condition is a separate leaf node:
+
+### Filter Leaf (Single Condition)
+
+```typescript
+{
+  "session": {
+    "properties": {
+      "property-name": {
+        "equals": "value"
+      }
+    }
+  }
+}
+```
+
+### Filter Branch (Multiple Conditions)
+
+```typescript
+{
+  "left": FilterNode,
+  "operator": "and" | "or",
+  "right": FilterNode
+}
+```
+
+### Available Operators
+
+**For property values:**
+- `equals` - Exact match
+- `not-equals` - Not equal to
+- `contains` - Contains substring
+- `not-contains` - Does not contain substring
+
+## Response Format
+
+The API returns an array of session objects with the following structure:
+
+```json
+{
+  "data": [
+    {
+      "session_id": "550e8400-e29b-41d4-a716-446655440000",
+      "session_name": "Customer Support",
+      "created_at": "2024-01-01T12:00:00Z",
+      "last_used": "2024-01-01T12:30:00Z",
+      "total_requests": 15,
+      "total_cost": 0.0234,
+      "properties": {
+        "user-id": "user-123",
+        "environment": "production"
+      }
+    }
+  ],
+  "error": null
+}
+```
+
+## Troubleshooting
+
+### Empty Results
+
+If you're getting empty results when you know sessions exist:
+
+**1. Check time range** - Ensure your timestamps are in milliseconds and cover the correct period:
+
+```bash
+# Get current time in milliseconds
+date +%s000
+
+# Convert specific date to milliseconds (macOS/Linux)
+date -d "2024-01-01" +%s000
+```
+
+**2. Verify property names** - Property names are case-sensitive and must match exactly:
+
+```bash
+# ❌ Wrong - case mismatch
+"properties": {
+  "Environment": { "equals": "production" }
+}
+
+# ✅ Correct - exact match
+"properties": {
+  "environment": { "equals": "production" }
+}
+```
+
+**3. Check filter structure** - Each property condition must be wrapped in a `session` object:
+
+<Accordion title="❌ WRONG - Missing session wrapper">
+```json
+{
+  "filter": {
+    "properties": {
+      "environment": {
+        "equals": "production"
+      }
+    }
+  }
+}
+```
+</Accordion>
+
+<Accordion title="✅ CORRECT - With session wrapper">
+```json
+{
+  "filter": {
+    "session": {
+      "properties": {
+        "environment": {
+          "equals": "production"
+        }
+      }
+    }
+  }
+}
+```
+</Accordion>
+
+### Region Issues
+
+Make sure you're using the correct regional endpoint:
+- **US:** `https://api.helicone.ai/v1/session/query`
+- **EU:** `https://eu.api.helicone.ai/v1/session/query`
+
+## Related Resources
+
+<CardGroup cols={2}>
+<Card title="Sessions Overview" icon="link" href="/features/sessions">
+Learn how to create and structure sessions
+</Card>
+
+<Card title="Custom Properties" icon="tag" href="/features/advanced-usage/custom-properties">
+Add metadata to sessions for advanced filtering
+</Card>
+
+<Card title="Request Query API" icon="code" href="/rest/request/post-v1requestquery">
+Query individual requests within sessions
+</Card>
+
+<Card title="Getting Sessions Guide" icon="book" href="/guides/cookbooks/getting-sessions">
+Step-by-step guide to retrieving session data
+</Card>
+</CardGroup>
