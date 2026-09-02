@@ -1,6 +1,6 @@
 import type { ModelUsage } from "../../cost/usage/types";
 import type { ModelProviderName } from "../../cost/models/providers";
-import { modelCostBreakdownFromRegistry } from "../../cost/costCalc";
+import { modelCost, modelCostBreakdownFromRegistry } from "../../cost/costCalc";
 
 describe("modelCostBreakdownFromRegistry", () => {
   it("should calculate cost for basic GPT-4o usage", () => {
@@ -435,5 +435,217 @@ describe("modelCostBreakdownFromRegistry", () => {
         expect(breakdown.cachedInputCost).toBe(30000 * 0.000002 * 0.1);
       }
     });
+  });
+});
+
+describe("unpriced model warning", () => {
+  let warnSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    warnSpy.mockRestore();
+  });
+
+  const legacyUsage = {
+    sum_prompt_tokens: 100,
+    prompt_cache_write_tokens: 0,
+    prompt_cache_read_tokens: 0,
+    prompt_audio_tokens: 0,
+    sum_completion_tokens: 50,
+    completion_audio_tokens: 0,
+    prompt_cache_write_5m: 0,
+    prompt_cache_write_1h: 0,
+  };
+
+  it("registry path warns with provider and model when no pricing exists", () => {
+    const breakdown = modelCostBreakdownFromRegistry({
+      modelUsage: { input: 100, output: 50 },
+      providerModelId: "not-a-real-model",
+      provider: "anthropic" as ModelProviderName,
+    });
+
+    expect(breakdown).toBeNull();
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    const message = String(warnSpy.mock.calls[0][0]);
+    expect(message).toContain("not-a-real-model");
+    expect(message).toContain("anthropic");
+  });
+
+  it("registry path does not warn when pricing exists", () => {
+    const breakdown = modelCostBreakdownFromRegistry({
+      modelUsage: { input: 100, output: 50 },
+      providerModelId: "gpt-4o",
+      provider: "openai" as ModelProviderName,
+    });
+
+    expect(breakdown).not.toBeNull();
+    expect(warnSpy).not.toHaveBeenCalled();
+  });
+
+  it("legacy modelCost warns and returns 0 when neither the legacy table nor the registry has pricing", () => {
+    const cost = modelCost({
+      provider: "ANTHROPIC",
+      model: "not-a-real-model",
+      ...legacyUsage,
+    });
+
+    expect(cost).toBe(0);
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    const message = String(warnSpy.mock.calls[0][0]);
+    expect(message).toContain("not-a-real-model");
+    expect(message).toContain("ANTHROPIC");
+  });
+
+  it("legacy modelCost does not warn for a model the registry prices", () => {
+    // gpt-5.4 has a registry entry but no row in the legacy openai table.
+    // Callers prefer the registry result, so a legacy miss here is not a silent zero.
+    const cost = modelCost({
+      provider: "OPENAI",
+      model: "gpt-5.4",
+      ...legacyUsage,
+    });
+
+    expect(cost).toBe(0);
+    expect(warnSpy).not.toHaveBeenCalled();
+  });
+
+  it("legacy modelCost does not warn when the legacy table has pricing", () => {
+    const cost = modelCost({
+      provider: "ANTHROPIC",
+      model: "claude-sonnet-4-6",
+      ...legacyUsage,
+      sum_prompt_tokens: 1_000_000,
+      sum_completion_tokens: 0,
+    });
+
+    expect(cost).toBeCloseTo(3, 10);
+    expect(warnSpy).not.toHaveBeenCalled();
+  });
+});
+
+describe("Claude Opus 4.7 / 4.8 / 5, Sonnet 5, Fable 5 / 5.1 pricing (anthropic)", () => {
+  // Rates per https://platform.claude.com/docs/en/about-claude/pricing (per MTok):
+  //   Opus 4.7 / 4.8 / 5: $5 in | $6.25 5m write | $10 1h write | $0.50 cache read | $25 out
+  //   Sonnet 5:           $2 in | $2.50 5m write | $4 1h write  | $0.20 cache read | $10 out
+  //   Fable 5:            $10 in | $12.50 5m write | $20 1h write | $1 cache read | $50 out
+  //   Fable 5.1:          $10 in | $12.50 5m write | $20 1h write | $0.25 cache read (0.025x) | $50 out
+
+  const oneMillionOfEverything: ModelUsage = {
+    input: 1_000_000,
+    output: 1_000_000,
+    cacheDetails: {
+      cachedInput: 1_000_000,
+      write5m: 1_000_000,
+      write1h: 1_000_000,
+    },
+  };
+
+  it("prices the pricing page worked example (50,000 in + 15,000 out at $5/$25) at $0.625 on Opus 4.7, 4.8 and 5", () => {
+    for (const providerModelId of ["claude-opus-4-7", "claude-opus-4-8", "claude-opus-5"]) {
+      const breakdown = modelCostBreakdownFromRegistry({
+        modelUsage: { input: 50_000, output: 15_000 },
+        providerModelId,
+        provider: "anthropic" as ModelProviderName,
+      });
+
+      expect(breakdown).not.toBeNull();
+      expect(breakdown!.inputCost).toBeCloseTo(0.25, 10);
+      expect(breakdown!.outputCost).toBeCloseTo(0.375, 10);
+      expect(breakdown!.totalCost).toBeCloseTo(0.625, 10);
+    }
+  });
+
+  it("applies $6.25 / $10 / $0.50 cache rates on Opus 4.8", () => {
+    const breakdown = modelCostBreakdownFromRegistry({
+      modelUsage: oneMillionOfEverything,
+      providerModelId: "claude-opus-4-8",
+      provider: "anthropic" as ModelProviderName,
+    });
+
+    expect(breakdown).not.toBeNull();
+    expect(breakdown!.inputCost).toBeCloseTo(5, 10);
+    expect(breakdown!.outputCost).toBeCloseTo(25, 10);
+    expect(breakdown!.cacheWrite5mCost).toBeCloseTo(6.25, 10);
+    expect(breakdown!.cacheWrite1hCost).toBeCloseTo(10, 10);
+    expect(breakdown!.cachedInputCost).toBeCloseTo(0.5, 10);
+  });
+
+  it("prices Sonnet 5 at $2 / $10 with $2.50 / $4 / $0.20 cache rates", () => {
+    const breakdown = modelCostBreakdownFromRegistry({
+      modelUsage: oneMillionOfEverything,
+      providerModelId: "claude-sonnet-5",
+      provider: "anthropic" as ModelProviderName,
+    });
+
+    expect(breakdown).not.toBeNull();
+    expect(breakdown!.inputCost).toBeCloseTo(2, 10);
+    expect(breakdown!.outputCost).toBeCloseTo(10, 10);
+    expect(breakdown!.cacheWrite5mCost).toBeCloseTo(2.5, 10);
+    expect(breakdown!.cacheWrite1hCost).toBeCloseTo(4, 10);
+    expect(breakdown!.cachedInputCost).toBeCloseTo(0.2, 10);
+  });
+
+  it("prices Fable 5 at $10 / $50 with a $1 cache read (0.1x)", () => {
+    const breakdown = modelCostBreakdownFromRegistry({
+      modelUsage: oneMillionOfEverything,
+      providerModelId: "claude-fable-5",
+      provider: "anthropic" as ModelProviderName,
+    });
+
+    expect(breakdown).not.toBeNull();
+    expect(breakdown!.inputCost).toBeCloseTo(10, 10);
+    expect(breakdown!.outputCost).toBeCloseTo(50, 10);
+    expect(breakdown!.cacheWrite5mCost).toBeCloseTo(12.5, 10);
+    expect(breakdown!.cacheWrite1hCost).toBeCloseTo(20, 10);
+    expect(breakdown!.cachedInputCost).toBeCloseTo(1, 10);
+  });
+
+  it("prices Fable 5.1 cache reads at $0.25 per MTok (0.025x), not the 0.1x default", () => {
+    const breakdown = modelCostBreakdownFromRegistry({
+      modelUsage: oneMillionOfEverything,
+      providerModelId: "claude-fable-5-1",
+      provider: "anthropic" as ModelProviderName,
+    });
+
+    expect(breakdown).not.toBeNull();
+    expect(breakdown!.inputCost).toBeCloseTo(10, 10);
+    expect(breakdown!.outputCost).toBeCloseTo(50, 10);
+    expect(breakdown!.cacheWrite5mCost).toBeCloseTo(12.5, 10);
+    expect(breakdown!.cacheWrite1hCost).toBeCloseTo(20, 10);
+    expect(breakdown!.cachedInputCost).toBeCloseTo(0.25, 10);
+  });
+
+  it("legacy table prices claude-opus-4-8 and the Fable 5.1 cache rates as well", () => {
+    const opus = modelCost({
+      provider: "ANTHROPIC",
+      model: "claude-opus-4-8",
+      sum_prompt_tokens: 50_000,
+      prompt_cache_write_tokens: 0,
+      prompt_cache_read_tokens: 0,
+      prompt_audio_tokens: 0,
+      sum_completion_tokens: 15_000,
+      completion_audio_tokens: 0,
+      prompt_cache_write_5m: 0,
+      prompt_cache_write_1h: 0,
+    });
+    expect(opus).toBeCloseTo(0.625, 10);
+
+    const fable51 = modelCost({
+      provider: "ANTHROPIC",
+      model: "claude-fable-5-1",
+      sum_prompt_tokens: 0,
+      prompt_cache_write_tokens: 2_000_000,
+      prompt_cache_read_tokens: 1_000_000,
+      prompt_audio_tokens: 0,
+      sum_completion_tokens: 0,
+      completion_audio_tokens: 0,
+      prompt_cache_write_5m: 1_000_000,
+      prompt_cache_write_1h: 1_000_000,
+    });
+    // $0.25 cache read + $12.50 5m write + $20 1h write
+    expect(fable51).toBeCloseTo(32.75, 10);
   });
 });
