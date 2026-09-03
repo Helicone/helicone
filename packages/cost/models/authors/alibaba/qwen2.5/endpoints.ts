@@ -36,6 +36,37 @@ export const endpoints = {
       "*": {},
     },
   },
+  "qwen2.5-7b-instruct:neuronpool": {
+    providerModelId: "qwen2.5-7b-instruct",
+    provider: "neuronpool",
+    author: "alibaba",
+    pricing: [
+      {
+        threshold: 0,
+        input: 2e-8,
+        output: 3e-8,
+      },
+    ],
+    rateLimits: {
+      rpm: 600,
+    },
+    contextLength: 32_768,
+    maxCompletionTokens: 4096,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stream",
+      "tools",
+      "tool_choice",
+      "response_format",
+      "structured_outputs",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${Qwen25ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

@@ -1,6 +1,17 @@
 import { ModelConfig } from "../../../types";
 
 export const models = {
+  "qwen2.5-7b-instruct": {
+    name: "Qwen2.5 7B Instruct",
+    author: "alibaba",
+    description:
+      "Qwen2.5 7B instruction-tuned model served on the NeuronPool public network.",
+    contextLength: 32_768,
+    maxOutputTokens: 4096,
+    created: "2024-09-15T00:00:00.000Z",
+    modality: { inputs: ["text"], outputs: ["text"] },
+    tokenizer: "Qwen",
+  },
   "qwen2.5-coder-7b-fast": {
     name: "Qwen2.5 Coder 7B fast",
     author: "alibaba",

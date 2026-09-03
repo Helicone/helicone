@@ -40,6 +40,37 @@ export const endpoints = {
       "*": {},
     },
   },
+  "gemma-3-12b-it:neuronpool": {
+    providerModelId: "gemma-3-12b-it",
+    provider: "neuronpool",
+    author: "google",
+    pricing: [
+      {
+        threshold: 0,
+        input: 4e-8,
+        output: 6e-8,
+      },
+    ],
+    rateLimits: {
+      rpm: 600,
+    },
+    contextLength: 131_072,
+    maxCompletionTokens: 4096,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stream",
+      "tools",
+      "tool_choice",
+      "response_format",
+      "structured_outputs",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<
     `${Gemma3ModelName}:${ModelProviderName}` | Gemma3ModelName,
