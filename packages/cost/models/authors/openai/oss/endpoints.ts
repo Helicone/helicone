@@ -82,6 +82,37 @@ export const endpoints = {
       "*": {},
     },
   },
+  "gpt-oss-20b:neuronpool": {
+    providerModelId: "gpt-oss-20b",
+    provider: "neuronpool",
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 1.5e-8,
+        output: 7e-8,
+      },
+    ],
+    rateLimits: {
+      rpm: 600,
+    },
+    contextLength: 131_072,
+    maxCompletionTokens: 4096,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stream",
+      "tools",
+      "tool_choice",
+      "response_format",
+      "structured_outputs",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
   "gpt-oss-20b:openrouter": {
     provider: "openrouter",
     author: "openai",
