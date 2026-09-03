@@ -74,6 +74,8 @@ export class WebsocketListeners {
   }
 
   removeListener(organizationId: string, listener: ConnectedRouterState) {
-    this.listeners.get(organizationId)?.filter((l) => l !== listener);
+    const remaining =
+      this.listeners.get(organizationId)?.filter((l) => l !== listener) ?? [];
+    this.listeners.set(organizationId, remaining);
   }
 }
