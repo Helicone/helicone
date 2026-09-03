@@ -56,6 +56,8 @@ export function heliconeProviderToModelProviderName(
       return "chutes";
     case "CEREBRAS":
       return "cerebras";
+    case "neuronpool":
+      return "neuronpool";
     case "BASETEN":
       return "baseten";
     case "FIREWORKS":
@@ -164,7 +166,7 @@ export const dbProviderToProvider = (
 
 export function buildEndpointUrl(
   endpoint: Endpoint,
-  requestParams: RequestParams,
+  requestParams: RequestParams
 ): Result<string> {
   const providerResult = getProvider(endpoint.provider);
   if (providerResult.error) {
