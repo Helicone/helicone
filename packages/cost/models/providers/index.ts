@@ -13,6 +13,7 @@ import { GroqProvider } from "./groq";
 import { HeliconeProvider } from "./helicone";
 import { MistralProvider } from "./mistral";
 import { NebiusProvider } from "./nebius";
+import { NeuronPoolProvider } from "./neuronpool";
 import { NovitaProvider } from "./novita";
 import { OpenAIProvider } from "./openai";
 import { OpenRouterProvider } from "./openrouter";
@@ -37,6 +38,7 @@ export const providers = {
   helicone: new HeliconeProvider(),
   mistral: new MistralProvider(),
   nebius: new NebiusProvider(),
+  neuronpool: new NeuronPoolProvider(),
   novita: new NovitaProvider(),
   openai: new OpenAIProvider(),
   openrouter: new OpenRouterProvider(),
@@ -81,6 +83,7 @@ export const ResponsesAPIEnabledProviders: ModelProviderName[] = [
   "groq",
   "mistral",
   "nebius",
+  "neuronpool",
   "novita",
   "openrouter",
   "perplexity",
