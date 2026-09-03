@@ -367,6 +367,37 @@ export const endpoints = {
       "*": {},
     },
   },
+  "qwen3-30b-a3b:neuronpool": {
+    providerModelId: "qwen3-30b-a3b",
+    provider: "neuronpool",
+    author: "qwen",
+    pricing: [
+      {
+        threshold: 0,
+        input: 6e-8,
+        output: 9e-8,
+      },
+    ],
+    rateLimits: {
+      rpm: 600,
+    },
+    contextLength: 32_768,
+    maxCompletionTokens: 4096,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stream",
+      "tools",
+      "tool_choice",
+      "response_format",
+      "structured_outputs",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${Qwen3ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;
