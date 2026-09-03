@@ -396,6 +396,8 @@ export function parseModelString(
     );
   }
 
+  // When provider is specified, allow unknown models (will use passthrough)
+  // This enables using new model versions without waiting for registry updates
   return ok({
     modelName,
     provider,
