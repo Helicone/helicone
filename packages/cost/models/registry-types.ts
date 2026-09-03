@@ -16,6 +16,8 @@ import { alibabaEndpointConfig, alibabaModels } from "./authors/alibaba";
 import { metaEndpointConfig, metaModels } from "./authors/meta";
 import { zaiEndpointConfig, zaiModels } from "./authors/zai";
 import { baiduEndpointConfig, baiduModels } from "./authors/baidu";
+import { neuronpoolEndpointConfig, neuronpoolModels } from "./authors/neuronpool";
+import { nomicEndpointConfig, nomicModels } from "./authors/nomic";
 
 // Combine all models for type derivation
 const allModels = {
@@ -28,6 +30,8 @@ const allModels = {
   ...alibabaModels,
   ...metaModels,
   ...baiduModels,
+  ...neuronpoolModels,
+  ...nomicModels,
   ...zaiModels
 };
 
@@ -44,6 +48,8 @@ const modelProviderConfigs = {
   ...alibabaEndpointConfig,
   ...metaEndpointConfig,
   ...baiduEndpointConfig,
+  ...neuronpoolEndpointConfig,
+  ...nomicEndpointConfig,
   ...zaiEndpointConfig
 };
 

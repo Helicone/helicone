@@ -89,6 +89,17 @@ export const models = {
     modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "GPT",
   },
+  "llama-3.2-1b-instruct": {
+    name: "Meta Llama 3.2 1B Instruct",
+    author: "meta-llama",
+    description:
+      "Compact Llama 3.2 1B instruction-tuned model served on the NeuronPool public network.",
+    contextLength: 131_072,
+    maxOutputTokens: 4096,
+    created: "2024-09-25T00:00:00.000Z",
+    modality: { inputs: ["text"], outputs: ["text"] },
+    tokenizer: "GPT",
+  },
   "llama-3.1-8b-instruct": {
     name: "Meta Llama 3.1 8B Instruct",
     author: "meta-llama",
