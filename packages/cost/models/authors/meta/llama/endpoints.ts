@@ -696,6 +696,68 @@ export const endpoints = {
       "*": {},
     },
   },
+  "llama-3.2-1b-instruct:neuronpool": {
+    providerModelId: "llama-3.2-1b-instruct",
+    provider: "neuronpool",
+    author: "meta-llama",
+    pricing: [
+      {
+        threshold: 0,
+        input: 5e-9,
+        output: 1e-8,
+      },
+    ],
+    rateLimits: {
+      rpm: 600,
+    },
+    contextLength: 131_072,
+    maxCompletionTokens: 4096,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stream",
+      "tools",
+      "tool_choice",
+      "response_format",
+      "structured_outputs",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "llama-3.1-8b-instruct:neuronpool": {
+    providerModelId: "llama-3.1-8b-instruct",
+    provider: "neuronpool",
+    author: "meta-llama",
+    pricing: [
+      {
+        threshold: 0,
+        input: 2e-8,
+        output: 3e-8,
+      },
+    ],
+    rateLimits: {
+      rpm: 600,
+    },
+    contextLength: 131_072,
+    maxCompletionTokens: 4096,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stream",
+      "tools",
+      "tool_choice",
+      "response_format",
+      "structured_outputs",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${LlamaModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;
