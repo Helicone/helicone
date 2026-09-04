@@ -207,7 +207,7 @@ export const providers: Provider[] = [
   {
     id: "neuronpool",
     name: "NeuronPool",
-    logoUrl: "/assets/home/providers/neuronpool.webp",
+    logoUrl: "/assets/home/providers/neuronpool.svg",
     description: "Distributed OpenAI-compatible inference. Buyer key: sk-neuronpool-…",
     docsUrl: "https://github.com/dannymota/neuronpool/blob/main/docs/integrations/helicone.md",
     apiKeyLabel: "NeuronPool API Key",
