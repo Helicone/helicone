@@ -8,7 +8,9 @@ export class NeuronPoolProvider extends BaseProvider {
   readonly pricingPages = ["https://neuronpool.damnknee.workers.dev/openrouter/models"];
   readonly modelPages = ["https://neuronpool.damnknee.workers.dev/v1/models"];
 
-  buildUrl(_endpoint: Endpoint, _requestParams: RequestParams): string {
-    return `${this.baseUrl}v1/chat/completions`;
+  buildUrl(endpoint: Endpoint, _requestParams: RequestParams): string {
+    const modelId = endpoint.providerModelId.toLowerCase();
+    const path = modelId.includes("embed") ? "v1/embeddings" : "v1/chat/completions";
+    return `${this.baseUrl}${path}`;
   }
 }

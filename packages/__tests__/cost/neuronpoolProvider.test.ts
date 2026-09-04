@@ -46,6 +46,12 @@ describe("NeuronPool provider", () => {
         {} as never,
       ),
     ).toBe("https://neuronpool.damnknee.workers.dev/v1/chat/completions");
+    expect(
+      provider.buildUrl(
+        { providerModelId: "nomic-embed-text" } as never,
+        {} as never,
+      ),
+    ).toBe("https://neuronpool.damnknee.workers.dev/v1/embeddings");
   });
 
   it("is priority 4 and uses the OpenAI usage processor", () => {
