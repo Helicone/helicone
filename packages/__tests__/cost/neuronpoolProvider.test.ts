@@ -73,4 +73,21 @@ describe("NeuronPool provider", () => {
       expect(endpoint.pricing?.[0]?.input).toBeGreaterThan(0);
     }
   });
+
+  it("snapshots NeuronPool catalog pricing (official registrySnapshots is not rewritten)", () => {
+    const snapshot = Object.fromEntries(
+      Object.entries(NEURONPOOL_ENDPOINTS)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([key, endpoint]) => [
+          key,
+          {
+            providerModelId: endpoint.providerModelId,
+            ptbEnabled: endpoint.ptbEnabled,
+            contextLength: endpoint.contextLength,
+            pricing: endpoint.pricing,
+          },
+        ]),
+    );
+    expect(JSON.stringify(snapshot, null, 2)).toMatchSnapshot();
+  });
 });
