@@ -76,6 +76,12 @@ export interface GeminiGenerateContentRequest {
   generationConfig?: GeminiGenerationConfig;
   tools?: GeminiTool[];
   toolConfig?: GeminiToolConfig;
+  /**
+   * Reference to a cached content resource.
+   * Format: "projects/{project}/locations/{location}/cachedContents/{cache_id}"
+   * or "cachedContents/{cache_id}" for Google AI Studio
+   */
+  cachedContent?: string;
 }
 
 export type ChatCompletionMessage =
