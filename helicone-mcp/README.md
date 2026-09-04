@@ -19,6 +19,34 @@ A Model Context Protocol (MCP) server for querying Helicone observability platfo
 }
 ```
 
+### EU Instance
+
+If you are using the EU region, set the `HELICONE_BASE_URL` environment variable:
+
+```json
+{
+  "mcpServers": {
+    "helicone": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@helicone/mcp@latest"],
+      "env": {
+        "HELICONE_API_KEY": "sk-helicone-eu-xxxxxxx-xxxxxxx-xxxxxxx-xxxxxxx",
+        "HELICONE_BASE_URL": "https://eu.api.helicone.ai"
+      }
+    }
+  }
+}
+```
+
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `HELICONE_API_KEY` | Your Helicone API key (required) | — |
+| `HELICONE_BASE_URL` | API base URL | `https://api.helicone.ai` |
+| `HELICONE_AI_GATEWAY_URL` | AI Gateway base URL | `https://ai-gateway.helicone.ai` |
+
 ## Tools
 
 ### `use_ai_gateway`
