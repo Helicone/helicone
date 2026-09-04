@@ -88,6 +88,8 @@ describe("NeuronPool provider", () => {
           },
         ]),
     );
-    expect(JSON.stringify(snapshot)).toMatchSnapshot();
+    expect(JSON.stringify(snapshot)).toBe(
+      '{"gemma-3-12b-it:neuronpool":{"providerModelId":"gemma-3-12b-it","ptbEnabled":false,"contextLength":131072,"pricing":[{"threshold":0,"input":4e-8,"output":6e-8}]},"gpt-oss-20b:neuronpool":{"providerModelId":"gpt-oss-20b","ptbEnabled":false,"contextLength":131072,"pricing":[{"threshold":0,"input":1.5e-8,"output":7e-8}]},"llama-3.1-8b-instruct:neuronpool":{"providerModelId":"llama-3.1-8b-instruct","ptbEnabled":false,"contextLength":131072,"pricing":[{"threshold":0,"input":2e-8,"output":3e-8}]},"llama-3.2-1b-instruct:neuronpool":{"providerModelId":"llama-3.2-1b-instruct","ptbEnabled":false,"contextLength":131072,"pricing":[{"threshold":0,"input":5e-9,"output":1e-8}]},"neuronpool-tiny-chat:neuronpool":{"providerModelId":"neuronpool-tiny-chat","ptbEnabled":false,"contextLength":4096,"pricing":[{"threshold":0,"input":1e-9,"output":2e-9}]},"nomic-embed-text:neuronpool":{"providerModelId":"nomic-embed-text","ptbEnabled":false,"contextLength":8192,"pricing":[{"threshold":0,"input":5e-9,"output":0}]},"qwen2.5-7b-instruct:neuronpool":{"providerModelId":"qwen2.5-7b-instruct","ptbEnabled":false,"contextLength":32768,"pricing":[{"threshold":0,"input":2e-8,"output":3e-8}]},"qwen3-30b-a3b:neuronpool":{"providerModelId":"qwen3-30b-a3b","ptbEnabled":false,"contextLength":32768,"pricing":[{"threshold":0,"input":6e-8,"output":9e-8}]}}',
+    );
   });
 });
