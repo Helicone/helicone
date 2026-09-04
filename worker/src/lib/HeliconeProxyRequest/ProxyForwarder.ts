@@ -42,6 +42,123 @@ import { getUsageProcessor } from "@helicone-package/cost/usage/getUsageProcesso
 import { modelCostBreakdownFromRegistry } from "@helicone-package/cost/costCalc";
 import { heliconeProviderToModelProviderName } from "@helicone-package/cost/models/provider-helpers";
 
+interface CostCalculationParams {
+  loggable: DBLoggable;
+  proxyRequest: HeliconeProxyRequest;
+}
+
+/**
+ * Calculates the cost of a request from the response body.
+ * This function waits for the full response to be received before calculating.
+ */
+async function calculateCostFromResponse({
+  loggable,
+  proxyRequest,
+}: CostCalculationParams): Promise<number | undefined> {
+  try {
+    const rawResponseResult = await loggable.readRawResponse();
+    if (rawResponseResult.error !== null) {
+      console.error("Error reading raw response for cost calculation:", rawResponseResult.error);
+      return undefined;
+    }
+
+    const rawResponse = rawResponseResult.data;
+    let cost: number | undefined = undefined;
+
+    // Handle AI Gateway requests (both BYOK and PTB)
+    const gatewayAttempt = proxyRequest.requestWrapper.getGatewayAttempt();
+    if (rawResponse && gatewayAttempt) {
+      const attemptModel = gatewayAttempt.endpoint.providerModelId;
+      const attemptProvider = gatewayAttempt.endpoint.provider;
+
+      const usageProcessor = getUsageProcessor(attemptProvider);
+
+      if (usageProcessor) {
+        const usage = await usageProcessor.parse({
+          responseBody: rawResponse,
+          isStream: proxyRequest.isStream,
+          model: attemptModel,
+        });
+
+        if (usage.data) {
+          const breakdown = modelCostBreakdownFromRegistry({
+            modelUsage: usage.data,
+            providerModelId: attemptModel,
+            provider: attemptProvider,
+          });
+
+          if (breakdown) {
+            cost = breakdown.totalCost;
+          }
+        }
+      }
+    } else if (rawResponse) {
+      // For non AI Gateway requests, fall back to legacy methods
+      const responseBodyResult = await loggable.parseRawResponse(rawResponse);
+      if (responseBodyResult.error !== null) {
+        console.error("Error parsing response for cost calculation:", responseBodyResult.error);
+        return undefined;
+      }
+      const responseData = responseBodyResult.data;
+
+      const model = responseData?.response.model;
+      const provider = proxyRequest.provider;
+
+      if (model && provider && responseData) {
+        // Provider -> ModelProviderName to try and use new registry
+        const modelProviderName = heliconeProviderToModelProviderName(provider);
+
+        if (modelProviderName) {
+          // Try usage processor + new registry first
+          const usageProcessor = getUsageProcessor(modelProviderName);
+
+          if (usageProcessor) {
+            const usage = await usageProcessor.parse({
+              responseBody: rawResponse,
+              isStream: proxyRequest.isStream,
+              model: model,
+            });
+
+            if (usage.data) {
+              const breakdown = modelCostBreakdownFromRegistry({
+                modelUsage: usage.data,
+                providerModelId: model,
+                provider: modelProviderName,
+              });
+
+              cost = breakdown?.totalCost;
+            }
+          }
+        }
+
+        // Final fallback for providers not in ModelProviderName
+        if (cost === undefined) {
+          cost =
+            costOfPrompt({
+              model,
+              promptTokens: responseData.response.prompt_tokens ?? 0,
+              completionTokens: responseData.response.completion_tokens ?? 0,
+              provider,
+              promptCacheWriteTokens:
+                responseData.response.prompt_cache_write_tokens ?? 0,
+              promptCacheReadTokens:
+                responseData.response.prompt_cache_read_tokens ?? 0,
+              promptAudioTokens:
+                responseData.response.prompt_audio_tokens ?? 0,
+              completionAudioTokens:
+                responseData.response.completion_audio_tokens ?? 0,
+            }) ?? 0;
+        }
+      }
+    }
+
+    return cost;
+  } catch (e) {
+    console.error("Error calculating cost:", e);
+    return undefined;
+  }
+}
+
 export async function proxyForwarder(
   request: RequestWrapper,
   env: Env,
@@ -429,6 +546,31 @@ export async function proxyForwarder(
     responseBuilder.setHeader("Helicone-Cache", "MISS");
   }
 
+  // Calculate cost synchronously if includeCost header is set
+  // Note: This buffers the entire response, so streaming benefits are lost when enabled
+  const includeCost = proxyRequest.requestWrapper.heliconeHeaders.featureFlags.includeCost;
+  let responseBody: BodyInit | null = response.body;
+
+  if (includeCost) {
+    try {
+      // Wait for the full response to calculate cost
+      const cost = await calculateCostFromResponse({
+        loggable,
+        proxyRequest,
+      });
+
+      if (cost !== undefined) {
+        responseBuilder.setHeader("Helicone-Cost", cost.toString());
+      }
+
+      // Get the buffered response body to return
+      const { body: bodyChunks } = await loggable.waitForResponse();
+      responseBody = bodyChunks.join("");
+    } catch (e) {
+      console.error("Error calculating cost for response header:", e);
+    }
+  }
+
   if (
     request?.heliconeHeaders?.heliconeAuth ||
     request?.heliconeHeaders.heliconeAuthV2 ||
@@ -454,7 +596,7 @@ export async function proxyForwarder(
   }
 
   return responseBuilder.build({
-    body: response.body,
+    body: responseBody,
     inheritFrom: response,
     status: response.status,
   });
