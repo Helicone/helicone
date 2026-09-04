@@ -1,0 +1,48 @@
+name: update-neuronpool-registry-snapshots
+on:
+  push:
+    paths:
+      - ".github/workflows/update-neuronpool-registry-snapshots.yml"
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    defaults:
+      run:
+        working-directory: packages
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          ref: neuronpool-provider
+      - name: Free disk space
+        uses: ./.github/actions/free-disk-space
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+          cache-dependency-path: yarn.lock
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+        working-directory: packages
+      - name: Update official registry snapshots
+        run: |
+          set -euo pipefail
+          npx jest --updateSnapshot __tests__/cost/registrySnapshots.test.ts
+          grep -q neuronpool __tests__/cost/__snapshots__/registrySnapshots.test.ts.snap
+          npx jest __tests__/cost/neuronpoolProvider.test.ts __tests__/cost/registrySnapshots.test.ts
+        working-directory: packages
+      - name: Commit snap and remove this workflow
+        working-directory: .
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/update-neuronpool-registry-snapshots.yml
+          git config user.name "Danny Mota"
+          git config user.email "danny.a.mota@gmail.com"
+          git add packages/__tests__/cost/__snapshots__/registrySnapshots.test.ts.snap
+          git add -u .github/workflows/update-neuronpool-registry-snapshots.yml
+          git status --short
+          git commit -m "test: refresh official registrySnapshots with NeuronPool catalog"
+          git push origin neuronpool-provider
