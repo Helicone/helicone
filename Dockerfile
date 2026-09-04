@@ -161,8 +161,11 @@ ENV S3_BUCKET_NAME=request-response-storage
 ENV S3_PROMPT_BUCKET_NAME=prompt-body-storage
 ENV BETTER_AUTH_SECRET=change-me-in-production
 
+# Pull the AI Gateway binary from the published image so supervisord can run it.
+COPY --from=helicone/ai-gateway:latest /usr/local/bin/ai-gateway /usr/local/bin/ai-gateway
+
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 
 # --------------------------------------------------------------------------------------------------------------------
 
-EXPOSE 3000 8585 8123 9080 9001 5432
+EXPOSE 3000 8585 8123 8788 9080 9001 5432
