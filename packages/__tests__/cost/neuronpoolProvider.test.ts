@@ -88,6 +88,6 @@ describe("NeuronPool provider", () => {
           },
         ]),
     );
-    expect(JSON.stringify(snapshot, null, 2)).toMatchSnapshot();
+    expect(JSON.stringify(snapshot)).toMatchSnapshot();
   });
 });
