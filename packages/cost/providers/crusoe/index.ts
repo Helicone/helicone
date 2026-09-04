@@ -136,9 +136,12 @@ export const costs: ModelRow[] = [
       operator: "equals",
       value: "nvidia/Nemotron-3.5-Lightning-30B-A3B",
     },
+    // The pricing page's output/cached columns are transposed for this row
+    // ($0.03 out / $0.20 cached as printed); the output rate is $0.20 per 1M,
+    // consistent with Nemotron 3 Nano, the other 30B-A3B in the catalog.
     cost: {
       prompt_token: 0.00000005,
-      completion_token: 0.00000003,
+      completion_token: 0.0000002,
     },
   },
 ];
