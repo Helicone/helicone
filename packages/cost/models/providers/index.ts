@@ -11,6 +11,7 @@ import { FireworksProvider } from "./fireworks";
 import { GoogleProvider } from "./google";
 import { GroqProvider } from "./groq";
 import { HeliconeProvider } from "./helicone";
+import { MiniMaxProvider } from "./minimax";
 import { MistralProvider } from "./mistral";
 import { NebiusProvider } from "./nebius";
 import { NovitaProvider } from "./novita";
@@ -35,6 +36,7 @@ export const providers = {
   "google-ai-studio": new GoogleProvider(),
   groq: new GroqProvider(),
   helicone: new HeliconeProvider(),
+  minimax: new MiniMaxProvider(),
   mistral: new MistralProvider(),
   nebius: new NebiusProvider(),
   novita: new NovitaProvider(),
@@ -87,6 +89,7 @@ export const ResponsesAPIEnabledProviders: ModelProviderName[] = [
   "xai",
   "baseten",
   "fireworks",
+  "minimax",
 
   // anthropic and chat completions provider
   "vertex"

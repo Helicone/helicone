@@ -62,6 +62,8 @@ export function heliconeProviderToModelProviderName(
       return "fireworks";
     case "CANOPYWAVE":
       return "canopywave";
+    case "MINIMAX":
+      return "minimax";
     // new registry does not have
     case "LOCAL":
     case "HELICONE":
@@ -158,6 +160,9 @@ export const dbProviderToProvider = (
   }
   if (provider === "nebius" || provider === "Nebius") {
     return "nebius";
+  }
+  if (provider === "minimax" || provider === "MiniMax") {
+    return "minimax";
   }
   return null;
 };

@@ -16,6 +16,7 @@ import { alibabaEndpointConfig, alibabaModels } from "./authors/alibaba";
 import { metaEndpointConfig, metaModels } from "./authors/meta";
 import { zaiEndpointConfig, zaiModels } from "./authors/zai";
 import { baiduEndpointConfig, baiduModels } from "./authors/baidu";
+import { minimaxEndpointConfig, minimaxModels } from "./authors/minimax";
 
 // Combine all models for type derivation
 const allModels = {
@@ -28,6 +29,7 @@ const allModels = {
   ...alibabaModels,
   ...metaModels,
   ...baiduModels,
+  ...minimaxModels,
   ...zaiModels
 };
 
@@ -44,6 +46,7 @@ const modelProviderConfigs = {
   ...alibabaEndpointConfig,
   ...metaEndpointConfig,
   ...baiduEndpointConfig,
+  ...minimaxEndpointConfig,
   ...zaiEndpointConfig
 };
 
