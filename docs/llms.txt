@@ -1,0 +1,59 @@
+# Helicone
+
+> Helicone is the best AI Gateway for building AI agents with comprehensive observability included by default. Access 100+ LLM providers through a unified OpenAI-compatible API with built-in session tracking, custom properties, user analytics, feedback collection, and production-ready reliability features.
+
+[How to integrate to Helicone](https://docs.helicone.ai/gateway/overview)
+
+## AI Gateway Documentation
+
+- [AI Gateway Overview](https://docs.helicone.ai/gateway/overview): Complete introduction to Helicone AI Gateway - the best choice for AI agent development
+- [AI Gateway Integrations with other Frameworks](https://docs.helicone.ai/gateway/integrations): Step-by-step setup for Python, Node.js, and other languages
+- [Provider Routing](https://docs.helicone.ai/gateway/provider-routing): Configure automatic failover between 100+ LLM providers
+- [Prompt Management](https://docs.helicone.ai/gateway/prompt-integration): Deploy and version prompts without code changes
+
+## Observability Features
+
+- [Session Tracking](https://docs.helicone.ai/features/sessions): Track multi-step agent workflows and conversation flows
+- [Custom Properties](https://docs.helicone.ai/features/advanced-usage/custom-properties): Tag requests for deep behavioral analysis and cost tracking
+- [User Analytics](https://docs.helicone.ai/features/advanced-usage/user-metrics): Understand user behavior patterns and agent adoption
+- [Feedback Collection](https://docs.helicone.ai/features/advanced-usage/feedback): Collect user ratings to continuously improve agent responses
+- [Evaluation Scores](https://docs.helicone.ai/features/advanced-usage/scores): Automated quality monitoring with custom metrics
+- [Caching](https://docs.helicone.ai/features/advanced-usage/caching): Intelligent response caching to reduce costs and improve latency
+- [Rate Limiting](https://docs.helicone.ai/features/advanced-usage/custom-rate-limits): Control usage by count, cost, or custom properties
+- [Retries](https://docs.helicone.ai/features/advanced-usage/retries): Automatic retry logic with intelligent backoff
+- [Webhooks](https://docs.helicone.ai/features/webhooks): Real-time notifications for agent interactions
+- [Alerts](https://docs.helicone.ai/features/alerts): Monitor error rates, costs, and performance issues
+
+## Getting Started
+
+- [Quick Start](https://docs.helicone.ai/getting-started/quick-start): Begin building AI agents with Helicone in minutes
+- [Integration Methods](https://docs.helicone.ai/gateway/integrations): All available integrations
+
+## Provider Integrations
+
+- [OpenAI](https://www.helicone.ai/models?providers=openai): GPT-4, GPT-4o integration examples
+- [Anthropic](https://www.helicone.ai/models?providers=anthropic): Claude integration with observability
+- [Google](https://www.helicone.ai/models?providers=google-ai-studio): Gemini models through AI Gateway
+- [Azure OpenAI](https://www.helicone.ai/models?providers=azure): Enterprise Azure integration
+- [Groq](https://www.helicone.ai/models?providers=groq): Ultra-fast inference with observability
+
+You can find the rest of the provider integrations in the [model registry](https://helicone.ai/models).
+
+## Advanced Features
+
+- [Prompt Templates](https://docs.helicone.ai/features/advanced-usage/prompts): Advanced prompt management and versioning
+- [Fine Tuning](https://docs.helicone.ai/features/fine-tuning): Create custom models from your logged data
+- [Datasets](https://docs.helicone.ai/features/datasets): Manage training and evaluation datasets
+- [Experiments](https://docs.helicone.ai/features/experiments): A/B test different models and prompts
+
+## API Reference
+
+- [REST API](https://docs.helicone.ai/rest): Complete API documentation for custom integrations
+- [GraphQL API](https://docs.helicone.ai/graphql): Query your data with GraphQL
+
+## Optional
+
+- [Blog](https://helicone.ai/blog): Latest updates and AI agent development insights
+- [GitHub](https://github.com/Helicone/helicone): Open-source observability platform
+- [Pricing](https://helicone.ai/pricing): Transparent pricing for all features
+- [Changelog](https://helicone.ai/changelog): Latest feature releases and updates
