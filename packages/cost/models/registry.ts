@@ -157,14 +157,36 @@ function buildEndpoint(
   endpointConfig: ModelProviderConfig,
   userEndpointConfig: UserEndpointConfig
 ): Result<Endpoint> {
-  const modelIdResult = buildModelId(endpointConfig, userEndpointConfig);
+  const mergedUserConfig: UserEndpointConfig = {
+    ...userEndpointConfig,
+  };
+
+  // For Bedrock only: merge crossRegion from model config if not provided by user
+  // This is important because newer Bedrock models like Claude 3.7+ require
+  // inference profiles (cross-region) instead of on-demand throughput
+  if (endpointConfig.provider === "bedrock") {
+    mergedUserConfig.crossRegion =
+      userEndpointConfig.crossRegion ?? endpointConfig.crossRegion ?? false;
+
+    // Also ensure a default region is set if none provided
+    // This is needed because cross-region inference profiles require a region to determine the prefix
+    if (!mergedUserConfig.region) {
+      const configuredRegions = Object.keys(endpointConfig.endpointConfigs);
+      mergedUserConfig.region =
+        configuredRegions.length > 0 && configuredRegions[0] !== "*"
+          ? configuredRegions[0]
+          : "us-east-1";
+    }
+  }
+
+  const modelIdResult = buildModelId(endpointConfig, mergedUserConfig);
   if (modelIdResult.error) {
     return err(modelIdResult.error);
   }
 
   return ok({
     modelConfig: endpointConfig,
-    userConfig: userEndpointConfig,
+    userConfig: mergedUserConfig,
     provider: endpointConfig.provider,
     author: endpointConfig.author,
     providerModelId: modelIdResult.data ?? "",
