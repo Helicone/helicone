@@ -16,6 +16,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { OnboardingPopoverAccordion } from "../templates/onboarding/OnboardingPopoverMore";
@@ -424,6 +425,7 @@ export const OnboardingProvider = ({
   const [isOnboardingVisible, setIsOnboardingVisible] = useState(false);
   const [onClickElement, setOnClickElement] = useState<() => void>(() => {});
   const [isOnboardingComplete, setIsOnboardingComplete] = useState(false);
+  const onboardingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const setCurrentStep = useCallback((step: number, delayMs?: number) => {
     if (delayMs) {
       setTimeout(() => {
@@ -437,6 +439,10 @@ export const OnboardingProvider = ({
 
   const startOnboarding = useCallback(() => {
     if (isOnboardingVisible) return;
+    // Clear any existing interval before starting a new one
+    if (onboardingIntervalRef.current) {
+      clearInterval(onboardingIntervalRef.current);
+    }
     const setReady = async () => {
       const countResponse = await $JAWN_API.POST("/v1/request/count/query", {
         body: {
@@ -445,16 +451,27 @@ export const OnboardingProvider = ({
       });
 
       if (countResponse?.data?.data && countResponse.data.data > 6) {
-        clearInterval(interval);
+        if (onboardingIntervalRef.current) {
+          clearInterval(onboardingIntervalRef.current);
+          onboardingIntervalRef.current = null;
+        }
         setIsOnboardingVisible(true);
         setCurrentStep(0);
         router.push("/requests");
       }
     };
 
-    const interval = setInterval(setReady, 1000);
-    return () => clearInterval(interval);
+    onboardingIntervalRef.current = setInterval(setReady, 1000);
   }, [setCurrentStep, isOnboardingVisible, router]);
+
+  // Cleanup interval on unmount
+  useEffect(() => {
+    return () => {
+      if (onboardingIntervalRef.current) {
+        clearInterval(onboardingIntervalRef.current);
+      }
+    };
+  }, []);
 
   const endOnboarding = useCallback(() => {
     setCurrentStep(0);
