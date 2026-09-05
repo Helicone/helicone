@@ -159,6 +159,9 @@ export const dbProviderToProvider = (
   if (provider === "nebius" || provider === "Nebius") {
     return "nebius";
   }
+  if (provider === "quicksilverpro" || provider === "QuickSilver Pro") {
+    return "quicksilverpro";
+  }
   return null;
 };
 

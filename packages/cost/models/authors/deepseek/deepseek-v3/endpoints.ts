@@ -283,6 +283,39 @@ export const endpoints = {
       "*": {},
     },
   },
+  "deepseek-v3:quicksilverpro": {
+    provider: "quicksilverpro",
+    author: "deepseek",
+    providerModelId: "deepseek-v3",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000024, // $0.24 per 1M tokens
+        output: 0.0000007, // $0.70 per 1M tokens
+      },
+    ],
+    contextLength: 128_000,
+    maxCompletionTokens: 8_192,
+    supportedParameters: [
+      "frequency_penalty",
+      "function_call",
+      "functions",
+      "max_tokens",
+      "presence_penalty",
+      "response_format",
+      "seed",
+      "stop",
+      "stream",
+      "temperature",
+      "tool_choice",
+      "tools",
+      "top_p",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${DeepSeekV3ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;
