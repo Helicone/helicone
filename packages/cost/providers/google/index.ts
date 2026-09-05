@@ -263,6 +263,16 @@ export const costs: ModelRow[] = [
       prompt_cache_read_token: 0.0000002, // $0.20/1M = 10% of input
     },
   },
+    {
+    model: {
+      operator: "includes",
+      value: "gemini-3.1-flash-lite-preview",
+    },
+    cost: {
+      prompt_token: 0.00000025, // $0.25/1M tokens
+      completion_token: 0.0000015, // $1.5/1M tokens
+    },
+  },
 ];
 
 export const modelDetails: ModelDetailsMap = {
