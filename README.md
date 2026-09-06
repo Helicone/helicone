@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/helicone-helicone-badge.png)](https://mseep.ai/app/helicone-helicone)
+
 <div align="center">
 
 | 🔍 Observability | 🕸️ Agent Tracing | 🚂 LLM Routing |
