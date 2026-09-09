@@ -129,7 +129,7 @@ export class HeliconeTemplateManager {
     TEMPLATE_REGEX.lastIndex = 0;
     result = result.replace(TEMPLATE_REGEX, (match, name) => {
       const value = name.trim() in inputs ? inputs[name.trim()] : undefined;
-      return value ? String(value) : match;
+      return value !== undefined && value !== null ? String(value) : match;
     });
     
     return {
