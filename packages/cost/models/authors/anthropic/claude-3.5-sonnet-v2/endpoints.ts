@@ -84,8 +84,8 @@ export const endpoints = {
     pricing: [
       {
         threshold: 0,
-        input: 0.000003,
-        output: 0.000015,
+        input: 0.000006, // AWS "Public Extended Access" pricing effective Dec 1, 2025
+        output: 0.00003,
         web_search: 0.01, // $10 per 1000 searches (1:1 USD; 10/1K)
         cacheMultipliers: {
           cachedInput: 0.1,
