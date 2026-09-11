@@ -22,7 +22,10 @@ export class NebiusProvider extends BaseProvider {
     try {
       const respJson = (await response.json()) as any;
       return {
-        message: respJson.detail || `Request failed with status ${response.status}`
+        message:
+          respJson.detail ||
+          respJson.error?.message ||
+          `Request failed with status ${response.status}`,
       };
     } catch (error) {
       return { message: `Request failed with status ${response.status}` };

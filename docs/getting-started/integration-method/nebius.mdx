@@ -1,7 +1,7 @@
 ---
 title: "Nebius Token Factory Integration"
 sidebarTitle: "Nebius Token Factory"
-description: "Connect Helicone with Nebius Token Factory, a platform that provides powerful AI models including text and multimodal models, embeddings and guardrails, and text-to-image models."
+description: "Send supported Nebius Token Factory API requests through Helicone's legacy provider gateway for observability."
 "twitter:title": "Nebius Token Factory AI Integration - Helicone OSS LLM Observability"
 ---
 
@@ -34,25 +34,35 @@ Replace the following Nebius Token Factory URL with the Helicone Gateway URL:
 
 `https://api.tokenfactory.nebius.com` -> `https://nebius.helicone.ai`
 
-and then add the following authentication headers:
+and then add the provider and Helicone authentication headers:
 
 ```javascript
-Authorization: Bearer <your API key>
+Authorization: Bearer <your Nebius API key>
+Helicone-Auth: Bearer <your Helicone API key>
 ```
 
 </Step>
 </Steps>
 
-Now you can access all the models on Nebius Token Factory with a simple fetch call:
+The legacy provider gateway preserves the path you send and forwards it to Nebius Token Factory. Check the [Token Factory model catalog](https://tokenfactory.nebius.com/) before choosing a model because availability changes over time.
+
+<Note>
+  Helicone's AI Gateway Nebius provider routes model requests to Chat
+  Completions. Helicone's `/v1/responses` support may translate a request to
+  Chat Completions; it does not provide direct access to the Token Factory
+  Responses API. This legacy integration documents Chat Completions and Image
+  Generations only.
+</Note>
 
 ## Example - Text Completion
 
 ```bash
 curl \
   --header "Authorization: Bearer $NEBIUS_API_KEY" \
+  --header "Helicone-Auth: Bearer $HELICONE_API_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-    "model": "deepseek-ai/DeepSeek-R1",
+    "model": "meta-llama/Llama-3.3-70B-Instruct",
     "messages": [
       {
         "role": "user",
@@ -65,12 +75,15 @@ curl \
 
 ## Example - Image Generation
 
+Use a currently available Token Factory image model ID. The placeholder below is intentional so this example does not pin a model that may have been retired.
+
 ```bash
 curl \
   --header "Authorization: Bearer $NEBIUS_API_KEY" \
+  --header "Helicone-Auth: Bearer $HELICONE_API_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-    "model": "black-forest-labs/flux-schnell",
+    "model": "<current-image-model-id>",
     "prompt": "A beautiful sunset over a mountain landscape"
 }' \
   --url https://nebius.helicone.ai/v1/images/generations
