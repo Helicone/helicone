@@ -610,7 +610,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Partial_TextOperators_": {
         "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{},"validators":{}},
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"not-equals":{"dataType":"string"},"equals":{"dataType":"string"},"like":{"dataType":"string"},"ilike":{"dataType":"string"},"contains":{"dataType":"string"},"not-contains":{"dataType":"string"}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Partial_NumberOperators_": {
