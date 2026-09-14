@@ -27,6 +27,7 @@ export const AUTHORS = [
   "alibaba",
   "zai",
   "baidu",
+  "ornith-ai",
 ] as const;
 
 export type AuthorName = (typeof AUTHORS)[number] | "passthrough";
@@ -75,6 +76,7 @@ export type StandardParameter =
   | "functions"
   | "function_call"
   | "reasoning"
+  | "reasoning_effort"
   | "include_reasoning"
   | "thinking"
   | "response_format"
@@ -105,6 +107,7 @@ export const PARAMETER_LABELS: Record<StandardParameter, string> = {
   functions: "Functions",
   function_call: "Function Call",
   reasoning: "Reasoning",
+  reasoning_effort: "Reasoning Effort",
   include_reasoning: "Include Reasoning",
   thinking: "Chain of Thought",
   response_format: "Response Format",

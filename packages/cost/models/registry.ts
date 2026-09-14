@@ -33,6 +33,7 @@ import { deepseekModels, deepseekEndpointConfig } from "./authors/deepseek";
 import { mistralModels, mistralEndpointConfig } from "./authors/mistral";
 import { zaiModels, zaiEndpointConfig } from "./authors/zai";
 import { baiduModels, baiduEndpointConfig } from "./authors/baidu";
+import { ornithAiModels, ornithAiEndpointConfig } from "./authors/ornith-ai";
 import {
   perplexityModels,
   perplexityEndpointConfig,
@@ -51,6 +52,7 @@ const allModels = {
   ...mistralModels,
   ...zaiModels,
   ...baiduModels,
+  ...ornithAiModels,
   ...perplexityModels,
 } satisfies Record<string, ModelConfig>;
 
@@ -67,6 +69,7 @@ const modelProviderConfigs = {
   ...mistralEndpointConfig,
   ...zaiEndpointConfig,
   ...baiduEndpointConfig,
+  ...ornithAiEndpointConfig,
   ...perplexityEndpointConfig,
 } satisfies Record<string, ModelProviderConfig>;
 

@@ -237,6 +237,15 @@ vi.mock("@supabase/supabase-js", () => ({
             config: null,
             byok_enabled: isByokEnabled,
           },
+          tiyuvta: {
+            org_id: "test-org-id",
+            provider_name: "tiyuvta",
+            decrypted_provider_key: "test-tiyuvta-api-key",
+            decrypted_provider_secret_key: null,
+            auth_type: "api_key",
+            config: null,
+            byok_enabled: isByokEnabled,
+          },
           nebius: {
             org_id: "test-org-id",
             provider_name: "nebius",
