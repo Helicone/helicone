@@ -1,10 +1,14 @@
 import { Usage } from "../../handlers/HandlerContext";
 import { PromiseGenericResult, ok } from "../../../packages/common/result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
+import {
+  getCacheTokenUsage,
+  getEffectivePromptTokens,
+} from "@helicone-package/cost/usage/cacheTokenUtils";
 
 export class GenericBodyProcessor implements IBodyProcessor {
   public async parse(
-    parseInput: ParseInput
+    parseInput: ParseInput,
   ): PromiseGenericResult<ParseOutput> {
     const parsedResponseBody = JSON.parse(parseInput.responseBody);
 
@@ -54,6 +58,10 @@ export class GenericBodyProcessor implements IBodyProcessor {
           cached_tokens?: number;
           audio_tokens?: number;
           cache_write_tokens?: number;
+          cache_write_details?: {
+            write_5m_tokens?: number;
+            write_1h_tokens?: number;
+          };
         };
         completion_tokens_details?: {
           reasoning_tokens?: number;
@@ -61,7 +69,7 @@ export class GenericBodyProcessor implements IBodyProcessor {
           accepted_prediction_tokens?: number;
           rejected_prediction_tokens?: number;
         };
-        
+
         // OpenAI Responses API
         input_tokens?: number;
         output_tokens?: number;
@@ -74,32 +82,53 @@ export class GenericBodyProcessor implements IBodyProcessor {
 
         // OpenRouter
         cost?: number;
+
+        // Anthropic and DeepSeek-compatible cache fields
+        cache_creation_input_tokens?: number;
+        cache_read_input_tokens?: number;
+        prompt_cache_hit_tokens?: number;
+        prompt_cache_miss_tokens?: number;
       };
     };
 
     // OpenAI charges for input, input cache read, output, output audio, input audio.
-    // Guard: if cached > prompt_tokens, data is already non-cached (Anthropic convention)
     const usage = response.usage;
-    const gPromptToks = usage?.prompt_tokens ?? usage?.input_tokens ?? 0;
-    const gCachedToks = usage?.prompt_tokens_details?.cached_tokens ?? usage?.input_tokens_details?.cached_tokens ?? 0;
-    const gAudioToks = usage?.prompt_tokens_details?.audio_tokens ?? 0;
-    const effectivePromptTokens = gCachedToks > gPromptToks
-        ? Math.max(0, gPromptToks - gAudioToks)
-        : Math.max(0, gPromptToks - gCachedToks - gAudioToks);
-    const effectiveCompletionTokens = usage?.completion_tokens !== undefined
-        ? Math.max(0, (usage.completion_tokens ?? 0) - (usage.completion_tokens_details?.reasoning_tokens ?? 0) - (usage.completion_tokens_details?.audio_tokens ?? 0))
-        : Math.max(0, (usage.output_tokens ?? 0) - (usage.output_tokens_details?.reasoning_tokens ?? 0));
-    
+    const {
+      promptTokens,
+      cachedTokens,
+      promptAudioTokens,
+      cacheWrite5mTokens,
+      cacheWrite1hTokens,
+    } = getCacheTokenUsage(usage);
+    const effectivePromptTokens = getEffectivePromptTokens({
+      promptTokens,
+      cachedTokens,
+      promptAudioTokens,
+    });
+    const effectiveCompletionTokens =
+      usage?.completion_tokens !== undefined
+        ? Math.max(
+            0,
+            (usage.completion_tokens ?? 0) -
+              (usage.completion_tokens_details?.reasoning_tokens ?? 0) -
+              (usage.completion_tokens_details?.audio_tokens ?? 0),
+          )
+        : Math.max(
+            0,
+            (usage.output_tokens ?? 0) -
+              (usage.output_tokens_details?.reasoning_tokens ?? 0),
+          );
+
     return {
       promptTokens: effectivePromptTokens,
-      promptCacheReadTokens: usage?.prompt_tokens_details?.cached_tokens ?? usage?.input_tokens_details?.cached_tokens ?? 0,
-      promptCacheWriteTokens: usage?.prompt_tokens_details?.cache_write_tokens ?? 0,
+      promptCacheReadTokens: cachedTokens,
+      promptCacheWriteTokens: cacheWrite5mTokens + cacheWrite1hTokens,
       completionTokens: effectiveCompletionTokens,
       totalTokens: usage?.total_tokens,
       heliconeCalculated: false,
 
       // OpenRouter may contain these fields based on wallet/BYOK setup
-      cost: usage?.cost
+      cost: usage?.cost,
     };
   }
 }
