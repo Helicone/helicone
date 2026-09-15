@@ -17,6 +17,7 @@ import { NovitaProvider } from "./novita";
 import { OpenAIProvider } from "./openai";
 import { OpenRouterProvider } from "./openrouter";
 import { PerplexityProvider } from "./perplexity";
+import { SaladCloudProvider } from "./saladcloud";
 import { VertexProvider } from "./vertex";
 import { XAIProvider } from "./xai";
 
@@ -41,6 +42,7 @@ export const providers = {
   openai: new OpenAIProvider(),
   openrouter: new OpenRouterProvider(),
   perplexity: new PerplexityProvider(),
+  saladcloud: new SaladCloudProvider(),
   vertex: new VertexProvider(),
   xai: new XAIProvider()
 } as const;
@@ -84,6 +86,7 @@ export const ResponsesAPIEnabledProviders: ModelProviderName[] = [
   "novita",
   "openrouter",
   "perplexity",
+  "saladcloud",
   "xai",
   "baseten",
   "fireworks",

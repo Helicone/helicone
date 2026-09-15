@@ -12,6 +12,17 @@ export const models = {
     modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "GPT",
   },
+  "qwen3.6-35b-a3b": {
+    name: "Qwen3.6 35B-A3B",
+    author: "qwen",
+    description:
+      "Qwen3.6 35B-A3B is a multimodal mixture-of-experts model available through SaladCloud AI Gateway for agentic tasks, multi-step reasoning, code generation, and instruction following.",
+    contextLength: 262_144,
+    maxOutputTokens: 262_144,
+    created: "2026-04-15T00:00:00.000Z",
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
+    tokenizer: "Qwen",
+  },
   "qwen3-30b-a3b": {
     name: "Qwen3 30B A3B",
     author: "qwen",

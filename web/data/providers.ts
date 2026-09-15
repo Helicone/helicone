@@ -265,6 +265,17 @@ export const providers: Provider[] = [
     relevanceScore: 4,
   },
   {
+    id: "saladcloud",
+    name: "SaladCloud AI Gateway",
+    logoUrl: "/assets/home/providers/saladcloud.svg",
+    description: "Configure your SaladCloud AI Gateway API key",
+    docsUrl:
+      "https://docs.helicone.ai/getting-started/integration-method/saladcloud",
+    apiKeyLabel: "SaladCloud API Key",
+    apiKeyPlaceholder: "...",
+    relevanceScore: 4,
+  },
+  {
     id: "chutes",
     name: "Chutes",
     logoUrl: "/assets/home/providers/chutes.webp",
