@@ -18,6 +18,13 @@ import { ClickhouseClientWrapper } from "../db/ClickhouseWrapper";
 import { DBWrapper } from "../db/DBWrapper";
 import { DBLoggable } from "../dbLogger/DBLoggable";
 import { Moderator } from "../managers/ModerationManager";
+import {
+  PEyeEyeManager,
+  PEyeEyeMissingSecretsError,
+  applyRedactedTexts,
+  collectMessageTexts,
+  type ChatMessage,
+} from "../managers/PEyeEyeManager";
 import { RateLimitManager } from "../managers/RateLimitManager";
 import { RequestResponseManager } from "../managers/RequestResponseManager";
 import { SentryManager } from "../managers/SentryManager";
@@ -360,6 +367,53 @@ export async function proxyForwarder(
     }
   }
 
+  // Peyeeye PII redaction (pre-call). Opt-in via `Helicone-Peyeeye-Enabled: true`.
+  // If redaction fails, fail closed -- never forward unredacted text to the LLM.
+  if (proxyRequest.requestWrapper.heliconeHeaders.peyeeyeEnabled) {
+    if (!env.PEYEEYE_API_KEY) {
+      return responseBuilder.build({
+        body: JSON.stringify({
+          success: false,
+          error: {
+            code: "PEYEEYE_MISCONFIGURED",
+            message:
+              "Helicone-Peyeeye-Enabled was set but the worker has no PEYEEYE_API_KEY binding.",
+          },
+        }),
+        status: 500,
+      });
+    }
+    try {
+      const peyeeyeResult = await runPeyeeyeRedaction(proxyRequest, env);
+      if (peyeeyeResult.error) {
+        return responseBuilder.build({
+          body: JSON.stringify({
+            success: false,
+            error: {
+              code: "PEYEEYE_REDACT_FAILED",
+              message: peyeeyeResult.error,
+            },
+          }),
+          status: 502,
+        });
+      }
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "peyeeye redaction failed";
+      const status = err instanceof PEyeEyeMissingSecretsError ? 401 : 502;
+      return responseBuilder.build({
+        body: JSON.stringify({
+          success: false,
+          error: {
+            code: "PEYEEYE_REDACT_FAILED",
+            message,
+          },
+        }),
+        status,
+      });
+    }
+  }
+
   const { data, error } = await handleProxyRequest(
     proxyRequest,
     rateLimited ? responseBuilder.buildRateLimitedResponse() : undefined
@@ -453,11 +507,171 @@ export async function proxyForwarder(
     );
   }
 
+  // Peyeeye rehydration (post-call). For non-streaming responses we buffer
+  // the body, swap placeholders back, and ship a fresh body. For streaming
+  // responses we currently pass through unchanged -- chunked rewriting would
+  // break SSE framing.
+  if (
+    proxyRequest.peyeeyeSessionId &&
+    !proxyRequest.isStream &&
+    response.status >= 200 &&
+    response.status < 300
+  ) {
+    const rehydratedBody = await rehydrateResponseBody(
+      response,
+      proxyRequest.peyeeyeSessionId,
+      env
+    );
+    // Best-effort cleanup of the stateful session.
+    if (
+      proxyRequest.peyeeyeSessionMode === "stateful" &&
+      proxyRequest.peyeeyeSessionId.startsWith("ses_")
+    ) {
+      try {
+        const cleanupManager = new PEyeEyeManager({
+          apiKey: env.PEYEEYE_API_KEY ?? "",
+          apiBase: env.PEYEEYE_API_BASE,
+        });
+        ctx.waitUntil(
+          cleanupManager.deleteSession(proxyRequest.peyeeyeSessionId)
+        );
+      } catch (err) {
+        console.warn("peyeeye: scheduling session cleanup failed", err);
+      }
+    }
+    return responseBuilder.build({
+      body: rehydratedBody,
+      inheritFrom: response,
+      status: response.status,
+    });
+  }
+
   return responseBuilder.build({
     body: response.body,
     inheritFrom: response,
     status: response.status,
   });
+}
+
+// Pre-call: redact every text-bearing chunk in the request body and write
+// the redacted body back via `setBody`. Stores the returned session id /
+// sealed key on the proxy request for the post-call hook to pick up.
+async function runPeyeeyeRedaction(
+  proxyRequest: HeliconeProxyRequest,
+  env: Env
+): Promise<{ error: string | null }> {
+  let bodyText: string;
+  try {
+    bodyText = (await proxyRequest.requestWrapper.unsafeGetBodyText()) || "";
+  } catch (err) {
+    return {
+      error: `peyeeye: failed to read request body: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    };
+  }
+  if (!bodyText) return { error: null };
+
+  let parsed: { messages?: ChatMessage[]; [k: string]: unknown };
+  try {
+    parsed = JSON.parse(bodyText);
+  } catch {
+    // Not JSON (e.g. multipart or empty) -- skip.
+    return { error: null };
+  }
+  const messages = Array.isArray(parsed?.messages) ? parsed.messages : [];
+  if (messages.length === 0) return { error: null };
+
+  const parts = collectMessageTexts(messages);
+  if (parts.length === 0) return { error: null };
+
+  const sessionMode =
+    proxyRequest.requestWrapper.heliconeHeaders.peyeeyeSessionMode ??
+    "stateful";
+
+  const manager = new PEyeEyeManager({
+    apiKey: env.PEYEEYE_API_KEY ?? "",
+    apiBase: env.PEYEEYE_API_BASE,
+    sessionMode,
+  });
+
+  const { redacted, sessionId } = await manager.redact(
+    parts.map((p) => p.text)
+  );
+
+  applyRedactedTexts(messages, parts, redacted);
+  parsed.messages = messages;
+  await proxyRequest.requestWrapper.setBody(JSON.stringify(parsed));
+
+  if (sessionId) {
+    proxyRequest.peyeeyeSessionId = sessionId;
+    proxyRequest.peyeeyeSessionMode = sessionMode;
+  }
+
+  return { error: null };
+}
+
+// Post-call: read the response body once, parse JSON, rehydrate any
+// chat-completion-style text fields, return a fresh body string. Best-effort
+// -- on any failure we fall back to the original body so the caller still
+// gets their response.
+async function rehydrateResponseBody(
+  response: Response,
+  sessionId: string,
+  env: Env
+): Promise<string> {
+  let raw: string;
+  try {
+    raw = await response.clone().text();
+  } catch (err) {
+    console.warn("peyeeye: failed to read response body for rehydration", err);
+    return await response.text().catch(() => "");
+  }
+  if (!raw) return raw;
+
+  let parsed: any;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    // Not JSON; ship as-is.
+    return raw;
+  }
+
+  const manager = new PEyeEyeManager({
+    apiKey: env.PEYEEYE_API_KEY ?? "",
+    apiBase: env.PEYEEYE_API_BASE,
+  });
+
+  try {
+    const choices = Array.isArray(parsed?.choices) ? parsed.choices : [];
+    for (const choice of choices) {
+      const message = choice?.message;
+      if (!message) continue;
+      if (typeof message.content === "string" && message.content) {
+        message.content = await manager.rehydrate(message.content, sessionId);
+      } else if (Array.isArray(message.content)) {
+        for (const part of message.content) {
+          if (part && typeof part === "object" && part.type === "text") {
+            const t = typeof part.text === "string" ? part.text : "";
+            if (t) part.text = await manager.rehydrate(t, sessionId);
+          }
+        }
+      }
+    }
+    // Anthropic-style: top-level `content` array of `{type:"text", text}`.
+    if (Array.isArray(parsed?.content)) {
+      for (const part of parsed.content) {
+        if (part && typeof part === "object" && part.type === "text") {
+          const t = typeof part.text === "string" ? part.text : "";
+          if (t) part.text = await manager.rehydrate(t, sessionId);
+        }
+      }
+    }
+    return JSON.stringify(parsed);
+  } catch (err) {
+    console.warn("peyeeye: rehydrate pass failed", err);
+    return raw;
+  }
 }
 
 async function parseLatestMessage(

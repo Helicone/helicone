@@ -47,6 +47,8 @@ declare namespace Cloudflare {
 		CUSTOMER_GATEWAY_URL: string;
 		RESEND_API_KEY: string;
 		PROMPTARMOR_API_KEY: string;
+		PEYEEYE_API_KEY: string;
+		PEYEEYE_API_BASE: string;
 		DATADOG_ENABLED: string;
 		DATADOG_API_KEY: string;
 		DATADOG_ENDPOINT: string;

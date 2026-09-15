@@ -90,6 +90,8 @@ export interface IHeliconeHeaders {
   promptSecurityEnabled: Nullable<boolean>;
   promptSecurityAdvanced: Nullable<string>;
   moderationsEnabled: boolean;
+  peyeeyeEnabled: boolean;
+  peyeeyeSessionMode: Nullable<"stateful" | "stateless">;
   posthogKey: Nullable<string>;
   lytixKey: Nullable<string>;
   lytixHost: Nullable<string>;
@@ -157,6 +159,8 @@ export class HeliconeHeaders implements IHeliconeHeaders {
   promptSecurityEnabled: Nullable<boolean>;
   promptSecurityAdvanced: Nullable<string>;
   moderationsEnabled: boolean;
+  peyeeyeEnabled: boolean;
+  peyeeyeSessionMode: Nullable<"stateful" | "stateless">;
   posthogKey: Nullable<string>;
   posthogHost: Nullable<string>;
   gatewayConfig: {
@@ -210,6 +214,8 @@ export class HeliconeHeaders implements IHeliconeHeaders {
     this.promptSecurityEnabled = heliconeHeaders.promptSecurityEnabled;
     this.promptSecurityAdvanced = heliconeHeaders.promptSecurityAdvanced;
     this.moderationsEnabled = heliconeHeaders.moderationsEnabled;
+    this.peyeeyeEnabled = heliconeHeaders.peyeeyeEnabled;
+    this.peyeeyeSessionMode = heliconeHeaders.peyeeyeSessionMode;
     this.lytixKey = heliconeHeaders.lytixKey;
     this.lytixHost = heliconeHeaders.lytixHost;
     this.posthogKey = heliconeHeaders.posthogKey;
@@ -413,6 +419,16 @@ export class HeliconeHeaders implements IHeliconeHeaders {
         this.headers.get("Helicone-Moderations-Enabled") == "true"
           ? true
           : false,
+      peyeeyeEnabled:
+        (this.headers.get("Helicone-Peyeeye-Enabled") ?? "").toLowerCase() ===
+        "true",
+      peyeeyeSessionMode: ((): Nullable<"stateful" | "stateless"> => {
+        const mode = this.headers
+          .get("Helicone-Peyeeye-Session-Mode")
+          ?.toLowerCase();
+        if (mode === "stateful" || mode === "stateless") return mode;
+        return null;
+      })(),
       posthogKey: this.headers.get("Helicone-Posthog-Key") ?? null,
       lytixKey: this.headers.get("Helicone-Lytix-Key") ?? null,
       lytixHost: this.headers.get("Helicone-Lytix-Host") ?? null,
