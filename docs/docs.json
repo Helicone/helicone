@@ -275,7 +275,8 @@
                 "pages": [
                   "getting-started/self-host/overview",
                   "getting-started/self-host/docker",
-                  "getting-started/self-host/kubernetes"
+                  "getting-started/self-host/kubernetes",
+                  "getting-started/self-host/valkey"
                 ]
               },
               "references/provider-integration",
