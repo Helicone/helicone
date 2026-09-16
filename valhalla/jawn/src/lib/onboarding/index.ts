@@ -717,7 +717,9 @@ export async function setupDemoOrganizationRequests({
   const heliconeLogger = new HeliconeManualLogger({
     apiKey: heliconeOnHeliconeApiKey,
     loggingEndpoint: `${
-      process.env.HELICONE_API_WORKER_URL ?? "https://api.worker.helicone.ai"
+      process.env.HELICONE_API_WORKER_URL ??
+      process.env.HELICONE_WORKER_URL ??
+      "https://api.worker.helicone.ai"
     }/custom/v1/log`,
   });
 
