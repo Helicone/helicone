@@ -69,7 +69,7 @@ export function toOpenAI(response: AnthropicResponseBody): OpenAIResponseBody {
             cache_write_details: {
               write_5m_tokens:
                 anthropicUsage.cache_creation?.ephemeral_5m_input_tokens ??
-                cachedTokens ??
+                cacheWriteTokens ??
                 0,
               write_1h_tokens:
                 anthropicUsage.cache_creation?.ephemeral_1h_input_tokens ?? 0,
