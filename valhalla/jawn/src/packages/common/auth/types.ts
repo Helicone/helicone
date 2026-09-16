@@ -25,6 +25,12 @@ export interface AuthParams {
   keyPermissions?: KeyPermissions;
   role?: Role;
   tier?: string;
+  /**
+   * How the request was authenticated. Set by the auth middleware. Only "jwt"
+   * proves the caller is the user identified by `userId`; API keys ("bearer")
+   * merely carry a stored user_id.
+   */
+  authType?: HeliconeAuth["_type"];
 }
 export type AuthResult = PromiseGenericResult<AuthParams>;
 

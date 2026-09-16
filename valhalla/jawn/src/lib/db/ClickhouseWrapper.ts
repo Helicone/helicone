@@ -126,14 +126,30 @@ export class ClickhouseClientWrapper {
     try {
       const query_params = paramsToValues(parameters);
 
-      // Check for SQL_helicone_organization_id variations with regex
-      // This catches different cases, underscore variations, and potential injection attempts
+      // Defense in depth on top of HeliconeSqlManager.validateSql. The tenant
+      // row policy reads the SQL_helicone_organization_id session setting, so
+      // the query must not be able to (a) name that setting, (b) carry any
+      // SETTINGS clause, or (c) use backtick identifiers, inside which
+      // ClickHouse decodes escapes like `\x69` (used to spell the setting name
+      // without matching the plain-text check).
       const forbiddenPattern = /sql[_\s]*helicone[_\s]*organization[_\s]*id/i;
       if (forbiddenPattern.test(query)) {
         return {
           data: null,
           error:
             "Query contains 'SQL_helicone_organization_id' keyword, which is not allowed in HQL queries",
+        };
+      }
+      if (/\bSETTINGS\b/i.test(query)) {
+        return {
+          data: null,
+          error: "Query contains a SETTINGS clause, which is not allowed in HQL queries",
+        };
+      }
+      if (query.includes("`")) {
+        return {
+          data: null,
+          error: "Backtick-quoted identifiers are not allowed in HQL queries",
         };
       }
 

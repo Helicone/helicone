@@ -119,6 +119,11 @@ export const authMiddleware = async (
       return;
     }
 
+    // Record how the caller authenticated so downstream authorization checks
+    // (e.g. platform-admin routes) can require a real user session rather than
+    // an API key. API keys carry a stored user_id, but that does not prove the
+    // caller is that user.
+    authParams.data.authType = authorization.data?._type;
     (req as any).authParams = authParams.data;
 
     // const onFinish = logHttpRequestInClickhouse(
@@ -135,9 +140,13 @@ export const authMiddleware = async (
 
     // res.on("finish", onFinish);
 
+    // Express routing is case-insensitive by default, so "/V1/ADMIN/..." reaches
+    // the same controllers as "/v1/admin/...". Normalize before comparing so the
+    // admin gate cannot be skipped by changing the path casing.
+    const normalizedPath = req.path.toLowerCase();
     if (
-      req.path.startsWith("/v1/admin") &&
-      req.path !== "/v1/admin/has-feature-flag"
+      normalizedPath.startsWith("/v1/admin") &&
+      normalizedPath !== "/v1/admin/has-feature-flag"
     ) {
       if (authorization.data?._type !== "jwt") {
         res.status(401).json({
@@ -145,7 +154,7 @@ export const authMiddleware = async (
         });
         return;
       }
-      await authCheckThrow(authParams.data.userId);
+      await authCheckThrow(authParams.data);
     }
     next();
   } catch (error) {
