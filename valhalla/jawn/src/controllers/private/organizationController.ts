@@ -379,7 +379,10 @@ export class OrganizationController extends Controller {
       return err(result.error ?? "Error adding member to organization");
     } else {
       this.setStatus(201);
-      return ok(result.data);
+      // Do not echo the resolved account id back to the caller: combined with
+      // the members listing (which hides platform admins) it acted as an oracle
+      // for discovering Helicone staff user ids.
+      return ok({ temporaryPassword: result.data.temporaryPassword });
     }
   }
 

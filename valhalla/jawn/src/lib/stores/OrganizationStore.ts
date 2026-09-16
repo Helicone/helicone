@@ -529,6 +529,23 @@ export class OrganizationStore extends BaseStore {
         return err("Unauthorized");
       }
 
+      // The new owner must already be a member of this organization. Without
+      // this check `organization.owner` could be pointed at an arbitrary user id.
+      const memberResult = await dbExecute<{ member: string }>(
+        `SELECT member
+         FROM organization_member
+         WHERE organization = $1 AND member = $2
+         LIMIT 1`,
+        [organizationId, memberId]
+      );
+      if (
+        memberResult.error ||
+        !memberResult.data ||
+        memberResult.data.length === 0
+      ) {
+        return err("New owner must be an existing member of the organization");
+      }
+
       // Update the organization owner
       const updateResult = await dbExecute(
         `UPDATE organization_member

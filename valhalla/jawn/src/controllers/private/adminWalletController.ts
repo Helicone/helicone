@@ -104,7 +104,7 @@ export class AdminWalletController extends Controller {
     @Query() page?: number,
     @Query() pageSize?: number
   ): Promise<Result<DashboardData, string>> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const settingsManager = new SettingsManager();
     const stripeProductSettings =
@@ -150,7 +150,7 @@ export class AdminWalletController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Path() orgId: string
   ): Promise<Result<WalletState, string>> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const adminWalletManager = new WalletManager(orgId);
     return adminWalletManager.getWalletState();
@@ -168,7 +168,7 @@ export class AdminWalletController extends Controller {
     const validatedPage = Math.max(0, page ?? 0);
     const validatedPageSize = Math.min(Math.max(1, pageSize ?? 50), 100);
 
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     // Validate table name to prevent injection
     const allowedTables = [
@@ -266,7 +266,7 @@ export class AdminWalletController extends Controller {
     @Query() type: "credit" | "debit",
     @Query() reason: string
   ): Promise<Result<WalletState, string>> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     // Validate inputs
     if (!amount || amount <= 0) {
@@ -374,7 +374,7 @@ export class AdminWalletController extends Controller {
       string
     >
   > {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     // Validate that at least one parameter is provided
     if (allowNegativeBalance === undefined && creditLimit === undefined) {
@@ -449,7 +449,7 @@ export class AdminWalletController extends Controller {
     @Query() provider: string,
     @Query() model: string
   ): Promise<Result<WalletState, string>> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     // Validate inputs
     if (!provider || !model) {
@@ -516,7 +516,7 @@ export class AdminWalletController extends Controller {
     @Query() endDate: string,
     @Query() groupBy?: "minute" | "hour" | "day" | "week" | "month"
   ): Promise<Result<TimeSeriesResponse, string>> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     // Get the token usage product ID from settings
     const settingsManager = new SettingsManager();
@@ -577,7 +577,7 @@ export class AdminWalletController extends Controller {
     @Query() startDate: string,
     @Query() endDate: string
   ): Promise<Result<ModelSpend[], string>> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const start = normalizeToStartOfDay(startDate);
     const end = normalizeToEndOfDay(endDate);
@@ -610,7 +610,7 @@ export class AdminWalletController extends Controller {
     @Path() orgId: string,
     @Path() invoiceId: string
   ): Promise<Result<{ deleted: boolean }, string>> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const manager = new InvoicingManager(orgId);
     return manager.deleteInvoice(invoiceId);
@@ -626,7 +626,7 @@ export class AdminWalletController extends Controller {
     @Path() invoiceId: string,
     @Body() body: { hostedInvoiceUrl: string | null }
   ): Promise<Result<{ updated: boolean }, string>> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const manager = new InvoicingManager(orgId);
     return manager.updateInvoice(invoiceId, body.hostedInvoiceUrl);
@@ -640,7 +640,7 @@ export class AdminWalletController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Path() orgId: string
   ): Promise<Result<PTBInvoice[], string>> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const creditsManager = new CreditsManager({
       organizationId: orgId,
@@ -658,7 +658,7 @@ export class AdminWalletController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Path() orgId: string
   ): Promise<Result<InvoiceSummary, string>> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const manager = new InvoicingManager(orgId);
     return manager.getInvoiceSummary();
@@ -679,7 +679,7 @@ export class AdminWalletController extends Controller {
       daysUntilDue?: number;
     }
   ): Promise<Result<CreateInvoiceResponse, string>> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const start = normalizeToStartOfDay(body.startDate);
     const end = normalizeToEndOfDay(body.endDate);
@@ -700,7 +700,7 @@ export class AdminWalletController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Path() orgId: string
   ): Promise<Result<OrgDiscount[], string>> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const creditsManager = new CreditsManager({
       organizationId: orgId,
@@ -719,7 +719,7 @@ export class AdminWalletController extends Controller {
     @Path() orgId: string,
     @Body() body: { discounts: OrgDiscount[] }
   ): Promise<Result<OrgDiscount[], string>> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const manager = new InvoicingManager(orgId);
     return manager.updateDiscounts(body.discounts);
