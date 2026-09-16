@@ -118,4 +118,58 @@ describe("GoogleBodyProcessor", () => {
       promptCacheReadTokens: 13644,
     });
   });
+
+  it("handles Gemini thinking model responses with thoughtsTokenCount", async () => {
+    const body = {
+      candidates: [
+        {
+          content: {
+            role: "model",
+            parts: [
+              {
+                text: "25 * 47 = 1175",
+              },
+            ],
+          },
+          finishReason: "STOP",
+          avgLogprobs: -0.24105726576781206,
+        },
+      ],
+      usageMetadata: {
+        promptTokenCount: 15,
+        candidatesTokenCount: 359,
+        totalTokenCount: 1035,
+        thoughtsTokenCount: 661,
+        trafficType: "ON_DEMAND",
+        promptTokensDetails: [
+          {
+            modality: "TEXT",
+            tokenCount: 15,
+          },
+        ],
+        candidatesTokensDetails: [
+          {
+            modality: "TEXT",
+            tokenCount: 359,
+          },
+        ],
+      },
+      modelVersion: "gemini-2.5-flash",
+      createTime: "2026-02-24T06:59:17.723195Z",
+      responseId: "RUydafuRLIuolu8P8YbxgAg",
+    };
+
+    const { usage } = await parse(body);
+
+    expect(usage).toEqual({
+      totalTokens: 1035,
+      promptTokens: 15,
+      // thoughts + candidates (661 + 359)
+      completionTokens: 1020,
+      // reasoningTokens should be extracted separately
+      reasoningTokens: 661,
+      heliconeCalculated: false,
+      promptCacheReadTokens: undefined,
+    });
+  });
 });

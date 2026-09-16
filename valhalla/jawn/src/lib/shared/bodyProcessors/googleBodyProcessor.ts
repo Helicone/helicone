@@ -70,19 +70,23 @@ export class GoogleBodyProcessor implements IBodyProcessor {
       ?.promptTokenCount;
     const cachedContentTokens = usageMetadataItem?.usageMetadata
       ?.cachedContentTokenCount;
+    // If there's no caching, return raw promptTokenCount
+    // If there's caching, subtract cached tokens from prompt tokens
     const adjustedPromptTokens =
-      promptTokens !== undefined && cachedContentTokens !== undefined
-        ? promptTokens - cachedContentTokens
+      promptTokens !== undefined
+        ? promptTokens - (cachedContentTokens ?? 0)
         : undefined;
+
+    const thoughtsTokenCount = usageMetadataItem?.usageMetadata?.thoughtsTokenCount ?? 0;
+    const candidatesTokenCount = usageMetadataItem?.usageMetadata?.candidatesTokenCount ?? 0;
 
     return ok({
       processedBody: parsedResponseBody,
       usage: {
         totalTokens: usageMetadataItem?.usageMetadata?.totalTokenCount,
         promptTokens: adjustedPromptTokens,
-        completionTokens:
-          (usageMetadataItem?.usageMetadata?.thoughtsTokenCount ?? 0) +
-          (usageMetadataItem?.usageMetadata?.candidatesTokenCount ?? 0),
+        completionTokens: thoughtsTokenCount + candidatesTokenCount,
+        reasoningTokens: thoughtsTokenCount > 0 ? thoughtsTokenCount : undefined,
         heliconeCalculated: false,
         promptCacheReadTokens: cachedContentTokens,
       },
