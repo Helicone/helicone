@@ -356,6 +356,144 @@ describe("Pass-Through Tests", () => {
         }));
     });
 
+    describe("Unknown model versions with passthrough", () => {
+      it("should successfully proxy unknown OpenAI model version to OpenAI API", () =>
+        runGatewayTest({
+          model: "gpt-5-turbo-preview/openai",
+          request: {
+            messages: [{ role: "user", content: "Test unknown model" }],
+            maxTokens: 100,
+          },
+          expected: {
+            providers: [
+              {
+                // Unknown model should be passed through to OpenAI
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "gpt-5-turbo-preview",
+                data: {
+                  id: "chatcmpl-unknown",
+                  object: "chat.completion",
+                  created: Date.now(),
+                  model: "gpt-5-turbo-preview",
+                  choices: [
+                    {
+                      index: 0,
+                      message: {
+                        role: "assistant",
+                        content: "Response from unknown model",
+                      },
+                      finish_reason: "stop",
+                    },
+                  ],
+                  usage: {
+                    prompt_tokens: 10,
+                    completion_tokens: 5,
+                    total_tokens: 15,
+                  },
+                },
+                expects: {
+                  headers: {
+                    Authorization: /^Bearer /,
+                  },
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should successfully proxy unknown Anthropic model version to Anthropic API", () =>
+        runGatewayTest({
+          model: "claude-4-opus-20250301/anthropic",
+          request: {
+            messages: [{ role: "user", content: "Test unknown Claude version" }],
+            maxTokens: 100,
+          },
+          expected: {
+            providers: [
+              {
+                // Unknown model should be passed through to Anthropic
+                url: "https://api.anthropic.com/v1/messages",
+                response: "success",
+                model: "claude-4-opus-20250301",
+                data: {
+                  id: "msg_unknown_version",
+                  type: "message",
+                  role: "assistant",
+                  content: [
+                    { type: "text", text: "Response from unknown Claude version" },
+                  ],
+                  model: "claude-4-opus-20250301",
+                  usage: { input_tokens: 10, output_tokens: 5 },
+                },
+                expects: {
+                  headers: {
+                    "x-api-key": "test-anthropic-api-key",
+                  },
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should fallback from unknown model to known model", () =>
+        runGatewayTest({
+          model: "gpt-5-experimental/openai,gpt-4-turbo/openai",
+          request: {
+            messages: [
+              { role: "user", content: "Test fallback with unknown model" },
+            ],
+            maxTokens: 100,
+          },
+          expected: {
+            providers: [
+              {
+                // First attempt: Unknown model fails
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "failure",
+                statusCode: 404,
+                errorMessage: "Model not found",
+              },
+              {
+                // Second attempt: Known model succeeds
+                url: "https://api.openai.com/v1/chat/completions",
+                response: "success",
+                model: "gpt-4-turbo",
+                data: {
+                  id: "chatcmpl-fallback",
+                  object: "chat.completion",
+                  created: Date.now(),
+                  model: "gpt-4-turbo",
+                  choices: [
+                    {
+                      index: 0,
+                      message: {
+                        role: "assistant",
+                        content: "Fallback to known model successful",
+                      },
+                      finish_reason: "stop",
+                    },
+                  ],
+                  usage: {
+                    prompt_tokens: 10,
+                    completion_tokens: 5,
+                    total_tokens: 15,
+                  },
+                },
+                expects: {
+                  headers: {
+                    Authorization: /^Bearer /,
+                  },
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
     describe("Mixed provider fallback scenarios", () => {
       it("should fallback from Groq to OpenAI to Anthropic", () =>
         runGatewayTest({
