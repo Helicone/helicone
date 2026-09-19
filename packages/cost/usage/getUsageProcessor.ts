@@ -18,6 +18,7 @@ export function getUsageProcessor(
     case "azure":
     case "baseten":
     case "canopywave":
+    case "tiyuvta":
     case "chutes":
     case "deepinfra":
     case "helicone":
