@@ -34,7 +34,7 @@ describe("BedrockProvider", () => {
       );
     });
 
-    it("should add region prefix for cross-region requests", () => {
+    it("should add region prefix for cross-region requests (boolean true)", () => {
       const url = provider.buildUrl(
         {
           providerModelId: "anthropic.claude-3-haiku-20240307-v1:0",
@@ -46,6 +46,36 @@ describe("BedrockProvider", () => {
 
       expect(url).toBe(
         "https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-haiku-20240307-v1:0/invoke"
+      );
+    });
+
+    it("should add region prefix for cross-region requests (string 'true' from UI)", () => {
+      const url = provider.buildUrl(
+        {
+          providerModelId: "anthropic.claude-3-haiku-20240307-v1:0",
+          modelConfig: { providerModelId: "anthropic.claude-3-haiku-20240307-v1:0" },
+          userConfig: { region: "us-east-1", crossRegion: "true" },
+        } as any,
+        { isStreaming: false }
+      );
+
+      expect(url).toBe(
+        "https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-3-haiku-20240307-v1:0/invoke"
+      );
+    });
+
+    it("should NOT add region prefix when crossRegion is string 'false'", () => {
+      const url = provider.buildUrl(
+        {
+          providerModelId: "anthropic.claude-3-haiku-20240307-v1:0",
+          modelConfig: { providerModelId: "anthropic.claude-3-haiku-20240307-v1:0" },
+          userConfig: { region: "us-east-1", crossRegion: "false" },
+        } as any,
+        { isStreaming: false }
+      );
+
+      expect(url).toBe(
+        "https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-haiku-20240307-v1:0/invoke"
       );
     });
 
