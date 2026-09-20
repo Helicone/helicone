@@ -104,6 +104,10 @@ export class AnthropicUsageProcessor implements IUsageProcessor {
       const outputTokens = usage.output_tokens ?? 0;
       const cacheReadInputTokens = usage.cache_read_input_tokens ?? 0;
 
+      // Total cache creation tokens (always present when caching occurs)
+      const cacheCreationInputTokens = usage.cache_creation_input_tokens ?? 0;
+
+      // TTL breakdown (may not be present in all API versions/responses)
       const cacheCreation = usage.cache_creation || {};
       const ephemeral5mTokens = cacheCreation.ephemeral_5m_input_tokens ?? 0;
       const ephemeral1hTokens = cacheCreation.ephemeral_1h_input_tokens ?? 0;
@@ -119,13 +123,21 @@ export class AnthropicUsageProcessor implements IUsageProcessor {
 
       if (
         cacheReadInputTokens > 0 ||
+        cacheCreationInputTokens > 0 ||
         ephemeral5mTokens > 0 ||
         ephemeral1hTokens > 0
       ) {
         modelUsage.cacheDetails = { cachedInput: cacheReadInputTokens };
 
+        // Use TTL breakdown if available, otherwise fall back to total cache creation tokens
+        // This handles cases where cache_creation_input_tokens is set but TTL breakdown is not
+        const ttlBreakdownTotal = ephemeral5mTokens + ephemeral1hTokens;
+
         if (ephemeral5mTokens > 0) {
           modelUsage.cacheDetails.write5m = ephemeral5mTokens;
+        } else if (cacheCreationInputTokens > 0 && ttlBreakdownTotal === 0) {
+          // No TTL breakdown provided, use total cache creation tokens as 5m (default TTL)
+          modelUsage.cacheDetails.write5m = cacheCreationInputTokens;
         }
 
         if (ephemeral1hTokens > 0) {
