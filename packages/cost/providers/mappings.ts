@@ -7,6 +7,7 @@ import { costs as azureCosts } from "./azure";
 import { costs as llamaCosts } from "./llama";
 import { costs as nvidiaCosts } from "./nvidia";
 import { costs as cohereCosts } from "./cohere";
+import { costs as deapiCosts } from "./deapi";
 import { costs as deepseekCosts } from "./deepseek";
 import { costs as fireworksAICosts } from "./fireworks";
 import { costs as groqCosts } from "./groq";
@@ -38,6 +39,7 @@ const nvidiaApiPattern = /^https:\/\/integrate\.api\.nvidia\.com/;
 const localProxyPattern = /^http:\/\/127\.0\.0\.1:\d+\/v\d+\/?$/;
 const heliconeProxyPattern = /^https:\/\/oai\.hconeai\.com/;
 const heliconeInferencePattern = /^https:\/\/inference\.helicone\.ai/;
+const deapi = /^https:\/\/oai\.deapi\.ai/;
 const amdbartekPattern = /^https:\/\/.*\.amdbartek\.dev/;
 const anyscalePattern = /^https:\/\/api\.endpoints\.anyscale\.com/;
 const cloudflareAiGatewayPattern = /^https:\/\/gateway\.ai\.cloudflare\.com/;
@@ -132,6 +134,7 @@ export const providersNames = [
   "CEREBRAS",
   "BASETEN",
   "CANOPYWAVE",
+  "DEAPI",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -325,7 +328,12 @@ export const providers: {
     pattern: canopywave,
     provider: "CANOPYWAVE",
     costs: [],
-  }
+  },
+  {
+    pattern: deapi,
+    provider: "DEAPI",
+    costs: deapiCosts,
+  },
 ];
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
