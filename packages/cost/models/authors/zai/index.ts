@@ -8,13 +8,17 @@ import type { ModelConfig, ModelProviderConfig } from "../../types";
 // Import models and endpoints
 import { models as glm4Models } from "./glm-4/models";
 import { endpoints as glm4Endpoints } from "./glm-4/endpoints";
+import { models as glm5Models } from "./glm-5/models";
+import { endpoints as glm5Endpoints } from "./glm-5/endpoints";
 
 // Aggregate models
 export const zaiModels = {
-  ...glm4Models
+  ...glm4Models,
+  ...glm5Models
 } satisfies Record<string, ModelConfig>;
 
 // Aggregate endpoints
 export const zaiEndpointConfig = {
-  ...glm4Endpoints
+  ...glm4Endpoints,
+  ...glm5Endpoints
 } satisfies Record<string, ModelProviderConfig>;
