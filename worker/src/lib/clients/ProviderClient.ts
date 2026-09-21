@@ -187,12 +187,30 @@ export async function callProviderWithRetry(
 ): Promise<Response> {
   let lastResponse;
 
+  // Convert ReadableStream body to string before retry loop to allow reuse across retries.
+  // ReadableStream bodies can only be consumed once, so we need to read them into a string
+  // that can be safely reused for each retry attempt.
+  let retryableBody = callProps.body;
+  if (retryableBody instanceof ReadableStream) {
+    const reader = retryableBody.getReader();
+    const chunks: Uint8Array[] = [];
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (value) chunks.push(value);
+    }
+    const decoder = new TextDecoder();
+    retryableBody = chunks.map((chunk) => decoder.decode(chunk)).join("");
+  }
+
+  const retryableCallProps = { ...callProps, body: retryableBody };
+
   try {
     // Use async-retry to call the forwardRequestToOpenAi function with exponential backoff
     await retry(
       async (bail, attempt) => {
         try {
-          const res = await callProvider(callProps);
+          const res = await callProvider(retryableCallProps);
 
           lastResponse = res;
           // Throw an error if the status code is 429 or 5xx
