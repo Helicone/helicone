@@ -111,7 +111,7 @@ type LLMResponseBody = {
   instructions?: string | null;
   model?: string | null;
   error?: {
-    heliconeMessage: any;
+    heliconeMessage: string | Record<string, unknown>;
   };
   toolDetailsResponse?: {
     status: string;
@@ -275,7 +275,7 @@ type HeliconeMetadata = {
   storageLocation?: string | null;
 };
 
-// UNORGANZIED
+// UNORGANIZED
 export type PromptMessage = Message | string;
 // These are planned I think?
 export type HeliconeErrorType = {
