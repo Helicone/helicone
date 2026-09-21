@@ -151,8 +151,8 @@ ENV CLICKHOUSE_HOST=http://localhost:8123
 ENV MINIO_ROOT_USER=minioadmin
 ENV MINIO_ROOT_PASSWORD=minioadmin
 
-# Default environment variables for supervisord (can be overridden at runtime with -e)
-# These are read by supervisord.conf using %(ENV_VAR)s syntax
+# Default environment variables (can be overridden at runtime via docker-compose or -e)
+# These are inherited by all supervisord child processes automatically
 ENV NEXT_PUBLIC_HELICONE_JAWN_SERVICE=http://localhost:8585
 ENV S3_ENDPOINT=http://localhost:9080
 ENV S3_ACCESS_KEY=minioadmin
@@ -161,6 +161,11 @@ ENV S3_BUCKET_NAME=request-response-storage
 ENV S3_PROMPT_BUCKET_NAME=prompt-body-storage
 ENV BETTER_AUTH_SECRET=change-me-in-production
 
+# Entrypoint generates __ENV.js from NEXT_PUBLIC_* env vars before starting services
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 
 # --------------------------------------------------------------------------------------------------------------------
