@@ -330,6 +330,12 @@ async function modifyEnvBasedOnPath(
         WORKER_TYPE: "GATEWAY_API",
         GATEWAY_TARGET: "https://api.deepseek.com",
       };
+    } else if (hostParts[0] === "auxen") {
+      return {
+        ...env,
+        WORKER_TYPE: "GATEWAY_API",
+        GATEWAY_TARGET: "https://api.auxen.ai",
+      };
     } else if (hostParts[0] === "nebius") {
       return {
         ...env,
