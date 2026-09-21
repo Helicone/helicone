@@ -125,6 +125,34 @@ export function toAnthropic(
     throw new Error("Logit bias is not supported");
   }
 
+  // Map response_format to Anthropic's output_config.format
+  // OpenAI uses `response_format: { type: "json_schema", json_schema: { schema, name } }`
+  // Anthropic uses `output_config: { format: { type: "json_schema", json_schema: { schema, name } } }`
+  // Note: Anthropic does not support `strict` (OpenAI-specific), so it is omitted.
+  if (
+    openAIBody.response_format &&
+    typeof openAIBody.response_format === "object" &&
+    "type" in openAIBody.response_format &&
+    openAIBody.response_format.type === "json_schema" &&
+    "json_schema" in openAIBody.response_format
+  ) {
+    const jsonSchema = (openAIBody.response_format as any).json_schema;
+    if (jsonSchema?.schema) {
+      antBody.output_config = {
+        format: {
+          type: "json_schema",
+          json_schema: {
+            schema: jsonSchema.schema,
+            ...(jsonSchema.name && { name: jsonSchema.name }),
+            ...(jsonSchema.description && {
+              description: jsonSchema.description,
+            }),
+          },
+        },
+      };
+    }
+  }
+
   // Map context_editing to Anthropic's context_management
   if (openAIBody.context_editing?.enabled) {
     antBody.context_management = mapContextEditing(openAIBody.context_editing);
