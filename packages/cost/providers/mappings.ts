@@ -6,6 +6,7 @@ import { costs as awsNovaCosts } from "./aws/awsNova";
 import { costs as azureCosts } from "./azure";
 import { costs as llamaCosts } from "./llama";
 import { costs as nvidiaCosts } from "./nvidia";
+import { costs as cerebrasCosts } from "./cerebras";
 import { costs as cohereCosts } from "./cohere";
 import { costs as deepseekCosts } from "./deepseek";
 import { costs as fireworksAICosts } from "./fireworks";
@@ -319,7 +320,7 @@ export const providers: {
   {
     pattern: cerebras,
     provider: "CEREBRAS",
-    costs: [],
+    costs: cerebrasCosts,
   },
   {
     pattern: canopywave,
