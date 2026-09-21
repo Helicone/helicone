@@ -54,6 +54,8 @@ export interface HeliconeProxyRequest {
   targetUrl: URL;
   threat?: boolean;
   flaggedForModeration?: boolean;
+  peyeeyeSessionId?: string;
+  peyeeyeSessionMode?: "stateful" | "stateless";
   cf?: CfProperties;
   escrowInfo?: EscrowInfo;
   env: Env;

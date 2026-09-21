@@ -66,6 +66,12 @@ OPENAI_ORG_ID = ""
 CUSTOMER_GATEWAY_URL = ""
 RESEND_API_KEY = ""
 PROMPTARMOR_API_KEY = ""
+# Peyeeye PII redaction (https://peyeeye.ai). Required when
+# `Helicone-Peyeeye-Enabled: true` requests come through. Set as a Wrangler
+# secret in production (`wrangler secret put PEYEEYE_API_KEY`); blank by
+# default so dev opt-out is the default.
+PEYEEYE_API_KEY = ""
+PEYEEYE_API_BASE = ""
 DATADOG_ENABLED = "false"
 DATADOG_API_KEY = ""
 DATADOG_ENDPOINT = ""
