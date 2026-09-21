@@ -3578,6 +3578,102 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "minimax/minimax-m2.5": {
+    "minimax-m2.5-highspeed:minimax": {
+      "context": 204000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "MiniMax-M2.5-highspeed",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "stop",
+        "stream",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "minimax",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "minimax-m2.5:minimax": {
+      "context": 204000,
+      "crossRegion": false,
+      "maxTokens": 8192,
+      "modelId": "MiniMax-M2.5",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "stop",
+        "stream",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "minimax",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
+  "minimax/minimax-m2.7": {
+    "minimax-m2.7-highspeed:minimax": {
+      "context": 1000000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "MiniMax-M2.7-highspeed",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "stop",
+        "stream",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "minimax",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "minimax-m2.7:minimax": {
+      "context": 1000000,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "MiniMax-M2.7",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "stop",
+        "stream",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "minimax",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
   "mistral/mistral-large": {
     "mistral-large-2411:mistral": {
       "context": 128000,
@@ -7522,6 +7618,14 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "openrouter",
     "openrouter",
   ],
+  "minimax/minimax-m2.5": [
+    "minimax",
+    "minimax",
+  ],
+  "minimax/minimax-m2.7": [
+    "minimax",
+    "minimax",
+  ],
   "mistral/mistral-large": [
     "mistral",
   ],
@@ -9321,6 +9425,24 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       },
     ],
   },
+  "minimax/minimax-m2.5": {
+    "minimax": [
+      {
+        "input": 1e-7,
+        "output": 5.5e-7,
+        "threshold": 0,
+      },
+    ],
+  },
+  "minimax/minimax-m2.7": {
+    "minimax": [
+      {
+        "input": 1e-7,
+        "output": 5.5e-7,
+        "threshold": 0,
+      },
+    ],
+  },
   "mistral/mistral-large": {
     "mistral": [
       {
@@ -10699,6 +10821,30 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "minimax-m2.5",
+      "providers": [
+        "minimax",
+      ],
+    },
+    {
+      "model": "minimax-m2.5-highspeed",
+      "providers": [
+        "minimax",
+      ],
+    },
+    {
+      "model": "minimax-m2.7",
+      "providers": [
+        "minimax",
+      ],
+    },
+    {
+      "model": "minimax-m2.7-highspeed",
+      "providers": [
+        "minimax",
+      ],
+    },
+    {
       "model": "mistral-large-2411",
       "providers": [
         "mistral",
@@ -10898,6 +11044,10 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "helicone",
     },
     {
+      "modelCount": 4,
+      "provider": "minimax",
+    },
+    {
       "modelCount": 1,
       "provider": "mistral",
     },
@@ -11017,6 +11167,10 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "llama-guard-4",
     "llama-prompt-guard-2-22m",
     "llama-prompt-guard-2-86m",
+    "minimax-m2.5",
+    "minimax-m2.5-highspeed",
+    "minimax-m2.7",
+    "minimax-m2.7-highspeed",
     "mistral-large-2411",
     "mistral-nemo",
     "mistral-small",
@@ -11049,9 +11203,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 329,
-  "totalModelProviderConfigs": 329,
-  "totalModelsWithPtb": 108,
-  "totalProviders": 21,
+  "totalEndpoints": 333,
+  "totalModelProviderConfigs": 333,
+  "totalModelsWithPtb": 112,
+  "totalProviders": 22,
 }
 `;

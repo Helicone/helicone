@@ -31,6 +31,7 @@ export const PROVIDER_PRIORITIES: Record<ModelProviderName, number> = {
   deepseek: 4,
   fireworks: 4,
   groq: 4,
+  minimax: 4,
   mistral: 4,
   nebius: 4,
   novita: 4,

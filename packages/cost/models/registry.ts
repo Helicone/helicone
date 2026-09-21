@@ -30,6 +30,7 @@ import {
 } from "./authors/moonshotai";
 import { alibabaModels, alibabaEndpointConfig } from "./authors/alibaba";
 import { deepseekModels, deepseekEndpointConfig } from "./authors/deepseek";
+import { minimaxModels, minimaxEndpointConfig } from "./authors/minimax";
 import { mistralModels, mistralEndpointConfig } from "./authors/mistral";
 import { zaiModels, zaiEndpointConfig } from "./authors/zai";
 import { baiduModels, baiduEndpointConfig } from "./authors/baidu";
@@ -48,6 +49,7 @@ const allModels = {
   ...moonshotaiModels,
   ...alibabaModels,
   ...deepseekModels,
+  ...minimaxModels,
   ...mistralModels,
   ...zaiModels,
   ...baiduModels,
@@ -64,6 +66,7 @@ const modelProviderConfigs = {
   ...moonshotaiEndpointConfig,
   ...alibabaEndpointConfig,
   ...deepseekEndpointConfig,
+  ...minimaxEndpointConfig,
   ...mistralEndpointConfig,
   ...zaiEndpointConfig,
   ...baiduEndpointConfig,
