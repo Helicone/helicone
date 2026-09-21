@@ -1,0 +1,90 @@
+---
+title: "Scalattice Integration"
+sidebarTitle: "Scalattice"
+description: "Connect Helicone with Scalattice, an OpenAI-compatible inference marketplace. Log requests, cost, and latency through a simple base URL change."
+"twitter:title": "Scalattice Integration - Helicone OSS LLM Observability"
+---
+
+import LegacyWarning from "/snippets/legacy-provider-warning.mdx";
+
+<LegacyWarning />
+
+Scalattice is an OpenAI-compatible inference marketplace. Create a key from the [developer docs](https://scalattice.cloud/docs/developers).
+
+# Gateway Integration
+
+<Steps>
+  <Step title="Create a Helicone account">
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+  </Step>
+  <Step title="Create a Scalattice API key">
+    Create an `slt_...` key from the [Scalattice developer dashboard](https://scalattice.cloud/developers).
+  </Step>
+  <Step title="Set HELICONE_API_KEY and SCALATTICE_API_KEY">
+```javascript
+HELICONE_API_KEY=<your Helicone API key>
+SCALATTICE_API_KEY=<your Scalattice API key>
+```
+  </Step>
+  <Step title="Point the OpenAI client at Helicone">
+
+Replace `https://api.scalattice.cloud/v1` with `https://scalattice.helicone.ai/v1` and add the Helicone auth header:
+
+```javascript
+Authorization: Bearer <SCALATTICE_API_KEY>
+Helicone-Auth: Bearer <HELICONE_API_KEY>
+```
+
+</Step>
+</Steps>
+
+## Example
+
+```python
+from openai import OpenAI
+import os
+
+client = OpenAI(
+    api_key=os.environ["SCALATTICE_API_KEY"],
+    base_url="https://scalattice.helicone.ai/v1",
+    default_headers={
+        "Helicone-Auth": f"Bearer {os.environ['HELICONE_API_KEY']}",
+    },
+)
+
+response = client.chat.completions.create(
+    model="qwen-3-14b",
+    messages=[{"role": "user", "content": "Hello from Scalattice"}],
+)
+print(response.choices[0].message.content)
+```
+
+```bash
+curl https://scalattice.helicone.ai/v1/chat/completions \
+  -H "Authorization: Bearer $SCALATTICE_API_KEY" \
+  -H "Helicone-Auth: Bearer $HELICONE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "qwen-3-14b",
+    "messages": [{"role": "user", "content": "Hello from Scalattice"}]
+  }'
+```
+
+If the dedicated `scalattice.helicone.ai` host is not live yet, use the generic OpenAI proxy and set the target:
+
+```python
+client = OpenAI(
+    api_key=os.environ["SCALATTICE_API_KEY"],
+    base_url="https://oai.helicone.ai/v1",
+    default_headers={
+        "Helicone-Auth": f"Bearer {os.environ['HELICONE_API_KEY']}",
+        "Helicone-Target-URL": "https://api.scalattice.cloud",
+    },
+)
+```
+
+Catalog IDs match `GET https://api.scalattice.cloud/v1/models`.
+
+For more on headers, see [Helicone Headers](https://docs.helicone.ai/helicone-headers/header-directory#utilizing-headers).
+For Scalattice itself, see the [developer docs](https://scalattice.cloud/docs/developers).
