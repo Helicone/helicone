@@ -7,6 +7,7 @@ COPY packages/common/package.json ./packages/common/
 COPY packages/cost/package.json ./packages/cost/
 COPY packages/filters/package.json ./packages/filters/
 COPY packages/llm-mapper/package.json ./packages/llm-mapper/
+COPY packages/pricing/package.json ./packages/pricing/
 COPY packages/prompts/package.json ./packages/prompts/
 COPY packages/secrets/package.json ./packages/secrets/
 COPY web/package.json ./web/
