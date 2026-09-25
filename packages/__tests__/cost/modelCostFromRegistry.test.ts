@@ -1,6 +1,7 @@
 import type { ModelUsage } from "../../cost/usage/types";
 import type { ModelProviderName } from "../../cost/models/providers";
 import { modelCostBreakdownFromRegistry } from "../../cost/costCalc";
+import { GoogleUsageProcessor } from "../../cost/usage/googleUsageProcessor";
 
 describe("modelCostBreakdownFromRegistry", () => {
   it("should calculate cost for basic GPT-4o usage", () => {
@@ -368,6 +369,87 @@ describe("modelCostBreakdownFromRegistry", () => {
         expect(breakdown.inputCost).toBe(300000 * 0.000004);
         expect(breakdown.outputCost).toBe(50000 * 0.000018);
         expect(breakdown.cachedInputCost).toBe(25000 * 0.000004 * 0.1);
+      }
+    });
+
+    it("should count video prompt tokens toward the Gemini 2.5 Pro 200K threshold", async () => {
+      // A long video prompt: Gemini reports most prompt tokens under the VIDEO modality
+      const response = {
+        usageMetadata: {
+          promptTokenCount: 241000,
+          candidatesTokenCount: 2000,
+          totalTokenCount: 243000,
+          promptTokensDetails: [
+            { modality: "TEXT", tokenCount: 1000 },
+            { modality: "VIDEO", tokenCount: 240000 },
+          ],
+          candidatesTokensDetails: [{ modality: "TEXT", tokenCount: 2000 }],
+        },
+      };
+
+      const usage = await new GoogleUsageProcessor().parse({
+        responseBody: JSON.stringify(response),
+        isStream: false,
+        model: "gemini-2.5-pro",
+      });
+      expect(usage.error).toBeNull();
+
+      const breakdown = modelCostBreakdownFromRegistry({
+        modelUsage: usage.data!,
+        providerModelId: "gemini-2.5-pro",
+        provider: "google-ai-studio" as ModelProviderName,
+      });
+
+      expect(breakdown).not.toBeNull();
+      if (breakdown) {
+        // The prompt is 241K tokens, so every token uses the over-200K rates:
+        // $2.50/M input (all modalities), $15/M output
+        expect(breakdown.inputCost).toBeCloseTo(1000 * 0.0000025, 12);
+        expect(breakdown.video!.inputCost).toBeCloseTo(240000 * 0.0000025, 12);
+        expect(breakdown.outputCost).toBeCloseTo(2000 * 0.000015, 12);
+      }
+    });
+
+    it("should count image input tokens toward the Vertex Gemini 2.5 Pro 200K threshold", () => {
+      const modelUsage: ModelUsage = {
+        input: 150000,
+        output: 1000,
+        image: { input: 60000 },
+      };
+
+      const breakdown = modelCostBreakdownFromRegistry({
+        modelUsage,
+        providerModelId: "gemini-2.5-pro",
+        provider: "vertex" as ModelProviderName,
+      });
+
+      expect(breakdown).not.toBeNull();
+      if (breakdown) {
+        // 210K input tokens in total, so the over-200K rates apply
+        expect(breakdown.inputCost).toBeCloseTo(150000 * 0.0000025, 12);
+        expect(breakdown.image!.inputCost).toBeCloseTo(60000 * 0.0000025, 12);
+        expect(breakdown.outputCost).toBeCloseTo(1000 * 0.000015, 12);
+      }
+    });
+
+    it("should keep Gemini 2.5 Pro media tokens at the base rate under 200K", () => {
+      const modelUsage: ModelUsage = {
+        input: 1000,
+        output: 1000,
+        video: { input: 100000 },
+      };
+
+      const breakdown = modelCostBreakdownFromRegistry({
+        modelUsage,
+        providerModelId: "gemini-2.5-pro",
+        provider: "google-ai-studio" as ModelProviderName,
+      });
+
+      expect(breakdown).not.toBeNull();
+      if (breakdown) {
+        expect(breakdown.inputCost).toBeCloseTo(1000 * 0.00000125, 12);
+        expect(breakdown.video!.inputCost).toBeCloseTo(100000 * 0.00000125, 12);
+        expect(breakdown.outputCost).toBeCloseTo(1000 * 0.00001, 12);
       }
     });
 
