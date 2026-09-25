@@ -44,16 +44,26 @@ export function costOf({
     return null;
   }
 
-  const cost = providerCost.costs.find((cost) => {
-    const valueLower = cost.model.value.toLowerCase();
-    if (cost.model.operator === "equals") {
-      return valueLower === modelLower;
-    } else if (cost.model.operator === "startsWith") {
-      return modelLower.startsWith(valueLower);
-    } else if (cost.model.operator === "includes") {
-      return modelLower.includes(valueLower);
-    }
-  });
+  // An exact model match wins over a broader "startsWith"/"includes" rule listed
+  // earlier, e.g. "o4-mini-batch" must not be priced by the "o4-mini" rule.
+  const exactCost = providerCost.costs.find(
+    (cost) =>
+      cost.model.operator === "equals" &&
+      cost.model.value.toLowerCase() === modelLower
+  );
+
+  const cost =
+    exactCost ??
+    providerCost.costs.find((cost) => {
+      const valueLower = cost.model.value.toLowerCase();
+      if (cost.model.operator === "equals") {
+        return valueLower === modelLower;
+      } else if (cost.model.operator === "startsWith") {
+        return modelLower.startsWith(valueLower);
+      } else if (cost.model.operator === "includes") {
+        return modelLower.includes(valueLower);
+      }
+    });
 
   return cost?.cost ?? null;
 }
