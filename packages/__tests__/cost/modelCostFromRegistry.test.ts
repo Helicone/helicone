@@ -371,6 +371,46 @@ describe("modelCostBreakdownFromRegistry", () => {
       }
     });
 
+    it("should price Gemini 2.5 Pro thinking tokens at the over-200K output rate", () => {
+      const modelUsage: ModelUsage = {
+        input: 250000, // Over 200K threshold
+        output: 2000,
+        thinking: 10000,
+      };
+
+      const breakdown = modelCostBreakdownFromRegistry({
+        modelUsage,
+        providerModelId: "gemini-2.5-pro",
+        provider: "google-ai-studio" as ModelProviderName,
+      });
+
+      expect(breakdown).not.toBeNull();
+      if (breakdown) {
+        // Over 200K the output rate, which includes thinking tokens, is $15/M
+        expect(breakdown.outputCost).toBe(2000 * 0.000015);
+        expect(breakdown.thinkingCost).toBe(10000 * 0.000015);
+      }
+    });
+
+    it("should price Gemini 2.5 Pro thinking tokens at the base output rate under 200K", () => {
+      const modelUsage: ModelUsage = {
+        input: 100000,
+        output: 2000,
+        thinking: 10000,
+      };
+
+      const breakdown = modelCostBreakdownFromRegistry({
+        modelUsage,
+        providerModelId: "gemini-2.5-pro",
+        provider: "vertex" as ModelProviderName,
+      });
+
+      expect(breakdown).not.toBeNull();
+      if (breakdown) {
+        expect(breakdown.thinkingCost).toBe(10000 * 0.00001);
+      }
+    });
+
     it("should inherit optional fields from base tier in higher tiers", () => {
       const modelUsage: ModelUsage = {
         input: 250000, // Over 200K threshold
