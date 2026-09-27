@@ -1029,12 +1029,12 @@ export class PromptManager extends BaseManager {
     }>(
       `
     WITH parent_prompt_version AS (
-      SELECT * FROM prompts_versions WHERE id = $1
+      SELECT * FROM prompts_versions WHERE id = $1 AND organization = $4
     ),
     bump_version AS (
-      SELECT major_version, minor_version 
-      FROM prompts_versions 
-      WHERE id = $8
+      SELECT major_version, minor_version
+      FROM prompts_versions
+      WHERE id = $8 AND organization = $4
     )
     INSERT INTO prompts_versions (prompt_v2, helicone_template, model, organization, major_version, minor_version, metadata, experiment_id, parent_prompt_version, updated_at)
     SELECT
@@ -1096,7 +1096,15 @@ export class PromptManager extends BaseManager {
       ]
     );
 
-    return resultMap(result, (data) => data[0]);
+    if (result.error) {
+      return err(result.error);
+    }
+
+    if (!result.data || result.data.length === 0) {
+      return err("Prompt version not found");
+    }
+
+    return ok(result.data[0]);
   }
 
   async editPromptVersionTemplate(
