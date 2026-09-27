@@ -8,7 +8,7 @@ description: "Log Neon AI Gateway requests in Helicone by routing them through t
 [Neon AI Gateway](https://neon.com/docs/ai-gateway/overview) is an OpenAI-compatible inference endpoint provided by Neon. A single Neon credential gives access to models from OpenAI, Google, Meta, Databricks, and Alibaba.
 
 <Note>
-  Neon AI Gateway is in beta. It requires a paid Neon plan and a project in the AWS US East (Ohio) region (`aws-us-east-2`).
+  Neon AI Gateway is generally available. It requires a paid Neon plan and is not available in every region; see [Regions](https://neon.com/docs/introduction/regions) for current coverage.
 </Note>
 
 Neon is not one of Helicone's registered providers, so it is not selectable in the [AI Gateway](/gateway/overview) model registry. Route it through the [Helicone Gateway](/getting-started/integration-method/gateway) instead, which proxies any OpenAI-compatible host you name in a header.
