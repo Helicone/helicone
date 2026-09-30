@@ -54,6 +54,11 @@ describe("getUsageProcessor", () => {
     expect(processor).toBeInstanceOf(OpenAIUsageProcessor);
   });
 
+  it("should return OpenAIUsageProcessor for synthorai provider", () => {
+    const processor = getUsageProcessor("synthorai");
+    expect(processor).toBeInstanceOf(OpenAIUsageProcessor);
+  });
+
   it("should return null for unsupported provider", () => {
     const processor = getUsageProcessor("unsupported-provider" as any);
     expect(processor).toBeNull();
