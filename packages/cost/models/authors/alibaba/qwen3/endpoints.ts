@@ -367,6 +367,46 @@ export const endpoints = {
       "*": {},
     },
   },
+  "qwen3-coder-30b-a3b-instruct:flexai": {
+    providerModelId: "Qwen3-Coder-30B-A3B-Instruct-FP8",
+    provider: "flexai",
+    author: "qwen",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000007, // $0.07 per million tokens
+        output: 0.00000026, // $0.26 per million tokens
+        cacheMultipliers: {
+          cachedInput: 0.15,
+        },
+      },
+    ],
+    quantization: "fp8",
+    contextLength: 262_144,
+    maxCompletionTokens: 262_144,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "top_k",
+      "min_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "seed",
+      "logit_bias",
+      "logprobs",
+      "top_logprobs",
+      "response_format",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${Qwen3ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

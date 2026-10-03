@@ -40,6 +40,46 @@ export const endpoints = {
       "*": {},
     },
   },
+  "mistral-nemo:flexai": {
+    providerModelId: "Mistral-Nemo-Instruct-2407-FP8",
+    provider: "flexai",
+    author: "mistral",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000000019, // $0.019 per million tokens
+        output: 0.00000003, // $0.03 per million tokens
+        cacheMultipliers: {
+          cachedInput: 0.15,
+        },
+      },
+    ],
+    quantization: "fp8",
+    contextLength: 131_072,
+    maxCompletionTokens: 131_072,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "top_k",
+      "min_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "seed",
+      "logit_bias",
+      "logprobs",
+      "top_logprobs",
+      "response_format",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<
     `${MistralNemoModelName}:${ModelProviderName}` | MistralNemoModelName,

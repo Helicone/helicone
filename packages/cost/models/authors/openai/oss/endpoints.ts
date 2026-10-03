@@ -280,6 +280,86 @@ export const endpoints = {
       "*": {},
     },
   },
+  "gpt-oss-120b:flexai": {
+    providerModelId: "gpt-oss-120b",
+    provider: "flexai",
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000003, // $0.03 per million tokens
+        output: 0.00000017, // $0.17 per million tokens
+        cacheMultipliers: {
+          cachedInput: 0.15,
+        },
+      },
+    ],
+    quantization: "fp4",
+    contextLength: 131_072,
+    maxCompletionTokens: 131_072,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "top_k",
+      "min_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "seed",
+      "logit_bias",
+      "logprobs",
+      "top_logprobs",
+      "response_format",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "gpt-oss-20b:flexai": {
+    providerModelId: "gpt-oss-20b",
+    provider: "flexai",
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000002, // $0.02 per million tokens
+        output: 0.0000001, // $0.10 per million tokens
+        cacheMultipliers: {
+          cachedInput: 0.15,
+        },
+      },
+    ],
+    quantization: "fp4",
+    contextLength: 131_072,
+    maxCompletionTokens: 131_072,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "top_k",
+      "min_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "seed",
+      "logit_bias",
+      "logprobs",
+      "top_logprobs",
+      "response_format",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${GPTOSSModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;

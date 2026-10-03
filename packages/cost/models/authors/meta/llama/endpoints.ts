@@ -696,6 +696,86 @@ export const endpoints = {
       "*": {},
     },
   },
+  "llama-3.1-8b-instruct:flexai": {
+    providerModelId: "Meta-Llama-3.1-8B-Instruct-FP8",
+    provider: "flexai",
+    author: "meta-llama",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000002, // $0.02 per million tokens
+        output: 0.00000005, // $0.05 per million tokens
+        cacheMultipliers: {
+          cachedInput: 0.15,
+        },
+      },
+    ],
+    quantization: "fp8",
+    contextLength: 131_072,
+    maxCompletionTokens: 131_072,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "top_k",
+      "min_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "seed",
+      "logit_bias",
+      "logprobs",
+      "top_logprobs",
+      "response_format",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "llama-3.3-70b-instruct:flexai": {
+    providerModelId: "Llama-3.3-70B-Instruct-FP8",
+    provider: "flexai",
+    author: "meta-llama",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000000135, // $0.135 per million tokens
+        output: 0.0000004, // $0.40 per million tokens
+        cacheMultipliers: {
+          cachedInput: 0.15,
+        },
+      },
+    ],
+    quantization: "fp8",
+    contextLength: 131_072,
+    maxCompletionTokens: 131_072,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "top_k",
+      "min_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "repetition_penalty",
+      "seed",
+      "logit_bias",
+      "logprobs",
+      "top_logprobs",
+      "response_format",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${LlamaModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;
