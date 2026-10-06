@@ -5,53 +5,62 @@ import { getOpenAIKeyFromAdmin } from "@/lib/clients/settings";
 import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
 import { logger } from "@/lib/telemetry/logger";
+import { Result, err, ok } from "@/packages/common/result";
 
-// Cache for the OpenAI client to avoid recreating it on every request
-let openaiClient: OpenAI | null = null;
-let isOnPrem = false;
+// On-prem deployments route through the Helicone OpenAI proxy with the admin
+// key; cloud deployments route through OpenRouter with the org's own key.
+const isOnPrem = !!process.env.NEXT_PUBLIC_IS_ON_PREM;
 
-// Function to get or create the OpenAI client
+// Build a fresh client for every request. The client carries the org's
+// decrypted provider key and per-org identity headers, so it must never be
+// cached at module scope and shared across orgs (CIRT-79).
 async function getOpenAIClient(
   orgId: string,
   userEmail: string,
-): Promise<OpenAI> {
-  // Return cached client if available
-  if (openaiClient) {
-    return openaiClient;
+): Promise<Result<OpenAI, string>> {
+  let apiKey: string;
+
+  if (isOnPrem) {
+    const adminKey = await getOpenAIKeyFromAdmin();
+    if (!adminKey) {
+      return err("No OpenAI key is configured for this on-prem deployment");
+    }
+    apiKey = adminKey;
+  } else {
+    const result = await dbExecute<{ decrypted_provider_key: string }>(
+      `SELECT decrypted_provider_key
+       FROM decrypted_provider_keys_v2
+       WHERE org_id = $1
+       AND soft_delete = false
+       AND provider_name = 'OpenRouter'
+       LIMIT 1`,
+      [orgId],
+    );
+    if (result.error) {
+      return err(result.error);
+    }
+    const key = result.data?.[0]?.decrypted_provider_key;
+    if (!key) {
+      return err(
+        "No OpenRouter provider key is configured for this organization",
+      );
+    }
+    apiKey = key;
   }
 
-  const result = await dbExecute<{
-    id: string;
-    org_id: string;
-    decrypted_provider_key: string;
-    provider_key_name: string;
-    provider_name: string;
-  }>(
-    `SELECT id, org_id, decrypted_provider_key, provider_key_name, provider_name
-     FROM decrypted_provider_keys_v2
-     WHERE org_id = $1
-     AND soft_delete = false
-     AND provider_name = 'OpenRouter'
-     LIMIT 1`,
-    [orgId],
+  return ok(
+    new OpenAI({
+      baseURL: isOnPrem
+        ? "https://oai.helicone.ai/v1/"
+        : "https://openrouter.helicone.ai/api/v1/",
+      apiKey,
+      defaultHeaders: {
+        "Helicone-Auth": `Bearer ${process.env.TEST_HELICONE_API_KEY || ""}`,
+        "Helicone-User-Id": orgId,
+        "Helicone-Property-User-Email": userEmail,
+      },
+    }),
   );
-
-  // Create and cache the client
-  openaiClient = new OpenAI({
-    baseURL: isOnPrem
-      ? "https://oai.helicone.ai/v1/"
-      : "https://openrouter.helicone.ai/api/v1/",
-    apiKey: process.env.NEXT_PUBLIC_IS_ON_PREM
-      ? await getOpenAIKeyFromAdmin()
-      : result.data?.[0]?.decrypted_provider_key || "",
-    defaultHeaders: {
-      "Helicone-Auth": `Bearer ${process.env.TEST_HELICONE_API_KEY || ""}`,
-      "Helicone-User-Id": orgId,
-      "Helicone-Property-User-Email": userEmail,
-    },
-  });
-
-  return openaiClient;
 }
 
 // Function to verify request is coming from a browser
@@ -125,11 +134,21 @@ async function handler({ req, res, userData }: HandlerWrapperOptions<any>) {
     return res.status(200).json(fakeResponse);
   }
 
+  const { data: openai, error: clientError } = await getOpenAIClient(
+    userData.orgId,
+    userData.user?.email,
+  );
+  if (clientError !== null || !openai) {
+    logger.error(
+      { error: clientError, orgId: userData.orgId },
+      "Failed to build LLM client",
+    );
+    return res
+      .status(400)
+      .json({ error: clientError ?? "Failed to build LLM client" });
+  }
+
   try {
-    // Get or initialize the OpenAI client
-
-    const openai = await getOpenAIClient(userData.orgId, userData.user?.email);
-
     const params = req.body as GenerateParams;
     const abortController = new AbortController();
 

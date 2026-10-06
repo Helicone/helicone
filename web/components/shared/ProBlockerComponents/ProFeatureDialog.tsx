@@ -88,11 +88,7 @@ export function ProFeatureDialog({
               See all features →
             </Link>
 
-            <UpgradeToProCTA
-              defaultPrompts={featureName === "Prompts"}
-              showAddons={featureName === "Prompts" || featureName === "Alerts"}
-              showContactCTA={true}
-            />
+            <UpgradeToProCTA showContactCTA={true} />
           </div>
         </div>
 

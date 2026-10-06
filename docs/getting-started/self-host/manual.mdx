@@ -97,25 +97,14 @@ yarn dev:local -p 3000
 You are done!
 
 ```bash
-export OPENAI_API_KEY="sk-"
-export HELICONE_API_KEY="sk-helicone-aizk36y-5yue2my-qmy5tza-n7x3aqa"
-curl --request POST \
-  --url http://localhost:8585/v1/gateway/oai/v1/chat/completions \
-  --header "Authorization: Bearer $OPENAI_API_KEY" \
-  --header "Helicone-Auth: Bearer $HELICONE_API_KEY" \
-  --header "Content-Type: application/json" \
-  --header "Accept-Encoding: identity" \
-  --header "helicone-property-hello: world" \
-  --data '{
-    "model": "gpt-4o-mini",
-    "messages": [
-        {
-            "role": "system",
-            "content": "generate a prompt for stable diffusion using this article.\n The prompt should instruct the image generation model to generate a image that would be suitable for the main image of the article.\n Therefore, the image should be relevant to the article, while being photorealistic, and safe for work.\n Only include the prompt, and do not include a introduction to the prompt. The entire prompt should be 90 characters or less. Make it as relevant to the image as possible, but do not include people or faces in the prompt."
-        }
-    ]
-}'
+curl http://localhost:8585/healthcheck
 ```
+
+<Note>
+  Jawn no longer proxies LLM traffic: the `/v1/gateway/*` routes have been
+  removed. To proxy requests through a self-hosted deployment, run the
+  [AI Gateway](/gateway/overview) alongside Jawn.
+</Note>
 
 You can login to Helicone at http://localhost:3000
 with the following credentials:

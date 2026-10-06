@@ -48,7 +48,6 @@ export interface NavigationItem {
 interface SidebarProps {
   NAVIGATION: NavigationItem[];
   changelog: ChangelogItem[];
-  setOpen: (open: boolean) => void;
   sidebarRef: React.RefObject<HTMLDivElement>;
 }
 
@@ -124,7 +123,10 @@ const DesktopSidebar = ({
     }
     const currentMonth = new Date().toISOString().slice(0, 7); // "YYYY-MM"
     return freeLimitMonth === currentMonth;
-  }, [orgContext?.currentOrg?.free_limit_exceeded, orgContext?.currentOrg?.tier]);
+  }, [
+    orgContext?.currentOrg?.free_limit_exceeded,
+    orgContext?.currentOrg?.tier,
+  ]);
 
   const navItemsRef = useRef<HTMLDivElement>(null);
   const [canShowInfoBox, setCanShowInfoBox] = useState(false);
@@ -295,28 +297,28 @@ const DesktopSidebar = ({
               <div className="flex flex-col">
                 {/* Free Limit Warning - Show at top when exceeded */}
                 {isFreeLimitExceeded && !isCollapsed && (
-                    <div className="mx-2 mb-2 mt-2 rounded-lg border border-destructive/50 bg-destructive/10 p-3">
-                      <div className="flex items-center gap-2 text-destructive">
-                        <AlertTriangle size={16} />
-                        <span className="text-sm font-medium">
-                          Free limit reached
-                        </span>
-                      </div>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Request/response bodies are no longer being stored.
-                        Upgrade to continue logging full data.
-                      </p>
-                      <Link href="/settings/billing">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="mt-2 w-full"
-                        >
-                          Upgrade Now
-                        </Button>
-                      </Link>
+                  <div className="mx-2 mb-2 mt-2 rounded-lg border border-destructive/50 bg-destructive/10 p-3">
+                    <div className="flex items-center gap-2 text-destructive">
+                      <AlertTriangle size={16} />
+                      <span className="text-sm font-medium">
+                        Free limit reached
+                      </span>
                     </div>
-                  )}
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Request/response bodies are no longer being stored.
+                      Upgrade to continue logging full data.
+                    </p>
+                    <Link href="/settings/billing">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-2 w-full"
+                      >
+                        Upgrade Now
+                      </Button>
+                    </Link>
+                  </div>
+                )}
 
                 {/* Quickstart Card - Only show if organization hasn't integrated */}
                 {onboardingStatus?.hasCompletedQuickstart === false &&
@@ -467,7 +469,10 @@ const DesktopSidebar = ({
                     )}
                   >
                     <div className="relative">
-                      <MessageCircle size={16} className="text-muted-foreground" />
+                      <MessageCircle
+                        size={16}
+                        className="text-muted-foreground"
+                      />
                       {agentChatOpen && (
                         <span className="absolute -right-1 -top-1 h-1.5 w-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
                       )}

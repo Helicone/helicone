@@ -1,5 +1,3 @@
-import { Experiment } from "../../stores/experimentStore";
-
 export interface PreparedRequest {
   url: URL;
   headers: { [key: string]: string };

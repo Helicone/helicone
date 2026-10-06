@@ -97,8 +97,10 @@ export class VaultController extends Controller {
       providerKeyId
     );
     if (result.error || !result.data) {
-      this.setStatus(500);
-      return { data: null, error: result.error || "Failed to retrieve key" };
+      // Return a generic 404 for both "does not exist" and "belongs to another
+      // organization" so this endpoint cannot be used as an existence oracle.
+      this.setStatus(404);
+      return { data: null, error: "Provider key not found" };
     }
 
     this.setStatus(200);

@@ -122,7 +122,7 @@ jobs:
           cd e2e
           yarn install
           # Run regular tests (excluding nightly)
-          yarn test
+          yarn test tests/on-push
           # Run nightly tests explicitly
           yarn test tests/nightly
 

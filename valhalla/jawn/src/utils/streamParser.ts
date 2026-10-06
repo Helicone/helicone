@@ -112,8 +112,18 @@ export function consolidateTextFields(responseBody: any[]): any {
   }
 }
 
+// Keys that can mutate Object.prototype (or an object's prototype chain) if
+// merged blindly. JSON.parse creates "__proto__" as an own enumerable property,
+// so Object.keys() lists it and body["__proto__"] resolves to Object.prototype
+// instead of undefined -- which made the merge below recurse into and write to
+// Object.prototype.
+const FORBIDDEN_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+
 export function recursivelyConsolidate(body: any, delta: any): any {
   Object.keys(delta).forEach((key) => {
+    if (FORBIDDEN_KEYS.has(key)) {
+      return; // never merge prototype-mutating keys
+    }
     if (body[key] === undefined || body[key] === null) {
       body[key] = delta[key];
     } else if (typeof body[key] === "object") {

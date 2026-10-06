@@ -26,15 +26,14 @@ Access the dashboard at `http://localhost:3000`.
 ## Example to test the Jawn service
 
 ```bash
-curl --location 'http://localhost:8585/v1/gateway/oai/v1/chat/completions' \
---header "Content-Type: application/json" \
---header "Authorization: Bearer $OPENAI_API_KEY" \
---header "Helicone-Auth: Bearer $HELICONE_API_KEY" \
---data '{
-    "model": "gpt-4o-mini",
-    "messages": [{"role": "user", "content": "Hello"}]
-  }'
+curl http://localhost:8585/healthcheck
 ```
+
+<Note>
+  Jawn no longer proxies LLM traffic: the `/v1/gateway/*` routes have been
+  removed. To proxy requests through a self-hosted deployment, run the
+  [AI Gateway](/gateway/overview) alongside Jawn.
+</Note>
 
 ## Production Setup (Remote Server)
 
@@ -124,12 +123,11 @@ docker exec -u postgres helicone psql -d helicone_test -c \
    VALUES ('USER_ID', 'ORG_ID', 'admin');"
 ```
 
-## Supported LLM Providers
+## LLM Proxying
 
-- OpenAI: `http://YOUR_IP:8585/v1/gateway/oai/v1/chat/completions`
-- Anthropic: `http://YOUR_IP:8585/v1/gateway/anthropic/v1/messages`
-
-Other providers (Vertex AI, AWS Bedrock, Azure OpenAI) are not supported in the self-hosted version.
+The all-in-one image runs the dashboard and the Jawn API only. Jawn's
+`/v1/gateway/*` proxy routes have been removed, so LLM requests must go through
+the [AI Gateway](/gateway/overview), which you can deploy next to this image.
 
 ## Important Notes
 

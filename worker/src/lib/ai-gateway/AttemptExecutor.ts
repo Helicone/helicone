@@ -24,6 +24,11 @@ import { GatewayMetrics } from "./GatewayMetrics";
 import { Attempt, AttemptError, EscrowInfo, PendingEscrow } from "./types";
 import { toChatCompletions } from "@helicone-package/llm-mapper/transform/providers/responses/request/toChatCompletions";
 import { WalletKVSync } from "./WalletKVSync";
+import { FeatureFlagManager } from "../managers/FeatureFlagManager";
+import {
+  PTB_DISABLED_MESSAGE,
+  PTB_ENABLED_FEATURE,
+} from "../../../../packages/common/billing/ptbAccess";
 
 // Minimum balance (in cents) to allow optimistic execution without waiting for escrow
 const ALLOWABLE_BALANCE_TO_SKIP_CHECK = 450; // $4.50 in cents
@@ -93,6 +98,17 @@ export class AttemptExecutor {
       AttemptError
     >
   > {
+    const featureFlagManager = new FeatureFlagManager(this.env);
+    if (
+      !(await featureFlagManager.hasFeature(props.orgId, PTB_ENABLED_FEATURE))
+    ) {
+      return err({
+        type: "request_failed",
+        message: PTB_DISABLED_MESSAGE,
+        statusCode: 403,
+      });
+    }
+
     const walletSpanId = props.traceContext?.sampled
       ? this.tracer.startSpan(
           "ai_gateway.ptb.credit_validation.reserve_escrow",

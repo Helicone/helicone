@@ -54,12 +54,6 @@ export interface EvaluatorResult {
   last_mile_config: any;
 }
 
-type EvaluatorExperiment = {
-  experiment_id: string;
-  experiment_created_at: string;
-  experiment_name: string;
-};
-
 type CreateOnlineEvaluatorParams = {
   config: Record<string, any>;
 };
@@ -173,22 +167,6 @@ export class EvaluatorController extends Controller {
       this.setStatus(500);
     } else {
       this.setStatus(204);
-    }
-    return result;
-  }
-
-  @Get("{evaluatorId}/experiments")
-  public async getExperimentsForEvaluator(
-    @Request() request: JawnAuthenticatedRequest,
-    @Path() evaluatorId: string
-  ): Promise<Result<EvaluatorExperiment[], string>> {
-    const evaluatorManager = new EvaluatorManager(request.authParams);
-    const result = await evaluatorManager.getExperiments(evaluatorId);
-
-    if (result.error || !result.data) {
-      this.setStatus(500);
-    } else {
-      this.setStatus(200);
     }
     return result;
   }

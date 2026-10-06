@@ -1,8 +1,6 @@
 import Stripe from "stripe";
 import {
   LLMUsage,
-  UpgradeToProRequest,
-  UpgradeToTeamBundleRequest,
   StripePaymentIntentsResponse,
   PaymentIntentSearchKind,
   PaymentIntentRecord,
@@ -26,9 +24,7 @@ import { Result, err, ok } from "../../packages/common/result";
 import { costOf } from "@helicone-package/cost";
 import { BaseManager } from "../BaseManager";
 import { SecretManager } from "@helicone-package/secrets/SecretManager";
-import { OrganizationManager } from "../organization/OrganizationManager";
 import { SettingsManager } from "../../utils/settings";
-import { subdivide } from "../../utils/subdivide";
 import { sendMeteredBatch } from "./sendBatchEvent";
 
 type StripeMeterEvent = Stripe.V2.Billing.MeterEventStreamCreateParams.Event;
@@ -51,7 +47,7 @@ const getProProductPrices = async (): Promise<
   try {
     const result = await dbExecute<{ name: string; settings: any }>(
       `SELECT * FROM helicone_settings`,
-      []
+      [],
     );
 
     if (result.error) {
@@ -62,7 +58,7 @@ const getProProductPrices = async (): Promise<
     return Object.entries(DEFAULT_PRODUCT_PRICES)
       .map(([productId, defaultPriceId]) => {
         const setting = result.data?.find(
-          (setting) => setting.name === `price:${productId}`
+          (setting) => setting.name === `price:${productId}`,
         );
         if (setting) {
           return { [productId]: setting.settings as string };
@@ -73,7 +69,7 @@ const getProProductPrices = async (): Promise<
               `INSERT INTO helicone_settings (name, settings)
              VALUES ($1, $2)
              ON CONFLICT (name) DO UPDATE SET settings = $2`,
-              [`price:${productId}`, JSON.stringify(defaultPriceId)]
+              [`price:${productId}`, JSON.stringify(defaultPriceId)],
             );
           }
         }
@@ -81,19 +77,13 @@ const getProProductPrices = async (): Promise<
       })
       .reduce(
         (acc, curr) => ({ ...acc, ...curr }),
-        {}
+        {},
       ) as typeof DEFAULT_PRODUCT_PRICES;
   } catch (error) {
     console.error("Error in getProProductPrices:", error);
     return DEFAULT_PRODUCT_PRICES;
   }
 };
-
-const COST_OF_PROMPTS = 50;
-const COST_OF_EVALS = 100;
-const COST_OF_EXPERIMENTS = 50;
-
-const EARLY_ADOPTER_COUPON = "9ca5IeEs"; // WlDg28Kf | prod: 9ca5IeEs
 
 export class StripeManager extends BaseManager {
   private stripe: Stripe;
@@ -105,38 +95,8 @@ export class StripeManager extends BaseManager {
     });
   }
 
-  public async getCostForPrompts(): Promise<Result<number, string>> {
-    const subscriptionResult = await this.getSubscription();
-    const proProductPrices = await getProProductPrices();
-    if (!subscriptionResult.data) {
-      return ok(COST_OF_PROMPTS);
-    }
-
-    const subscription = subscriptionResult.data;
-
-    if (
-      subscription.items.data.some(
-        (item) => item.price.id === proProductPrices["prompts"]
-      )
-    ) {
-      const priceTheyArePayingForPrompts = subscription.items.data.find(
-        (item) => item.price.id === proProductPrices["prompts"]
-      );
-      if (
-        priceTheyArePayingForPrompts &&
-        priceTheyArePayingForPrompts.price.unit_amount &&
-        priceTheyArePayingForPrompts?.quantity &&
-        priceTheyArePayingForPrompts.quantity > 0
-      ) {
-        return ok(priceTheyArePayingForPrompts.price.unit_amount / 100);
-      }
-    }
-
-    return ok(COST_OF_PROMPTS);
-  }
-
   public async trackStripeMeter(
-    events: StripeMeterEvent[]
+    events: StripeMeterEvent[],
   ): Promise<Result<string, string>> {
     try {
       // First create a meter event session to get an auth token
@@ -155,9 +115,12 @@ export class StripeManager extends BaseManager {
    */
   public async getBillingPeriodUsage(
     orgId: string,
-    periodStart: Date
+    periodStart: Date,
   ): Promise<
-    Result<{ requests: number; storageBytes: number; storageMb: number }, string>
+    Result<
+      { requests: number; storageBytes: number; storageMb: number },
+      string
+    >
   > {
     try {
       const result = await dbQueryClickhouse<{
@@ -172,7 +135,7 @@ export class StripeManager extends BaseManager {
         WHERE organization_id = {val_0: String}
           AND request_created_at >= {val_1: DateTime64(3)}
         `,
-        [orgId, periodStart]
+        [orgId, periodStart],
       );
 
       if (result.error) {
@@ -198,7 +161,7 @@ export class StripeManager extends BaseManager {
     stripeCustomerId: string,
     timestamp: Date,
     requests: number,
-    storageBytes: number
+    storageBytes: number,
   ): Promise<Result<{ requestsEvent: string; storageEvent: string }, string>> {
     try {
       const events: StripeMeterEvent[] = [];
@@ -246,73 +209,11 @@ export class StripeManager extends BaseManager {
         requestsEvent:
           requests > 0 ? `sent ${requests} requests` : "skipped (0 requests)",
         storageEvent:
-          storageBytes > 0
-            ? `sent ${storageBytes} bytes`
-            : "skipped (0 bytes)",
+          storageBytes > 0 ? `sent ${storageBytes} bytes` : "skipped (0 bytes)",
       });
     } catch (error) {
       return err(`Error sending backdated usage events: ${error}`);
     }
-  }
-
-  public async getCostForEvals(): Promise<Result<number, string>> {
-    const subscriptionResult = await this.getSubscription();
-    const proProductPrices = await getProProductPrices();
-    if (!subscriptionResult.data) {
-      return ok(COST_OF_EVALS);
-    }
-
-    const subscription = subscriptionResult.data;
-
-    if (
-      subscription.items.data.some(
-        (item) => item.price.id === proProductPrices["evals"]
-      )
-    ) {
-      const priceTheyArePayingForEvals = subscription.items.data.find(
-        (item) => item.price.id === proProductPrices["evals"]
-      );
-      if (
-        priceTheyArePayingForEvals &&
-        priceTheyArePayingForEvals.price.unit_amount &&
-        priceTheyArePayingForEvals?.quantity &&
-        priceTheyArePayingForEvals.quantity > 0
-      ) {
-        return ok(priceTheyArePayingForEvals.price.unit_amount / 100);
-      }
-    }
-
-    return ok(COST_OF_EVALS);
-  }
-
-  public async getCostForExperiments(): Promise<Result<number, string>> {
-    const subscriptionResult = await this.getSubscription();
-    const proProductPrices = await getProProductPrices();
-    if (!subscriptionResult.data) {
-      return ok(COST_OF_EXPERIMENTS);
-    }
-
-    const subscription = subscriptionResult.data;
-
-    if (
-      subscription.items.data.some(
-        (item) => item.price.id === proProductPrices["experiments"]
-      )
-    ) {
-      const priceTheyArePayingForExperiments = subscription.items.data.find(
-        (item) => item.price.id === proProductPrices["experiments"]
-      );
-      if (
-        priceTheyArePayingForExperiments &&
-        priceTheyArePayingForExperiments.price.unit_amount &&
-        priceTheyArePayingForExperiments?.quantity &&
-        priceTheyArePayingForExperiments.quantity > 0
-      ) {
-        return ok(priceTheyArePayingForExperiments.price.unit_amount / 100);
-      }
-    }
-
-    return ok(COST_OF_EXPERIMENTS);
   }
 
   private async getOrCreateStripeCustomer(): Promise<Result<string, string>> {
@@ -323,7 +224,7 @@ export class StripeManager extends BaseManager {
          FROM organization
          WHERE id = $1
          LIMIT 1`,
-        [this.authParams.organizationId]
+        [this.authParams.organizationId],
       );
 
       if (orgResult.error) {
@@ -357,7 +258,7 @@ export class StripeManager extends BaseManager {
         `UPDATE organization
          SET stripe_customer_id = $1
          WHERE id = $2`,
-        [customer.id, this.authParams.organizationId]
+        [customer.id, this.authParams.organizationId],
       );
 
       if (updateResult.error) {
@@ -400,14 +301,14 @@ export class StripeManager extends BaseManager {
 SELECT count(*) as count
 from request_response_rmt
 WHERE (${builtFilter.filter})`,
-      builtFilter.argsAcc
+      builtFilter.argsAcc,
     );
     if (result.error) {
       return err("Error getting free usage");
     }
 
     return ok(
-      result.data?.[0]?.count === undefined ? -1 : +result.data?.[0]?.count
+      result.data?.[0]?.count === undefined ? -1 : +result.data?.[0]?.count,
     );
   }
 
@@ -451,35 +352,9 @@ WHERE (${builtFilter.filter})`,
       return err(`Error undoing cancel subscription: ${error.message}`);
     }
   }
-  public async upgradeToProExistingCustomer(
-    origin: string,
-    body: UpgradeToProRequest
-  ): Promise<Result<string, string>> {
-    try {
-      const customerId = await this.getOrCreateStripeCustomer();
-      if (customerId.error || !customerId.data) {
-        return err("Error getting or creating stripe customer");
-      }
-
-      // New pricing (2025-12-10): unlimited seats, no seat count needed
-      const session = await this.portalLinkUpgradeToPro(
-        origin,
-        customerId.data,
-        body
-      );
-
-      if (session.error) {
-        return err(session.error);
-      }
-
-      return ok(session.data?.url!);
-    } catch (error: any) {
-      return err(`Error upgrading to pro: ${error.message}`);
-    }
-  }
 
   public async manageSubscriptionPaymentLink(
-    origin: string
+    origin: string,
   ): Promise<Result<string, string>> {
     try {
       const customerIdResult = await this.getOrCreateStripeCustomer();
@@ -497,330 +372,11 @@ WHERE (${builtFilter.filter})`,
       return err(`Error creating payment link: ${error.message}`);
     }
   }
-  private async getOrgMemberCount(): Promise<Result<number, string>> {
-    const organizationManager = new OrganizationManager(this.authParams);
-    return await organizationManager.getMemberCount(true);
-  }
 
   private shouldApplyCoupon(): boolean {
     const currentDate = new Date();
     const cutoffDate = new Date("2024-10-15");
     return currentDate < cutoffDate;
-  }
-
-  private async shouldApplyWaterlooCoupon(
-    customerId: string
-  ): Promise<boolean> {
-    try {
-      const customer = await this.stripe.customers.retrieve(customerId);
-      if (
-        !customer.deleted &&
-        customer.object === "customer" &&
-        customer.email?.endsWith("uwaterloo.ca")
-      ) {
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error("Error checking Waterloo email:", error);
-      return false;
-    }
-  }
-
-  private async portalLinkUpgradeToPro(
-    origin: string,
-    customerId: string,
-    body: UpgradeToProRequest
-  ): Promise<Result<Stripe.Checkout.Session, string>> {
-    const proProductPrices = await getProProductPrices();
-
-    // New pricing (2025-12-10): $79/mo flat, prompts included, unlimited seats
-    // Plus metered billing for requests and GB usage
-    const settingsManager = new SettingsManager();
-    const stripeProductSettings =
-      await settingsManager.getSetting("stripe:products");
-    if (!stripeProductSettings?.pro20251210_79Price) {
-      return err("stripe:products pro20251210_79Price is not configured");
-    }
-    if (!stripeProductSettings?.requestVolumePrice_20251210) {
-      return err(
-        "stripe:products requestVolumePrice_20251210 is not configured"
-      );
-    }
-    if (!stripeProductSettings?.gigVolumePrice_20251210) {
-      return err("stripe:products gigVolumePrice_20251210 is not configured");
-    }
-
-    const sessionParams: Stripe.Checkout.SessionCreateParams = {
-      customer: customerId,
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price: stripeProductSettings.pro20251210_79Price, // $79/mo flat
-          quantity: 1,
-        },
-        {
-          price: stripeProductSettings.requestVolumePrice_20251210, // Metered request billing
-        },
-        {
-          price: stripeProductSettings.gigVolumePrice_20251210, // Metered GB billing
-        },
-      ],
-      mode: "subscription",
-      metadata: {
-        orgId: this.authParams.organizationId,
-        tier: "pro-20251210",
-      },
-      subscription_data: {
-        trial_period_days: 7,
-        metadata: {
-          orgId: this.authParams.organizationId,
-          tier: "pro-20251210",
-        },
-      },
-      ui_mode: body.ui_mode ?? "hosted",
-    };
-
-    // Add success_url and cancel_url only if not in embedded mode
-    if (body.ui_mode !== "embedded") {
-      sessionParams.success_url = `${origin}/dashboard`;
-      sessionParams.cancel_url = `${origin}/dashboard`;
-    } else {
-      sessionParams.return_url = `${origin}/onboarding/integrate`;
-    }
-
-    const isWaterlooEmail = await this.shouldApplyWaterlooCoupon(customerId);
-    if (isWaterlooEmail) {
-      sessionParams.discounts = [
-        {
-          coupon: "WATERLOO2025",
-        },
-      ];
-    } else {
-      sessionParams.allow_promotion_codes = true;
-    }
-
-    const session = await this.stripe.checkout.sessions.create(sessionParams);
-
-    return ok(session);
-  }
-
-  public async upgradeToProLink(
-    origin: string,
-    body: UpgradeToProRequest
-  ): Promise<Result<string, string>> {
-    try {
-      const subscriptionResult = await this.getSubscription();
-      if (subscriptionResult.data) {
-        return err("User already has a pro subscription");
-      }
-
-      const customerId = await this.getOrCreateStripeCustomer();
-
-      if (customerId.error || !customerId.data) {
-        return err("Error getting or creating stripe customer");
-      }
-
-      // New pricing (2025-12-10): unlimited seats, no seat count needed
-      const sessionUrl = await this.portalLinkUpgradeToPro(
-        origin,
-        customerId.data,
-        body
-      );
-
-      if (sessionUrl.error) {
-        return err(sessionUrl.error);
-      }
-
-      // For embedded mode, return the client secret instead of the URL
-      if (body.ui_mode === "embedded") {
-        return ok(sessionUrl.data?.client_secret!);
-      }
-
-      return ok(sessionUrl.data?.url!);
-    } catch (error: any) {
-      return err(`Error creating upgrade link: ${error.message}`);
-    }
-  }
-
-  private async portalLinkUpgradeToTeamBundle(
-    origin: string,
-    customerId: string,
-    isNewCustomer: boolean,
-    uiMode: "embedded" | "hosted"
-  ): Promise<Result<Stripe.Checkout.Session, string>> {
-    // New pricing (2025-12-10): $799/mo flat, prompts/experiments/evals included
-    // Plus metered billing for requests and GB usage
-    const settingsManager = new SettingsManager();
-    const stripeProductSettings =
-      await settingsManager.getSetting("stripe:products");
-    if (!stripeProductSettings?.team20251210_799Price) {
-      return err("stripe:products team20251210_799Price is not configured");
-    }
-    if (!stripeProductSettings?.requestVolumePrice_20251210) {
-      return err(
-        "stripe:products requestVolumePrice_20251210 is not configured"
-      );
-    }
-    if (!stripeProductSettings?.gigVolumePrice_20251210) {
-      return err("stripe:products gigVolumePrice_20251210 is not configured");
-    }
-
-    const sessionParams: Stripe.Checkout.SessionCreateParams = {
-      customer: customerId,
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price: stripeProductSettings.team20251210_799Price, // $799/mo flat
-          quantity: 1,
-        },
-        {
-          price: stripeProductSettings.requestVolumePrice_20251210, // Metered request billing
-        },
-        {
-          price: stripeProductSettings.gigVolumePrice_20251210, // Metered GB billing
-        },
-      ],
-      mode: "subscription",
-      metadata: {
-        orgId: this.authParams.organizationId,
-        tier: "team-20251210",
-      },
-      subscription_data: {
-        trial_period_days: isNewCustomer ? 7 : undefined,
-        metadata: {
-          orgId: this.authParams.organizationId,
-          tier: "team-20251210",
-        },
-      },
-      ui_mode: uiMode,
-    };
-
-    // Add success_url and cancel_url only if not in embedded mode
-    if (uiMode !== "embedded") {
-      sessionParams.success_url = `${origin}/dashboard`;
-      sessionParams.cancel_url = `${origin}/dashboard`;
-    } else {
-      sessionParams.return_url = `${origin}/onboarding/integrate`;
-    }
-
-    const isWaterlooEmail = await this.shouldApplyWaterlooCoupon(customerId);
-    if (isWaterlooEmail) {
-      sessionParams.discounts = [
-        {
-          coupon: "WATERLOO2025",
-        },
-      ];
-    } else {
-      sessionParams.allow_promotion_codes = true;
-    }
-
-    const session = await this.stripe.checkout.sessions.create(sessionParams);
-
-    return ok(session);
-  }
-
-  async upgradeToTeamBundleLink(
-    returnUrl: string,
-    body: UpgradeToTeamBundleRequest
-  ): Promise<Result<string, string>> {
-    try {
-      const subscriptionResult = await this.getSubscription();
-      if (subscriptionResult.data) {
-        return err("User already has a pro subscription");
-      }
-
-      const customerId = await this.getOrCreateStripeCustomer();
-      if (customerId.error || !customerId.data) {
-        return err("Error getting or creating stripe customer");
-      }
-
-      const session = await this.portalLinkUpgradeToTeamBundle(
-        returnUrl,
-        customerId.data,
-        true,
-        body.ui_mode ?? "hosted"
-      );
-
-      if (session.error) {
-        return err(session.error);
-      }
-
-      if (body.ui_mode === "embedded") {
-        return ok(session.data?.client_secret!);
-      }
-
-      return ok(session.data?.url!);
-    } catch (error: any) {
-      return err(`Error upgrading to team bundle: ${error.message}`);
-    }
-  }
-
-  async upgradeToTeamBundleExistingCustomer(
-    returnUrl: string,
-    body: UpgradeToTeamBundleRequest
-  ): Promise<Result<string, string>> {
-    try {
-      const subscriptionResult = await this.getSubscription();
-      if (!subscriptionResult.data) {
-        return err("No existing subscription found");
-      }
-
-      const customerId = await this.getOrCreateStripeCustomer();
-      if (customerId.error || !customerId.data) {
-        return err("Error getting or creating stripe customer");
-      }
-
-      const subscription = subscriptionResult.data;
-
-      if (
-        subscription.cancel_at_period_end ||
-        subscription.status === "canceled"
-      ) {
-        const session = await this.portalLinkUpgradeToTeamBundle(
-          returnUrl,
-          customerId.data,
-          false,
-          body.ui_mode ?? "hosted"
-        );
-
-        if (session.error) {
-          return err(session.error);
-        }
-
-        if (body.ui_mode === "embedded") {
-          return ok(session.data?.client_secret!);
-        }
-        return ok(session.data?.url!);
-      }
-
-      // Cancels after they pay for the new subscription
-      // await this.stripe.subscriptions.update(subscription.id, {
-      //   cancel_at_period_end: true,
-      //   proration_behavior: "create_prorations",
-      //   cancellation_details: {
-      //     comment: "Upgrading to team bundle at the end of the billing period",
-      //   },
-      // });
-
-      const session = await this.portalLinkUpgradeToTeamBundle(
-        returnUrl,
-        customerId.data,
-        false,
-        body.ui_mode ?? "hosted"
-      );
-
-      if (session.error) {
-        return err(session.error);
-      }
-
-      if (body.ui_mode === "embedded") {
-        return ok(session.data?.client_secret!);
-      }
-      return ok(session.data?.url!);
-    } catch (error: any) {
-      return err(`Error upgrading to team bundle: ${error.message}`);
-    }
   }
 
   private async getEvaluatorsUsage({
@@ -879,7 +435,7 @@ WHERE (${builtFilter.filter})`,
             total_count: model.total_count,
           };
         })
-        .filter((item): item is LLMUsage => item !== null) ?? []
+        .filter((item): item is LLMUsage => item !== null) ?? [],
     );
   }
 
@@ -939,7 +495,7 @@ WHERE (${builtFilter.filter})`,
             total_count: model.total_count,
           };
         })
-        .filter((item): item is LLMUsage => item !== null) ?? []
+        .filter((item): item is LLMUsage => item !== null) ?? [],
     );
   }
 
@@ -984,295 +540,17 @@ WHERE (${builtFilter.filter})`,
     }
   }
 
-  private async addProductToStripe(
-    productType: "alerts" | "prompts" | "experiments" | "evals"
-  ): Promise<Result<null, string>> {
-    const proProductPrices = await getProProductPrices();
-    try {
-      const subscriptionResult = await this.getSubscription();
-      if (!subscriptionResult.data) {
-        return err("No existing subscription found");
-      }
-
-      const subscription = subscriptionResult.data;
-      const priceId = proProductPrices[productType];
-
-      // Check if the product is already included in the subscription
-      const existingItem = subscription.items.data.find(
-        (item) => item.price.id === priceId
-      );
-      if (existingItem && existingItem.quantity === 0) {
-        await this.stripe.subscriptions.update(subscription.id, {
-          items: [
-            {
-              id: existingItem.id,
-              quantity: 1,
-            },
-          ],
-          proration_behavior: "create_prorations",
-        });
-
-        return ok(null);
-      }
-
-      // Add the product to the subscription
-      const updatedSubscription = await this.stripe.subscriptions.update(
-        subscription.id,
-        {
-          items: [
-            ...subscription.items.data.map((item) => ({ id: item.id })),
-            {
-              price: priceId,
-              quantity: 1,
-            },
-          ],
-          proration_behavior: "create_prorations",
-        }
-      );
-
-      console.log(
-        `Subscription updated with ${productType}:`,
-        updatedSubscription.id
-      );
-
-      return ok(null);
-    } catch (error: any) {
-      return err(
-        `Error adding ${productType} to subscription: ${error.message}`
-      );
-    }
-  }
-
-  public async addProductToSubscription(
-    productType: "alerts" | "prompts" | "experiments" | "evals"
-  ): Promise<Result<null, string>> {
-    const stripeAddResult = await this.addProductToStripe(productType);
-    if (stripeAddResult.error) {
-      return err(stripeAddResult.error);
-    }
-
-    const currentOrgStripeMetadata = await this.getStripeMetadata();
-    if (currentOrgStripeMetadata.error) {
-      return err(currentOrgStripeMetadata.error);
-    }
-
-    const orgData = await this.getOrganization();
-    if (orgData.error) {
-      return err(orgData.error);
-    }
-
-    const existingMetadata =
-      (orgData.data?.stripe_metadata as Record<string, any>) || {};
-    const existingAddons =
-      (existingMetadata.addons as Record<string, boolean>) || {};
-
-    await dbExecute(
-      `UPDATE organization
-       SET stripe_metadata = $1
-       WHERE id = $2`,
-      [
-        JSON.stringify({
-          ...existingMetadata,
-          addons: {
-            ...existingAddons,
-            [productType]: true,
-          },
-        }),
-        this.authParams.organizationId,
-      ]
-    );
-
-    return ok(null);
-  }
-
-  private async getStripeMetadata(): Promise<Result<Stripe.Metadata, string>> {
-    const subscriptionResult = await this.getSubscription();
-    if (!subscriptionResult.data) {
-      return err("No existing subscription found");
-    }
-
-    const subscription = subscriptionResult.data;
-    return ok(subscription.metadata);
-  }
-
-  private async deleteProductFromStripe(
-    productType: "alerts" | "prompts" | "experiments" | "evals"
-  ): Promise<Result<null, string>> {
-    const proProductPrices = await getProProductPrices();
-    try {
-      const subscriptionResult = await this.getSubscription();
-      if (!subscriptionResult.data) {
-        return err("No existing subscription found");
-      }
-
-      const subscription = subscriptionResult.data;
-      const currentPriceId = proProductPrices[productType];
-
-      // First try to find the item by the current price ID
-      let itemToRemove = subscription.items.data.find(
-        (item) => item.price.id === currentPriceId
-      );
-
-      // If not found by current price ID, try to find by product name/type
-      if (!itemToRemove) {
-        itemToRemove = subscription.items.data.find((item) => {
-          const product = item.price.product as Stripe.Product;
-          // Check if the product name or metadata contains the productType
-          return (
-            product.name.toLowerCase().includes(productType.toLowerCase()) ||
-            (product.metadata && product.metadata.type === productType)
-          );
-        });
-      }
-
-      if (!itemToRemove) {
-        console.log(`${productType.toUpperCase()} ITEM NOT FOUND`);
-        return ok(null); // Product not found in subscription
-      }
-
-      // If the item is already set to quantity 0, no need to update
-      if (itemToRemove.quantity !== undefined && itemToRemove.quantity === 0) {
-        console.log(`${productType} is already scheduled for removal`);
-        return ok(null);
-      }
-
-      const result = await this.stripe.subscriptions.update(subscription.id, {
-        items: [
-          {
-            id: itemToRemove.id,
-            quantity: 0,
-          },
-        ],
-        proration_behavior: "create_prorations",
-      });
-
-      console.log(
-        `${productType} scheduled for removal at the end of the billing cycle`
-      );
-
-      return ok(null);
-    } catch (error: any) {
-      return err(
-        `Error deleting ${productType} from subscription: ${error.message}`
-      );
-    }
-  }
-
-  public async deleteProductFromSubscription(
-    productType: "alerts" | "prompts" | "experiments" | "evals"
-  ): Promise<Result<null, string>> {
-    const stripeDeleteResult = await this.deleteProductFromStripe(productType);
-    if (stripeDeleteResult.error) {
-      return err(stripeDeleteResult.error);
-    }
-
-    const orgData = await this.getOrganization();
-
-    if (orgData.error) {
-      return err("Failed to get organization data");
-    }
-
-    const existingMetadata =
-      (orgData.data?.stripe_metadata as Record<string, any>) || {};
-    const existingAddons =
-      (existingMetadata.addons as Record<string, boolean>) || {};
-
-    await dbExecute(
-      `UPDATE organization
-       SET stripe_metadata = $1
-       WHERE id = $2`,
-      [
-        JSON.stringify({
-          ...existingMetadata,
-          addons: {
-            ...existingAddons,
-            [productType]: false,
-          },
-        }),
-        this.authParams.organizationId,
-      ]
-    );
-
-    return ok(null);
-  }
-
-  // Takes the existing subscription and adds any missing products
-  public async migrateToPro(): Promise<Result<null, string>> {
-    const proProductPrices = await getProProductPrices();
-    try {
-      const subscriptionResult = await this.getSubscription();
-      if (!subscriptionResult.data) {
-        return err("No existing subscription found");
-      }
-
-      const subscription = subscriptionResult.data;
-      const existingProducts = subscription.items.data.map(
-        (item) => item.price.id
-      );
-
-      const missingProducts = Object.values([
-        proProductPrices["pro-users"],
-      ]).filter((productId) => !existingProducts.includes(productId));
-
-      if (missingProducts.length === 0) {
-        return ok(null); // All pro products are already in the subscription
-      }
-
-      const updateParams: Stripe.SubscriptionUpdateParams = {
-        items: missingProducts.map((productId) => ({ price: productId })),
-        metadata: {
-          orgId: this.authParams.organizationId,
-          tier: "pro-20250202",
-        },
-        proration_behavior: "none",
-      };
-
-      if (this.shouldApplyCoupon()) {
-        updateParams.coupon = EARLY_ADOPTER_COUPON;
-      }
-
-      await this.stripe.subscriptions.update(subscription.id, updateParams);
-
-      // Update the organization tier and reset free limit flag
-      const updateResult = await dbExecute(
-        `UPDATE organization
-         SET tier = $1,
-             free_limit_exceeded = NULL
-         WHERE id = $2`,
-        ["pro-20250202", this.authParams.organizationId]
-      );
-
-      if (updateResult.error) {
-        return err(`Error updating organization tier: ${updateResult.error}`);
-      }
-
-      return ok(null);
-    } catch (error: any) {
-      if (
-        error.message.includes("is already using that Price") &&
-        error.message.includes("an existing Subscription")
-      ) {
-        // Even if there was an error, try to update the tier
-        await dbExecute(
-          `UPDATE organization
-           SET tier = $1,
-               free_limit_exceeded = NULL
-           WHERE id = $2`,
-          ["pro-20250202", this.authParams.organizationId]
-        );
-      }
-      return err(`Error migrating to pro: ${error.message}`);
-    }
-  }
-
   /**
    * Internal helper to migrate a subscription to new pricing.
    * Handles both pro and team tier migrations.
    */
   private async migrateToNewPricing(
-    tierType: "pro" | "team"
+    tierType: "pro" | "team",
   ): Promise<
-    Result<{ previousTier: string; newTier: string; subscriptionId: string }, string>
+    Result<
+      { previousTier: string; newTier: string; subscriptionId: string },
+      string
+    >
   > {
     const validTiers =
       tierType === "pro"
@@ -1291,7 +569,7 @@ WHERE (${builtFilter.filter})`,
       const currentTier = org.data.tier;
       if (!validTiers.includes(currentTier ?? "")) {
         return err(
-          `Organization is not on a valid ${tierType} tier. Current tier: ${currentTier}`
+          `Organization is not on a valid ${tierType} tier. Current tier: ${currentTier}`,
         );
       }
 
@@ -1311,7 +589,7 @@ WHERE (${builtFilter.filter})`,
       }
       if (!stripeProductSettings?.requestVolumePrice_20251210) {
         return err(
-          "stripe:products requestVolumePrice_20251210 is not configured"
+          "stripe:products requestVolumePrice_20251210 is not configured",
         );
       }
       if (!stripeProductSettings?.gigVolumePrice_20251210) {
@@ -1337,7 +615,7 @@ WHERE (${builtFilter.filter})`,
             tier: newTier,
           },
           proration_behavior: "none",
-        }
+        },
       );
 
       const updateResult = await dbExecute(
@@ -1359,7 +637,7 @@ WHERE (${builtFilter.filter})`,
             },
           }),
           this.authParams.organizationId,
-        ]
+        ],
       );
 
       if (updateResult.error) {
@@ -1372,7 +650,9 @@ WHERE (${builtFilter.filter})`,
         subscriptionId: subscription.id,
       });
     } catch (error: any) {
-      return err(`Error migrating to new ${tierType} pricing: ${error.message}`);
+      return err(
+        `Error migrating to new ${tierType} pricing: ${error.message}`,
+      );
     }
   }
 
@@ -1380,7 +660,10 @@ WHERE (${builtFilter.filter})`,
    * Migrate from legacy pro tiers (pro-20240913, pro-20250202) to new pricing (pro-20251210)
    */
   public async migrateToNewProPricing(): Promise<
-    Result<{ previousTier: string; newTier: string; subscriptionId: string }, string>
+    Result<
+      { previousTier: string; newTier: string; subscriptionId: string },
+      string
+    >
   > {
     return this.migrateToNewPricing("pro");
   }
@@ -1389,7 +672,10 @@ WHERE (${builtFilter.filter})`,
    * Migrate from legacy team tier (team-20250130) to new pricing (team-20251210)
    */
   public async migrateToNewTeamPricing(): Promise<
-    Result<{ previousTier: string; newTier: string; subscriptionId: string }, string>
+    Result<
+      { previousTier: string; newTier: string; subscriptionId: string },
+      string
+    >
   > {
     return this.migrateToNewPricing("team");
   }
@@ -1405,7 +691,7 @@ WHERE (${builtFilter.filter})`,
          FROM organization
          WHERE id = $1
          LIMIT 1`,
-        [this.authParams.organizationId]
+        [this.authParams.organizationId],
       );
 
       if (result.error || !result.data || result.data.length === 0) {
@@ -1434,7 +720,7 @@ WHERE (${builtFilter.filter})`,
         organization.data.stripe_subscription_id,
         {
           expand: ["items.data.price.product"],
-        }
+        },
       );
 
       return ok(subscription);
@@ -1446,7 +732,7 @@ WHERE (${builtFilter.filter})`,
   public async createCloudGatewayCheckoutSession(
     origin: string,
     amount: number,
-    returnUrl?: string
+    returnUrl?: string,
   ): Promise<Result<string, string>> {
     try {
       const customerId = await this.getOrCreateStripeCustomer();
@@ -1471,7 +757,7 @@ WHERE (${builtFilter.filter})`,
         const PERCENT_FEE_RATE = 0.03;
         const FIXED_FEE_CENTS = 30;
         const percentageFeeCents = Math.ceil(
-          creditsAmountCents * PERCENT_FEE_RATE
+          creditsAmountCents * PERCENT_FEE_RATE,
         );
         const stripeFeeCents = percentageFeeCents + FIXED_FEE_CENTS;
         const totalAmountCents = creditsAmountCents + stripeFeeCents;
@@ -1522,7 +808,7 @@ WHERE (${builtFilter.filter})`,
 
         if (checkoutResult.lastResponse.statusCode !== 200) {
           return err(
-            `Got status code ${checkoutResult.lastResponse.statusCode} from Stripe`
+            `Got status code ${checkoutResult.lastResponse.statusCode} from Stripe`,
           );
         } else if (!checkoutResult.url) {
           return err("Stripe did not return a session URL");
@@ -1531,18 +817,18 @@ WHERE (${builtFilter.filter})`,
         return ok(checkoutResult.url);
       } catch (error: any) {
         return err(
-          `Error creating cloud gateway checkout session: ${error.message}`
+          `Error creating cloud gateway checkout session: ${error.message}`,
         );
       }
     } catch (error: any) {
       return err(
-        `Error creating cloud gateway checkout session: ${error.message}`
+        `Error creating cloud gateway checkout session: ${error.message}`,
       );
     }
   }
 
   public async updateProUserCount(
-    count: number
+    count: number,
   ): Promise<Result<null, string>> {
     const proProductPrices = await getProProductPrices();
     try {
@@ -1555,7 +841,7 @@ WHERE (${builtFilter.filter})`,
       const proUsersPriceId = proProductPrices["pro-users"];
 
       const proUsersItem = subscription.items.data.find(
-        (item) => item.price.id === proUsersPriceId
+        (item) => item.price.id === proUsersPriceId,
       );
 
       if (!proUsersItem) {
@@ -1572,18 +858,18 @@ WHERE (${builtFilter.filter})`,
             },
           ],
           proration_behavior: "create_prorations",
-        }
+        },
       );
 
       console.log(
         "Pro-user count updated in subscription:",
-        updatedSubscription.id
+        updatedSubscription.id,
       );
 
       return ok(null);
     } catch (error: any) {
       return err(
-        `Error updating pro-user count in subscription: ${error.message}`
+        `Error updating pro-user count in subscription: ${error.message}`,
       );
     }
   }
@@ -1597,7 +883,7 @@ WHERE (${builtFilter.filter})`,
 
       const proProductPrices = await getProProductPrices();
       const proUsersItem = subscriptionResult.data.items.data.find(
-        (item) => item.price.id === proProductPrices["pro-users"]
+        (item) => item.price.id === proProductPrices["pro-users"],
       );
 
       return ok(proUsersItem?.quantity ?? 0);
@@ -1609,7 +895,7 @@ WHERE (${builtFilter.filter})`,
   public async searchPaymentIntents(
     searchKind: PaymentIntentSearchKind,
     limit: number = 10,
-    page?: string
+    page?: string,
   ): Promise<Result<StripePaymentIntentsResponse, string>> {
     try {
       let query: string;
@@ -1625,7 +911,7 @@ WHERE (${builtFilter.filter})`,
             process.env.STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT;
           if (!productId) {
             console.error(
-              "[Stripe API] STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT not configured"
+              "[Stripe API] STRIPE_CLOUD_GATEWAY_TOKEN_USAGE_PRODUCT not configured",
             );
             return err("Stripe product ID not configured");
           }
@@ -1671,7 +957,7 @@ WHERE (${builtFilter.filter})`,
           if (refunds.data.length > 0) {
             totalRefunded = refunds.data.reduce(
               (sum, refund) => sum + refund.amount,
-              0
+              0,
             );
             isFullyRefunded = totalRefunded >= intent.amount;
             refundIds = refunds.data.map((refund) => refund.id);
@@ -1680,14 +966,14 @@ WHERE (${builtFilter.filter})`,
             if (isFullyRefunded) {
               latestRefundDate = Math.max(
                 ...refunds.data.map((r) => r.created),
-                intent.created
+                intent.created,
               );
             }
           }
         } catch (refundError) {
           console.error(
             `Error fetching refunds for payment intent ${intent.id}:`,
-            refundError
+            refundError,
           );
           // Continue processing other payment intents even if one fails
         }
@@ -1781,7 +1067,7 @@ WHERE (${builtFilter.filter})`,
   }
 
   async updateAutoTopoffSettings(
-    settings: UpdateAutoTopoffSettingsRequest
+    settings: UpdateAutoTopoffSettingsRequest,
   ): Promise<Result<AutoTopoffSettings, string>> {
     try {
       const org = await this.getOrganization();
@@ -1793,7 +1079,7 @@ WHERE (${builtFilter.filter})`,
       if (org.data.stripe_customer_id) {
         try {
           const paymentMethod = await this.stripe.paymentMethods.retrieve(
-            settings.stripePaymentMethodId
+            settings.stripePaymentMethodId,
           );
 
           // Validate payment method belongs to this organization's customer
@@ -1828,7 +1114,7 @@ WHERE (${builtFilter.filter})`,
           settings.thresholdCents,
           settings.topoffAmountCents,
           settings.stripePaymentMethodId,
-        ]
+        ],
       );
 
       if (
@@ -1837,7 +1123,7 @@ WHERE (${builtFilter.filter})`,
         upsertResult.data.length === 0
       ) {
         return err(
-          `Error updating auto topoff settings: ${upsertResult.error}`
+          `Error updating auto topoff settings: ${upsertResult.error}`,
         );
       }
 
@@ -1865,7 +1151,7 @@ WHERE (${builtFilter.filter})`,
 
       const result = await dbExecute(
         `UPDATE organization_auto_topoff SET enabled = false WHERE organization_id = $1`,
-        [org.data.id]
+        [org.data.id],
       );
 
       if (result.error) {
@@ -1901,7 +1187,7 @@ WHERE (${builtFilter.filter})`,
           last4: pm.card?.last4 || "****",
           exp_month: pm.card?.exp_month || 0,
           exp_year: pm.card?.exp_year || 0,
-        }))
+        })),
       );
     } catch (error) {
       return err(`Error fetching payment methods: ${error}`);
@@ -1910,14 +1196,14 @@ WHERE (${builtFilter.filter})`,
 
   async createSetupSession(
     origin: string,
-    returnUrl?: string
+    returnUrl?: string,
   ): Promise<Result<string, string>> {
     try {
       const customerIdResult = await this.getOrCreateStripeCustomer();
 
       if (customerIdResult.error || !customerIdResult.data) {
         return err(
-          `Failed to get or create Stripe customer: ${customerIdResult.error}`
+          `Failed to get or create Stripe customer: ${customerIdResult.error}`,
         );
       }
       const customerId = customerIdResult.data;
@@ -1948,7 +1234,7 @@ WHERE (${builtFilter.filter})`,
   }
 
   async removePaymentMethod(
-    paymentMethodId: string
+    paymentMethodId: string,
   ): Promise<Result<void, string>> {
     try {
       const org = await this.getOrganization();
@@ -1993,10 +1279,10 @@ WHERE (${builtFilter.filter})`,
       // Calculate days elapsed and total
       const msPerDay = 24 * 60 * 60 * 1000;
       const daysElapsed = Math.floor(
-        (now.getTime() - periodStart.getTime()) / msPerDay
+        (now.getTime() - periodStart.getTime()) / msPerDay,
       );
       const daysTotal = Math.floor(
-        (periodEnd.getTime() - periodStart.getTime()) / msPerDay
+        (periodEnd.getTime() - periodStart.getTime()) / msPerDay,
       );
 
       // Query ClickHouse for daily usage data within billing period

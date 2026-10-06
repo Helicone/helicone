@@ -179,6 +179,17 @@ export class OrganizationManager extends BaseManager {
     email: string
   ): Promise<Result<{ userId: string; temporaryPassword?: string }, string>> {
     if (!this.authParams.userId) return err("Unauthorized");
+    // Authorize before touching any user record: an unauthorized caller must
+    // not be able to resolve emails to account ids or create accounts.
+    if (
+      (await this.organizationStore.checkAccessToMutateOrg(
+        organizationId,
+        this.authParams.userId
+      )) === false
+    ) {
+      return err("User does not have access to add member to organization");
+    }
+
     let { data: userId, error: userIdError } =
       await this.organizationStore.getUserByEmail(email);
 
@@ -216,14 +227,6 @@ export class OrganizationManager extends BaseManager {
 
     if (userIdError) {
       return err(userIdError);
-    }
-    if (
-      (await this.organizationStore.checkAccessToMutateOrg(
-        organizationId,
-        this.authParams.userId
-      )) === false
-    ) {
-      return err("User does not have access to add member to organization");
     }
 
     const { error: insertError } =

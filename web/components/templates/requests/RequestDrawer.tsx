@@ -334,27 +334,6 @@ export default function RequestDrawer(props: RequestDivProps) {
     return { requestInfo, tokenInfo, parameterInfo };
   }, [request, requestParameters]);
 
-  // Create experiment handler
-  const handleCreateExperiment = useCallback(() => {
-    if (!request) return;
-
-    jawn
-      .POST("/v2/experiment/create/from-request/{requestId}", {
-        params: {
-          path: {
-            requestId: request.id,
-          },
-        },
-      })
-      .then((res) => {
-        if (res.error || !res.data.data?.experimentId) {
-          setNotification("Failed to create experiment", "error");
-          return;
-        }
-        router.push(`/experiments/${res.data.data?.experimentId}`);
-      });
-  }, [jawn, request, router, setNotification]);
-
   // TODO: Delete legacy prompts code
   const hasNewPromptData = useMemo(
     () =>

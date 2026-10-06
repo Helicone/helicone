@@ -214,7 +214,11 @@ export class KeyManager extends BaseManager {
          RETURNING id`,
         [
           hashedKey,
-          orgResult.data[0].owner,
+          // Stamp the key with the authenticated actor, never the (mutable)
+          // organization owner: a tenant could otherwise transfer ownership to
+          // a foreign user, mint a key carrying that user's id, and transfer
+          // ownership back.
+          this.authParams.userId ?? orgResult.data[0].owner,
           keyName,
           this.authParams.organizationId,
           keyPermissions,
@@ -644,7 +648,8 @@ export class KeyManager extends BaseManager {
         RETURNING id`,
         [
           hashedKey,
-          orgResult.data[0].owner,
+          // See createNormalKey: stamp with the authenticated actor.
+          this.authParams.userId ?? orgResult.data[0].owner,
           keyName,
           this.authParams.organizationId,
           keyPermissions,

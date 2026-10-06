@@ -50,9 +50,15 @@ async function getDecryptedProviderKeysByOrgId(
   );
 }
 
+/**
+ * Look up a provider key by id, scoped to the calling org. `orgId` is
+ * required on purpose: a provider key id must never be resolvable across
+ * tenants (CIRT-80). Resolves to `null` when no matching key exists.
+ */
 async function getDecryptedProviderKeyById(
   providerKeyId: string,
-): Promise<Result<DecryptedProviderKey, string>> {
+  orgId: string,
+): Promise<Result<DecryptedProviderKey | null, string>> {
   return resultMap(
     await dbExecute<{
       id: string;
@@ -61,16 +67,23 @@ async function getDecryptedProviderKeyById(
       provider_key_name: string;
       provider_name: string;
     }>(
-      `SELECT id, org_id, decrypted_provider_key, provider_key_name, provider_name from decrypted_provider_keys_v2 where id = $1 and soft_delete = false limit 1`,
-      [providerKeyId],
+      `SELECT id, org_id, decrypted_provider_key, provider_key_name, provider_name
+       FROM decrypted_provider_keys_v2
+       WHERE id = $1 AND org_id = $2 AND soft_delete = false
+       LIMIT 1`,
+      [providerKeyId, orgId],
     ),
-    (key) => ({
-      id: key?.[0]?.id,
-      org_id: key?.[0]?.org_id,
-      provider_key: key?.[0]?.decrypted_provider_key,
-      provider_name: key?.[0]?.provider_name,
-      provider_key_name: key?.[0]?.provider_key_name,
-    }),
+    (rows) => {
+      const key = rows?.[0];
+      if (!key) return null;
+      return {
+        id: key.id,
+        org_id: key.org_id,
+        provider_key: key.decrypted_provider_key,
+        provider_name: key.provider_name,
+        provider_key_name: key.provider_key_name,
+      };
+    },
   );
 }
 

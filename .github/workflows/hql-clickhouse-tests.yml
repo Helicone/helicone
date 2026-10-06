@@ -40,6 +40,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Free disk space
+        uses: ./.github/actions/free-disk-space
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:

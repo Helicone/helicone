@@ -24,6 +24,7 @@ async function handler({
 }: HandlerWrapperOptions<Result<HeliconeProxyKeys, string>>) {
   if (req.method !== "POST") {
     res.status(405).json({ error: "Method not allowed", data: null });
+    return;
   }
 
   const { providerKeyId, heliconeProxyKeyName, limits } = req.body as {
@@ -42,14 +43,23 @@ async function handler({
     return;
   }
 
-  const { data: providerKey, error } =
-    await getDecryptedProviderKeyById(providerKeyId);
+  // Scoped to the caller's org: a provider key id from another tenant must
+  // resolve to "not found", never to a usable key (CIRT-80).
+  const { data: providerKey, error } = await getDecryptedProviderKeyById(
+    providerKeyId,
+    userData.orgId,
+  );
 
-  if (error || !providerKey?.id) {
+  if (error) {
     logger.error({ error, providerKeyId }, "Failed to retrieve provider key");
     res
       .status(500)
-      .json({ error: error ?? "Failed to retrieve provider key", data: null });
+      .json({ error: "Failed to retrieve provider key", data: null });
+    return;
+  }
+
+  if (!providerKey?.id || providerKey.org_id !== userData.orgId) {
+    res.status(404).json({ error: "Provider key not found", data: null });
     return;
   }
 

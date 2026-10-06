@@ -24,7 +24,6 @@ import { TimeFilter } from "@helicone-package/filters/filterDefs";
 import { SortDirection } from "../../../services/lib/sorts/requests/sorts";
 import ThemedDrawer from "../../shared/themed/themedDrawer";
 import ThemedTable from "../../shared/themed/table/themedTable";
-import UpgradeProModal from "../../shared/upgradeProModal";
 import ModelPill from "../requests/modelPill";
 import UnauthorizedView from "../requests/UnauthorizedView";
 import { formatNumber } from "../users/initialColumns";
@@ -152,7 +151,6 @@ const CachePage = (props: CachePageProps) => {
   const [selectedRequest, setSelectedRequest] =
     useState<SelectedCachedRequest>();
   const [open, setOpen] = useState<boolean>(false);
-  const [openUpgradeModal, setOpenUpgradeModal] = useState<boolean>(false);
   const heliconeAuthClient = useHeliconeAuthClient();
   const org = useOrg();
   const {
@@ -523,7 +521,6 @@ const CachePage = (props: CachePageProps) => {
           </div>
         )}
       </ThemedDrawer>
-      <UpgradeProModal open={openUpgradeModal} setOpen={setOpenUpgradeModal} />
     </>
   );
 };

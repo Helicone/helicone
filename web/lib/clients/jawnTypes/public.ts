@@ -42,9 +42,6 @@ export interface paths {
   "/v1/evaluator/query": {
     post: operations["QueryEvaluators"];
   };
-  "/v1/evaluator/{evaluatorId}/experiments": {
-    get: operations["GetExperimentsForEvaluator"];
-  };
   "/v1/evaluator/{evaluatorId}/onlineEvaluators": {
     get: operations["GetOnlineEvaluators"];
     post: operations["CreateOnlineEvaluator"];
@@ -64,222 +61,11 @@ export interface paths {
   "/v1/evaluator/{evaluatorId}/stats": {
     get: operations["GetEvaluatorStats"];
   };
-  "/v1/prompt-2025/id/{promptId}": {
-    get: operations["GetPrompt2025"];
-  };
-  "/v1/prompt-2025/id/{promptId}/rename": {
-    post: operations["RenamePrompt2025"];
-  };
-  "/v1/prompt-2025/id/{promptId}/tags": {
-    patch: operations["UpdatePrompt2025Tags"];
-  };
-  "/v1/prompt-2025/{promptId}": {
-    delete: operations["DeletePrompt2025"];
-  };
-  "/v1/prompt-2025/{promptId}/{versionId}": {
-    delete: operations["DeletePrompt2025Version"];
-  };
-  "/v1/prompt-2025/id/{promptId}/{versionId}/inputs": {
-    get: operations["GetPrompt2025Inputs"];
-  };
-  "/v1/prompt-2025/tags": {
-    get: operations["GetPrompt2025Tags"];
-  };
-  "/v1/prompt-2025/environments": {
-    get: operations["GetPrompt2025Environments"];
-  };
-  "/v1/prompt-2025": {
-    post: operations["CreatePrompt2025"];
-  };
-  "/v1/prompt-2025/update": {
-    post: operations["UpdatePrompt2025"];
-  };
-  "/v1/prompt-2025/update/environment": {
-    post: operations["SetPromptVersionEnvironment"];
-  };
-  "/v1/prompt-2025/remove/environment": {
-    post: operations["RemoveEnvironmentFromVersion"];
-  };
-  "/v1/prompt-2025/count": {
-    get: operations["GetPrompt2025Count"];
-  };
-  "/v1/prompt-2025/query": {
-    post: operations["GetPrompts2025"];
-  };
-  "/v1/prompt-2025/query/version": {
-    post: operations["GetPrompt2025Version"];
-  };
-  "/v1/prompt-2025/query/environment-version": {
-    post: operations["GetPrompt2025EnvironmentVersion"];
-  };
-  "/v1/prompt-2025/query/versions": {
-    post: operations["GetPrompt2025Versions"];
-  };
-  "/v1/prompt-2025/query/production-version": {
-    post: operations["GetPrompt2025ProductionVersion"];
-  };
-  "/v1/prompt-2025/query/total-versions": {
-    post: operations["GetPrompt2025TotalVersions"];
-  };
-  "/v1/prompt-2025/{promptVersionId}/prompt-body": {
-    /** @description Get the full prompt body (messages, tools, etc.) for a specific prompt version. */
-    get: operations["GetPrompt2025VersionBody"];
-  };
-  "/v2/prompt-2025/query/version": {
-    post: operations["GetPrompt2025Version"];
-  };
-  "/v2/prompt-2025/query/environment-version": {
-    post: operations["GetPrompt2025EnvironmentVersion"];
-  };
-  "/v2/prompt-2025/query/production-version": {
-    post: operations["GetPrompt2025ProductionVersion"];
-  };
-  "/v1/prompt/has-prompts": {
-    get: operations["HasPrompts"];
-  };
-  "/v1/prompt/query": {
-    post: operations["GetPrompts"];
-  };
-  "/v1/prompt/{promptId}/query": {
-    post: operations["GetPrompt"];
-  };
-  "/v1/prompt/{promptId}": {
-    delete: operations["DeletePrompt"];
-  };
-  "/v1/prompt/create": {
-    post: operations["CreatePrompt"];
-  };
-  "/v1/prompt/{promptId}/user-defined-id": {
-    patch: operations["UpdatePromptUserDefinedId"];
-  };
-  "/v1/prompt/version/{promptVersionId}/edit-label": {
-    post: operations["EditPromptVersionLabel"];
-  };
-  "/v1/prompt/version/{promptVersionId}/edit-template": {
-    post: operations["EditPromptVersionTemplate"];
-  };
-  "/v1/prompt/version/{promptVersionId}/subversion-from-ui": {
-    post: operations["CreateSubversionFromUi"];
-  };
-  "/v1/prompt/version/{promptVersionId}/subversion": {
-    post: operations["CreateSubversion"];
-  };
-  "/v1/prompt/version/{promptVersionId}/promote": {
-    post: operations["PromotePromptVersionToProduction"];
-  };
-  "/v1/prompt/version/{promptVersionId}/inputs/query": {
-    post: operations["GetInputs"];
-  };
-  "/v1/prompt/{promptId}/experiments": {
-    get: operations["GetPromptExperiments"];
-  };
-  "/v1/prompt/{promptId}/versions/query": {
-    post: operations["GetPromptVersions"];
-  };
-  "/v1/prompt/version/{promptVersionId}": {
-    get: operations["GetPromptVersion"];
-    delete: operations["DeletePromptVersion"];
-  };
-  "/v1/prompt/{user_defined_id}/compile": {
-    post: operations["GetPromptVersionsCompiled"];
-  };
-  "/v1/prompt/{user_defined_id}/template": {
-    post: operations["GetPromptVersionTemplates"];
-  };
-  "/v2/experiment/create/empty": {
-    post: operations["CreateEmptyExperiment"];
-  };
-  "/v2/experiment/create/from-request/{requestId}": {
-    post: operations["CreateExperimentFromRequest"];
-  };
-  "/v2/experiment/new": {
-    post: operations["CreateNewExperiment"];
-  };
-  "/v2/experiment": {
-    get: operations["GetExperiments"];
-  };
-  "/v2/experiment/{experimentId}": {
-    get: operations["GetExperimentById"];
-    delete: operations["DeleteExperiment"];
-  };
-  "/v2/experiment/{experimentId}/prompt-version": {
-    post: operations["CreateNewPromptVersionForExperiment"];
-  };
-  "/v2/experiment/{experimentId}/prompt-version/{promptVersionId}": {
-    delete: operations["DeletePromptVersion"];
-  };
-  "/v2/experiment/{experimentId}/prompt-versions": {
-    get: operations["GetPromptVersionsForExperiment"];
-  };
-  "/v2/experiment/{experimentId}/input-keys": {
-    get: operations["GetInputKeysForExperiment"];
-  };
-  "/v2/experiment/{experimentId}/add-manual-row": {
-    post: operations["AddManualRowToExperiment"];
-  };
-  "/v2/experiment/{experimentId}/add-manual-rows-batch": {
-    post: operations["AddManualRowsToExperimentBatch"];
-  };
-  "/v2/experiment/{experimentId}/rows": {
-    delete: operations["DeleteExperimentTableRows"];
-  };
-  "/v2/experiment/{experimentId}/row/insert/batch": {
-    post: operations["CreateExperimentTableRowBatch"];
-  };
-  "/v2/experiment/{experimentId}/row/insert/dataset/{datasetId}": {
-    post: operations["CreateExperimentTableRowFromDataset"];
-  };
-  "/v2/experiment/{experimentId}/row/update": {
-    post: operations["UpdateExperimentTableRow"];
-  };
-  "/v2/experiment/{experimentId}/run-hypothesis": {
-    post: operations["RunHypothesis"];
-  };
-  "/v2/experiment/{experimentId}/evaluators": {
-    get: operations["GetExperimentEvaluators"];
-    post: operations["CreateExperimentEvaluator"];
-  };
-  "/v2/experiment/{experimentId}/evaluators/{evaluatorId}": {
-    delete: operations["DeleteExperimentEvaluator"];
-  };
-  "/v2/experiment/{experimentId}/evaluators/run": {
-    post: operations["RunExperimentEvaluators"];
-  };
-  "/v2/experiment/{experimentId}/should-run-evaluators": {
-    get: operations["ShouldRunEvaluators"];
-  };
-  "/v2/experiment/{experimentId}/{promptVersionId}/scores": {
-    get: operations["GetExperimentPromptVersionScores"];
-  };
-  "/v2/experiment/{experimentId}/{requestId}/{scoreKey}": {
-    get: operations["GetExperimentScore"];
-  };
-  "/v1/stripe/subscription/cost-for-prompts": {
-    get: operations["GetCostForPrompts"];
-  };
-  "/v1/stripe/subscription/cost-for-evals": {
-    get: operations["GetCostForEvals"];
-  };
-  "/v1/stripe/subscription/cost-for-experiments": {
-    get: operations["GetCostForExperiments"];
-  };
   "/v1/stripe/subscription/free/usage": {
     get: operations["GetFreeUsage"];
   };
   "/v1/stripe/cloud/checkout-session": {
     post: operations["CreateCloudGatewayCheckoutSession"];
-  };
-  "/v1/stripe/subscription/new-customer/upgrade-to-pro": {
-    post: operations["UpgradeToPro"];
-  };
-  "/v1/stripe/subscription/existing-customer/upgrade-to-pro": {
-    post: operations["UpgradeExistingCustomer"];
-  };
-  "/v1/stripe/subscription/new-customer/upgrade-to-team-bundle": {
-    post: operations["UpgradeToTeamBundle"];
-  };
-  "/v1/stripe/subscription/existing-customer/upgrade-to-team-bundle": {
-    post: operations["UpgradeExistingCustomerToTeamBundle"];
   };
   "/v1/stripe/subscription/manage-subscription": {
     post: operations["ManageSubscription"];
@@ -287,18 +73,11 @@ export interface paths {
   "/v1/stripe/subscription/undo-cancel-subscription": {
     post: operations["UndoCancelSubscription"];
   };
-  "/v1/stripe/subscription/add-ons/{productType}": {
-    post: operations["AddOns"];
-    delete: operations["DeleteAddOns"];
-  };
   "/v1/stripe/subscription/preview-invoice": {
     get: operations["PreviewInvoice"];
   };
   "/v1/stripe/subscription/cancel-subscription": {
     post: operations["CancelSubscription"];
-  };
-  "/v1/stripe/subscription/migrate-to-pro": {
-    post: operations["MigrateToPro"];
   };
   "/v1/stripe/payment-intents/search": {
     get: operations["SearchPaymentIntents"];
@@ -480,6 +259,125 @@ export interface paths {
   "/v1/property/{propertyKey}/top-requests/query": {
     post: operations["GetTopRequests"];
   };
+  "/v1/prompt-2025/id/{promptId}": {
+    get: operations["GetPrompt2025"];
+  };
+  "/v1/prompt-2025/id/{promptId}/rename": {
+    post: operations["RenamePrompt2025"];
+  };
+  "/v1/prompt-2025/id/{promptId}/tags": {
+    patch: operations["UpdatePrompt2025Tags"];
+  };
+  "/v1/prompt-2025/{promptId}": {
+    delete: operations["DeletePrompt2025"];
+  };
+  "/v1/prompt-2025/{promptId}/{versionId}": {
+    delete: operations["DeletePrompt2025Version"];
+  };
+  "/v1/prompt-2025/id/{promptId}/{versionId}/inputs": {
+    get: operations["GetPrompt2025Inputs"];
+  };
+  "/v1/prompt-2025/tags": {
+    get: operations["GetPrompt2025Tags"];
+  };
+  "/v1/prompt-2025/environments": {
+    get: operations["GetPrompt2025Environments"];
+  };
+  "/v1/prompt-2025": {
+    post: operations["CreatePrompt2025"];
+  };
+  "/v1/prompt-2025/update": {
+    post: operations["UpdatePrompt2025"];
+  };
+  "/v1/prompt-2025/update/environment": {
+    post: operations["SetPromptVersionEnvironment"];
+  };
+  "/v1/prompt-2025/remove/environment": {
+    post: operations["RemoveEnvironmentFromVersion"];
+  };
+  "/v1/prompt-2025/count": {
+    get: operations["GetPrompt2025Count"];
+  };
+  "/v1/prompt-2025/query": {
+    post: operations["GetPrompts2025"];
+  };
+  "/v1/prompt-2025/query/version": {
+    post: operations["GetPrompt2025Version"];
+  };
+  "/v1/prompt-2025/query/environment-version": {
+    post: operations["GetPrompt2025EnvironmentVersion"];
+  };
+  "/v1/prompt-2025/query/versions": {
+    post: operations["GetPrompt2025Versions"];
+  };
+  "/v1/prompt-2025/query/production-version": {
+    post: operations["GetPrompt2025ProductionVersion"];
+  };
+  "/v1/prompt-2025/query/total-versions": {
+    post: operations["GetPrompt2025TotalVersions"];
+  };
+  "/v1/prompt-2025/{promptVersionId}/prompt-body": {
+    /** @description Get the full prompt body (messages, tools, etc.) for a specific prompt version. */
+    get: operations["GetPrompt2025VersionBody"];
+  };
+  "/v2/prompt-2025/query/version": {
+    post: operations["GetPrompt2025Version"];
+  };
+  "/v2/prompt-2025/query/environment-version": {
+    post: operations["GetPrompt2025EnvironmentVersion"];
+  };
+  "/v2/prompt-2025/query/production-version": {
+    post: operations["GetPrompt2025ProductionVersion"];
+  };
+  "/v1/prompt/has-prompts": {
+    get: operations["HasPrompts"];
+  };
+  "/v1/prompt/query": {
+    post: operations["GetPrompts"];
+  };
+  "/v1/prompt/{promptId}/query": {
+    post: operations["GetPrompt"];
+  };
+  "/v1/prompt/{promptId}": {
+    delete: operations["DeletePrompt"];
+  };
+  "/v1/prompt/create": {
+    post: operations["CreatePrompt"];
+  };
+  "/v1/prompt/{promptId}/user-defined-id": {
+    patch: operations["UpdatePromptUserDefinedId"];
+  };
+  "/v1/prompt/version/{promptVersionId}/edit-label": {
+    post: operations["EditPromptVersionLabel"];
+  };
+  "/v1/prompt/version/{promptVersionId}/edit-template": {
+    post: operations["EditPromptVersionTemplate"];
+  };
+  "/v1/prompt/version/{promptVersionId}/subversion-from-ui": {
+    post: operations["CreateSubversionFromUi"];
+  };
+  "/v1/prompt/version/{promptVersionId}/subversion": {
+    post: operations["CreateSubversion"];
+  };
+  "/v1/prompt/version/{promptVersionId}/promote": {
+    post: operations["PromotePromptVersionToProduction"];
+  };
+  "/v1/prompt/version/{promptVersionId}/inputs/query": {
+    post: operations["GetInputs"];
+  };
+  "/v1/prompt/{promptId}/versions/query": {
+    post: operations["GetPromptVersions"];
+  };
+  "/v1/prompt/version/{promptVersionId}": {
+    get: operations["GetPromptVersion"];
+    delete: operations["DeletePromptVersion"];
+  };
+  "/v1/prompt/{user_defined_id}/compile": {
+    post: operations["GetPromptVersionsCompiled"];
+  };
+  "/v1/prompt/{user_defined_id}/template": {
+    post: operations["GetPromptVersionTemplates"];
+  };
   "/v1/playground/generate": {
     post: operations["Generate"];
   };
@@ -642,83 +540,6 @@ export interface paths {
      * @description Create a new saved query
      */
     post: operations["CreateSavedQuery"];
-  };
-  "/v1/experiment/new-empty": {
-    post: operations["CreateNewEmptyExperiment"];
-  };
-  "/v1/experiment/table/new": {
-    post: operations["CreateNewExperimentTable"];
-  };
-  "/v1/experiment/table/{experimentTableId}/query": {
-    post: operations["GetExperimentTableById"];
-  };
-  "/v1/experiment/table/{experimentTableId}/metadata/query": {
-    post: operations["GetExperimentTableMetadata"];
-  };
-  "/v1/experiment/tables/query": {
-    post: operations["GetExperimentTables"];
-  };
-  "/v1/experiment/table/{experimentTableId}/cell": {
-    post: operations["CreateExperimentCell"];
-    patch: operations["UpdateExperimentCell"];
-  };
-  "/v1/experiment/table/{experimentTableId}/column": {
-    post: operations["CreateExperimentColumn"];
-  };
-  "/v1/experiment/table/{experimentTableId}/row/new": {
-    post: operations["CreateExperimentTableRow"];
-  };
-  "/v1/experiment/table/{experimentTableId}/row/{rowIndex}": {
-    delete: operations["DeleteExperimentTableRow"];
-  };
-  "/v1/experiment/table/{experimentTableId}/row/insert/batch": {
-    post: operations["CreateExperimentTableRowWithCellsBatch"];
-  };
-  "/v1/experiment/update-meta": {
-    post: operations["UpdateExperimentMeta"];
-  };
-  "/v1/experiment": {
-    post: operations["CreateNewExperimentOld"];
-  };
-  "/v1/experiment/hypothesis": {
-    post: operations["CreateNewExperimentHypothesis"];
-  };
-  "/v1/experiment/hypothesis/{hypothesisId}/scores/query": {
-    post: operations["GetExperimentHypothesisScores"];
-  };
-  "/v1/experiment/{experimentId}/evaluators": {
-    get: operations["GetExperimentEvaluators"];
-    post: operations["CreateExperimentEvaluatorOld"];
-  };
-  "/v1/experiment/{experimentId}/evaluators/run": {
-    post: operations["RunExperimentEvaluatorsOld"];
-  };
-  "/v1/experiment/{experimentId}/evaluators/{evaluatorId}": {
-    delete: operations["DeleteExperimentEvaluatorOld"];
-  };
-  "/v1/experiment/query": {
-    post: operations["GetExperimentsOld"];
-  };
-  "/v1/experiment/dataset": {
-    post: operations["AddDataset"];
-  };
-  "/v1/experiment/dataset/random": {
-    post: operations["AddRandomDataset"];
-  };
-  "/v1/experiment/dataset/query": {
-    post: operations["GetDatasets"];
-  };
-  "/v1/experiment/dataset/{datasetId}/row/insert": {
-    post: operations["InsertDatasetRow"];
-  };
-  "/v1/experiment/dataset/{datasetId}/version/{promptVersionId}/row/new": {
-    post: operations["CreateDatasetRow"];
-  };
-  "/v1/experiment/dataset/{datasetId}/inputs/query": {
-    post: operations["GetDataset"];
-  };
-  "/v1/experiment/dataset/{datasetId}/mutate": {
-    post: operations["MutateDataset"];
   };
   "/v1/helicone-dataset": {
     post: operations["AddHeliconeDataset"];
@@ -929,17 +750,6 @@ export interface components {
       error: null;
     };
     "Result_null.string_": components["schemas"]["ResultSuccess_null_"] | components["schemas"]["ResultError_string_"];
-    EvaluatorExperiment: {
-      experiment_name: string;
-      experiment_created_at: string;
-      experiment_id: string;
-    };
-    "ResultSuccess_EvaluatorExperiment-Array_": {
-      data: components["schemas"]["EvaluatorExperiment"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_EvaluatorExperiment-Array.string_": components["schemas"]["ResultSuccess_EvaluatorExperiment-Array_"] | components["schemas"]["ResultError_string_"];
     OnlineEvaluatorByEvaluatorId: {
       config: unknown;
       id: string;
@@ -1055,637 +865,10 @@ export interface components {
       error: null;
     };
     "Result_EvaluatorStats.string_": components["schemas"]["ResultSuccess_EvaluatorStats_"] | components["schemas"]["ResultError_string_"];
-    Prompt2025: {
-      id: string;
-      name: string;
-      tags: string[];
-      created_at: string;
-    };
-    ResultSuccess_Prompt2025_: {
-      data: components["schemas"]["Prompt2025"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Prompt2025.string_": components["schemas"]["ResultSuccess_Prompt2025_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_string-Array_": {
-      data: string[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_string-Array.string_": components["schemas"]["ResultSuccess_string-Array_"] | components["schemas"]["ResultError_string_"];
-    Prompt2025Input: {
-      request_id: string;
-      version_id: string;
-      inputs: components["schemas"]["Record_string.any_"];
-    };
-    ResultSuccess_Prompt2025Input_: {
-      data: components["schemas"]["Prompt2025Input"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Prompt2025Input.string_": components["schemas"]["ResultSuccess_Prompt2025Input_"] | components["schemas"]["ResultError_string_"];
-    PromptCreateResponse: {
-      id: string;
-      versionId: string;
-    };
-    ResultSuccess_PromptCreateResponse_: {
-      data: components["schemas"]["PromptCreateResponse"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptCreateResponse.string_": components["schemas"]["ResultSuccess_PromptCreateResponse_"] | components["schemas"]["ResultError_string_"];
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.number_": {
-      [key: string]: number;
-    };
-    /** @description Simplified interface for the OpenAI Chat request format */
-    OpenAIChatRequest: {
-      model?: string;
-      messages?: ({
-          tool_calls?: {
-              /** @enum {string} */
-              type: "function";
-              function: {
-                arguments: string;
-                name: string;
-              };
-              id: string;
-            }[];
-          tool_call_id?: string;
-          name?: string;
-          content: (string | {
-              image_url?: {
-                url: string;
-              };
-              text?: string;
-              type: string;
-            }[]) | null;
-          role: string;
-        })[];
-      /** Format: double */
-      temperature?: number;
-      /** Format: double */
-      top_p?: number;
-      /** Format: double */
-      max_tokens?: number;
-      /** Format: double */
-      max_completion_tokens?: number;
-      stream?: boolean;
-      stop?: string[] | string;
-      tools?: {
-          function: {
-            strict?: boolean;
-            parameters?: components["schemas"]["Record_string.any_"];
-            description?: string;
-            name: string;
-          };
-          /** @enum {string} */
-          type: "function";
-        }[];
-      tool_choice?: {
-        function?: {
-          name: string;
-          /** @enum {string} */
-          type: "function";
-        };
-        type: string;
-      } | ("none" | "auto" | "required");
-      parallel_tool_calls?: boolean;
-      /** @enum {string} */
-      reasoning_effort?: "minimal" | "low" | "medium" | "high";
-      /** @enum {string} */
-      verbosity?: "low" | "medium" | "high";
-      /** Format: double */
-      frequency_penalty?: number;
-      /** Format: double */
-      presence_penalty?: number;
-      logit_bias?: components["schemas"]["Record_string.number_"];
-      logprobs?: boolean;
-      /** Format: double */
-      top_logprobs?: number;
-      /** Format: double */
-      n?: number;
-      modalities?: string[];
-      prediction?: unknown;
-      audio?: unknown;
-      response_format?: {
-        json_schema?: unknown;
-        type: string;
-      };
-      /** Format: double */
-      seed?: number;
-      service_tier?: string;
-      store?: boolean;
-      stream_options?: unknown;
-      metadata?: components["schemas"]["Record_string.string_"];
-      user?: string;
-      function_call?: string | {
-        name: string;
-      };
-      functions?: unknown[];
-    };
-    "ResultSuccess__id-string__": {
-      data: {
-        id: string;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__id-string_.string_": components["schemas"]["ResultSuccess__id-string__"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_number_: {
-      /** Format: double */
-      data: number;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_number.string_": components["schemas"]["ResultSuccess_number_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_Prompt2025-Array_": {
-      data: components["schemas"]["Prompt2025"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Prompt2025-Array.string_": components["schemas"]["ResultSuccess_Prompt2025-Array_"] | components["schemas"]["ResultError_string_"];
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.unknown_": {
-      [key: string]: unknown;
-    };
-    Prompt2025VersionPromptBody: {
-      model?: string;
-      messages?: ({
-          tool_calls?: {
-              /** @enum {string} */
-              type: "function";
-              function: {
-                arguments: string;
-                name: string;
-              };
-              id: string;
-            }[];
-          tool_call_id?: string;
-          name?: string;
-          content: (string | {
-              image_url?: {
-                url: string;
-              };
-              text?: string;
-              type: string;
-            }[]) | null;
-          role: string;
-        })[];
-      /** Format: double */
-      temperature?: number;
-      /** Format: double */
-      top_p?: number;
-      /** Format: double */
-      max_tokens?: number;
-      tools?: {
-          function: {
-            parameters: components["schemas"]["Record_string.unknown_"];
-            description: string;
-            name: string;
-          };
-          /** @enum {string} */
-          type: "function";
-        }[];
-      tool_choice?: string | {
-        function?: {
-          name: string;
-          /** @enum {string} */
-          type: "function";
-        };
-        type: string;
-      };
-      [key: string]: unknown;
-    };
-    Prompt2025Version: {
-      id: string;
-      model: string;
-      prompt_id: string;
-      /** Format: double */
-      major_version: number;
-      /** Format: double */
-      minor_version: number;
-      commit_message: string;
-      environments?: string[];
-      created_at: string;
-      s3_url?: string;
-      /**
-       * @description The full prompt body including messages. Only included when explicitly requested
-       * via the `includePromptBody` parameter to avoid unnecessary data transfer.
-       */
-      prompt_body?: components["schemas"]["Prompt2025VersionPromptBody"];
-    };
-    ResultSuccess_Prompt2025Version_: {
-      data: components["schemas"]["Prompt2025Version"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Prompt2025Version.string_": components["schemas"]["ResultSuccess_Prompt2025Version_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_Prompt2025Version-Array_": {
-      data: components["schemas"]["Prompt2025Version"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Prompt2025Version-Array.string_": components["schemas"]["ResultSuccess_Prompt2025Version-Array_"] | components["schemas"]["ResultError_string_"];
-    PromptVersionCounts: {
-      /** Format: double */
-      totalVersions: number;
-      /** Format: double */
-      majorVersions: number;
-    };
-    ResultSuccess_PromptVersionCounts_: {
-      data: components["schemas"]["PromptVersionCounts"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptVersionCounts.string_": components["schemas"]["ResultSuccess_PromptVersionCounts_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_Prompt2025Version_91_prompt_body_93__: {
-      data: components["schemas"]["Prompt2025VersionPromptBody"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Prompt2025Version_91_prompt_body_93_.string_": components["schemas"]["ResultSuccess_Prompt2025Version_91_prompt_body_93__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__hasPrompts-boolean__": {
-      data: {
-        hasPrompts: boolean;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__hasPrompts-boolean_.string_": components["schemas"]["ResultSuccess__hasPrompts-boolean__"] | components["schemas"]["ResultError_string_"];
-    PromptsResult: {
-      id: string;
-      user_defined_id: string;
-      description: string;
-      pretty_name: string;
-      created_at: string;
-      /** Format: double */
-      major_version: number;
-      metadata?: components["schemas"]["Record_string.any_"];
-    };
-    "ResultSuccess_PromptsResult-Array_": {
-      data: components["schemas"]["PromptsResult"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptsResult-Array.string_": components["schemas"]["ResultSuccess_PromptsResult-Array_"] | components["schemas"]["ResultError_string_"];
-    /** @description Make all properties in T optional */
-    Partial_TextOperators_: {
-      "not-equals"?: string;
-      equals?: string;
-      like?: string;
-      ilike?: string;
-      contains?: string;
-      "not-contains"?: string;
-    };
-    /** @description Make all properties in T optional */
-    Partial_PromptToOperators_: {
-      id?: components["schemas"]["Partial_TextOperators_"];
-      user_defined_id?: components["schemas"]["Partial_TextOperators_"];
-    };
-    /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.prompt_v2_": {
-      prompt_v2?: components["schemas"]["Partial_PromptToOperators_"];
-    };
-    FilterLeafSubset_prompt_v2_: components["schemas"]["Pick_FilterLeaf.prompt_v2_"];
-    PromptsFilterNode: components["schemas"]["FilterLeafSubset_prompt_v2_"] | components["schemas"]["PromptsFilterBranch"] | "all";
-    PromptsFilterBranch: {
-      right: components["schemas"]["PromptsFilterNode"];
-      /** @enum {string} */
-      operator: "or" | "and";
-      left: components["schemas"]["PromptsFilterNode"];
-    };
-    PromptsQueryParams: {
-      filter: components["schemas"]["PromptsFilterNode"];
-    };
-    PromptResult: {
-      id: string;
-      user_defined_id: string;
-      description: string;
-      pretty_name: string;
-      /** Format: double */
-      major_version: number;
-      latest_version_id: string;
-      latest_model_used: string;
-      created_at: string;
-      last_used: string;
-      versions: string[];
-      metadata?: components["schemas"]["Record_string.any_"];
-    };
-    ResultSuccess_PromptResult_: {
-      data: components["schemas"]["PromptResult"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptResult.string_": components["schemas"]["ResultSuccess_PromptResult_"] | components["schemas"]["ResultError_string_"];
-    PromptQueryParams: {
-      timeFilter: {
-        end: string;
-        start: string;
-      };
-    };
-    CreatePromptResponse: {
-      id: string;
-      prompt_version_id: string;
-    };
-    ResultSuccess_CreatePromptResponse_: {
-      data: components["schemas"]["CreatePromptResponse"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_CreatePromptResponse.string_": components["schemas"]["ResultSuccess_CreatePromptResponse_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__metadata-Record_string.any___": {
-      data: {
-        metadata: components["schemas"]["Record_string.any_"];
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__metadata-Record_string.any__.string_": components["schemas"]["ResultSuccess__metadata-Record_string.any___"] | components["schemas"]["ResultError_string_"];
-    PromptEditSubversionLabelParams: {
-      label: string;
-    };
-    PromptEditSubversionTemplateParams: {
-      heliconeTemplate: unknown;
-      experimentId?: string;
-    };
-    PromptVersionResult: {
-      id: string;
-      /** Format: double */
-      minor_version: number;
-      /** Format: double */
-      major_version: number;
-      prompt_v2: string;
-      model: string;
-      helicone_template: string;
-      created_at: string;
-      metadata: components["schemas"]["Record_string.any_"];
-      parent_prompt_version?: string | null;
-      experiment_id?: string | null;
-      updated_at?: string;
-    };
-    ResultSuccess_PromptVersionResult_: {
-      data: components["schemas"]["PromptVersionResult"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptVersionResult.string_": components["schemas"]["ResultSuccess_PromptVersionResult_"] | components["schemas"]["ResultError_string_"];
-    PromptCreateSubversionParams: {
-      newHeliconeTemplate: unknown;
-      isMajorVersion?: boolean;
-      metadata?: components["schemas"]["Record_string.any_"];
-      experimentId?: string;
-      bumpForMajorPromptVersionId?: string;
-    };
-    PromptInputRecord: {
-      id: string;
-      inputs: components["schemas"]["Record_string.string_"];
-      dataset_row_id?: string;
-      source_request: string;
-      prompt_version: string;
-      created_at: string;
-      response_body?: string;
-      request_body?: string;
-      auto_prompt_inputs: unknown[];
-    };
-    "ResultSuccess_PromptInputRecord-Array_": {
-      data: components["schemas"]["PromptInputRecord"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptInputRecord-Array.string_": components["schemas"]["ResultSuccess_PromptInputRecord-Array_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array_": {
-      data: {
-          meta: components["schemas"]["Record_string.any_"];
-          dataset: string;
-          /** Format: double */
-          num_hypotheses: number;
-          created_at: string;
-          id: string;
-        }[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array.string_": components["schemas"]["ResultSuccess__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_PromptVersionResult-Array_": {
-      data: components["schemas"]["PromptVersionResult"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptVersionResult-Array.string_": components["schemas"]["ResultSuccess_PromptVersionResult-Array_"] | components["schemas"]["ResultError_string_"];
-    /** @description Make all properties in T optional */
-    Partial_NumberOperators_: {
-      /** Format: double */
-      "not-equals"?: number;
-      /** Format: double */
-      equals?: number;
-      /** Format: double */
-      gte?: number;
-      /** Format: double */
-      lte?: number;
-      /** Format: double */
-      lt?: number;
-      /** Format: double */
-      gt?: number;
-    };
-    /** @description Make all properties in T optional */
-    Partial_PromptVersionsToOperators_: {
-      minor_version?: components["schemas"]["Partial_NumberOperators_"];
-      major_version?: components["schemas"]["Partial_NumberOperators_"];
-      id?: components["schemas"]["Partial_TextOperators_"];
-      prompt_v2?: components["schemas"]["Partial_TextOperators_"];
-    };
-    /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.prompts_versions_": {
-      prompts_versions?: components["schemas"]["Partial_PromptVersionsToOperators_"];
-    };
-    FilterLeafSubset_prompts_versions_: components["schemas"]["Pick_FilterLeaf.prompts_versions_"];
-    PromptVersionsFilterNode: components["schemas"]["FilterLeafSubset_prompts_versions_"] | components["schemas"]["PromptVersionsFilterBranch"] | "all";
-    PromptVersionsFilterBranch: {
-      right: components["schemas"]["PromptVersionsFilterNode"];
-      /** @enum {string} */
-      operator: "or" | "and";
-      left: components["schemas"]["PromptVersionsFilterNode"];
-    };
-    PromptVersionsQueryParams: {
-      filter?: components["schemas"]["PromptVersionsFilterNode"];
-      includeExperimentVersions?: boolean;
-    };
-    PromptVersionResultCompiled: {
-      id: string;
-      /** Format: double */
-      minor_version: number;
-      /** Format: double */
-      major_version: number;
-      prompt_v2: string;
-      model: string;
-      prompt_compiled: unknown;
-    };
-    ResultSuccess_PromptVersionResultCompiled_: {
-      data: components["schemas"]["PromptVersionResultCompiled"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptVersionResultCompiled.string_": components["schemas"]["ResultSuccess_PromptVersionResultCompiled_"] | components["schemas"]["ResultError_string_"];
-    PromptVersiosQueryParamsCompiled: {
-      filter?: components["schemas"]["PromptVersionsFilterNode"];
-      includeExperimentVersions?: boolean;
-      inputs: components["schemas"]["Record_string.string_"];
-    };
-    PromptVersionResultFilled: {
-      id: string;
-      /** Format: double */
-      minor_version: number;
-      /** Format: double */
-      major_version: number;
-      prompt_v2: string;
-      model: string;
-      filled_helicone_template: unknown;
-    };
-    ResultSuccess_PromptVersionResultFilled_: {
-      data: components["schemas"]["PromptVersionResultFilled"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_PromptVersionResultFilled.string_": components["schemas"]["ResultSuccess_PromptVersionResultFilled_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__experimentId-string__": {
-      data: {
-        experimentId: string;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__experimentId-string_.string_": components["schemas"]["ResultSuccess__experimentId-string__"] | components["schemas"]["ResultError_string_"];
-    ExperimentV2: {
-      id: string;
-      name: string;
-      original_prompt_version: string;
-      copied_original_prompt_version: string | null;
-      input_keys: string[] | null;
-      created_at: string;
-    };
-    "ResultSuccess_ExperimentV2-Array_": {
-      data: components["schemas"]["ExperimentV2"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ExperimentV2-Array.string_": components["schemas"]["ResultSuccess_ExperimentV2-Array_"] | components["schemas"]["ResultError_string_"];
-    ExperimentV2Output: {
-      id: string;
-      request_id: string;
-      is_original: boolean;
-      prompt_version_id: string;
-      created_at: string;
-      input_record_id: string;
-    };
-    ExperimentV2Row: {
-      id: string;
-      inputs: components["schemas"]["Record_string.string_"];
-      prompt_version: string;
-      requests: components["schemas"]["ExperimentV2Output"][];
-      auto_prompt_inputs: unknown[];
-    };
-    ExtendedExperimentData: {
-      id: string;
-      name: string;
-      original_prompt_version: string;
-      copied_original_prompt_version: string | null;
-      input_keys: string[] | null;
-      created_at: string;
-      rows: components["schemas"]["ExperimentV2Row"][];
-    };
-    ResultSuccess_ExtendedExperimentData_: {
-      data: components["schemas"]["ExtendedExperimentData"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ExtendedExperimentData.string_": components["schemas"]["ResultSuccess_ExtendedExperimentData_"] | components["schemas"]["ResultError_string_"];
-    CreateNewPromptVersionForExperimentParams: {
-      newHeliconeTemplate: unknown;
-      isMajorVersion?: boolean;
-      metadata?: components["schemas"]["Record_string.any_"];
-      experimentId?: string;
-      bumpForMajorPromptVersionId?: string;
-      parentPromptVersionId: string;
-    };
-Json: JsonObject;
-    ExperimentV2PromptVersion: {
-      created_at: string | null;
-      experiment_id: string | null;
-      helicone_template: components["schemas"]["Json"] | null;
-      id: string;
-      /** Format: double */
-      major_version: number;
-      metadata: components["schemas"]["Json"] | null;
-      /** Format: double */
-      minor_version: number;
-      model: string | null;
-      organization: string;
-      prompt_v2: string;
-      soft_delete: boolean | null;
-    };
-    "ResultSuccess_ExperimentV2PromptVersion-Array_": {
-      data: components["schemas"]["ExperimentV2PromptVersion"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ExperimentV2PromptVersion-Array.string_": components["schemas"]["ResultSuccess_ExperimentV2PromptVersion-Array_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_string_: {
-      data: string;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_string.string_": components["schemas"]["ResultSuccess_string_"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_boolean_: {
-      data: boolean;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_boolean.string_": components["schemas"]["ResultSuccess_boolean_"] | components["schemas"]["ResultError_string_"];
-    ScoreV2: {
-      valueType: string;
-      value: number | string;
-      /** Format: double */
-      max: number;
-      /** Format: double */
-      min: number;
-    };
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.ScoreV2_": {
-      [key: string]: components["schemas"]["ScoreV2"];
-    };
-    "ResultSuccess_Record_string.ScoreV2__": {
-      data: components["schemas"]["Record_string.ScoreV2_"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Record_string.ScoreV2_.string_": components["schemas"]["ResultSuccess_Record_string.ScoreV2__"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_ScoreV2-or-null_": {
-      data: components["schemas"]["ScoreV2"] | null;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ScoreV2-or-null.string_": components["schemas"]["ResultSuccess_ScoreV2-or-null_"] | components["schemas"]["ResultError_string_"];
     CreateCloudGatewayCheckoutSessionRequest: {
       /** Format: double */
       amount: number;
       returnUrl?: string;
-    };
-    UpgradeToProRequest: {
-      addons?: {
-        evals?: boolean;
-        experiments?: boolean;
-        prompts?: boolean;
-        alerts?: boolean;
-      };
-      /** Format: double */
-      seats?: number;
-      /** @enum {string} */
-      ui_mode?: "embedded" | "hosted";
-    };
-    UpgradeToTeamBundleRequest: {
-      /** @enum {string} */
-      ui_mode?: "embedded" | "hosted";
     };
     LLMUsage: {
       model: string;
@@ -1796,6 +979,15 @@ Json: JsonObject;
         requestsCost: number;
       };
     };
+    "ResultSuccess__id-string__": {
+      data: {
+        id: string;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__id-string_.string_": components["schemas"]["ResultSuccess__id-string__"] | components["schemas"]["ResultError_string_"];
+Json: JsonObject;
     IntegrationCreateParams: {
       integration_name: string;
       settings?: components["schemas"]["Json"];
@@ -1833,17 +1025,46 @@ Json: JsonObject;
       error: null;
     };
     "Result_Array__id-string--name-string__.string_": components["schemas"]["ResultSuccess_Array__id-string--name-string___"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_string_: {
+      data: string;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_string.string_": components["schemas"]["ResultSuccess_string_"] | components["schemas"]["ResultError_string_"];
     TestStripeMeterEventRequest: {
       event_name: string;
       customer_id: string;
     };
+    ResultSuccess_number_: {
+      /** Format: double */
+      data: number;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_number.string_": components["schemas"]["ResultSuccess_number_"] | components["schemas"]["ResultError_string_"];
     /** @description Make all properties in T optional */
-    Partial_ResponseTableToOperators_: {
-      body_tokens?: components["schemas"]["Partial_NumberOperators_"];
-      body_model?: components["schemas"]["Partial_TextOperators_"];
-      body_completion?: components["schemas"]["Partial_TextOperators_"];
-      status?: components["schemas"]["Partial_NumberOperators_"];
-      model?: components["schemas"]["Partial_TextOperators_"];
+    Partial_TextOperators_: {
+      "not-equals"?: string;
+      equals?: string;
+      like?: string;
+      ilike?: string;
+      contains?: string;
+      "not-contains"?: string;
+    };
+    /** @description Make all properties in T optional */
+    Partial_NumberOperators_: {
+      /** Format: double */
+      "not-equals"?: number;
+      /** Format: double */
+      equals?: number;
+      /** Format: double */
+      gte?: number;
+      /** Format: double */
+      lte?: number;
+      /** Format: double */
+      lt?: number;
+      /** Format: double */
+      gt?: number;
     };
     /** @description Make all properties in T optional */
     Partial_TimestampOperators_: {
@@ -1852,6 +1073,17 @@ Json: JsonObject;
       lte?: string;
       lt?: string;
       gt?: string;
+    };
+    /** @description Make all properties in T optional */
+    Partial_BooleanOperators_: {
+      equals?: boolean;
+    };
+    /** @description Make all properties in T optional */
+    Partial_FeedbackTableToOperators_: {
+      id?: components["schemas"]["Partial_NumberOperators_"];
+      created_at?: components["schemas"]["Partial_TimestampOperators_"];
+      rating?: components["schemas"]["Partial_BooleanOperators_"];
+      response_id?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
     Partial_RequestTableToOperators_: {
@@ -1869,15 +1101,12 @@ Json: JsonObject;
       prompt_id?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
-    Partial_BooleanOperators_: {
-      equals?: boolean;
-    };
-    /** @description Make all properties in T optional */
-    Partial_FeedbackTableToOperators_: {
-      id?: components["schemas"]["Partial_NumberOperators_"];
-      created_at?: components["schemas"]["Partial_TimestampOperators_"];
-      rating?: components["schemas"]["Partial_BooleanOperators_"];
-      response_id?: components["schemas"]["Partial_TextOperators_"];
+    Partial_ResponseTableToOperators_: {
+      body_tokens?: components["schemas"]["Partial_NumberOperators_"];
+      body_model?: components["schemas"]["Partial_TextOperators_"];
+      body_completion?: components["schemas"]["Partial_TextOperators_"];
+      status?: components["schemas"]["Partial_NumberOperators_"];
+      model?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
     Partial_TimestampOperatorsTyped_: {
@@ -1958,14 +1187,14 @@ Json: JsonObject;
       values?: {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
-      response?: components["schemas"]["Partial_ResponseTableToOperators_"];
-      request?: components["schemas"]["Partial_RequestTableToOperators_"];
       feedback?: components["schemas"]["Partial_FeedbackTableToOperators_"];
-      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
-      sessions_request_response_rmt?: components["schemas"]["Partial_SessionsRequestResponseRMTToOperators_"];
+      request?: components["schemas"]["Partial_RequestTableToOperators_"];
+      response?: components["schemas"]["Partial_ResponseTableToOperators_"];
       properties?: {
         [key: string]: components["schemas"]["Partial_TextOperators_"];
       };
+      request_response_rmt?: components["schemas"]["Partial_RequestResponseRMTToOperators_"];
+      sessions_request_response_rmt?: components["schemas"]["Partial_SessionsRequestResponseRMTToOperators_"];
     };
     "FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_": components["schemas"]["Pick_FilterLeaf.feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"];
     RequestFilterNode: components["schemas"]["FilterLeafSubset_feedback-or-request-or-response-or-properties-or-values-or-request_response_rmt-or-sessions_request_response_rmt_"] | components["schemas"]["RequestFilterBranch"] | "all";
@@ -2212,6 +1441,10 @@ Json: JsonObject;
     LlmSchema: {
       request: components["schemas"]["LLMRequestBody"];
       response?: components["schemas"]["LLMResponseBody"] | null;
+    };
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.number_": {
+      [key: string]: number;
     };
     HeliconeRequest: {
       response_id: string | null;
@@ -2571,6 +1804,10 @@ Json: JsonObject;
       isValid: boolean;
       errors: components["schemas"]["ValidationError"][];
     };
+    /** @description Construct a type with a set of properties K of type T */
+    "Record_string.unknown_": {
+      [key: string]: unknown;
+    };
     TypedProviderRequest: {
       url: string;
       json: components["schemas"]["Record_string.unknown_"];
@@ -2894,6 +2131,18 @@ Json: JsonObject;
       value?: components["schemas"]["Partial_TextOperators_"];
     };
     /** @description Make all properties in T optional */
+    Partial_PromptToOperators_: {
+      id?: components["schemas"]["Partial_TextOperators_"];
+      user_defined_id?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
+    Partial_PromptVersionsToOperators_: {
+      minor_version?: components["schemas"]["Partial_NumberOperators_"];
+      major_version?: components["schemas"]["Partial_NumberOperators_"];
+      id?: components["schemas"]["Partial_TextOperators_"];
+      prompt_v2?: components["schemas"]["Partial_TextOperators_"];
+    };
+    /** @description Make all properties in T optional */
     Partial_ExperimentToOperators_: {
       id?: components["schemas"]["Partial_TextOperators_"];
       prompt_v2?: components["schemas"]["Partial_TextOperators_"];
@@ -3095,6 +2344,12 @@ Json: JsonObject;
       /** @enum {number|null} */
       error: null;
     };
+    "ResultSuccess_string-Array_": {
+      data: string[];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_string-Array.string_": components["schemas"]["ResultSuccess_string-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__value-string--cost-number_-Array_": {
       data: {
           /** Format: double */
@@ -3121,6 +2376,421 @@ Json: JsonObject;
       error: null;
     };
     "Result__value-string--count-number_-Array.string_": components["schemas"]["ResultSuccess__value-string--count-number_-Array_"] | components["schemas"]["ResultError_string_"];
+    Prompt2025: {
+      id: string;
+      name: string;
+      tags: string[];
+      created_at: string;
+    };
+    ResultSuccess_Prompt2025_: {
+      data: components["schemas"]["Prompt2025"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025.string_": components["schemas"]["ResultSuccess_Prompt2025_"] | components["schemas"]["ResultError_string_"];
+    Prompt2025Input: {
+      request_id: string;
+      version_id: string;
+      inputs: components["schemas"]["Record_string.any_"];
+    };
+    ResultSuccess_Prompt2025Input_: {
+      data: components["schemas"]["Prompt2025Input"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025Input.string_": components["schemas"]["ResultSuccess_Prompt2025Input_"] | components["schemas"]["ResultError_string_"];
+    PromptCreateResponse: {
+      id: string;
+      versionId: string;
+    };
+    ResultSuccess_PromptCreateResponse_: {
+      data: components["schemas"]["PromptCreateResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptCreateResponse.string_": components["schemas"]["ResultSuccess_PromptCreateResponse_"] | components["schemas"]["ResultError_string_"];
+    /** @description Simplified interface for the OpenAI Chat request format */
+    OpenAIChatRequest: {
+      model?: string;
+      messages?: ({
+          tool_calls?: {
+              /** @enum {string} */
+              type: "function";
+              function: {
+                arguments: string;
+                name: string;
+              };
+              id: string;
+            }[];
+          tool_call_id?: string;
+          name?: string;
+          content: (string | {
+              image_url?: {
+                url: string;
+              };
+              text?: string;
+              type: string;
+            }[]) | null;
+          role: string;
+        })[];
+      /** Format: double */
+      temperature?: number;
+      /** Format: double */
+      top_p?: number;
+      /** Format: double */
+      max_tokens?: number;
+      /** Format: double */
+      max_completion_tokens?: number;
+      stream?: boolean;
+      stop?: string[] | string;
+      tools?: {
+          function: {
+            strict?: boolean;
+            parameters?: components["schemas"]["Record_string.any_"];
+            description?: string;
+            name: string;
+          };
+          /** @enum {string} */
+          type: "function";
+        }[];
+      tool_choice?: {
+        function?: {
+          name: string;
+          /** @enum {string} */
+          type: "function";
+        };
+        type: string;
+      } | ("none" | "auto" | "required");
+      parallel_tool_calls?: boolean;
+      /** @enum {string} */
+      reasoning_effort?: "minimal" | "low" | "medium" | "high";
+      /** @enum {string} */
+      verbosity?: "low" | "medium" | "high";
+      /** Format: double */
+      frequency_penalty?: number;
+      /** Format: double */
+      presence_penalty?: number;
+      logit_bias?: components["schemas"]["Record_string.number_"];
+      logprobs?: boolean;
+      /** Format: double */
+      top_logprobs?: number;
+      /** Format: double */
+      n?: number;
+      modalities?: string[];
+      prediction?: unknown;
+      audio?: unknown;
+      response_format?: {
+        json_schema?: unknown;
+        type: string;
+      };
+      /** Format: double */
+      seed?: number;
+      service_tier?: string;
+      store?: boolean;
+      stream_options?: unknown;
+      metadata?: components["schemas"]["Record_string.string_"];
+      user?: string;
+      function_call?: string | {
+        name: string;
+      };
+      functions?: unknown[];
+    };
+    "ResultSuccess_Prompt2025-Array_": {
+      data: components["schemas"]["Prompt2025"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025-Array.string_": components["schemas"]["ResultSuccess_Prompt2025-Array_"] | components["schemas"]["ResultError_string_"];
+    Prompt2025VersionPromptBody: {
+      model?: string;
+      messages?: ({
+          tool_calls?: {
+              /** @enum {string} */
+              type: "function";
+              function: {
+                arguments: string;
+                name: string;
+              };
+              id: string;
+            }[];
+          tool_call_id?: string;
+          name?: string;
+          content: (string | {
+              image_url?: {
+                url: string;
+              };
+              text?: string;
+              type: string;
+            }[]) | null;
+          role: string;
+        })[];
+      /** Format: double */
+      temperature?: number;
+      /** Format: double */
+      top_p?: number;
+      /** Format: double */
+      max_tokens?: number;
+      tools?: {
+          function: {
+            parameters: components["schemas"]["Record_string.unknown_"];
+            description: string;
+            name: string;
+          };
+          /** @enum {string} */
+          type: "function";
+        }[];
+      tool_choice?: string | {
+        function?: {
+          name: string;
+          /** @enum {string} */
+          type: "function";
+        };
+        type: string;
+      };
+      [key: string]: unknown;
+    };
+    Prompt2025Version: {
+      id: string;
+      model: string;
+      prompt_id: string;
+      /** Format: double */
+      major_version: number;
+      /** Format: double */
+      minor_version: number;
+      commit_message: string;
+      environments?: string[];
+      created_at: string;
+      s3_url?: string;
+      /**
+       * @description The full prompt body including messages. Only included when explicitly requested
+       * via the `includePromptBody` parameter to avoid unnecessary data transfer.
+       */
+      prompt_body?: components["schemas"]["Prompt2025VersionPromptBody"];
+    };
+    ResultSuccess_Prompt2025Version_: {
+      data: components["schemas"]["Prompt2025Version"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025Version.string_": components["schemas"]["ResultSuccess_Prompt2025Version_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_Prompt2025Version-Array_": {
+      data: components["schemas"]["Prompt2025Version"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025Version-Array.string_": components["schemas"]["ResultSuccess_Prompt2025Version-Array_"] | components["schemas"]["ResultError_string_"];
+    PromptVersionCounts: {
+      /** Format: double */
+      totalVersions: number;
+      /** Format: double */
+      majorVersions: number;
+    };
+    ResultSuccess_PromptVersionCounts_: {
+      data: components["schemas"]["PromptVersionCounts"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptVersionCounts.string_": components["schemas"]["ResultSuccess_PromptVersionCounts_"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_Prompt2025Version_91_prompt_body_93__: {
+      data: components["schemas"]["Prompt2025VersionPromptBody"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_Prompt2025Version_91_prompt_body_93_.string_": components["schemas"]["ResultSuccess_Prompt2025Version_91_prompt_body_93__"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__hasPrompts-boolean__": {
+      data: {
+        hasPrompts: boolean;
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__hasPrompts-boolean_.string_": components["schemas"]["ResultSuccess__hasPrompts-boolean__"] | components["schemas"]["ResultError_string_"];
+    PromptsResult: {
+      id: string;
+      user_defined_id: string;
+      description: string;
+      pretty_name: string;
+      created_at: string;
+      /** Format: double */
+      major_version: number;
+      metadata?: components["schemas"]["Record_string.any_"];
+    };
+    "ResultSuccess_PromptsResult-Array_": {
+      data: components["schemas"]["PromptsResult"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptsResult-Array.string_": components["schemas"]["ResultSuccess_PromptsResult-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_FilterLeaf.prompt_v2_": {
+      prompt_v2?: components["schemas"]["Partial_PromptToOperators_"];
+    };
+    FilterLeafSubset_prompt_v2_: components["schemas"]["Pick_FilterLeaf.prompt_v2_"];
+    PromptsFilterNode: components["schemas"]["FilterLeafSubset_prompt_v2_"] | components["schemas"]["PromptsFilterBranch"] | "all";
+    PromptsFilterBranch: {
+      right: components["schemas"]["PromptsFilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      left: components["schemas"]["PromptsFilterNode"];
+    };
+    PromptsQueryParams: {
+      filter: components["schemas"]["PromptsFilterNode"];
+    };
+    PromptResult: {
+      id: string;
+      user_defined_id: string;
+      description: string;
+      pretty_name: string;
+      /** Format: double */
+      major_version: number;
+      latest_version_id: string;
+      latest_model_used: string;
+      created_at: string;
+      last_used: string;
+      versions: string[];
+      metadata?: components["schemas"]["Record_string.any_"];
+    };
+    ResultSuccess_PromptResult_: {
+      data: components["schemas"]["PromptResult"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptResult.string_": components["schemas"]["ResultSuccess_PromptResult_"] | components["schemas"]["ResultError_string_"];
+    PromptQueryParams: {
+      timeFilter: {
+        end: string;
+        start: string;
+      };
+    };
+    CreatePromptResponse: {
+      id: string;
+      prompt_version_id: string;
+    };
+    ResultSuccess_CreatePromptResponse_: {
+      data: components["schemas"]["CreatePromptResponse"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_CreatePromptResponse.string_": components["schemas"]["ResultSuccess_CreatePromptResponse_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess__metadata-Record_string.any___": {
+      data: {
+        metadata: components["schemas"]["Record_string.any_"];
+      };
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result__metadata-Record_string.any__.string_": components["schemas"]["ResultSuccess__metadata-Record_string.any___"] | components["schemas"]["ResultError_string_"];
+    PromptEditSubversionLabelParams: {
+      label: string;
+    };
+    PromptEditSubversionTemplateParams: {
+      heliconeTemplate: unknown;
+      experimentId?: string;
+    };
+    PromptVersionResult: {
+      id: string;
+      /** Format: double */
+      minor_version: number;
+      /** Format: double */
+      major_version: number;
+      prompt_v2: string;
+      model: string;
+      helicone_template: string;
+      created_at: string;
+      metadata: components["schemas"]["Record_string.any_"];
+      parent_prompt_version?: string | null;
+      experiment_id?: string | null;
+      updated_at?: string;
+    };
+    ResultSuccess_PromptVersionResult_: {
+      data: components["schemas"]["PromptVersionResult"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptVersionResult.string_": components["schemas"]["ResultSuccess_PromptVersionResult_"] | components["schemas"]["ResultError_string_"];
+    PromptCreateSubversionParams: {
+      newHeliconeTemplate: unknown;
+      isMajorVersion?: boolean;
+      metadata?: components["schemas"]["Record_string.any_"];
+      experimentId?: string;
+      bumpForMajorPromptVersionId?: string;
+    };
+    PromptInputRecord: {
+      id: string;
+      inputs: components["schemas"]["Record_string.string_"];
+      dataset_row_id?: string;
+      source_request: string;
+      prompt_version: string;
+      created_at: string;
+      response_body?: string;
+      request_body?: string;
+      auto_prompt_inputs: unknown[];
+    };
+    "ResultSuccess_PromptInputRecord-Array_": {
+      data: components["schemas"]["PromptInputRecord"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptInputRecord-Array.string_": components["schemas"]["ResultSuccess_PromptInputRecord-Array_"] | components["schemas"]["ResultError_string_"];
+    "ResultSuccess_PromptVersionResult-Array_": {
+      data: components["schemas"]["PromptVersionResult"][];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptVersionResult-Array.string_": components["schemas"]["ResultSuccess_PromptVersionResult-Array_"] | components["schemas"]["ResultError_string_"];
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_FilterLeaf.prompts_versions_": {
+      prompts_versions?: components["schemas"]["Partial_PromptVersionsToOperators_"];
+    };
+    FilterLeafSubset_prompts_versions_: components["schemas"]["Pick_FilterLeaf.prompts_versions_"];
+    PromptVersionsFilterNode: components["schemas"]["FilterLeafSubset_prompts_versions_"] | components["schemas"]["PromptVersionsFilterBranch"] | "all";
+    PromptVersionsFilterBranch: {
+      right: components["schemas"]["PromptVersionsFilterNode"];
+      /** @enum {string} */
+      operator: "or" | "and";
+      left: components["schemas"]["PromptVersionsFilterNode"];
+    };
+    PromptVersionsQueryParams: {
+      filter?: components["schemas"]["PromptVersionsFilterNode"];
+      includeExperimentVersions?: boolean;
+    };
+    PromptVersionResultCompiled: {
+      id: string;
+      /** Format: double */
+      minor_version: number;
+      /** Format: double */
+      major_version: number;
+      prompt_v2: string;
+      model: string;
+      prompt_compiled: unknown;
+    };
+    ResultSuccess_PromptVersionResultCompiled_: {
+      data: components["schemas"]["PromptVersionResultCompiled"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptVersionResultCompiled.string_": components["schemas"]["ResultSuccess_PromptVersionResultCompiled_"] | components["schemas"]["ResultError_string_"];
+    PromptVersiosQueryParamsCompiled: {
+      filter?: components["schemas"]["PromptVersionsFilterNode"];
+      includeExperimentVersions?: boolean;
+      inputs: components["schemas"]["Record_string.string_"];
+    };
+    PromptVersionResultFilled: {
+      id: string;
+      /** Format: double */
+      minor_version: number;
+      /** Format: double */
+      major_version: number;
+      prompt_v2: string;
+      model: string;
+      filled_helicone_template: unknown;
+    };
+    ResultSuccess_PromptVersionResultFilled_: {
+      data: components["schemas"]["PromptVersionResultFilled"];
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_PromptVersionResultFilled.string_": components["schemas"]["ResultSuccess_PromptVersionResultFilled_"] | components["schemas"]["ResultError_string_"];
     "ChatCompletionTokenLogprob.TopLogprob": {
       /** @description The token. */
       token: string;
@@ -3451,6 +3121,12 @@ Json: JsonObject;
       error: null;
     };
     "Result_ChatCompletion-or-_content-string--reasoning-string--calls-any_.string_": components["schemas"]["ResultSuccess_ChatCompletion-or-_content-string--reasoning-string--calls-any__"] | components["schemas"]["ResultError_string_"];
+    ResultSuccess_boolean_: {
+      data: boolean;
+      /** @enum {number|null} */
+      error: null;
+    };
+    "Result_boolean.string_": components["schemas"]["ResultSuccess_boolean_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__apiKey-string__": {
       data: {
         apiKey: string;
@@ -4083,216 +3759,6 @@ Json: JsonObject;
       error: null;
     };
     "Result_HqlSavedQuery.string_": components["schemas"]["ResultSuccess_HqlSavedQuery_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess__tableId-string--experimentId-string__": {
-      data: {
-        experimentId: string;
-        tableId: string;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__tableId-string--experimentId-string_.string_": components["schemas"]["ResultSuccess__tableId-string--experimentId-string__"] | components["schemas"]["ResultError_string_"];
-    CreateExperimentTableParams: {
-      datasetId: string;
-      experimentMetadata: components["schemas"]["Record_string.any_"];
-      promptVersionId: string;
-      newHeliconeTemplate: string;
-      isMajorVersion: boolean;
-      promptSubversionMetadata: components["schemas"]["Record_string.any_"];
-      experimentTableMetadata?: components["schemas"]["Record_string.any_"];
-    };
-    ExperimentTableColumn: {
-      id: string;
-      columnName: string;
-      columnType: string;
-      hypothesisId?: string;
-      cells: ({
-          metadata?: components["schemas"]["Record_string.any_"];
-          value: string | null;
-          requestId?: string;
-          /** Format: double */
-          rowIndex: number;
-          id: string;
-        })[];
-      metadata?: components["schemas"]["Record_string.any_"];
-    };
-    ExperimentTable: {
-      id: string;
-      name: string;
-      experimentId: string;
-      columns: components["schemas"]["ExperimentTableColumn"][];
-      metadata?: components["schemas"]["Record_string.any_"];
-    };
-    ResultSuccess_ExperimentTable_: {
-      data: components["schemas"]["ExperimentTable"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ExperimentTable.string_": components["schemas"]["ResultSuccess_ExperimentTable_"] | components["schemas"]["ResultError_string_"];
-    ExperimentTableSimplified: {
-      id: string;
-      name: string;
-      experimentId: string;
-      createdAt: string;
-      metadata?: unknown;
-      columns: {
-          columnType: string;
-          columnName: string;
-          id: string;
-        }[];
-    };
-    ResultSuccess_ExperimentTableSimplified_: {
-      data: components["schemas"]["ExperimentTableSimplified"];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ExperimentTableSimplified.string_": components["schemas"]["ResultSuccess_ExperimentTableSimplified_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_ExperimentTableSimplified-Array_": {
-      data: components["schemas"]["ExperimentTableSimplified"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_ExperimentTableSimplified-Array.string_": components["schemas"]["ResultSuccess_ExperimentTableSimplified-Array_"] | components["schemas"]["ResultError_string_"];
-    NewExperimentParams: {
-      datasetId: string;
-      promptVersion: string;
-      model: string;
-      providerKeyId: string;
-      meta?: unknown;
-    };
-    "ResultSuccess__hypothesisId-string__": {
-      data: {
-        hypothesisId: string;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__hypothesisId-string_.string_": components["schemas"]["ResultSuccess__hypothesisId-string__"] | components["schemas"]["ResultError_string_"];
-    Score: {
-      valueType: string;
-      value: number | string;
-    };
-    /** @description Construct a type with a set of properties K of type T */
-    "Record_string.Score_": {
-      [key: string]: components["schemas"]["Score"];
-    };
-    "ResultSuccess__runsCount-number--scores-Record_string.Score___": {
-      data: {
-        scores: components["schemas"]["Record_string.Score_"];
-        /** Format: double */
-        runsCount: number;
-      };
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__runsCount-number--scores-Record_string.Score__.string_": components["schemas"]["ResultSuccess__runsCount-number--scores-Record_string.Score___"] | components["schemas"]["ResultError_string_"];
-    ResponseObj: {
-      body: unknown;
-      createdAt: string;
-      /** Format: double */
-      completionTokens: number;
-      /** Format: double */
-      promptTokens: number;
-      /** Format: double */
-      promptCacheWriteTokens: number;
-      /** Format: double */
-      promptCacheReadTokens: number;
-      /** Format: double */
-      delayMs: number;
-      model: string;
-    };
-    RequestObj: {
-      id: string;
-      provider: string;
-    };
-    ExperimentDatasetRow: {
-      rowId: string;
-      inputRecord: {
-        request: components["schemas"]["RequestObj"];
-        response: components["schemas"]["ResponseObj"];
-        autoInputs: components["schemas"]["Record_string.string_"][];
-        inputs: components["schemas"]["Record_string.string_"];
-        requestPath: string;
-        requestId: string;
-        id: string;
-      };
-      /** Format: double */
-      rowIndex: number;
-      columnId: string;
-      scores: components["schemas"]["Record_string.Score_"];
-    };
-    ExperimentScores: {
-      dataset: {
-        scores: components["schemas"]["Record_string.Score_"];
-      };
-      hypothesis: {
-        scores: components["schemas"]["Record_string.Score_"];
-        /** Format: double */
-        runsCount: number;
-      };
-    };
-    Experiment: {
-      id: string;
-      organization: string;
-      dataset: {
-        rows: components["schemas"]["ExperimentDatasetRow"][];
-        name: string;
-        id: string;
-      };
-      meta: unknown;
-      createdAt: string;
-      hypotheses: {
-          runs: {
-              request?: components["schemas"]["RequestObj"];
-              scores: components["schemas"]["Record_string.Score_"];
-              response?: components["schemas"]["ResponseObj"];
-              resultRequestId: string;
-              datasetRowId: string;
-            }[];
-          providerKey: string;
-          createdAt: string;
-          status: string;
-          model: string;
-          parentPromptVersion?: {
-            template: unknown;
-          };
-          promptVersion?: {
-            template: unknown;
-          };
-          promptVersionId: string;
-          id: string;
-        }[];
-      scores: components["schemas"]["ExperimentScores"] | null;
-      tableId: string | null;
-    };
-    "ResultSuccess_Experiment-Array_": {
-      data: components["schemas"]["Experiment"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_Experiment-Array.string_": components["schemas"]["ResultSuccess_Experiment-Array_"] | components["schemas"]["ResultError_string_"];
-    /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.experiment_": {
-      experiment?: components["schemas"]["Partial_ExperimentToOperators_"];
-    };
-    FilterLeafSubset_experiment_: components["schemas"]["Pick_FilterLeaf.experiment_"];
-    ExperimentFilterNode: components["schemas"]["FilterLeafSubset_experiment_"] | components["schemas"]["ExperimentFilterBranch"] | "all";
-    ExperimentFilterBranch: {
-      right: components["schemas"]["ExperimentFilterNode"];
-      /** @enum {string} */
-      operator: "or" | "and";
-      left: components["schemas"]["ExperimentFilterNode"];
-    };
-    IncludeExperimentKeys: {
-      /** @enum {boolean} */
-      inputs?: true;
-      /** @enum {boolean} */
-      promptVersion?: true;
-      /** @enum {boolean} */
-      responseBodies?: true;
-      /** @enum {boolean} */
-      score?: true;
-    };
     "ResultSuccess__datasetId-string__": {
       data: {
         datasetId: string;
@@ -4301,56 +3767,6 @@ Json: JsonObject;
       error: null;
     };
     "Result__datasetId-string_.string_": components["schemas"]["ResultSuccess__datasetId-string__"] | components["schemas"]["ResultError_string_"];
-    DatasetMetadata: {
-      promptVersionId?: string;
-      inputRecordsIds?: string[];
-    };
-    NewDatasetParams: {
-      datasetName: string;
-      requestIds: string[];
-      /** @enum {string} */
-      datasetType: "experiment" | "helicone";
-      meta?: components["schemas"]["DatasetMetadata"];
-    };
-    /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_FilterLeaf.request-or-prompts_versions_": {
-      request?: components["schemas"]["Partial_RequestTableToOperators_"];
-      prompts_versions?: components["schemas"]["Partial_PromptVersionsToOperators_"];
-    };
-    "FilterLeafSubset_request-or-prompts_versions_": components["schemas"]["Pick_FilterLeaf.request-or-prompts_versions_"];
-    DatasetFilterNode: components["schemas"]["FilterLeafSubset_request-or-prompts_versions_"] | components["schemas"]["DatasetFilterBranch"] | "all";
-    DatasetFilterBranch: {
-      right: components["schemas"]["DatasetFilterNode"];
-      /** @enum {string} */
-      operator: "or" | "and";
-      left: components["schemas"]["DatasetFilterNode"];
-    };
-    RandomDatasetParams: {
-      datasetName: string;
-      filter: components["schemas"]["DatasetFilterNode"];
-      /** Format: double */
-      offset?: number;
-      /** Format: double */
-      limit?: number;
-    };
-    DatasetResult: {
-      id: string;
-      name: string;
-      created_at: string;
-      meta?: components["schemas"]["DatasetMetadata"];
-    };
-    "ResultSuccess_DatasetResult-Array_": {
-      data: components["schemas"]["DatasetResult"][];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result_DatasetResult-Array.string_": components["schemas"]["ResultSuccess_DatasetResult-Array_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess___-Array_": {
-      data: Record<string, never>[];
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result___-Array.string_": components["schemas"]["ResultSuccess___-Array_"] | components["schemas"]["ResultError_string_"];
     HeliconeDatasetMetadata: {
       promptVersionId?: string;
       inputRecordsIds?: string[];
@@ -4945,21 +4361,6 @@ export interface operations {
       };
     };
   };
-  GetExperimentsForEvaluator: {
-    parameters: {
-      path: {
-        evaluatorId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_EvaluatorExperiment-Array.string_"];
-        };
-      };
-    };
-  };
   GetOnlineEvaluators: {
     parameters: {
       path: {
@@ -5081,1114 +4482,6 @@ export interface operations {
       };
     };
   };
-  GetPrompt2025: {
-    parameters: {
-      path: {
-        promptId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Prompt2025.string_"];
-        };
-      };
-    };
-  };
-  RenamePrompt2025: {
-    parameters: {
-      path: {
-        promptId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          name: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  UpdatePrompt2025Tags: {
-    parameters: {
-      path: {
-        promptId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          tags: string[];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_string-Array.string_"];
-        };
-      };
-    };
-  };
-  DeletePrompt2025: {
-    parameters: {
-      path: {
-        promptId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  DeletePrompt2025Version: {
-    parameters: {
-      path: {
-        promptId: string;
-        versionId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  GetPrompt2025Inputs: {
-    parameters: {
-      query: {
-        requestId: string;
-      };
-      path: {
-        promptId: string;
-        versionId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Prompt2025Input.string_"];
-        };
-      };
-    };
-  };
-  GetPrompt2025Tags: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_string-Array.string_"];
-        };
-      };
-    };
-  };
-  GetPrompt2025Environments: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_string-Array.string_"];
-        };
-      };
-    };
-  };
-  CreatePrompt2025: {
-    requestBody: {
-      content: {
-        "application/json": {
-          promptBody: components["schemas"]["OpenAIChatRequest"];
-          tags: string[];
-          name: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_PromptCreateResponse.string_"];
-        };
-      };
-    };
-  };
-  UpdatePrompt2025: {
-    requestBody: {
-      content: {
-        "application/json": {
-          promptBody: components["schemas"]["OpenAIChatRequest"];
-          commitMessage: string;
-          environment?: string;
-          newMajorVersion: boolean;
-          promptVersionId: string;
-          promptId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__id-string_.string_"];
-        };
-      };
-    };
-  };
-  SetPromptVersionEnvironment: {
-    requestBody: {
-      content: {
-        "application/json": {
-          environment: string;
-          promptVersionId: string;
-          promptId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  RemoveEnvironmentFromVersion: {
-    requestBody: {
-      content: {
-        "application/json": {
-          environment: string;
-          promptVersionId: string;
-          promptId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  GetPrompt2025Count: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_number.string_"];
-        };
-      };
-    };
-  };
-  GetPrompts2025: {
-    requestBody: {
-      content: {
-        "application/json": {
-          /** Format: double */
-          pageSize: number;
-          /** Format: double */
-          page: number;
-          tagsFilter: string[];
-          search: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Prompt2025-Array.string_"];
-        };
-      };
-    };
-  };
-  GetPrompt2025Version: {
-    requestBody: {
-      content: {
-        "application/json": {
-          promptVersionId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Prompt2025Version.string_"];
-        };
-      };
-    };
-  };
-  GetPrompt2025EnvironmentVersion: {
-    requestBody: {
-      content: {
-        "application/json": {
-          environment: string;
-          promptId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Prompt2025Version.string_"];
-        };
-      };
-    };
-  };
-  GetPrompt2025Versions: {
-    requestBody: {
-      content: {
-        "application/json": {
-          /** Format: double */
-          majorVersion?: number;
-          promptId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Prompt2025Version-Array.string_"];
-        };
-      };
-    };
-  };
-  GetPrompt2025ProductionVersion: {
-    requestBody: {
-      content: {
-        "application/json": {
-          promptId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Prompt2025Version.string_"];
-        };
-      };
-    };
-  };
-  GetPrompt2025TotalVersions: {
-    requestBody: {
-      content: {
-        "application/json": {
-          promptId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_PromptVersionCounts.string_"];
-        };
-      };
-    };
-  };
-  /** @description Get the full prompt body (messages, tools, etc.) for a specific prompt version. */
-  GetPrompt2025VersionBody: {
-    parameters: {
-      path: {
-        promptVersionId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Prompt2025Version_91_prompt_body_93_.string_"];
-        };
-      };
-    };
-  };
-  HasPrompts: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__hasPrompts-boolean_.string_"];
-        };
-      };
-    };
-  };
-  GetPrompts: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PromptsQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_PromptsResult-Array.string_"];
-        };
-      };
-    };
-  };
-  GetPrompt: {
-    parameters: {
-      path: {
-        promptId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PromptQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_PromptResult.string_"];
-        };
-      };
-    };
-  };
-  DeletePrompt: {
-    parameters: {
-      path: {
-        promptId: string;
-      };
-    };
-    responses: {
-      /** @description No content */
-      204: {
-        content: never;
-      };
-    };
-  };
-  CreatePrompt: {
-    requestBody: {
-      content: {
-        "application/json": {
-          metadata: components["schemas"]["Record_string.any_"];
-          prompt: unknown;
-          userDefinedId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_CreatePromptResponse.string_"];
-        };
-      };
-    };
-  };
-  UpdatePromptUserDefinedId: {
-    parameters: {
-      path: {
-        promptId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          userDefinedId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  EditPromptVersionLabel: {
-    parameters: {
-      path: {
-        promptVersionId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PromptEditSubversionLabelParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__metadata-Record_string.any__.string_"];
-        };
-      };
-    };
-  };
-  EditPromptVersionTemplate: {
-    parameters: {
-      path: {
-        promptVersionId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PromptEditSubversionTemplateParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  CreateSubversionFromUi: {
-    parameters: {
-      path: {
-        promptVersionId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PromptCreateSubversionParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
-        };
-      };
-    };
-  };
-  CreateSubversion: {
-    parameters: {
-      path: {
-        promptVersionId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PromptCreateSubversionParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
-        };
-      };
-    };
-  };
-  PromotePromptVersionToProduction: {
-    parameters: {
-      path: {
-        promptVersionId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          previousProductionVersionId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
-        };
-      };
-    };
-  };
-  GetInputs: {
-    parameters: {
-      path: {
-        promptVersionId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          random?: boolean;
-          /** Format: double */
-          limit: number;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_PromptInputRecord-Array.string_"];
-        };
-      };
-    };
-  };
-  GetPromptExperiments: {
-    parameters: {
-      path: {
-        promptId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__id-string--created_at-string--num_hypotheses-number--dataset-string--meta-Record_string.any__-Array.string_"];
-        };
-      };
-    };
-  };
-  GetPromptVersions: {
-    parameters: {
-      path: {
-        promptId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PromptVersionsQueryParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_PromptVersionResult-Array.string_"];
-        };
-      };
-    };
-  };
-  GetPromptVersion: {
-    parameters: {
-      path: {
-        promptVersionId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
-        };
-      };
-    };
-  };
-  DeletePromptVersion: {
-    parameters: {
-      path: {
-        experimentId: string;
-        promptVersionId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  GetPromptVersionsCompiled: {
-    parameters: {
-      path: {
-        user_defined_id: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PromptVersiosQueryParamsCompiled"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_PromptVersionResultCompiled.string_"];
-        };
-      };
-    };
-  };
-  GetPromptVersionTemplates: {
-    parameters: {
-      path: {
-        user_defined_id: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PromptVersiosQueryParamsCompiled"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_PromptVersionResultFilled.string_"];
-        };
-      };
-    };
-  };
-  CreateEmptyExperiment: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
-        };
-      };
-    };
-  };
-  CreateExperimentFromRequest: {
-    parameters: {
-      path: {
-        requestId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
-        };
-      };
-    };
-  };
-  CreateNewExperiment: {
-    requestBody: {
-      content: {
-        "application/json": {
-          originalPromptVersion: string;
-          name: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
-        };
-      };
-    };
-  };
-  GetExperiments: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ExperimentV2-Array.string_"];
-        };
-      };
-    };
-  };
-  GetExperimentById: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ExtendedExperimentData.string_"];
-        };
-      };
-    };
-  };
-  DeleteExperiment: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  CreateNewPromptVersionForExperiment: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateNewPromptVersionForExperimentParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
-        };
-      };
-    };
-  };
-  GetPromptVersionsForExperiment: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ExperimentV2PromptVersion-Array.string_"];
-        };
-      };
-    };
-  };
-  GetInputKeysForExperiment: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_string-Array.string_"];
-        };
-      };
-    };
-  };
-  AddManualRowToExperiment: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          inputs: components["schemas"]["Record_string.string_"];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_string.string_"];
-        };
-      };
-    };
-  };
-  AddManualRowsToExperimentBatch: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          inputs: components["schemas"]["Record_string.string_"][];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  DeleteExperimentTableRows: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          inputRecordIds: string[];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  CreateExperimentTableRowBatch: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          rows: {
-              autoInputs: unknown[];
-              inputs: components["schemas"]["Record_string.string_"];
-              inputRecordId: string;
-            }[];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  CreateExperimentTableRowFromDataset: {
-    parameters: {
-      path: {
-        experimentId: string;
-        datasetId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  UpdateExperimentTableRow: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          inputs: components["schemas"]["Record_string.string_"];
-          inputRecordId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  RunHypothesis: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          inputRecordId: string;
-          promptVersionId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_string.string_"];
-        };
-      };
-    };
-  };
-  GetExperimentEvaluators: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_EvaluatorResult-Array.string_"];
-        };
-      };
-    };
-  };
-  CreateExperimentEvaluator: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          evaluatorId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  DeleteExperimentEvaluator: {
-    parameters: {
-      path: {
-        experimentId: string;
-        evaluatorId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  RunExperimentEvaluators: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  ShouldRunEvaluators: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_boolean.string_"];
-        };
-      };
-    };
-  };
-  GetExperimentPromptVersionScores: {
-    parameters: {
-      path: {
-        experimentId: string;
-        promptVersionId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Record_string.ScoreV2_.string_"];
-        };
-      };
-    };
-  };
-  GetExperimentScore: {
-    parameters: {
-      path: {
-        experimentId: string;
-        requestId: string;
-        scoreKey: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ScoreV2-or-null.string_"];
-        };
-      };
-    };
-  };
-  GetCostForPrompts: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": number;
-        };
-      };
-    };
-  };
-  GetCostForEvals: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": number;
-        };
-      };
-    };
-  };
-  GetCostForExperiments: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": number;
-        };
-      };
-    };
-  };
   GetFreeUsage: {
     responses: {
       /** @description Ok */
@@ -6216,66 +4509,6 @@ export interface operations {
       };
     };
   };
-  UpgradeToPro: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpgradeToProRequest"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": string;
-        };
-      };
-    };
-  };
-  UpgradeExistingCustomer: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpgradeToProRequest"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": string;
-        };
-      };
-    };
-  };
-  UpgradeToTeamBundle: {
-    requestBody?: {
-      content: {
-        "application/json": components["schemas"]["UpgradeToTeamBundleRequest"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": string;
-        };
-      };
-    };
-  };
-  UpgradeExistingCustomerToTeamBundle: {
-    requestBody?: {
-      content: {
-        "application/json": components["schemas"]["UpgradeToTeamBundleRequest"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": string;
-        };
-      };
-    };
-  };
   ManageSubscription: {
     responses: {
       /** @description Ok */
@@ -6287,36 +4520,6 @@ export interface operations {
     };
   };
   UndoCancelSubscription: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": null;
-        };
-      };
-    };
-  };
-  AddOns: {
-    parameters: {
-      path: {
-        productType: "alerts" | "prompts" | "experiments" | "evals";
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": null;
-        };
-      };
-    };
-  };
-  DeleteAddOns: {
-    parameters: {
-      path: {
-        productType: "alerts" | "prompts" | "experiments" | "evals";
-      };
-    };
     responses: {
       /** @description Ok */
       200: {
@@ -6371,16 +4574,6 @@ export interface operations {
       200: {
         content: {
           "application/json": null;
-        };
-      };
-    };
-  };
-  MigrateToPro: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": unknown;
         };
       };
     };
@@ -7393,6 +5586,665 @@ export interface operations {
       };
     };
   };
+  GetPrompt2025: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025.string_"];
+        };
+      };
+    };
+  };
+  RenamePrompt2025: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  UpdatePrompt2025Tags: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          tags: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string-Array.string_"];
+        };
+      };
+    };
+  };
+  DeletePrompt2025: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  DeletePrompt2025Version: {
+    parameters: {
+      path: {
+        promptId: string;
+        versionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025Inputs: {
+    parameters: {
+      query: {
+        requestId: string;
+      };
+      path: {
+        promptId: string;
+        versionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025Input.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025Tags: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025Environments: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_string-Array.string_"];
+        };
+      };
+    };
+  };
+  CreatePrompt2025: {
+    requestBody: {
+      content: {
+        "application/json": {
+          promptBody: components["schemas"]["OpenAIChatRequest"];
+          tags: string[];
+          name: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptCreateResponse.string_"];
+        };
+      };
+    };
+  };
+  UpdatePrompt2025: {
+    requestBody: {
+      content: {
+        "application/json": {
+          promptBody: components["schemas"]["OpenAIChatRequest"];
+          commitMessage: string;
+          environment?: string;
+          newMajorVersion: boolean;
+          promptVersionId: string;
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__id-string_.string_"];
+        };
+      };
+    };
+  };
+  SetPromptVersionEnvironment: {
+    requestBody: {
+      content: {
+        "application/json": {
+          environment: string;
+          promptVersionId: string;
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  RemoveEnvironmentFromVersion: {
+    requestBody: {
+      content: {
+        "application/json": {
+          environment: string;
+          promptVersionId: string;
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025Count: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_number.string_"];
+        };
+      };
+    };
+  };
+  GetPrompts2025: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          pageSize: number;
+          /** Format: double */
+          page: number;
+          tagsFilter: string[];
+          search: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025Version: {
+    requestBody: {
+      content: {
+        "application/json": {
+          promptVersionId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025Version.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025EnvironmentVersion: {
+    requestBody: {
+      content: {
+        "application/json": {
+          environment: string;
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025Version.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025Versions: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /** Format: double */
+          majorVersion?: number;
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025Version-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025ProductionVersion: {
+    requestBody: {
+      content: {
+        "application/json": {
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025Version.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt2025TotalVersions: {
+    requestBody: {
+      content: {
+        "application/json": {
+          promptId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionCounts.string_"];
+        };
+      };
+    };
+  };
+  /** @description Get the full prompt body (messages, tools, etc.) for a specific prompt version. */
+  GetPrompt2025VersionBody: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_Prompt2025Version_91_prompt_body_93_.string_"];
+        };
+      };
+    };
+  };
+  HasPrompts: {
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__hasPrompts-boolean_.string_"];
+        };
+      };
+    };
+  };
+  GetPrompts: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptsQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptsResult-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPrompt: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptResult.string_"];
+        };
+      };
+    };
+  };
+  DeletePrompt: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    responses: {
+      /** @description No content */
+      204: {
+        content: never;
+      };
+    };
+  };
+  CreatePrompt: {
+    requestBody: {
+      content: {
+        "application/json": {
+          metadata: components["schemas"]["Record_string.any_"];
+          prompt: unknown;
+          userDefinedId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_CreatePromptResponse.string_"];
+        };
+      };
+    };
+  };
+  UpdatePromptUserDefinedId: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          userDefinedId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  EditPromptVersionLabel: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptEditSubversionLabelParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result__metadata-Record_string.any__.string_"];
+        };
+      };
+    };
+  };
+  EditPromptVersionTemplate: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptEditSubversionTemplateParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  CreateSubversionFromUi: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptCreateSubversionParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
+        };
+      };
+    };
+  };
+  CreateSubversion: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptCreateSubversionParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
+        };
+      };
+    };
+  };
+  PromotePromptVersionToProduction: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          previousProductionVersionId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
+        };
+      };
+    };
+  };
+  GetInputs: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          random?: boolean;
+          /** Format: double */
+          limit: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptInputRecord-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPromptVersions: {
+    parameters: {
+      path: {
+        promptId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptVersionsQueryParams"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResult-Array.string_"];
+        };
+      };
+    };
+  };
+  GetPromptVersion: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResult.string_"];
+        };
+      };
+    };
+  };
+  DeletePromptVersion: {
+    parameters: {
+      path: {
+        promptVersionId: string;
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_null.string_"];
+        };
+      };
+    };
+  };
+  GetPromptVersionsCompiled: {
+    parameters: {
+      path: {
+        user_defined_id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptVersiosQueryParamsCompiled"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResultCompiled.string_"];
+        };
+      };
+    };
+  };
+  GetPromptVersionTemplates: {
+    parameters: {
+      path: {
+        user_defined_id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PromptVersiosQueryParamsCompiled"];
+      };
+    };
+    responses: {
+      /** @description Ok */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Result_PromptVersionResultFilled.string_"];
+        };
+      };
+    };
+  };
   Generate: {
     requestBody: {
       content: {
@@ -8042,497 +6894,6 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["Result_HqlSavedQuery-Array.string_"];
-        };
-      };
-    };
-  };
-  CreateNewEmptyExperiment: {
-    requestBody: {
-      content: {
-        "application/json": {
-          datasetId: string;
-          metadata: components["schemas"]["Record_string.string_"];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
-        };
-      };
-    };
-  };
-  CreateNewExperimentTable: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateExperimentTableParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__tableId-string--experimentId-string_.string_"];
-        };
-      };
-    };
-  };
-  GetExperimentTableById: {
-    parameters: {
-      path: {
-        experimentTableId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ExperimentTable.string_"];
-        };
-      };
-    };
-  };
-  GetExperimentTableMetadata: {
-    parameters: {
-      path: {
-        experimentTableId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ExperimentTableSimplified.string_"];
-        };
-      };
-    };
-  };
-  GetExperimentTables: {
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_ExperimentTableSimplified-Array.string_"];
-        };
-      };
-    };
-  };
-  CreateExperimentCell: {
-    parameters: {
-      path: {
-        experimentTableId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          value: string | null;
-          /** Format: double */
-          rowIndex: number;
-          columnId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  UpdateExperimentCell: {
-    parameters: {
-      path: {
-        experimentTableId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          updateInputs?: boolean;
-          metadata?: string;
-          value?: string;
-          status?: string;
-          cellId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  CreateExperimentColumn: {
-    parameters: {
-      path: {
-        experimentTableId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          inputKeys?: string[];
-          promptVersionId?: string;
-          hypothesisId?: string;
-          columnType: string;
-          columnName: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  CreateExperimentTableRow: {
-    parameters: {
-      path: {
-        experimentTableId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          inputs?: components["schemas"]["Record_string.string_"];
-          sourceRequest?: string;
-          promptVersionId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  DeleteExperimentTableRow: {
-    parameters: {
-      path: {
-        experimentTableId: string;
-        rowIndex: number;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  CreateExperimentTableRowWithCellsBatch: {
-    parameters: {
-      path: {
-        experimentTableId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          rows: ({
-              sourceRequest?: string;
-              cells: ({
-                  metadata?: unknown;
-                  value: string | null;
-                  columnId: string;
-                })[];
-              datasetId: string;
-              inputs: components["schemas"]["Record_string.string_"];
-              inputRecordId: string;
-            })[];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  UpdateExperimentMeta: {
-    requestBody: {
-      content: {
-        "application/json": {
-          meta: components["schemas"]["Record_string.string_"];
-          experimentId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ResultError_string_"] | components["schemas"]["ResultSuccess_unknown_"];
-        };
-      };
-    };
-  };
-  CreateNewExperimentOld: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["NewExperimentParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__experimentId-string_.string_"];
-        };
-      };
-    };
-  };
-  CreateNewExperimentHypothesis: {
-    requestBody: {
-      content: {
-        "application/json": {
-          /** @enum {string} */
-          status: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
-          providerKeyId: string;
-          promptVersion: string;
-          model: string;
-          experimentId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__hypothesisId-string_.string_"];
-        };
-      };
-    };
-  };
-  GetExperimentHypothesisScores: {
-    parameters: {
-      path: {
-        hypothesisId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__runsCount-number--scores-Record_string.Score__.string_"];
-        };
-      };
-    };
-  };
-  CreateExperimentEvaluatorOld: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          evaluatorId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  RunExperimentEvaluatorsOld: {
-    parameters: {
-      path: {
-        experimentId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  DeleteExperimentEvaluatorOld: {
-    parameters: {
-      path: {
-        experimentId: string;
-        evaluatorId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_null.string_"];
-        };
-      };
-    };
-  };
-  GetExperimentsOld: {
-    requestBody: {
-      content: {
-        "application/json": {
-          include?: components["schemas"]["IncludeExperimentKeys"];
-          filter: components["schemas"]["ExperimentFilterNode"];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_Experiment-Array.string_"];
-        };
-      };
-    };
-  };
-  AddDataset: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["NewDatasetParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__datasetId-string_.string_"];
-        };
-      };
-    };
-  };
-  AddRandomDataset: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["RandomDatasetParams"];
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result__datasetId-string_.string_"];
-        };
-      };
-    };
-  };
-  GetDatasets: {
-    requestBody: {
-      content: {
-        "application/json": {
-          promptVersionId?: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_DatasetResult-Array.string_"];
-        };
-      };
-    };
-  };
-  InsertDatasetRow: {
-    parameters: {
-      path: {
-        datasetId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          originalColumnId?: string;
-          inputs: components["schemas"]["Record_string.string_"];
-          inputRecordId: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_string.string_"];
-        };
-      };
-    };
-  };
-  CreateDatasetRow: {
-    parameters: {
-      path: {
-        datasetId: string;
-        promptVersionId: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          sourceRequest?: string;
-          inputs: components["schemas"]["Record_string.string_"];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_string.string_"];
-        };
-      };
-    };
-  };
-  GetDataset: {
-    parameters: {
-      path: {
-        datasetId: string;
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result_PromptInputRecord-Array.string_"];
-        };
-      };
-    };
-  };
-  MutateDataset: {
-    requestBody: {
-      content: {
-        "application/json": {
-          removeRequests: string[];
-          addRequests: string[];
-        };
-      };
-    };
-    responses: {
-      /** @description Ok */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Result___-Array.string_"];
         };
       };
     };

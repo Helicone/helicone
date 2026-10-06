@@ -45,7 +45,6 @@ import {
   MetricsPanel,
   MetricsPanelProps,
 } from "../../shared/metrics/metricsPanel";
-import UpgradeProModal from "../../shared/upgradeProModal";
 import { formatLargeNumber } from "../../shared/utils/numberFormat";
 import useSearchParams from "../../shared/utils/useSearchParams";
 import UnauthorizedView from "../requests/UnauthorizedView";
@@ -98,7 +97,8 @@ const DashboardPage = (props: DashboardPageProps) => {
   // TODO: Move this to a hook and consolidate with the request page
   // Make the hook called like "useTimeFilter"
   // Get the default time filter from org settings, fallback to "7d"
-  const defaultTimeFilter = (orgContext?.currentOrg?.default_time_filter ?? "7d") as TimeInterval;
+  const defaultTimeFilter = (orgContext?.currentOrg?.default_time_filter ??
+    "7d") as TimeInterval;
 
   const getTimeFilter = () => {
     const currentTimeFilter = searchParams.get("t");
@@ -115,7 +115,9 @@ const DashboardPage = (props: DashboardPageProps) => {
       };
     } else {
       range = {
-        start: getTimeIntervalAgo((currentTimeFilter as TimeInterval) || defaultTimeFilter),
+        start: getTimeIntervalAgo(
+          (currentTimeFilter as TimeInterval) || defaultTimeFilter,
+        ),
         end: new Date(),
       };
     }
@@ -133,8 +135,6 @@ const DashboardPage = (props: DashboardPageProps) => {
     })(),
   );
   const [timeFilter, setTimeFilter] = useState<TimeFilter>(getTimeFilter());
-
-  const [open, setOpen] = useState(false);
 
   const timeIncrement = useMemo(
     () => getTimeInterval(timeFilter),
@@ -154,7 +154,8 @@ const DashboardPage = (props: DashboardPageProps) => {
   useEffect(() => {
     const currentTimeFilter = searchParams.get("t");
     if (!currentTimeFilter && orgContext?.currentOrg?.default_time_filter) {
-      const newDefaultInterval = orgContext.currentOrg.default_time_filter as TimeInterval;
+      const newDefaultInterval = orgContext.currentOrg
+        .default_time_filter as TimeInterval;
       setInterval(newDefaultInterval);
       setTimeFilter({
         start: getTimeIntervalAgo(newDefaultInterval),
@@ -1297,8 +1298,6 @@ const DashboardPage = (props: DashboardPageProps) => {
               open={openSuggestGraph}
               setOpen={setOpenSuggestGraph}
             />
-
-            <UpgradeProModal open={open} setOpen={setOpen} />
           </div>
         )}
       </div>

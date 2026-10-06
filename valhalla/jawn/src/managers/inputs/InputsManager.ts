@@ -198,16 +198,25 @@ export class InputsManager extends BaseManager {
     inputRecordId: string,
     inputs: Record<string, string>
   ): Promise<Result<string, string>> {
+    // prompt_input_record has no organization column of its own; ownership is
+    // reached through its prompt_version. Scope the write so a caller can only
+    // update records belonging to their own organization.
     const updateQuery = `
       UPDATE prompt_input_record
       SET inputs = COALESCE(inputs, '{}'::jsonb) || $1::jsonb
       WHERE id = $2
+      AND prompt_version IN (
+        SELECT pv.id
+        FROM prompts_versions pv
+        WHERE pv.organization = $3
+      )
       RETURNING id
     `;
 
     const result = await dbExecute<{ id: string }>(updateQuery, [
       JSON.stringify(inputs),
       inputRecordId,
+      this.authParams.organizationId,
     ]);
 
     if (result.error || !result.data?.[0]?.id) {

@@ -2,7 +2,10 @@ import {
   HandlerWrapperOptions,
   withAuth,
 } from "../../../lib/api/handlerWrappers";
-import { getAggregatedKeyMetrics } from "../../../lib/api/property/aggregatedKeyMetrics";
+import {
+  getAggregatedKeyMetrics,
+  safeLimit,
+} from "../../../lib/api/property/aggregatedKeyMetrics";
 import { resultsAll } from "@/packages/common/result";
 import { UnPromise } from "../../../lib/tsxHelpers";
 
@@ -26,7 +29,7 @@ async function handler(
     filter,
     timeFilter,
     userData.orgId,
-    req.body.limit,
+    safeLimit(req.body.limit),
     req.body.sortKey,
     req.body.sortDirection,
   );

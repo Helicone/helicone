@@ -56,7 +56,6 @@ import {
   templateToHeliconeTags,
 } from "@/utils/variables";
 import { autoFillInputs } from "@helicone/prompts";
-import { FlaskConicalIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { LLMRequestBody, Message } from "@helicone-package/llm-mapper/types";
@@ -79,7 +78,6 @@ import {
 } from "../../../../services/hooks/prompts/prompts";
 import { useGetRequestWithBodies } from "../../../../services/hooks/requests";
 import DeployDialog from "./DeployDialog";
-import { useExperiment } from "./hooks";
 import PromptMetricsTab from "./PromptMetricsTab";
 import { ProviderCard } from "@/components/providers/ProviderCard";
 import { providers } from "@/data/providers";
@@ -154,8 +152,6 @@ export default function PromptEditor({
   } = usePromptVersions(promptId ?? "");
   // - Notifications
   const { setNotification } = useNotification();
-  // - Experiment
-  const { newFromPromptVersion } = useExperiment();
   // - Create Prompt
   const { createPrompt, isCreating: isCreatingPrompt } = useCreatePrompt();
 
@@ -1352,25 +1348,6 @@ export default function PromptEditor({
               </TooltipContent>
             )}
           </Tooltip>
-
-          {/* Experiment Button */}
-          {promptId && (
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={newFromPromptVersion.isPending}
-              onClick={async () => {
-                const result = await newFromPromptVersion.mutateAsync({
-                  name: `${promptData?.user_defined_id}_V${state.version}.${state.versionId}`,
-                  originalPromptVersion: state.versionId ?? "",
-                });
-                router.push(`/experiments/${result.data?.data?.experimentId}`);
-              }}
-            >
-              <FlaskConicalIcon className="mr-2 h-4 w-4" />
-              <span>Experiment</span>
-            </Button>
-          )}
 
           {/* Deploy Button */}
           {promptId && (
