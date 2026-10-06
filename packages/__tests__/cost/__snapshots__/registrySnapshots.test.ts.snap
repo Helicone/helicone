@@ -3261,10 +3261,8 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       "modelId": "Llama-3.3-70B-Instruct-FP8",
       "parameters": [
         "frequency_penalty",
-        "logit_bias",
         "logprobs",
         "max_tokens",
-        "min_p",
         "presence_penalty",
         "repetition_penalty",
         "response_format",

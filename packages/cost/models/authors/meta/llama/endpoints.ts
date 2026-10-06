@@ -753,6 +753,7 @@ export const endpoints = {
     quantization: "fp8",
     contextLength: 131_072,
     maxCompletionTokens: 131_072,
+    // min_p and logit_bias are rejected on this deployment (speculative decoding).
     supportedParameters: [
       "tools",
       "tool_choice",
@@ -760,13 +761,11 @@ export const endpoints = {
       "temperature",
       "top_p",
       "top_k",
-      "min_p",
       "stop",
       "frequency_penalty",
       "presence_penalty",
       "repetition_penalty",
       "seed",
-      "logit_bias",
       "logprobs",
       "top_logprobs",
       "response_format",
