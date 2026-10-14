@@ -19,10 +19,20 @@ export async function withTimeout<T>(
   promise: Promise<T>,
   timeout: number
 ): Promise<T> {
-  const timeoutPromise = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error("Request timed out")), timeout)
-  );
-  return (await Promise.race([promise, timeoutPromise])) as T;
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutId = setTimeout(
+      () => reject(new Error("Request timed out")),
+      timeout
+    );
+  });
+  try {
+    return (await Promise.race([promise, timeoutPromise])) as T;
+  } finally {
+    if (timeoutId !== undefined) {
+      clearTimeout(timeoutId);
+    }
+  }
 }
 
 export function enumerate<T>(arr: T[]): [number, T][] {

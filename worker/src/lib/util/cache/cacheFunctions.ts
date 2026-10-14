@@ -146,13 +146,17 @@ export async function getCachedResponse(
   cacheSeed: string | null
 ): Promise<Response | null> {
   const CACHE_TIMEOUT = 2000;
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
   try {
     const { requests: requestCaches, freeIndexes } = (await Promise.race([
       getMaxCachedResponses(request, settings, cacheKv, cacheSeed),
-      new Promise((resolve, reject) =>
-        setTimeout(() => reject(new Error("Cache timeout")), CACHE_TIMEOUT)
-      ),
+      new Promise((resolve, reject) => {
+        timeoutId = setTimeout(
+          () => reject(new Error("Cache timeout")),
+          CACHE_TIMEOUT
+        );
+      }),
     ])) as {
       requests: {
         headers: Record<string, string>;
@@ -207,6 +211,10 @@ export async function getCachedResponse(
   } catch (error) {
     console.error("Error fetching cache:", error);
     return null;
+  } finally {
+    if (timeoutId !== undefined) {
+      clearTimeout(timeoutId);
+    }
   }
 }
 
