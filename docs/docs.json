@@ -240,7 +240,8 @@
                   "getting-started/integration-method/crewai",
                   "other-integrations/dify",
                   "gateway/integrations/llamaindex",
-                  "other-integrations/ragas"
+                  "other-integrations/ragas",
+                  "other-integrations/tealtiger"
                 ]
               },
               {
