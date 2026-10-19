@@ -232,7 +232,8 @@ export function calculateModelCostBreakdown(params: {
   breakdown.outputCost = modelUsage.output * outputPricing.output;
 
   if (modelUsage.thinking) {
-    const thinkingRate = basePricing.thinking ?? basePricing.output;
+    // Thinking tokens are billed as output, so they follow the same tier as output tokens
+    const thinkingRate = outputPricing.thinking ?? outputPricing.output;
     breakdown.thinkingCost = modelUsage.thinking * thinkingRate;
   }
 
