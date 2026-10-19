@@ -1,0 +1,93 @@
+---
+title: "DaoXE Integration"
+sidebarTitle: "DaoXE"
+description: "Connect Helicone with DaoXE, a multi-model multi-protocol AI gateway. Monitor Chat Completions traffic through Helicone Gateway with Helicone-Target-Url."
+"twitter:title": "DaoXE Integration - Helicone OSS LLM Observability"
+---
+
+import LegacyWarning from "/snippets/legacy-provider-warning.mdx";
+
+<LegacyWarning />
+
+[DaoXE](https://daoxe.com) is a multi-model multi-protocol API gateway with an OpenAI-compatible Chat Completions endpoint at `https://daoxe.com/v1`. Use an exact model ID from your DaoXE account catalog (`GET /v1/models`). DaoXE is not available in mainland China.
+
+# Gateway Integration
+
+Use Helicone Gateway and point the target URL at DaoXE. This does **not** require a dedicated Helicone subdomain.
+
+<Steps>
+  <Step title="Create a Helicone account">
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you
+    can generate an [API key](https://helicone.ai/developer).
+  </Step>
+  <Step title="Create a DaoXE account">
+    Log into [daoxe.com](https://daoxe.com) or create an account. Generate an API key from the
+    [dashboard](https://daoxe.com/dashboard).
+  </Step>
+  <Step title="Set environment variables">
+```bash
+HELICONE_API_KEY=<your Helicone API key>
+DAOXE_API_KEY=<your DaoXE API key>
+DAOXE_MODEL=<exact model ID from GET /v1/models>
+```
+  </Step>
+  <Step title="Send traffic through Helicone Gateway">
+
+Point the OpenAI client at Helicone Gateway and set `Helicone-Target-Url` to DaoXE:
+
+```
+base_url: https://gateway.helicone.ai/v1
+Helicone-Auth: Bearer $HELICONE_API_KEY
+Helicone-Target-Url: https://daoxe.com
+Authorization: Bearer $DAOXE_API_KEY
+```
+
+</Step>
+</Steps>
+
+## Example (Python)
+
+```python
+from openai import OpenAI
+import os
+
+client = OpenAI(
+    api_key=os.environ["DAOXE_API_KEY"],
+    base_url="https://gateway.helicone.ai/v1",
+    default_headers={
+        "Helicone-Auth": f"Bearer {os.environ['HELICONE_API_KEY']}",
+        "Helicone-Target-Url": "https://daoxe.com",
+        "Helicone-Target-Provider": "DaoXE",
+    },
+)
+
+resp = client.chat.completions.create(
+    model=os.environ["DAOXE_MODEL"],
+    messages=[{"role": "user", "content": "Say hello in one short sentence."}],
+)
+print(resp.choices[0].message.content)
+```
+
+## Example (cURL)
+
+```bash
+curl https://gateway.helicone.ai/v1/chat/completions \
+  -H "Authorization: Bearer $DAOXE_API_KEY" \
+  -H "Helicone-Auth: Bearer $HELICONE_API_KEY" \
+  -H "Helicone-Target-Url: https://daoxe.com" \
+  -H "Helicone-Target-Provider: DaoXE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "'"$DAOXE_MODEL"'",
+    "messages": [{"role": "user", "content": "Say hello in one short sentence."}]
+  }'
+```
+
+## Notes
+
+- Prefer exact account model IDs from DaoXE `GET /v1/models` — do not hardcode a public model price list.
+- DaoXE also exposes OpenAI Responses and Anthropic Messages for other clients; this page covers the Chat Completions path used with the OpenAI SDK.
+- For domain approval / dedicated subdomain requests, contact Helicone engineering (see [Gateway approved domains](/getting-started/integration-method/gateway#approved-domains)).
+
+For more headers, see [Helicone Headers](/helicone-headers/header-directory).  
+DaoXE examples: [github.com/seven7763/DaoXE-AI](https://github.com/seven7763/DaoXE-AI)

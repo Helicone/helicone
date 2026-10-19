@@ -192,6 +192,7 @@
                   "getting-started/integration-method/hyperbolic",
                   "getting-started/integration-method/mistral",
                   "getting-started/integration-method/nebius",
+                  "getting-started/integration-method/daoxe",
                   "getting-started/integration-method/novita",
                   {
                     "group": "Nvidia",
