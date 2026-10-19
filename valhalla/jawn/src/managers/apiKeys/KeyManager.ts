@@ -5,6 +5,7 @@ import { AuthParams } from "../../packages/common/auth/types";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { Result, err, isError, ok } from "../../packages/common/result";
 import { hashAuth } from "../../utils/hash";
+import { maskProviderSecret } from "../../utils/providerKeyAccess";
 import { BaseManager } from "../BaseManager";
 import { DecryptedProviderKey } from "../VaultManager";
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
@@ -35,6 +36,20 @@ export interface ProviderKeyRow {
   config?: Record<string, any>;
   byok_enabled?: boolean;
   cuid?: string;
+}
+
+/**
+ * Provider key as returned to API callers. The secret values are masked and
+ * can never be used to call the provider (INC-710).
+ */
+export interface MaskedProviderKey {
+  id: string;
+  org_id: string;
+  provider_name: string;
+  provider_key_name: string;
+  cuid: string | null;
+  provider_key_masked: string | null;
+  provider_secret_key_masked: string | null;
 }
 
 type HashedPasswordRow = {
@@ -495,6 +510,31 @@ export class KeyManager extends BaseManager {
     } catch (error) {
       return err(`Failed to get decrypted provider key: ${error}`);
     }
+  }
+
+  /**
+   * Get a provider key with its secret values masked. This is the only shape
+   * that should ever leave Jawn over HTTP; plaintext provider keys stay
+   * server-side.
+   */
+  async getMaskedProviderKeyById(
+    providerKeyId: string
+  ): Promise<Result<MaskedProviderKey, string>> {
+    const decrypted = await this.getDecryptedProviderKeyById(providerKeyId);
+    if (decrypted.error || !decrypted.data) {
+      return err(decrypted.error ?? "Provider key not found");
+    }
+
+    const key = decrypted.data;
+    return ok({
+      id: key.id ?? providerKeyId,
+      org_id: key.org_id ?? this.authParams.organizationId,
+      provider_name: key.provider_name ?? "",
+      provider_key_name: key.provider_key_name ?? "",
+      cuid: key.cuid ?? null,
+      provider_key_masked: maskProviderSecret(key.provider_key),
+      provider_secret_key_masked: maskProviderSecret(key.provider_secret_key),
+    });
   }
 
   private async hasAccessToProviderKey(

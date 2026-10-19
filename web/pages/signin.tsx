@@ -183,16 +183,10 @@ const SignIn = ({
                 <div className="flex flex-col items-center text-center gap-6">
                   <div className="flex flex-col gap-3">
                     <h2 className="text-2xl font-semibold text-gray-900">
-                      🚀 Helicone has joined Mintlify
+                      Helicone is no longer part of Mintlify
                     </h2>
                     <p className="text-sm text-gray-600">
-                      New signups are disabled.{" "}
-                      <Link
-                        href="https://www.helicone.ai/blog/joining-mintlify"
-                        className="text-sky-500 hover:text-sky-700"
-                      >
-                        Learn more about what&apos;s next →
-                      </Link>
+                      New signups are disabled. Details to come soon.
                     </p>
                   </div>
 

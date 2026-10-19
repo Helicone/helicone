@@ -25,6 +25,10 @@ import {
 } from "./util/tokenLimitException";
 import { Provider } from "@helicone-package/llm-mapper/types";
 import { getAndStoreInCache } from "./util/cache/secureCache";
+import {
+  checkOrgProviderKeyOwnership,
+  needsResellerTypeCheck,
+} from "../../../packages/common/providerKeys/orgProviderKeyOwnership";
 import { Result, err, map, mapPostgrestErr, ok } from "./util/results";
 import { parseJSXObject } from "@helicone/prompts";
 import { HELICONE_API_KEY_REGEX } from "./util/apiKeyRegex";
@@ -772,19 +776,61 @@ export async function getProviderKeyFromPortalKey(
     .from("helicone_api_keys")
     .select("*")
     .eq("api_key_hash", await hash(authKey))
+    .eq("soft_delete", false)
     .single();
+
+  if (apiKey.error || !apiKey.data?.organization_id) {
+    return err("API key not found");
+  }
 
   const organization = await supabaseClient
     .from("organization")
     .select("*")
-    .eq("id", apiKey.data?.organization_id ?? "")
+    .eq("id", apiKey.data.organization_id)
+    .eq("soft_delete", false)
     .single();
+
+  if (organization.error || !organization.data?.org_provider_key) {
+    return err("Organization has no provider key");
+  }
 
   const providerKeyId = await supabaseClient
     .from("provider_keys")
     .select("*")
-    .eq("id", organization.data?.org_provider_key ?? "")
+    .eq("id", organization.data.org_provider_key)
+    .eq("soft_delete", false)
     .single();
+
+  // INC-710 defense in depth: only use org_provider_key when the provider key
+  // belongs to this organization or to the reseller that created it.
+  // reseller_id is not in the generated types, so read it defensively.
+  const orgId = organization.data.id;
+  const resellerId =
+    (organization.data as { reseller_id?: string | null }).reseller_id ??
+    null;
+  const providerKeyOrgId = providerKeyId.data?.org_id ?? null;
+  let resellerOrganizationType: string | null = null;
+  if (needsResellerTypeCheck({ orgId, resellerId, providerKeyOrgId })) {
+    const reseller = await supabaseClient
+      .from("organization")
+      .select("organization_type")
+      .eq("id", resellerId ?? "")
+      .eq("soft_delete", false)
+      .single();
+    resellerOrganizationType = reseller.data?.organization_type ?? null;
+  }
+  const ownership = checkOrgProviderKeyOwnership({
+    orgId,
+    resellerId,
+    providerKeyOrgId,
+    resellerOrganizationType,
+  });
+  if (!ownership.allowed) {
+    console.warn(
+      `[INC-710] Refusing org_provider_key for organization ${orgId}: ${ownership.reason} (provider key ${organization.data.org_provider_key}, provider key org ${providerKeyOrgId ?? "none"})`
+    );
+    return err("Provider key not found");
+  }
 
   const check = await checkLimitsSingle(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

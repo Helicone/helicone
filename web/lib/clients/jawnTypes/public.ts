@@ -10,6 +10,11 @@ interface JsonObject { [key: string]: JsonValue; }
 
 export interface paths {
   "/v1/api-keys/provider-key/{providerKeyId}": {
+    /**
+     * @description Returns provider key metadata with the secret values MASKED. Plaintext
+     * provider keys are never returned over HTTP (INC-710). Requires a signed-in
+     * organization owner or admin; Helicone API keys are rejected.
+     */
     get: operations["GetProviderKey"];
     delete: operations["DeleteProviderKey"];
     patch: operations["UpdateProviderKey"];
@@ -18,6 +23,7 @@ export interface paths {
     post: operations["CreateProviderKey"];
   };
   "/v1/api-keys/provider-keys": {
+    /** @description Lists provider key metadata only (no key material, encrypted or not). */
     get: operations["GetProviderKeys"];
   };
   "/v1/api-keys": {
@@ -644,14 +650,18 @@ export interface components {
       providerKey: string;
       providerName: string;
     };
-    DecryptedProviderKey: {
-      cuid?: string | null;
-      provider_secret_key: string | null;
-      provider_key_name: string | null;
-      provider_name: string | null;
-      provider_key: string | null;
-      org_id: string | null;
-      id: string | null;
+    /**
+     * @description Provider key as returned to API callers. The secret values are masked and
+     * can never be used to call the provider (INC-710).
+     */
+    MaskedProviderKey: {
+      id: string;
+      org_id: string;
+      provider_name: string;
+      provider_key_name: string;
+      cuid: string | null;
+      provider_key_masked: string | null;
+      provider_secret_key_masked: string | null;
     };
     /** @description Construct a type with a set of properties K of type T */
     "Record_string.any_": {
@@ -1654,6 +1664,15 @@ Json: JsonObject;
       key: string;
       provider: string;
       name?: string;
+    };
+    DecryptedProviderKey: {
+      cuid?: string | null;
+      provider_secret_key: string | null;
+      provider_key_name: string | null;
+      provider_name: string | null;
+      provider_key: string | null;
+      org_id: string | null;
+      id: string | null;
     };
     "ResultSuccess_DecryptedProviderKey-Array_": {
       data: components["schemas"]["DecryptedProviderKey"][];
@@ -4090,6 +4109,11 @@ export type external = Record<string, never>;
 
 export interface operations {
 
+  /**
+   * @description Returns provider key metadata with the secret values MASKED. Plaintext
+   * provider keys are never returned over HTTP (INC-710). Requires a signed-in
+   * organization owner or admin; Helicone API keys are rejected.
+   */
   GetProviderKey: {
     parameters: {
       path: {
@@ -4100,7 +4124,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["DecryptedProviderKey"] | {
+          "application/json": components["schemas"]["MaskedProviderKey"] | {
             error: string;
           };
         };
@@ -4166,6 +4190,7 @@ export interface operations {
       };
     };
   };
+  /** @description Lists provider key metadata only (no key material, encrypted or not). */
   GetProviderKeys: {
     responses: {
       /** @description Ok */

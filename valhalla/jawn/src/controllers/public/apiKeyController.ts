@@ -17,6 +17,10 @@ import { KeyManager } from "../../managers/apiKeys/KeyManager";
 import { setAPIKey } from "../../lib/refetchKeys";
 import { dbProviderToProvider } from "@helicone-package/cost/models/provider-helpers";
 import { err, isError, ok, Result } from "../../packages/common/result";
+import { isJwtOrgAdmin } from "../../utils/providerKeyAccess";
+
+const PROVIDER_KEY_FORBIDDEN =
+  "Forbidden: managing provider keys requires a signed-in organization owner or admin. Helicone API keys cannot read or modify provider keys.";
 
 export type UpdateProviderKeyRequest = {
   providerKey?: string;
@@ -43,6 +47,11 @@ export class ApiKeyController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Path() providerKeyId: string
   ) {
+    if (!isJwtOrgAdmin(request.authParams)) {
+      this.setStatus(403);
+      return { error: PROVIDER_KEY_FORBIDDEN };
+    }
+
     const keyManager = new KeyManager(request.authParams);
     const result = await keyManager.deleteProviderKey(providerKeyId);
 
@@ -69,6 +78,11 @@ export class ApiKeyController extends Controller {
     @Body()
     body: CreateProviderKeyRequest
   ) {
+    if (!isJwtOrgAdmin(request.authParams)) {
+      this.setStatus(403);
+      return { error: PROVIDER_KEY_FORBIDDEN };
+    }
+
     const keyManager = new KeyManager(request.authParams);
     const result = await keyManager.createProviderKey(body);
 
@@ -88,23 +102,36 @@ export class ApiKeyController extends Controller {
     return result.data;
   }
 
+  /**
+   * Returns provider key metadata with the secret values MASKED. Plaintext
+   * provider keys are never returned over HTTP (INC-710). Requires a signed-in
+   * organization owner or admin; Helicone API keys are rejected.
+   */
   @Get("/provider-key/{providerKeyId}")
   public async getProviderKey(
     @Request() request: JawnAuthenticatedRequest,
     @Path() providerKeyId: string
   ) {
-    const keyManager = new KeyManager(request.authParams);
-    const result = await keyManager.getDecryptedProviderKeyById(providerKeyId);
-
-    if (result.error) {
-      this.setStatus(500);
-      return { error: result.error };
+    if (!isJwtOrgAdmin(request.authParams)) {
+      this.setStatus(403);
+      return { error: PROVIDER_KEY_FORBIDDEN };
     }
 
-    // Return the decrypted key data directly
+    const keyManager = new KeyManager(request.authParams);
+    const result = await keyManager.getMaskedProviderKeyById(providerKeyId);
+
+    if (result.error || !result.data) {
+      // Same response for "does not exist" and "belongs to another org".
+      this.setStatus(404);
+      return { error: "Provider key not found" };
+    }
+
     return result.data;
   }
 
+  /**
+   * Lists provider key metadata only (no key material, encrypted or not).
+   */
   @Get("/provider-keys")
   public async getProviderKeys(@Request() request: JawnAuthenticatedRequest) {
     const keyManager = new KeyManager(request.authParams);
@@ -118,7 +145,6 @@ export class ApiKeyController extends Controller {
     return result.data;
   }
 
-
   @Patch("/provider-key/{providerKeyId}")
   public async updateProviderKey(
     @Request() request: JawnAuthenticatedRequest,
@@ -126,6 +152,11 @@ export class ApiKeyController extends Controller {
     @Body()
     body: UpdateProviderKeyRequest
   ): Promise<Result<{ id: string; providerName: string }, string>> {
+    if (!isJwtOrgAdmin(request.authParams)) {
+      this.setStatus(403);
+      return err(PROVIDER_KEY_FORBIDDEN);
+    }
+
     const keyManager = new KeyManager(request.authParams);
     const result = await keyManager.updateProviderKey({
       providerKeyId,
