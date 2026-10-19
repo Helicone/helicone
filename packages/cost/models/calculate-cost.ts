@@ -178,7 +178,12 @@ export function calculateModelCostBreakdown(params: {
     providerModelId,
     provider,
   );
-  if (configResult.error || !configResult.data) return null;
+  if (configResult.error || !configResult.data) {
+    console.warn(
+      `No pricing found in the model registry for providerModelId "${providerModelId}" (provider "${provider}"); cost cannot be calculated`
+    );
+    return null;
+  }
 
   const config: ModelProviderConfig = configResult.data;
 
