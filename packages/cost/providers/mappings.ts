@@ -1,5 +1,6 @@
 import { ModelDetailsMap, ModelRow } from "../interfaces/Cost";
 import { anthropicProvider } from "./anthropic";
+import { costs as abstractCosts } from "./abstract";
 import { costs as avianCosts } from "./avian";
 import { costs as awsBedrockCosts } from "./aws/awsBedrock";
 import { costs as awsNovaCosts } from "./aws/awsNova";
@@ -94,6 +95,9 @@ const cerebras = /^https:\/\/api\.cerebras\.ai/;
 // https://inference.canopywave.io
 const canopywave = /^https:\/\/inference\.canopywave\.io/;
 
+// https://api.abstract.inc
+const abstract = /^https:\/\/api\.abstract\.inc/;
+
 export const providersNames = [
   "OPENAI",
   "ANTHROPIC",
@@ -132,6 +136,7 @@ export const providersNames = [
   "CEREBRAS",
   "BASETEN",
   "CANOPYWAVE",
+  "ABSTRACT",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -325,7 +330,12 @@ export const providers: {
     pattern: canopywave,
     provider: "CANOPYWAVE",
     costs: [],
-  }
+  },
+  {
+    pattern: abstract,
+    provider: "ABSTRACT",
+    costs: abstractCosts,
+  },
 ];
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
