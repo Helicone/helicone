@@ -25,6 +25,10 @@ export type UpdateOrganizationParams = Pick<
   variant?: string;
 };
 
+// Organization types a caller may create through the API. Reseller
+// organizations are provisioned out of band.
+const CREATABLE_ORGANIZATION_TYPES = ["user", "customer"];
+
 export type FilterRow = {
   filterMapIdx: number;
   operatorIdx: number;
@@ -116,22 +120,89 @@ export class OrganizationManager extends BaseManager {
       return err("Unauthorized");
     }
 
-    if (createOrgParams.organization_type === "customer") {
-      const org = await this.getOrg();
-      if (org.data?.organization_type !== "reseller") {
-        return err("Only resellers can create customers");
-      }
+    const organizationType = createOrgParams.organization_type ?? "user";
+    if (!CREATABLE_ORGANIZATION_TYPES.includes(organizationType)) {
+      return err("Invalid organization type");
     }
 
     if (createOrgParams.tier !== "free") {
       return err("Only free tier is supported");
     }
-    const insert =
-      await this.organizationStore.createNewOrganization(createOrgParams);
+
+    // INC-710: org_provider_key attaches a stored provider key to every
+    // request made with this organization's customer-portal API keys. It may
+    // only be set when a reseller creates a customer organization, and only to
+    // a provider key the reseller organization itself owns. The reseller is
+    // always the caller's current organization, never a request-body value.
+    let resellerId: string | null = null;
+    if (organizationType === "customer") {
+      const reseller = await this.authorizeResellerCaller();
+      if (reseller.error !== null) {
+        return err(reseller.error);
+      }
+      resellerId = reseller.data;
+    }
+
+    const orgProviderKey = createOrgParams.org_provider_key ?? null;
+    if (orgProviderKey !== null) {
+      if (resellerId === null) {
+        return err(
+          "org_provider_key can only be set by a reseller on a customer organization"
+        );
+      }
+      const owned = await this.organizationStore.isProviderKeyOwnedByOrg(
+        orgProviderKey,
+        resellerId
+      );
+      if (owned.error !== null) {
+        return err(owned.error);
+      }
+      if (!owned.data) {
+        return err("Provider key not found");
+      }
+    }
+
+    const insert = await this.organizationStore.createNewOrganization(
+      {
+        ...createOrgParams,
+        organization_type: organizationType,
+        org_provider_key: orgProviderKey,
+      },
+      resellerId
+    );
     if (insert.error || !insert.data) {
       return err(insert.error);
     }
     return ok(insert.data);
+  }
+
+  /**
+   * Confirms the caller is acting from a reseller organization they
+   * administer and returns that organization's id.
+   */
+  private async authorizeResellerCaller(): Promise<Result<string, string>> {
+    if (!this.authParams.userId) return err("Unauthorized");
+    const org = await this.getOrg();
+    if (
+      org.error ||
+      !org.data ||
+      org.data.organization_type !== "reseller" ||
+      org.data.soft_delete
+    ) {
+      return err("Only resellers can create customers");
+    }
+    const member = await this.organizationStore.getOrganizationMember(
+      this.authParams.userId,
+      org.data.id
+    );
+    if (
+      member.error !== null ||
+      !member.data ||
+      (member.data.org_role !== "owner" && member.data.org_role !== "admin")
+    ) {
+      return err("Only reseller admins can create customers");
+    }
+    return ok(org.data.id);
   }
 
   async updateOrganization(
@@ -139,6 +210,14 @@ export class OrganizationManager extends BaseManager {
     organizationId: string
   ): Promise<Result<string, string>> {
     if (!this.authParams.userId) return err("Unauthorized");
+    // INC-710: the provider key attached to an organization is fixed at
+    // creation by its reseller and is never updatable by clients.
+    if (
+      updateOrgParams.org_provider_key !== undefined &&
+      updateOrgParams.org_provider_key !== null
+    ) {
+      return err("org_provider_key cannot be updated");
+    }
     const hasAccess = await this.organizationStore.checkAccessToMutateOrg(
       organizationId,
       this.authParams.userId

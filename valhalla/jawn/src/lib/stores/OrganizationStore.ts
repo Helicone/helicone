@@ -15,30 +15,57 @@ import { err, ok, Result } from "../../packages/common/result";
 import { BaseStore } from "./baseStore";
 
 export class OrganizationStore extends BaseStore {
+  /**
+   * Callers must authorize org_provider_key and resellerId first (see
+   * OrganizationManager.createOrganization). reseller_id is only written for
+   * customer organizations, so ordinary organization creation does not
+   * depend on that column.
+   */
   async createNewOrganization(
-    createOrgParams: NewOrganizationParams
+    createOrgParams: NewOrganizationParams,
+    resellerId: string | null = null
   ): Promise<Result<NewOrganizationParams, string>> {
     try {
+      const columns = [
+        "name",
+        "owner",
+        "tier",
+        "is_personal",
+        "has_onboarded",
+        "soft_delete",
+        "organization_type",
+        "limits",
+        "color",
+        "icon",
+        "stripe_customer_id",
+        "org_provider_key",
+      ];
+      const values: unknown[] = [
+        createOrgParams.name,
+        createOrgParams.owner,
+        createOrgParams.tier,
+        createOrgParams.is_personal ?? false,
+        createOrgParams.has_onboarded ?? false,
+        createOrgParams.soft_delete ?? false,
+        createOrgParams.organization_type ?? "user",
+        createOrgParams.limits ?? {},
+        createOrgParams.color,
+        createOrgParams.icon,
+        createOrgParams.stripe_customer_id,
+        createOrgParams.org_provider_key ?? null,
+      ];
+      if (resellerId !== null) {
+        columns.push("reseller_id");
+        values.push(resellerId);
+      }
+      const placeholders = values.map((_, i) => `$${i + 1}`).join(", ");
+
       // Insert the organization and return the inserted record
       const orgResult = await dbExecute<NewOrganizationParams>(
-        `INSERT INTO organization (name, owner, tier, is_personal, has_onboarded, soft_delete, 
-          organization_type, limits, color, icon, stripe_customer_id, org_provider_key)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        `INSERT INTO organization (${columns.join(", ")})
+         VALUES (${placeholders})
          RETURNING *`,
-        [
-          createOrgParams.name,
-          createOrgParams.owner,
-          createOrgParams.tier,
-          createOrgParams.is_personal ?? false,
-          createOrgParams.has_onboarded ?? false,
-          createOrgParams.soft_delete ?? false,
-          createOrgParams.organization_type ?? "user",
-          createOrgParams.limits ?? {},
-          createOrgParams.color,
-          createOrgParams.icon,
-          createOrgParams.stripe_customer_id,
-          createOrgParams.org_provider_key,
-        ]
+        values
       );
 
       if (orgResult.error || !orgResult.data || orgResult.data.length === 0) {
@@ -67,6 +94,22 @@ export class OrganizationStore extends BaseStore {
       console.error("Failed to create organization:", error);
       return err(String(error));
     }
+  }
+
+  async isProviderKeyOwnedByOrg(
+    providerKeyId: string,
+    orgId: string
+  ): Promise<Result<boolean, string>> {
+    const result = await dbExecute<{ id: string }>(
+      `SELECT id FROM provider_keys
+       WHERE id = $1 AND org_id = $2 AND soft_delete = false
+       LIMIT 1`,
+      [providerKeyId, orgId]
+    );
+    if (result.error) {
+      return err(result.error);
+    }
+    return ok((result.data?.length ?? 0) > 0);
   }
 
   async createStarterOrg(userId: string): Promise<Result<string, string>> {

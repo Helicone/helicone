@@ -386,46 +386,45 @@
 				],
 				"type": "object"
 			},
-			"DecryptedProviderKey": {
+			"MaskedProviderKey": {
+				"description": "Provider key as returned to API callers. The secret values are masked and\ncan never be used to call the provider (INC-710).",
 				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"org_id": {
+						"type": "string"
+					},
+					"provider_name": {
+						"type": "string"
+					},
+					"provider_key_name": {
+						"type": "string"
+					},
 					"cuid": {
 						"type": "string",
 						"nullable": true
 					},
-					"provider_secret_key": {
+					"provider_key_masked": {
 						"type": "string",
 						"nullable": true
 					},
-					"provider_key_name": {
-						"type": "string",
-						"nullable": true
-					},
-					"provider_name": {
-						"type": "string",
-						"nullable": true
-					},
-					"provider_key": {
-						"type": "string",
-						"nullable": true
-					},
-					"org_id": {
-						"type": "string",
-						"nullable": true
-					},
-					"id": {
+					"provider_secret_key_masked": {
 						"type": "string",
 						"nullable": true
 					}
 				},
 				"required": [
-					"provider_secret_key",
-					"provider_key_name",
-					"provider_name",
-					"provider_key",
+					"id",
 					"org_id",
-					"id"
+					"provider_name",
+					"provider_key_name",
+					"cuid",
+					"provider_key_masked",
+					"provider_secret_key_masked"
 				],
-				"type": "object"
+				"type": "object",
+				"additionalProperties": false
 			},
 			"Record_string.any_": {
 				"properties": {},
@@ -46723,7 +46722,7 @@
 								"schema": {
 									"anyOf": [
 										{
-											"$ref": "#/components/schemas/DecryptedProviderKey"
+											"$ref": "#/components/schemas/MaskedProviderKey"
 										},
 										{
 											"properties": {
@@ -46742,6 +46741,7 @@
 						}
 					}
 				},
+				"description": "Returns provider key metadata with the secret values MASKED. Plaintext\nprovider keys are never returned over HTTP (INC-710). Requires a signed-in\norganization owner or admin; Helicone API keys are rejected.",
 				"tags": [
 					"API Key"
 				],
@@ -46897,6 +46897,7 @@
 						}
 					}
 				},
+				"description": "Lists provider key metadata only (no key material, encrypted or not).",
 				"tags": [
 					"API Key"
 				],
