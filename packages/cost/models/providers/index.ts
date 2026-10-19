@@ -1,4 +1,5 @@
 import { AnthropicProvider } from "./anthropic";
+import { AtlasCloudProvider } from "./atlascloud";
 import { AzureOpenAIProvider } from "./azure";
 import { BasetenProvider } from "./baseten";
 import { BedrockProvider } from "./bedrock";
@@ -24,6 +25,7 @@ import { XAIProvider } from "./xai";
 export const providers = {
   baseten: new BasetenProvider(),
   anthropic: new AnthropicProvider(),
+  atlascloud: new AtlasCloudProvider(),
   azure: new AzureOpenAIProvider(),
   bedrock: new BedrockProvider(),
   canopywave: new CanopyWaveProvider(),

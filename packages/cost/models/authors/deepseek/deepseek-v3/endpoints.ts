@@ -283,6 +283,45 @@ export const endpoints = {
       "*": {},
     },
   },
+  "deepseek-v3.1-terminus:atlascloud": {
+    provider: "atlascloud",
+    author: "deepseek",
+    providerModelId: "deepseek-ai/DeepSeek-V3.1-Terminus",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000003, // $0.30 per 1M tokens
+        output: 0.00000095, // $0.95 per 1M tokens
+        cacheMultipliers: {
+          cachedInput: 0.4333, // $0.13 per 1M tokens (cache hit) = $0.30 * 0.4333
+        },
+      },
+    ],
+    quantization: "fp8",
+    contextLength: 131_072,
+    maxCompletionTokens: 65_536,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "top_k",
+      "min_p",
+      "repetition_penalty",
+      "logit_bias",
+      "response_format",
+      "structured_outputs",
+    ],
+    ptbEnabled: true,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${DeepSeekV3ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;
