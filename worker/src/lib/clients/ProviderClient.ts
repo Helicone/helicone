@@ -5,6 +5,12 @@ import {
 import retry from "async-retry";
 import { llmmapper } from "./llmmapper/llmmapper";
 import { ValidRequestBody } from "../../RequestBodyBuffer/IRequestBodyBuffer";
+import { buildProviderRequestHeaders } from "../security/outboundHeaders";
+import {
+  CredentialPin,
+  isTargetAllowedForPin,
+  pinnedTargetRejection,
+} from "../security/credentialPin";
 
 export interface CallProps {
   headers: Headers;
@@ -15,6 +21,12 @@ export interface CallProps {
   originalUrl: URL;
   extraHeaders: Headers | null;
   env: Env;
+  /**
+   * Set when the request carries a provider key Helicone injected (vault or
+   * AI Gateway BYOK). The target must then be that provider's first-party
+   * origin.
+   */
+  credentialPin?: CredentialPin | null;
 }
 
 export function callPropsFromProxyRequest(
@@ -30,35 +42,13 @@ export function callPropsFromProxyRequest(
     originalUrl: proxyRequest.requestWrapper.url,
     extraHeaders: proxyRequest.requestWrapper.extraHeaders,
     env: proxyRequest.env,
+    credentialPin: proxyRequest.requestWrapper.getCredentialPin(),
   };
 }
 
-function removeHeliconeHeaders(request: Headers, removeAuth: boolean = false): Headers {
-  const newHeaders = new Headers();
-  for (const [key, value] of request.entries()) {
-    const lowerKey = key.toLowerCase();
-    if (lowerKey.startsWith("helicone-")) {
-      continue;
-    }
-    // Remove Authorization header if requested (for URL-based auth providers)
-    if (removeAuth && lowerKey === "authorization") {
-      continue;
-    }
-    newHeaders.set(key, value);
-  }
-  return newHeaders;
-}
-
-function joinHeaders(h1: Headers, h2: Headers): Headers {
-  const newHeaders = new Headers();
-  for (const [key, value] of h1.entries()) {
-    newHeaders.set(key, value);
-  }
-  for (const [key, value] of h2.entries()) {
-    newHeaders.set(key, value);
-  }
-  return newHeaders;
-}
+// Provider credentials are never forwarded across a redirect: a 3xx from the
+// target is returned to the caller as-is instead of being followed.
+const PROVIDER_FETCH_REDIRECT = "manual" as const;
 
 async function callWithMapper(
   targetUrl: URL,
@@ -66,11 +56,13 @@ async function callWithMapper(
     | {
       method: string;
       headers: Headers;
+      redirect?: RequestInit["redirect"];
     }
     | {
       body: string;
       method: string;
       headers: Headers;
+      redirect?: RequestInit["redirect"];
     }
 ): Promise<Response> {
   if (targetUrl.host === "gateway.llmmapper.com") {
@@ -104,15 +96,13 @@ export async function callProvider(props: CallProps): Promise<Response> {
   const { headers, method, apiBase, body, increaseTimeout, originalUrl, env } =
     props;
 
-  const mockResponseHeader = headers.get("__helicone-mock-response");
+  // Mock responses short-circuit the provider call. Only honoured in local
+  // development; elsewhere the header is ignored (and never forwarded).
+  const mockResponseHeader =
+    env.ENVIRONMENT === "development"
+      ? headers.get("__helicone-mock-response")
+      : null;
   if (mockResponseHeader) {
-    // temporarily remove for load testing
-    // if (env.ENVIRONMENT === "production") {
-    // return new Response("Mock responses not allowed in production", {
-    //   status: 403,
-    // });
-    // }
-
     try {
       const mockResponseBody = JSON.parse(mockResponseHeader);
       return new Response(JSON.stringify(mockResponseBody), {
@@ -141,12 +131,24 @@ export async function callProvider(props: CallProps): Promise<Response> {
 
   const targetUrl = buildTargetUrl(originalUrl, apiBase);
 
-  const removedHeaders = removeHeliconeHeaders(headers);
-
-  let headersWithExtra = removedHeaders;
-  if (props.extraHeaders) {
-    headersWithExtra = joinHeaders(removedHeaders, props.extraHeaders);
+  // Last line of defence for injected credentials: whatever routed us here,
+  // a vault / BYOK key only goes to its provider's first-party origin.
+  if (
+    props.credentialPin &&
+    !isTargetAllowedForPin(props.credentialPin, targetUrl)
+  ) {
+    console.warn(
+      `[credential-pin] refusing ${props.credentialPin.source} key for provider "${props.credentialPin.providerName ?? "unknown"}" to ${targetUrl.origin}`
+    );
+    return pinnedTargetRejection(props.credentialPin, targetUrl);
   }
+
+  // Outbound headers come from an allowlist; Helicone headers and any header
+  // carrying a Helicone key are never sent to the provider.
+  const headersWithExtra = buildProviderRequestHeaders(
+    headers,
+    props.extraHeaders
+  );
 
   if (
     originalUrl.host.includes("localhost") ||
@@ -155,7 +157,11 @@ export async function callProvider(props: CallProps): Promise<Response> {
     headersWithExtra.set("Accept-Encoding", "Identity");
   }
 
-  const baseInit = { method, headers: headersWithExtra };
+  const baseInit = {
+    method,
+    headers: headersWithExtra,
+    redirect: PROVIDER_FETCH_REDIRECT,
+  };
   const init = method === "GET" ? { ...baseInit } : { ...baseInit, body };
 
   let response: Response;

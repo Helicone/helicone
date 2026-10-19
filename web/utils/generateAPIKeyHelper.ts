@@ -1,35 +1,34 @@
-import generateApiKey from "generate-api-key";
 import { getJawnClient } from "../lib/clients/jawn";
 
-export function generateAPIKeyHelper(
+/**
+ * Asks Jawn to create a Helicone API key. The key is generated server-side
+ * and returned once in the response.
+ */
+export async function generateAPIKeyHelper(
   permission: "rw" | "w",
-  organization_type: string,
   keyName: string,
   isEu: boolean,
   governance: boolean,
   enableRateLimit?: boolean,
-) {
-  const apiKeyPrefix = permission === "rw" ? "sk" : "pk";
+  orgId?: string,
+): Promise<{ apiKey: string | null; error: string | null }> {
+  const jawn = getJawnClient(orgId);
+  const res = await jawn.POST("/v1/key/generateHash", {
+    body: {
+      keyName: keyName,
+      permissions: permission,
+      governance: governance,
+      enableRateLimit: enableRateLimit ?? false,
+      isEu,
+    },
+  });
 
-  const apiKey = `${apiKeyPrefix}${
-    organization_type === "customer" ? "" : "-helicone"
-  }${isEu ? "-eu" : ""}${organization_type === "customer" ? "-cp" : ""}${
-    governance ? "-gov" : ""
-  }${enableRateLimit ? "-rl" : ""}-${generateApiKey({
-    method: "base32",
-    dashes: true,
-  }).toString()}`.toLowerCase();
+  if (!res.response.ok || !res.data?.apiKey) {
+    return {
+      apiKey: null,
+      error: res.data?.error?.message ?? "Failed to generate API key",
+    };
+  }
 
-  const jawn = getJawnClient();
-  return {
-    res: jawn.POST("/v1/key/generateHash", {
-      body: {
-        apiKey,
-        keyName: keyName,
-        permissions: permission,
-        governance: governance,
-      },
-    }),
-    apiKey: apiKey,
-  };
+  return { apiKey: res.data.apiKey, error: null };
 }

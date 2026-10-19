@@ -18,6 +18,17 @@ import { setAPIKey } from "../../lib/refetchKeys";
 import { dbProviderToProvider } from "@helicone-package/cost/models/provider-helpers";
 import { err, isError, ok, Result } from "../../packages/common/result";
 import { isJwtOrgAdmin } from "../../utils/providerKeyAccess";
+import {
+  authorizeOrgActor,
+  isPermissionSubset,
+  ORG_ADMIN_ROLES,
+} from "../../utils/orgAuthz";
+
+const API_KEY_FORBIDDEN =
+  "Forbidden: managing Helicone API keys requires a signed-in organization owner or admin. API keys and proxy keys cannot create, change or delete keys.";
+
+// Permissions held by a signed-in owner/admin. New keys may be at most this.
+const JWT_ADMIN_KEY_PERMISSIONS = "rw";
 
 const PROVIDER_KEY_FORBIDDEN =
   "Forbidden: managing provider keys requires a signed-in organization owner or admin. Helicone API keys cannot read or modify provider keys.";
@@ -104,7 +115,7 @@ export class ApiKeyController extends Controller {
 
   /**
    * Returns provider key metadata with the secret values MASKED. Plaintext
-   * provider keys are never returned over HTTP (INC-710). Requires a signed-in
+   * provider keys are never returned over HTTP. Requires a signed-in
    * organization owner or admin; Helicone API keys are rejected.
    */
   @Get("/provider-key/{providerKeyId}")
@@ -195,10 +206,21 @@ export class ApiKeyController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Body() body: { api_key_name: string; key_permissions?: "rw" | "r" | "w" }
   ) {
+    const actor = await authorizeOrgActor(request.authParams, ORG_ADMIN_ROLES);
+    if (actor.error !== null) {
+      this.setStatus(actor.error.status);
+      return { error: API_KEY_FORBIDDEN };
+    }
+    const keyPermissions = body.key_permissions ?? "rw";
+    if (!isPermissionSubset(keyPermissions, JWT_ADMIN_KEY_PERMISSIONS)) {
+      this.setStatus(400);
+      return { error: "Invalid key permissions" };
+    }
+
     const keyManager = new KeyManager(request.authParams);
     const result = await keyManager.createNormalKey(
       body.api_key_name,
-      body.key_permissions ?? "rw"
+      keyPermissions
     );
 
     if (result.error || !result.data) {
@@ -224,6 +246,17 @@ export class ApiKeyController extends Controller {
       proxyKeyName: string;
     }
   ) {
+    // A proxy key unlocks a stored provider key, so minting one is limited
+    // like provider key management.
+    if (!isJwtOrgAdmin(request.authParams)) {
+      this.setStatus(403);
+      return { error: PROVIDER_KEY_FORBIDDEN };
+    }
+    const actor = await authorizeOrgActor(request.authParams, ORG_ADMIN_ROLES);
+    if (actor.error !== null) {
+      this.setStatus(actor.error.status);
+      return { error: PROVIDER_KEY_FORBIDDEN };
+    }
     const keyManager = new KeyManager(request.authParams);
     const result = await keyManager.createProxyKey({
       providerKeyId: body.providerKeyId,
@@ -243,6 +276,11 @@ export class ApiKeyController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Path() apiKeyId: number
   ) {
+    const actor = await authorizeOrgActor(request.authParams, ORG_ADMIN_ROLES);
+    if (actor.error !== null) {
+      this.setStatus(actor.error.status);
+      return { error: API_KEY_FORBIDDEN };
+    }
     const keyManager = new KeyManager(request.authParams);
     const result = await keyManager.deleteAPIKey(apiKeyId);
 
@@ -266,6 +304,11 @@ export class ApiKeyController extends Controller {
     @Path() apiKeyId: number,
     @Body() body: { api_key_name: string }
   ) {
+    const actor = await authorizeOrgActor(request.authParams, ORG_ADMIN_ROLES);
+    if (actor.error !== null) {
+      this.setStatus(actor.error.status);
+      return { error: API_KEY_FORBIDDEN };
+    }
     const keyManager = new KeyManager(request.authParams);
     const result = await keyManager.updateAPIKey(apiKeyId, {
       api_key_name: body.api_key_name,

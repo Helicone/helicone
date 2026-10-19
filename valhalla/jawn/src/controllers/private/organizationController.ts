@@ -14,12 +14,14 @@ import {
 import { err, ok, Result } from "../../packages/common/result";
 import { OrganizationManager } from "../../managers/organization/OrganizationManager";
 import type {
+  ClientOrganization,
   NewOrganizationParams,
   OnboardingStatus,
   OrganizationFilter,
   OrganizationLayout,
   OrganizationMember,
   OrganizationOwner,
+  ResellerCustomerOrganization,
   UpdateOrganizationParams,
 } from "../../managers/organization/OrganizationManager";
 import { StripeManager } from "../../managers/stripe/StripeManager";
@@ -32,6 +34,8 @@ import { getHeliconeAuthClient } from "../../packages/common/auth/server/AuthCli
 import { KVCache } from "../../lib/cache/kvCache";
 import { cacheResultCustom } from "../../utils/cacheResult";
 import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
+import { organizationClientSelect } from "../../lib/stores/OrganizationStore";
+import { authorizeOrgActor, ORG_ADMIN_ROLES } from "../../utils/orgAuthz";
 
 const kvCache = new KVCache(12 * 60 * 60 * 1000);
 
@@ -42,8 +46,8 @@ export class OrganizationController extends Controller {
   @Get("/")
   public async getOrganizations(@Request() req: ExpressRequest): Promise<
     Result<
-      (Database["public"]["Tables"]["organization"]["Row"] & {
-        role: string;
+      (ClientOrganization & {
+        org_role: string | null;
       })[],
       string
     >
@@ -70,13 +74,16 @@ export class OrganizationController extends Controller {
       return err(authParams.error ?? "User not found");
     }
 
+    // Explicit column list: billing identifiers are never returned.
     const result = await dbExecute<
-      Database["public"]["Tables"]["organization"]["Row"] & {
-        role: string;
+      ClientOrganization & {
+        org_role: string | null;
       }
     >(
-      `SELECT DISTINCT ON (organization.id) organization.*, organization_member.org_role
-      FROM organization 
+      `SELECT DISTINCT ON (organization.id) ${organizationClientSelect(
+        "organization"
+      )}, organization_member.org_role
+      FROM organization
       left join organization_member on organization.id = organization_member.organization
       WHERE soft_delete = false
       and (organization_member.member = $1 or organization.owner = $1)
@@ -143,17 +150,23 @@ export class OrganizationController extends Controller {
   public async getOrganization(
     @Path() organizationId: string,
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<
-    Result<Database["public"]["Tables"]["organization"]["Row"], string>
-  > {
-    const result = await dbExecute<
-      Database["public"]["Tables"]["organization"]["Row"]
-    >(
-      `SELECT organization.* FROM organization 
+  ): Promise<Result<ClientOrganization, string>> {
+    // API keys are bound to their own organization: the stored user_id on a
+    // key must not open up every other organization that user belongs to.
+    if (
+      request.authParams.authType !== "jwt" &&
+      organizationId !== request.authParams.organizationId
+    ) {
+      this.setStatus(404);
+      return err("Organization not found");
+    }
+    const result = await dbExecute<ClientOrganization>(
+      `SELECT ${organizationClientSelect("organization")} FROM organization
       left join organization_member on organization.id = organization_member.organization
       WHERE soft_delete = false
       and (organization_member.member = $1 or organization.owner = $1)
-      and organization.id = $2`,
+      and organization.id = $2
+      LIMIT 1`,
       [request.authParams.userId, organizationId]
     );
 
@@ -174,36 +187,31 @@ export class OrganizationController extends Controller {
   public async getReseller(
     @Path() resellerId: string,
     @Request() request: JawnAuthenticatedRequest
-  ) {
-    // Verify the requesting user's organization is the reseller
-    const orgId = request.authParams.organizationId;
-    const resellerCheck = await dbExecute<{ reseller_id: string }>(
-      `SELECT reseller_id FROM organization WHERE id = $1 AND soft_delete = false`,
-      [orgId]
+  ): Promise<Result<ResellerCustomerOrganization[], string>> {
+    // Only an owner/admin signed in to the reseller organization itself may
+    // list its customer organizations.
+    const actor = await authorizeOrgActor(
+      request.authParams,
+      ORG_ADMIN_ROLES,
+      resellerId
     );
-    if (
-      !resellerCheck.data?.length ||
-      resellerCheck.data[0].reseller_id !== resellerId
-    ) {
-      // Only allow access if the user's org is the reseller org itself
-      const isReseller = await dbExecute<{ id: string }>(
-        `SELECT id FROM organization WHERE id = $1 AND reseller_id = $2 AND soft_delete = false`,
-        [orgId, resellerId]
-      );
-      if (!isReseller.data?.length) {
-        this.setStatus(403);
-        return err("Not authorized to access this reseller's organizations");
-      }
+    if (actor.error !== null) {
+      this.setStatus(actor.error.status);
+      return err(actor.error.message);
     }
 
-    const result = await dbExecute<
-      Database["public"]["Tables"]["organization"]["Row"]
-    >(
-      `SELECT * FROM organization WHERE reseller_id = $1 and soft_delete = false`,
-      [resellerId]
+    const result = await dbExecute<ResellerCustomerOrganization>(
+      `SELECT id, name, created_at, color, icon, tier, organization_type
+       FROM organization
+       WHERE reseller_id = $1 and soft_delete = false`,
+      [actor.data.organizationId]
     );
+    if (result.error) {
+      this.setStatus(500);
+      return err("Error getting customer organizations");
+    }
 
-    return ok(result);
+    return ok(result.data ?? []);
   }
 
   @Post("/user/accept_terms")
@@ -242,7 +250,7 @@ export class OrganizationController extends Controller {
 
     const result = await organizationManager.createOrganization(requestBody);
     if (result.error || !result.data) {
-      this.setStatus(500);
+      this.setStatus(result.error === "Unauthorized" ? 403 : 400);
       return err(result.error ?? "Error creating organization");
     } else {
       this.setStatus(201); // set return status 201
@@ -298,8 +306,18 @@ export class OrganizationController extends Controller {
     requestBody: { email: string },
     @Path() organizationId: string,
     @Request() request: JawnAuthenticatedRequest
-  ): Promise<Result<{ temporaryPassword?: string } | null, string>> {
+  ): Promise<Result<null, string>> {
     const organizationManager = new OrganizationManager(request.authParams);
+
+    // Authorize first: JWT owner/admin of the organization the caller signed
+    // in to. Seat and tier checks below therefore apply to the path org.
+    const actor =
+      await organizationManager.authorizeMemberManagement(organizationId);
+    if (actor.error !== null) {
+      this.setStatus(actor.error.status);
+      return err(actor.error.message);
+    }
+
     const org = await organizationManager.getOrg();
     if (org.error || !org.data) {
       return err(`Error getting organization: ${org.error}`);
@@ -375,14 +393,15 @@ export class OrganizationController extends Controller {
     );
 
     if (result.error || !result.data) {
-      this.setStatus(500);
+      this.setStatus(400);
       return err(result.error ?? "Error adding member to organization");
     } else {
       this.setStatus(201);
       // Do not echo the resolved account id back to the caller: combined with
       // the members listing (which hides platform admins) it acted as an oracle
-      // for discovering Helicone staff user ids.
-      return ok({ temporaryPassword: result.data.temporaryPassword });
+      // for discovering Helicone staff user ids. No credentials are ever
+      // returned either.
+      return ok(null);
     }
   }
 
@@ -446,7 +465,7 @@ export class OrganizationController extends Controller {
 
     const result = await organizationManager.deleteOrganization();
     if (result.error || !result.data) {
-      this.setStatus(500);
+      this.setStatus(403);
       return err(result.error ?? "Error deleting organization");
     } else {
       this.setStatus(201);
@@ -508,7 +527,7 @@ export class OrganizationController extends Controller {
       requestBody.memberId
     );
     if (result.error || !result.data) {
-      this.setStatus(500);
+      this.setStatus(400);
       return err(result.error ?? "Error updating organization member");
     } else {
       this.setStatus(201);
@@ -530,7 +549,7 @@ export class OrganizationController extends Controller {
       requestBody.memberId
     );
     if (result.error || !result.data) {
-      this.setStatus(500);
+      this.setStatus(400);
       return err(result.error ?? "Error updating organization owner");
     } else {
       this.setStatus(201);
@@ -564,6 +583,17 @@ export class OrganizationController extends Controller {
   ): Promise<Result<null, string>> {
     const stripeManager = new StripeManager(request.authParams);
     const organizationManager = new OrganizationManager(request.authParams);
+
+    // Authorize before any billing side effect. The path org must be the
+    // authenticated org, so the seat count below is for the same org.
+    const authorized = await organizationManager.authorizeMemberRemoval(
+      organizationId,
+      memberId
+    );
+    if (authorized.error !== null) {
+      this.setStatus(authorized.error.status);
+      return err(authorized.error.message);
+    }
 
     const memberCount = await organizationManager.getMemberCount(true);
     if (memberCount.error || memberCount.data == null || memberCount.data < 0) {
@@ -616,7 +646,7 @@ export class OrganizationController extends Controller {
       Database["public"]["Tables"]["organization"]["Row"]
     >(
       `SELECT DISTINCT ON (organization.id) organization.* 
-      FROM organization 
+      FROM organization
       left join organization_member on organization.id = organization_member.organization
       WHERE tier = 'demo' 
       and coalesce((onboarding_status->>'demoDataSetup')::boolean, false) != true

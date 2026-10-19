@@ -50,14 +50,16 @@ const AddKeyModal = (props: AddKeyModalProps) => {
     const permission = keyPermissions.checked ? "rw" : "w";
     const enableRateLimit = rateLimit.checked;
 
-    const { res, apiKey } = await addKey.mutateAsync({
-      permission,
-      keyName: keyName.value,
-      isEu: window.location.hostname.includes("eu."),
-      enableRateLimit,
-    });
-    if (res.response.ok) {
+    try {
+      const { apiKey } = await addKey.mutateAsync({
+        permission,
+        keyName: keyName.value,
+        isEu: window.location.hostname.includes("eu."),
+        enableRateLimit,
+      });
       setReturnedKey(apiKey);
+    } catch {
+      // useKeys reports the failure.
     }
   };
 

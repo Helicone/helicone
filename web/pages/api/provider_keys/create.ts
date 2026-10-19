@@ -8,6 +8,8 @@ import { Result } from "@/packages/common/result";
 import { DecryptedProviderKey } from "../../../services/lib/keys";
 import { Permission } from "../../../services/lib/user";
 import { logger } from "@/lib/telemetry/logger";
+import { maskProviderSecret } from "@/lib/api/security/maskProviderSecret";
+import { withSameOrigin } from "@/lib/api/security/sameOrigin";
 
 async function handler({
   req,
@@ -16,6 +18,7 @@ async function handler({
 }: HandlerWrapperOptions<Result<DecryptedProviderKey, string>>) {
   if (req.method !== "POST") {
     res.status(405).json({ error: "Method not allowed", data: null });
+    return;
   }
 
   const { providerName, providerKey, providerKeyName } = req.body as {
@@ -48,7 +51,9 @@ async function handler({
 
   if (error) {
     logger.error({ error }, "Failed to insert provider key");
-    res.status(500).json({ error: error, data: null });
+    res
+      .status(500)
+      .json({ error: "Failed to create provider key", data: null });
     return;
   }
 
@@ -56,7 +61,8 @@ async function handler({
     data: {
       id: keyId,
       org_id: userData.orgId,
-      provider_key: providerKey,
+      // Never echo the secret back; the client already has it.
+      provider_key: maskProviderSecret(providerKey),
       provider_name: providerName,
       provider_key_name: providerKeyName,
     },
@@ -64,4 +70,4 @@ async function handler({
   });
 }
 
-export default withAuth(handler, [Permission.MANAGE_KEYS]);
+export default withSameOrigin(withAuth(handler, [Permission.MANAGE_KEYS]));

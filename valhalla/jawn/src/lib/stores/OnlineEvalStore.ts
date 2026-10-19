@@ -61,7 +61,8 @@ export class OnlineEvalStore extends BaseStore {
         online_evaluators.config,
         evaluator.last_mile_config as last_mile_config
       FROM online_evaluators 
-      JOIN evaluator ON online_evaluators.evaluator = evaluator.id 
+      JOIN evaluator ON online_evaluators.evaluator = evaluator.id
+        AND evaluator.organization_id = online_evaluators.organization
       WHERE online_evaluators.organization = $1`,
       [orgId]
     );
@@ -81,8 +82,9 @@ export class OnlineEvalStore extends BaseStore {
         online_evaluators.id,
         online_evaluators.config
       FROM online_evaluators 
-      WHERE online_evaluators.evaluator = $1`,
-      [evaluatorId]
+      WHERE online_evaluators.evaluator = $1
+      AND online_evaluators.organization = $2`,
+      [evaluatorId, this.organizationId]
     );
 
     if (error) {
@@ -92,12 +94,43 @@ export class OnlineEvalStore extends BaseStore {
     return ok(data ?? []);
   }
 
+  /**
+   * Creates an online evaluator for an evaluator owned by this store's org.
+   * Returns an error (without inserting) if the evaluator is not owned by the
+   * organization, so one tenant can never schedule another tenant's evaluator.
+   */
+  public async createOnlineEvaluator(
+    evaluatorId: string,
+    config: Record<string, any>
+  ): PromiseGenericResult<null> {
+    const { data, error } = await dbExecute<{ id: string }>(
+      `INSERT INTO online_evaluators (evaluator, organization, config)
+       SELECT evaluator.id, $2, $3
+       FROM evaluator
+       WHERE evaluator.id = $1 AND evaluator.organization_id = $2
+       RETURNING id`,
+      [evaluatorId, this.organizationId, JSON.stringify(config)]
+    );
+
+    if (error) {
+      return err(error);
+    }
+
+    if (!data || data.length === 0) {
+      return err("Evaluator not found");
+    }
+
+    return ok(null);
+  }
+
   public async deleteOnlineEvaluator(
-    onlineEvaluatorId: string
+    onlineEvaluatorId: string,
+    evaluatorId: string
   ): PromiseGenericResult<null> {
     const { error } = await dbExecute(
-      `DELETE FROM online_evaluators WHERE id = $1`,
-      [onlineEvaluatorId]
+      `DELETE FROM online_evaluators
+       WHERE id = $1 AND evaluator = $2 AND organization = $3`,
+      [onlineEvaluatorId, evaluatorId, this.organizationId]
     );
 
     if (error) {

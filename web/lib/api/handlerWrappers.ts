@@ -168,28 +168,63 @@ export function withAuthSSR<T>(
   };
 }
 
+/**
+ * Platform (Helicone staff) admin check: the user must be listed in the
+ * `admins` table. Fails closed on DB errors.
+ */
+export async function isPlatformAdmin(userId: string | undefined) {
+  if (!userId) {
+    return false;
+  }
+  const { data, error } = await dbExecute<{ user_id: string }>(
+    "SELECT user_id FROM admins WHERE user_id = $1",
+    [userId],
+  );
+  if (error) {
+    return false;
+  }
+  return (data ?? []).some((admin) => admin.user_id === userId);
+}
+
+/**
+ * API-route counterpart of withAdminSSR: 401 without a session, 403 unless
+ * the session user is a platform admin.
+ */
+export function withAdminAuth<T>(
+  handler: (options: {
+    req: NextApiRequest;
+    res: NextApiResponse<T>;
+    userId: string;
+  }) => Promise<void>,
+) {
+  return async (
+    req: NextApiRequest,
+    res: NextApiResponse<T | { error: string }>,
+  ) => {
+    const client = await getSSRHeliconeAuthClient({ ctx: { req, res } });
+    const user = await client.getUser();
+    if (user.error || !user.data?.id) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+    if (!(await isPlatformAdmin(user.data.id))) {
+      res.status(403).json({ error: "Forbidden" });
+      return;
+    }
+    await handler({
+      req,
+      res: res as NextApiResponse<T>,
+      userId: user.data.id,
+    });
+  };
+}
+
 export const withAdminSSR = withAuthSSR(async (options) => {
   const {
     userData: { userId },
   } = options;
 
-  const { data, error } = await dbExecute<{ user_id: string }>(
-    "SELECT user_id FROM admins WHERE user_id = $1",
-    [userId],
-  );
-
-  const admins = data?.map((admin) => admin.user_id || "") || [];
-
-  if (error) {
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
-  }
-
-  if (!admins.includes(userId || "")) {
+  if (!(await isPlatformAdmin(userId))) {
     return {
       redirect: {
         destination: "/",

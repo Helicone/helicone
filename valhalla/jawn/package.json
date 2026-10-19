@@ -19,7 +19,6 @@
     "@aws-sdk/client-sqs": "^3.799.0",
     "@aws-sdk/s3-request-presigner": "^3.537.0",
     "@clickhouse/client": "^1.12.0",
-    "@codesandbox/sdk": "^0.0.10",
     "@helicone-package/cost": "*",
     "@helicone-package/filters": "*",
     "@helicone-package/llm-mapper": "*",

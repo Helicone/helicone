@@ -14,7 +14,8 @@ import {
 import type { JawnAuthenticatedRequest } from "../../types/request";
 import { AlertManager, AlertResponse } from "../../managers/alert/AlertManager";
 import type { AlertRequest } from "../../managers/alert/AlertManager";
-import { Result } from "../../packages/common/result";
+import { Result, err } from "../../packages/common/result";
+import { checkJwtOrgAdmin } from "../../utils/orgAuthz";
 
 @Route("v1/alert")
 @Tags("Alert")
@@ -40,6 +41,11 @@ export class AlertController extends Controller {
     alert: AlertRequest,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<string, string>> {
+    const denied = await checkJwtOrgAdmin(request.authParams);
+    if (denied) {
+      this.setStatus(denied.status);
+      return err(denied.message);
+    }
     const manager = new AlertManager(request.authParams);
     const result = await manager.createAlert(alert);
     return result;
@@ -50,6 +56,11 @@ export class AlertController extends Controller {
     @Path() alertId: string,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
+    const denied = await checkJwtOrgAdmin(request.authParams);
+    if (denied) {
+      this.setStatus(denied.status);
+      return err(denied.message);
+    }
     const manager = new AlertManager(request.authParams);
     const result = await manager.deleteAlert(alertId);
     return result;

@@ -343,7 +343,7 @@ export const allCosts = providers.flatMap((provider) => provider.costs ?? []);
 // detection or cost data), but which the gateway must still be allowed to
 // reach: AI Gateway registry endpoints (baseten, chutes) and the hardcoded
 // GATEWAY_TARGETs in worker/src/index.ts (hyperbolic, predibase, llmmapper).
-// Before CIRT-76 these were only rate limited; now unapproved hosts get a 403.
+// Previously these were only rate limited; now unapproved hosts get a 403.
 const gatewayOnlyApprovedDomains: RegExp[] = [
   /^https:\/\/inference\.baseten\.co(\/|$)/,
   /^https:\/\/(llm|api)\.chutes\.ai(\/|$)/,
@@ -369,7 +369,8 @@ export const approvedDomains = [
  *   "https://api.anthropic.com/v1/messages"    -> accepted
  *
  * `undefined` means "no override requested" and is accepted; an unparseable
- * string or one carrying credentials is rejected.
+ * string, one carrying credentials, or plain http (other than the local dev
+ * proxy) is rejected.
  */
 export function isApprovedApiBase(apiBase: string | undefined | null): boolean {
   if (apiBase === undefined || apiBase === null) return true;
@@ -385,6 +386,12 @@ export function isApprovedApiBase(apiBase: string | undefined | null): boolean {
   if (url.protocol !== "https:" && url.protocol !== "http:") return false;
 
   const normalized = `${url.origin}${url.pathname}`;
+  // Plain http is only acceptable for the local development proxy. Every
+  // provider host must be reached over TLS so the forwarded key is not sent
+  // in the clear.
+  if (url.protocol === "http:" && !localProxyPattern.test(normalized)) {
+    return false;
+  }
   return approvedDomains.some((domain) => domain.test(normalized));
 }
 

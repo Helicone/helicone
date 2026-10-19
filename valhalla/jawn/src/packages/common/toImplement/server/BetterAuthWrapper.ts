@@ -159,6 +159,7 @@ export class BetterAuthWrapper implements HeliconeAuthClient {
         organizationId: org?.data?.[0]?.id ?? "",
         role: org?.data?.[0]?.role ?? "member",
         tier: org?.data?.[0]?.tier ?? "free",
+        authType: "jwt",
       });
     } else if (auth._type === "bearer") {
       return authenticateBearer(auth.token);

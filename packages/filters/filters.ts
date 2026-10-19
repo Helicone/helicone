@@ -7,6 +7,19 @@ import {
   TablesAndViews,
 } from "./filterDefs";
 import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
+import {
+  FilterValidationError,
+  hasOwn,
+  isFilterBranchShape,
+  isUserFilterOperator,
+  splitFilterLeaf,
+  validateFilterNode,
+} from "./filterValidation";
+
+export {
+  FilterValidationError,
+  validateFilterNode,
+} from "./filterValidation";
 
 export enum TagType {
   REQUEST = "request",
@@ -29,13 +42,17 @@ type KeyMappings = {
 const extractOperatorAndValueFromAnOperator = (
   operator: AnyOperator
 ): { operator: AllOperators; value: any } => {
-  for (const key in operator) {
-    return {
-      operator: key as AllOperators,
-      value: operator[key as keyof typeof operator],
-    };
+  const keys =
+    typeof operator === "object" && operator !== null
+      ? Object.keys(operator)
+      : [];
+  if (keys.length !== 1 || !isUserFilterOperator(keys[0])) {
+    throw new FilterValidationError("Invalid filter operator");
   }
-  throw new Error(`Invalid operator ${JSON.stringify(operator)}`);
+  return {
+    operator: keys[0],
+    value: operator[keys[0] as keyof typeof operator],
+  };
 };
 
 function easyKeyMappings<T extends keyof TablesAndViews>(
@@ -45,7 +62,19 @@ function easyKeyMappings<T extends keyof TablesAndViews>(
   table?: T
 ): KeyMapper<TablesAndViews[T]> {
   return (key, placeValueSafely) => {
-    const column = Object.keys(key)[0] as keyof typeof keyMappings;
+    const columns = Object.keys(key);
+    if (columns.length !== 1) {
+      throw new FilterValidationError(
+        "Invalid filter: expected exactly one column per table filter"
+      );
+    }
+    const column = columns[0] as keyof typeof keyMappings;
+    // Only own properties of the mapping are columns. Anything else (including
+    // Object.prototype members such as "constructor" or "toString") has no
+    // mapping in this context and is skipped without touching the SQL.
+    if (!hasOwn(keyMappings, column)) {
+      return { column: undefined, operator: "equals", value: "" };
+    }
     const columnFromMapping = keyMappings[column];
     const { operator, value } = extractOperatorAndValueFromAnOperator(
       key[column as keyof typeof keyMappings] as AnyOperator
@@ -435,35 +464,27 @@ const havingKeyMappings: KeyMappings = {
   job_node: NOT_IMPLEMENTED,
 };
 
+const OPERATOR_TO_SQL: { readonly [K in AllOperators]: string } = {
+  equals: "=",
+  "not-equals": "!=",
+  like: "LIKE",
+  ilike: "ILIKE",
+  gte: ">=",
+  gt: ">",
+  lt: "<",
+  lte: "<=",
+  contains: "ILIKE",
+  "not-contains": "NOT ILIKE",
+  "gin-contains": "@>",
+  "vector-contains": "@@",
+  has: "HAS",
+};
+
 function operatorToSql(operator: AllOperators): string {
-  switch (operator) {
-    case "equals":
-      return "=";
-    case "not-equals":
-      return "!=";
-    case "like":
-      return "LIKE";
-    case "ilike":
-      return "ILIKE";
-    case "gte":
-      return ">=";
-    case "gt":
-      return ">";
-    case "lt":
-      return "<";
-    case "lte":
-      return "<=";
-    case "contains":
-      return "ILIKE";
-    case "not-contains":
-      return "NOT ILIKE";
-    case "gin-contains":
-      return "@>";
-    case "vector-contains":
-      return "@@";
-    case "has":
-      return "HAS";
+  if (!hasOwn(OPERATOR_TO_SQL, operator)) {
+    throw new FilterValidationError("Invalid filter operator");
   }
+  return OPERATOR_TO_SQL[operator];
 }
 
 export function buildFilterLeaf(
@@ -480,10 +501,18 @@ export function buildFilterLeaf(
     return argPlaceHolder(argsAcc.length - 1, value);
   };
 
-  const filters = Object.keys(filter).reduce<string[]>((acc, _tableKey) => {
-    const tableKey = _tableKey as keyof typeof filter;
-    const table = filter[tableKey];
+  // Validates tables/columns/operators against the schema (throws on anything
+  // unknown) and splits the leaf so each atom is one column + one operator.
+  // Atoms are ANDed, so no predicate in the leaf is ever silently dropped.
+  const atoms = splitFilterLeaf(filter);
+
+  const filters = atoms.reduce<string[]>((acc, atom) => {
+    const tableKey = atom.table;
+    const table = atom.tableFilter as TablesAndViews[typeof tableKey];
     // table is {session_tag: { equals: "test" }} tableKey is sessions_request_response_rmt
+    if (!hasOwn(keyMappings, tableKey)) {
+      throw new FilterValidationError("Invalid filter: unknown table");
+    }
     const mapper = keyMappings[tableKey] as KeyMapper<typeof table>;
 
     const {
@@ -549,7 +578,14 @@ export function buildFilterBranch(
 } {
   const { filter, argPlaceHolder, argsAcc, having } = args;
   if (filter.operator !== "or" && filter.operator !== "and") {
-    throw new Error("Invalid filter: only OR is supported");
+    throw new FilterValidationError(
+      'Invalid filter: branch operator must be "and" or "or"'
+    );
+  }
+  if (filter.left === undefined || filter.right === undefined) {
+    throw new FilterValidationError(
+      "Invalid filter: branch must have left and right"
+    );
   }
   const { filter: leftFilter, argsAcc: leftArgsAcc } = buildFilter({
     ...args,
@@ -582,10 +618,13 @@ export function buildFilter(args: BuildFilterArgs): {
       argsAcc,
     };
   }
-  if ("left" in filter) {
+  if (typeof filter !== "object" || filter === null || Array.isArray(filter)) {
+    throw new FilterValidationError("Invalid filter: node must be an object");
+  }
+  if (isFilterBranchShape(filter)) {
     return buildFilterBranch({
       ...args,
-      filter,
+      filter: filter as FilterBranch,
       argsAcc,
       argPlaceHolder,
       having,
@@ -593,7 +632,7 @@ export function buildFilter(args: BuildFilterArgs): {
   }
 
   const res = buildFilterLeaf(
-    filter,
+    filter as FilterLeaf,
     argsAcc,
     having ? havingKeyMappings : whereKeyMappings,
     argPlaceHolder
@@ -630,6 +669,7 @@ export function clickhouseParam(index: number, parameter: any) {
 export function buildFilterClickHouse(
   args: ExternalBuildFilterArgs
 ): ReturnType<typeof buildFilter> {
+  validateFilterNode(args.filter);
   return buildFilter({
     ...args,
     argPlaceHolder: clickhouseParam,
@@ -639,6 +679,7 @@ export function buildFilterClickHouse(
 export function buildFilterPostgres(
   args: ExternalBuildFilterArgs
 ): ReturnType<typeof buildFilter> {
+  validateFilterNode(args.filter);
   return buildFilter({
     ...args,
     argPlaceHolder: (index, parameter) => `$${index + 1}`,
@@ -755,17 +796,31 @@ export async function buildFilterWithAuth(
 ): Promise<{ filter: string; argsAcc: any[] }> {
   const { org_id, filter } = args;
 
-  const filterNode: FilterNode = {
-    left: getOrgIdFilter(org_id),
-    operator: "and",
-    right: filter,
-  };
+  // Reject unknown tables/columns/operators before any SQL is generated.
+  validateFilterNode(filter);
 
   const filterBuilder =
     database === "clickhouse" ? buildFilterClickHouse : buildFilterPostgres;
 
-  return filterBuilder({
+  // Build the org scope and the caller's filter separately and join them as
+  // `(org) AND (filter)` so nothing in the caller's filter can widen the
+  // org predicate.
+  const orgFilter = filterBuilder({
     ...args,
-    filter: filterNode,
+    filter: getOrgIdFilter(org_id),
   });
+  if (!args.having && orgFilter.filter === "true") {
+    // The org predicate must always produce SQL in a WHERE clause.
+    throw new Error("Organization filter did not produce a predicate");
+  }
+  const userFilter = filterBuilder({
+    ...args,
+    filter,
+    argsAcc: orgFilter.argsAcc,
+  });
+
+  return {
+    filter: `(${orgFilter.filter}) AND (${userFilter.filter})`,
+    argsAcc: userFilter.argsAcc,
+  };
 }

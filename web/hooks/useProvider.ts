@@ -190,7 +190,7 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
 
   /**
    * Fetch the MASKED form of a stored provider key (e.g. "sk-ant••••••••abcd").
-   * Plaintext provider keys are never returned to the browser (INC-710), and
+   * Plaintext provider keys are never returned to the browser, and
    * only organization owners/admins may call this.
    */
   const viewMaskedProviderKey = async (

@@ -29,12 +29,22 @@ export class ProviderController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Body() body: ProviderQueryParams
   ): Promise<Result<ProviderMetric[], string>> {
-    const { filter, offset, limit, timeFilter } = body;
+    const { filter, timeFilter } = body;
 
-    if (isNaN(offset) || isNaN(limit)) {
+    if (
+      typeof body.offset !== "number" ||
+      typeof body.limit !== "number" ||
+      !Number.isFinite(body.offset) ||
+      !Number.isFinite(body.limit)
+    ) {
       this.setStatus(400);
       return err("Invalid offset or limit");
     }
+
+    // limit/offset are interpolated into the ClickHouse query, so they must be
+    // bounded integers.
+    const limit = Math.min(Math.max(Math.floor(body.limit), 1), 1000);
+    const offset = Math.min(Math.max(Math.floor(body.offset), 0), 100_000);
 
     const builtFilter = await buildFilterWithAuthClickHouse({
       org_id: request.authParams.organizationId,

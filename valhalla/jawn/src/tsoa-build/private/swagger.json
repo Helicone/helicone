@@ -387,7 +387,7 @@
 				"type": "object"
 			},
 			"MaskedProviderKey": {
-				"description": "Provider key as returned to API callers. The secret values are masked and\ncan never be used to call the provider (INC-710).",
+				"description": "Provider key as returned to API callers. The secret values are masked and\ncan never be used to call the provider.",
 				"properties": {
 					"id": {
 						"type": "string"
@@ -1005,180 +1005,192 @@
 				],
 				"nullable": true
 			},
-			"ResultSuccess__40_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-and-_role-string__41_-Array_": {
+			"Pick_OrganizationRow.Exclude_keyofOrganizationRow.stripe_customer_id-or-stripe_metadata-or-stripe_subscription_id-or-stripe_subscription_item_id__": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"allow_negative_balance": {
+						"type": "boolean"
+					},
+					"color": {
+						"type": "string"
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"credit_limit": {
+						"type": "number",
+						"format": "double"
+					},
+					"default_time_filter": {
+						"type": "string"
+					},
+					"domain": {
+						"type": "string"
+					},
+					"gateway_discount_enabled": {
+						"type": "boolean"
+					},
+					"governance_settings": {
+						"$ref": "#/components/schemas/Json"
+					},
+					"has_integrated": {
+						"type": "boolean"
+					},
+					"has_onboarded": {
+						"type": "boolean"
+					},
+					"icon": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					},
+					"is_main_org": {
+						"type": "boolean"
+					},
+					"is_personal": {
+						"type": "boolean"
+					},
+					"limits": {
+						"$ref": "#/components/schemas/Json"
+					},
+					"onboarding_status": {
+						"$ref": "#/components/schemas/Json"
+					},
+					"org_provider_key": {
+						"type": "string"
+					},
+					"organization_type": {
+						"type": "string"
+					},
+					"owner": {
+						"type": "string"
+					},
+					"percent_to_log": {
+						"type": "number",
+						"format": "double"
+					},
+					"playground_helicone": {
+						"type": "boolean"
+					},
+					"referral": {
+						"type": "string"
+					},
+					"request_limit": {
+						"type": "number",
+						"format": "double"
+					},
+					"size": {
+						"type": "string"
+					},
+					"soft_delete": {
+						"type": "boolean"
+					},
+					"subscription_status": {
+						"type": "string"
+					},
+					"tier": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name",
+					"allow_negative_balance",
+					"color",
+					"created_at",
+					"credit_limit",
+					"default_time_filter",
+					"domain",
+					"gateway_discount_enabled",
+					"governance_settings",
+					"has_integrated",
+					"has_onboarded",
+					"icon",
+					"id",
+					"is_main_org",
+					"is_personal",
+					"limits",
+					"onboarding_status",
+					"org_provider_key",
+					"organization_type",
+					"owner",
+					"percent_to_log",
+					"playground_helicone",
+					"referral",
+					"request_limit",
+					"size",
+					"soft_delete",
+					"subscription_status",
+					"tier"
+				],
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"Omit_OrganizationRow.stripe_customer_id-or-stripe_metadata-or-stripe_subscription_id-or-stripe_subscription_item_id_": {
+				"$ref": "#/components/schemas/Pick_OrganizationRow.Exclude_keyofOrganizationRow.stripe_customer_id-or-stripe_metadata-or-stripe_subscription_id-or-stripe_subscription_item_id__",
+				"description": "Construct a type with the properties of T except for those in type K."
+			},
+			"OrganizationAddons": {
+				"properties": {
+					"evals": {
+						"type": "boolean"
+					},
+					"experiments": {
+						"type": "boolean"
+					},
+					"prompts": {
+						"type": "boolean"
+					}
+				},
+				"type": "object"
+			},
+			"ClientOrganization": {
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/Omit_OrganizationRow.stripe_customer_id-or-stripe_metadata-or-stripe_subscription_id-or-stripe_subscription_item_id_"
+					},
+					{
+						"properties": {
+							"addons": {
+								"allOf": [
+									{
+										"$ref": "#/components/schemas/OrganizationAddons"
+									}
+								],
+								"nullable": true
+							},
+							"free_limit_exceeded": {
+								"type": "string",
+								"nullable": true
+							}
+						},
+						"required": [
+							"addons"
+						],
+						"type": "object"
+					}
+				],
+				"description": "Organization as returned to API clients. Billing identifiers and raw\nstripe_metadata are omitted; the add-on flags are exposed as `addons`."
+			},
+			"ResultSuccess__40_ClientOrganization-and-_org_role-string-or-null__41_-Array_": {
 				"properties": {
 					"data": {
 						"items": {
 							"allOf": [
 								{
-									"properties": {
-										"tier": {
-											"type": "string",
-											"nullable": true
-										},
-										"subscription_status": {
-											"type": "string",
-											"nullable": true
-										},
-										"stripe_subscription_item_id": {
-											"type": "string",
-											"nullable": true
-										},
-										"stripe_subscription_id": {
-											"type": "string",
-											"nullable": true
-										},
-										"stripe_metadata": {
-											"$ref": "#/components/schemas/Json"
-										},
-										"stripe_customer_id": {
-											"type": "string",
-											"nullable": true
-										},
-										"soft_delete": {
-											"type": "boolean"
-										},
-										"size": {
-											"type": "string",
-											"nullable": true
-										},
-										"request_limit": {
-											"type": "number",
-											"format": "double",
-											"nullable": true
-										},
-										"referral": {
-											"type": "string",
-											"nullable": true
-										},
-										"playground_helicone": {
-											"type": "boolean"
-										},
-										"percent_to_log": {
-											"type": "number",
-											"format": "double",
-											"nullable": true
-										},
-										"owner": {
-											"type": "string"
-										},
-										"organization_type": {
-											"type": "string"
-										},
-										"org_provider_key": {
-											"type": "string",
-											"nullable": true
-										},
-										"onboarding_status": {
-											"$ref": "#/components/schemas/Json"
-										},
-										"name": {
-											"type": "string"
-										},
-										"limits": {
-											"allOf": [
-												{
-													"$ref": "#/components/schemas/Json"
-												}
-											],
-											"nullable": true
-										},
-										"is_personal": {
-											"type": "boolean"
-										},
-										"is_main_org": {
-											"type": "boolean"
-										},
-										"id": {
-											"type": "string"
-										},
-										"icon": {
-											"type": "string"
-										},
-										"has_onboarded": {
-											"type": "boolean"
-										},
-										"has_integrated": {
-											"type": "boolean"
-										},
-										"governance_settings": {
-											"allOf": [
-												{
-													"$ref": "#/components/schemas/Json"
-												}
-											],
-											"nullable": true
-										},
-										"gateway_discount_enabled": {
-											"type": "boolean"
-										},
-										"domain": {
-											"type": "string",
-											"nullable": true
-										},
-										"default_time_filter": {
-											"type": "string",
-											"nullable": true
-										},
-										"credit_limit": {
-											"type": "number",
-											"format": "double"
-										},
-										"created_at": {
-											"type": "string",
-											"nullable": true
-										},
-										"color": {
-											"type": "string"
-										},
-										"allow_negative_balance": {
-											"type": "boolean"
-										}
-									},
-									"required": [
-										"tier",
-										"subscription_status",
-										"stripe_subscription_item_id",
-										"stripe_subscription_id",
-										"stripe_metadata",
-										"stripe_customer_id",
-										"soft_delete",
-										"size",
-										"request_limit",
-										"referral",
-										"playground_helicone",
-										"percent_to_log",
-										"owner",
-										"organization_type",
-										"org_provider_key",
-										"onboarding_status",
-										"name",
-										"limits",
-										"is_personal",
-										"is_main_org",
-										"id",
-										"icon",
-										"has_onboarded",
-										"has_integrated",
-										"governance_settings",
-										"gateway_discount_enabled",
-										"domain",
-										"default_time_filter",
-										"credit_limit",
-										"created_at",
-										"color",
-										"allow_negative_balance"
-									],
-									"type": "object"
+									"$ref": "#/components/schemas/ClientOrganization"
 								},
 								{
 									"properties": {
-										"role": {
-											"type": "string"
+										"org_role": {
+											"type": "string",
+											"nullable": true
 										}
 									},
 									"required": [
-										"role"
+										"org_role"
 									],
 									"type": "object"
 								}
@@ -1201,10 +1213,10 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result__40_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-and-_role-string__41_-Array.string_": {
+			"Result__40_ClientOrganization-and-_org_role-string-or-null__41_-Array.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess__40_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-and-_role-string__41_-Array_"
+						"$ref": "#/components/schemas/ResultSuccess__40_ClientOrganization-and-_org_role-string-or-null__41_-Array_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
@@ -1252,168 +1264,10 @@
 					}
 				]
 			},
-			"ResultSuccess_Database-at-public_91_Tables_93_-at-organization_91_Row_93__": {
+			"ResultSuccess_ClientOrganization_": {
 				"properties": {
 					"data": {
-						"properties": {
-							"tier": {
-								"type": "string",
-								"nullable": true
-							},
-							"subscription_status": {
-								"type": "string",
-								"nullable": true
-							},
-							"stripe_subscription_item_id": {
-								"type": "string",
-								"nullable": true
-							},
-							"stripe_subscription_id": {
-								"type": "string",
-								"nullable": true
-							},
-							"stripe_metadata": {
-								"$ref": "#/components/schemas/Json"
-							},
-							"stripe_customer_id": {
-								"type": "string",
-								"nullable": true
-							},
-							"soft_delete": {
-								"type": "boolean"
-							},
-							"size": {
-								"type": "string",
-								"nullable": true
-							},
-							"request_limit": {
-								"type": "number",
-								"format": "double",
-								"nullable": true
-							},
-							"referral": {
-								"type": "string",
-								"nullable": true
-							},
-							"playground_helicone": {
-								"type": "boolean"
-							},
-							"percent_to_log": {
-								"type": "number",
-								"format": "double",
-								"nullable": true
-							},
-							"owner": {
-								"type": "string"
-							},
-							"organization_type": {
-								"type": "string"
-							},
-							"org_provider_key": {
-								"type": "string",
-								"nullable": true
-							},
-							"onboarding_status": {
-								"$ref": "#/components/schemas/Json"
-							},
-							"name": {
-								"type": "string"
-							},
-							"limits": {
-								"allOf": [
-									{
-										"$ref": "#/components/schemas/Json"
-									}
-								],
-								"nullable": true
-							},
-							"is_personal": {
-								"type": "boolean"
-							},
-							"is_main_org": {
-								"type": "boolean"
-							},
-							"id": {
-								"type": "string"
-							},
-							"icon": {
-								"type": "string"
-							},
-							"has_onboarded": {
-								"type": "boolean"
-							},
-							"has_integrated": {
-								"type": "boolean"
-							},
-							"governance_settings": {
-								"allOf": [
-									{
-										"$ref": "#/components/schemas/Json"
-									}
-								],
-								"nullable": true
-							},
-							"gateway_discount_enabled": {
-								"type": "boolean"
-							},
-							"domain": {
-								"type": "string",
-								"nullable": true
-							},
-							"default_time_filter": {
-								"type": "string",
-								"nullable": true
-							},
-							"credit_limit": {
-								"type": "number",
-								"format": "double"
-							},
-							"created_at": {
-								"type": "string",
-								"nullable": true
-							},
-							"color": {
-								"type": "string"
-							},
-							"allow_negative_balance": {
-								"type": "boolean"
-							}
-						},
-						"required": [
-							"tier",
-							"subscription_status",
-							"stripe_subscription_item_id",
-							"stripe_subscription_id",
-							"stripe_metadata",
-							"stripe_customer_id",
-							"soft_delete",
-							"size",
-							"request_limit",
-							"referral",
-							"playground_helicone",
-							"percent_to_log",
-							"owner",
-							"organization_type",
-							"org_provider_key",
-							"onboarding_status",
-							"name",
-							"limits",
-							"is_personal",
-							"is_main_org",
-							"id",
-							"icon",
-							"has_onboarded",
-							"has_integrated",
-							"governance_settings",
-							"gateway_discount_enabled",
-							"domain",
-							"default_time_filter",
-							"credit_limit",
-							"created_at",
-							"color",
-							"allow_negative_balance"
-						],
-						"type": "object"
+						"$ref": "#/components/schemas/ClientOrganization"
 					},
 					"error": {
 						"type": "number",
@@ -1430,19 +1284,64 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Result_Database-at-public_91_Tables_93_-at-organization_91_Row_93_.string_": {
+			"Result_ClientOrganization.string_": {
 				"anyOf": [
 					{
-						"$ref": "#/components/schemas/ResultSuccess_Database-at-public_91_Tables_93_-at-organization_91_Row_93__"
+						"$ref": "#/components/schemas/ResultSuccess_ClientOrganization_"
 					},
 					{
 						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
 			},
-			"ResultSuccess_unknown_": {
+			"Pick_OrganizationRow.id-or-name-or-created_at-or-color-or-icon-or-tier-or-organization_type_": {
 				"properties": {
-					"data": {},
+					"name": {
+						"type": "string"
+					},
+					"color": {
+						"type": "string"
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"icon": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					},
+					"organization_type": {
+						"type": "string"
+					},
+					"tier": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name",
+					"color",
+					"created_at",
+					"icon",
+					"id",
+					"organization_type",
+					"tier"
+				],
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
+			},
+			"ResellerCustomerOrganization": {
+				"$ref": "#/components/schemas/Pick_OrganizationRow.id-or-name-or-created_at-or-color-or-icon-or-tier-or-organization_type_",
+				"description": "Customer organization as listed to its reseller."
+			},
+			"ResultSuccess_ResellerCustomerOrganization-Array_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/ResellerCustomerOrganization"
+						},
+						"type": "array"
+					},
 					"error": {
 						"type": "number",
 						"enum": [
@@ -1458,23 +1357,15 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ResultError_unknown_": {
-				"properties": {
-					"data": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
+			"Result_ResellerCustomerOrganization-Array.string_": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ResultSuccess_ResellerCustomerOrganization-Array_"
 					},
-					"error": {}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
+					{
+						"$ref": "#/components/schemas/ResultError_string_"
+					}
+				]
 			},
 			"ResultSuccess_string_": {
 				"properties": {
@@ -1506,138 +1397,60 @@
 					}
 				]
 			},
-			"NewOrganizationParams": {
+			"Pick_OrganizationInsert.name-or-color-or-icon-or-organization_type-or-org_provider_key_": {
 				"properties": {
-					"tier": {
-						"type": "string",
-						"nullable": true
-					},
-					"subscription_status": {
-						"type": "string",
-						"nullable": true
-					},
-					"stripe_subscription_item_id": {
-						"type": "string",
-						"nullable": true
-					},
-					"stripe_subscription_id": {
-						"type": "string",
-						"nullable": true
-					},
-					"stripe_metadata": {
-						"$ref": "#/components/schemas/Json"
-					},
-					"stripe_customer_id": {
-						"type": "string",
-						"nullable": true
-					},
-					"soft_delete": {
-						"type": "boolean"
-					},
-					"size": {
-						"type": "string",
-						"nullable": true
-					},
-					"request_limit": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"referral": {
-						"type": "string",
-						"nullable": true
-					},
-					"playground_helicone": {
-						"type": "boolean"
-					},
-					"percent_to_log": {
-						"type": "number",
-						"format": "double",
-						"nullable": true
-					},
-					"owner": {
-						"type": "string"
-					},
-					"organization_type": {
-						"type": "string"
-					},
-					"org_provider_key": {
-						"type": "string",
-						"nullable": true
-					},
-					"onboarding_status": {
-						"$ref": "#/components/schemas/Json"
-					},
 					"name": {
 						"type": "string"
 					},
-					"limits": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Json"
-							}
-						],
-						"nullable": true
-					},
-					"is_personal": {
-						"type": "boolean"
-					},
-					"is_main_org": {
-						"type": "boolean"
-					},
-					"id": {
+					"color": {
 						"type": "string"
 					},
 					"icon": {
 						"type": "string"
 					},
-					"has_onboarded": {
-						"type": "boolean"
-					},
-					"has_integrated": {
-						"type": "boolean"
-					},
-					"governance_settings": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/Json"
-							}
-						],
-						"nullable": true
-					},
-					"gateway_discount_enabled": {
-						"type": "boolean"
-					},
-					"domain": {
-						"type": "string",
-						"nullable": true
-					},
-					"default_time_filter": {
-						"type": "string",
-						"nullable": true
-					},
-					"credit_limit": {
-						"type": "number",
-						"format": "double"
-					},
-					"created_at": {
-						"type": "string",
-						"nullable": true
-					},
-					"color": {
+					"org_provider_key": {
 						"type": "string"
 					},
-					"allow_negative_balance": {
-						"type": "boolean"
+					"organization_type": {
+						"type": "string"
 					}
 				},
 				"required": [
-					"owner",
 					"name"
 				],
-				"type": "object"
+				"type": "object",
+				"description": "From T, pick a set of properties whose keys are in the union K"
 			},
-			"Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-organization_type-or-onboarding_status-or-default_time_filter_": {
+			"NewOrganizationParams": {
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/Pick_OrganizationInsert.name-or-color-or-icon-or-organization_type-or-org_provider_key_"
+					},
+					{
+						"properties": {
+							"has_integrated": {
+								"type": "boolean",
+								"deprecated": true
+							},
+							"tier": {
+								"type": "string",
+								"nullable": true,
+								"deprecated": true
+							},
+							"owner": {
+								"type": "string",
+								"deprecated": true
+							},
+							"has_onboarded": {
+								"type": "boolean"
+							}
+						},
+						"type": "object"
+					}
+				],
+				"description": "Fields a client may supply when creating an organization. Everything else\n(owner, tier, billing identifiers, limits, flags) is set server-side.\n\n`owner`, `tier` and `has_integrated` are still accepted from older clients\nbut are validated or ignored, never written as given."
+			},
+			"Pick_OrganizationInsert.name-or-color-or-icon-or-org_provider_key-or-limits-or-organization_type-or-onboarding_status-or-default_time_filter_": {
 				"properties": {
 					"name": {
 						"type": "string"
@@ -1645,22 +1458,22 @@
 					"color": {
 						"type": "string"
 					},
-					"icon": {
+					"default_time_filter": {
 						"type": "string"
 					},
-					"org_provider_key": {
+					"icon": {
 						"type": "string"
 					},
 					"limits": {
 						"$ref": "#/components/schemas/Json"
 					},
-					"organization_type": {
-						"type": "string"
-					},
 					"onboarding_status": {
 						"$ref": "#/components/schemas/Json"
 					},
-					"default_time_filter": {
+					"org_provider_key": {
+						"type": "string"
+					},
+					"organization_type": {
 						"type": "string"
 					}
 				},
@@ -1673,7 +1486,7 @@
 			"UpdateOrganizationParams": {
 				"allOf": [
 					{
-						"$ref": "#/components/schemas/Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-organization_type-or-onboarding_status-or-default_time_filter_"
+						"$ref": "#/components/schemas/Pick_OrganizationInsert.name-or-color-or-icon-or-org_provider_key-or-limits-or-organization_type-or-onboarding_status-or-default_time_filter_"
 					},
 					{
 						"properties": {
@@ -1682,42 +1495,6 @@
 							}
 						},
 						"type": "object"
-					}
-				]
-			},
-			"ResultSuccess__temporaryPassword_63_-string_-or-null_": {
-				"properties": {
-					"data": {
-						"properties": {
-							"temporaryPassword": {
-								"type": "string"
-							}
-						},
-						"type": "object",
-						"nullable": true
-					},
-					"error": {
-						"type": "number",
-						"enum": [
-							null
-						],
-						"nullable": true
-					}
-				},
-				"required": [
-					"data",
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Result__temporaryPassword_63_-string_-or-null.string_": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ResultSuccess__temporaryPassword_63_-string_-or-null_"
-					},
-					{
-						"$ref": "#/components/schemas/ResultError_string_"
 					}
 				]
 			},
@@ -3274,33 +3051,70 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"KeyPermissions": {
-				"type": "string",
-				"enum": [
-					"w",
-					"rw"
-				]
+			"ResultError_unknown_": {
+				"properties": {
+					"data": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					},
+					"error": {}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ResultSuccess_unknown_": {
+				"properties": {
+					"data": {},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"data",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
 			},
 			"GenerateHashQueryParams": {
 				"properties": {
-					"apiKey": {
-						"type": "string"
-					},
-					"governance": {
-						"type": "boolean"
-					},
 					"keyName": {
 						"type": "string"
 					},
 					"permissions": {
-						"$ref": "#/components/schemas/KeyPermissions"
+						"type": "string",
+						"enum": [
+							"rw",
+							"w"
+						]
+					},
+					"governance": {
+						"type": "boolean"
+					},
+					"enableRateLimit": {
+						"type": "boolean",
+						"description": "Adds the \"-rl\" prefix marker used by rate-limited keys."
+					},
+					"isEu": {
+						"type": "boolean",
+						"description": "Adds the \"-eu\" prefix marker. Purely cosmetic; not a secret."
 					}
 				},
 				"required": [
-					"apiKey",
-					"governance",
 					"keyName",
-					"permissions"
+					"permissions",
+					"governance"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -46741,7 +46555,7 @@
 						}
 					}
 				},
-				"description": "Returns provider key metadata with the secret values MASKED. Plaintext\nprovider keys are never returned over HTTP (INC-710). Requires a signed-in\norganization owner or admin; Helicone API keys are rejected.",
+				"description": "Returns provider key metadata with the secret values MASKED. Plaintext\nprovider keys are never returned over HTTP. Requires a signed-in\norganization owner or admin; Helicone API keys are rejected.",
 				"tags": [
 					"API Key"
 				],
@@ -47925,7 +47739,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result__40_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-and-_role-string__41_-Array.string_"
+									"$ref": "#/components/schemas/Result__40_ClientOrganization-and-_org_role-string-or-null__41_-Array.string_"
 								}
 							}
 						}
@@ -47977,7 +47791,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result_Database-at-public_91_Tables_93_-at-organization_91_Row_93_.string_"
+									"$ref": "#/components/schemas/Result_ClientOrganization.string_"
 								}
 							}
 						}
@@ -48012,14 +47826,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"anyOf": [
-										{
-											"$ref": "#/components/schemas/ResultSuccess_unknown_"
-										},
-										{
-											"$ref": "#/components/schemas/ResultError_unknown_"
-										}
-									]
+									"$ref": "#/components/schemas/Result_ResellerCustomerOrganization-Array.string_"
 								}
 							}
 						}
@@ -48198,7 +48005,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Result__temporaryPassword_63_-string_-or-null.string_"
+									"$ref": "#/components/schemas/Result_null.string_"
 								}
 							}
 						}
@@ -49502,6 +49309,7 @@
 						"description": "No content"
 					}
 				},
+				"description": "Internal HTTP fallback used by the Helicone worker. Requires the\nserver-held manual access key in heliconeMeta.",
 				"tags": [
 					"Log"
 				],
@@ -49536,10 +49344,10 @@
 								"schema": {
 									"anyOf": [
 										{
-											"$ref": "#/components/schemas/ResultError_unknown_"
+											"$ref": "#/components/schemas/ResultSuccess_any_"
 										},
 										{
-											"$ref": "#/components/schemas/ResultSuccess_any_"
+											"$ref": "#/components/schemas/ResultError_unknown_"
 										}
 									]
 								}
@@ -49718,6 +49526,9 @@
 											},
 											"type": "object"
 										},
+										"apiKey": {
+											"type": "string"
+										},
 										"success": {
 											"type": "boolean"
 										}
@@ -49728,6 +49539,7 @@
 						}
 					}
 				},
+				"description": "Creates a Helicone API key for the signed-in organization. The key is\ngenerated server-side and returned once; it is never accepted from the\ncaller.",
 				"tags": [
 					"Utils"
 				],

@@ -6,7 +6,10 @@ import { createOpenAIMockResponse } from "../test-utils";
 // Define auth expectations for Google AI Studio
 // Note: Google AI Studio uses API key in URL query parameter, not headers
 const googleAuthExpectations = {
-  // No header expectations - auth is in URL query param
+  // API key goes in the x-goog-api-key header, never in the URL
+  headers: {
+    "x-goog-api-key": /^(test|helicone)-google-api-key$/,
+  },
 };
 
 // Define auth expectations for Vertex
@@ -49,8 +52,8 @@ describe("Google Registry Tests", () => {
           expected: {
             providers: [
               {
-                // Native Google endpoint with API key in URL query param
-                url: /^https:\/\/generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-2\.5-flash:generateContent\?key=/,
+                // Native Google endpoint; API key in x-goog-api-key header, not the URL
+                url: /^https:\/\/generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-2\.5-flash:generateContent$/,
                 response: "success",
                 // Native Google format doesn't use model field in body
                 model: undefined,
@@ -90,8 +93,8 @@ describe("Google Registry Tests", () => {
           expected: {
             providers: [
               {
-                // Native Google endpoint with API key in URL query param
-                url: /^https:\/\/generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-2\.5-flash-lite:generateContent\?key=/,
+                // Native Google endpoint; API key in x-goog-api-key header, not the URL
+                url: /^https:\/\/generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-2\.5-flash-lite:generateContent$/,
                 response: "success",
                 // Native Google format doesn't use model field in body
                 model: undefined,
@@ -131,8 +134,8 @@ describe("Google Registry Tests", () => {
           expected: {
             providers: [
               {
-                // Native Google endpoint with API key in URL query param
-                url: /^https:\/\/generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-2\.5-pro:generateContent\?key=/,
+                // Native Google endpoint; API key in x-goog-api-key header, not the URL
+                url: /^https:\/\/generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-2\.5-pro:generateContent$/,
                 response: "success",
                 // Native Google format doesn't use model field in body
                 model: undefined,
@@ -422,8 +425,8 @@ describe("Google Registry Tests", () => {
           expected: {
             providers: [
               {
-                // Native Google endpoint with API key in URL query param
-                url: /^https:\/\/generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-2\.5-flash:generateContent\?key=/,
+                // Native Google endpoint; API key in x-goog-api-key header, not the URL
+                url: /^https:\/\/generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-2\.5-flash:generateContent$/,
                 response: "failure",
                 statusCode: 500,
                 errorMessage: "Google AI Studio service unavailable",
@@ -439,8 +442,8 @@ describe("Google Registry Tests", () => {
           expected: {
             providers: [
               {
-                // Native Google endpoint with API key in URL query param
-                url: /^https:\/\/generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-2\.5-pro:generateContent\?key=/,
+                // Native Google endpoint; API key in x-goog-api-key header, not the URL
+                url: /^https:\/\/generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-2\.5-pro:generateContent$/,
                 response: "failure",
                 statusCode: 429,
                 errorMessage: "Rate limit exceeded",
@@ -456,8 +459,8 @@ describe("Google Registry Tests", () => {
           expected: {
             providers: [
               {
-                // Native Google endpoint with API key in URL query param
-                url: /^https:\/\/generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-2\.5-flash:generateContent\?key=/,
+                // Native Google endpoint; API key in x-goog-api-key header, not the URL
+                url: /^https:\/\/generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-2\.5-flash:generateContent$/,
                 response: "failure",
                 statusCode: 401,
                 errorMessage: "Invalid API key",

@@ -10,6 +10,8 @@ export class GoogleProvider extends BaseProvider {
   readonly pricingPages = ["https://ai.google.dev/gemini-api/docs/pricing"];
   readonly modelPages = ["https://ai.google.dev/gemini-api/docs/models"];
 
+  // The API key is sent in the x-goog-api-key header, never in the URL: URLs
+  // end up in request logs, traces and error messages, headers do not.
   buildUrl(endpoint: Endpoint, requestParams: RequestParams): string {
     const modelId = endpoint.providerModelId || "";
     const modelPath = modelId.startsWith("models/")
@@ -17,21 +19,20 @@ export class GoogleProvider extends BaseProvider {
       : `models/${modelId}`;
 
     if (requestParams.isStreaming) {
-      return `${this.baseUrl}/${modelPath}:streamGenerateContent?alt=sse&key=${requestParams.apiKey}`;
+      return `${this.baseUrl}/${modelPath}:streamGenerateContent?alt=sse`;
     }
-    else {
-      return `${this.baseUrl}/${modelPath}:generateContent?key=${requestParams.apiKey}`;
-    }
+    return `${this.baseUrl}/${modelPath}:generateContent`;
   }
 
-  // Override authenticate to return empty headers since auth is in URL query param
   authenticate(
     authContext: AuthContext,
     endpoint: Endpoint,
     cacheProvider?: CacheProvider
   ): AuthResult {
     return {
-      headers: {},
+      headers: {
+        "x-goog-api-key": authContext.apiKey || "",
+      },
     };
   }
 

@@ -8,7 +8,7 @@ import { Database } from "../../supabase/database.types";
 import { HeliconeAuth } from "./db/DBWrapper";
 import {
   checkLimits,
-  checkLimitsSingle,
+  checkLimitsSingleCached,
 } from "./managers/UsageLimitManager.ts";
 import {
   HeliconeHeaders,
@@ -26,10 +26,16 @@ import {
 import { Provider } from "@helicone-package/llm-mapper/types";
 import { getAndStoreInCache } from "./util/cache/secureCache";
 import {
+  AUTH_CACHE_TTL_SECONDS,
+  CACHE_KEY_PREFIXES,
+  VAULT_NEGATIVE_CACHE_TTL_SECONDS,
+} from "./util/cache/cacheKeys";
+import { CredentialPin } from "./security/credentialPin";
+import {
   checkOrgProviderKeyOwnership,
   needsResellerTypeCheck,
 } from "../../../packages/common/providerKeys/orgProviderKeyOwnership";
-import { Result, err, map, mapPostgrestErr, ok } from "./util/results";
+import { Result, err, ok } from "./util/results";
 import { parseJSXObject } from "@helicone/prompts";
 import { HELICONE_API_KEY_REGEX } from "./util/apiKeyRegex";
 import { Attempt } from "./ai-gateway/types";
@@ -86,6 +92,11 @@ export class RequestWrapper {
   private bodyKeyOverride: object | null = null;
 
   private gatewayAttempt?: Attempt;
+
+  // Set when the outbound provider key was decrypted from the vault (proxy
+  // key or customer-portal key). Such keys are pinned to their provider's
+  // first-party origin; see lib/security/credentialPin.ts.
+  private vaultKeyPin: CredentialPin | null = null;
 
   /*
   We allow the Authorization header to take both the provider key and the helicone auth key comma seprated.
@@ -622,13 +633,15 @@ export class RequestWrapper {
           `Provider key not found using Customer Portal Key. Error: ${error}`
         );
       }
-      this.extraHeaders = new Headers();
-      this.extraHeaders.set("helicone-organization-id", data.heliconeOrgId);
-
-      this.extraHeaders.set(
-        "helicone-request-id",
-        this.heliconeHeaders.requestId
-      );
+      // helicone-organization-id / helicone-request-id used to be attached
+      // here as extra outbound headers; Helicone headers are never sent to
+      // providers (lib/security/outboundHeaders.ts).
+      this.vaultKeyPin = {
+        source: "portal",
+        providerName: data.providerName ?? null,
+        config: data.providerKeyConfig ?? null,
+        providerKeyId: data.providerKeyId ?? null,
+      };
 
       this.authorization = data.providerKey;
       const headers = new Headers(this.headers);
@@ -651,6 +664,12 @@ export class RequestWrapper {
       }
       const providerKeyRow = data;
 
+      this.vaultKeyPin = {
+        source: "proxy",
+        providerName: providerKeyRow.providerName ?? null,
+        config: providerKeyRow.providerKeyConfig ?? null,
+        providerKeyId: providerKeyRow.providerKeyId ?? null,
+      };
       this.heliconeProxyKeyId = providerKeyRow.proxyKeyId;
       this.authorization = providerKeyRow.providerKey;
       const headers = new Headers(this.headers);
@@ -684,13 +703,7 @@ export class RequestWrapper {
       this.env.SUPABASE_SERVICE_ROLE_KEY
     );
 
-    return await getAndStoreInCache(
-      `getProxy-CP-${authKey}`,
-      env,
-      async () =>
-        await getProviderKeyFromPortalKey(authKey, env, supabaseClient),
-      43200 // 12 hours
-    );
+    return getProviderKeyFromPortalKeyCache(authKey, env, supabaseClient);
   }
 
   /**
@@ -735,36 +748,142 @@ export class RequestWrapper {
   getGatewayAttempt(): Attempt | undefined {
     return this.gatewayAttempt;
   }
+
+  /** True when the provider key for this request came from the vault. */
+  isVaultKeyRequest(): boolean {
+    return this.vaultKeyPin !== null;
+  }
+
+  /**
+   * The pin for any provider credential Helicone injected into this request:
+   * a vault key (proxy / customer-portal) or the BYOK key chosen by the AI
+   * Gateway. Null when the caller supplied the provider key themselves.
+   */
+  getCredentialPin(): CredentialPin | null {
+    if (this.vaultKeyPin) {
+      return this.vaultKeyPin;
+    }
+    const attempt = this.gatewayAttempt;
+    if (attempt && attempt.authType === "byok") {
+      return {
+        source: "byok",
+        providerName:
+          attempt.providerKey?.provider ?? attempt.endpoint.provider,
+        config: attempt.providerKey?.config ?? null,
+      };
+    }
+    return null;
+  }
 }
+
+type ProxyKeyLimitRow =
+  Database["public"]["Tables"]["helicone_proxy_key_limits"]["Row"];
 
 interface CustomerPortalValues {
   providerKey: string;
   heliconeOrgId: string;
+  providerKeyId: string;
+  providerName: string | null;
+  providerKeyConfig: unknown;
+  // organization.limits, enforced on every request (not cached as a verdict)
+  orgCostLimit: number;
+  orgRequestLimit: number;
 }
 
 export interface ProxyKeyRow {
   providerKey: string;
   proxyKeyId: string;
   organizationId: string;
+  providerKeyId: string;
+  providerName: string | null;
+  providerKeyConfig: unknown;
+  // helicone_proxy_key_limits rows, enforced on every request
+  limits: ProxyKeyLimitRow[];
 }
 
+// Lookup failures that are a property of the presented key (unknown, revoked,
+// unverifiable) are remembered briefly; transient DB errors are not.
+const DEFINITIVE_VAULT_LOOKUP_ERRORS = new Set<string>([
+  "Proxy key id not found",
+  "Proxy key not found in storedProxyKey",
+  "Proxy key not verified",
+  "Provider key not found",
+  "API key not found",
+  "Organization has no provider key",
+]);
+
+function isDefinitiveVaultLookupError(error: string): boolean {
+  return DEFINITIVE_VAULT_LOOKUP_ERRORS.has(error);
+}
+
+/**
+ * Resolves a proxy key to its decrypted provider key. The resolution is
+ * cached for AUTH_CACHE_TTL_SECONDS; the proxy key's limits are checked on
+ * every call, hit or miss.
+ */
 export async function getProviderKeyFromProxyCache(
   authKey: string,
   env: Env,
   supabaseClient: SupabaseClient<Database>
 ): Promise<Result<ProxyKeyRow, string>> {
-  return await getAndStoreInCache(
-    `getProxyKey-${authKey}`,
+  const resolved = await getAndStoreInCache<ProxyKeyRow, string>(
+    `${CACHE_KEY_PREFIXES.proxyKey}${authKey}`,
     env,
     async () => await getProviderKeyFromProxy(authKey, env, supabaseClient),
-    43200 // 12 hours
+    AUTH_CACHE_TTL_SECONDS,
+    true,
+    {
+      ttl: VAULT_NEGATIVE_CACHE_TTL_SECONDS,
+      shouldCache: isDefinitiveVaultLookupError,
+    }
   );
+  if (resolved.error !== null) {
+    return resolved;
+  }
+
+  const limits = resolved.data.limits ?? [];
+  if (limits.length > 0 && !(await checkLimits(limits, env))) {
+    return err("Limits are not valid");
+  }
+  return resolved;
 }
 
-export interface ProxyKeyRow {
-  providerKey: string;
-  proxyKeyId: string;
-  organizationId: string;
+/**
+ * Resolves a customer-portal key to the organization's provider key. Cached
+ * for AUTH_CACHE_TTL_SECONDS; the organization's limits are checked on every
+ * call, hit or miss.
+ */
+export async function getProviderKeyFromPortalKeyCache(
+  authKey: string,
+  env: Env,
+  supabaseClient: SupabaseClient<Database>
+): Promise<Result<CustomerPortalValues, string>> {
+  const resolved = await getAndStoreInCache<CustomerPortalValues, string>(
+    `${CACHE_KEY_PREFIXES.customerPortalKey}${authKey}`,
+    env,
+    async () => await getProviderKeyFromPortalKey(authKey, env, supabaseClient),
+    AUTH_CACHE_TTL_SECONDS,
+    true,
+    {
+      ttl: VAULT_NEGATIVE_CACHE_TTL_SECONDS,
+      shouldCache: isDefinitiveVaultLookupError,
+    }
+  );
+  if (resolved.error !== null) {
+    return resolved;
+  }
+
+  const check = await checkLimitsSingleCached(
+    resolved.data.orgCostLimit ?? -1,
+    resolved.data.orgRequestLimit ?? -1,
+    "month",
+    resolved.data.heliconeOrgId,
+    env
+  );
+  if (check.error) {
+    return err(check.error);
+  }
+  return resolved;
 }
 
 export async function getProviderKeyFromPortalKey(
@@ -801,7 +920,7 @@ export async function getProviderKeyFromPortalKey(
     .eq("soft_delete", false)
     .single();
 
-  // INC-710 defense in depth: only use org_provider_key when the provider key
+  // Defense in depth: only use org_provider_key when the provider key
   // belongs to this organization or to the reseller that created it.
   // reseller_id is not in the generated types, so read it defensively.
   const orgId = organization.data.id;
@@ -827,36 +946,37 @@ export async function getProviderKeyFromPortalKey(
   });
   if (!ownership.allowed) {
     console.warn(
-      `[INC-710] Refusing org_provider_key for organization ${orgId}: ${ownership.reason} (provider key ${organization.data.org_provider_key}, provider key org ${providerKeyOrgId ?? "none"})`
+      `Refusing org_provider_key for organization ${orgId}: ${ownership.reason} (provider key ${organization.data.org_provider_key}, provider key org ${providerKeyOrgId ?? "none"})`
     );
     return err("Provider key not found");
   }
 
-  const check = await checkLimitsSingle(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (organization.data?.limits as any)?.["cost"] ?? -1,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (organization.data?.limits as any)?.["requests"] ?? -1,
-    "month",
-    apiKey.data?.organization_id ?? "",
-    env
-  );
-
-  if (check.error) {
-    return err(check.error);
-  }
-
   const providerKey = await supabaseClient
     .from("decrypted_provider_keys_v2")
-    .select("decrypted_provider_key")
+    .select("id, decrypted_provider_key, provider_name, config")
     .eq("id", providerKeyId.data?.id ?? "")
     .eq("soft_delete", false)
     .single();
 
-  return map(mapPostgrestErr(providerKey), (x) => ({
-    providerKey: x.decrypted_provider_key ?? "",
+  if (providerKey.error || !providerKey.data?.decrypted_provider_key) {
+    return err("Provider key not found");
+  }
+
+  return ok({
+    providerKey: providerKey.data.decrypted_provider_key,
     heliconeOrgId: apiKey.data?.organization_id ?? "",
-  }));
+    providerKeyId: providerKey.data.id ?? providerKeyId.data?.id ?? "",
+    providerName:
+      providerKey.data.provider_name ??
+      providerKeyId.data?.provider_name ??
+      null,
+    providerKeyConfig:
+      providerKey.data.config ?? providerKeyId.data?.config ?? null,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    orgCostLimit: (organization.data?.limits as any)?.["cost"] ?? -1,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    orgRequestLimit: (organization.data?.limits as any)?.["requests"] ?? -1,
+  });
 }
 
 export async function getProviderKeyFromProxy(
@@ -897,10 +1017,9 @@ export async function getProviderKeyFromProxy(
     return err("Proxy key not found in storedProxyKey");
   }
 
-  if (limits.data && limits.data.length > 0) {
-    if (!(await checkLimits(limits.data, env))) {
-      return err("Limits are not valid");
-    }
+  if (limits.error) {
+    // Do not resolve (and cache) a key whose limits could not be read.
+    return err(`Error fetching proxy key limits: ${limits.error.message}`);
   }
 
   // @ts-ignore - RPC function not included in generated database types
@@ -913,10 +1032,12 @@ export async function getProviderKeyFromProxy(
     return err("Proxy key not verified");
   }
 
+  // The provider key must belong to the same organization as the proxy key.
   const providerKey = await supabaseClient
     .from("decrypted_provider_keys_v2")
-    .select("decrypted_provider_key")
+    .select("id, decrypted_provider_key, provider_name, config")
     .eq("id", storedProxyKey.data.provider_key_id)
+    .eq("org_id", storedProxyKey.data.org_id)
     .eq("soft_delete", false)
     .single();
 
@@ -928,5 +1049,9 @@ export async function getProviderKeyFromProxy(
     providerKey: providerKey.data.decrypted_provider_key,
     proxyKeyId: storedProxyKey.data.id,
     organizationId: storedProxyKey.data.org_id,
+    providerKeyId: providerKey.data.id ?? storedProxyKey.data.provider_key_id,
+    providerName: providerKey.data.provider_name ?? null,
+    providerKeyConfig: providerKey.data.config ?? null,
+    limits: limits.data ?? [],
   });
 }

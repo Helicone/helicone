@@ -88,6 +88,14 @@ describe("isApprovedApiBase", () => {
     ).toBe(true);
   });
 
+  it("rejects plain http for provider hosts (keys must not travel in clear)", () => {
+    expect(isApprovedApiBase("http://myres.openai.azure.com/openai")).toBe(
+      false,
+    );
+    expect(isApprovedApiBase("http://api.openai.com/v1")).toBe(false);
+    expect(isApprovedApiBase("http://127.0.0.1:8080/v1")).toBe(true);
+  });
+
   it("rejects unparseable or non-http inputs", () => {
     expect(isApprovedApiBase("not a url")).toBe(false);
     expect(isApprovedApiBase("api.anthropic.com")).toBe(false);

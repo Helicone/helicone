@@ -1,6 +1,13 @@
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
 import { ProviderKey, ProviderKeysStore } from "../db/ProviderKeysStore";
 import { getFromKVCacheOnly, storeInCache } from "../util/cache/secureCache";
+import {
+  AUTH_CACHE_TTL_SECONDS,
+  CACHE_KEY_PREFIXES,
+} from "../util/cache/cacheKeys";
+
+const providerKeysCacheKey = (orgId: string) =>
+  `${CACHE_KEY_PREFIXES.providerKeys}${orgId}`;
 
 /**
  * Creates a sentinel key to cache when no keys exist for a provider.
@@ -37,13 +44,13 @@ export class ProviderKeysManager {
     if (orgId) {
       this.providerKeysFromCache.set(
         orgId,
-        this.getProviderKeysFromCache(`provider_keys_${orgId}`)
+        this.getProviderKeysFromCache(providerKeysCacheKey(orgId))
       );
     }
 
     this.providerKeysFromCache.set(
       env.HELICONE_ORG_ID,
-      this.getProviderKeysFromCache(`provider_keys_${env.HELICONE_ORG_ID}`)
+      this.getProviderKeysFromCache(providerKeysCacheKey(env.HELICONE_ORG_ID))
     );
   }
 
@@ -53,10 +60,10 @@ export class ProviderKeysManager {
       await Promise.all(
         Object.entries(providerKeys).map(async ([orgId, keys]) => {
           await storeInCache(
-            `provider_keys_${orgId}`,
+            providerKeysCacheKey(orgId),
             JSON.stringify(keys),
             this.env,
-            43200 // 12 hours
+            AUTH_CACHE_TTL_SECONDS
           );
         })
       );
@@ -70,10 +77,10 @@ export class ProviderKeysManager {
       return;
     }
     await storeInCache(
-      `provider_keys_${orgId}`,
+      providerKeysCacheKey(orgId),
       JSON.stringify(providerKeys),
       this.env,
-      43200 // 12 hours
+      AUTH_CACHE_TTL_SECONDS
     );
   }
 
@@ -129,7 +136,11 @@ export class ProviderKeysManager {
   private async getProviderKeysFromCache(
     kvCacheKey: string
   ): Promise<ProviderKey[] | null> {
-    const kvKeys = await getFromKVCacheOnly(kvCacheKey, this.env, 43200);
+    const kvKeys = await getFromKVCacheOnly(
+      kvCacheKey,
+      this.env,
+      AUTH_CACHE_TTL_SECONDS
+    );
     if (!kvKeys) {
       return null;
     }
@@ -146,7 +157,7 @@ export class ProviderKeysManager {
     }
 
     const result = await this.getProviderKeysFromCache(
-      `provider_keys_${orgId}`
+      providerKeysCacheKey(orgId)
     );
 
     if (result) {
@@ -162,10 +173,10 @@ export class ProviderKeysManager {
    */
   private storeInCacheAsync(orgId: string, keysToStore: ProviderKey[]): void {
     const cachePromise = storeInCache(
-      `provider_keys_${orgId}`,
+      providerKeysCacheKey(orgId),
       JSON.stringify(keysToStore),
       this.env,
-      43200 // 12 hours
+      AUTH_CACHE_TTL_SECONDS
     );
 
     if (this.ctx) {
@@ -204,9 +215,9 @@ export class ProviderKeysManager {
       if (!fetchedKeys) {
         // Store null sentinel asynchronously
         const existingKeys = await getFromKVCacheOnly(
-          `provider_keys_${orgId}`,
+          providerKeysCacheKey(orgId),
           this.env,
-          43200 // 12 hours
+          AUTH_CACHE_TTL_SECONDS
         );
         if (existingKeys) {
           const existingKeysData = JSON.parse(existingKeys) as ProviderKey[];
@@ -223,9 +234,9 @@ export class ProviderKeysManager {
 
       // Store fetched keys asynchronously
       const existingKeys = await getFromKVCacheOnly(
-        `provider_keys_${orgId}`,
+        providerKeysCacheKey(orgId),
         this.env,
-        43200 // 12 hours
+        AUTH_CACHE_TTL_SECONDS
       );
       if (existingKeys) {
         const existingKeysData = JSON.parse(existingKeys) as ProviderKey[];

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Stub the downstream forwarder so these tests exercise only getProvider's
-// target validation (CIRT-76). The rest of the ai-gateway suite mocks
+// target validation. The rest of the ai-gateway suite mocks
 // gatewayForwarder wholesale, so nothing else covers this path.
 vi.mock("../../src/lib/HeliconeProxyRequest/ProxyForwarder", () => ({
   proxyForwarder: vi.fn(

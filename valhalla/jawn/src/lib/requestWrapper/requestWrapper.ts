@@ -505,7 +505,7 @@ export async function getProviderKeyFromPortalKey(
     return err(providerKeyId.error);
   }
 
-  // INC-710 defense in depth: only use org_provider_key when the provider key
+  // Defense in depth: only use org_provider_key when the provider key
   // belongs to this organization or to the reseller that created it.
   const providerKeyOrgId = providerKeyId.data?.[0]?.org_id;
   let resellerOrganizationType: string | null = null;
@@ -535,7 +535,7 @@ export async function getProviderKeyFromPortalKey(
   });
   if (!ownership.allowed) {
     console.warn(
-      `[INC-710] Refusing org_provider_key for organization ${org.id}: ${ownership.reason} (provider key ${org.org_provider_key}, provider key org ${providerKeyOrgId ?? "none"})`
+      `Refusing org_provider_key for organization ${org.id}: ${ownership.reason} (provider key ${org.org_provider_key}, provider key org ${providerKeyOrgId ?? "none"})`
     );
     return err("Provider key not found");
   }

@@ -42,31 +42,10 @@ export async function testEvaluator(
       };
     }
   } else if (testData._type === "python") {
-    const result = await jawn.POST("/v1/evaluator/python/test", {
-      body: {
-        code: testData.code,
-        testInput: testInput,
-      },
-    });
-    if (result?.data?.data) {
-      return {
-        ...(result?.data?.data ?? {}),
-        _type: "completed",
-      };
-    } else {
-      // Handle error response - result can be any structure from the API
-      const errorObj = result?.error ||
-        result?.data?.error || { message: "Unknown error - try again" };
-      const errorMessage =
-        typeof errorObj === "object"
-          ? JSON.stringify(errorObj, null, 2)
-          : String(errorObj);
-
-      return {
-        _type: "error",
-        error: errorMessage,
-      };
-    }
+    return {
+      _type: "error",
+      error: "Python evaluators are no longer supported",
+    };
   } else if (testData._type === "lastmile") {
     const result = await jawn.POST("/v1/evaluator/lastmile/test", {
       body: {

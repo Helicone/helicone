@@ -2,6 +2,7 @@ import * as Sentry from "@sentry/node";
 import { PromiseGenericResult, err, ok } from "../../packages/common/result";
 import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
+import { validateExternalUrl } from "../../utils/ssrfGuard";
 
 interface LytixModelIO {
   lytixHost?: string;
@@ -58,8 +59,15 @@ export class LytixHandler extends AbstractLogHandler {
       try {
         // send lytix logs to lytix
         const lytixHost = lytixModelIO.lytixHost ?? "https://api.lytix.co";
+        // The host is customer-supplied: refuse internal addresses and do not
+        // follow redirects.
+        const allowed = await validateExternalUrl(lytixHost);
+        if (allowed.error !== null) {
+          continue;
+        }
         await fetch(`${lytixHost}/v1/metrics/modelIO`, {
           method: "POST",
+          redirect: "error",
           headers: {
             "lx-api-key": `Bearer ${lytixModelIO.apiKey}`,
           },

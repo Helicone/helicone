@@ -9,6 +9,7 @@ import {
 } from "@helicone-package/cost/providers/mappings";
 import { BaseRouter } from "./routerFactory";
 import { EscrowInfo } from "../lib/ai-gateway/types";
+import { vaultKeyOverrideRejection } from "../lib/security/credentialPin";
 
 function validateURL(url: string) {
   try {
@@ -219,6 +220,16 @@ export const getGatewayAPIRouter = (router: BaseRouter) => {
         return response;
       }
       const fallbacks = requestWrapper.heliconeHeaders.fallBacks;
+
+      // Fallbacks let the caller pick both the target and the headers. A
+      // vault key must not be routed by the caller, so they are refused.
+      if (
+        fallbacks &&
+        fallbacks.length > 0 &&
+        requestWrapper.isVaultKeyRequest()
+      ) {
+        return vaultKeyOverrideRejection("helicone-fallbacks");
+      }
 
       if (fallbacks && fallbacks.length > 0) {
         return await fallBack(requestWrapper, forwarder);
