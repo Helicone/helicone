@@ -5,6 +5,7 @@ import { BarChart } from "@tremor/react";
 import { Result } from "@/packages/common/result";
 import { HeliconeStats } from "./api/stats";
 import { getTimeMap } from "../lib/timeCalculations/constants";
+import { withAdminSSR } from "../lib/api/handlerWrappers";
 
 interface HomeProps {}
 
@@ -284,3 +285,6 @@ const Home = (props: HomeProps) => {
 };
 
 export default Home;
+
+// Internal metrics page: platform admins only (the API it calls is gated too).
+export const getServerSideProps = withAdminSSR;

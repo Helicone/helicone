@@ -1,5 +1,5 @@
 /**
- * INC-710: organization.org_provider_key makes Helicone attach a stored
+ * organization.org_provider_key makes Helicone attach a stored
  * provider key to requests made with that organization's customer-portal
  * API keys. The key must belong to the organization itself, or to the
  * reseller organization that created it.

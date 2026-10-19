@@ -6,13 +6,78 @@ import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { err, ok, Result } from "../../packages/common/result";
 import { OrganizationStore } from "../../lib/stores/OrganizationStore";
 import { BaseManager } from "../BaseManager";
-import crypto from "crypto";
+import {
+  authorizeOrgActor,
+  getVerifiedOrgRole,
+  isAssignableMemberRole,
+  ORG_ADMIN_ROLES,
+  ORG_OWNER_ROLES,
+  OrgAuthzError,
+} from "../../utils/orgAuthz";
 
-export type NewOrganizationParams =
-  Database["public"]["Tables"]["organization"]["Insert"];
+type OrganizationInsert = Database["public"]["Tables"]["organization"]["Insert"];
+type OrganizationRow = Database["public"]["Tables"]["organization"]["Row"];
+
+export type OrganizationAddons = {
+  prompts?: boolean;
+  experiments?: boolean;
+  evals?: boolean;
+};
+
+/**
+ * Organization as returned to API clients. Billing identifiers and raw
+ * stripe_metadata are omitted; the add-on flags are exposed as `addons`.
+ */
+export type ClientOrganization = Omit<
+  OrganizationRow,
+  | "stripe_customer_id"
+  | "stripe_metadata"
+  | "stripe_subscription_id"
+  | "stripe_subscription_item_id"
+> & {
+  free_limit_exceeded?: string | null;
+  addons: OrganizationAddons | null;
+};
+
+/** Customer organization as listed to its reseller. */
+export type ResellerCustomerOrganization = Pick<
+  OrganizationRow,
+  "id" | "name" | "created_at" | "color" | "icon" | "tier" | "organization_type"
+>;
+
+/**
+ * Fields a client may supply when creating an organization. Everything else
+ * (owner, tier, billing identifiers, limits, flags) is set server-side.
+ *
+ * `owner`, `tier` and `has_integrated` are still accepted from older clients
+ * but are validated or ignored, never written as given.
+ */
+export type NewOrganizationParams = Pick<
+  OrganizationInsert,
+  "name" | "color" | "icon" | "organization_type" | "org_provider_key"
+> & {
+  has_onboarded?: boolean;
+  /** @deprecated Always the authenticated user. */
+  owner?: string;
+  /** @deprecated Always "free". */
+  tier?: string | null;
+  /** @deprecated Ignored. */
+  has_integrated?: boolean;
+};
+
+/** The exact values written to the organization row on creation. */
+export type OrganizationCreateRecord = {
+  name: string;
+  owner: string;
+  color: string | null;
+  icon: string | null;
+  organization_type: string;
+  org_provider_key: string | null;
+  has_onboarded: boolean;
+};
 
 export type UpdateOrganizationParams = Pick<
-  NewOrganizationParams,
+  OrganizationInsert,
   | "name"
   | "color"
   | "icon"
@@ -114,9 +179,16 @@ export class OrganizationManager extends BaseManager {
 
   async createOrganization(
     createOrgParams: NewOrganizationParams
-  ): Promise<Result<NewOrganizationParams, string>> {
-    if (!this.authParams.userId) return err("Unauthorized");
-    if (createOrgParams.owner !== this.authParams.userId) {
+  ): Promise<Result<{ id: string }, string>> {
+    // Creating an organization makes the caller its owner, so the caller must
+    // be a real user session, not an API key carrying a stored user id.
+    if (this.authParams.authType !== "jwt" || !this.authParams.userId) {
+      return err("Unauthorized");
+    }
+    if (
+      createOrgParams.owner !== undefined &&
+      createOrgParams.owner !== this.authParams.userId
+    ) {
       return err("Unauthorized");
     }
 
@@ -125,11 +197,19 @@ export class OrganizationManager extends BaseManager {
       return err("Invalid organization type");
     }
 
-    if (createOrgParams.tier !== "free") {
+    if (
+      createOrgParams.tier !== undefined &&
+      createOrgParams.tier !== null &&
+      createOrgParams.tier !== "free"
+    ) {
       return err("Only free tier is supported");
     }
 
-    // INC-710: org_provider_key attaches a stored provider key to every
+    if (!createOrgParams.name || createOrgParams.name.trim() === "") {
+      return err("Organization name is required");
+    }
+
+    // org_provider_key attaches a stored provider key to every
     // request made with this organization's customer-portal API keys. It may
     // only be set when a reseller creates a customer organization, and only to
     // a provider key the reseller organization itself owns. The reseller is
@@ -162,12 +242,20 @@ export class OrganizationManager extends BaseManager {
       }
     }
 
+    // Build the row from an explicit allowlist. Billing identifiers
+    // (stripe_*), limits, tier and ownership are never taken from the client.
+    const record: OrganizationCreateRecord = {
+      name: createOrgParams.name,
+      owner: this.authParams.userId,
+      color: createOrgParams.color ?? null,
+      icon: createOrgParams.icon ?? null,
+      organization_type: organizationType,
+      org_provider_key: orgProviderKey,
+      has_onboarded: createOrgParams.has_onboarded === true,
+    };
+
     const insert = await this.organizationStore.createNewOrganization(
-      {
-        ...createOrgParams,
-        organization_type: organizationType,
-        org_provider_key: orgProviderKey,
-      },
+      record,
       resellerId
     );
     if (insert.error || !insert.data) {
@@ -209,8 +297,12 @@ export class OrganizationManager extends BaseManager {
     updateOrgParams: UpdateOrganizationParams,
     organizationId: string
   ): Promise<Result<string, string>> {
-    if (!this.authParams.userId) return err("Unauthorized");
-    // INC-710: the provider key attached to an organization is fixed at
+    // Only a signed-in user may change organization settings; an API key's
+    // stored user_id is not proof of identity.
+    if (this.authParams.authType !== "jwt" || !this.authParams.userId) {
+      return err("Unauthorized");
+    }
+    // The provider key attached to an organization is fixed at
     // creation by its reseller and is never updatable by clients.
     if (
       updateOrgParams.org_provider_key !== undefined &&
@@ -253,72 +345,75 @@ export class OrganizationManager extends BaseManager {
     return ok(data);
   }
 
+  /**
+   * Authorizes a membership change on `organizationId`. The organization must
+   * be the one the caller authenticated against, the caller must be signed in
+   * (JWT), and the caller's role is re-read from the database.
+   */
+  async authorizeMemberManagement(
+    organizationId: string,
+    allowedRoles = ORG_ADMIN_ROLES
+  ) {
+    return authorizeOrgActor(this.authParams, allowedRoles, organizationId);
+  }
+
   async addMember(
     organizationId: string,
     email: string
-  ): Promise<Result<{ userId: string; temporaryPassword?: string }, string>> {
-    if (!this.authParams.userId) return err("Unauthorized");
+  ): Promise<Result<{ userId: string }, string>> {
     // Authorize before touching any user record: an unauthorized caller must
     // not be able to resolve emails to account ids or create accounts.
-    if (
-      (await this.organizationStore.checkAccessToMutateOrg(
-        organizationId,
-        this.authParams.userId
-      )) === false
-    ) {
-      return err("User does not have access to add member to organization");
+    const actor = await this.authorizeMemberManagement(organizationId);
+    if (actor.error !== null) {
+      return err(actor.error.message);
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail || !normalizedEmail.includes("@")) {
+      return err("Invalid email");
     }
 
     let { data: userId, error: userIdError } =
-      await this.organizationStore.getUserByEmail(email);
+      await this.organizationStore.getUserByEmail(normalizedEmail);
 
     if (userIdError) {
       return err(userIdError);
     }
-    let temporaryPassword: string | undefined;
     if (!userId || userId.length === 0) {
+      // Never mint accounts or credentials on someone else's behalf.
+      // Supabase mode sends the invitee a sign-in email (no credential is
+      // returned to the caller); other auth modes require the person to sign
+      // up first.
+      if (process.env.NEXT_PUBLIC_BETTER_AUTH === "true") {
+        return err(
+          "No Helicone account exists for this email. Ask them to sign up first, then add them."
+        );
+      }
       try {
-        // We still need to use the auth API for this specific function
-        const authClient = getHeliconeAuthClient();
-        if (process.env.NEXT_PUBLIC_BETTER_AUTH === "true") {
-          temporaryPassword = crypto.randomBytes(18).toString("base64url");
-        }
-        const userResult = await authClient.createUser({
-          email,
-          password: temporaryPassword,
+        const userResult = await getHeliconeAuthClient().createUser({
+          email: normalizedEmail,
           otp: true,
         });
-        if (userResult.error) {
-          return err(userResult.error);
+        if (userResult.error || !userResult.data?.id) {
+          return err(userResult.error ?? "Failed to invite user");
         }
-
-        if (!userResult.data?.id) {
-          return err("Failed to create user");
-        }
-
-        // we refetch the id since createUser can return a better auth format id (not a UUID)
-        userId = userResult.data?.id ?? "";
-        userIdError = null;
+        userId = userResult.data.id;
       } catch (error) {
-        return err(`Failed to send OTP: ${error}`);
+        return err(`Failed to send invite: ${error}`);
       }
-    }
-
-    if (userIdError) {
-      return err(userIdError);
     }
 
     const { error: insertError } =
       await this.organizationStore.addMemberToOrganization(
         userId!,
-        organizationId
+        actor.data.organizationId
       );
 
     if (insertError && insertError !== null) {
       return err(insertError);
     }
 
-    return ok({ userId: userId!, temporaryPassword });
+    return ok({ userId: userId! });
   }
 
   async updateMember(
@@ -326,21 +421,43 @@ export class OrganizationManager extends BaseManager {
     orgRole: string,
     memberId: string
   ): Promise<Result<string, string>> {
-    if (!this.authParams.userId) return err("Unauthorized");
-    const hasAccess = await this.organizationStore.checkAccessToMutateOrg(
-      organizationId,
-      this.authParams.userId
-    );
-    if (!hasAccess) {
-      return err("User does not have access to update member");
-    }
     if (!organizationId || !orgRole || !memberId)
       return err("Invalid parameters");
 
+    const actor = await this.authorizeMemberManagement(organizationId);
+    if (actor.error !== null) {
+      return err(actor.error.message);
+    }
+
+    if (!isAssignableMemberRole(orgRole)) {
+      return err("Invalid role. Allowed roles: member, admin");
+    }
+    if (memberId === actor.data.userId) {
+      return err("You cannot change your own role");
+    }
+    if (memberId === actor.data.ownerId) {
+      return err(
+        "The organization owner's role cannot be changed. Transfer ownership instead."
+      );
+    }
+
+    const target = await getVerifiedOrgRole(
+      actor.data.organizationId,
+      memberId
+    );
+    if (target.error !== null) {
+      return err("Error checking member role");
+    }
+    if (!target.data) {
+      return err("User is not a member of this organization");
+    }
+    if (target.data.role === "admin" && actor.data.role !== "owner") {
+      return err("Only the organization owner can change an admin's role");
+    }
+
     const { error: updateError } =
       await this.organizationStore.updateOrganizationMember(
-        organizationId,
-        this.authParams.userId,
+        actor.data.organizationId,
         orgRole,
         memberId
       );
@@ -355,20 +472,22 @@ export class OrganizationManager extends BaseManager {
     organizationId: string,
     memberId: string
   ): Promise<Result<string, string>> {
-    if (!this.authParams.userId) return err("Unauthorized");
-    const isUserOwner = await this.organizationStore.isUserOwner(
-      organizationId,
-      this.authParams.userId
-    );
-    if (!isUserOwner) {
-      return err("User does not have access to update member");
-    }
     if (!organizationId || !memberId) return err("Invalid parameters");
+    const actor = await this.authorizeMemberManagement(
+      organizationId,
+      ORG_OWNER_ROLES
+    );
+    if (actor.error !== null) {
+      return err(actor.error.message);
+    }
+    if (memberId === actor.data.userId) {
+      return err("You already own this organization");
+    }
 
     const { error: updateError } =
       await this.organizationStore.updateOrganizationOwner(
-        organizationId,
-        this.authParams.userId,
+        actor.data.organizationId,
+        actor.data.userId,
         memberId
       );
 
@@ -395,24 +514,80 @@ export class OrganizationManager extends BaseManager {
     return ok(owner);
   }
 
+  /**
+   * Checks that the caller may remove `memberId` from `organizationId`:
+   *  - the owner can never be removed;
+   *  - any member may remove themselves (leave);
+   *  - removing someone else requires admin, and removing an admin requires
+   *    the owner.
+   */
+  async authorizeMemberRemoval(
+    organizationId: string,
+    memberId: string
+  ): Promise<Result<{ organizationId: string }, OrgAuthzError>> {
+    const actor = await this.authorizeMemberManagement(organizationId, [
+      "owner",
+      "admin",
+      "member",
+    ]);
+    if (actor.error !== null) {
+      return err(actor.error);
+    }
+    if (!memberId) {
+      return err({ status: 403, message: "Invalid member" });
+    }
+    if (memberId === actor.data.ownerId) {
+      return err({
+        status: 403,
+        message:
+          "The organization owner cannot be removed. Transfer ownership first.",
+      });
+    }
+    if (memberId !== actor.data.userId) {
+      if (actor.data.role === "member") {
+        return err({
+          status: 403,
+          message: "Only organization owners and admins can remove members",
+        });
+      }
+      const target = await getVerifiedOrgRole(
+        actor.data.organizationId,
+        memberId
+      );
+      if (target.error !== null) {
+        return err({ status: 500, message: "Error checking member role" });
+      }
+      if (!target.data) {
+        return err({
+          status: 403,
+          message: "User is not a member of this organization",
+        });
+      }
+      if (target.data.role === "admin" && actor.data.role !== "owner") {
+        return err({
+          status: 403,
+          message: "Only the organization owner can remove an admin",
+        });
+      }
+    }
+    return ok({ organizationId: actor.data.organizationId });
+  }
+
   async removeOrganizationMember(
     organizationId: string,
     memberId: string
   ): Promise<Result<string, string>> {
-    if (!this.authParams.userId) return err("Unauthorized");
-    const hasAccess = await this.organizationStore.checkAccessToMutateOrg(
+    const authorized = await this.authorizeMemberRemoval(
       organizationId,
-      this.authParams.userId
+      memberId
     );
-    if (!hasAccess) {
-      return err(
-        "User does not have access to remove member from organization"
-      );
+    if (authorized.error !== null) {
+      return err(authorized.error.message);
     }
 
     const { error: deleteError } =
       await this.organizationStore.removeMemberFromOrganization(
-        organizationId,
+        authorized.data.organizationId,
         memberId
       );
 
@@ -479,14 +654,10 @@ export class OrganizationManager extends BaseManager {
   }
 
   async deleteOrganization(): Promise<Result<string, string>> {
-    if (!this.authParams.userId) return err("Unauthorized");
-    const hasAccess = await this.organizationStore.checkAccessToMutateOrg(
-      this.authParams.organizationId,
-      this.authParams.userId
-    );
-
-    if (!hasAccess) {
-      return err("User does not have access to delete organization");
+    // Deleting an organization is owner-only and requires a signed-in user.
+    const actor = await authorizeOrgActor(this.authParams, ORG_OWNER_ROLES);
+    if (actor.error !== null) {
+      return err(actor.error.message);
     }
     const { data: orgData, error: orgError } =
       await this.organizationStore.deleteOrganization();

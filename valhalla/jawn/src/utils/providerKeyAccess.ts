@@ -8,7 +8,7 @@ import { AuthParams } from "../packages/common/auth/types";
  * Helicone API keys are never accepted: they authenticate as "bearer", carry
  * no org role, and are frequently distributed widely inside customer
  * infrastructure (including read-only keys). Org members are not accepted
- * either. See INC-710.
+ * either.
  */
 export function isJwtOrgAdmin(authParams: AuthParams | undefined): boolean {
   if (!authParams || authParams.authType !== "jwt") {

@@ -56,6 +56,21 @@ const nextConfig = {
       },
     ];
   },
+  async headers() {
+    return [
+      {
+        // The dashboard is never embedded in an iframe (no first-party embeds
+        // exist), so forbid framing entirely to prevent clickjacking.
+        source: "/:path*",
+        headers: [
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        ],
+      },
+    ];
+  },
   async rewrites() {
     return [
       {

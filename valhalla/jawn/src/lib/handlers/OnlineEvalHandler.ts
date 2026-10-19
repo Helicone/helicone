@@ -3,6 +3,7 @@ import {
   getEvaluatorScoreName,
   getFullEvaluatorScoreName,
 } from "../../managers/evaluator/EvaluatorManager";
+import { isPythonEvaluator } from "../../managers/evaluator/pythonEvaluator";
 import { cacheResultCustom } from "../../utils/cacheResult";
 import { KVCache } from "../cache/kvCache";
 import { err, PromiseGenericResult } from "../../packages/common/result";
@@ -11,6 +12,19 @@ import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext, toHeliconeRequest } from "./HandlerContext";
 
 const kvCache = new KVCache(60); // 1 minutes
+
+let loggedPythonEvaluatorSkip = false;
+
+/** Python evaluators are retired; note it once per process, not per log. */
+function logPythonEvaluatorSkipOnce() {
+  if (loggedPythonEvaluatorSkip) {
+    return;
+  }
+  loggedPythonEvaluatorSkip = true;
+  console.log(
+    "Skipping python online evaluators: python evaluators are no longer supported"
+  );
+}
 
 export class OnlineEvalHandler extends AbstractLogHandler {
   public async handle(context: HandlerContext): PromiseGenericResult<string> {
@@ -43,6 +57,18 @@ export class OnlineEvalHandler extends AbstractLogHandler {
     }
 
     for (const onlineEval of onlineEvals.data ?? []) {
+      if (
+        isPythonEvaluator({
+          scoring_type: onlineEval.evaluator_scoring_type,
+          code_template: onlineEval.evaluator_code_template,
+          llm_template: onlineEval.evaluator_llm_template,
+          last_mile_config: onlineEval.last_mile_config,
+        })
+      ) {
+        logPythonEvaluatorSkipOnce();
+        continue;
+      }
+
       const sampleRate = Number(
         (onlineEval.config as any)?.["sampleRate"] ?? 100
       );

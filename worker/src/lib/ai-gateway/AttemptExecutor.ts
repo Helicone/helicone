@@ -29,6 +29,7 @@ import {
   PTB_DISABLED_MESSAGE,
   PTB_ENABLED_FEATURE,
 } from "../../../../packages/common/billing/ptbAccess";
+import { redactSecretsFromUrl } from "../security/redact";
 
 // Minimum balance (in cents) to allow optimistic execution without waiting for escrow
 const ALLOWABLE_BALANCE_TO_SKIP_CHECK = 450; // $4.50 in cents
@@ -209,7 +210,7 @@ export class AttemptExecutor {
       ptbSpanId = props.traceContext?.sampled
         ? this.tracer.startSpan(
             "ai_gateway.ptb",
-            `${props.requestWrapper.getMethod()} ${props.requestWrapper.getUrl()}`,
+            `${props.requestWrapper.getMethod()} ${redactSecretsFromUrl(props.requestWrapper.getUrl())}`,
             "ai-gateway-ptb",
             {
               provider: endpoint.provider,
@@ -390,13 +391,24 @@ export class AttemptExecutor {
         requestWrapper.setHeader(key, value);
       }
 
-      // If provider doesn't return Authorization header, remove the original one
-      // This handles providers that use URL-based auth (like Google's native API)
-      // Check both cases since headers can be lowercase or capitalized
-      const hasAuthHeader =
-        "Authorization" in authHeaders || "authorization" in authHeaders;
-      if (!hasAuthHeader && endpoint.provider === "google-ai-studio") {
-        requestWrapper.getHeaders().delete("Authorization");
+      // resetObject() restored the caller's original headers, so Authorization
+      // / x-api-key may still hold the caller's Helicone API key. Only the
+      // credential headers the provider's authenticate() produced may go out;
+      // drop every other credential header (e.g. Authorization for Anthropic,
+      // Azure and Google, which authenticate with x-api-key / api-key /
+      // x-goog-api-key).
+      const providerAuthHeaderNames = new Set(
+        Object.keys(authHeaders).map((key) => key.toLowerCase())
+      );
+      for (const credentialHeader of [
+        "authorization",
+        "x-api-key",
+        "api-key",
+        "x-goog-api-key",
+      ]) {
+        if (!providerAuthHeaderNames.has(credentialHeader)) {
+          requestWrapper.getHeaders().delete(credentialHeader);
+        }
       }
 
       metrics.markPreRequestEnd();

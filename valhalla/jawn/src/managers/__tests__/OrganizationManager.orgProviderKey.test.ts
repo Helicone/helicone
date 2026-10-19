@@ -85,11 +85,12 @@ function insertedValue(column: string): unknown {
   return idx === -1 ? undefined : (call[1] as unknown[])[idx];
 }
 
-describe("OrganizationManager.createOrganization org_provider_key (INC-710)", () => {
+describe("OrganizationManager.createOrganization org_provider_key", () => {
   const authParams: AuthParams = {
     organizationId: CALLER_ORG_ID,
     userId: USER_ID,
     role: "admin",
+    authType: "jwt",
   };
 
   beforeEach(() => {
@@ -230,13 +231,14 @@ describe("OrganizationManager.createOrganization org_provider_key (INC-710)", ()
   });
 });
 
-describe("OrganizationManager.updateOrganization org_provider_key (INC-710)", () => {
+describe("OrganizationManager.updateOrganization org_provider_key", () => {
   test("rejects attempts to set org_provider_key", async () => {
     mockDbExecute.mockReset();
     const manager = new OrganizationManager({
       organizationId: CALLER_ORG_ID,
       userId: USER_ID,
       role: "admin",
+      authType: "jwt",
     });
 
     const result = await manager.updateOrganization(
@@ -246,5 +248,97 @@ describe("OrganizationManager.updateOrganization org_provider_key (INC-710)", ()
 
     expect(result.error).toBe("org_provider_key cannot be updated");
     expect(mockDbExecute).not.toHaveBeenCalled();
+  });
+
+  test("rejects API-key callers", async () => {
+    mockDbExecute.mockReset();
+    const manager = new OrganizationManager({
+      organizationId: CALLER_ORG_ID,
+      userId: USER_ID,
+      authType: "bearer",
+      keyPermissions: "rw",
+    });
+
+    const result = await manager.updateOrganization({ name: "x" }, CALLER_ORG_ID);
+
+    expect(result.error).toBe("Unauthorized");
+    expect(mockDbExecute).not.toHaveBeenCalled();
+  });
+});
+
+describe("OrganizationManager.createOrganization field allowlist", () => {
+  const jwtAuth: AuthParams = {
+    organizationId: CALLER_ORG_ID,
+    userId: USER_ID,
+    role: "owner",
+    authType: "jwt",
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test("never writes client-supplied billing identifiers, limits or flags", async () => {
+    installDb({ callerOrgType: "user", callerRole: "owner", ownedKeyIds: [] });
+    const manager = new OrganizationManager(jwtAuth);
+
+    const result = await manager.createOrganization({
+      name: "New org",
+      color: "blue",
+      icon: "building",
+      ...({
+        stripe_customer_id: "cus_other",
+        stripe_subscription_id: "sub_other",
+        limits: { requests: 999999999 },
+        is_personal: true,
+        soft_delete: true,
+      } as object),
+    });
+
+    expect(result.error).toBeNull();
+    const call = insertCall();
+    expect(call).toBeDefined();
+    const sql = call![0] as string;
+    expect(sql).not.toContain("stripe_customer_id");
+    expect(sql).not.toContain("stripe_subscription_id");
+    expect(insertedValue("owner")).toBe(USER_ID);
+    expect(insertedValue("tier")).toBe("free");
+    expect(insertedValue("limits")).toEqual({});
+    expect(insertedValue("is_personal")).toBe(false);
+    expect(insertedValue("soft_delete")).toBe(false);
+    expect(insertedValue("color")).toBe("blue");
+    expect(insertedValue("icon")).toBe("building");
+  });
+
+  test("rejects API-key callers", async () => {
+    installDb({ callerOrgType: "user", callerRole: "owner", ownedKeyIds: [] });
+    const manager = new OrganizationManager({
+      ...jwtAuth,
+      authType: "bearer",
+      keyPermissions: "rw",
+    });
+
+    const result = await manager.createOrganization({ name: "New org" });
+
+    expect(result.error).toBe("Unauthorized");
+    expect(insertCall()).toBeUndefined();
+  });
+
+  test("rejects an owner other than the caller and non-free tiers", async () => {
+    installDb({ callerOrgType: "user", callerRole: "owner", ownedKeyIds: [] });
+    const manager = new OrganizationManager(jwtAuth);
+
+    const otherOwner = await manager.createOrganization({
+      name: "New org",
+      owner: "99999999-9999-9999-9999-999999999999",
+    });
+    expect(otherOwner.error).toBe("Unauthorized");
+
+    const paidTier = await manager.createOrganization({
+      name: "New org",
+      tier: "enterprise",
+    });
+    expect(paidTier.error).toBe("Only free tier is supported");
+    expect(insertCall()).toBeUndefined();
   });
 });

@@ -2,6 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { dbExecute, dbQueryClickhouse } from "../../lib/api/db/dbExecute";
 import { Result } from "@/packages/common/result";
+import { withAdminAuth } from "../../lib/api/handlerWrappers";
 
 type CountOverTime = {
   count_step: number;
@@ -324,11 +325,22 @@ ORDER BY
   };
 }
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<Result<HeliconeStats, string>>,
-) {
-  res.setHeader("Cache-Control", `s-maxage=${60 * 10}, public`); // 10 minutes
+async function handler({
+  req,
+  res,
+}: {
+  req: NextApiRequest;
+  res: NextApiResponse<Result<HeliconeStats, string>>;
+}) {
+  if (req.method !== "GET") {
+    res.status(405).json({ error: "Method not allowed", data: null });
+    return;
+  }
+  // Internal business metrics: platform admins only. Must not be cached by a
+  // shared CDN, or the admin's response would be served to everyone.
+  res.setHeader("Cache-Control", "private, no-store");
 
   res.status(200).json(await getModelUsageOverTime());
 }
+
+export default withAdminAuth(handler);

@@ -35,7 +35,7 @@ export interface paths {
   "/v1/api-keys/provider-key/{providerKeyId}": {
     /**
      * @description Returns provider key metadata with the secret values MASKED. Plaintext
-     * provider keys are never returned over HTTP (INC-710). Requires a signed-in
+     * provider keys are never returned over HTTP. Requires a signed-in
      * organization owner or admin; Helicone API keys are rejected.
      */
     get: operations["GetProviderKey"];
@@ -212,6 +212,10 @@ export interface paths {
     post: operations["TestStripeMeterEvent"];
   };
   "/v1/log/request": {
+    /**
+     * @description Internal HTTP fallback used by the Helicone worker. Requires the
+     * server-held manual access key in heliconeMeta.
+     */
     post: operations["LogRequests"];
   };
   "/v1/gov-organization/limits/member/{memberId}": {
@@ -225,6 +229,11 @@ export interface paths {
     get: operations["IsGovernanceOrg"];
   };
   "/v1/key/generateHash": {
+    /**
+     * @description Creates a Helicone API key for the signed-in organization. The key is
+     * generated server-side and returned once; it is never accepted from the
+     * caller.
+     */
     post: operations["GenerateHash"];
   };
   "/v1/filter": {
@@ -677,7 +686,7 @@ export interface components {
     };
     /**
      * @description Provider key as returned to API callers. The secret values are masked and
-     * can never be used to call the provider (INC-710).
+     * can never be used to call the provider.
      */
     MaskedProviderKey: {
       id: string;
@@ -851,50 +860,63 @@ export interface components {
       };
     };
 Json: JsonObject;
-    "ResultSuccess__40_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-and-_role-string__41_-Array_": {
-      data: (({
-          tier: string | null;
-          subscription_status: string | null;
-          stripe_subscription_item_id: string | null;
-          stripe_subscription_id: string | null;
-          stripe_metadata: components["schemas"]["Json"];
-          stripe_customer_id: string | null;
-          soft_delete: boolean;
-          size: string | null;
-          /** Format: double */
-          request_limit: number | null;
-          referral: string | null;
-          playground_helicone: boolean;
-          /** Format: double */
-          percent_to_log: number | null;
-          owner: string;
-          organization_type: string;
-          org_provider_key: string | null;
-          onboarding_status: components["schemas"]["Json"];
-          name: string;
-          limits: components["schemas"]["Json"] | null;
-          is_personal: boolean;
-          is_main_org: boolean;
-          id: string;
-          icon: string;
-          has_onboarded: boolean;
-          has_integrated: boolean;
-          governance_settings: components["schemas"]["Json"] | null;
-          gateway_discount_enabled: boolean;
-          domain: string | null;
-          default_time_filter: string | null;
-          /** Format: double */
-          credit_limit: number;
-          created_at: string | null;
-          color: string;
-          allow_negative_balance: boolean;
-        }) & {
-          role: string;
-        })[];
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_OrganizationRow.Exclude_keyofOrganizationRow.stripe_customer_id-or-stripe_metadata-or-stripe_subscription_id-or-stripe_subscription_item_id__": {
+      name: string;
+      allow_negative_balance: boolean;
+      color: string;
+      created_at: string;
+      /** Format: double */
+      credit_limit: number;
+      default_time_filter: string;
+      domain: string;
+      gateway_discount_enabled: boolean;
+      governance_settings: components["schemas"]["Json"];
+      has_integrated: boolean;
+      has_onboarded: boolean;
+      icon: string;
+      id: string;
+      is_main_org: boolean;
+      is_personal: boolean;
+      limits: components["schemas"]["Json"];
+      onboarding_status: components["schemas"]["Json"];
+      org_provider_key: string;
+      organization_type: string;
+      owner: string;
+      /** Format: double */
+      percent_to_log: number;
+      playground_helicone: boolean;
+      referral: string;
+      /** Format: double */
+      request_limit: number;
+      size: string;
+      soft_delete: boolean;
+      subscription_status: string;
+      tier: string;
+    };
+    /** @description Construct a type with the properties of T except for those in type K. */
+    "Omit_OrganizationRow.stripe_customer_id-or-stripe_metadata-or-stripe_subscription_id-or-stripe_subscription_item_id_": components["schemas"]["Pick_OrganizationRow.Exclude_keyofOrganizationRow.stripe_customer_id-or-stripe_metadata-or-stripe_subscription_id-or-stripe_subscription_item_id__"];
+    OrganizationAddons: {
+      evals?: boolean;
+      experiments?: boolean;
+      prompts?: boolean;
+    };
+    /**
+     * @description Organization as returned to API clients. Billing identifiers and raw
+     * stripe_metadata are omitted; the add-on flags are exposed as `addons`.
+     */
+    ClientOrganization: components["schemas"]["Omit_OrganizationRow.stripe_customer_id-or-stripe_metadata-or-stripe_subscription_id-or-stripe_subscription_item_id_"] & ({
+      addons: components["schemas"]["OrganizationAddons"] | null;
+      free_limit_exceeded?: string | null;
+    });
+    "ResultSuccess__40_ClientOrganization-and-_org_role-string-or-null__41_-Array_": {
+      data: (components["schemas"]["ClientOrganization"] & ({
+          org_role: string | null;
+        }))[];
       /** @enum {number|null} */
       error: null;
     };
-    "Result__40_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-and-_role-string__41_-Array.string_": components["schemas"]["ResultSuccess__40_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-and-_role-string__41_-Array_"] | components["schemas"]["ResultError_string_"];
+    "Result__40_ClientOrganization-and-_org_role-string-or-null__41_-Array.string_": components["schemas"]["ResultSuccess__40_ClientOrganization-and-_org_role-string-or-null__41_-Array_"] | components["schemas"]["ResultError_string_"];
     "ResultSuccess__model-string_-Array_": {
       data: {
           model: string;
@@ -903,123 +925,74 @@ Json: JsonObject;
       error: null;
     };
     "Result__model-string_-Array.string_": components["schemas"]["ResultSuccess__model-string_-Array_"] | components["schemas"]["ResultError_string_"];
-    "ResultSuccess_Database-at-public_91_Tables_93_-at-organization_91_Row_93__": {
-      data: {
-        tier: string | null;
-        subscription_status: string | null;
-        stripe_subscription_item_id: string | null;
-        stripe_subscription_id: string | null;
-        stripe_metadata: components["schemas"]["Json"];
-        stripe_customer_id: string | null;
-        soft_delete: boolean;
-        size: string | null;
-        /** Format: double */
-        request_limit: number | null;
-        referral: string | null;
-        playground_helicone: boolean;
-        /** Format: double */
-        percent_to_log: number | null;
-        owner: string;
-        organization_type: string;
-        org_provider_key: string | null;
-        onboarding_status: components["schemas"]["Json"];
-        name: string;
-        limits: components["schemas"]["Json"] | null;
-        is_personal: boolean;
-        is_main_org: boolean;
-        id: string;
-        icon: string;
-        has_onboarded: boolean;
-        has_integrated: boolean;
-        governance_settings: components["schemas"]["Json"] | null;
-        gateway_discount_enabled: boolean;
-        domain: string | null;
-        default_time_filter: string | null;
-        /** Format: double */
-        credit_limit: number;
-        created_at: string | null;
-        color: string;
-        allow_negative_balance: boolean;
-      };
+    ResultSuccess_ClientOrganization_: {
+      data: components["schemas"]["ClientOrganization"];
       /** @enum {number|null} */
       error: null;
     };
-    "Result_Database-at-public_91_Tables_93_-at-organization_91_Row_93_.string_": components["schemas"]["ResultSuccess_Database-at-public_91_Tables_93_-at-organization_91_Row_93__"] | components["schemas"]["ResultError_string_"];
-    ResultSuccess_unknown_: {
-      data: unknown;
+    "Result_ClientOrganization.string_": components["schemas"]["ResultSuccess_ClientOrganization_"] | components["schemas"]["ResultError_string_"];
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_OrganizationRow.id-or-name-or-created_at-or-color-or-icon-or-tier-or-organization_type_": {
+      name: string;
+      color: string;
+      created_at: string;
+      icon: string;
+      id: string;
+      organization_type: string;
+      tier: string;
+    };
+    /** @description Customer organization as listed to its reseller. */
+    ResellerCustomerOrganization: components["schemas"]["Pick_OrganizationRow.id-or-name-or-created_at-or-color-or-icon-or-tier-or-organization_type_"];
+    "ResultSuccess_ResellerCustomerOrganization-Array_": {
+      data: components["schemas"]["ResellerCustomerOrganization"][];
       /** @enum {number|null} */
       error: null;
     };
-    ResultError_unknown_: {
-      /** @enum {number|null} */
-      data: null;
-      error: unknown;
-    };
+    "Result_ResellerCustomerOrganization-Array.string_": components["schemas"]["ResultSuccess_ResellerCustomerOrganization-Array_"] | components["schemas"]["ResultError_string_"];
     ResultSuccess_string_: {
       data: string;
       /** @enum {number|null} */
       error: null;
     };
     "Result_string.string_": components["schemas"]["ResultSuccess_string_"] | components["schemas"]["ResultError_string_"];
-    NewOrganizationParams: {
-      tier?: string | null;
-      subscription_status?: string | null;
-      stripe_subscription_item_id?: string | null;
-      stripe_subscription_id?: string | null;
-      stripe_metadata?: components["schemas"]["Json"];
-      stripe_customer_id?: string | null;
-      soft_delete?: boolean;
-      size?: string | null;
-      /** Format: double */
-      request_limit?: number | null;
-      referral?: string | null;
-      playground_helicone?: boolean;
-      /** Format: double */
-      percent_to_log?: number | null;
-      owner: string;
-      organization_type?: string;
-      org_provider_key?: string | null;
-      onboarding_status?: components["schemas"]["Json"];
-      name: string;
-      limits?: components["schemas"]["Json"] | null;
-      is_personal?: boolean;
-      is_main_org?: boolean;
-      id?: string;
-      icon?: string;
-      has_onboarded?: boolean;
-      has_integrated?: boolean;
-      governance_settings?: components["schemas"]["Json"] | null;
-      gateway_discount_enabled?: boolean;
-      domain?: string | null;
-      default_time_filter?: string | null;
-      /** Format: double */
-      credit_limit?: number;
-      created_at?: string | null;
-      color?: string;
-      allow_negative_balance?: boolean;
-    };
     /** @description From T, pick a set of properties whose keys are in the union K */
-    "Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-organization_type-or-onboarding_status-or-default_time_filter_": {
+    "Pick_OrganizationInsert.name-or-color-or-icon-or-organization_type-or-org_provider_key_": {
       name: string;
       color?: string;
       icon?: string;
       org_provider_key?: string;
-      limits?: components["schemas"]["Json"];
       organization_type?: string;
-      onboarding_status?: components["schemas"]["Json"];
-      default_time_filter?: string;
     };
-    UpdateOrganizationParams: components["schemas"]["Pick_NewOrganizationParams.name-or-color-or-icon-or-org_provider_key-or-limits-or-organization_type-or-onboarding_status-or-default_time_filter_"] & {
+    /**
+     * @description Fields a client may supply when creating an organization. Everything else
+     * (owner, tier, billing identifiers, limits, flags) is set server-side.
+     *
+     * `owner`, `tier` and `has_integrated` are still accepted from older clients
+     * but are validated or ignored, never written as given.
+     */
+    NewOrganizationParams: components["schemas"]["Pick_OrganizationInsert.name-or-color-or-icon-or-organization_type-or-org_provider_key_"] & ({
+      /** @deprecated */
+      has_integrated?: boolean;
+      /** @deprecated */
+      tier?: string | null;
+      /** @deprecated */
+      owner?: string;
+      has_onboarded?: boolean;
+    });
+    /** @description From T, pick a set of properties whose keys are in the union K */
+    "Pick_OrganizationInsert.name-or-color-or-icon-or-org_provider_key-or-limits-or-organization_type-or-onboarding_status-or-default_time_filter_": {
+      name: string;
+      color?: string;
+      default_time_filter?: string;
+      icon?: string;
+      limits?: components["schemas"]["Json"];
+      onboarding_status?: components["schemas"]["Json"];
+      org_provider_key?: string;
+      organization_type?: string;
+    };
+    UpdateOrganizationParams: components["schemas"]["Pick_OrganizationInsert.name-or-color-or-icon-or-org_provider_key-or-limits-or-organization_type-or-onboarding_status-or-default_time_filter_"] & {
       variant?: string;
     };
-    "ResultSuccess__temporaryPassword_63_-string_-or-null_": {
-      data: {
-        temporaryPassword?: string;
-      } | null;
-      /** @enum {number|null} */
-      error: null;
-    };
-    "Result__temporaryPassword_63_-string_-or-null.string_": components["schemas"]["ResultSuccess__temporaryPassword_63_-string_-or-null_"] | components["schemas"]["ResultError_string_"];
     UIFilterRowTree: components["schemas"]["UIFilterRowNode"] | components["schemas"]["FilterRow"];
     UIFilterRowNode: {
       /** @enum {string} */
@@ -1438,13 +1411,25 @@ Json: JsonObject;
       /** @enum {number|null} */
       error: null;
     };
-    /** @enum {string} */
-    KeyPermissions: "w" | "rw";
+    ResultError_unknown_: {
+      /** @enum {number|null} */
+      data: null;
+      error: unknown;
+    };
+    ResultSuccess_unknown_: {
+      data: unknown;
+      /** @enum {number|null} */
+      error: null;
+    };
     GenerateHashQueryParams: {
-      apiKey: string;
-      governance: boolean;
       keyName: string;
-      permissions: components["schemas"]["KeyPermissions"];
+      /** @enum {string} */
+      permissions: "rw" | "w";
+      governance: boolean;
+      /** @description Adds the "-rl" prefix marker used by rate-limited keys. */
+      enableRateLimit?: boolean;
+      /** @description Adds the "-eu" prefix marker. Purely cosmetic; not a secret. */
+      isEu?: boolean;
     };
     StoreFilterType: {
       createdAt?: string;
@@ -15768,7 +15753,7 @@ export interface operations {
   };
   /**
    * @description Returns provider key metadata with the secret values MASKED. Plaintext
-   * provider keys are never returned over HTTP (INC-710). Requires a signed-in
+   * provider keys are never returned over HTTP. Requires a signed-in
    * organization owner or admin; Helicone API keys are rejected.
    */
   GetProviderKey: {
@@ -16201,7 +16186,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result__40_Database-at-public_91_Tables_93_-at-organization_91_Row_93_-and-_role-string__41_-Array.string_"];
+          "application/json": components["schemas"]["Result__40_ClientOrganization-and-_org_role-string-or-null__41_-Array.string_"];
         };
       };
     };
@@ -16226,7 +16211,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result_Database-at-public_91_Tables_93_-at-organization_91_Row_93_.string_"];
+          "application/json": components["schemas"]["Result_ClientOrganization.string_"];
         };
       };
     };
@@ -16241,7 +16226,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["ResultSuccess_unknown_"] | components["schemas"]["ResultError_unknown_"];
+          "application/json": components["schemas"]["Result_ResellerCustomerOrganization-Array.string_"];
         };
       };
     };
@@ -16323,7 +16308,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["Result__temporaryPassword_63_-string_-or-null.string_"];
+          "application/json": components["schemas"]["Result_null.string_"];
         };
       };
     };
@@ -16841,6 +16826,10 @@ export interface operations {
       };
     };
   };
+  /**
+   * @description Internal HTTP fallback used by the Helicone worker. Requires the
+   * server-held manual access key in heliconeMeta.
+   */
   LogRequests: {
     /** @description Log message to log */
     requestBody: {
@@ -16890,7 +16879,7 @@ export interface operations {
       /** @description Ok */
       200: {
         content: {
-          "application/json": components["schemas"]["ResultError_unknown_"] | components["schemas"]["ResultSuccess_any_"];
+          "application/json": components["schemas"]["ResultSuccess_any_"] | components["schemas"]["ResultError_unknown_"];
         };
       };
     };
@@ -16915,6 +16904,11 @@ export interface operations {
       };
     };
   };
+  /**
+   * @description Creates a Helicone API key for the signed-in organization. The key is
+   * generated server-side and returned once; it is never accepted from the
+   * caller.
+   */
   GenerateHash: {
     requestBody: {
       content: {
@@ -16930,6 +16924,7 @@ export interface operations {
               details?: string;
               message?: string;
             };
+            apiKey?: string;
             success?: boolean;
           };
         };

@@ -209,7 +209,7 @@ export class HeliconeProxyRequestMapper {
   }
 
   private validateApiConfiguration(api_base: string | undefined): boolean {
-    // Validates the parsed origin, not the raw string (CIRT-73).
+    // Validates the parsed origin, not the raw string.
     return isApprovedApiBase(api_base);
   }
 

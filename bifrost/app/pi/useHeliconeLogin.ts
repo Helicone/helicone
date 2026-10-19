@@ -4,15 +4,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Cookies from "js-cookie";
 import { testAPIKey } from "./first_page/useTestApiKey";
 
-function generateUUID() {
-  // Only use crypto.randomUUID() in browser environment
-  if (typeof window !== "undefined") {
-    return crypto.randomUUID();
-  }
-  // Return a placeholder value for server-side rendering
-  return "SERVER_SIDE_UUID";
-}
-
 export const useCountDown = (seconds: number, onFinish: () => void) => {
   const [countDown, setCountDown] = useState(seconds);
 
@@ -27,16 +18,24 @@ export const useCountDown = (seconds: number, onFinish: () => void) => {
 };
 
 export const useHeliconeLogin = (invalid_api_key?: boolean) => {
+  const jawn = useJawnClient();
+  // Session ids are issued by the server; they are never chosen client-side.
   const sessionUUID = useQuery({
     queryKey: ["sessionUUID"],
-    queryFn: () => generateUUID(),
+    queryFn: async () => {
+      if (typeof window === "undefined") {
+        return null;
+      }
+      const res = await jawn.POST("/v1/public/pi/session", {});
+      return res.data?.data?.sessionUUID ?? null;
+    },
+    staleTime: 9 * 60 * 1000,
   });
 
   const countDown = useCountDown(600, () => {
     sessionUUID.refetch();
   });
 
-  const jawn = useJawnClient();
   const apiKey = useQuery({
     queryKey: ["pi-session", sessionUUID.data],
     queryFn: async () => {

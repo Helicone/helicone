@@ -116,10 +116,22 @@ export class AdminController extends Controller {
     @Body() body: { feature: string; orgId: string }
   ): Promise<Result<boolean, string>> {
     try {
+      // Callers may only check their own organization's flags. Platform
+      // admins (JWT + admins table) may check any organization.
+      let orgId = request.authParams.organizationId;
+      if (body.orgId && body.orgId !== orgId) {
+        try {
+          await authCheckThrow(request.authParams);
+          orgId = body.orgId;
+        } catch {
+          this.setStatus(403);
+          return err("Forbidden");
+        }
+      }
       const { data } = await dbExecute<{
         id: string;
       }>(`SELECT id FROM feature_flags WHERE org_id = $1 AND feature = $2`, [
-        body.orgId,
+        orgId,
         body.feature,
       ]);
 

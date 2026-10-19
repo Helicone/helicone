@@ -12,6 +12,7 @@ import { handleFeedback } from "../lib/managers/FeedbackManager";
 import { getGatewayAPIRouter } from "./gatewayRouter";
 import { getGenerateRouter } from "./generateRouter";
 import { getAIGatewayRouter } from "./aiGatewayRouter";
+import { vaultKeyOverrideRejection } from "../lib/security/credentialPin";
 
 export type BaseRouter = RouterType<
   Route,
@@ -58,6 +59,11 @@ const WORKER_MAP = {
         }
         if (!requestWrapper?.heliconeHeaders?.heliconeAuthV2?.token) {
           return error(500, "Invalid User");
+        }
+        // The customer gateway forwards to a customer-operated host; a key
+        // decrypted from the vault must never be sent there.
+        if (requestWrapper.isVaultKeyRequest()) {
+          return vaultKeyOverrideRejection("A customer gateway");
         }
         const gatewayTarget = urlsObj?.[baseHost];
 

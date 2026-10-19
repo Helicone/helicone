@@ -5,6 +5,7 @@ import {
 } from "../../../../lib/api/handlerWrappers";
 import { Result } from "@/packages/common/result";
 import { Permission } from "../../../../services/lib/user";
+import { withSameOrigin } from "@/lib/api/security/sameOrigin";
 
 async function handler({
   req,
@@ -13,6 +14,7 @@ async function handler({
 }: HandlerWrapperOptions<Result<null, string>>) {
   if (req.method !== "DELETE") {
     res.status(405).json({ error: "Method not allowed", data: null });
+    return;
   }
 
   const { id } = req.query;
@@ -28,11 +30,13 @@ async function handler({
   );
 
   if (deleteProxyKeys.error) {
-    res.status(500).json({ error: deleteProxyKeys.error, data: null });
+    res
+      .status(500)
+      .json({ error: "Failed to delete provider key", data: null });
     return;
   }
 
   res.status(200).json({ error: null, data: null });
 }
 
-export default withAuth(handler, [Permission.MANAGE_KEYS]);
+export default withSameOrigin(withAuth(handler, [Permission.MANAGE_KEYS]));

@@ -99,7 +99,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
   const [isEditingKey, setIsEditingKey] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   // Masked forms of the stored key (e.g. "sk-ant••••••••abcd"). The browser
-  // never receives plaintext provider keys (INC-710).
+  // never receives plaintext provider keys.
   const [maskedKey, setMaskedKey] = useState<string | null>(null);
   const [maskedSecretKey, setMaskedSecretKey] = useState<string | null>(null);
   const [configValues, setConfigValues] = useState<Record<string, string>>({});

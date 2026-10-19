@@ -7,7 +7,7 @@ const ORG = "org-customer";
 const RESELLER = "org-reseller";
 const VICTIM = "org-victim";
 
-describe("checkOrgProviderKeyOwnership (INC-710)", () => {
+describe("checkOrgProviderKeyOwnership", () => {
   test("allows a provider key owned by the organization itself", () => {
     expect(
       checkOrgProviderKeyOwnership({
