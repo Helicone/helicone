@@ -202,10 +202,11 @@ export class ResponseBodyHandler extends AbstractLogHandler {
           } else if (parsedUsage.data) {
             context.usage = parsedUsage.data ?? null;
 
-            const providerModelId =
+            const providerModelId = (
               context.message.heliconeMeta.providerModelId ??
               (!isAIGateway ? context.processedLog.model : "") ??
-              "";
+              ""
+            ).replace(/^models\//, "");
 
             const breakdown = modelCostBreakdownFromRegistry({
               modelUsage: parsedUsage.data,
