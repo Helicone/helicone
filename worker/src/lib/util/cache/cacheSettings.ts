@@ -14,17 +14,17 @@ export interface CacheSettings {
   cacheSeed: string | null;
 }
 
-function buildCacheControl(cacheControl: string): string {
-  const sMaxAge = cacheControl.match(/s-maxage=(\d+)/)?.[1];
-  const maxAge = cacheControl.match(/max-age=(\d+)/)?.[1];
+export function buildCacheControl(cacheControl: string): string {
+  const sMaxAge = cacheControl.match(/(?:^|[,\s])s-maxage=(\d+)(?:[,\s;]|$)/i)?.[1];
+  const maxAge = cacheControl.match(/(?:^|[,\s])max-age=(\d+)(?:[,\s;]|$)/i)?.[1];
 
   if (sMaxAge || maxAge) {
     let sMaxAgeInSeconds = 0;
     try {
       sMaxAgeInSeconds = sMaxAge
-        ? parseInt(sMaxAge)
+        ? parseInt(sMaxAge, 10)
         : maxAge
-          ? parseInt(maxAge)
+          ? parseInt(maxAge, 10)
           : 0;
     } catch (e) {
       console.error("Error parsing s-maxage or max-age", e);
