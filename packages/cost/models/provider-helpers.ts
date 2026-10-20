@@ -159,6 +159,18 @@ export const dbProviderToProvider = (
   if (provider === "nebius" || provider === "Nebius") {
     return "nebius";
   }
+  if (provider === "xai" || provider === "XAI" || provider === "xAi") {
+    return "xai";
+  }
+  if (provider === "perplexity" || provider === "Perplexity") {
+    return "perplexity";
+  }
+  if (provider === "mistral" || provider === "Mistral") {
+    return "mistral";
+  }
+  if (provider === "helicone" || provider === "Helicone") {
+    return "helicone";
+  }
   return null;
 };
 
