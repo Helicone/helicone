@@ -53,7 +53,7 @@ async function getDecryptedProviderKeysByOrgId(
 /**
  * Look up a provider key by id, scoped to the calling org. `orgId` is
  * required on purpose: a provider key id must never be resolvable across
- * tenants (CIRT-80). Resolves to `null` when no matching key exists.
+ * tenants. Resolves to `null` when no matching key exists.
  */
 async function getDecryptedProviderKeyById(
   providerKeyId: string,

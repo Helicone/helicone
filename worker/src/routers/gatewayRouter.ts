@@ -1,15 +1,15 @@
 import { Provider } from "..";
 import { proxyForwarder } from "../lib/HeliconeProxyRequest/ProxyForwarder";
 import { RequestWrapper } from "../lib/RequestWrapper";
-import { safePut } from "../lib/safePut";
 import { enumerate } from "../lib/util/helpers";
 import { Result, err, ok } from "../lib/util/results";
 import {
-  approvedDomains,
+  isApprovedApiBase,
   providers,
 } from "@helicone-package/cost/providers/mappings";
 import { BaseRouter } from "./routerFactory";
 import { EscrowInfo } from "../lib/ai-gateway/types";
+import { vaultKeyOverrideRejection } from "../lib/security/credentialPin";
 
 function validateURL(url: string) {
   try {
@@ -20,67 +20,9 @@ function validateURL(url: string) {
   }
 }
 
-function isApprovedDomain(url: string) {
-  return approvedDomains.some((domain) => domain.test(url));
-}
-
-// Only allow 10,000 requests per day per unapproved domain
-async function rateLimitUnapprovedDomains(
-  url: string,
-  rateLimitKV: KVNamespace
-): Promise<{
-  rateLimited: boolean;
-}> {
-  if (!isApprovedDomain(url)) {
-    const MAX_REQUESTS_PER_DAY = 10_000;
-    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
-    const rlKey = `gateway-rl-${url}-${today}`;
-    const count = await rateLimitKV.get(rlKey);
-    if (count && parseInt(count) > MAX_REQUESTS_PER_DAY) {
-      return {
-        rateLimited: true,
-      };
-    } else if (count) {
-      await safePut({
-        key: rateLimitKV,
-        keyName: rlKey,
-        value: (parseInt(count) + 1).toString(),
-      });
-    } else {
-      const gatewayRlList = await rateLimitKV.get(`gateway-rl-list`);
-      if (!gatewayRlList) {
-        await safePut({
-          key: rateLimitKV,
-          keyName: `gateway-rl-list`,
-          value: JSON.stringify([rlKey]),
-          options: { expirationTtl: 365 * 24 * 60 * 60 }, // 1 year
-        });
-      } else {
-        const list = JSON.parse(gatewayRlList);
-        list.push(url);
-        await safePut({
-          key: rateLimitKV,
-          keyName: `gateway-rl-list`,
-          value: JSON.stringify(list),
-          options: { expirationTtl: 365 * 24 * 60 * 60 }, // 1 year
-        });
-      }
-      await safePut({
-        key: rateLimitKV,
-        keyName: rlKey,
-        value: "1",
-      });
-    }
-  }
-  return {
-    rateLimited: false,
-  };
-}
-
 async function getProvider(
   targetBaseUrl: string | null,
   setBaseURLOverride: (url: string) => void,
-  rateLimitKV: KVNamespace,
   headers: Headers
 ): Promise<
   Result<
@@ -98,7 +40,7 @@ async function getProvider(
     );
   }
   if (!validateURL(targetBaseUrl)) {
-    err(
+    return err(
       new Response(`Invalid target base url "${targetBaseUrl}"`, {
         status: 400,
       })
@@ -106,26 +48,21 @@ async function getProvider(
   }
   const targetBaseUrlHost = new URL(targetBaseUrl).origin;
 
-  if (targetBaseUrlHost !== targetBaseUrl) {
-    err(
+  // A path on the target is tolerated, not rejected: the AI Gateway passes
+  // full endpoint URLs (".../v1/chat/completions") and some GATEWAY_TARGETs
+  // carry a path (firecrawl, bedrock). buildTargetUrl only ever uses the
+  // origin of the override, so the origin is what has to be authorized.
+  // (This guard used to call err() without returning, so it never fired.)
+
+  // The target must be an approved provider origin. This is an authorization
+  // check, not a rate limit: the outbound request may carry a decrypted
+  // provider key, so it must never be sent to a caller-chosen host.
+  if (!isApprovedApiBase(targetBaseUrlHost)) {
+    return err(
       new Response(
-        `Target base url "${targetBaseUrl}" must not contain a path, got "${targetBaseUrlHost}"`,
+        `Target base url "${targetBaseUrlHost}" is not an approved provider domain. To request a new provider, contact engineering@helicone.ai`,
         {
-          status: 400,
-        }
-      )
-    );
-  }
-  const { rateLimited } = await rateLimitUnapprovedDomains(
-    targetBaseUrlHost,
-    rateLimitKV
-  );
-  if (rateLimited) {
-    err(
-      new Response(
-        `Rate limited unapproved domain! To get your target-url on the list of approved domains to surpase the rate limit please reach out to us at engineering@helicone.ai`,
-        {
-          status: 429,
+          status: 403,
         }
       )
     );
@@ -138,10 +75,26 @@ async function getProvider(
     const callback = headers.get("Upstash-Callback");
 
     if (callback) {
-      const callbackUrl = new URL(callback);
-      const targetBaseUrl = callbackUrl.origin;
-      setBaseURLOverride(targetBaseUrl);
-      provider = getProviderFromTargetUrl(targetBaseUrl);
+      if (!validateURL(callback)) {
+        return err(
+          new Response(`Invalid Upstash-Callback url "${callback}"`, {
+            status: 400,
+          })
+        );
+      }
+      const callbackOrigin = new URL(callback).origin;
+      if (!isApprovedApiBase(callbackOrigin)) {
+        return err(
+          new Response(
+            `Upstash-Callback "${callbackOrigin}" is not an approved provider domain`,
+            {
+              status: 403,
+            }
+          )
+        );
+      }
+      setBaseURLOverride(callbackOrigin);
+      provider = getProviderFromTargetUrl(callbackOrigin);
     }
   }
 
@@ -179,7 +132,6 @@ export const gatewayForwarder = async (
   const { data: provderResults, error } = await getProvider(
     targetProps.targetBaseUrl,
     targetProps.setBaseURLOverride,
-    env.RATE_LIMIT_KV,
     requestWrapper.headers
   );
 
@@ -268,6 +220,16 @@ export const getGatewayAPIRouter = (router: BaseRouter) => {
         return response;
       }
       const fallbacks = requestWrapper.heliconeHeaders.fallBacks;
+
+      // Fallbacks let the caller pick both the target and the headers. A
+      // vault key must not be routed by the caller, so they are refused.
+      if (
+        fallbacks &&
+        fallbacks.length > 0 &&
+        requestWrapper.isVaultKeyRequest()
+      ) {
+        return vaultKeyOverrideRejection("helicone-fallbacks");
+      }
 
       if (fallbacks && fallbacks.length > 0) {
         return await fallBack(requestWrapper, forwarder);

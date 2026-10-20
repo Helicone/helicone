@@ -82,7 +82,7 @@ describe("Simple Cache Test", () => {
 
   it("should cache and retrieve a simple response", async () => {
     // Step 1: Generate cache key
-    const cacheKey = await kvKeyFromRequest(mockRequest, 0, null);
+    const cacheKey = await kvKeyFromRequest(mockRequest, 0, null, "test-org-id");
     expect(cacheKey).toBeDefined();
     expect(cacheKey).toContain("hashed_");
     
@@ -91,7 +91,8 @@ describe("Simple Cache Test", () => {
       mockRequest,
       { bucketSize: 1 },
       mockCacheKv,
-      null
+      null,
+      "test-org-id"
     );
     expect(initialCache).toBeNull();
     
@@ -112,6 +113,7 @@ describe("Simple Cache Test", () => {
       settings: { bucketSize: 1 },
       cacheKv: mockCacheKv,
       cacheSeed: null,
+      organizationId: "test-org-id",
     });
     
     expect(saveResult).toBe(true);
@@ -121,7 +123,8 @@ describe("Simple Cache Test", () => {
       mockRequest,
       { bucketSize: 1 },
       mockCacheKv,
-      null
+      null,
+      "test-org-id"
     );
     
     expect(cachedResponse).not.toBeNull();
@@ -169,7 +172,7 @@ describe("Simple Cache Test", () => {
     const mockRequest1 = createMockRequest(request1Body);
     
     // Manually populate cache for request 1
-    const key1 = await kvKeyFromRequest(mockRequest1, 0, null);
+    const key1 = await kvKeyFromRequest(mockRequest1, 0, null, "test-org-id");
     cacheStorage.set(key1, {
       headers: { "Content-Type": "application/json" },
       latency: 100,
@@ -184,7 +187,7 @@ describe("Simple Cache Test", () => {
     const mockRequest2 = createMockRequest(request2Body);
     
     // Manually populate cache for request 2
-    const key2 = await kvKeyFromRequest(mockRequest2, 0, null);
+    const key2 = await kvKeyFromRequest(mockRequest2, 0, null, "test-org-id");
     
     // Keys should be different for different requests
     expect(key1).not.toBe(key2);
@@ -200,7 +203,8 @@ describe("Simple Cache Test", () => {
       mockRequest1,
       { bucketSize: 1 },
       mockCacheKv,
-      null
+      null,
+      "test-org-id"
     );
     const body1 = await cached1?.text();
     expect(body1).toBe('{"answer":"4"}');
@@ -210,7 +214,8 @@ describe("Simple Cache Test", () => {
       mockRequest2,
       { bucketSize: 1 },
       mockCacheKv,
-      null
+      null,
+      "test-org-id"
     );
     const body2 = await cached2?.text();
     expect(body2).toBe('{"answer":"6"}');
@@ -241,6 +246,7 @@ describe("Simple Cache Test", () => {
       settings: { bucketSize: 1 },
       cacheKv: mockCacheKv,
       cacheSeed: null,
+      organizationId: "test-org-id",
     });
     
     // Second request with different timestamp and request_id but same content
@@ -258,7 +264,8 @@ describe("Simple Cache Test", () => {
       mockRequest,
       { bucketSize: 1 },
       mockCacheKv,
-      null
+      null,
+      "test-org-id"
     );
 
     expect(cachedResponse).not.toBeNull();
@@ -283,7 +290,7 @@ describe("Simple Cache Test", () => {
 
     // Manually populate cache buckets
     for (let i = 0; i < 3; i++) {
-      const key = await kvKeyFromRequest(mockRequest, i, null);
+      const key = await kvKeyFromRequest(mockRequest, i, null, "test-org-id");
       cacheStorage.set(key, {
         headers: { "Content-Type": "application/json" },
         latency: 100 + i * 10,
@@ -296,7 +303,8 @@ describe("Simple Cache Test", () => {
       mockRequest,
       { bucketSize: 3 },
       mockCacheKv,
-      null
+      null,
+      "test-org-id"
     );
 
     expect(cachedResponse).not.toBeNull();

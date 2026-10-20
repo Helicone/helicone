@@ -14,7 +14,17 @@ import { Result, err, ok } from "../../packages/common/result";
 import { type JawnAuthenticatedRequest } from "../../types/request";
 import crypto from "crypto";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
-import { sendTestWebhook } from "../../lib/clients/webhookSender";
+import {
+  resolveWebhookDestination,
+  sendTestWebhook,
+} from "../../lib/clients/webhookSender";
+import {
+  isJwtOrgAdmin,
+  maskProviderSecret,
+} from "../../utils/providerKeyAccess";
+
+export const WEBHOOK_FORBIDDEN_MESSAGE =
+  "Only organization owners and admins can manage webhooks";
 
 export interface WebhookData {
   destination: string;
@@ -32,6 +42,21 @@ export class WebhookController extends Controller {
     webhookData: WebhookData,
     @Request() request: JawnAuthenticatedRequest
   ) {
+    if (!isJwtOrgAdmin(request.authParams)) {
+      this.setStatus(403);
+      return err(WEBHOOK_FORBIDDEN_MESSAGE);
+    }
+
+    // Reject internal / private destinations up front (delivery re-checks and
+    // pins DNS on every send, so this is not the only line of defence).
+    const destination = await resolveWebhookDestination(
+      webhookData?.destination
+    );
+    if (destination.error) {
+      this.setStatus(400);
+      return err(destination.error);
+    }
+
     const newHMACKEY = crypto.randomBytes(32).toString("hex");
 
     const sampleRate = webhookData.config?.sampleRate ?? 100;
@@ -94,7 +119,21 @@ export class WebhookController extends Controller {
   }
 
   @Get("/")
-  public async getWebhooks(@Request() request: JawnAuthenticatedRequest) {
+  public async getWebhooks(
+    @Request() request: JawnAuthenticatedRequest
+  ): Promise<
+    Result<
+      {
+        id: string;
+        created_at: string;
+        destination: string;
+        version: string;
+        config: string;
+        hmac_key: string;
+      }[],
+      string
+    >
+  > {
     const result = await dbExecute<{
       id: string;
       created_at: string;
@@ -116,11 +155,22 @@ export class WebhookController extends Controller {
 
     if (result.error || !result.data) {
       this.setStatus(500);
-    } else {
-      this.setStatus(200);
+      return result;
     }
 
-    return result;
+    this.setStatus(200);
+
+    // The signing secret lets anyone forge webhook deliveries; only owners and
+    // admins (JWT) may read it.
+    if (isJwtOrgAdmin(request.authParams)) {
+      return result;
+    }
+    return ok(
+      result.data.map((webhook) => ({
+        ...webhook,
+        hmac_key: maskProviderSecret(webhook.hmac_key) ?? "",
+      }))
+    );
   }
 
   @Delete("/{webhookId}")
@@ -128,6 +178,11 @@ export class WebhookController extends Controller {
     @Path() webhookId: string,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
+    if (!isJwtOrgAdmin(request.authParams)) {
+      this.setStatus(403);
+      return err(WEBHOOK_FORBIDDEN_MESSAGE);
+    }
+
     const result = await dbExecute(
       `DELETE FROM webhooks WHERE id = $1 AND org_id = $2`,
       [webhookId, request.authParams.organizationId]
@@ -147,6 +202,11 @@ export class WebhookController extends Controller {
     @Path() webhookId: string,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<{ success: boolean; message: string }, string>> {
+    if (!isJwtOrgAdmin(request.authParams)) {
+      this.setStatus(403);
+      return err(WEBHOOK_FORBIDDEN_MESSAGE);
+    }
+
     // Fetch the webhook configuration
     const webhookResult = await dbExecute<{
       id: string;
@@ -171,7 +231,7 @@ export class WebhookController extends Controller {
     const testResult = await sendTestWebhook(webhook);
     
     if (testResult.error) {
-      this.setStatus(500);
+      this.setStatus(400);
       return err(testResult.error);
     }
 

@@ -8,6 +8,7 @@ import { getDataDogClient } from "../lib/monitoring/DataDogClient";
 import { DBWrapper } from "../lib/db/DBWrapper";
 import { createDataDogTracer } from "../lib/monitoring/DataDogTracer";
 import { registry } from "@helicone-package/cost/models/registry";
+import { redactSecretsFromUrl } from "../lib/security/redact";
 
 export const getAIGatewayRouter = (router: BaseRouter) => {
   router.post(
@@ -19,6 +20,26 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
       ctx: ExecutionContext
     ) => {
       requestWrapper.setRequestReferrer("ai-gateway");
+
+      // Proxy keys and customer-portal keys grant one stored provider key.
+      // The AI Gateway authenticates the org and then routes across every
+      // BYOK key (and PTB credits) the org has, so accepting them here would
+      // widen a single-key grant to the whole org. Only Helicone API keys.
+      if (requestWrapper.isVaultKeyRequest()) {
+        return new Response(
+          JSON.stringify({
+            error: {
+              message:
+                "Proxy keys and customer portal keys are not supported by the AI Gateway. Use a Helicone API key.",
+              type: "invalid_api_key",
+            },
+          }),
+          {
+            status: 401,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+      }
 
       try {
         const pathLower = new URL(
@@ -57,7 +78,7 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
       const tracer = createDataDogTracer(env);
       const traceContext = tracer.startTrace(
         "ai_gateway",
-        requestWrapper.getUrl(),
+        redactSecretsFromUrl(requestWrapper.getUrl()),
         {
           http_method: requestWrapper.getMethod(),
         }
@@ -95,7 +116,7 @@ export const getAIGatewayRouter = (router: BaseRouter) => {
       const { data: auth, error: authError } = await requestWrapper.auth();
       tracer.finishSpan(authSpan);
 
-      if (authError || !auth || !rawAPIKey) {
+      if (authError || !auth || !rawAPIKey || auth._type === "bearerProxy") {
         console.error(authError);
         tracer.setError(authSpan, authError?.toString() || "Invalid API key");
         tracer.finishTrace({ error: "auth_failed" });

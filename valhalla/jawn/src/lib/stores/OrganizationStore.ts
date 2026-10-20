@@ -1,6 +1,6 @@
 import {
-  NewOrganizationParams,
   OnboardingStatus,
+  OrganizationCreateRecord,
   OrganizationFilter,
   OrganizationLayout,
   OrganizationMember,
@@ -14,31 +14,107 @@ import { dbExecute } from "../shared/db/dbExecute";
 import { err, ok, Result } from "../../packages/common/result";
 import { BaseStore } from "./baseStore";
 
+/**
+ * Organization columns that may be returned to API clients. Billing
+ * identifiers (stripe_customer_id, stripe_subscription_id,
+ * stripe_subscription_item_id) and raw stripe_metadata are never returned;
+ * only the add-on flags from stripe_metadata are exposed, as `addons`.
+ */
+export const ORGANIZATION_CLIENT_COLUMNS = [
+  "allow_negative_balance",
+  "color",
+  "created_at",
+  "credit_limit",
+  "default_time_filter",
+  "domain",
+  "free_limit_exceeded",
+  "gateway_discount_enabled",
+  "governance_settings",
+  "has_integrated",
+  "has_onboarded",
+  "icon",
+  "id",
+  "is_main_org",
+  "is_personal",
+  "limits",
+  "name",
+  "onboarding_status",
+  "org_provider_key",
+  "organization_type",
+  "owner",
+  "percent_to_log",
+  "playground_helicone",
+  "referral",
+  "request_limit",
+  "size",
+  "soft_delete",
+  "subscription_status",
+  "tier",
+] as const;
+
+/** SELECT list for client-facing organization rows (table alias required). */
+export function organizationClientSelect(alias: string): string {
+  return [
+    ...ORGANIZATION_CLIENT_COLUMNS.map((c) => `${alias}.${c}`),
+    `${alias}.stripe_metadata->'addons' AS addons`,
+  ].join(", ");
+}
+
 export class OrganizationStore extends BaseStore {
+  /**
+   * Callers must authorize the record (owner, org_provider_key, resellerId)
+   * first; see OrganizationManager.createOrganization. Only the columns listed
+   * here are ever written: billing identifiers (stripe_*), limits and tier are
+   * server-controlled and cannot be supplied by a client.
+   */
   async createNewOrganization(
-    createOrgParams: NewOrganizationParams
-  ): Promise<Result<NewOrganizationParams, string>> {
+    record: OrganizationCreateRecord,
+    resellerId: string | null = null
+  ): Promise<Result<{ id: string }, string>> {
     try {
+      const columns = [
+        "name",
+        "owner",
+        "tier",
+        "is_personal",
+        "has_onboarded",
+        "soft_delete",
+        "organization_type",
+        "limits",
+        "org_provider_key",
+      ];
+      const values: unknown[] = [
+        record.name,
+        record.owner,
+        "free",
+        false,
+        record.has_onboarded,
+        false,
+        record.organization_type,
+        {},
+        record.org_provider_key,
+      ];
+      // color and icon have column defaults; only override when provided.
+      if (record.color) {
+        columns.push("color");
+        values.push(record.color);
+      }
+      if (record.icon) {
+        columns.push("icon");
+        values.push(record.icon);
+      }
+      if (resellerId !== null) {
+        columns.push("reseller_id");
+        values.push(resellerId);
+      }
+      const placeholders = values.map((_, i) => `$${i + 1}`).join(", ");
+
       // Insert the organization and return the inserted record
-      const orgResult = await dbExecute<NewOrganizationParams>(
-        `INSERT INTO organization (name, owner, tier, is_personal, has_onboarded, soft_delete, 
-          organization_type, limits, color, icon, stripe_customer_id, org_provider_key)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-         RETURNING *`,
-        [
-          createOrgParams.name,
-          createOrgParams.owner,
-          createOrgParams.tier,
-          createOrgParams.is_personal ?? false,
-          createOrgParams.has_onboarded ?? false,
-          createOrgParams.soft_delete ?? false,
-          createOrgParams.organization_type ?? "user",
-          createOrgParams.limits ?? {},
-          createOrgParams.color,
-          createOrgParams.icon,
-          createOrgParams.stripe_customer_id,
-          createOrgParams.org_provider_key,
-        ]
+      const orgResult = await dbExecute<{ id: string }>(
+        `INSERT INTO organization (${columns.join(", ")})
+         VALUES (${placeholders})
+         RETURNING id`,
+        values
       );
 
       if (orgResult.error || !orgResult.data || orgResult.data.length === 0) {
@@ -53,7 +129,7 @@ export class OrganizationStore extends BaseStore {
          (created_at, member, organization, org_role)
          VALUES ($1, $2, $3, $4)
          RETURNING *`,
-        [new Date().toISOString(), createOrgParams.owner, insert.id, "owner"]
+        [new Date().toISOString(), record.owner, insert.id, "owner"]
       );
 
       if (memberResult.error) {
@@ -62,11 +138,27 @@ export class OrganizationStore extends BaseStore {
         );
       }
 
-      return ok(insert);
+      return ok({ id: insert.id });
     } catch (error) {
       console.error("Failed to create organization:", error);
       return err(String(error));
     }
+  }
+
+  async isProviderKeyOwnedByOrg(
+    providerKeyId: string,
+    orgId: string
+  ): Promise<Result<boolean, string>> {
+    const result = await dbExecute<{ id: string }>(
+      `SELECT id FROM provider_keys
+       WHERE id = $1 AND org_id = $2 AND soft_delete = false
+       LIMIT 1`,
+      [providerKeyId, orgId]
+    );
+    if (result.error) {
+      return err(result.error);
+    }
+    return ok((result.data?.length ?? 0) > 0);
   }
 
   async createStarterOrg(userId: string): Promise<Result<string, string>> {
@@ -422,10 +514,12 @@ export class OrganizationStore extends BaseStore {
     }
 
     try {
+      // Never removes the organization owner, whatever the caller checked.
       const result = await dbExecute(
         `DELETE FROM organization_member
          WHERE member = $1
-         AND organization = $2`,
+         AND organization = $2
+         AND member <> (SELECT owner FROM organization WHERE id = $2)`,
         [memberId, organizationId]
       );
 
@@ -439,61 +533,36 @@ export class OrganizationStore extends BaseStore {
     }
   }
 
+  /**
+   * Sets a member's role. Callers must authorize first (see
+   * OrganizationManager.updateMember). As defence in depth the statement can
+   * never touch the organization owner or assign anything but member/admin.
+   */
   async updateOrganizationMember(
     organizationId: string,
-    userId: string,
-    orgRole: string,
+    orgRole: "member" | "admin",
     memberId: string
   ): Promise<Result<null, string>> {
+    if (orgRole !== "member" && orgRole !== "admin") {
+      return err("Invalid role");
+    }
     try {
-      // Check if organization exists and user has access
-      const orgResult = await dbExecute<{ id: string; owner: string }>(
-        `SELECT id, owner
-         FROM organization
-         WHERE id = $1
-         LIMIT 1`,
-        [organizationId]
-      );
-
-      if (orgResult.error || !orgResult.data || orgResult.data.length === 0) {
-        return err("Organization not found");
-      }
-
-      const org = orgResult.data[0];
-
-      // Check if user is a member of the organization
-      const orgMemberResult = await dbExecute<{ org_role: string }>(
-        `SELECT org_role
-         FROM organization_member
-         WHERE member = $1
-         AND organization = $2
-         LIMIT 1`,
-        [userId, organizationId]
-      );
-
-      if (!orgMemberResult.data || orgMemberResult.data.length === 0) {
-        return err("User is not a member of this organization");
-      }
-
-      const orgMember = orgMemberResult.data[0];
-      const isAdmin = orgMember.org_role === "admin";
-      const isOwner = org.owner === userId;
-
-      if (!isAdmin && !isOwner) {
-        return err("Unauthorized");
-      }
-
-      // Update the organization member's role
-      const updateResult = await dbExecute(
+      const updateResult = await dbExecute<{ member: string }>(
         `UPDATE organization_member
          SET org_role = $1
          WHERE member = $2
-         AND organization = $3`,
+         AND organization = $3
+         AND org_role <> 'owner'
+         AND member <> (SELECT owner FROM organization WHERE id = $3)
+         RETURNING member`,
         [orgRole, memberId, organizationId]
       );
 
       if (updateResult.error) {
         return err(updateResult.error);
+      }
+      if (!updateResult.data || updateResult.data.length === 0) {
+        return err("Member not found");
       }
 
       return ok(null);
@@ -667,7 +736,10 @@ export class OrganizationStore extends BaseStore {
     organizationId: string
   ): Promise<Result<null, string>> {
     const tempKey: Result<BaseTempKey, string> =
-      await generateTempHeliconeAPIKey(organizationId);
+      await generateTempHeliconeAPIKey(organizationId, {
+        kind: "actor",
+        userId,
+      });
 
     const hasBeenSetup = await dbExecute<{ demoDataSetup: boolean }>(
       `select onboarding_status->>'demoDataSetup' as demoDataSetup from organization where id = $1`,

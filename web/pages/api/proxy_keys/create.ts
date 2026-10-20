@@ -12,6 +12,8 @@ import {
   HeliconeProxyKeys,
 } from "../../../services/lib/keys";
 import { logger } from "@/lib/telemetry/logger";
+import { Permission } from "../../../services/lib/user";
+import { withSameOrigin } from "@/lib/api/security/sameOrigin";
 
 type HashedPasswordRow = {
   hashed_password: string;
@@ -44,7 +46,7 @@ async function handler({
   }
 
   // Scoped to the caller's org: a provider key id from another tenant must
-  // resolve to "not found", never to a usable key (CIRT-80).
+  // resolve to "not found", never to a usable key.
   const { data: providerKey, error } = await getDecryptedProviderKeyById(
     providerKeyId,
     userData.orgId,
@@ -124,7 +126,7 @@ async function handler({
 
   newProxyMapping.data.helicone_proxy_key = proxyKey;
 
-  if (limits.length > 0) {
+  if (Array.isArray(limits) && limits.length > 0) {
     for (const limit of limits) {
       await dbExecute(
         `INSERT INTO helicone_proxy_key_limits (id, helicone_proxy_key, timewindow_seconds, count, cost, currency) VALUES ($1, $2, $3, $4, $5, $6)`,
@@ -143,4 +145,4 @@ async function handler({
   res.status(200).json({ error: null, data: newProxyMapping.data });
 }
 
-export default withAuth(handler);
+export default withSameOrigin(withAuth(handler, [Permission.MANAGE_KEYS]));

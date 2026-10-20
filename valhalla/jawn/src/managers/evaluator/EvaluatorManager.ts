@@ -7,12 +7,17 @@ import {
 } from "../../controllers/public/evaluatorController";
 import { LLMAsAJudge } from "../../lib/clients/LLMAsAJudge/LLMAsAJudge";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
+import { HELICONE_DB } from "../../lib/shared/db/pgpClient";
 import { Result, err, ok, resultMap } from "../../packages/common/result";
 import { HeliconeRequest, LlmSchema } from "@helicone-package/llm-mapper/types";
 import { BaseManager } from "../BaseManager";
 import { convertTestInputToHeliconeRequest } from "./convert";
 import { runLastMileEvaluator } from "./lastmile/run";
-import { pythonEvaluator } from "./pythonEvaluator";
+import {
+  isPythonEvaluator,
+  paramsSetPythonEvaluator,
+  PYTHON_EVALUATORS_UNSUPPORTED_MESSAGE,
+} from "./pythonEvaluator";
 import { LastMileConfigForm } from "./types";
 import { dbQueryClickhouse } from "../../lib/shared/db/dbExecute";
 
@@ -43,23 +48,6 @@ export class EvaluatorManager extends BaseManager {
       config,
       testInput.inputs
     );
-  }
-  testPythonEvaluator({
-    code,
-    requestBodyString,
-    responseString,
-  }: {
-    code: string;
-    requestBodyString: string;
-    responseString: string;
-  }) {
-    return pythonEvaluator({
-      code,
-      requestBodyString,
-      responseString,
-      orgId: this.authParams.organizationId,
-      uniqueId: "0",
-    });
   }
   async runLLMEvaluatorScore({
     evaluator,
@@ -103,27 +91,8 @@ export class EvaluatorManager extends BaseManager {
         return err(result.error);
       }
       return ok({ score: result.data!.score });
-    } else if (evaluator.code_template) {
-      const codeResult = await pythonEvaluator({
-        code: evaluator.code_template,
-        requestBodyString: JSON.stringify(requestBody),
-        responseString: JSON.stringify(responseBody),
-        uniqueId: request_id,
-        orgId: this.authParams.organizationId,
-      });
-      if (codeResult.error) {
-        return err(codeResult.error);
-      }
-      if (codeResult.data?.output == undefined) {
-        return err("Score is undefined");
-      }
-      if (codeResult.data?.output.toLowerCase() === "true") {
-        return ok({ score: true });
-      } else if (codeResult.data?.output.toLowerCase() === "false") {
-        return ok({ score: false });
-      } else {
-        return ok({ score: +codeResult.data?.output });
-      }
+    } else if (isPythonEvaluator(evaluator)) {
+      return err(PYTHON_EVALUATORS_UNSUPPORTED_MESSAGE);
     } else {
       return err("Evaluator type not supported");
     }
@@ -132,6 +101,10 @@ export class EvaluatorManager extends BaseManager {
   async createEvaluator(
     params: CreateEvaluatorParams
   ): Promise<Result<EvaluatorResult, string>> {
+    if (paramsSetPythonEvaluator(params)) {
+      return err(PYTHON_EVALUATORS_UNSUPPORTED_MESSAGE);
+    }
+
     const result = await dbExecute<EvaluatorResult>(
       `
       INSERT INTO evaluator (scoring_type, llm_template, organization_id, name, code_template, last_mile_config)
@@ -184,6 +157,43 @@ export class EvaluatorManager extends BaseManager {
     evaluatorId: string,
     params: UpdateEvaluatorParams
   ): Promise<Result<EvaluatorResult, string>> {
+    if (paramsSetPythonEvaluator(params)) {
+      return err(PYTHON_EVALUATORS_UNSUPPORTED_MESSAGE);
+    }
+
+    // Reject updates that leave the evaluator a python evaluator, so existing
+    // python evaluators can't be edited (they can still be deleted).
+    const existing = await dbExecute<{
+      scoring_type: string | null;
+      code_template: unknown;
+      llm_template: unknown;
+      last_mile_config: unknown;
+    }>(
+      `SELECT scoring_type, code_template, llm_template, last_mile_config
+       FROM evaluator
+       WHERE id = $1 AND organization_id = $2
+       LIMIT 1`,
+      [evaluatorId, this.authParams.organizationId]
+    );
+    if (existing.error) {
+      return err(existing.error);
+    }
+    const current = existing.data?.[0];
+    if (
+      current &&
+      isPythonEvaluator({
+        scoring_type: params.scoring_type ?? current.scoring_type,
+        code_template:
+          params.code_template !== undefined
+            ? params.code_template
+            : current.code_template,
+        llm_template: params.llm_template ?? current.llm_template,
+        last_mile_config: params.last_mile_config ?? current.last_mile_config,
+      })
+    ) {
+      return err(PYTHON_EVALUATORS_UNSUPPORTED_MESSAGE);
+    }
+
     const updateFields: string[] = [];
     const updateValues: any[] = [];
     let paramIndex = 1;
@@ -226,69 +236,64 @@ export class EvaluatorManager extends BaseManager {
   }
 
   async deleteEvaluator(evaluatorId: string): Promise<Result<null, string>> {
-    const deleteExperimentEvaluator = await dbExecute(
-      `
-      DELETE FROM evaluator_experiments_v3
-      WHERE evaluator = $1
-      `,
-      [evaluatorId]
+    const orgId = this.authParams.organizationId;
+
+    // Ownership check first: never touch link tables for an evaluator that
+    // belongs to another organization.
+    const owned = await dbExecute<{ id: string }>(
+      `SELECT id FROM evaluator WHERE id = $1 AND organization_id = $2 LIMIT 1`,
+      [evaluatorId, orgId]
     );
-    if (deleteExperimentEvaluator.error) {
-      return err(
-        `Failed to delete evaluator experiments: ${deleteExperimentEvaluator.error}`
-      );
+    if (owned.error) {
+      return err(`Failed to delete evaluator: ${owned.error}`);
+    }
+    if (!owned.data?.[0]) {
+      return err("Evaluator not found");
     }
 
-    const deleteOldExperimentEvaluators = await dbExecute(
-      `
-      DELETE FROM evaluator_experiments
-      WHERE evaluator = $1
-      `,
-      [evaluatorId]
-    );
-    if (deleteOldExperimentEvaluators.error) {
+    try {
+      await HELICONE_DB.tx(async (t) => {
+        await t.none(
+          `DELETE FROM evaluator_experiments_v3
+           WHERE evaluator = $1
+           AND evaluator IN (SELECT id FROM evaluator WHERE id = $1 AND organization_id = $2)`,
+          [evaluatorId, orgId]
+        );
+
+        await t.none(
+          `DELETE FROM evaluator_experiments
+           WHERE evaluator = $1
+           AND evaluator IN (SELECT id FROM evaluator WHERE id = $1 AND organization_id = $2)`,
+          [evaluatorId, orgId]
+        );
+
+        await t.none(
+          `DELETE FROM online_evaluators
+           WHERE evaluator = $1 AND organization = $2`,
+          [evaluatorId, orgId]
+        );
+
+        await t.none(
+          `UPDATE score_attribute
+           SET evaluator_id = NULL
+           WHERE evaluator_id = $1 AND organization = $2`,
+          [evaluatorId, orgId]
+        );
+
+        const deleted = await t.result(
+          `DELETE FROM evaluator
+           WHERE id = $1 AND organization_id = $2`,
+          [evaluatorId, orgId]
+        );
+        if (deleted.rowCount !== 1) {
+          throw new Error("Evaluator not found");
+        }
+      });
+    } catch (e) {
+      console.error("Failed to delete evaluator", e);
       return err(
-        `Failed to delete old experiment evaluators: ${deleteOldExperimentEvaluators.error}`
+        `Failed to delete evaluator: ${e instanceof Error ? e.message : "unknown error"}`
       );
-    }
-
-    const deleteOnlineEvaluators = await dbExecute(
-      `
-      DELETE FROM online_evaluators
-      WHERE evaluator = $1 and organization = $2
-      `,
-      [evaluatorId, this.authParams.organizationId]
-    );
-    if (deleteOnlineEvaluators.error) {
-      return err(
-        `Failed to delete online evaluators: ${deleteOnlineEvaluators.error}`
-      );
-    }
-
-    const setNullScoreAttributes = await dbExecute(
-      `
-      UPDATE score_attribute
-      SET evaluator_id = NULL
-      WHERE evaluator_id = $1 and organization = $2
-      `,
-      [evaluatorId, this.authParams.organizationId]
-    );
-    if (setNullScoreAttributes.error) {
-      return err(
-        `Failed to set null score attributes: ${setNullScoreAttributes.error}`
-      );
-    }
-
-    const result = await dbExecute(
-      `
-      DELETE FROM evaluator
-      WHERE id = $1 AND organization_id = $2
-      `,
-      [evaluatorId, this.authParams.organizationId]
-    );
-
-    if (result.error) {
-      return err(`Failed to delete evaluator: ${result.error}`);
     }
 
     return ok(null);

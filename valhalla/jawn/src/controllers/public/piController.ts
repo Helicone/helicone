@@ -19,45 +19,50 @@ import {
   getXOverTime,
 } from "../../managers/helpers/getXOverTime";
 import { COST_PRECISION_MULTIPLIER } from "@helicone-package/cost/costCalc";
+import { authorizeOrgActor, ORG_ADMIN_ROLES } from "../../utils/orgAuthz";
+import {
+  deleteExpiredPiSessions,
+  linkPiSession,
+} from "../../lib/stores/piSessionStore";
 
 @Route("/v1/pi")
 @Tags("PI")
 @Security("api_key")
 export class PiController extends Controller {
+  /**
+   * Links a device session (created by POST /v1/public/pi/session) to the
+   * signed-in organization. Requires a signed-in owner or admin; only
+   * server-issued, unexpired, not-yet-linked session ids are accepted.
+   */
   @Post("/session")
   public async addSession(
     @Body()
     body: { sessionUUID: string },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<string, string>> {
+    const actor = await authorizeOrgActor(request.authParams, ORG_ADMIN_ROLES);
+    if (actor.error !== null) {
+      this.setStatus(actor.error.status);
+      return err(actor.error.message);
+    }
+
     // clean sessions should probably be done in a cron job
-    let one_hour_ago = new Date(new Date().getTime() - 1 * 60 * 60 * 1000);
-    // delete all sessions older than 1 hour
-
-    // 10% chance of deleting all sessions older than 1 hour
     if (Math.random() < 0.1) {
-      await dbExecute(
-        `DELETE FROM pi_session 
-         WHERE created_at < $1`,
-        [one_hour_ago]
-      );
+      await deleteExpiredPiSessions();
     }
 
-    const { error } = await dbExecute(
-      `INSERT INTO pi_session 
-       (session_id, organization_id) 
-       VALUES ($1, $2)`,
-      [body.sessionUUID, request.authParams.organizationId]
-    );
+    const linked = await linkPiSession({
+      sessionId: body.sessionUUID,
+      organizationId: actor.data.organizationId,
+      userId: actor.data.userId,
+    });
 
-    if (error) {
-      this.setStatus(500);
-      console.error(error);
-      return err(error || "Failed to add session");
-    } else {
-      this.setStatus(200);
-      return ok("success");
+    if (linked.error !== null) {
+      this.setStatus(400);
+      return err(linked.error);
     }
+    this.setStatus(200);
+    return ok("success");
   }
 
   @Post("/org-name/query")

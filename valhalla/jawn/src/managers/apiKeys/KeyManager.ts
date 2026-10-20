@@ -5,6 +5,7 @@ import { AuthParams } from "../../packages/common/auth/types";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { Result, err, isError, ok } from "../../packages/common/result";
 import { hashAuth } from "../../utils/hash";
+import { maskProviderSecret } from "../../utils/providerKeyAccess";
 import { BaseManager } from "../BaseManager";
 import { DecryptedProviderKey } from "../VaultManager";
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
@@ -35,6 +36,20 @@ export interface ProviderKeyRow {
   config?: Record<string, any>;
   byok_enabled?: boolean;
   cuid?: string;
+}
+
+/**
+ * Provider key as returned to API callers. The secret values are masked and
+ * can never be used to call the provider.
+ */
+export interface MaskedProviderKey {
+  id: string;
+  org_id: string;
+  provider_name: string;
+  provider_key_name: string;
+  cuid: string | null;
+  provider_key_masked: string | null;
+  provider_secret_key_masked: string | null;
 }
 
 type HashedPasswordRow = {
@@ -187,6 +202,12 @@ export class KeyManager extends BaseManager {
   ): Promise<
     Result<{ id: string; apiKey: string; hashedKey: string }, string>
   > {
+    // A normal key is stamped with the signed-in user who created it. There is
+    // no fallback to the organization owner: an API key caller (or a caller
+    // without a verified user) cannot mint keys at all.
+    if (this.authParams.authType !== "jwt" || !this.authParams.userId) {
+      return err("Unauthorized");
+    }
     try {
       const IS_EU = process.env.AWS_REGION === "eu-west-1";
       const apiKey = `sk-helicone${IS_EU ? "-eu" : ""}-${generateApiKey({
@@ -194,11 +215,11 @@ export class KeyManager extends BaseManager {
         dashes: true,
       }).toString()}`.toLowerCase();
 
-      // Get organization information
-      const orgResult = await dbExecute<{ owner: string }>(
-        `SELECT owner
+      const orgResult = await dbExecute<{ id: string }>(
+        `SELECT id
          FROM organization
          WHERE id = $1
+         AND soft_delete = false
          LIMIT 1`,
         [this.authParams.organizationId]
       );
@@ -214,11 +235,7 @@ export class KeyManager extends BaseManager {
          RETURNING id`,
         [
           hashedKey,
-          // Stamp the key with the authenticated actor, never the (mutable)
-          // organization owner: a tenant could otherwise transfer ownership to
-          // a foreign user, mint a key carrying that user's id, and transfer
-          // ownership back.
-          this.authParams.userId ?? orgResult.data[0].owner,
+          this.authParams.userId,
           keyName,
           this.authParams.organizationId,
           keyPermissions,
@@ -497,6 +514,31 @@ export class KeyManager extends BaseManager {
     }
   }
 
+  /**
+   * Get a provider key with its secret values masked. This is the only shape
+   * that should ever leave Jawn over HTTP; plaintext provider keys stay
+   * server-side.
+   */
+  async getMaskedProviderKeyById(
+    providerKeyId: string
+  ): Promise<Result<MaskedProviderKey, string>> {
+    const decrypted = await this.getDecryptedProviderKeyById(providerKeyId);
+    if (decrypted.error || !decrypted.data) {
+      return err(decrypted.error ?? "Provider key not found");
+    }
+
+    const key = decrypted.data;
+    return ok({
+      id: key.id ?? providerKeyId,
+      org_id: key.org_id ?? this.authParams.organizationId,
+      provider_name: key.provider_name ?? "",
+      provider_key_name: key.provider_key_name ?? "",
+      cuid: key.cuid ?? null,
+      provider_key_masked: maskProviderSecret(key.provider_key),
+      provider_secret_key_masked: maskProviderSecret(key.provider_secret_key),
+    });
+  }
+
   private async hasAccessToProviderKey(
     providerKeyId: string
   ): Promise<Result<boolean, string>> {
@@ -610,10 +652,21 @@ export class KeyManager extends BaseManager {
   /**
    * Create a temporary API key for experiments
    */
+  /**
+   * Creates a temporary key (temp_key = true, swept after a short TTL).
+   *
+   * The KeyManager's authParams.userId must be the identity the key acts for;
+   * see generateHeliconeAPIKey for how callers choose it. An empty or missing
+   * user id is rejected.
+   */
   async createTempKey(
     keyName: string = "auto-generated-experiment-key",
     keyPermissions: "rw" | "r" | "w" = "w"
   ): Promise<Result<{ id: string; apiKey: string }, string>> {
+    const userId = this.authParams.userId;
+    if (!userId || userId.trim() === "") {
+      return err("Temporary keys require a user identity");
+    }
     try {
       const IS_EU = process.env.AWS_REGION === "eu-west-1";
       const apiKey = `sk-helicone${IS_EU ? "-eu" : ""}-${generateApiKey({
@@ -621,9 +674,8 @@ export class KeyManager extends BaseManager {
         dashes: true,
       }).toString()}`.toLowerCase();
 
-      // Get organization information
-      const orgResult = await dbExecute<{ owner: string }>(
-        `SELECT owner
+      const orgResult = await dbExecute<{ id: string }>(
+        `SELECT id
          FROM organization
          WHERE id = $1
          LIMIT 1`,
@@ -648,8 +700,7 @@ export class KeyManager extends BaseManager {
         RETURNING id`,
         [
           hashedKey,
-          // See createNormalKey: stamp with the authenticated actor.
-          this.authParams.userId ?? orgResult.data[0].owner,
+          userId,
           keyName,
           this.authParams.organizationId,
           keyPermissions,

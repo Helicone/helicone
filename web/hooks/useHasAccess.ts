@@ -7,9 +7,10 @@ export const useHasAccess = (feature: FeatureId) => {
 
   return useMemo(() => {
     const tier = org?.currentOrg?.tier;
-    const stripeMetadata = org?.currentOrg?.stripe_metadata as {
-      addons?: { [key in (typeof ADDON_FEATURES)[number]]?: boolean };
-    };
+    const addons = org?.currentOrg?.addons as
+      | { [key in (typeof ADDON_FEATURES)[number]]?: boolean }
+      | null
+      | undefined;
 
     if (NON_FREE_FEATURES.includes(feature as any)) {
       return tier !== "free";
@@ -31,20 +32,17 @@ export const useHasAccess = (feature: FeatureId) => {
     if (
       tier === "pro-20240913" &&
       (feature === "evals" || feature === "experiments") &&
-      stripeMetadata?.addons?.["prompts"]
+      addons?.["prompts"]
     ) {
       return true;
     }
 
     // Legacy pro tiers require add-ons for certain features
     if (tier === "pro-20240913" || tier === "pro-20250202") {
-      return (
-        stripeMetadata?.addons?.[feature as (typeof ADDON_FEATURES)[number]] ??
-        false
-      );
+      return addons?.[feature as (typeof ADDON_FEATURES)[number]] ?? false;
     }
 
     // Free tier
     return false;
-  }, [org?.currentOrg?.tier, org?.currentOrg?.stripe_metadata, feature]);
+  }, [org?.currentOrg?.tier, org?.currentOrg?.addons, feature]);
 };

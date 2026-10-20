@@ -5,6 +5,36 @@ import { Provider, ProviderKey } from "@/types/provider";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { logger } from "@/lib/telemetry/logger";
 
+/**
+ * Pull a human-readable message out of an openapi-fetch error payload. Jawn
+ * returns either `{ error: string }` or a `Result` (`{ data, error }`).
+ */
+const jawnErrorMessage = (error: unknown): string => {
+  if (typeof error === "string") return error;
+  if (error && typeof error === "object" && "error" in error) {
+    const inner = (error as { error: unknown }).error;
+    if (typeof inner === "string") return inner;
+  }
+  return "Unknown error";
+};
+
+/**
+ * openapi-fetch returns `{ error }` for non-2xx responses, but the generated
+ * Jawn types declare no error responses, so `error` is typed as `never`.
+ */
+const responseError = (response: unknown): unknown =>
+  response && typeof response === "object" && "error" in response
+    ? (response as { error?: unknown }).error
+    : undefined;
+
+export type MaskedProviderKeyResult =
+  | {
+      ok: true;
+      providerKeyMasked: string | null;
+      providerSecretKeyMasked: string | null;
+    }
+  | { ok: false; forbidden: boolean; message: string };
+
 interface UseProviderParams {
   // If a provider is specified, the hook will work in "provider-specific" mode
   provider?: Provider;
@@ -72,14 +102,26 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
       if (config !== undefined) body.config = config;
       if (byokEnabled !== undefined) body.byokEnabled = byokEnabled;
 
-      return jawnClient.PATCH("/v1/api-keys/provider-key/{providerKeyId}", {
-        params: {
-          path: {
-            providerKeyId: keyId,
+      const response = await jawnClient.PATCH(
+        "/v1/api-keys/provider-key/{providerKeyId}",
+        {
+          params: {
+            path: {
+              providerKeyId: keyId,
+            },
           },
+          body,
         },
-        body,
-      });
+      );
+
+      if (responseError(response)) {
+        throw new Error(jawnErrorMessage(responseError(response)));
+      }
+      if (response.data?.error) {
+        throw new Error(response.data.error);
+      }
+
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: providerKeysQueryKey });
@@ -123,7 +165,9 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
           },
         });
 
-        if (response.error) throw new Error(response);
+        if (responseError(response)) {
+          throw new Error(jawnErrorMessage(responseError(response)));
+        }
         return response.data;
       } catch (error) {
         logger.error(
@@ -144,13 +188,17 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
     },
   });
 
-  const viewDecryptedProviderKey = async (
+  /**
+   * Fetch the MASKED form of a stored provider key (e.g. "sk-ant••••••••abcd").
+   * Plaintext provider keys are never returned to the browser, and
+   * only organization owners/admins may call this.
+   */
+  const viewMaskedProviderKey = async (
     keyId: string,
-  ): Promise<{
-    providerKey: string;
-    providerSecretKey?: string | null;
-  } | null> => {
-    if (!orgId) return null;
+  ): Promise<MaskedProviderKeyResult> => {
+    if (!orgId) {
+      return { ok: false, forbidden: false, message: "No organization" };
+    }
 
     try {
       const jawnClient = getJawnClient(orgId);
@@ -165,33 +213,39 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
         },
       );
 
-      if (response && "error" in response) {
+      const error = responseError(response);
+      if (error) {
         logger.error(
-          { error: response.error, keyId, orgId },
-          "Failed to fetch decrypted key",
+          { error, keyId, orgId },
+          "Failed to fetch masked provider key",
         );
-        return null;
-      }
-
-      // Type guard to safely access provider_key
-      if (
-        response?.data &&
-        typeof response.data === "object" &&
-        "provider_key" in response.data
-      ) {
         return {
-          providerKey: response.data.provider_key || "",
-          providerSecretKey:
-            "provider_secret_key" in response.data
-              ? response.data.provider_secret_key
-              : "",
+          ok: false,
+          forbidden: response.response?.status === 403,
+          message: jawnErrorMessage(error),
         };
       }
 
-      return null;
+      const data = response.data;
+      if (data && typeof data === "object" && "provider_key_masked" in data) {
+        return {
+          ok: true,
+          providerKeyMasked: data.provider_key_masked ?? null,
+          providerSecretKeyMasked: data.provider_secret_key_masked ?? null,
+        };
+      }
+
+      return {
+        ok: false,
+        forbidden: false,
+        message:
+          data && typeof data === "object" && "error" in data
+            ? jawnErrorMessage(data)
+            : "Unexpected response",
+      };
     } catch (error) {
-      logger.error({ error, keyId, orgId }, "Error viewing decrypted key");
-      return null;
+      logger.error({ error, keyId, orgId }, "Error viewing masked key");
+      return { ok: false, forbidden: false, message: "Unexpected error" };
     }
   };
 
@@ -212,8 +266,11 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
         },
       );
 
-      if (response && "error" in response) {
-        throw new Error(response.error);
+      if (responseError(response)) {
+        throw new Error(jawnErrorMessage(responseError(response)));
+      }
+      if (response.data && "error" in response.data) {
+        throw new Error(jawnErrorMessage(response.data));
       }
 
       return response.data;
@@ -250,7 +307,7 @@ export const useProvider = ({ provider }: UseProviderParams = {}) => {
     isSavingKey: updateProviderKey.isPending || addProviderKey.isPending,
     isSavedKey: updateProviderKey.isSuccess || addProviderKey.isSuccess,
     isDeletingKey: deleteProviderKey.isPending,
-    viewDecryptedProviderKey,
+    viewMaskedProviderKey,
     refetchProviderKeys,
   };
 };

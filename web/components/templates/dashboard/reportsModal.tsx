@@ -1,6 +1,6 @@
 import ThemedModal from "../../shared/themed/themedModal";
 import { useJawnClient } from "@/lib/clients/jawnHook";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Switch } from "@/components/ui/switch";
 import { MultiSelect, MultiSelectItem } from "@tremor/react";
 import { useOrg } from "@/components/layout/org/organizationContext";
@@ -23,15 +23,6 @@ interface ReportsModalProps {
 
 const ReportsModal = (props: ReportsModalProps) => {
   const { open, setOpen, report, refetchReport } = props;
-
-  const slackRedirectUrl = useMemo(() => {
-    if (typeof window !== "undefined" && window) {
-      return `${
-        window.location.protocol === "http:" ? "https://redirectmeto.com/" : ""
-      }${window.location.origin}/slack/redirect`;
-    }
-    return null;
-  }, []);
 
   const jawn = useJawnClient();
 
@@ -273,15 +264,10 @@ const ReportsModal = (props: ReportsModalProps) => {
                   </>
                 ) : (
                   <Button asChild variant="outline">
-                    <a
-                      href={`https://slack.com/oauth/v2/authorize?scope=channels:read,groups:read,chat:write,chat:write.public&client_id=${
-                        process.env.NEXT_PUBLIC_SLACK_CLIENT_ID ?? ""
-                      }&state=${
-                        orgContext?.currentOrg?.id || ""
-                      }&redirect_uri=${slackRedirectUrl}`}
-                    >
-                      Connect Slack
-                    </a>
+                    {/* Full-page navigation to an API route that sets the OAuth
+                        nonce cookie and 302s to Slack; next/link would break it. */}
+                    {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+                    <a href="/api/slack/oauth-start">Connect Slack</a>
                   </Button>
                 ))}
             </div>

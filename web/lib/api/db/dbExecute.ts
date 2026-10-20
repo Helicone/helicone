@@ -35,6 +35,8 @@ export function printRunnableQuery(
   logger.info({ setParams, query }, "Runnable query");
 }
 
+const DB_QUERY_ERROR_MESSAGE = "Error executing query";
+
 export async function dbQueryClickhouse<T>(
   query: string,
   parameters: (number | string | boolean | Date)[],
@@ -81,10 +83,12 @@ export async function dbQueryClickhouse<T>(
     });
     return { data: await queryResult.json<T[]>(), error: null };
   } catch (err) {
+    // Log the real error server-side only; never return raw database errors
+    // (which can include SQL, schema details or parameters) to clients.
     logger.error({ query, parameters, error: err }, "Error executing query");
     return {
       data: null,
-      error: JSON.stringify(err),
+      error: DB_QUERY_ERROR_MESSAGE,
     };
   }
 }
@@ -128,7 +132,7 @@ export async function dbExecute<T>(
   } catch (err) {
     logger.error({ query, parameters, error: err }, "Error executing query");
     await client.end();
-    return { data: null, error: JSON.stringify(err) };
+    return { data: null, error: DB_QUERY_ERROR_MESSAGE };
   }
 }
 

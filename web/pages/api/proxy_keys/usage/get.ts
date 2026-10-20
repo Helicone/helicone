@@ -40,6 +40,7 @@ async function handler({
 }: HandlerWrapperOptions<Result<LimitUsageResult[], string>>) {
   if (req.method !== "POST") {
     res.status(405).json({ error: "Method not allowed", data: null });
+    return;
   }
   const { limits } = req.body as {
     limits: DecryptedProviderKeyMapping["limits"];

@@ -213,6 +213,12 @@ export class AutoTopoffManager {
         return err("No payment method configured");
       }
 
+      // Re-check the failure cap right before charging; never attempt another
+      // charge once the cap is reached, whatever the caller checked earlier.
+      if (settings.consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+        return err("Auto topoff disabled after repeated payment failures");
+      }
+
       // Get customer ID from organization
       const { data: org, error: orgError } = await this.supabaseClient
         .from("organization")

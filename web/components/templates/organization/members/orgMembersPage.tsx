@@ -1,8 +1,8 @@
+import type { OrgRow } from "@/components/layout/org/OrgContextValue";
 import { ProFeatureWrapper } from "@/components/shared/ProBlockerComponents/ProFeatureWrapper";
 import { Button } from "@/components/ui/button";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import { useState } from "react";
-import { Database } from "../../../../db/database.types";
 import { useGetOrgMembers } from "../../../../services/hooks/organizations";
 import { useOrg } from "../../../layout/org/organizationContext";
 import AddMemberModal from "../addMemberModal";
@@ -14,7 +14,7 @@ import {
 import "@/styles/settings.css";
 import { PlusIcon } from "lucide-react";
 interface OrgMembersPageProps {
-  org: Database["public"]["Tables"]["organization"]["Row"];
+  org: OrgRow;
   wFull?: boolean;
 }
 

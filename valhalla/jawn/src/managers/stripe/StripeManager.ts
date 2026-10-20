@@ -9,6 +9,7 @@ import {
   PaymentMethod,
   UsageStatsResponse,
   DailyUsageDataPoint,
+  validateAutoTopoffSettings,
 } from "../../controllers/public/stripeController";
 import {
   calculateGBCost,
@@ -1070,6 +1071,11 @@ WHERE (${builtFilter.filter})`,
     settings: UpdateAutoTopoffSettingsRequest,
   ): Promise<Result<AutoTopoffSettings, string>> {
     try {
+      const validationError = validateAutoTopoffSettings(settings);
+      if (validationError) {
+        return err(validationError);
+      }
+
       const org = await this.getOrganization();
       if (org.error || !org.data) {
         return err("Failed to get organization");
@@ -1105,7 +1111,15 @@ WHERE (${builtFilter.filter})`,
            threshold_cents = $3,
            topoff_amount_cents = $4,
            stripe_payment_method_id = $5,
-           consecutive_failures = 0,
+           -- Saving settings must not clear the failure counter, otherwise
+           -- re-saving lets the worker keep retrying a failing card. The
+           -- counter is reset by a successful top-off (worker) or when a
+           -- different payment method is configured.
+           consecutive_failures = CASE
+             WHEN organization_auto_topoff.stripe_payment_method_id IS DISTINCT FROM EXCLUDED.stripe_payment_method_id
+               THEN 0
+             ELSE organization_auto_topoff.consecutive_failures
+           END,
            updated_at = NOW()
          RETURNING *`,
         [

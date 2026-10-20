@@ -630,6 +630,11 @@ export class Prompt2025Manager extends BaseManager {
     }
 
     const current = currentVersionInfo.data[0];
+    // The base version must belong to the prompt we're writing into; otherwise
+    // a caller could fork a version of prompt A into prompt B (or vice versa).
+    if (current.prompt_id !== params.promptId) {
+      return err("Prompt version does not belong to the specified prompt");
+    }
     let nextMajor: number;
     let nextMinor: number;
 
@@ -1016,6 +1021,56 @@ export class PromptManager extends BaseManager {
       console.error("Template:", params.newHeliconeTemplate);
     }
 
+    // Tenancy checks: the parent version (and its prompt), the optional bump
+    // version and the optional experiment must all belong to the caller's org.
+    // Without these, a caller could insert a version into another org's prompt.
+    const parentCheck = await dbExecute<{ id: string; prompt_v2: string }>(
+      `SELECT prompts_versions.id, prompts_versions.prompt_v2
+       FROM prompts_versions
+       JOIN prompt_v2 ON prompt_v2.id = prompts_versions.prompt_v2
+       WHERE prompts_versions.id = $1
+       AND prompts_versions.organization = $2
+       AND prompts_versions.soft_delete = false
+       AND prompt_v2.organization = $2
+       AND prompt_v2.soft_delete = false
+       LIMIT 1`,
+      [parentPromptVersionId, this.authParams.organizationId]
+    );
+    if (parentCheck.error || !parentCheck.data?.[0]) {
+      return err("Parent prompt version not found");
+    }
+    const parentPromptId = parentCheck.data[0].prompt_v2;
+
+    if (params.bumpForMajorPromptVersionId) {
+      const bumpCheck = await dbExecute<{ id: string }>(
+        `SELECT id
+         FROM prompts_versions
+         WHERE id = $1
+         AND organization = $2
+         AND prompt_v2 = $3
+         AND soft_delete = false
+         LIMIT 1`,
+        [
+          params.bumpForMajorPromptVersionId,
+          this.authParams.organizationId,
+          parentPromptId,
+        ]
+      );
+      if (bumpCheck.error || !bumpCheck.data?.[0]) {
+        return err("Bump prompt version not found");
+      }
+    }
+
+    if (params.experimentId) {
+      const experimentCheck = await dbExecute<{ id: string }>(
+        `SELECT id FROM experiment_v3 WHERE id = $1 AND organization = $2 LIMIT 1`,
+        [params.experimentId, this.authParams.organizationId]
+      );
+      if (experimentCheck.error || !experimentCheck.data?.[0]) {
+        return err("Experiment not found");
+      }
+    }
+
     const result = await dbExecute<{
       id: string;
       minor_version: number;
@@ -1029,12 +1084,13 @@ export class PromptManager extends BaseManager {
     }>(
       `
     WITH parent_prompt_version AS (
-      SELECT * FROM prompts_versions WHERE id = $1 AND organization = $4
+      SELECT * FROM prompts_versions
+      WHERE id = $1 AND organization = $4 AND soft_delete = false
     ),
     bump_version AS (
       SELECT major_version, minor_version
       FROM prompts_versions
-      WHERE id = $8 AND organization = $4
+      WHERE id = $8 AND organization = $4 AND soft_delete = false
     )
     INSERT INTO prompts_versions (prompt_v2, helicone_template, model, organization, major_version, minor_version, metadata, experiment_id, parent_prompt_version, updated_at)
     SELECT
@@ -1053,6 +1109,7 @@ export class PromptManager extends BaseManager {
             FROM prompts_versions pv1
             WHERE pv1.major_version = (SELECT major_version FROM bump_version)
             AND pv1.prompt_v2 = ppv.prompt_v2
+            AND pv1.organization = $4
             ORDER BY pv1.major_version DESC, pv1.minor_version DESC
             LIMIT 1
           )
@@ -1062,6 +1119,7 @@ export class PromptManager extends BaseManager {
             FROM prompts_versions pv1
             WHERE pv1.major_version = ppv.major_version
             AND pv1.prompt_v2 = ppv.prompt_v2
+            AND pv1.organization = $4
             ORDER BY pv1.major_version DESC, pv1.minor_version DESC
             LIMIT 1
           )
@@ -1099,8 +1157,7 @@ export class PromptManager extends BaseManager {
     if (result.error) {
       return err(result.error);
     }
-
-    if (!result.data || result.data.length === 0) {
+    if (!result.data?.[0]) {
       return err("Prompt version not found");
     }
 
@@ -1118,18 +1175,23 @@ export class PromptManager extends BaseManager {
       return err("Helicone template too large");
     }
 
-    const result = await dbExecute<PromptVersionResult>(
+    const result = await dbExecute<{ id: string }>(
       `
     UPDATE prompts_versions
     SET helicone_template = $1,
     updated_at = now()
     WHERE id = $2 AND organization = $3
+    RETURNING id
     `,
       [params.heliconeTemplate, promptVersionId, this.authParams.organizationId]
     );
 
     if (result.error) {
       return err(result.error);
+    }
+
+    if (!result.data || result.data.length !== 1) {
+      return err("Prompt version not found");
     }
 
     if (params.experimentId) {
@@ -1140,39 +1202,54 @@ export class PromptManager extends BaseManager {
         ).matchAll(/<helicone-prompt-input key=\\"(\w+)\\" \/>/g)
       ).map((match) => match[1]);
 
-      // Get existing input keys for experiment
+      // Get existing input keys for experiment (scoped to the caller's org)
       const existingKeysResult = await dbExecute<{ input_keys: string[] }>(
         `SELECT input_keys
          FROM experiment_v3
          WHERE id = $1
+         AND organization = $2
          LIMIT 1`,
-        [params.experimentId]
+        [params.experimentId, this.authParams.organizationId]
       );
 
-      const existingInputKeys = existingKeysResult.data?.[0]?.input_keys ?? [];
+      if (existingKeysResult.error || !existingKeysResult.data?.[0]) {
+        return err("Experiment not found");
+      }
 
-      // Update experiment input keys
-      const res = await Promise.all([
-        dbExecute(
-          `UPDATE experiment_v3
-           SET input_keys = $1
-           WHERE organization = $2
-           AND id = $3`,
-          [
-            [...new Set([...existingInputKeys, ...newPromptVersionInputKeys])],
-            this.authParams.organizationId,
-            params.experimentId,
-          ]
-        ),
-        dbExecute(
-          `INSERT INTO prompt_input_keys (key, prompt_version)
-           SELECT unnest($1::text[]), $2
-           ON CONFLICT (key, prompt_version) DO NOTHING`,
-          [`{${newPromptVersionInputKeys.join(",")}}`, promptVersionId]
-        ),
-      ]);
+      const existingInputKeys = existingKeysResult.data[0].input_keys ?? [];
 
-      if (res.some((r) => r.error)) {
+      // Update experiment input keys. Require exactly one scoped row before
+      // touching prompt_input_keys so a foreign experiment id cannot be used
+      // to attach keys.
+      const updateExperiment = await dbExecute<{ id: string }>(
+        `UPDATE experiment_v3
+         SET input_keys = $1
+         WHERE organization = $2
+         AND id = $3
+         RETURNING id`,
+        [
+          [...new Set([...existingInputKeys, ...newPromptVersionInputKeys])],
+          this.authParams.organizationId,
+          params.experimentId,
+        ]
+      );
+
+      if (
+        updateExperiment.error ||
+        !updateExperiment.data ||
+        updateExperiment.data.length !== 1
+      ) {
+        return err("Failed to update experiment input keys");
+      }
+
+      const insertKeys = await dbExecute(
+        `INSERT INTO prompt_input_keys (key, prompt_version)
+         SELECT unnest($1::text[]), $2
+         ON CONFLICT (key, prompt_version) DO NOTHING`,
+        [`{${newPromptVersionInputKeys.join(",")}}`, promptVersionId]
+      );
+
+      if (insertKeys.error) {
         return err("Failed to update experiment input keys");
       }
 
@@ -1366,6 +1443,7 @@ export class PromptManager extends BaseManager {
     FROM prompts_versions
     left join prompt_v2 on prompt_v2.id = prompts_versions.prompt_v2
     WHERE prompt_v2.organization = $1
+    AND prompts_versions.organization = $1
     AND prompt_v2.soft_delete = false
     AND prompts_versions.soft_delete = false
     AND (${filterWithAuth.filter})
@@ -1414,9 +1492,11 @@ export class PromptManager extends BaseManager {
     left join prompt_v2 on prompt_v2.id = prompts_versions.prompt_v2
     left join prompt_input_record on prompt_input_record.prompt_version = prompts_versions.id
     WHERE prompt_v2.organization = $1
+    AND prompts_versions.organization = $1
     AND prompt_v2.soft_delete = false
     AND (prompts_versions.metadata->>'isProduction')::boolean = true
     AND (${filterWithAuth.filter})
+    ORDER BY prompts_versions.major_version, prompts_versions.minor_version, prompts_versions.created_at
     `,
       filterWithAuth.argsAcc
     );
@@ -1473,9 +1553,11 @@ export class PromptManager extends BaseManager {
     left join prompt_v2 on prompt_v2.id = prompts_versions.prompt_v2
     left join prompt_input_record on prompt_input_record.prompt_version = prompts_versions.id
     WHERE prompt_v2.organization = $1
+    AND prompts_versions.organization = $1
     AND prompt_v2.soft_delete = false
     AND (prompts_versions.metadata->>'isProduction')::boolean = true
     AND (${filterWithAuth.filter})
+    ORDER BY prompts_versions.major_version, prompts_versions.minor_version, prompts_versions.created_at
     `,
       filterWithAuth.argsAcc
     );
@@ -1526,7 +1608,7 @@ export class PromptManager extends BaseManager {
       description,
       pretty_name,
       prompt_v2.created_at,
-      (SELECT major_version FROM prompts_versions pv WHERE pv.prompt_v2 = prompt_v2.id ORDER BY major_version DESC LIMIT 1) as major_version,
+      (SELECT major_version FROM prompts_versions pv WHERE pv.prompt_v2 = prompt_v2.id AND pv.organization = prompt_v2.organization ORDER BY major_version DESC LIMIT 1) as major_version,
       metadata
     FROM prompt_v2
     WHERE prompt_v2.organization = $1
@@ -1576,6 +1658,7 @@ export class PromptManager extends BaseManager {
           SELECT prompts_versions.id as versions
           from prompts_versions
           WHERE prompts_versions.prompt_v2 = prompt_v2.id
+          AND prompts_versions.organization = prompt_v2.organization
           ORDER BY prompts_versions.major_version DESC, prompts_versions.minor_version DESC
           LIMIT 100
         ) as pv2
@@ -1584,6 +1667,7 @@ export class PromptManager extends BaseManager {
     FROM prompts_versions
     left join prompt_v2 on prompt_v2.id = prompts_versions.prompt_v2
     WHERE prompt_v2.organization = $1
+    AND prompts_versions.organization = $1
     AND prompt_v2.soft_delete = false
     AND prompt_v2.id = $2
     ORDER BY prompts_versions.major_version DESC, prompts_versions.minor_version DESC

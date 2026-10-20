@@ -8,11 +8,9 @@ import { getHeliconeAuthClient } from "@/packages/common/auth/server/AuthClientF
 import { costOf } from "@helicone-package/cost";
 import { OnboardingState } from "@/services/hooks/useOrgOnboarding";
 import { WebClient } from "@slack/web-api";
-import generateApiKey from "generate-api-key";
 import { buffer } from "micro";
 import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
-import { hashAuth } from "../../../../lib/hashClient";
 import { logger } from "@/lib/telemetry/logger";
 
 async function getUserIdFromEmail(email: string): Promise<string | null> {
@@ -316,112 +314,6 @@ const PricingVersionOld = {
   },
 };
 
-// TempAPIKey class for managing temporary API keys with automatic cleanup
-class TempAPIKey {
-  constructor(
-    private apiKey: string,
-    private keyId: number,
-  ) {}
-
-  // Use the key for an operation and ensure cleanup afterward
-  async use<T>(callback: (apiKey: string) => Promise<T>): Promise<T> {
-    try {
-      return await callback(this.apiKey);
-    } finally {
-      await this.cleanup();
-    }
-  }
-
-  // Clean up the key by soft-deleting it
-  private async cleanup() {
-    try {
-      await dbExecute(
-        `UPDATE helicone_api_keys SET soft_delete = true WHERE id = $1`,
-        [this.keyId],
-      );
-    } catch (error) {
-      logger.error({ error }, "Failed to cleanup temporary API key");
-    }
-  }
-}
-
-// Generate a temporary API key for server-to-server communication
-async function generateTempAPIKey(
-  organizationId: string,
-  keyName: string,
-  keyPermissions: "rw" | "r" | "w",
-): Promise<TempAPIKey> {
-  const apiKey = `sk-helicone-${generateApiKey({
-    method: "base32",
-    dashes: true,
-  }).toString()}`.toLowerCase();
-
-  // Define a type for the organization data
-  type OrgData = {
-    owner: string;
-  };
-
-  const { data: orgData, error: orgError } = await dbExecute<OrgData>(
-    `SELECT owner FROM organization WHERE id = $1 LIMIT 1`,
-    [organizationId],
-  );
-
-  if (orgError || !orgData || orgData.length === 0) {
-    throw new Error(`Failed to find organization: ${orgError}`);
-  }
-
-  const owner = orgData[0].owner;
-
-  const { data: keyData, error: keyError } = await dbExecute<{ id: number }>(
-    `INSERT INTO helicone_api_keys (api_key_hash, user_id, api_key_name, organization_id, key_permissions, temp_key) 
-     VALUES ($1, $2, $3, $4, $5, $6) 
-     RETURNING id`,
-    [
-      await hashAuth(apiKey),
-      owner ?? "",
-      keyName,
-      organizationId,
-      keyPermissions,
-      true,
-    ],
-  );
-
-  if (keyError || !keyData || keyData.length === 0) {
-    throw new Error("Failed to create API key");
-  }
-
-  return new TempAPIKey(apiKey, keyData[0].id);
-}
-
-// Helper function to get the Jawn service URL
-function getJawnServiceUrl(): string {
-  // Get the URL from environment variable
-  const jawnServiceUrl = process.env.NEXT_PUBLIC_HELICONE_JAWN_SERVICE;
-
-  if (!jawnServiceUrl) {
-    // Fallback to APP_URL or NEXT_PUBLIC_APP_URL with Jawn port if not specified
-    const appUrl =
-      process.env.APP_URL ||
-      process.env.NEXT_PUBLIC_APP_URL ||
-      "http://localhost:3000";
-    try {
-      const url = new URL(appUrl);
-      // Default Jawn port is 8585
-      return `${url.protocol}//${url.hostname}:8585`;
-    } catch {
-      return "http://localhost:8585";
-    }
-  }
-
-  // In serverless environments (Next.js API routes), replace localhost with 127.0.0.1
-  // This is needed because localhost doesn't resolve correctly in serverless environments
-  if (typeof window === "undefined" && jawnServiceUrl.includes("localhost")) {
-    return jawnServiceUrl.replace("localhost", "127.0.0.1");
-  }
-
-  return jawnServiceUrl;
-}
-
 async function inviteOnboardingMembers(orgId: string | undefined) {
   if (!orgId) {
     return;
@@ -455,47 +347,42 @@ async function inviteOnboardingMembers(orgId: string | undefined) {
     return;
   }
 
-  // Get the Jawn service URL (with localhost replaced by 127.0.0.1 if needed)
-  const jawnServiceUrl = getJawnServiceUrl();
-
-  // Generate a temporary API key and use it with automatic cleanup
-  const tempKey = await generateTempAPIKey(
-    orgId,
-    "Stripe Webhook Server Key",
-    "rw",
-  );
-
-  // Use the key with automatic cleanup
-  await tempKey.use(async (serverApiKey) => {
-    for (const member of onboardingStatus.members) {
-      if (!member.email) {
+  // Add the members the owner chose during onboarding. Only people who
+  // already have a Helicone account are added; accounts and credentials are
+  // never created on someone else's behalf. (Jawn's add_member route now
+  // requires a signed-in owner/admin, so this server-side flow writes the
+  // membership directly instead of minting an owner-stamped API key.)
+  for (const member of onboardingStatus.members) {
+    if (!member.email) {
+      continue;
+    }
+    try {
+      const userId = await getUserIdFromEmail(
+        String(member.email).trim().toLowerCase(),
+      );
+      if (!userId) {
+        logger.info(
+          { orgId },
+          "Skipping onboarding invite: no Helicone account for email",
+        );
         continue;
       }
-      try {
-        const response = await fetch(
-          `${jawnServiceUrl}/v1/organization/${orgId}/add_member`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${serverApiKey}`,
-            },
-            body: JSON.stringify({
-              email: member.email,
-            }),
-          },
-        );
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        await response.json();
-      } catch (error) {
-        logger.error({ email: member.email, error }, "Failed to invite member");
+      const { error } = await dbExecute(
+        `INSERT INTO organization_member (organization, member, org_role)
+         SELECT $1, $2, 'member'
+         WHERE NOT EXISTS (
+           SELECT 1 FROM organization_member
+           WHERE organization = $1 AND member = $2
+         )`,
+        [orgId, userId],
+      );
+      if (error) {
+        throw new Error(String(error));
       }
+    } catch (error) {
+      logger.error({ email: member.email, error }, "Failed to invite member");
     }
-  });
+  }
 }
 
 async function createSlackChannelAndInviteMembers(
