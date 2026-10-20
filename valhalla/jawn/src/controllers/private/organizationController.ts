@@ -222,14 +222,10 @@ export class OrganizationController extends Controller {
       return err("User not found");
     }
 
+    // Jawn's database login has no write access to auth.users, so the update
+    // goes through a SECURITY DEFINER function.
     const result = await dbExecute(
-      `UPDATE auth.users
-       SET raw_user_meta_data = jsonb_set(
-         COALESCE(raw_user_meta_data, '{}'::jsonb),
-         '{accepted_terms_date}',
-         $1::jsonb
-       )
-       WHERE id = $2`,
+      `SELECT public.jawn_set_accepted_terms_date($2::uuid, $1::jsonb)`,
       [JSON.stringify(new Date().toISOString()), request.authParams.userId]
     );
 
