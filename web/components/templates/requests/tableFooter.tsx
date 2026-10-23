@@ -42,6 +42,13 @@ export default function TableFooter(props: TableFooterProps) {
   const totalPages = Math.ceil(count / pageSize);
   const [page, setPage] = useState<number>(currentPage);
 
+  // Sync local page state with prop when it changes externally (e.g., from URL)
+  useEffect(() => {
+    if (currentPage !== page) {
+      setPage(currentPage);
+    }
+  }, [currentPage]);
+
   const debouncedPage = useDebounce(page, 1200);
 
   useEffect(() => {
