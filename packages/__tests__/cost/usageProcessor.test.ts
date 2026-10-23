@@ -170,6 +170,34 @@ describe("OpenAIUsageProcessor", () => {
 
     expect(results).toMatchSnapshot();
   });
+
+  it("should not double count accepted prediction tokens", async () => {
+    const responseBody = JSON.stringify({
+      usage: {
+        prompt_tokens: 10,
+        completion_tokens: 100,
+        completion_tokens_details: {
+          accepted_prediction_tokens: 60,
+          rejected_prediction_tokens: 20,
+        },
+      },
+    });
+
+    const result = await processor.parse({
+      responseBody,
+      isStream: false,
+      model: "gpt-4o",
+    });
+
+    expect(result.error).toBeNull();
+    // Accepted and rejected prediction tokens are both inside
+    // completion_tokens (OpenAI still bills the rejected ones), so `output`
+    // must stay 100 instead of adding the accepted 60 on top of it.
+    expect(result.data).toEqual({
+      input: 10,
+      output: 100,
+    });
+  });
 });
 
 describe("Azure Usage Processing", () => {
@@ -386,6 +414,32 @@ describe("XAI/Grok specific features", () => {
     });
     // web_search should not be present when num_sources_used is 0
     expect(result.data?.web_search).toBeUndefined();
+  });
+
+  it("should not double count accepted prediction tokens in XAI responses", async () => {
+    const xaiResponse = JSON.stringify({
+      usage: {
+        prompt_tokens: 10,
+        prompt_tokens_details: { text_tokens: 10 },
+        completion_tokens: 100,
+        completion_tokens_details: {
+          accepted_prediction_tokens: 60,
+          rejected_prediction_tokens: 20,
+        },
+      },
+    });
+
+    const result = await xaiProcessor.parse({
+      responseBody: xaiResponse,
+      isStream: false,
+      model: "grok-3",
+    });
+
+    expect(result.error).toBeNull();
+    expect(result.data).toEqual({
+      input: 10,
+      output: 100,
+    });
   });
 
   it("should parse XAI stream response with web search", async () => {
