@@ -7945,7 +7945,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
           "cachedInput": 0.15,
         },
         "input": 7e-8,
-        "output": 2.6e-7,
+        "output": 2.8e-7,
         "threshold": 0,
       },
     ],
@@ -9485,8 +9485,8 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "cacheMultipliers": {
           "cachedInput": 0.15,
         },
-        "input": 1.35e-7,
-        "output": 4e-7,
+        "input": 2.2e-7,
+        "output": 5e-7,
         "threshold": 0,
       },
     ],
@@ -9541,7 +9541,7 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "cacheMultipliers": {
           "cachedInput": 0.15,
         },
-        "input": 1.9e-8,
+        "input": 2.3e-8,
         "output": 3e-8,
         "threshold": 0,
       },

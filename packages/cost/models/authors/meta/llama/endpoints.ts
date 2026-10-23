@@ -743,8 +743,8 @@ export const endpoints = {
     pricing: [
       {
         threshold: 0,
-        input: 0.000000135, // $0.135 per million tokens
-        output: 0.0000004, // $0.40 per million tokens
+        input: 0.00000022, // $0.22 per million tokens
+        output: 0.0000005, // $0.50 per million tokens
         cacheMultipliers: {
           cachedInput: 0.15,
         },
