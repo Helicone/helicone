@@ -10,10 +10,10 @@ export const endpoints = {
     pricing: [
       {
         threshold: 0,
-        input: 0.00000004, // $0.04/1M
-        output: 0.00000008, // $0.08/1M
+        input: 0.00000003, // $0.03/1M
+        output: 0.00000012, // $0.12/1M
         cacheMultipliers: {
-          cachedInput: 0.2, // $0.008/1M cache read (20% of input)
+          cachedInput: 0.2, // $0.006/1M cache read (20% of input)
         },
       },
     ],
