@@ -45,6 +45,13 @@ const canopywaveAuthExpectations = {
   },
 };
 
+// Define auth expectations for Engy provider
+const engyAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
 describe("Moonshot AI Registry Tests", () => {
   beforeEach(() => {
     // Clear all mocks between tests
@@ -3107,6 +3114,77 @@ describe("Moonshot AI Registry Tests", () => {
               },
             ],
             finalStatus: 429,
+          },
+        }));
+    });
+  });
+
+  describe("BYOK Tests - kimi-k3 with Engy Provider", () => {
+    describe("kimi-k3", () => {
+      it("should handle engy provider", () =>
+        runGatewayTest({
+          model: "kimi-k3/engy",
+          expected: {
+            providers: [
+              {
+                url: "https://api.engy.ai/v1/chat/completions",
+                response: "success",
+                model: "kimi-k3",
+                data: createOpenAIMockResponse("kimi-k3"),
+                expects: engyAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle tool calls with engy provider", () =>
+        runGatewayTest({
+          model: "kimi-k3/engy",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "What's the weather?" }],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "get_weather",
+                    description: "Get current weather",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        location: { type: "string" },
+                      },
+                      required: ["location"],
+                    },
+                  },
+                },
+              ],
+              tool_choice: "auto",
+              temperature: 0.7,
+              max_tokens: 1000,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.engy.ai/v1/chat/completions",
+                response: "success",
+                model: "kimi-k3",
+                data: createOpenAIMockResponse("kimi-k3"),
+                expects: {
+                  ...engyAuthExpectations,
+                  bodyContains: [
+                    "tools",
+                    "tool_choice",
+                    "get_weather",
+                    "temperature",
+                    "max_tokens",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
           },
         }));
     });
