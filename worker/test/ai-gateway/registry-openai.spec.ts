@@ -40,6 +40,12 @@ const cerebrasAuthExpectations = {
   },
 };
 
+const flexaiAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
 describe("OpenAI Registry Tests", () => {
   beforeEach(() => {
     // Clear all mocks between tests
@@ -2043,6 +2049,132 @@ describe("OpenAI Registry Tests", () => {
               expects: {
                 ...novitaAuthExpectations,
                 bodyContains: ["reasoning", "max_tokens"],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+  });
+
+  describe("BYOK Tests - GPT-OSS 120B with FlexAI Provider", () => {
+    describe("gpt-oss-120b", () => {
+      it("should handle flexai provider", () =>
+        runGatewayTest({
+          model: "gpt-oss-120b/flexai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.flex.ai/v1/chat/completions",
+                response: "success",
+                model: "gpt-oss-120b",
+                data: createOpenAIMockResponse("gpt-oss-120b"),
+                expects: flexaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle provider failure", () =>
+        runGatewayTest({
+          model: "gpt-oss-120b/flexai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.flex.ai/v1/chat/completions",
+                response: "failure",
+                statusCode: 500,
+                errorMessage: "FlexAI service unavailable",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+    });
+  });
+
+  describe("BYOK Tests - GPT-OSS 20B with FlexAI Provider", () => {
+    describe("gpt-oss-20b", () => {
+      it("should handle flexai provider", () =>
+        runGatewayTest({
+          model: "gpt-oss-20b/flexai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.flex.ai/v1/chat/completions",
+                response: "success",
+                model: "gpt-oss-20b",
+                data: createOpenAIMockResponse("gpt-oss-20b"),
+                expects: flexaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle provider failure", () =>
+        runGatewayTest({
+          model: "gpt-oss-20b/flexai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.flex.ai/v1/chat/completions",
+                response: "failure",
+                statusCode: 500,
+                errorMessage: "FlexAI service unavailable",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+    });
+  });
+
+  describe("Parameter Tests - GPT-OSS 120B on FlexAI", () => {
+    it("should forward tool calls", () =>
+      runGatewayTest({
+        model: "gpt-oss-120b/flexai",
+        request: {
+          body: {
+            messages: [{ role: "user", content: "What's the weather?" }],
+            tools: [
+              {
+                type: "function",
+                function: {
+                  name: "get_weather",
+                  description: "Get current weather",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      location: { type: "string" },
+                    },
+                    required: ["location"],
+                  },
+                },
+              },
+            ],
+            tool_choice: "auto",
+            temperature: 0.7,
+            max_tokens: 1000,
+          },
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.flex.ai/v1/chat/completions",
+              response: "success",
+              model: "gpt-oss-120b",
+              data: createOpenAIMockResponse("gpt-oss-120b"),
+              expects: {
+                ...flexaiAuthExpectations,
+                bodyContains: [
+                  "tools",
+                  "tool_choice",
+                  "get_weather",
+                  "temperature",
+                  "max_tokens",
+                ],
               },
             },
           ],

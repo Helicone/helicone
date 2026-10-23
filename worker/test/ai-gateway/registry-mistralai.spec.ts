@@ -32,6 +32,12 @@ const mistralaiAuthExpectations = {
   },
 };
 
+const flexaiAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
 describe("Mistral Registry Tests", () => {
   beforeEach(() => {
     // Clear all mocks between tests
@@ -2534,5 +2540,123 @@ describe("Mistral Registry Tests", () => {
           },
         }));
     });
+  });
+
+  describe("BYOK Tests - Mistral Nemo with FlexAI Provider", () => {
+    describe("mistral-nemo", () => {
+      it("should handle flexai provider", () =>
+        runGatewayTest({
+          model: "mistral-nemo/flexai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.flex.ai/v1/chat/completions",
+                response: "success",
+                model: "Mistral-Nemo-Instruct-2407-FP8",
+                data: createOpenAIMockResponse("Mistral-Nemo-Instruct-2407-FP8"),
+                expects: flexaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle provider failure", () =>
+        runGatewayTest({
+          model: "mistral-nemo/flexai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.flex.ai/v1/chat/completions",
+                response: "failure",
+                statusCode: 500,
+                errorMessage: "FlexAI service unavailable",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+    });
+  });
+
+  describe("Parameter Tests - Mistral Nemo tool calls on FlexAI", () => {
+    it("should forward tool calls", () =>
+      runGatewayTest({
+        model: "mistral-nemo/flexai",
+        request: {
+          body: {
+            messages: [{ role: "user", content: "What's the weather?" }],
+            tools: [
+              {
+                type: "function",
+                function: {
+                  name: "get_weather",
+                  description: "Get current weather",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      location: { type: "string" },
+                    },
+                    required: ["location"],
+                  },
+                },
+              },
+            ],
+            tool_choice: "auto",
+          },
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.flex.ai/v1/chat/completions",
+              response: "success",
+              model: "Mistral-Nemo-Instruct-2407-FP8",
+              data: createOpenAIMockResponse("Mistral-Nemo-Instruct-2407-FP8"),
+              expects: {
+                ...flexaiAuthExpectations,
+                bodyContains: ["tools", "tool_choice", "get_weather"],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
+  });
+
+  describe("Parameter Tests - Mistral Nemo on FlexAI", () => {
+    it("should forward response_format and sampling parameters", () =>
+      runGatewayTest({
+        model: "mistral-nemo/flexai",
+        request: {
+          body: {
+            messages: [{ role: "user", content: "Generate JSON data" }],
+            response_format: { type: "json_object" },
+            temperature: 0.1,
+            frequency_penalty: 0.5,
+            presence_penalty: 0.3,
+          },
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.flex.ai/v1/chat/completions",
+              response: "success",
+              model: "Mistral-Nemo-Instruct-2407-FP8",
+              data: createOpenAIMockResponse("Mistral-Nemo-Instruct-2407-FP8"),
+              expects: {
+                ...flexaiAuthExpectations,
+                bodyContains: [
+                  "response_format",
+                  "json_object",
+                  "temperature",
+                  "frequency_penalty",
+                  "presence_penalty",
+                ],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
   });
 });
