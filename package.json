@@ -22,7 +22,8 @@
   "resolutions": {
     "d3-color": "^3.1.0",
     "ws": "^8.17.1",
-    "@peculiar/x509": "1.13.0"
+    "@peculiar/x509": "1.13.0",
+    "sharp": "0.35.5"
   },
   "devDependencies": {
     "husky": "^9.1.7",

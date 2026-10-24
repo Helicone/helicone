@@ -13,8 +13,8 @@ export class VercelStreamProcessor implements IBodyProcessor {
         return ok({
           processedBody: JSON.parse(parseInput.responseBody),
         });
-      } catch (e) {
-        console.error("Error parsing Vercel response as JSON", e);
+      } catch {
+        console.error("Error parsing Vercel response as JSON");
       }
     }
 
@@ -92,8 +92,8 @@ export class VercelStreamProcessor implements IBodyProcessor {
             }
           }
         }
-      } catch (e) {
-        console.error("Error parsing Vercel stream chunk:", line, e);
+      } catch {
+        console.error("Error parsing Vercel stream chunk");
       }
     }
 
@@ -136,8 +136,8 @@ export class VercelStreamProcessor implements IBodyProcessor {
         processedBody,
         usage,
       });
-    } catch (e) {
-      console.error("Error processing Vercel stream response", e);
+    } catch {
+      console.error("Error processing Vercel stream response");
       return ok({
         processedBody: {
           choices: [

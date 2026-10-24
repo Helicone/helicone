@@ -77,9 +77,11 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
       const bodyJson = JSON.parse(text);
       const modifiedBody = this.applyOverride(bodyJson, override);
       this.cachedText = JSON.stringify(modifiedBody);
-    } catch (e) {
-      console.error("Failed to apply body override:", e);
-      throw e;
+    } catch {
+      // Parser errors can echo customer input, so avoid logging or rethrowing
+      // the original exception.
+      console.error("Failed to apply body override");
+      throw new Error("Failed to apply body override");
     }
   }
 
@@ -190,8 +192,8 @@ export class RequestBodyBuffer_InMemory implements IRequestBodyBuffer {
   private async getJson<T>(): Promise<T> {
     try {
       return JSON.parse(await this.unsafeGetRawText());
-    } catch (e) {
-      console.error("RequestWrapper.getJson", e, await this.unsafeGetRawText());
+    } catch {
+      console.error("RequestBodyBuffer.getJson: invalid JSON body");
       return {} as T;
     }
   }

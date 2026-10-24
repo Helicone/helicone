@@ -106,8 +106,8 @@ export function consolidateTextFields(responseBody: any[]): any {
       }
     });
     return consolidated;
-  } catch (e) {
-    console.error("Error consolidating text fields", e);
+  } catch {
+    console.error("Error consolidating text fields");
     return responseBody[0];
   }
 }
@@ -298,8 +298,8 @@ export function consolidateGoogleTextFields(responseBody: any[]): any {
     }, {});
 
     return consolidated;
-  } catch (e) {
-    console.error("Error consolidating text fields", e);
+  } catch {
+    console.error("Error consolidating text fields");
     return responseBody[0];
   }
 }

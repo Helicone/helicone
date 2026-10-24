@@ -40,8 +40,8 @@ export function parseVercelStream(result: string): Result<any, string> {
           };
         }
       }
-    } catch (e) {
-      console.error("Error parsing Vercel stream chunk:", line, e);
+    } catch {
+      console.error("Error parsing Vercel stream chunk");
       continue;
     }
   }

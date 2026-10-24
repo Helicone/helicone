@@ -124,8 +124,8 @@ export async function anthropicAIStream(
     .map((line) => {
       try {
         return JSON.parse(line.replace("data:", ""));
-      } catch (e) {
-        console.error("Error parsing line", line);
+      } catch {
+        console.error("Error parsing Anthropic stream line");
         return {};
       }
     })
@@ -135,8 +135,8 @@ export async function anthropicAIStream(
     return ok({
       ...recursivelyConsolidateAnthropicListForClaude(lines),
     });
-  } catch (e) {
-    console.error("Error parsing response", e);
+  } catch {
+    console.error("Error consolidating Anthropic stream");
     return {
       data: {
         streamed_data: result,

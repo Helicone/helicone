@@ -25,9 +25,9 @@ export class GroqStreamProcessor implements IBodyProcessor {
     const data = lines.map((line, i) => {
       try {
         return JSON.parse(line.replace("data:", ""));
-      } catch (e) {
-        console.log("Error parsing line Groq", line);
-        return { msg: `Error parsing line`, line };
+      } catch {
+        console.error("Error parsing Groq stream line");
+        return { msg: "Error parsing line" };
       }
     });
 
@@ -104,8 +104,8 @@ export class GroqStreamProcessor implements IBodyProcessor {
         },
         usage: usage,
       });
-    } catch (e) {
-      console.error(`Error parsing Groq stream response: ${e}`);
+    } catch {
+      console.error("Error processing Groq stream response");
       return ok({
         processedBody: {
           streamed_data: data,

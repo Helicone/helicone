@@ -482,12 +482,10 @@ export class RequestWrapper {
   async unsafeGetJson<T>(): Promise<T> {
     try {
       return JSON.parse(await this.unsafeGetBodyText());
-    } catch (e) {
-      console.error(
-        "RequestWrapper.getJson",
-        e,
-        await this.unsafeGetBodyText()
-      );
+    } catch {
+      // Request bodies may contain customer prompts and credentials. Even a
+      // SyntaxError can include a snippet of the input, so log neither.
+      console.error("RequestWrapper.getJson: invalid JSON body");
       return {} as T;
     }
   }

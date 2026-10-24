@@ -395,12 +395,10 @@ export class DBLoggable {
       } else {
         return ok(JSON.parse(result));
       }
-    } catch (e) {
-      console.log("Error parsing response 1", e);
-      return {
-        data: null,
-        error: "error parsing response, " + e + ", " + result,
-      };
+    } catch {
+      // Provider output and parser errors can contain customer content.
+      console.error("Error parsing provider response");
+      return err("error parsing provider response");
     }
   }
 
@@ -585,8 +583,8 @@ export class DBLoggable {
       return ok({
         response: parsedData.response,
       });
-    } catch (e) {
-      return err("error parsing raw response, " + e);
+    } catch {
+      return err("error parsing raw response");
     }
   }
 
@@ -878,8 +876,8 @@ export class DBLoggable {
                   "OPENAI",
                 bodyMapping: bodyMapping ?? "OPENAI",
               });
-            } catch (e) {
-              console.error("Failed to normalize AI Gateway response:", e);
+            } catch {
+              console.error("Failed to normalize AI Gateway response");
               openAIResponse = providerResponse;
             }
           } else {
@@ -901,8 +899,8 @@ export class DBLoggable {
             `Error storing request response in S3: ${s3Result.error}`
           );
         }
-      } catch (e) {
-        console.error("Error preparing S3 payload:", e);
+      } catch {
+        console.error("Error preparing S3 payload");
       }
     }
 
@@ -1049,7 +1047,8 @@ export class DBLoggable {
     try {
       return JSON.parse(body);
     } catch (e) {
-      console.error(`Error parsing ${bodyType} body: ${e}`);
+      // JSON parsing errors can echo part of the customer payload.
+      console.error(`Error parsing ${bodyType} body`);
       return {
         helicone_error: `error parsing ${bodyType} body: ${e}`,
         parse_response_error: e,

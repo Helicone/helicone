@@ -71,7 +71,7 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
           .replace("event:", "")
           .trim();
         if (!ALLOWED_LINES.includes(cleanedLine)) {
-          console.error("Error parsing line Anthropic", line);
+          console.error("Error parsing Anthropic stream line");
         }
       }
     }
@@ -140,8 +140,8 @@ export class AnthropicStreamBodyProcessor implements IBodyProcessor {
           },
         });
       }
-    } catch (e) {
-      console.error("Error parsing response", e);
+    } catch {
+      console.error("Error processing Anthropic stream response");
       return ok({
         processedBody: {
           streamed_data: originalResponseBody,

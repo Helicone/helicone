@@ -134,13 +134,13 @@ export function CreditsWaitlistForm({
     }
 
     // Open the share link in a popup
-    let shareWindow;
+    let shareWindow: Window | null;
     if (platform === "twitter") {
       const tweetUrl = `https://x.com/justinstorre/status/1966175044821987542`;
       shareWindow = window.open(
         tweetUrl,
         "twitter-share",
-        "width=600,height=700,left=200,top=100"
+        "width=600,height=700,left=200,top=100",
       );
       setPendingShareTwitter(true);
     } else {
@@ -149,15 +149,16 @@ export function CreditsWaitlistForm({
       shareWindow = window.open(
         linkedinUrl,
         "linkedin-share",
-        "width=700,height=700,left=200,top=100"
+        "width=700,height=700,left=200,top=100",
       );
       setPendingShareLinkedIn(true);
     }
 
     // Check when window closes
-    if (shareWindow) {
+    const openedWindow = shareWindow;
+    if (openedWindow) {
       const checkClosed = setInterval(() => {
-        if (shareWindow.closed) {
+        if (openedWindow.closed) {
           clearInterval(checkClosed);
           windowCheckInterval.current = undefined;
           // Window closed, keep pending state to show confirmation
@@ -194,7 +195,7 @@ export function CreditsWaitlistForm({
             feature: "credits",
             platform,
           }),
-        }
+        },
       );
 
       if (response.ok) {

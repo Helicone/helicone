@@ -39,3 +39,7 @@ jobs:
       - name: Run TypeScript compiler
         run: yarn tsc
         working-directory: valhalla/jawn
+
+      - name: Run stream parser redaction tests
+        run: yarn test:jawn streamParserRedaction.test.ts --runInBand
+        working-directory: valhalla/jawn

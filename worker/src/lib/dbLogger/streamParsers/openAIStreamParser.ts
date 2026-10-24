@@ -9,8 +9,8 @@ export async function parseOpenAIStream(result: string) {
     if (i === lines.length - 1) return {};
     try {
       return JSON.parse(line.replace("data:", ""));
-    } catch (e) {
-      console.error("Error parsing line", line);
+    } catch {
+      console.error("Error parsing OpenAI stream line");
       return {};
     }
   });
@@ -28,8 +28,8 @@ export async function parseOpenAIStream(result: string) {
       },
       error: null,
     };
-  } catch (e) {
-    console.error("Error parsing response", e);
+  } catch {
+    console.error("Error consolidating OpenAI stream");
     return {
       data: {
         streamed_data: data,

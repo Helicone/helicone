@@ -100,8 +100,8 @@ export class LlamaStreamBodyProcessor implements IBodyProcessor {
         }
 
         processedChunks.push(chunk);
-      } catch (e) {
-        console.error("Error parsing line Llama", line);
+      } catch {
+        console.error("Error parsing Llama stream line");
         processedChunks.push({});
       }
     }
@@ -157,8 +157,8 @@ export class LlamaStreamBodyProcessor implements IBodyProcessor {
         processedBody: processedBody,
         usage: usage,
       });
-    } catch (e) {
-      console.error("Error parsing Llama response", e);
+    } catch {
+      console.error("Error processing Llama response");
       return ok({
         processedBody: {
           streamed_data: originalResponseBody,

@@ -74,7 +74,6 @@ export class ResponseBodyHandler extends AbstractLogHandler {
     });
 
     try {
-      console.log("Processing response body for request:", context.message.log.request);
       const processedResponseBody = await this.processBody(context);
       if (processedResponseBody.data?.statusOverride) {
         context.message.log.response.status =

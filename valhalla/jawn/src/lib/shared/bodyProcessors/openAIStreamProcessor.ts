@@ -73,16 +73,16 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
     const data = lines.map((line, i) => {
       try {
         return JSON.parse(line.replace("data:", ""));
-      } catch (e) {
+      } catch {
         // This line was filling up the logs
         if (
           !line.includes("[DONE]") &&
           line !== "" &&
           !line.startsWith("event:") // we do not parse event lines
         ) {
-          console.log("Error parsing line OpenAI", line);
+          console.error("Error parsing OpenAI stream line");
         }
-        return err({ msg: `Error parsing line`, line });
+        return err({ msg: "Error parsing line" });
       }
     });
 
@@ -215,8 +215,8 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
         },
         usage: usage,
       });
-    } catch (e) {
-      console.error(`Error parsing OpenAI stream response: ${e}`);
+    } catch {
+      console.error("Error processing OpenAI stream response");
       return ok({
         processedBody: {
           streamed_data: data,

@@ -34,9 +34,9 @@ export class TogetherAIStreamProcessor implements IBodyProcessor {
       if (i === lines.length - 1) return {};
       try {
         return JSON.parse(line.replace("data:", ""));
-      } catch (e) {
-        console.log("Error parsing line TogetherAI", line);
-        return err({ msg: `Error parsing line`, line });
+      } catch {
+        console.error("Error parsing TogetherAI stream line");
+        return err({ msg: "Error parsing line" });
       }
     });
 
@@ -54,8 +54,8 @@ export class TogetherAIStreamProcessor implements IBodyProcessor {
           heliconeCalculated: usage.helicone_calculated,
         },
       });
-    } catch (e) {
-      console.error(`Error parsing OpenAI stream response: ${e}`);
+    } catch {
+      console.error("Error processing TogetherAI stream response");
       return ok({
         processedBody: {
           streamed_data: data,

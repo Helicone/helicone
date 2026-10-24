@@ -17,6 +17,7 @@ import { APIKeysManager } from "../../lib/managers/APIKeysManager";
 import { ModelProviderName } from "@helicone-package/cost/models/providers";
 import { BaseOpenAPIRouter } from "../routerFactory";
 import { getWalletRouter } from "./walletRouter";
+import { validateNodeReferences } from "../../lib/security/nodeOwnership";
 
 function getAPIRouterV1(
   router: OpenAPIRouterType<
@@ -316,6 +317,21 @@ function getAPIRouterV1(
 
       if (isValidTask.error) {
         return client.response.newError(isValidTask.error, 400);
+      }
+
+      // The queue uses a service-role client, so foreign keys alone do not
+      // prevent a node from referencing another organization's job or parent.
+      const invalidReference = await validateNodeReferences(
+        client.db,
+        authParams.data.organizationId,
+        node.job,
+        node.parentJobId
+      );
+      if (invalidReference === "job") {
+        return client.response.newError("Job not found", 404);
+      }
+      if (invalidReference === "parent") {
+        return client.response.newError("Parent node not found", 404);
       }
 
       const { data, error } = await client.queue.addNode(

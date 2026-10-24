@@ -11,9 +11,9 @@ export class VercelBodyProcessor implements IBodyProcessor {
     let parsedResponseBody: any;
     try {
       parsedResponseBody = JSON.parse(responseBody);
-    } catch (e) {
-      console.error("Error parsing Vercel response body as JSON:", e);
-      return err(`Failed to parse Vercel response body: ${e}`);
+    } catch {
+      console.error("Error parsing Vercel response body as JSON");
+      return err("Failed to parse Vercel response body");
     }
 
     return ok({

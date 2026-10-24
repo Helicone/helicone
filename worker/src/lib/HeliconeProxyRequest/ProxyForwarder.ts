@@ -566,7 +566,7 @@ async function log(
     .readRawResponse()
     .then(async (rawResponseResult) => {
       if (rawResponseResult.error !== null) {
-        console.error("Error reading raw response:", rawResponseResult.error);
+        console.error("Error reading raw response");
         return;
       }
 
@@ -613,7 +613,7 @@ async function log(
         // parse response body to help get usage (legacy method compatibility)
         const responseBodyResult = await loggable.parseRawResponse(rawResponse);
         if (responseBodyResult.error !== null) {
-          console.error("Error parsing response:", responseBodyResult.error);
+          console.error("Error parsing response");
           return;
         }
         const responseData = responseBodyResult.data;
@@ -745,8 +745,8 @@ async function log(
         await tracer.sendTrace();
       }
     })
-    .catch((error) => {
-      console.error("Error in response processing chain:", error);
+    .catch(() => {
+      console.error("Error in response processing chain");
     });
 
   // Wait for both logging and response processing to complete

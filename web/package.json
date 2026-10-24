@@ -96,6 +96,7 @@
     "moment": "^2.29.4",
     "monaco-editor": "0.31.0",
     "next": "^14.2.30",
+    "sharp": "0.35.5",
     "next-runtime-env": "^1.7.1",
     "next-sitemap": "^4.2.3",
     "next-themes": "^0.4.6",

@@ -30,8 +30,8 @@ export class GoogleStreamBodyProcessor implements IBodyProcessor {
         if (index === lines.length - 1 && line === "") return acc;
         const parsedLine = JSON.parse(line.replace("data: ", ""));
         acc.push(parsedLine);
-      } catch (e) {
-        console.log("Error parsing line Google", line);
+      } catch {
+        console.error("Error parsing Google stream line");
       }
       return acc;
     }, []);
@@ -56,8 +56,8 @@ export class GoogleStreamBodyProcessor implements IBodyProcessor {
           heliconeCalculated: true,
         },
       });
-    } catch (e) {
-      console.error(`Error parsing Google stream response: ${e}`);
+    } catch {
+      console.error("Error processing Google stream response");
       return ok({
         processedBody: {
           streamed_data: data,

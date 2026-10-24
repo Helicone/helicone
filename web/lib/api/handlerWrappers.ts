@@ -28,8 +28,10 @@ export class RequestBodyParser {
       } else {
         this.body = req.body;
       }
-    } catch (e) {
-      logger.error({ error: e, body: req.body }, "RequestBodyParser error");
+    } catch {
+      // API bodies may contain customer data or keys. SyntaxError messages can
+      // echo the input, so neither the body nor the exception belongs in logs.
+      logger.error("RequestBodyParser: invalid JSON body");
       this.body = {};
     }
   }
