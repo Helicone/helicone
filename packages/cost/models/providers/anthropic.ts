@@ -35,6 +35,7 @@ export class AnthropicProvider extends BaseProvider {
       enabledBetaHeaders.push("context-1m-2025-08-07");
     }
     headers["anthropic-beta"] = enabledBetaHeaders.join(",");
+    headers["User-Agent"] = "helicone";
     return { headers };
   }
 
