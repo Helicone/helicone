@@ -298,6 +298,81 @@ describe("AnthropicUsageProcessor", () => {
     });
   });
 
+  it("should extract cache_creation_input_tokens without TTL breakdown", async () => {
+    // Test case for older API responses that have cache_creation_input_tokens
+    // but no cache_creation.ephemeral_5m_input_tokens breakdown
+    const mockResponse = {
+      id: "msg_test",
+      type: "message",
+      role: "assistant",
+      content: [{ type: "text", text: "Hello" }],
+      model: "claude-sonnet-4",
+      stop_reason: "end_turn",
+      usage: {
+        input_tokens: 100,
+        output_tokens: 50,
+        cache_creation_input_tokens: 500,
+        cache_read_input_tokens: 200,
+        // Note: no cache_creation.ephemeral_5m_input_tokens
+      },
+    };
+
+    const result = await processor.parse({
+      responseBody: JSON.stringify(mockResponse),
+      isStream: false,
+      model: "claude-sonnet-4",
+    });
+
+    expect(result.error).toBeNull();
+    expect(result.data).toEqual({
+      input: 100,
+      output: 50,
+      cacheDetails: {
+        cachedInput: 200,
+        write5m: 500, // Should fall back to cache_creation_input_tokens
+      },
+    });
+  });
+
+  it("should prefer TTL breakdown over total cache_creation_input_tokens", async () => {
+    // When both total and breakdown are provided, use the breakdown
+    const mockResponse = {
+      id: "msg_test",
+      type: "message",
+      role: "assistant",
+      content: [{ type: "text", text: "Hello" }],
+      model: "claude-sonnet-4",
+      stop_reason: "end_turn",
+      usage: {
+        input_tokens: 100,
+        output_tokens: 50,
+        cache_creation_input_tokens: 600, // Total (should be 5m + 1h)
+        cache_read_input_tokens: 200,
+        cache_creation: {
+          ephemeral_5m_input_tokens: 400,
+          ephemeral_1h_input_tokens: 200,
+        },
+      },
+    };
+
+    const result = await processor.parse({
+      responseBody: JSON.stringify(mockResponse),
+      isStream: false,
+      model: "claude-sonnet-4",
+    });
+
+    expect(result.error).toBeNull();
+    expect(result.data).toEqual({
+      input: 100,
+      output: 50,
+      cacheDetails: {
+        cachedInput: 200,
+        write5m: 400, // Use breakdown, not total
+        write1h: 200,
+      },
+    });
+  });
+
   it("usage processing snapshot", async () => {
     const testCases = [
       {
