@@ -173,7 +173,7 @@ const response = await client.chat.completions.create(
 ```
 
 <Note>
-Per-user rate limiting requires the `Helicone-User-Id` header. See [User Metrics](/observability/user-metrics) for more details.
+Per-user rate limiting requires the `Helicone-User-Id` header. See [User Metrics](/features/advanced-usage/user-metrics) for more details.
 </Note>
 
 ### Cost-Based Limits
@@ -198,7 +198,7 @@ const response = await client.chat.completions.create(
 
 ### Custom Property Limits
 
-Limit by [custom properties](/observability/custom-properties) like organization or tier:
+Limit by [custom properties](/features/advanced-usage/custom-properties) like organization or tier:
 
 ```typescript
 // Each organization gets 5000 requests per hour
