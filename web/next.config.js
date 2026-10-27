@@ -41,6 +41,11 @@ const nextConfig = {
   },
   reactStrictMode: false,
   swcMinify: true,
+  // Next 16 builds with Turbopack by default and refuses a config that carries a
+  // webpack function (injected here by @next/bundle-analyzer) unless a turbopack
+  // config is present. An empty turbopack config is the minimal acknowledgement
+  // Next itself documents; this project has no hand-written webpack config.
+  turbopack: {},
   transpilePackages: ["@helicone-package/cost", "@helicone-package/llm-mapper"],
   async redirects() {
     return [
