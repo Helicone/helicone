@@ -1,19 +1,39 @@
 import { providers } from "@helicone-package/cost/providers/mappings";
 import { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 export async function generateMetadata({
   params,
 }: {
   params: { comparison: string };
 }): Promise<Metadata> {
-  const [modelAWithProvider, modelBWithProvider] =
-    params.comparison.split("-vs-");
-  const [modelA, providerA] = modelAWithProvider.split("-on-");
-  const [modelB, providerB] = modelBWithProvider.split("-on-");
-  const decodedModelA = decodeURIComponent(modelA || "");
-  const decodedModelB = decodeURIComponent(modelB || "");
-  const decodedProviderA = decodeURIComponent(providerA || "");
-  const decodedProviderB = decodeURIComponent(providerB || "");
+  const comparisonParts = params.comparison.split("-vs-");
+  if (comparisonParts.length !== 2) {
+    notFound();
+  }
+  const [modelAWithProvider, modelBWithProvider] = comparisonParts;
+  const modelAParts = modelAWithProvider.split("-on-");
+  const modelBParts = modelBWithProvider.split("-on-");
+  if (modelAParts.length !== 2 || modelBParts.length !== 2) {
+    notFound();
+  }
+  const [modelA, providerA] = modelAParts;
+  const [modelB, providerB] = modelBParts;
+  if (!modelA || !providerA || !modelB || !providerB) {
+    notFound();
+  }
+  const [decodedModelA, decodedModelB, decodedProviderA, decodedProviderB] = [
+    modelA,
+    modelB,
+    providerA,
+    providerB,
+  ].map((value) => {
+    try {
+      return decodeURIComponent(value);
+    } catch {
+      notFound();
+    }
+  });
 
   const title = getComparisonTitle(
     decodedModelA,
@@ -36,7 +56,7 @@ export async function generateMetadata({
     openGraph: {
       type: "website",
       siteName: "Helicone.ai",
-      url: `https://www.helicone.ai/comparison/${modelA}-vs-${modelB}`,
+      url: `https://www.helicone.ai/comparison/${params.comparison}`,
       title,
       description,
       images: imageUrl,
