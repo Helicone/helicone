@@ -27,6 +27,11 @@ export default async function Home({
   if (!modelA || !providerA || !modelB || !providerB) {
     notFound();
   }
+  try {
+    [modelA, providerA, modelB, providerB].forEach(decodeURIComponent);
+  } catch {
+    notFound();
+  }
 
   // Find the provider info
   const providerInfoA = providers.find(
