@@ -22,6 +22,11 @@ export default async function Home({
     "file-path": string;
   };
 }) {
+  const metadata = await getMetadata(params["file-path"]);
+  if (!metadata) {
+    notFound();
+  }
+
   const changelogFolder = path.join(
     process.cwd(),
     "app",
@@ -31,7 +36,14 @@ export default async function Home({
     "src.mdx"
   );
 
-  const source = await fs.readFile(changelogFolder, "utf8");
+  const source = await fs
+    .readFile(changelogFolder, "utf8")
+    .catch((error: NodeJS.ErrnoException) => {
+      if (error.code === "ENOENT") {
+        notFound();
+      }
+      throw error;
+    });
 
   const mdxSource = await serialize(source, {
     mdxOptions: {
@@ -45,12 +57,6 @@ export default async function Home({
       ],
     },
   });
-
-  const metadata = await getMetadata(params["file-path"]);
-
-  if (!metadata) {
-    notFound();
-  }
 
   return (
     <div className="w-full bg-white h-full antialiased relative">
