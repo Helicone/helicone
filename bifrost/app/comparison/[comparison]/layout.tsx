@@ -36,7 +36,7 @@ export async function generateMetadata({
     openGraph: {
       type: "website",
       siteName: "Helicone.ai",
-      url: `https://www.helicone.ai/comparison/${modelA}-vs-${modelB}`,
+      url: `https://www.helicone.ai/comparison/${params.comparison}`,
       title,
       description,
       images: imageUrl,
