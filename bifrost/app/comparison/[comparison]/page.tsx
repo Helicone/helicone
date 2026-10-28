@@ -1,5 +1,6 @@
 import Banner from "@/app/components/templates/Banner";
 import { providers } from "@helicone-package/cost/providers/mappings";
+import { notFound } from "next/navigation";
 import { ModelComparisonPage } from "../ModelComparisonPage";
 import QueryProvider from "../QueryProvider";
 
@@ -10,11 +11,22 @@ export default async function Home({
     comparison: string;
   };
 }) {
-  // Parse the comparison string
-  const [modelAWithProvider, modelBWithProvider] =
-    params.comparison.split("-vs-");
-  const [modelA, providerA] = modelAWithProvider.split("-on-");
-  const [modelB, providerB] = modelBWithProvider.split("-on-");
+  // Only provider-qualified comparisons can be rendered.
+  const comparisonParts = params.comparison.split("-vs-");
+  if (comparisonParts.length !== 2) {
+    notFound();
+  }
+  const [modelAWithProvider, modelBWithProvider] = comparisonParts;
+  const modelAParts = modelAWithProvider.split("-on-");
+  const modelBParts = modelBWithProvider.split("-on-");
+  if (modelAParts.length !== 2 || modelBParts.length !== 2) {
+    notFound();
+  }
+  const [modelA, providerA] = modelAParts;
+  const [modelB, providerB] = modelBParts;
+  if (!modelA || !providerA || !modelB || !providerB) {
+    notFound();
+  }
 
   // Find the provider info
   const providerInfoA = providers.find(
