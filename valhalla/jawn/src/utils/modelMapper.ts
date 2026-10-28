@@ -6,7 +6,9 @@ export function getModelFromRequest(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (requestBody && (requestBody as any).model) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (requestBody as any).model;
+    const model = (requestBody as any).model;
+    // Strip Google's "models/" prefix for consistent cost registry lookups
+    return typeof model === "string" ? model.replace(/^models\//, "") : model;
   }
 
   if (targetUrl && targetUrl.toLowerCase().includes("firecrawl")) {
@@ -53,13 +55,14 @@ function getModelFromPath(path: string) {
 }
 
 export function getModelFromResponse(responseBody: any) {
-  return (
+  const model =
     responseBody?.model ??
     responseBody?.body?.model ??
     responseBody?.body?.modelVersion ??
     responseBody?.providerMetadata?.gateway?.routing?.originalModelId ??
-    null
-  );
+    null;
+  // Strip Google's "models/" prefix for consistent cost registry lookups
+  return typeof model === "string" ? model.replace(/^models\//, "") : model;
 }
 
 export function calculateModel(
