@@ -322,6 +322,26 @@ describe("modelCostBreakdownFromRegistry", () => {
       }
     });
 
+    it("should use higher tier pricing for openai gpt-5.4 over 272K tokens", () => {
+      const modelUsage: ModelUsage = {
+        input: 300000, // 300K tokens - over 272K threshold
+        output: 50000,
+      };
+
+      const breakdown = modelCostBreakdownFromRegistry({
+        modelUsage,
+        providerModelId: "gpt-5.4",
+        provider: "openai" as ModelProviderName,
+      });
+
+      expect(breakdown).not.toBeNull();
+      if (breakdown) {
+        // Higher tier (>272K): $5/M input, $22.50/M output
+        expect(breakdown.inputCost).toBe(300000 * 0.000005);
+        expect(breakdown.outputCost).toBe(50000 * 0.0000225);
+      }
+    });
+
     it("should use base tier pricing for Gemini 3 Pro Preview under 200K tokens", () => {
       const modelUsage: ModelUsage = {
         input: 150000, // 150K tokens - under threshold
