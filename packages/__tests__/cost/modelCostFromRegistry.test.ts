@@ -318,7 +318,11 @@ describe("modelCostBreakdownFromRegistry", () => {
         expect(breakdown.inputCost).toBe(250000 * 0.000006);
         expect(breakdown.outputCost).toBe(50000 * 0.0000225);
         expect(breakdown.cachedInputCost).toBe(10000 * 0.000003 * 0.1);
-        expect(breakdown.cacheWrite5mCost).toBe(5000 * 0.000003 * 1.25);
+        // Regression for #5766: cache writes tier on the same threshold
+        // as the input cost (here, the long-context tier), not the base
+        // tier — the original 0.000003 base-tier rate undercharged
+        // >200k-token Anthropic requests at the long-context rate.
+        expect(breakdown.cacheWrite5mCost).toBe(5000 * 0.000006 * 1.25);
       }
     });
 
