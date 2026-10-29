@@ -29,7 +29,7 @@
 - 📊 **Observe**: Inspect and debug traces & [sessions](https://docs.helicone.ai/features/sessions) for agents, chatbots, document processing pipelines, and more
 - 📈 **Analyze**: Track metrics like [cost](https://docs.helicone.ai/faq/how-we-calculate-cost#developer), latency, quality, and more. Export to [PostHog](https://docs.helicone.ai/getting-started/integration-method/posthog) in one-line for custom dashboards
 - 🎮 **Playground**: Rapidly test and iterate on prompts, sessions and traces in our UI.
-- 🧠 **Prompt Management**: [Version prompts](https://docs.helicone.ai/features/prompts) using production data. Deploy prompts through the AI Gateway without code changes. Your prompts remain under your control, always accessible.
+- 🧠 **Prompt Management**: [Version prompts](https://docs.helicone.ai/features/advanced-usage/prompts/overview) using production data. Deploy prompts through the AI Gateway without code changes. Your prompts remain under your control, always accessible.
 - 🎛️ **Fine-tune**: Fine-tune with one of our fine-tuning partners: [OpenPipe](https://openpipe.ai/) or [Autonomi](https://www.autonomi.ai/) (more coming soon)
 - 🛡️ **Enterprise Ready**: SOC 2 and GDPR compliant
 
