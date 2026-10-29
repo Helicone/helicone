@@ -4,7 +4,7 @@ import { ReactElement } from "react";
 import AuthLayout from "../../components/layout/auth/authLayout";
 import WebhooksPage from "../../components/templates/webhooks/webhooksPage";
 
-const WebhooksSettings: NextPageWithLayout<void> = () => {
+const WebhooksSettings: NextPageWithLayout = () => {
   return <WebhooksPage />;
 };
 
