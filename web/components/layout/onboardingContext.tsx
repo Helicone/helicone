@@ -77,7 +77,7 @@ openai.chat.completions.create(
         content: "Generate an abstract for a course on space.",
       },
     ],
-    model: "gpt-4",
+    model: "gpt-6-luna",
   },
   {
     headers: {
@@ -107,7 +107,7 @@ const chatCompletion = await openai.chat.completions.create(
         content: hpf\`Write a story about \${{ character }}\`,
       },
     ],
-    model: "gpt-3.5-turbo",
+    model: "gpt-6-luna",
   },
   {
     // 3. Add Prompt Id Header
