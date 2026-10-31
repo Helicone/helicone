@@ -53,7 +53,7 @@ llm = ChatOpenAI(
 import OpenAI from "openai";
 
 const llm = new OpenAI({
-  modelName: "gpt-3.5-turbo",
+  modelName: "gpt-6-luna",
   configuration: {
     baseUrl: "${BASE_PATH}",
     defaultHeaders: {
