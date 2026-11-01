@@ -233,11 +233,10 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
       };
     }
 
-    const rejectedTokens = completionDetails.rejected_prediction_tokens ?? 0;
-    const acceptedTokens = completionDetails.accepted_prediction_tokens ?? 0;
-    if (rejectedTokens > 0 || acceptedTokens > 0) {
-      modelUsage.output = effectiveCompletionTokens + acceptedTokens;
-    }
+    // Prediction tokens need no adjustment: OpenAI counts both accepted and
+    // rejected_prediction_tokens inside completion_tokens (the rejected ones
+    // are explicitly still counted for billing), so `output` already includes
+    // them and adding acceptedTokens would double count.
 
     // Add web search usage if present
     for (const output_item of parsedResponse.output || []) {

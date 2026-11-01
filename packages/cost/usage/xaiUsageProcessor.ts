@@ -51,11 +51,9 @@ export class XAIUsageProcessor extends OpenAIUsageProcessor {
       };
     }
 
-    const rejectedTokens = completionDetails.rejected_prediction_tokens ?? 0;
-    const acceptedTokens = completionDetails.accepted_prediction_tokens ?? 0;
-    if (rejectedTokens > 0 || acceptedTokens > 0) {
-      modelUsage.output = effectiveCompletionTokens + acceptedTokens;
-    }
+    // Prediction tokens need no adjustment: accepted and rejected prediction
+    // tokens are counted inside completion_tokens, so `output` already
+    // includes them.
 
     // XAI adds num_sources_used for web search
     const numSourcesUsed = usage.num_sources_used ?? 0;
