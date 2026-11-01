@@ -56,8 +56,13 @@ export const useHeliconeLogin = (invalid_api_key?: boolean) => {
   });
 
   useEffect(() => {
-    // Restart the countdown whenever a new session UUID is issued.
-    resetCountDown();
+    // Restart the countdown only when a new session UUID is actually issued.
+    // A failed refetch resolves to null (the queryFn returns null instead of
+    // throwing, so React Query treats it as successful data); resetting on
+    // null would show a fresh countdown for an invalid link.
+    if (sessionUUID.data) {
+      resetCountDown();
+    }
   }, [sessionUUID.data, resetCountDown]);
 
   const apiKey = useQuery({
