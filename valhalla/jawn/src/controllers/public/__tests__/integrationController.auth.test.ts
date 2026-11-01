@@ -87,6 +87,65 @@ describe("redactIntegrationSettings", () => {
     ) as any;
     expect(restored).toEqual({});
   });
+
+  it("restores masked array entries without discarding edits beside them", () => {
+    const existing = {
+      credentials: {
+        tokens: ["original-token", "other-token"],
+        label: "Old label",
+        enabled: false,
+      },
+    };
+    const redacted = redactIntegrationSettings(existing) as any;
+    const restored = restoreRedactedSecrets(
+      {
+        ...redacted,
+        credentials: {
+          ...redacted.credentials,
+          tokens: [redacted.credentials.tokens[0], "replacement-token"],
+          label: "New label",
+          enabled: true,
+        },
+      },
+      existing
+    );
+
+    expect(restored).toEqual({
+      credentials: {
+        tokens: ["original-token", "replacement-token"],
+        label: "New label",
+        enabled: true,
+      },
+    });
+  });
+
+  it("restores secrets in arrays beneath ordinary setting keys", () => {
+    const existing = {
+      providers: [
+        { access_token: "first-token", name: "First" },
+        { access_token: "second-token", name: "Second" },
+      ],
+    };
+    const redacted = redactIntegrationSettings(existing) as any;
+    const restored = restoreRedactedSecrets(
+      {
+        providers: [
+          { ...redacted.providers[0], name: "Renamed" },
+          { ...redacted.providers[1], access_token: "new-token" },
+          { access_token: "••••", name: "No stored token" },
+        ],
+      },
+      existing
+    );
+
+    expect(restored).toEqual({
+      providers: [
+        { access_token: "first-token", name: "Renamed" },
+        { access_token: "new-token", name: "Second" },
+        { name: "No stored token" },
+      ],
+    });
+  });
 });
 
 describe("IntegrationController", () => {
@@ -114,6 +173,40 @@ describe("IntegrationController", () => {
       expect(json).not.toContain(SLACK_TOKEN);
       expect(json).not.toContain("test-slack-user-token");
     }
+  });
+
+  it("persists restored secrets instead of array masks on update", async () => {
+    const existing = { credentials: { tokens: ["stored-token"] } };
+    const redacted = redactIntegrationSettings(existing) as any;
+    mockDbExecute
+      .mockResolvedValueOnce({
+        data: [{ settings: existing }],
+        error: null,
+      } as any)
+      .mockResolvedValueOnce({ data: [], error: null } as any);
+
+    const result = await new IntegrationController().updateIntegration(
+      "i-1",
+      {
+        settings: {
+          credentials: {
+            tokens: [redacted.credentials.tokens[0], "new-token"],
+          },
+        },
+      },
+      req(admin)
+    );
+
+    expect(result.error).toBeNull();
+    expect(mockDbExecute).toHaveBeenNthCalledWith(
+      2,
+      expect.stringContaining("UPDATE integrations"),
+      [
+        { credentials: { tokens: ["stored-token", "new-token"] } },
+        "i-1",
+        "org-1",
+      ]
+    );
   });
 
   describe.each([
