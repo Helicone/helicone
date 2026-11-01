@@ -1,20 +1,39 @@
 import { useJawnClient } from "@/lib/clients/jawnHook";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Cookies from "js-cookie";
 import { testAPIKey } from "./first_page/useTestApiKey";
 
 export const useCountDown = (seconds: number, onFinish: () => void) => {
   const [countDown, setCountDown] = useState(seconds);
+  const onFinishRef = useRef(onFinish);
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    onFinishRef.current = onFinish;
+  });
+
+  useEffect(() => {
+    if (seconds <= 0) {
+      return;
+    }
+    if (countDown <= 0) {
+      onFinishRef.current();
+      // Do not reset here: the countdown only restarts via `reset` once a
+      // fresh value (e.g. a rotated session UUID) actually arrives, so the
+      // timer never misrepresents the expiry of a stale session.
+      return;
+    }
+    const timeout = setTimeout(() => {
       setCountDown((prev) => prev - 1);
     }, 1000);
-    return () => clearInterval(interval);
-  }, []);
+    return () => clearTimeout(timeout);
+  }, [countDown, seconds]);
 
-  return countDown;
+  const reset = useCallback(() => {
+    setCountDown(seconds);
+  }, [seconds]);
+
+  return { countDown, reset };
 };
 
 export const useHeliconeLogin = (invalid_api_key?: boolean) => {
@@ -32,9 +51,14 @@ export const useHeliconeLogin = (invalid_api_key?: boolean) => {
     staleTime: 9 * 60 * 1000,
   });
 
-  const countDown = useCountDown(600, () => {
+  const { countDown, reset: resetCountDown } = useCountDown(600, () => {
     sessionUUID.refetch();
   });
+
+  useEffect(() => {
+    // Restart the countdown whenever a new session UUID is issued.
+    resetCountDown();
+  }, [sessionUUID.data, resetCountDown]);
 
   const apiKey = useQuery({
     queryKey: ["pi-session", sessionUUID.data],
