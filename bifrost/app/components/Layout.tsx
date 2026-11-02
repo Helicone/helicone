@@ -1,6 +1,7 @@
 import Footer from "@/components/layout/footer";
 import NavBar from "@/components/layout/navbar";
 import Banner from "@/components/home/Banner";
+import { getGithubStars } from "@/lib/github";
 import { getMetadata } from "@/components/templates/blog/getMetaData";
 import { BLOG_CONTENT } from "../blog/page";
 
@@ -13,11 +14,7 @@ export const Layout = async ({
   hideFooter?: boolean;
   noNavbarMargin?: boolean;
 }) => {
-  const githubResponse = await fetch(
-    "https://api.github.com/repos/helicone/helicone"
-  );
-  const githubData = await githubResponse.json();
-  const stars = githubData.stargazers_count;
+  const stars = await getGithubStars();
 
   const featuredBlogFolderName = (BLOG_CONTENT[0] as any)?.dynmaicEntry
     ?.folderName;

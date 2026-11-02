@@ -77,7 +77,8 @@ describe("timeout timers are cleared once the work settles", () => {
       request as any,
       { bucketSize: 1 },
       cacheKv as any,
-      null
+      null,
+      "org_test"
     );
 
     // bucket has a free index -> cache miss -> null

@@ -221,11 +221,6 @@ export type BlogStructure =
 export const BLOG_CONTENT: BlogStructure[] = [
   {
     dynmaicEntry: {
-      folderName: "joining-mintlify",
-    },
-  },
-  {
-    dynmaicEntry: {
       folderName: "ptb-gateway-launch",
     },
   },

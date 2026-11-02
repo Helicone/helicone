@@ -13,6 +13,7 @@ async function handler({
 }: HandlerWrapperOptions<Result<DecryptedProviderKeyMapping[], string>>) {
   if (req.method !== "GET") {
     res.status(405).json({ error: "Method not allowed", data: null });
+    return;
   }
 
   const query = `

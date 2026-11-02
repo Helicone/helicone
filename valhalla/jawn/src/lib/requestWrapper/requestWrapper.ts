@@ -17,6 +17,10 @@ import { getAndStoreInCache } from "../cache/staticMemCache";
 import { Database } from "../db/database.types";
 import { hashAuth } from "../db/hash";
 import { dbExecute } from "../shared/db/dbExecute";
+import {
+  checkOrgProviderKeyOwnership,
+  needsResellerTypeCheck,
+} from "../../../../../packages/common/providerKeys/orgProviderKeyOwnership";
 
 export const HELICONE_RATE_LIMITED_API_KEY_REGEX = [
   /^sk-helicone-rl-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}-[a-z0-9]{7}$/,
@@ -452,7 +456,9 @@ export async function getProviderKeyFromPortalKey(
   authKey: string
 ): Promise<Result<CustomerPortalValues, string>> {
   const apiKey = await dbExecute<{ organization_id: string }>(
-    `SELECT organization_id FROM helicone_api_keys WHERE api_key_hash = $1 LIMIT 1`,
+    `SELECT organization_id FROM helicone_api_keys
+     WHERE api_key_hash = $1 AND soft_delete = false
+     LIMIT 1`,
     [await hashAuth(authKey)]
   );
 
@@ -460,26 +466,78 @@ export async function getProviderKeyFromPortalKey(
     return err(apiKey.error);
   }
 
+  const organizationId = apiKey.data?.[0]?.organization_id;
+  if (!organizationId) {
+    return err("API key not found");
+  }
+
+  // reseller_id is read through to_jsonb so this query does not depend on
+  // the column existing in every environment.
   const organization = await dbExecute<{
-    org_provider_key: string;
+    id: string;
+    org_provider_key: string | null;
+    reseller_id: string | null;
     limits: any;
   }>(
-    `SELECT org_provider_key, limits FROM organization WHERE id = $1 LIMIT 1`,
-    [apiKey.data?.[0]?.organization_id ?? ""]
+    `SELECT id, org_provider_key, to_jsonb(organization)->>'reseller_id' AS reseller_id, limits
+     FROM organization
+     WHERE id = $1 AND soft_delete = false
+     LIMIT 1`,
+    [organizationId]
   );
 
   if (organization.error) {
     return err(organization.error);
   }
 
+  const org = organization.data?.[0];
+  if (!org?.org_provider_key) {
+    return err("Organization has no provider key");
+  }
+
   const providerKeyId = await dbExecute<
     Database["public"]["Tables"]["provider_keys"]["Row"]
-  >(`SELECT * FROM provider_keys WHERE id = $1 LIMIT 1`, [
-    organization.data?.[0]?.org_provider_key ?? "",
+  >(`SELECT * FROM provider_keys WHERE id = $1 AND soft_delete = false LIMIT 1`, [
+    org.org_provider_key,
   ]);
 
   if (providerKeyId.error) {
     return err(providerKeyId.error);
+  }
+
+  // Defense in depth: only use org_provider_key when the provider key
+  // belongs to this organization or to the reseller that created it.
+  const providerKeyOrgId = providerKeyId.data?.[0]?.org_id;
+  let resellerOrganizationType: string | null = null;
+  if (
+    needsResellerTypeCheck({
+      orgId: org.id,
+      resellerId: org.reseller_id,
+      providerKeyOrgId,
+    })
+  ) {
+    const reseller = await dbExecute<{ organization_type: string }>(
+      `SELECT organization_type FROM organization
+       WHERE id = $1 AND soft_delete = false
+       LIMIT 1`,
+      [org.reseller_id]
+    );
+    if (reseller.error) {
+      return err(reseller.error);
+    }
+    resellerOrganizationType = reseller.data?.[0]?.organization_type ?? null;
+  }
+  const ownership = checkOrgProviderKeyOwnership({
+    orgId: org.id,
+    resellerId: org.reseller_id,
+    providerKeyOrgId,
+    resellerOrganizationType,
+  });
+  if (!ownership.allowed) {
+    console.warn(
+      `Refusing org_provider_key for organization ${org.id}: ${ownership.reason} (provider key ${org.org_provider_key}, provider key org ${providerKeyOrgId ?? "none"})`
+    );
+    return err("Provider key not found");
   }
 
   const check = await usageLimitManager.checkLimitsSingle(

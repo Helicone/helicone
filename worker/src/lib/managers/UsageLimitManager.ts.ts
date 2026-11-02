@@ -51,6 +51,50 @@ export async function checkLimitsSingle(
     `OK, within limits {cost: ${cost}/${costUSD}, count: ${count}/${requestCount}}}`
   );
 }
+/**
+ * checkLimitsSingle with a 60s verdict cache in CACHE_KV, so org limits can be
+ * enforced on every request without a ClickHouse query per request.
+ */
+export async function checkLimitsSingleCached(
+  costUSD: number,
+  requestCount: number,
+  timeGrain: "minute" | "hour" | "day" | "week" | "month",
+  organizationId: string,
+  env: Env
+): Promise<Result<string, string>> {
+  if (costUSD === -1 && requestCount === -1) {
+    return ok("OK, no limits configured");
+  }
+  if (!organizationId) {
+    return err("No organization ID provided");
+  }
+  const cacheKey = `org-limits-v1-${(
+    await hash(`${organizationId}:${timeGrain}:${costUSD}:${requestCount}`)
+  ).substring(0, 32)}`;
+  const cached = await env.CACHE_KV.get(cacheKey);
+  if (cached !== null) {
+    return cached === "ok" ? ok("OK, within limits (cached)") : err(cached);
+  }
+
+  const result = await checkLimitsSingle(
+    costUSD,
+    requestCount,
+    timeGrain,
+    organizationId,
+    env
+  );
+  // Do not cache infrastructure failures; they are retried next request.
+  if (result.error !== "Error checking limits") {
+    await safePut({
+      key: env.CACHE_KV,
+      keyName: cacheKey,
+      value: result.error === null ? "ok" : result.error,
+      options: { expirationTtl: 60 },
+    });
+  }
+  return result;
+}
+
 const generateSubquery = (index: number) => {
   const secondsVal = `val_${index * 2}`;
   const proxyKeyIdVal = `val_${index * 2 + 1}`;

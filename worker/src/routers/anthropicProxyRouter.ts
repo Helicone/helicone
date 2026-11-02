@@ -1,4 +1,5 @@
 import { proxyForwarder } from "../lib/HeliconeProxyRequest/ProxyForwarder";
+import { directProviderPassthrough } from "../lib/HeliconeProxyRequest/directPassthrough";
 import { RequestWrapper } from "../lib/RequestWrapper";
 import { BaseRouter } from "./routerFactory";
 
@@ -8,21 +9,15 @@ export const getAnthropicProxyRouter = (router: BaseRouter) => {
     "/v1/files*",
     async (
       request: Request,
-      _: RequestWrapper,
+      requestWrapper: RequestWrapper,
       __: Env,
       ___: ExecutionContext
     ) => {
-      const originalUrl = new URL(request.url);
-      const new_url = `https://api.anthropic.com${originalUrl.pathname}${originalUrl.search}`;
-
-      const headers = new Headers(request.headers);
-
-      return await fetch(new_url, {
+      return await directProviderPassthrough({
+        origin: "https://api.anthropic.com",
+        requestWrapper,
         method: request.method,
-        headers: headers,
         body: request.body,
-        // @ts-ignore - duplex is needed for streaming bodies
-        duplex: 'half',
       });
     }
   );
@@ -32,20 +27,15 @@ export const getAnthropicProxyRouter = (router: BaseRouter) => {
     "/v1/files*",
     async (
       request: Request,
-      _: RequestWrapper,
+      requestWrapper: RequestWrapper,
       __: Env,
       ___: ExecutionContext
     ) => {
-      const originalUrl = new URL(request.url);
-      const new_url = `https://api.anthropic.com${originalUrl.pathname}${originalUrl.search}`;
-      const headers = new Headers(request.headers);
-
-      return await fetch(new_url, {
+      return await directProviderPassthrough({
+        origin: "https://api.anthropic.com",
+        requestWrapper,
         method: request.method,
-        headers: headers,
         body: request.body,
-        // @ts-ignore - duplex is needed for streaming bodies
-        duplex: 'half',
       });
     }
   );

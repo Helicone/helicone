@@ -1,7 +1,5 @@
 import { Col, Row } from "@/components/layout/common";
 import { LLMEvaluatorConfigForm } from "@/components/templates/evals/CreateNewEvaluator/LLMEvaluatorConfigForm";
-import { PythonEvaluatorConfigForm } from "@/components/templates/evals/CreateNewEvaluator/PythonEvaluatorConfigForm";
-import { COMPOSITE_OPTIONS } from "@/components/templates/evals/testing/examples";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { XIcon } from "lucide-react";
@@ -16,7 +14,6 @@ import { H3 } from "@/components/ui/typography";
 import { useEffect } from "react";
 import {
   useLLMEvaluatorSubmit,
-  usePythonEvaluatorSubmit,
   useLastMileEvaluatorSubmit,
 } from "../hooks/useEvaluatorSubmit";
 import { useTestDataStore } from "../testing/testingStore";
@@ -39,7 +36,9 @@ export const useCreatePanelTabs = create<{
 );
 
 export const CreatePanel = () => {
-  const { selectedTab, setSelectedTab } = useCreatePanelTabs();
+  const { selectedTab: storedTab, setSelectedTab } = useCreatePanelTabs();
+  // Python evaluators are no longer supported; ignore a persisted python tab.
+  const selectedTab = storedTab === "python" ? "llm-as-a-judge" : storedTab;
   const { resetPanels, openTestPanel } = useEvalPanelStore();
   const { isSubmitting, setHideFormButtons } = useEvalFormStore();
 
@@ -50,9 +49,6 @@ export const CreatePanel = () => {
   const {
     llmConfig,
     llmTemplate,
-    pythonName,
-    pythonDescription,
-    pythonCode,
     lastMileName,
     lastMileDescription,
     lastMileConfig,
@@ -60,7 +56,6 @@ export const CreatePanel = () => {
 
   // Create mutation hooks for each evaluator type
   const llmSubmit = useLLMEvaluatorSubmit(() => resetPanels());
-  const pythonSubmit = usePythonEvaluatorSubmit(() => resetPanels());
   const lastMileSubmit = useLastMileEvaluatorSubmit(() => resetPanels());
 
   // Hide the form buttons when this component mounts
@@ -82,12 +77,6 @@ export const CreatePanel = () => {
         evaluator_scoring_type: llmConfig.expectedValueType,
         evaluator_name: llmConfig.name || "evaluator",
       });
-    } else if (selectedTab === "python") {
-      setTestConfig({
-        _type: "python",
-        evaluator_name: pythonName || "Python Evaluator",
-        code: pythonCode,
-      });
     } else if (selectedTab === "lastmile") {
       setTestConfig({
         _type: "lastmile",
@@ -100,8 +89,6 @@ export const CreatePanel = () => {
     setTestConfig,
     llmTemplate,
     llmConfig,
-    pythonName,
-    pythonCode,
     lastMileName,
     lastMileConfig,
   ]);
@@ -114,12 +101,6 @@ export const CreatePanel = () => {
         evaluator_llm_template: llmTemplate,
         evaluator_scoring_type: llmConfig.expectedValueType,
         evaluator_name: llmConfig.name || "LLM Evaluator",
-      });
-    } else if (selectedTab === "python") {
-      setTestConfig({
-        _type: "python",
-        evaluator_name: pythonName || "Python Evaluator",
-        code: pythonCode,
       });
     } else if (selectedTab === "lastmile") {
       setTestConfig({
@@ -139,12 +120,6 @@ export const CreatePanel = () => {
       llmSubmit.mutate({
         configFormParams: llmConfig,
         openAIFunction: llmTemplate,
-      });
-    } else if (selectedTab === "python") {
-      pythonSubmit.mutate({
-        name: pythonName,
-        description: pythonDescription,
-        code: pythonCode,
       });
     } else if (selectedTab === "lastmile") {
       lastMileSubmit.mutate({
@@ -178,8 +153,8 @@ export const CreatePanel = () => {
           <TabsTrigger value="llm-as-a-judge" className="text-xs">
             LLM-as-a-judge
           </TabsTrigger>
-          <TabsTrigger value="python" className="text-xs">
-            Python
+          <TabsTrigger value="python" className="text-xs" disabled>
+            Python (no longer supported)
           </TabsTrigger>
           <TabsTrigger value="lastmile" className="text-xs">
             LastMile AutoEval
@@ -197,22 +172,6 @@ export const CreatePanel = () => {
               openTestPanel={() => {
                 openTestPanel();
               }}
-            />
-          </TabsContent>
-          <TabsContent
-            value="python"
-            className="m-0 h-full p-0 data-[state=active]:flex data-[state=active]:flex-col"
-          >
-            <PythonEvaluatorConfigForm
-              onSubmit={() => {
-                resetPanels();
-              }}
-              openTestPanel={() => {
-                openTestPanel();
-              }}
-              configFormParams={COMPOSITE_OPTIONS[0].preset}
-              name={COMPOSITE_OPTIONS[0].name}
-              key={COMPOSITE_OPTIONS[0].name + "python"}
             />
           </TabsContent>
           <TabsContent
@@ -245,16 +204,10 @@ export const CreatePanel = () => {
             className="bg-primary text-primary-foreground hover:bg-primary/90"
             onClick={handleCreate}
             disabled={
-              isSubmitting ||
-              llmSubmit.isPending ||
-              pythonSubmit.isPending ||
-              lastMileSubmit.isPending
+              isSubmitting || llmSubmit.isPending || lastMileSubmit.isPending
             }
           >
-            {isSubmitting ||
-            llmSubmit.isPending ||
-            pythonSubmit.isPending ||
-            lastMileSubmit.isPending ? (
+            {isSubmitting || llmSubmit.isPending || lastMileSubmit.isPending ? (
               <span className="flex items-center gap-2">
                 <svg
                   className="-ml-1 mr-2 h-4 w-4 animate-spin text-white"

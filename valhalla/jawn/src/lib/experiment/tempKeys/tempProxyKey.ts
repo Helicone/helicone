@@ -57,15 +57,19 @@ async function createProxyKey(
 
 class TempProxyKey implements BaseTempKey {
   private keyUsed = false;
+  private cleanedUp = false;
   constructor(
     private proxyKey: string,
     private proxyKeyId: string
   ) {}
 
   async cleanup() {
-    if (this.keyUsed) {
+    // Runs once. (Previously it returned early whenever the key had been
+    // used, so experiment proxy keys were never deleted.)
+    if (this.cleanedUp) {
       return;
     }
+    this.cleanedUp = true;
 
     try {
       // Direct database access for cleanup
@@ -87,14 +91,11 @@ class TempProxyKey implements BaseTempKey {
     }
 
     this.keyUsed = true;
-    return callback(this.proxyKey)
-      .then(async (t) => {
-        await this.cleanup();
-        return t;
-      })
-      .finally(async () => {
-        await this.cleanup();
-      });
+    try {
+      return await callback(this.proxyKey);
+    } finally {
+      await this.cleanup();
+    }
   }
 }
 

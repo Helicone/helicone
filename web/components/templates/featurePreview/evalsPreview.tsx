@@ -11,7 +11,7 @@ const evalFeatures: Feature[] = [
   {
     title: "Catch Regression Pre-Deployment",
     description: [
-      "Three evaluation modes: LLM-as-a-Judge, executable Python (CodeSandbox), and LastMileAI RAG evals",
+      "Two evaluation modes: LLM-as-a-Judge and LastMileAI RAG evals",
       "Leverage LastMileAI's RAG-specific metrics including faithfulness, relevance, and answer quality scoring",
       "Integrated with all major AI providers (Anthropic, OpenAI, Google, Meta, DeepSeek)",
     ],

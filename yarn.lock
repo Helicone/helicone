@@ -1450,11 +1450,6 @@
   resolved "https://registry.yarnpkg.com/@cloudflare/workerd-windows-64/-/workerd-windows-64-1.20251202.0.tgz#725e66f8f6c2b39fe52a7c97be12b8e672b83e8f"
   integrity sha512-gzeU6eDydTi7ib+Q9DD/c0hpXtqPucnHk2tfGU03mljPObYxzMkkPGgB5qxpksFvub3y4K0ChjqYxGJB4F+j3g==
 
-"@codesandbox/sdk@^0.0.10":
-  version "0.0.10"
-  resolved "https://registry.npmjs.org/@codesandbox/sdk/-/sdk-0.0.10.tgz"
-  integrity sha512-5AMcAnfX5koKKO2YNoItq2KrXJFquzHOcMgl6M1qOC2YvVQbUZijD0tvKWD/qMTCwYW3ry8346eeTtyBKosDjw==
-
 "@corex/deepmerge@^4.0.43":
   version "4.0.43"
   resolved "https://registry.npmjs.org/@corex/deepmerge/-/deepmerge-4.0.43.tgz"

@@ -340,12 +340,12 @@ const generateHandler = async (
       ctx
     );
   } catch (e: unknown) {
+    // Stack traces stay in the worker logs; they are not returned to callers.
     console.error("Error in generate route:", e);
     return createErrorResponse(
       e instanceof Error ? e.message : "An unexpected error occurred",
       "internal_server_error",
-      500,
-      { stack: e instanceof Error ? e.stack : undefined }
+      500
     );
   }
 };

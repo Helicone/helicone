@@ -275,6 +275,12 @@ server.on("error", console.error);
 
 server.setTimeout(1000 * 60 * 10); // 10 minutes
 
+// Keep idle sockets open longer than the ALB idle timeout (60s in US and EU).
+// With Node's 5s default, the ALB can reuse a socket Node already closed and
+// return a 502 to the client. headersTimeout must stay above keepAliveTimeout.
+server.keepAliveTimeout = 65 * 1000;
+server.headersTimeout = 66 * 1000;
+
 // This shuts down the server and all delayed operations with delay only locally, on AWS it will be killed by the OS with no delay
 // Please wait few minutes before terminating the original task on AWS
 async function gracefulShutdown(signal: string) {

@@ -13,7 +13,7 @@ const isOnPrem = !!process.env.NEXT_PUBLIC_IS_ON_PREM;
 
 // Build a fresh client for every request. The client carries the org's
 // decrypted provider key and per-org identity headers, so it must never be
-// cached at module scope and shared across orgs (CIRT-79).
+// cached at module scope and shared across orgs.
 async function getOpenAIClient(
   orgId: string,
   userEmail: string,

@@ -68,10 +68,9 @@ export function useProFeature(featureName: FeatureName, enabled = true) {
         org?.currentOrg?.tier === "demo" ||
         org?.currentOrg?.tier === "team-20250130" ||
         org?.currentOrg?.tier === "team-20251210" ||
-        (org?.currentOrg?.stripe_metadata as { addons?: { prompts?: boolean } })
-          ?.addons?.prompts)
+        org?.currentOrg?.addons?.prompts)
     );
-  }, [org?.currentOrg?.tier, org?.currentOrg?.stripe_metadata, enabled]);
+  }, [org?.currentOrg?.tier, org?.currentOrg?.addons, enabled]);
 
   const customDescription = useMemo(
     () => descriptions[featureName],

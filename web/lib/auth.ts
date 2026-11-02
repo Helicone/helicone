@@ -38,9 +38,15 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     autoSignIn: false,
+    // Unverified addresses must not get a session: otherwise anyone can sign
+    // up and act as an email address they don't control.
+    requireEmailVerification: true,
   },
   emailVerification: {
     sendOnSignUp: true,
+    // Users blocked by requireEmailVerification get a fresh link when they
+    // try to sign in, so existing unverified accounts can recover.
+    sendOnSignIn: true,
     // Define the function to send the verification email
     sendVerificationEmail: async ({ user, url }, request) => {
       logger.info({ email: user.email }, "Sending verification email");

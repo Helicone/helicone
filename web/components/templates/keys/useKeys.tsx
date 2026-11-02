@@ -43,15 +43,18 @@ export const useKeys = () => {
       isEu: boolean;
       enableRateLimit?: boolean;
     }) => {
-      const { res, apiKey } = generateAPIKeyHelper(
+      const { apiKey, error } = await generateAPIKeyHelper(
         permission,
-        org?.currentOrg?.organization_type!,
         keyName,
         isEu,
         useGovernance,
         enableRateLimit,
+        org?.currentOrg?.id,
       );
-      return { res: await res, apiKey };
+      if (error || !apiKey) {
+        throw new Error(error ?? "Failed to create API key");
+      }
+      return { apiKey };
     },
     onSuccess: () => {
       setNotification("Successfully created API key", "success");

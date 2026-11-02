@@ -15,6 +15,41 @@ import OpenAI from "openai";
 import { generateTempHeliconeAPIKey } from "../../lib/experiment/tempKeys/tempAPIKey";
 import { PlaygroundManager } from "../../managers/playgroundManager";
 import { ChatCompletionService } from "../../lib/services/chatCompletionService";
+import { dbExecute } from "../../lib/shared/db/dbExecute";
+import {
+  checkOrgRateLimit,
+  EVALUATOR_RATE_LIMITS,
+} from "../../managers/evaluator/orgRateLimit";
+
+/**
+ * Resolves the caller's role in the org, but only for a real user session
+ * (JWT). API keys carry a stored user_id that does not prove the caller is
+ * that user, so they never resolve to a role here.
+ */
+export async function getJwtMemberRole(
+  authParams: JawnAuthenticatedRequest["authParams"]
+): Promise<"owner" | "admin" | "member" | null> {
+  if (authParams?.authType !== "jwt" || !authParams.userId) {
+    return null;
+  }
+  const result = await dbExecute<{ org_role: string }>(
+    `SELECT om.org_role
+     FROM organization_member om
+     WHERE om.organization = $1 AND om.member = $2
+     UNION ALL
+     SELECT 'owner' AS org_role
+     FROM organization o
+     WHERE o.id = $1 AND o.owner = $2`,
+    [authParams.organizationId, authParams.userId]
+  );
+  if (result.error || !result.data || result.data.length === 0) {
+    return null;
+  }
+  const roles = result.data.map((r) => r.org_role);
+  if (roles.includes("owner")) return "owner";
+  if (roles.includes("admin")) return "admin";
+  return "member";
+}
 
 @Route("v1/playground")
 @Tags("Playground")
@@ -35,6 +70,21 @@ export class PlaygroundController extends Controller {
       string
     >
   > {
+    const role = await getJwtMemberRole(request.authParams);
+    if (!role) {
+      this.setStatus(403);
+      return err("The playground requires a signed-in organization member");
+    }
+
+    const rateLimit = await checkOrgRateLimit({
+      ...EVALUATOR_RATE_LIMITS.playgroundGenerate,
+      orgId: request.authParams.organizationId,
+    });
+    if (!rateLimit.allowed) {
+      this.setStatus(429);
+      return err("Too many playground requests, please try again later");
+    }
+
     try {
       const { useAIGateway, logRequest, ...prompt } = bodyParams;
 
@@ -47,8 +97,14 @@ export class PlaygroundController extends Controller {
         : "https://ai-gateway.helicone.ai/v1";
 
       try {
+        if (!request.authParams.userId) {
+          this.setStatus(401);
+          return err("Unauthorized");
+        }
+        // The temp key is used server-side only and carries the caller.
         const tempKey = await generateTempHeliconeAPIKey(
           request.authParams.organizationId,
+          { kind: "actor", userId: request.authParams.userId },
         );
         if (tempKey.error || !tempKey.data) {
           console.error("[API] Failed to generate temp key:", tempKey.error);
@@ -97,7 +153,8 @@ export class PlaygroundController extends Controller {
       }
     } catch (error) {
       this.setStatus(500);
-      return err("Failed to generate response: " + JSON.stringify(error));
+      console.error("[API] Playground generate failed:", error);
+      return err("Failed to generate response");
     }
   }
 
@@ -106,6 +163,15 @@ export class PlaygroundController extends Controller {
     @Body() params: { requestsThroughHelicone: boolean },
     @Request() request: JawnAuthenticatedRequest,
   ): Promise<Result<string, string>> {
+    const role = await getJwtMemberRole(request.authParams);
+    if (role !== "owner" && role !== "admin") {
+      this.setStatus(403);
+      return err("Only organization owners and admins can change this setting");
+    }
+    if (typeof params?.requestsThroughHelicone !== "boolean") {
+      this.setStatus(400);
+      return err("requestsThroughHelicone must be a boolean");
+    }
     const playgroundManager = new PlaygroundManager(request.authParams);
     return playgroundManager.setPlaygroundRequestsThroughHelicone(
       request.authParams.organizationId,

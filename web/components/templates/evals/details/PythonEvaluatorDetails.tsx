@@ -1,8 +1,7 @@
-import { Col } from "@/components/layout/common";
 import React from "react";
+import { P } from "@/components/ui/typography";
 import { useEvaluators } from "../EvaluatorHook";
 import { Evaluator } from "./types";
-import { PythonEvaluatorConfigForm } from "@/components/templates/evals/CreateNewEvaluator/PythonEvaluatorConfigForm";
 
 interface PythonEvaluatorDetailsProps {
   evaluator: Evaluator;
@@ -10,24 +9,14 @@ interface PythonEvaluatorDetailsProps {
   setSelectedEvaluator: (evaluator: Evaluator | null) => void;
 }
 
-const PythonEvaluatorDetails: React.FC<PythonEvaluatorDetailsProps> = ({
-  evaluator,
-  deleteEvaluator,
-  setSelectedEvaluator,
-}) => {
+const PythonEvaluatorDetails: React.FC<PythonEvaluatorDetailsProps> = () => {
   return (
-    <Col className="space-y-4">
-      <PythonEvaluatorConfigForm
-        configFormParams={{
-          code: (evaluator.code_template as any)?.code ?? "",
-          description: (evaluator.code_template as any)?.description ?? "",
-          testInput: (evaluator.code_template as any)?.test_input,
-        }}
-        onSubmit={() => {}}
-        name={evaluator.name}
-        existingEvaluatorId={evaluator.id}
-      />
-    </Col>
+    <div className="flex flex-col gap-4 p-4">
+      <P>
+        Python evaluators are no longer supported. This evaluator no longer runs
+        and can&apos;t be edited or tested. You can still delete it.
+      </P>
+    </div>
   );
 };
 

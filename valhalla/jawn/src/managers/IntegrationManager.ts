@@ -8,6 +8,116 @@ import {
   IntegrationUpdateParams,
 } from "../controllers/public/integrationController";
 import { Json } from "../lib/db/database.types";
+import { maskProviderSecret } from "../utils/providerKeyAccess";
+
+// ---------------------------------------------------------------------------
+// Secret redaction for integration settings
+//
+// Integration settings can hold third-party credentials (e.g. the Slack OAuth
+// response with access_token / authed_user.access_token). They must never be
+// returned by the API. Any key that looks like a credential is masked in every
+// GET response; on update, masked values sent back by the client are replaced
+// with the stored secret so round-tripping settings does not destroy them.
+// ---------------------------------------------------------------------------
+
+const SECRET_KEY_PATTERN =
+  /(token|secret|key|password|passwd|credential|signature|private)/i;
+const MASK_MARKER = "\u2022\u2022\u2022\u2022";
+
+export function isSecretSettingKey(key: string): boolean {
+  return SECRET_KEY_PATTERN.test(key);
+}
+
+function maskAllStrings(value: Json | undefined): Json | undefined {
+  if (typeof value === "string") {
+    return maskProviderSecret(value) ?? "";
+  }
+  if (Array.isArray(value)) {
+    return value.map((v) => maskAllStrings(v) as Json);
+  }
+  if (value && typeof value === "object") {
+    const out: { [key: string]: Json | undefined } = {};
+    for (const [k, v] of Object.entries(value)) {
+      out[k] = maskAllStrings(v);
+    }
+    return out;
+  }
+  return value;
+}
+
+/** Returns a copy of `settings` with every credential-like value masked. */
+export function redactIntegrationSettings(
+  settings: Json | undefined
+): Json | undefined {
+  if (Array.isArray(settings)) {
+    return settings.map((v) => redactIntegrationSettings(v) as Json);
+  }
+  if (settings && typeof settings === "object") {
+    const out: { [key: string]: Json | undefined } = {};
+    for (const [k, v] of Object.entries(settings)) {
+      out[k] = isSecretSettingKey(k)
+        ? maskAllStrings(v)
+        : redactIntegrationSettings(v);
+    }
+    return out;
+  }
+  return settings;
+}
+
+export function redactIntegration<T extends { settings?: Json }>(
+  integration: T
+): T {
+  return {
+    ...integration,
+    settings: redactIntegrationSettings(integration.settings) as Json,
+  };
+}
+
+function containsMask(value: Json | undefined): boolean {
+  if (typeof value === "string") return value.includes(MASK_MARKER);
+  if (Array.isArray(value)) return value.some(containsMask);
+  if (value && typeof value === "object") {
+    return Object.values(value).some(containsMask);
+  }
+  return false;
+}
+
+/**
+ * For an update, replaces credential-like values that are still masked (the
+ * client echoed back what GET returned) with the stored value. Masked values
+ * with no stored counterpart are dropped rather than persisted.
+ */
+export function restoreRedactedSecrets(
+  incoming: Json | undefined,
+  existing: Json | undefined
+): Json | undefined {
+  if (
+    !incoming ||
+    typeof incoming !== "object" ||
+    Array.isArray(incoming)
+  ) {
+    return incoming;
+  }
+  const existingObj =
+    existing && typeof existing === "object" && !Array.isArray(existing)
+      ? existing
+      : {};
+  const out: { [key: string]: Json | undefined } = {};
+  for (const [k, v] of Object.entries(incoming)) {
+    if (isSecretSettingKey(k) && containsMask(v)) {
+      if (k in existingObj) {
+        out[k] = existingObj[k];
+      }
+      continue;
+    }
+    if (v && typeof v === "object" && !Array.isArray(v)) {
+      out[k] = restoreRedactedSecrets(v, existingObj[k]);
+    } else {
+      out[k] = v;
+    }
+  }
+  return out;
+}
 
 export class IntegrationManager extends BaseManager {
   constructor(authParams: AuthParams) {
@@ -77,8 +187,24 @@ export class IntegrationManager extends BaseManager {
       }
 
       if (params.settings !== undefined) {
+        let settings = params.settings;
+        if (containsMask(settings)) {
+          const existing = await dbExecute<{ settings: Json }>(
+            `SELECT settings FROM integrations
+             WHERE id = $1 AND organization_id = $2
+             LIMIT 1`,
+            [integrationId, this.authParams.organizationId]
+          );
+          if (existing.error) {
+            return err(existing.error);
+          }
+          settings = restoreRedactedSecrets(
+            settings,
+            existing.data?.[0]?.settings
+          ) as Json;
+        }
         updates.push(`settings = $${paramIndex++}`);
-        values.push(params.settings);
+        values.push(settings);
       }
 
       if (params.active !== undefined) {

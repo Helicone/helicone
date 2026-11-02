@@ -54,7 +54,7 @@ export class StripeIntegrationManager extends BaseManager {
       const integration =
         await this.integrationManager.getIntegration(integrationId);
       if (integration.error) {
-        return err(`Integration not found: ${integration.error}`);
+        return err("Integration not found");
       }
 
       if (!integration.data?.active) {
@@ -69,7 +69,8 @@ export class StripeIntegrationManager extends BaseManager {
       const stripeKeys =
         await this.vaultManager.getDecryptedProviderKeysByOrgId();
       if (stripeKeys.error) {
-        return err(`Failed to get vault keys: ${stripeKeys.error}`);
+        console.error("Failed to get vault keys:", stripeKeys.error);
+        return err("Failed to load Stripe API key");
       }
 
       const stripeKey = stripeKeys.data?.find(
@@ -129,7 +130,8 @@ export class StripeIntegrationManager extends BaseManager {
         return err(`Failed to send meter events to Stripe: ${errorMessage}`);
       }
     } catch (error) {
-      return err(`Error testing meter event: ${error}`);
+      console.error("Error testing meter event:", error);
+      return err("Error testing meter event");
     }
   }
 

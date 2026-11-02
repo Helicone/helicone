@@ -16,6 +16,7 @@ import {
   DecryptedProviderKey,
   VaultManager,
 } from "../../managers/VaultManager";
+import { isJwtOrgAdmin } from "../../utils/providerKeyAccess";
 
 export interface AddVaultKeyParams {
   key: string;
@@ -32,12 +33,7 @@ export class VaultController extends Controller {
     @Body() requestBody: AddVaultKeyParams,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<{ id: string }, string>> {
-    if (
-      !(
-        request.authParams.role === "admin" ||
-        request.authParams.role === "owner"
-      )
-    ) {
+    if (!isJwtOrgAdmin(request.authParams)) {
       this.setStatus(403);
       return { data: null, error: "Forbidden" };
     }
@@ -56,12 +52,7 @@ export class VaultController extends Controller {
   public async getKeys(
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<DecryptedProviderKey[], string>> {
-    if (
-      !(
-        request.authParams.role === "admin" ||
-        request.authParams.role === "owner"
-      )
-    ) {
+    if (!isJwtOrgAdmin(request.authParams)) {
       this.setStatus(403);
       return { data: null, error: "Forbidden" };
     }
@@ -81,12 +72,7 @@ export class VaultController extends Controller {
     @Path() providerKeyId: string,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<DecryptedProviderKey, string>> {
-    if (
-      !(
-        request.authParams.role === "admin" ||
-        request.authParams.role === "owner"
-      )
-    ) {
+    if (!isJwtOrgAdmin(request.authParams)) {
       this.setStatus(403);
       return { data: null, error: "Forbidden" };
     }
@@ -113,12 +99,7 @@ export class VaultController extends Controller {
     @Body() requestBody: { key?: string; name?: string; active?: boolean },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
-    if (
-      !(
-        request.authParams.role === "admin" ||
-        request.authParams.role === "owner"
-      )
-    ) {
+    if (!isJwtOrgAdmin(request.authParams)) {
       this.setStatus(403);
       return { data: null, error: "Forbidden" };
     }

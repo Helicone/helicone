@@ -79,6 +79,18 @@ export async function getAllSignedURLsFromInputs(
   }, {} as PromptInputRecord["inputs"]);
 }
 
+// Each returned row fetches request/response bodies and signs URLs, so the
+// page size must be bounded regardless of what the caller asks for.
+export const MAX_INPUTS_LIMIT = 1000;
+
+export function clampInputsLimit(limit: unknown): number {
+  const n = typeof limit === "number" ? limit : Number(limit);
+  if (!Number.isFinite(n) || n < 1) {
+    return 1;
+  }
+  return Math.min(Math.floor(n), MAX_INPUTS_LIMIT);
+}
+
 export class InputsManager extends BaseManager {
   async createInputRecord(
     promptVersionId: string,
@@ -252,7 +264,7 @@ export class InputsManager extends BaseManager {
       LIMIT $3
 
       `,
-      [this.authParams.organizationId, datasetId, limit]
+      [this.authParams.organizationId, datasetId, clampInputsLimit(limit)]
     );
     return promiseResultMap(result, async (data) => {
       return Promise.all(
@@ -348,7 +360,7 @@ export class InputsManager extends BaseManager {
       LIMIT $3
 
       `,
-      [this.authParams.organizationId, promptVersion, limit]
+      [this.authParams.organizationId, promptVersion, clampInputsLimit(limit)]
     );
     const bodyStore = new RequestResponseBodyStore(
       this.authParams.organizationId

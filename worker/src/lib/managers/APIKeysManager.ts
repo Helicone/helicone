@@ -4,6 +4,13 @@ import {
   removeFromCache,
   storeInCache,
 } from "../util/cache/secureCache";
+import {
+  AUTH_CACHE_TTL_SECONDS,
+  CACHE_KEY_PREFIXES,
+} from "../util/cache/cacheKeys";
+
+const apiKeyCacheKey = (apiKeyHash: string) =>
+  `${CACHE_KEY_PREFIXES.apiKeys}${apiKeyHash}`;
 
 export class APIKeysManager {
   constructor(
@@ -17,14 +24,14 @@ export class APIKeysManager {
       await Promise.all(
         apiKeys.map(async (key) => {
           if (key.soft_delete) {
-            await removeFromCache(`api_keys_${key.api_key_hash}`, this.env);
+            await removeFromCache(apiKeyCacheKey(key.api_key_hash), this.env);
             return;
           }
           await storeInCache(
-            `api_keys_${key.api_key_hash}`,
+            apiKeyCacheKey(key.api_key_hash),
             key.organization_id,
             this.env,
-            43200 // 12 hours
+            AUTH_CACHE_TTL_SECONDS
           );
         })
       );
@@ -40,22 +47,22 @@ export class APIKeysManager {
       return;
     }
     if (softDelete) {
-      await removeFromCache(`api_keys_${apiKeyHash}`, this.env);
+      await removeFromCache(apiKeyCacheKey(apiKeyHash), this.env);
       return;
     }
     await storeInCache(
-      `api_keys_${apiKeyHash}`,
+      apiKeyCacheKey(apiKeyHash),
       organizationId,
       this.env,
-      43200 // 12 hours
+      AUTH_CACHE_TTL_SECONDS
     );
   }
 
   async getAPIKey(apiKeyHash: string): Promise<string | null> {
     const key = await getFromKVCacheOnly(
-      `api_keys_${apiKeyHash}`,
+      apiKeyCacheKey(apiKeyHash),
       this.env,
-      43200 // 12 hours
+      AUTH_CACHE_TTL_SECONDS
     );
     if (!key) {
       return null;

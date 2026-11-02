@@ -46,7 +46,7 @@ describe("cacheFunctions", () => {
       
       (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(requestBody);
 
-      const result = await kvKeyFromRequest(mockRequest, 0, null);
+      const result = await kvKeyFromRequest(mockRequest, 0, null, "test-org-id");
 
       // The hash should include the full request body
       expect(result).toContain("hashed_");
@@ -65,7 +65,7 @@ describe("cacheFunctions", () => {
       (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(JSON.stringify(requestBody));
       mockRequest.requestWrapper.heliconeHeaders.cacheHeaders.cacheIgnoreKeys = ["request_id", "timestamp"];
 
-      const result = await kvKeyFromRequest(mockRequest, 0, null);
+      const result = await kvKeyFromRequest(mockRequest, 0, null, "test-org-id");
 
       // The hash should not include the ignored keys
       const expectedBody = JSON.stringify({
@@ -85,7 +85,7 @@ describe("cacheFunctions", () => {
       (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(textBody);
       mockRequest.requestWrapper.heliconeHeaders.cacheHeaders.cacheIgnoreKeys = ["some_key"];
 
-      const result = await kvKeyFromRequest(mockRequest, 0, null);
+      const result = await kvKeyFromRequest(mockRequest, 0, null, "test-org-id");
 
       // For non-JSON bodies, the original text should be used
       expect(result).toContain("hashed_");
@@ -102,7 +102,7 @@ describe("cacheFunctions", () => {
       (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(requestBody);
       mockRequest.requestWrapper.heliconeHeaders.cacheHeaders.cacheIgnoreKeys = [];
 
-      const result = await kvKeyFromRequest(mockRequest, 0, null);
+      const result = await kvKeyFromRequest(mockRequest, 0, null, "test-org-id");
 
       // With empty array, all keys should be included
       expect(result).toContain("hashed_");
@@ -123,7 +123,7 @@ describe("cacheFunctions", () => {
       (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(JSON.stringify(requestBody));
       mockRequest.requestWrapper.heliconeHeaders.cacheHeaders.cacheIgnoreKeys = ["request_id"];
 
-      const result = await kvKeyFromRequest(mockRequest, 0, null);
+      const result = await kvKeyFromRequest(mockRequest, 0, null, "test-org-id");
 
       // Only top-level request_id should be removed, nested one should remain
       const expectedBody = JSON.stringify({
@@ -157,10 +157,10 @@ describe("cacheFunctions", () => {
       mockRequest.requestWrapper.heliconeHeaders.cacheHeaders.cacheIgnoreKeys = ["request_id"];
 
       (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(requestBody1);
-      const result1 = await kvKeyFromRequest(mockRequest, 0, null);
+      const result1 = await kvKeyFromRequest(mockRequest, 0, null, "test-org-id");
 
       (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(requestBody2);
-      const result2 = await kvKeyFromRequest(mockRequest, 0, null);
+      const result2 = await kvKeyFromRequest(mockRequest, 0, null, "test-org-id");
 
       // Keys should be different because model is different (not ignored)
       expect(result1).not.toEqual(result2);
@@ -184,10 +184,10 @@ describe("cacheFunctions", () => {
       mockRequest.requestWrapper.heliconeHeaders.cacheHeaders.cacheIgnoreKeys = ["request_id", "timestamp"];
 
       (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(requestBody1);
-      const result1 = await kvKeyFromRequest(mockRequest, 0, null);
+      const result1 = await kvKeyFromRequest(mockRequest, 0, null, "test-org-id");
 
       (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(requestBody2);
-      const result2 = await kvKeyFromRequest(mockRequest, 0, null);
+      const result2 = await kvKeyFromRequest(mockRequest, 0, null, "test-org-id");
 
       // Keys should be the same because only ignored fields are different
       expect(result1).toEqual(result2);
@@ -201,8 +201,8 @@ describe("cacheFunctions", () => {
       
       (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(requestBody);
 
-      const resultWithSeed = await kvKeyFromRequest(mockRequest, 0, "test-seed");
-      const resultWithoutSeed = await kvKeyFromRequest(mockRequest, 0, null);
+      const resultWithSeed = await kvKeyFromRequest(mockRequest, 0, "test-seed", "test-org-id");
+      const resultWithoutSeed = await kvKeyFromRequest(mockRequest, 0, null, "test-org-id");
 
       expect(resultWithSeed).toContain("test-seed");
       expect(resultWithoutSeed).not.toContain("test-seed");
@@ -217,9 +217,9 @@ describe("cacheFunctions", () => {
       
       (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(requestBody);
 
-      const resultWithIndex0 = await kvKeyFromRequest(mockRequest, 0, null);
-      const resultWithIndex1 = await kvKeyFromRequest(mockRequest, 1, null);
-      const resultWithIndex5 = await kvKeyFromRequest(mockRequest, 5, null);
+      const resultWithIndex0 = await kvKeyFromRequest(mockRequest, 0, null, "test-org-id");
+      const resultWithIndex1 = await kvKeyFromRequest(mockRequest, 1, null, "test-org-id");
+      const resultWithIndex5 = await kvKeyFromRequest(mockRequest, 5, null, "test-org-id");
 
       // Index 0 should not be included
       expect(resultWithIndex0).not.toContain("0");
@@ -247,12 +247,34 @@ describe("cacheFunctions", () => {
       mockRequest.requestWrapper.headers = googleHeaders;
       mockRequest.requestWrapper.getHeaders = vi.fn(() => googleHeaders);
 
-      const result = await kvKeyFromRequest(mockRequest, 0, null);
+      const result = await kvKeyFromRequest(mockRequest, 0, null, "test-org-id");
 
       // The result should not contain the Google auth token
       expect(result).not.toContain("ya29");
       // Should contain the helicone-cache header
       expect(result).toContain("helicone-cache-control");
+    });
+
+    it("scopes cache keys to the organization and versions them", async () => {
+      (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(
+        JSON.stringify({ model: "gpt-4", messages: [] })
+      );
+
+      const orgA = await kvKeyFromRequest(mockRequest, 0, null, "org-a");
+      const orgB = await kvKeyFromRequest(mockRequest, 0, null, "org-b");
+
+      expect(orgA.startsWith("v2:org-a:")).toBe(true);
+      expect(orgB.startsWith("v2:org-b:")).toBe(true);
+      expect(orgA).not.toEqual(orgB);
+    });
+
+    it("refuses to build a cache key without an organization", async () => {
+      (mockRequest.requestWrapper.unsafeGetBodyText as Mock).mockResolvedValue(
+        "{}"
+      );
+      await expect(
+        kvKeyFromRequest(mockRequest, 0, null, "")
+      ).rejects.toThrow();
     });
   });
 });

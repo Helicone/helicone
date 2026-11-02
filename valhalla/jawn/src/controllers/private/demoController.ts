@@ -8,8 +8,43 @@ import {
 import { Body, Controller, Post, Request, Route, Security, Tags } from "tsoa";
 import { GET_KEY } from "../../lib/clients/constant";
 import { generateTempHeliconeAPIKey } from "../../lib/experiment/tempKeys/tempAPIKey";
-import { ok, Result } from "../../packages/common/result";
+import { err, ok, Result } from "../../packages/common/result";
 import { type JawnAuthenticatedRequest } from "../../types/request";
+import { consumeFixedWindow } from "../../utils/fixedWindowRateLimit";
+
+// The demo spends Helicone's own OpenAI key, so it is bounded per org.
+export const DEMO_RATE_LIMIT = { limit: 60, windowMs: 10 * 60 * 1000 };
+export const DEMO_MAX_TOKENS = 2000;
+export const DEMO_DEFAULT_MAX_TOKENS = 1000;
+export const DEMO_MAX_MESSAGES = 50;
+export const DEMO_MAX_PAYLOAD_BYTES = 64 * 1024;
+
+export function clampDemoMaxTokens(maxTokens: number | undefined): number {
+  if (typeof maxTokens !== "number" || !Number.isFinite(maxTokens)) {
+    return DEMO_DEFAULT_MAX_TOKENS;
+  }
+  return Math.min(Math.max(1, Math.floor(maxTokens)), DEMO_MAX_TOKENS);
+}
+
+export function validateDemoPayload(body: {
+  messages: unknown[];
+  tools?: unknown[];
+}): string | null {
+  if (!Array.isArray(body.messages) || body.messages.length === 0) {
+    return "messages are required";
+  }
+  if (body.messages.length > DEMO_MAX_MESSAGES) {
+    return `At most ${DEMO_MAX_MESSAGES} messages are allowed`;
+  }
+  const size = Buffer.byteLength(
+    JSON.stringify({ messages: body.messages, tools: body.tools ?? [] }),
+    "utf8"
+  );
+  if (size > DEMO_MAX_PAYLOAD_BYTES) {
+    return "Request is too large";
+  }
+  return null;
+}
 
 @Route("v1/demo")
 @Tags("Demo")
@@ -33,6 +68,31 @@ export class DemoController extends Controller {
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<OpenAI.Chat.Completions.ChatCompletion, string>> {
+    // The demo is a dashboard feature: signed-in users only.
+    if (
+      request.authParams.authType !== "jwt" ||
+      !request.authParams.userId
+    ) {
+      this.setStatus(403);
+      return err("Forbidden");
+    }
+
+    const payloadError = validateDemoPayload(body);
+    if (payloadError) {
+      this.setStatus(400);
+      return err(payloadError);
+    }
+
+    const allowed = await consumeFixedWindow(
+      `demo:${request.authParams.organizationId}`,
+      DEMO_RATE_LIMIT.limit,
+      DEMO_RATE_LIMIT.windowMs
+    );
+    if (!allowed) {
+      this.setStatus(429);
+      return err("Too many demo requests, please try again later.");
+    }
+
     const heliconeOnHeliconeApiKey = await GET_KEY(
       "key:helicone_on_helicone_key"
     );
@@ -49,10 +109,11 @@ export class DemoController extends Controller {
     }
 
     const tempAPIKey = await generateTempHeliconeAPIKey(
-      request.authParams.organizationId
+      request.authParams.organizationId,
+      { kind: "actor", userId: request.authParams.userId }
     );
 
-    if (!tempAPIKey) {
+    if (!tempAPIKey || tempAPIKey.error) {
       this.setStatus(500);
       return {
         error: "Failed to generate temporary API key",
@@ -104,7 +165,7 @@ export class DemoController extends Controller {
         messages: body.messages,
         tools: body.tools,
         tool_choice: body.tool_choice,
-        max_tokens: body.max_tokens ?? 1000,
+        max_tokens: clampDemoMaxTokens(body.max_tokens),
       } as OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming;
 
       const completion = await openai.chat.completions.create(requestBody);

@@ -1,5 +1,6 @@
 import { ISLAND_WIDTH } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import { getGithubStars } from "@/lib/github";
 import { Button } from "../ui/button";
 import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
@@ -143,11 +144,7 @@ const CostCalculatorSvg = () => (
 );
 
 const OpenSource = async () => {
-  const githubResponse = await fetch(
-    "https://api.github.com/repos/helicone/helicone"
-  );
-  const githubData = await githubResponse.json();
-  const stars = githubData.stargazers_count;
+  const stars = await getGithubStars();
 
   return (
     <div className={cn(ISLAND_WIDTH, "flex flex-col gap-12 pt-32 pb-20")}>

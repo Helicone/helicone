@@ -18,6 +18,63 @@ import express from "express";
 import Stripe from "stripe";
 import { hasPtbAccess } from "../../lib/billing/ptbAccess";
 import { PTB_DISABLED_MESSAGE } from "../../../../../packages/common/billing/ptbAccess";
+import { isJwtOrgAdmin } from "../../utils/providerKeyAccess";
+
+export const BILLING_FORBIDDEN_MESSAGE =
+  "Only organization owners and admins can change billing settings";
+
+// Auto top-off limits (cents)
+export const AUTO_TOPOFF_MIN_AMOUNT_CENTS = 500; // $5
+export const AUTO_TOPOFF_MAX_AMOUNT_CENTS = 1_000_000; // $10,000
+export const AUTO_TOPOFF_MAX_THRESHOLD_CENTS = 100_000; // $1,000
+
+/**
+ * Validates auto top-off settings. Returns an error message, or null if valid.
+ *
+ * The threshold is capped so that a single settings change cannot make the
+ * worker repeatedly charge the saved card: it may not exceed the top-off
+ * amount (otherwise one top-off never lifts the balance above the threshold)
+ * and may not exceed $1,000.
+ */
+export function validateAutoTopoffSettings(body: {
+  thresholdCents: unknown;
+  topoffAmountCents: unknown;
+}): string | null {
+  const { thresholdCents, topoffAmountCents } = body;
+  if (
+    typeof thresholdCents !== "number" ||
+    !Number.isFinite(thresholdCents) ||
+    !Number.isInteger(thresholdCents)
+  ) {
+    return "Threshold must be a whole number of cents";
+  }
+  if (
+    typeof topoffAmountCents !== "number" ||
+    !Number.isFinite(topoffAmountCents) ||
+    !Number.isInteger(topoffAmountCents)
+  ) {
+    return "Top-off amount must be a whole number of cents";
+  }
+  if (thresholdCents < 0) {
+    return "Threshold must be non-negative";
+  }
+  if (topoffAmountCents <= 0) {
+    return "Top-off amount must be positive";
+  }
+  if (topoffAmountCents < AUTO_TOPOFF_MIN_AMOUNT_CENTS) {
+    return "Top-off amount must be at least $5";
+  }
+  if (topoffAmountCents > AUTO_TOPOFF_MAX_AMOUNT_CENTS) {
+    return "Top-off amount must not exceed $10,000";
+  }
+  if (thresholdCents > AUTO_TOPOFF_MAX_THRESHOLD_CENTS) {
+    return "Threshold must not exceed $1,000";
+  }
+  if (thresholdCents > topoffAmountCents) {
+    return "Threshold must not exceed the top-off amount";
+  }
+  return null;
+}
 
 export interface CreateCloudGatewayCheckoutSessionRequest {
   amount: number;
@@ -126,6 +183,16 @@ export interface LLMUsage {
 @Tags("Stripe")
 @Security("api_key")
 export class StripeController extends Controller {
+  /**
+   * Billing changes (subscriptions, payment methods, auto top-off, credit
+   * purchases) are restricted to a real user session whose org role is owner
+   * or admin. Helicone API keys and org members are rejected.
+   */
+  private forbidden(): never {
+    this.setStatus(403);
+    return { error: BILLING_FORBIDDEN_MESSAGE } as never;
+  }
+
   @Get("/subscription/free/usage")
   public async getFreeUsage(@Request() request: JawnAuthenticatedRequest) {
     const stripeManager = new StripeManager(request.authParams);
@@ -144,6 +211,10 @@ export class StripeController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Body() body: CreateCloudGatewayCheckoutSessionRequest,
   ): Promise<{ checkoutUrl: string }> {
+    if (!isJwtOrgAdmin(request.authParams)) {
+      return this.forbidden();
+    }
+
     const accessResult = await hasPtbAccess(request.authParams.organizationId);
     if (accessResult.error) {
       console.error(
@@ -215,6 +286,10 @@ export class StripeController extends Controller {
   public async manageSubscription(
     @Request() request: JawnAuthenticatedRequest,
   ) {
+    if (!isJwtOrgAdmin(request.authParams)) {
+      return this.forbidden();
+    }
+
     const stripeManager = new StripeManager(request.authParams);
     const result = await stripeManager.manageSubscriptionPaymentLink(
       request.headers.origin ?? "",
@@ -232,6 +307,10 @@ export class StripeController extends Controller {
   public async undoCancelSubscription(
     @Request() request: JawnAuthenticatedRequest,
   ) {
+    if (!isJwtOrgAdmin(request.authParams)) {
+      return this.forbidden();
+    }
+
     const stripeManager = new StripeManager(request.authParams);
     const result = await stripeManager.undoCancelSubscription();
 
@@ -294,6 +373,10 @@ export class StripeController extends Controller {
   public async cancelSubscription(
     @Request() request: JawnAuthenticatedRequest,
   ) {
+    if (!isJwtOrgAdmin(request.authParams)) {
+      return this.forbidden();
+    }
+
     const stripeManager = new StripeManager(request.authParams);
     const result = await stripeManager.downgradeToFree();
 
@@ -408,22 +491,14 @@ export class StripeController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Body() body: UpdateAutoTopoffSettingsRequest,
   ): Promise<AutoTopoffSettings> {
-    // Validation
-    if (body.thresholdCents < 0) {
-      this.setStatus(400);
-      throw new Error("Threshold must be non-negative");
+    if (!isJwtOrgAdmin(request.authParams)) {
+      return this.forbidden();
     }
-    if (body.topoffAmountCents <= 0) {
+
+    const validationError = validateAutoTopoffSettings(body);
+    if (validationError) {
       this.setStatus(400);
-      throw new Error("Top-off amount must be positive");
-    }
-    if (body.topoffAmountCents < 500) {
-      this.setStatus(400);
-      throw new Error("Top-off amount must be at least $5");
-    }
-    if (body.topoffAmountCents > 1000000) {
-      this.setStatus(400);
-      throw new Error("Top-off amount must not exceed $10,000");
+      throw new Error(validationError);
     }
 
     const stripeManager = new StripeManager(request.authParams);
@@ -446,6 +521,10 @@ export class StripeController extends Controller {
   public async disableAutoTopoff(
     @Request() request: JawnAuthenticatedRequest,
   ): Promise<{ success: boolean }> {
+    if (!isJwtOrgAdmin(request.authParams)) {
+      return this.forbidden();
+    }
+
     const stripeManager = new StripeManager(request.authParams);
     const result = await stripeManager.disableAutoTopoff();
 
@@ -482,6 +561,10 @@ export class StripeController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Body() body: CreateSetupSessionRequest,
   ): Promise<{ setupUrl: string }> {
+    if (!isJwtOrgAdmin(request.authParams)) {
+      return this.forbidden();
+    }
+
     // Validate returnUrl to prevent open redirect attacks
     if (body.returnUrl) {
       if (!body.returnUrl.startsWith("/")) {
@@ -526,6 +609,10 @@ export class StripeController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Path() paymentMethodId: string,
   ): Promise<{ success: boolean }> {
+    if (!isJwtOrgAdmin(request.authParams)) {
+      return this.forbidden();
+    }
+
     const stripeManager = new StripeManager(request.authParams);
     const result = await stripeManager.removePaymentMethod(paymentMethodId);
 

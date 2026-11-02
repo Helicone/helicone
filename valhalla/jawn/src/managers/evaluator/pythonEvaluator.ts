@@ -1,104 +1,52 @@
-import { err, ok, Result } from "../../packages/common/result";
-import { SandboxPool } from "./SanboxPool";
+/**
+ * Python evaluators used to run user code in CodeSandbox sandboxes. The
+ * feature has been retired: nothing here creates a sandbox or loads the
+ * CodeSandbox SDK. Existing python evaluator rows stay in the database but
+ * never run.
+ */
+export const PYTHON_EVALUATORS_UNSUPPORTED_MESSAGE =
+  "Python evaluators are no longer supported";
 
-const pool = new SandboxPool({ concurrency: 50, opts: {} });
+export const PYTHON_SCORING_TYPE = "PYTHON";
 
-function withTimeout<T>(promise: Promise<T>, timeout: number): Promise<T> {
-  return Promise.race([
-    promise,
-    new Promise<T>((_, reject) =>
-      setTimeout(() => reject(new Error("Timeout")), timeout)
-    ),
-  ]);
+/**
+ * True when an evaluator is a python evaluator: scoring type PYTHON, or a
+ * code template with no LLM template or LastMile config (the same dispatch
+ * order EvaluatorManager.runLLMEvaluatorScore uses).
+ */
+export function isPythonEvaluator(evaluator: {
+  scoring_type?: string | null;
+  code_template?: unknown;
+  llm_template?: unknown;
+  last_mile_config?: unknown;
+}): boolean {
+  if (
+    typeof evaluator.scoring_type === "string" &&
+    evaluator.scoring_type.toUpperCase() === PYTHON_SCORING_TYPE
+  ) {
+    return true;
+  }
+  return (
+    !evaluator.last_mile_config &&
+    !evaluator.llm_template &&
+    evaluator.code_template !== undefined &&
+    evaluator.code_template !== null
+  );
 }
 
-export async function pythonEvaluator({
-  code,
-  requestBodyString,
-  responseString,
-  orgId,
-  uniqueId,
-}: {
-  code: string;
-  requestBodyString: string;
-  responseString: string;
-  orgId: string;
-  uniqueId: string;
-}): Promise<
-  Result<
-    {
-      output: string;
-      traces: string[];
-      statusCode?: number;
-    },
-    string
-  >
-> {
-  const sandbox = await pool.getSandbox({ id: orgId });
-
-  console.log("Got sandbox:", sandbox.id);
-
-  process.on("SIGINT", () => {
-    sandbox.shutdown();
-  });
-
-  process.on("SIGTERM", () => {
-    sandbox.shutdown();
-  });
-
-  const traces: string[] = [];
-  try {
-    console.log("Writing files");
-    await withTimeout(
-      Promise.all([
-        sandbox.fs.writeFile(
-          `/tmp/${uniqueId}/request.json`,
-          new TextEncoder().encode(requestBodyString),
-          {
-            create: true,
-            overwrite: true,
-          }
-        ),
-
-        await sandbox.fs.writeFile(
-          `/tmp/${uniqueId}/response.json`,
-          new TextEncoder().encode(responseString),
-          {
-            create: true,
-            overwrite: true,
-          }
-        ),
-      ]),
-      10000
-    );
-
-    const result = await withTimeout(
-      sandbox.shells.python.run(`HELICONE_EXECUTION_ID="${uniqueId}"\n${code}`),
-      10000
-    );
-    traces.push(result.output);
-
-    let output = "";
-    try {
-      output = await withTimeout(
-        sandbox.fs.readFile(`/tmp/${uniqueId}/output.txt`),
-        10000
-      ).then((r) => r.toString());
-    } catch (e) {
-      console.error(e);
-    }
-
-    await withTimeout(sandbox.shells.run(`rm -rf /tmp/${uniqueId}`), 10000);
-
-    return ok({
-      output: output.toString(),
-      traces,
-      statusCode: result.exitCode,
-    });
-  } catch (e) {
-    console.error(e);
-    return err(JSON.stringify(e));
-  } finally {
-    console.log("Shutting down sandbox");
+/**
+ * True when create/update params would make an evaluator a python evaluator.
+ * Setting code_template to null (clearing it) is allowed.
+ */
+export function paramsSetPythonEvaluator(params: {
+  scoring_type?: string | null;
+  code_template?: unknown;
+}): boolean {
+  if (
+    typeof params.scoring_type === "string" &&
+    params.scoring_type.toUpperCase() === PYTHON_SCORING_TYPE
+  ) {
+    return true;
   }
+  return params.code_template !== undefined && params.code_template !== null;
 }

@@ -26,6 +26,81 @@ import {
   ThreadSummary,
 } from "../../managers/InAppThreadsManager";
 
+/**
+ * Models the dashboard's Helix agent may request (see web
+ * components/templates/agent/ChatInterface.tsx). The endpoint spends
+ * Helicone's own credits, so anything else is rejected.
+ */
+export const AGENT_ALLOWED_MODELS = new Set([
+  "gpt-5",
+  "gpt-5-mini",
+  "claude-sonnet-4-5-20250514",
+  "gpt-5/openai",
+  "gpt-5-mini/openai",
+  "claude-sonnet-4-5-20250514/anthropic",
+]);
+const AGENT_MAX_MODEL_FALLBACKS = 3;
+export const AGENT_MAX_TOKENS = 16_384;
+const AGENT_INPUT_KEYS = ["page", "model", "date"] as const;
+const AGENT_INPUT_MAX_LENGTH = 256;
+// Per-organization daily request budget, enforced by the AI gateway.
+const AGENT_RATE_LIMIT_POLICY = "300;w=86400;s=OrganizationId";
+
+/** Returns an error message if `model` is not an allowed agent model list. */
+export function validateAgentModel(model: unknown): string | null {
+  if (typeof model !== "string" || model.trim() === "") {
+    return "model is required";
+  }
+  const candidates = model.split(",").map((m) => m.trim());
+  if (
+    candidates.length > AGENT_MAX_MODEL_FALLBACKS ||
+    candidates.some((m) => !AGENT_ALLOWED_MODELS.has(m))
+  ) {
+    return "Unsupported model";
+  }
+  return null;
+}
+
+/**
+ * Caps a client-supplied max_tokens. Returns undefined when absent, or an
+ * error string when invalid.
+ */
+export function capAgentMaxTokens(
+  maxTokens: unknown
+): { value: number | undefined } | { error: string } {
+  if (maxTokens === undefined || maxTokens === null) {
+    return { value: undefined };
+  }
+  if (
+    typeof maxTokens !== "number" ||
+    !Number.isInteger(maxTokens) ||
+    maxTokens <= 0
+  ) {
+    return { error: "max_tokens must be a positive integer" };
+  }
+  return { value: Math.min(maxTokens, AGENT_MAX_TOKENS) };
+}
+
+/**
+ * Only the template variables the dashboard's Helix prompt uses are passed
+ * through, as short strings. Everything else from the client is dropped.
+ */
+export function sanitizeAgentInputs(
+  inputs: unknown
+): Record<string, string> | undefined {
+  if (!inputs || typeof inputs !== "object" || Array.isArray(inputs)) {
+    return undefined;
+  }
+  const out: Record<string, string> = {};
+  for (const key of AGENT_INPUT_KEYS) {
+    const value = (inputs as Record<string, unknown>)[key];
+    if (typeof value === "string") {
+      out[key] = value.slice(0, AGENT_INPUT_MAX_LENGTH);
+    }
+  }
+  return out;
+}
+
 @Route("v1/agent")
 @Tags("Agent")
 @Security("api_key")
@@ -48,10 +123,49 @@ export class AgentController extends Controller {
       string
     >
   > {
+    // Only dashboard users (JWT) may spend Helicone's credits on Helix, and the
+    // gateway rate limit is keyed on the organization, so fail closed if
+    // either identity is missing.
+    if (
+      request.authParams.authType !== "jwt" ||
+      !request.authParams.userId ||
+      !request.authParams.organizationId
+    ) {
+      this.setStatus(403);
+      return err("The agent is only available from the Helicone dashboard");
+    }
+
+    const modelError = validateAgentModel(bodyParams?.model);
+    if (modelError) {
+      this.setStatus(400);
+      return err(modelError);
+    }
+
+    const maxTokens = capAgentMaxTokens(bodyParams?.max_tokens);
+    if ("error" in maxTokens) {
+      this.setStatus(400);
+      return err(maxTokens.error);
+    }
+
     try {
       // Extract and ignore useAIGateway and logRequest for agent endpoint
-      // Done so its the exact interface as v1/playground/generate
-      const { useAIGateway, logRequest, ...params } = bodyParams;
+      // Done so its the exact interface as v1/playground/generate.
+      // prompt_id / environment are also ignored: the agent always runs the
+      // internal Helix prompt.
+      const {
+        useAIGateway,
+        logRequest,
+        prompt_id: _ignoredPromptId,
+        environment: _ignoredEnvironment,
+        inputs: rawInputs,
+        ...params
+      } = bodyParams;
+
+      const PROMPT_ID = await GET_KEY("key:helix_prompt_id");
+      if (!PROMPT_ID) {
+        this.setStatus(503);
+        return err("Agent is not configured");
+      }
 
       const tempKey = await getHeliconeDefaultTempKey(
         request.authParams.organizationId
@@ -62,8 +176,6 @@ export class AgentController extends Controller {
           tempKey.error || "Failed to generate temporary API key"
         );
       }
-
-      const PROMPT_ID = await GET_KEY("key:helix_prompt_id");
 
       return tempKey.data.with<
         Result<
@@ -82,7 +194,7 @@ export class AgentController extends Controller {
               request.authParams.organizationId,
             "Helicone-User-Id": request.authParams.userId,
             "Helicone-Property-Is-Agent": "true",
-            "Helicone-RateLimit-Policy": "100;w=86400;s=user",
+            "Helicone-RateLimit-Policy": AGENT_RATE_LIMIT_POLICY,
           },
         });
         const abortController = new AbortController();
@@ -93,7 +205,7 @@ export class AgentController extends Controller {
             messages:
               (params.messages as HeliconeChatCreateParams["messages"]) || [],
             temperature: params.temperature,
-            max_tokens: params.max_tokens,
+            max_tokens: maxTokens.value,
             top_p: params.top_p,
             frequency_penalty: params.frequency_penalty,
             presence_penalty: params.presence_penalty,
@@ -105,10 +217,9 @@ export class AgentController extends Controller {
             verbosity: params.verbosity,
             stream_options: { include_usage: true },
 
-            // Helicone Prompt Params
-            prompt_id: bodyParams.prompt_id ?? PROMPT_ID,
-            environment: bodyParams.environment,
-            inputs: bodyParams.inputs,
+            // Helicone Prompt Params (server-controlled)
+            prompt_id: PROMPT_ID,
+            inputs: sanitizeAgentInputs(rawInputs),
           } satisfies
             | HeliconeChatCreateParams
             | HeliconeChatCreateParamsStreaming;
