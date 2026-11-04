@@ -14,10 +14,10 @@ export const endpoints = {
         output: 0.0000004,
         audio: {
           input: 0.0000003, // $0.30/1M audio input tokens
-          cachedInputMultiplier: 0.0833333, // $0.025/1M cached audio (8.33% of input)
+          cachedInputMultiplier: 0.1, // $0.03/1M cached audio (10% of input)
         },
         cacheMultipliers: {
-          cachedInput: 0.25,
+          cachedInput: 0.1, // $0.01/1M = 10% of input
           write5m: 1.0,
         },
         cacheStoragePerHour: 0.000001,
@@ -60,10 +60,10 @@ export const endpoints = {
         output: 0.0000004,
         audio: {
           input: 0.0000003, // $0.30/1M audio input tokens
-          cachedInputMultiplier: 0.0833333, // $0.025/1M cached audio (8.33% of input)
+          cachedInputMultiplier: 0.1, // $0.03/1M cached audio (10% of input)
         },
         cacheMultipliers: {
-          cachedInput: 0.25,
+          cachedInput: 0.1, // $0.01/1M = 10% of input
           write5m: 1.0,
         },
         cacheStoragePerHour: 0.000001,

@@ -13,7 +13,7 @@ export const endpoints = {
         input: 0.00000125,
         output: 0.00001,
         cacheMultipliers: {
-          cachedInput: 0.25,
+          cachedInput: 0.1, // $0.125/1M = 10% of input
           write5m: 1.0,
         },
         cacheStoragePerHour: 0.0000045,
@@ -60,7 +60,7 @@ export const endpoints = {
         input: 0.00000125,
         output: 0.00001,
         cacheMultipliers: {
-          cachedInput: 0.25,
+          cachedInput: 0.1, // $0.125/1M = 10% of input
           write5m: 1.0,
         },
         cacheStoragePerHour: 0.0000045,
