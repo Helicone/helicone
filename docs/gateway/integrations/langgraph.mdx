@@ -25,7 +25,7 @@ Follow the same setup as [LangChain AI Gateway integration](/gateway/integration
 <CodeGroup>
 ```typescript TypeScript - OpenAI
 import { ChatOpenAI } from "@langchain/openai";
-import { createReactAgent } from "@langchain/langgraph/prebuilt";
+import { createAgent } from "langchain";
 import { MemorySaver } from "@langchain/langgraph";
 
 const model = new ChatOpenAI({
@@ -36,8 +36,8 @@ const model = new ChatOpenAI({
     },
 });
 
-const agent = createReactAgent({
-    llm: model,
+const agent = createAgent({
+    model,
     tools: yourTools,
     checkpointer: new MemorySaver(),
 });
@@ -45,7 +45,7 @@ const agent = createReactAgent({
 
 ```python Python - OpenAI
 from langchain_openai import ChatOpenAI
-from langgraph.prebuilt import create_react_agent
+from langchain.agents import create_agent
 from langgraph.checkpoint.memory import MemorySaver
 
 model = ChatOpenAI(
@@ -54,9 +54,9 @@ model = ChatOpenAI(
     base_url="https://ai-gateway.helicone.ai/v1",
 )
 
-agent = create_react_agent(
+agent = create_agent(
     model,
-    tools=your_tools,
+    tools=[your_tools],
     checkpointer=MemorySaver(),
 )
 ```
@@ -71,29 +71,29 @@ agent = create_react_agent(
 <CodeGroup>
 ```typescript TypeScript
 import { ChatOpenAI } from "@langchain/openai";
-import { createReactAgent } from "@langchain/langgraph/prebuilt";
+import { createAgent } from "langchain";
 
 const model = new ChatOpenAI({
     model: 'gpt-4o-mini',
     apiKey: process.env.OPENAI_API_KEY,
 });
 
-const agent = createReactAgent({
-    llm: model,
+const agent = createAgent({
+    model,
     tools: myTools,
 });
 ```
 
 ```python Python
 from langchain_openai import ChatOpenAI
-from langgraph.prebuilt import create_react_agent
+from langchain.agents import create_agent
 
 model = ChatOpenAI(
     model='gpt-4o-mini',
     api_key=os.getenv('OPENAI_API_KEY'),
 )
 
-agent = create_react_agent(model, tools=my_tools)
+agent = create_agent(model, tools=[my_tools])
 ```
 </CodeGroup>
 
@@ -102,7 +102,7 @@ agent = create_react_agent(model, tools=my_tools)
 <CodeGroup>
 ```typescript TypeScript
 import { ChatOpenAI } from "@langchain/openai";
-import { createReactAgent } from "@langchain/langgraph/prebuilt";
+import { createAgent } from "langchain";
 
 const model = new ChatOpenAI({
     model: 'gpt-4.1-mini',                      // 100+ models supported
@@ -112,15 +112,15 @@ const model = new ChatOpenAI({
     },
 });
 
-const agent = createReactAgent({
-    llm: model,
+const agent = createAgent({
+    model,
     tools: myTools,
 });
 ```
 
 ```python Python
 from langchain_openai import ChatOpenAI
-from langgraph.prebuilt import create_react_agent
+from langchain.agents import create_agent
 
 model = ChatOpenAI(
     model='gpt-4.1-mini',                      # 100+ models supported
@@ -128,7 +128,7 @@ model = ChatOpenAI(
     base_url="https://ai-gateway.helicone.ai/v1"  # Add this!
 )
 
-agent = create_react_agent(model, tools=my_tools)
+agent = create_agent(model, tools=[my_tools])
 ```
 </CodeGroup>
 
