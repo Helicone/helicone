@@ -1,6 +1,10 @@
 import { IUsageProcessor, ParseInput } from "./IUsageProcessor";
 import { ModelUsage } from "./types";
 import { Result } from "../../common/result";
+import {
+  getCacheTokenUsage,
+  getEffectivePromptTokens,
+} from "./cacheTokenUtils";
 
 export class OpenAIUsageProcessor implements IUsageProcessor {
   public async parse(
@@ -140,33 +144,27 @@ export class OpenAIUsageProcessor implements IUsageProcessor {
     // OpenAIUsage from "@helicone-package/llm-mapper/transform/types/common";
     // ResponsesUsage from "@helicone-package/llm-mapper/transform/types/responses";
 
-    const promptTokens = usage.prompt_tokens ?? usage.input_tokens ?? 0;
     const completionTokens =
       usage.completion_tokens ?? usage.output_tokens ?? 0;
 
-    const promptDetails =
-      usage.prompt_tokens_details || usage.input_tokens_details || {};
     const completionDetails =
       usage.completion_tokens_details || usage.output_tokens_details || {};
 
-    const cachedTokens = promptDetails.cached_tokens ?? 0;
-    const promptAudioTokens = promptDetails.audio_tokens ?? 0;
+    const {
+      promptTokens,
+      cachedTokens,
+      promptAudioTokens,
+      cacheWrite5mTokens,
+      cacheWrite1hTokens,
+    } = getCacheTokenUsage(usage);
     const completionAudioTokens = completionDetails.audio_tokens ?? 0;
     const reasoningTokens = completionDetails.reasoning_tokens ?? 0;
 
-    // AI Gateway fields - cache write tokens
-    // First try to get the detailed breakdown (5m vs 1h), then fall back to total cache_write_tokens
-    const cacheWriteDetails = promptDetails.cache_write_details;
-    const cacheWriteTokensTotal = promptDetails.cache_write_tokens ?? 0;
-
-    // If we have detailed breakdown, use it; otherwise treat all cache writes as 5m (the common case)
-    const cacheWrite5mTokens = cacheWriteDetails?.write_5m_tokens ?? cacheWriteTokensTotal;
-    const cacheWrite1hTokens = cacheWriteDetails?.write_1h_tokens ?? 0;
-
-    // Guard: if cached > prompt_tokens, data is already non-cached (Anthropic convention)
-    const effectivePromptTokens = cachedTokens > promptTokens
-      ? Math.max(0, promptTokens - promptAudioTokens)
-      : Math.max(0, promptTokens - cachedTokens - promptAudioTokens);
+    const effectivePromptTokens = getEffectivePromptTokens({
+      promptTokens,
+      cachedTokens,
+      promptAudioTokens,
+    });
     const effectiveCompletionTokens = Math.max(
       0,
       completionTokens - completionAudioTokens - reasoningTokens,

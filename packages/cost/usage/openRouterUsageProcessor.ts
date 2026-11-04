@@ -1,6 +1,10 @@
 import { IUsageProcessor, ParseInput } from "./IUsageProcessor";
 import { ModelUsage } from "./types";
 import { Result } from "../../common/result";
+import {
+  getCacheTokenUsage,
+  getEffectivePromptTokens,
+} from "./cacheTokenUtils";
 
 export interface OpenRouterCostDetails {
   upstream_inference_cost?: number;
@@ -10,7 +14,7 @@ export interface OpenRouterCostDetails {
 
 export function getOpenRouterDeclaredCost(
   cost?: number,
-  cost_details?: OpenRouterCostDetails
+  cost_details?: OpenRouterCostDetails,
 ): number | undefined {
   // Priority 1: Direct cost field
   if (cost && cost > 0) {
@@ -18,7 +22,10 @@ export function getOpenRouterDeclaredCost(
   }
 
   // Priority 2: Upstream inference cost
-  if (cost_details?.upstream_inference_cost && cost_details.upstream_inference_cost > 0) {
+  if (
+    cost_details?.upstream_inference_cost &&
+    cost_details.upstream_inference_cost > 0
+  ) {
     return cost_details.upstream_inference_cost;
   }
 
@@ -29,7 +36,10 @@ export function getOpenRouterDeclaredCost(
     cost_details.upstream_inference_prompt_cost > 0 &&
     cost_details.upstream_inference_completions_cost > 0
   ) {
-    return cost_details.upstream_inference_prompt_cost + cost_details.upstream_inference_completions_cost;
+    return (
+      cost_details.upstream_inference_prompt_cost +
+      cost_details.upstream_inference_completions_cost
+    );
   }
 
   return undefined;
@@ -42,7 +52,9 @@ export interface OpenRouterUsage extends ModelUsage {
 }
 
 export class OpenRouterUsageProcessor implements IUsageProcessor {
-  public async parse(parseInput: ParseInput): Promise<Result<OpenRouterUsage, string>> {
+  public async parse(
+    parseInput: ParseInput,
+  ): Promise<Result<OpenRouterUsage, string>> {
     try {
       if (parseInput.isStream) {
         return this.parseStreamResponse(parseInput.responseBody);
@@ -57,7 +69,9 @@ export class OpenRouterUsageProcessor implements IUsageProcessor {
     }
   }
 
-  protected parseNonStreamResponse(responseBody: string): Result<OpenRouterUsage, string> {
+  protected parseNonStreamResponse(
+    responseBody: string,
+  ): Result<OpenRouterUsage, string> {
     try {
       const parsedResponse = JSON.parse(responseBody);
       const usage = this.extractUsageFromResponse(parsedResponse);
@@ -73,11 +87,16 @@ export class OpenRouterUsageProcessor implements IUsageProcessor {
     }
   }
 
-  protected parseStreamResponse(responseBody: string): Result<OpenRouterUsage, string> {
+  protected parseStreamResponse(
+    responseBody: string,
+  ): Result<OpenRouterUsage, string> {
     try {
       const lines = responseBody
         .split("\n")
-        .filter((line) => line.trim() !== "" && !line.includes("OPENROUTER PROCESSING"))
+        .filter(
+          (line) =>
+            line.trim() !== "" && !line.includes("OPENROUTER PROCESSING"),
+        )
         .map((line) => {
           if (line === "data: [DONE]") return null;
           try {
@@ -105,7 +124,9 @@ export class OpenRouterUsageProcessor implements IUsageProcessor {
 
   protected consolidateStreamData(streamData: any[]): any {
     // Look for the last chunk with usage data
-    const lastChunkWithUsage = [...streamData].reverse().find(chunk => chunk?.usage);
+    const lastChunkWithUsage = [...streamData]
+      .reverse()
+      .find((chunk) => chunk?.usage);
     if (lastChunkWithUsage?.usage) {
       return lastChunkWithUsage;
     }
@@ -148,20 +169,26 @@ export class OpenRouterUsageProcessor implements IUsageProcessor {
     const is_byok = usage.is_byok;
 
     // OpenRouter still provides token counts for compatibility
-    const promptTokens = usage.prompt_tokens ?? usage.input_tokens ?? 0;
-    const completionTokens = usage.completion_tokens ?? usage.output_tokens ?? 0;
+    const completionTokens =
+      usage.completion_tokens ?? usage.output_tokens ?? 0;
 
-    const promptDetails = usage.prompt_tokens_details || {};
     const completionDetails = usage.completion_tokens_details || {};
 
-    const cachedTokens = promptDetails.cached_tokens ?? 0;
-    const promptAudioTokens = promptDetails.audio_tokens ?? 0;
+    const { promptTokens, cachedTokens, promptAudioTokens } =
+      getCacheTokenUsage(usage);
     const completionAudioTokens = completionDetails.audio_tokens ?? 0;
     const reasoningTokens = completionDetails.reasoning_tokens ?? 0;
 
     // Calculate effective tokens (for logging/analytics, not for cost)
-    const effectivePromptTokens = Math.max(0, promptTokens - cachedTokens - promptAudioTokens);
-    const effectiveCompletionTokens = Math.max(0, completionTokens - completionAudioTokens - reasoningTokens);
+    const effectivePromptTokens = getEffectivePromptTokens({
+      promptTokens,
+      cachedTokens,
+      promptAudioTokens,
+    });
+    const effectiveCompletionTokens = Math.max(
+      0,
+      completionTokens - completionAudioTokens - reasoningTokens,
+    );
 
     // Get declared cost and apply passthrough billing markup if needed
     let declaredCost = getOpenRouterDeclaredCost(cost, cost_details);
