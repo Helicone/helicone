@@ -1,5 +1,5 @@
 import type { ModelUsage, ModalityUsage } from "../usage/types";
-import type { ModelProviderConfig, ModelPricing, ModalityPricing } from "./types";
+import type { AuthorName, ModelProviderConfig, ModelPricing, ModalityPricing } from "./types";
 import type { ModelProviderName } from "./providers";
 import { registry } from "./registry";
 
@@ -111,7 +111,24 @@ function getPricingTier(
   return preprocessedPricing[matchedTierIndex];
 }
 
-function getThresholdValueFunction(provider: ModelProviderName): (usage: ModelUsage, field: CostBreakdownField) => number {
+// total prompt length: fresh input plus anything read from cache
+function promptLength(usage: ModelUsage): number {
+  return usage.input + (usage.cacheDetails?.cachedInput ?? 0);
+}
+
+// Anthropic bills cache writes as part of the prompt, so they count toward the threshold
+function anthropicPromptLength(usage: ModelUsage): number {
+  return (
+    promptLength(usage) +
+    (usage.cacheDetails?.write5m ?? 0) +
+    (usage.cacheDetails?.write1h ?? 0)
+  );
+}
+
+function getThresholdValueFunction(
+  provider: ModelProviderName,
+  author: AuthorName,
+): (usage: ModelUsage, field: CostBreakdownField) => number {
   switch (provider) {
     case "vertex":
       return (usage: ModelUsage, field: CostBreakdownField) => {
@@ -142,10 +159,7 @@ function getThresholdValueFunction(provider: ModelProviderName): (usage: ModelUs
         switch (field) {
           case "inputCost":
           case "outputCost":
-            return usage.input + 
-              (usage.cacheDetails?.cachedInput ?? 0) + 
-              (usage.cacheDetails?.write5m ?? 0) + 
-              (usage.cacheDetails?.write1h ?? 0);
+            return anthropicPromptLength(usage);
           default:
             return 0;
         }
@@ -156,13 +170,38 @@ function getThresholdValueFunction(provider: ModelProviderName): (usage: ModelUs
           case "inputCost":
           case "outputCost":
           case "cachedInputCost":
-            return usage.input + (usage.cacheDetails?.cachedInput ?? 0);
+            return promptLength(usage);
           default:
             return 0;
         }
       }
     default:
-      return () => 0;
+      // Everything else (openai, azure, openrouter, helicone, bedrock, ...) tiers on
+      // the request's prompt length. These providers resell models from several
+      // authors, so an Anthropic-authored model keeps the Anthropic rule wherever it
+      // is served from. Providers whose models declare a single tier are unaffected:
+      // the only tier has threshold 0, so any value selects it.
+      if (author === "anthropic") {
+        return (usage: ModelUsage, field: CostBreakdownField) => {
+          switch (field) {
+            case "inputCost":
+            case "outputCost":
+              return anthropicPromptLength(usage);
+            default:
+              return 0;
+          }
+        };
+      }
+      return (usage: ModelUsage, field: CostBreakdownField) => {
+        switch (field) {
+          case "inputCost":
+          case "outputCost":
+          case "cachedInputCost":
+            return promptLength(usage);
+          default:
+            return 0;
+        }
+      };
   }
 }
 
@@ -186,7 +225,7 @@ export function calculateModelCostBreakdown(params: {
   // e.g Anthropic's inputCost and output cost is higher if PROMPT >= X tokens
   // e.g Vertex's inputCost is higher if INPUT >= X tokens, but cachedInputCost is higher if CACHED_INPUT >= X tokens
   // getThresholdValue is a function that will return the value to compare to X
-  const getThresholdValue = getThresholdValueFunction(provider);
+  const getThresholdValue = getThresholdValueFunction(provider, config.author);
   const sortedPricing = [...config.pricing].sort((a, b) => a.threshold - b.threshold);
   // Preprocess pricing tiers once upfront to fill missing fields from previous tiers
   const preprocessedPricing = preprocessPricingTiers(sortedPricing);
