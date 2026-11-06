@@ -56,7 +56,8 @@ export function toOpenAI(response: AnthropicResponseBody): OpenAIResponseBody {
     model: response.model,
     choices: [choice],
     usage: {
-      prompt_tokens: anthropicUsage.input_tokens,
+      // OpenAI's prompt_tokens includes cached tokens; match the streaming converter
+      prompt_tokens: anthropicUsage.input_tokens + cachedTokens,
       completion_tokens: anthropicUsage.output_tokens,
       total_tokens: anthropicUsage.input_tokens + anthropicUsage.output_tokens + cachedTokens + cacheWriteTokens,
       ...((cachedTokens > 0 || cacheWriteTokens > 0) && {
