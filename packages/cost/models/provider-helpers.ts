@@ -8,6 +8,7 @@ import type {
   RequestBodyContext,
   RequestParams,
   ModelSpec,
+  BodyMappingType,
 } from "./types";
 import { providers, ModelProviderName } from "./providers";
 import { BaseProvider } from "./providers/base";
@@ -252,6 +253,58 @@ export async function authenticateRequest(
   }
 }
 
+// Chat Completions omits the terminal usage chunk unless this is set.
+// Native Anthropic, Google, Bedrock, and Vertex must not receive the field.
+// Other compatible providers stay unchanged until their stream_options contract is confirmed.
+const CHAT_COMPLETIONS_STREAM_USAGE_PROVIDERS = new Set<ModelProviderName>([
+  "openai",
+  "azure",
+]);
+
+function isPlainRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/**
+ * Adds stream_options.include_usage for official OpenAI Chat Completions streams
+ * when the caller omitted it. Does not mutate the input body. An explicit
+ * boolean include_usage is left as sent.
+ */
+export function ensureChatCompletionsStreamUsage(
+  parsedBody: unknown,
+  endpoint: Endpoint,
+  bodyMapping: BodyMappingType
+): any {
+  if (!isPlainRecord(parsedBody)) {
+    return parsedBody;
+  }
+  if (bodyMapping === "RESPONSES") {
+    return parsedBody;
+  }
+  if ((endpoint.modelConfig?.responseFormat ?? "OPENAI") !== "OPENAI") {
+    return parsedBody;
+  }
+  if (!CHAT_COMPLETIONS_STREAM_USAGE_PROVIDERS.has(endpoint.provider)) {
+    return parsedBody;
+  }
+  if (parsedBody.stream !== true) {
+    return parsedBody;
+  }
+
+  const existing = parsedBody.stream_options;
+  if (isPlainRecord(existing) && typeof existing.include_usage === "boolean") {
+    return parsedBody;
+  }
+
+  return {
+    ...parsedBody,
+    stream_options: {
+      ...(isPlainRecord(existing) ? existing : {}),
+      include_usage: true,
+    },
+  };
+}
+
 export function filterUnsupportedParameters(
   parsedBody: any,
   endpoint: Endpoint
@@ -291,8 +344,13 @@ export async function buildRequestBody(
     context.parsedBody,
     endpoint
   );
+  const bodyWithStreamUsage = ensureChatCompletionsStreamUsage(
+    filteredBody,
+    endpoint,
+    context.bodyMapping
+  );
 
-  const filteredContext = { ...context, parsedBody: filteredBody };
+  const filteredContext = { ...context, parsedBody: bodyWithStreamUsage };
 
   if (!provider.buildRequestBody) {
     return ok(
