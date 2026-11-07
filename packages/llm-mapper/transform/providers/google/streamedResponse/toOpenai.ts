@@ -219,7 +219,10 @@ export class GoogleToOpenAIStreamConverter {
                 ...(reasoning_details.length > 0 && { reasoning_details }),
               },
               logprobs: null,
-              finish_reason: mapGoogleFinishReason(candidate.finishReason),
+              finish_reason: mapGoogleFinishReason(
+                candidate.finishReason,
+                this.toolCallIndex > 0
+              ),
             },
           ],
           ...(event.usageMetadata
