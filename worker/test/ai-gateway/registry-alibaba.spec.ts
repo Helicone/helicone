@@ -35,6 +35,12 @@ const canopywaveAuthExpectations = {
   },
 };
 
+const engyAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
 describe("Alibaba Registry Tests", () => {
   beforeEach(() => {
     // Clear all mocks between tests
@@ -5564,5 +5570,95 @@ describe("Alibaba Registry Tests", () => {
         }));
     });
 
+  });
+
+  describe("BYOK Tests - qwen3 with Engy Provider", () => {
+    describe("qwen3.8-27b", () => {
+      it("should handle engy provider", () =>
+        runGatewayTest({
+          model: "qwen3.8-27b/engy",
+          expected: {
+            providers: [
+              {
+                url: "https://api.engy.ai/v1/chat/completions",
+                response: "success",
+                model: "qwen3.8-27b",
+                data: createOpenAIMockResponse("qwen3.8-27b"),
+                expects: engyAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle tool calls with engy provider", () =>
+        runGatewayTest({
+          model: "qwen3.8-27b/engy",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "What's the weather?" }],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "get_weather",
+                    description: "Get current weather",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        location: { type: "string" },
+                      },
+                      required: ["location"],
+                    },
+                  },
+                },
+              ],
+              tool_choice: "auto",
+              temperature: 0.7,
+              max_tokens: 1000,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.engy.ai/v1/chat/completions",
+                response: "success",
+                model: "qwen3.8-27b",
+                data: createOpenAIMockResponse("qwen3.8-27b"),
+                expects: {
+                  ...engyAuthExpectations,
+                  bodyContains: [
+                    "tools",
+                    "tool_choice",
+                    "get_weather",
+                    "temperature",
+                    "max_tokens",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("qwen3.6-35b-a3b", () => {
+      it("should handle engy provider", () =>
+        runGatewayTest({
+          model: "qwen3.6-35b-a3b/engy",
+          expected: {
+            providers: [
+              {
+                url: "https://api.engy.ai/v1/chat/completions",
+                response: "success",
+                model: "qwen3.6-35b-a3b",
+                data: createOpenAIMockResponse("qwen3.6-35b-a3b"),
+                expects: engyAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
   });
 });

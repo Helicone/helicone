@@ -20,6 +20,7 @@ export function getUsageProcessor(
     case "canopywave":
     case "chutes":
     case "deepinfra":
+    case "engy":
     case "helicone":
     case "mistral":
     case "nebius":

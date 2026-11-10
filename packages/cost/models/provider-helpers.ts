@@ -62,6 +62,8 @@ export function heliconeProviderToModelProviderName(
       return "fireworks";
     case "CANOPYWAVE":
       return "canopywave";
+    case "ENGY":
+      return "engy";
     // new registry does not have
     case "LOCAL":
     case "HELICONE":
@@ -155,6 +157,9 @@ export const dbProviderToProvider = (
   }
   if (provider === "chutes" || provider === "Chutes") {
     return "chutes";
+  }
+  if (provider === "engy" || provider === "Engy") {
+    return "engy";
   }
   if (provider === "nebius" || provider === "Nebius") {
     return "nebius";

@@ -81,6 +81,28 @@ export const models = {
     modality: { inputs: ["text"], outputs: ["text"] },
     tokenizer: "Qwen",
   },
+  "qwen3.8-27b": {
+    name: "Qwen3.8 27B",
+    author: "qwen",
+    description:
+      "Qwen3.8 27B is a 27 billion parameter multimodal model in the Qwen series, supporting text and image inputs with a 1M token context window for reasoning, coding, and agentic workloads.",
+    contextLength: 1_001_536,
+    maxOutputTokens: 16_384,
+    created: "2026-08-01T00:00:00.000Z",
+    modality: { inputs: ["text", "image"], outputs: ["text"] },
+    tokenizer: "Qwen",
+  },
+  "qwen3.6-35b-a3b": {
+    name: "Qwen3.6 35B A3B",
+    author: "qwen",
+    description:
+      "Qwen3.6 35B A3B is a Mixture-of-Experts model in the Qwen series with 35B total and 3B active parameters, offering strong efficiency for general dialogue and reasoning with a 208K token context window.",
+    contextLength: 208_192,
+    maxOutputTokens: 16_384,
+    created: "2026-05-01T00:00:00.000Z",
+    modality: { inputs: ["text"], outputs: ["text"] },
+    tokenizer: "Qwen",
+  },
 } satisfies Record<string, ModelConfig>;
 
 export type Qwen3ModelName = keyof typeof models;
