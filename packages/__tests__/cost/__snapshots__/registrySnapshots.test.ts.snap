@@ -4148,6 +4148,30 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
     },
   },
   "moonshotai/kimi-k3": {
+    "kimi-k3.1-pro:engy": {
+      "context": 1113088,
+      "crossRegion": false,
+      "maxTokens": 16384,
+      "modelId": "kimi-k3.1-pro",
+      "parameters": [
+        "frequency_penalty",
+        "max_tokens",
+        "presence_penalty",
+        "response_format",
+        "seed",
+        "stop",
+        "stream",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "engy",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
     "kimi-k3:engy": {
       "context": 1113088,
       "crossRegion": false,
@@ -7756,6 +7780,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
   ],
   "moonshotai/kimi-k3": [
     "engy",
+    "engy",
   ],
   "openai/gpt-4.1": [
     "azure",
@@ -9668,8 +9693,8 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "cacheMultipliers": {
           "cachedInput": 0.1,
         },
-        "input": 0.00000195,
-        "output": 0.00000975,
+        "input": 0.0000014,
+        "output": 0.000007,
         "threshold": 0,
       },
     ],
@@ -10921,6 +10946,12 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "kimi-k3.1-pro",
+      "providers": [
+        "engy",
+      ],
+    },
+    {
       "model": "llama-3.1-8b-instant",
       "providers": [
         "groq",
@@ -11188,7 +11219,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "deepseek",
     },
     {
-      "modelCount": 8,
+      "modelCount": 9,
       "provider": "engy",
     },
     {
@@ -11359,8 +11390,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 337,
-  "totalModelProviderConfigs": 337,
+  "totalEndpoints": 338,
+  "totalModelProviderConfigs": 338,
   "totalModelsWithPtb": 108,
   "totalProviders": 22,
 }

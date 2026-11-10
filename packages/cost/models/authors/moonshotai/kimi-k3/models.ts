@@ -12,6 +12,17 @@ export const models = {
     modality: { inputs: ["text", "image"], outputs: ["text"] },
     tokenizer: "MoonshotAI",
   },
+  "kimi-k3.1-pro": {
+    name: "Kimi K3.1 Pro",
+    author: "moonshotai",
+    description:
+      "Kimi K3.1 Pro (moonshotai/Kimi-K3.1-Pro) is Moonshot AI's flagship multimodal model with a 1.1M token context window, unifying text, image, and video understanding with strong reasoning, coding, and agentic capabilities.",
+    contextLength: 1_113_088,
+    maxOutputTokens: 16_384,
+    created: "2026-11-01T00:00:00.000Z",
+    modality: { inputs: ["text", "image", "video"], outputs: ["text"] },
+    tokenizer: "MoonshotAI",
+  },
 } satisfies Record<string, ModelConfig>;
 
 export type KimiK3ModelName = keyof typeof models;

@@ -37,6 +37,40 @@ export const endpoints = {
       "*": {},
     },
   },
+  "kimi-k3.1-pro:engy": {
+    providerModelId: "kimi-k3.1-pro",
+    provider: "engy",
+    author: "moonshotai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000014, // $1.40/1M
+        output: 0.000007, // $7.00/1M
+        cacheMultipliers: {
+          cachedInput: 0.1, // $0.14/1M cache read (10% of input)
+        },
+      },
+    ],
+    contextLength: 1_113_088,
+    maxCompletionTokens: 16_384,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "stream",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "tools",
+      "tool_choice",
+      "response_format",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<
     `${KimiK3ModelName}:${ModelProviderName}` | KimiK3ModelName,
