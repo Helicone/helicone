@@ -3188,5 +3188,74 @@ describe("Moonshot AI Registry Tests", () => {
           },
         }));
     });
+
+    describe("kimi-k3.1-pro", () => {
+      it("should handle engy provider", () =>
+        runGatewayTest({
+          model: "kimi-k3.1-pro/engy",
+          expected: {
+            providers: [
+              {
+                url: "https://api.engy.ai/v1/chat/completions",
+                response: "success",
+                model: "kimi-k3.1-pro",
+                data: createOpenAIMockResponse("kimi-k3.1-pro"),
+                expects: engyAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle tool calls with engy provider", () =>
+        runGatewayTest({
+          model: "kimi-k3.1-pro/engy",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "What's the weather?" }],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "get_weather",
+                    description: "Get current weather",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        location: { type: "string" },
+                      },
+                      required: ["location"],
+                    },
+                  },
+                },
+              ],
+              tool_choice: "auto",
+              temperature: 0.7,
+              max_tokens: 1000,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.engy.ai/v1/chat/completions",
+                response: "success",
+                model: "kimi-k3.1-pro",
+                data: createOpenAIMockResponse("kimi-k3.1-pro"),
+                expects: {
+                  ...engyAuthExpectations,
+                  bodyContains: [
+                    "tools",
+                    "tool_choice",
+                    "get_weather",
+                    "temperature",
+                    "max_tokens",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
   });
 });
