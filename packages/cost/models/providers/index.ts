@@ -17,6 +17,7 @@ import { NovitaProvider } from "./novita";
 import { OpenAIProvider } from "./openai";
 import { OpenRouterProvider } from "./openrouter";
 import { PerplexityProvider } from "./perplexity";
+import { SynapProvider } from "./synap";
 import { VertexProvider } from "./vertex";
 import { XAIProvider } from "./xai";
 
@@ -41,6 +42,7 @@ export const providers = {
   openai: new OpenAIProvider(),
   openrouter: new OpenRouterProvider(),
   perplexity: new PerplexityProvider(),
+  synap: new SynapProvider(),
   vertex: new VertexProvider(),
   xai: new XAIProvider()
 } as const;

@@ -265,6 +265,16 @@ export const providers: Provider[] = [
     relevanceScore: 4,
   },
   {
+    id: "synap",
+    name: "Synap",
+    logoUrl: "/assets/home/providers/synap.webp",
+    description: "Configure your Synap API keys",
+    docsUrl: "https://docs.helicone.ai/getting-started/integration-methods",
+    apiKeyLabel: "Synap API Key",
+    apiKeyPlaceholder: "...",
+    relevanceScore: 4,
+  },
+  {
     id: "chutes",
     name: "Chutes",
     logoUrl: "/assets/home/providers/chutes.webp",

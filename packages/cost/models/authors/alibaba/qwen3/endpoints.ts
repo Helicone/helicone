@@ -367,6 +367,34 @@ export const endpoints = {
       "*": {},
     },
   },
+  "qwen3-coder-30b-a3b-instruct:synap": {
+    providerModelId: "qwen3-coder-30b",
+    provider: "synap",
+    author: "alibaba",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000000675, // $0.0675 per million input tokens
+        output: 0.00000027, // $0.27 per million output tokens
+      },
+    ],
+    contextLength: 98_304,
+    maxCompletionTokens: 98_304,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "response_format",
+      "structured_outputs",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${Qwen3ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;
