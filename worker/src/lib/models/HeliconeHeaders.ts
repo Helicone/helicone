@@ -377,11 +377,14 @@ export class HeliconeHeaders implements IHeliconeHeaders {
           ? parseInt(this.headers.get("Helicone-Cache-Bucket-Max-Size") ?? "0")
           : null,
         cacheControl: this.headers.get("Helicone-Cache-Control") ?? null,
-        cacheIgnoreKeys: this.headers.get("Helicone-Cache-Ignore-Keys")
-          ? JSON.parse(
-            `[${this.headers.get("Helicone-Cache-Ignore-Keys") ?? ""}]`
-          )
-          : null,
+        cacheIgnoreKeys: (() => {
+          const raw = this.headers.get("Helicone-Cache-Ignore-Keys");
+          if (!raw) return null;
+          return raw
+            .split(",")
+            .map((key) => key.trim())
+            .filter((key) => key.length > 0);
+        })(),
       },
       promptName: this.headers.get("Helicone-Prompt-Name") ?? null,
       userId: this.headers.get("Helicone-User-Id") ?? null,
