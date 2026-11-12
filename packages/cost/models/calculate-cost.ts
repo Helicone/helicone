@@ -215,16 +215,23 @@ export function calculateModelCostBreakdown(params: {
         modelUsage.cacheDetails.cachedInput * cachedInputPricing.input * cachedMultiplier;
     }
 
+    // Cache writes tier on the same threshold as inputCost — the
+    // long-context threshold is "total prompt tokens above N", and
+    // cache writes count toward that. Using the base tier (preprocessed
+    // pricing tier 0) undercharges >200k-token requests at the
+    // long-context rate. Regression for #5766.
     if (modelUsage.cacheDetails.write5m) {
-      const write5mMultiplier = basePricing.cacheMultipliers?.write5m ?? 1.0;
+      const write5mPricing = getPricingTier(preprocessedPricing, getThresholdValue(modelUsage, "inputCost"));
+      const write5mMultiplier = write5mPricing.cacheMultipliers?.write5m ?? 1.0;
       breakdown.cacheWrite5mCost =
-        modelUsage.cacheDetails.write5m * basePricing.input * write5mMultiplier;
+        modelUsage.cacheDetails.write5m * write5mPricing.input * write5mMultiplier;
     }
 
     if (modelUsage.cacheDetails.write1h) {
-      const write1hMultiplier = basePricing.cacheMultipliers?.write1h ?? 1.0;
+      const write1hPricing = getPricingTier(preprocessedPricing, getThresholdValue(modelUsage, "inputCost"));
+      const write1hMultiplier = write1hPricing.cacheMultipliers?.write1h ?? 1.0;
       breakdown.cacheWrite1hCost =
-        modelUsage.cacheDetails.write1h * basePricing.input * write1hMultiplier;
+        modelUsage.cacheDetails.write1h * write1hPricing.input * write1hMultiplier;
     }
   }
 
