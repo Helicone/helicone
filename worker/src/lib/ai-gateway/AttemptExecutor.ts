@@ -6,6 +6,7 @@ import {
 } from "@helicone-package/cost/models/provider-helpers";
 import {
   AuthContext,
+  BodyMappingType,
   Endpoint,
   Plugin,
   RequestParams,
@@ -30,6 +31,38 @@ import {
   PTB_ENABLED_FEATURE,
 } from "../../../../packages/common/billing/ptbAccess";
 import { redactSecretsFromUrl } from "../security/redact";
+
+// OpenAI and Azure Chat Completions omit the terminal usage chunk unless this is set.
+function withPtbChatCompletionsUsage(
+  parsedBody: any,
+  endpoint: Endpoint,
+  bodyMapping: BodyMappingType,
+  authType: "byok" | "ptb"
+): any {
+  if (
+    authType !== "ptb" ||
+    bodyMapping === "RESPONSES" ||
+    parsedBody?.stream !== true ||
+    (endpoint.provider !== "openai" && endpoint.provider !== "azure")
+  ) {
+    return parsedBody;
+  }
+  if ((endpoint.modelConfig?.responseFormat ?? "OPENAI") !== "OPENAI") {
+    return parsedBody;
+  }
+  const existing = parsedBody.stream_options;
+  const preserved =
+    existing && typeof existing === "object" && !Array.isArray(existing)
+      ? existing
+      : {};
+  return {
+    ...parsedBody,
+    stream_options: {
+      ...preserved,
+      include_usage: true,
+    },
+  };
+}
 
 // Minimum balance (in cents) to allow optimistic execution without waiting for escrow
 const ALLOWABLE_BALANCE_TO_SKIP_CHECK = 450; // $4.50 in cents
@@ -255,6 +288,7 @@ export class AttemptExecutor {
       props.forwarder,
       escrowInfo,
       props.metrics,
+      props.attempt.authType,
       props.attempt.plugins,
       props.traceContext
     );
@@ -309,15 +343,22 @@ export class AttemptExecutor {
     ) => Promise<Response>,
     escrowInfo: EscrowInfo | undefined,
     metrics: GatewayMetrics,
+    authType: "byok" | "ptb",
     plugins?: Plugin[],
     traceContext?: TraceContext | null
   ): Promise<Result<Response, AttemptError>> {
     const bodyMapping =
       endpoint.userConfig.gatewayMapping ||
       requestWrapper.heliconeHeaders.gatewayConfig.bodyMapping;
+    const outboundBody = withPtbChatCompletionsUsage(
+      parsedBody,
+      endpoint,
+      bodyMapping,
+      authType
+    );
     try {
       const bodyResult = await buildRequestBody(endpoint, {
-        parsedBody,
+        parsedBody: outboundBody,
         bodyMapping: bodyMapping,
         toAnthropic: (body, modelId, options) =>
           toAnthropic(body, modelId, plugins, options),
