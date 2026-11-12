@@ -18,6 +18,7 @@ import { costs as fineTunedOpenAICosts } from "./openai/fine-tuned-models";
 import { costs as openRouterCosts } from "./openrouter";
 import { costs as perplexityCosts } from "./perplexity";
 import { costs as qstashCosts } from "./qstash";
+import { costs as runcrateCosts } from "./runcrate";
 import { costs as togetherAIChatCosts } from "./togetherai/chat";
 import { costs as togetherAIChatLlamaCosts } from "./togetherai/chat/llama";
 import {
@@ -98,6 +99,9 @@ const cerebras = /^https:\/\/api\.cerebras\.ai(\/|$)/;
 // https://inference.canopywave.io
 const canopywave = /^https:\/\/inference\.canopywave\.io(\/|$)/;
 
+// https://api.runcrate.ai
+const runcrate = /^https:\/\/api\.runcrate\.ai(\/|$)/;
+
 export const providersNames = [
   "OPENAI",
   "ANTHROPIC",
@@ -136,6 +140,7 @@ export const providersNames = [
   "CEREBRAS",
   "BASETEN",
   "CANOPYWAVE",
+  "RUNCRATE",
 ] as const;
 
 export type ProviderName = (typeof providersNames)[number];
@@ -329,6 +334,11 @@ export const providers: {
     pattern: canopywave,
     provider: "CANOPYWAVE",
     costs: [],
+  },
+  {
+    pattern: runcrate,
+    provider: "RUNCRATE",
+    costs: runcrateCosts,
   },
 ];
 
