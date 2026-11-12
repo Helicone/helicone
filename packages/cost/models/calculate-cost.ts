@@ -161,6 +161,21 @@ function getThresholdValueFunction(provider: ModelProviderName): (usage: ModelUs
             return 0;
         }
       }
+    case "openai":
+    case "azure":
+    case "openrouter":
+    case "helicone":
+      // Tier threshold is based on total prompt size (input + cached input).
+      return (usage: ModelUsage, field: CostBreakdownField) => {
+        switch (field) {
+          case "inputCost":
+          case "outputCost":
+          case "cachedInputCost":
+            return usage.input + (usage.cacheDetails?.cachedInput ?? 0);
+          default:
+            return 0;
+        }
+      };
     default:
       return () => 0;
   }
