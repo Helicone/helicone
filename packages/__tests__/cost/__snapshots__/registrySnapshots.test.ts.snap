@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Registry Snapshots archived endpoints snapshot 1`] = `{}`;
 
@@ -188,6 +188,27 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
       "provider": "nebius",
       "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+    "qwen3-coder-30b-a3b-instruct:synap": {
+      "context": 98304,
+      "crossRegion": false,
+      "maxTokens": 98304,
+      "modelId": "qwen3-coder-30b",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "synap",
+      "ptbEnabled": false,
       "regions": [
         "*",
       ],
@@ -6447,6 +6468,27 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "gpt-oss-20b:synap": {
+      "context": 65536,
+      "crossRegion": false,
+      "maxTokens": 65536,
+      "modelId": "gpt-oss-20b",
+      "parameters": [
+        "max_tokens",
+        "response_format",
+        "stop",
+        "structured_outputs",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "synap",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
   },
   "perplexity/sonar": {
     "sonar-deep-research:perplexity": {
@@ -7311,6 +7353,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "novita",
     "novita",
     "openrouter",
+    "synap",
   ],
   "anthropic/claude-3-haiku-20240307": [
     "anthropic",
@@ -7692,6 +7735,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "novita",
     "openrouter",
     "openrouter",
+    "synap",
   ],
   "perplexity/sonar": [
     "perplexity",
@@ -7786,6 +7830,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
       {
         "input": 4.22e-7,
         "output": 8.44e-7,
+        "threshold": 0,
+      },
+    ],
+    "synap": [
+      {
+        "input": 6.75e-8,
+        "output": 2.7e-7,
         "threshold": 0,
       },
     ],
@@ -9865,6 +9916,13 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "web_search": 0.01,
       },
     ],
+    "synap": [
+      {
+        "input": 1.7e-8,
+        "output": 8.5e-8,
+        "threshold": 0,
+      },
+    ],
   },
   "perplexity/sonar": {
     "perplexity": [
@@ -10523,6 +10581,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
         "groq",
         "novita",
         "openrouter",
+        "synap",
       ],
     },
     {
@@ -10799,6 +10858,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "model": "qwen3-coder-30b-a3b-instruct",
       "providers": [
         "nebius",
+        "synap",
       ],
     },
     {
@@ -10920,6 +10980,10 @@ exports[`Registry Snapshots verify registry state 1`] = `
     {
       "modelCount": 5,
       "provider": "perplexity",
+    },
+    {
+      "modelCount": 2,
+      "provider": "synap",
     },
     {
       "modelCount": 23,
@@ -11049,9 +11113,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 329,
-  "totalModelProviderConfigs": 329,
+  "totalEndpoints": 331,
+  "totalModelProviderConfigs": 331,
   "totalModelsWithPtb": 108,
-  "totalProviders": 21,
+  "totalProviders": 22,
 }
 `;

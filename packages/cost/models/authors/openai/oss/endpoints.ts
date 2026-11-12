@@ -152,6 +152,34 @@ export const endpoints = {
       "*": {},
     },
   },
+  "gpt-oss-20b:synap": {
+    providerModelId: "gpt-oss-20b",
+    provider: "synap",
+    author: "openai",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000000017, // $0.017 per million input tokens
+        output: 0.000000085, // $0.085 per million output tokens
+      },
+    ],
+    contextLength: 65_536,
+    maxCompletionTokens: 65_536,
+    supportedParameters: [
+      "tools",
+      "tool_choice",
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "response_format",
+      "structured_outputs",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
   "gpt-oss-120b:openrouter": {
     provider: "openrouter",
     author: "openai",
