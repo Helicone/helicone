@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import AuthLayout from "@/components/layout/auth/authLayout";
 import { useJawnClient } from "@/lib/clients/jawnHook";
-import Link from "next/link";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -33,8 +32,8 @@ export default function OnboardingPage() {
               you sure you want to link your account?
             </p>
             <p className="text-center text-muted-foreground">
-              You can always revoke access in the{" "}
-              <Link href="/api-keys">API keys page</Link>.
+              The device receives a write-only key that expires automatically.
+              Only organization owners and admins can link devices.
             </p>
             {sessionId && (
               <Button

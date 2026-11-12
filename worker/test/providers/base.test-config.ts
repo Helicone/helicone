@@ -18,6 +18,7 @@ export interface TestCase {
   byokEnabled?: boolean;
   currentCredits?: number;
   creditsEnabled?: boolean;
+  featureFlags?: string[];
   orgId?: string;
 }
 

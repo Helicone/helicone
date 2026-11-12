@@ -19,10 +19,102 @@ import { Database } from "../../../../lib/db/database.types";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { hashAuth } from "../../../../lib/db/hash";
 import { SecretManager } from "@helicone-package/secrets/SecretManager";
-import { cacheResultCustom } from "../../../../utils/cacheResult";
 import { authenticateBearer } from "./common";
 
 const kvCache = new KVCache(10 * 1000); // 10 seconds
+
+/**
+ * Version of the auth cache entries (AuthParams and OrgParams) this code
+ * writes and reads. BUMP THIS whenever the cached shape or its meaning
+ * changes.
+ *
+ * Tasks running different code versions share Redis during a deploy. The
+ * version is part of every key, so each version only ever reads entries it
+ * wrote itself; anything else is a cache miss and the credential is verified
+ * from scratch. (v1 was the unversioned pre-authType format.)
+ */
+export const AUTH_CACHE_VERSION = 2;
+
+const AUTH_CACHE_PREFIX = `auth:v${AUTH_CACHE_VERSION}`;
+
+const VERIFIED_AUTH_TYPES: ReadonlySet<string> = new Set<
+  HeliconeAuth["_type"]
+>(["jwt", "bearer", "bearerProxy"]);
+
+export async function authCacheKey(
+  authorization: HeliconeAuth,
+  organizationId?: string
+): Promise<string> {
+  // Full SHA-256 of the credential; never a truncated hash.
+  const digest = await hashAuth(
+    JSON.stringify(authorization) + organizationId
+  );
+  return `${AUTH_CACHE_PREFIX}:cred:${digest}`;
+}
+
+export function orgCacheKey(organizationId: string): string {
+  return `${AUTH_CACHE_PREFIX}:org:${organizationId}`;
+}
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+/**
+ * A cached auth entry is only trusted if it is a success carrying an
+ * organization and a credential type that an authenticator verified.
+ * Anything else (including entries from another code version that slipped
+ * past the key version) is treated as a miss.
+ */
+export function isValidCachedAuth(value: unknown): boolean {
+  if (!isObject(value) || value.error != null || !isObject(value.data)) {
+    return false;
+  }
+  const data = value.data;
+  return (
+    typeof data.organizationId === "string" &&
+    data.organizationId.length > 0 &&
+    typeof data.authType === "string" &&
+    VERIFIED_AUTH_TYPES.has(data.authType)
+  );
+}
+
+function isValidCachedOrg(value: unknown): boolean {
+  return (
+    isObject(value) &&
+    value.error == null &&
+    isObject(value.data) &&
+    typeof value.data.id === "string" &&
+    value.data.id.length > 0
+  );
+}
+
+/**
+ * Read-through cache for auth results. Only successful results are cached,
+ * and a cached value is used only if `isValid` accepts it; otherwise `fn`
+ * runs the full verification path.
+ */
+async function cachedAuthResult<T>(
+  key: string,
+  fn: () => Promise<Result<T, string>>,
+  isValid: (value: unknown) => boolean
+): Promise<Result<T, string>> {
+  const cached = await kvCache.get<unknown>(key).catch((e) => {
+    console.error("Failed to read auth cache:", e);
+    return null;
+  });
+  if (cached !== null && isValid(cached)) {
+    return cached as Result<T, string>;
+  }
+
+  const result = await fn();
+  if (result.error === null && result.data) {
+    kvCache.set(key, result).catch((e) => {
+      console.error("Failed to set auth cache:", e);
+    });
+  }
+  return result;
+}
 
 export class SupabaseConnector {
   client: SupabaseClient<Database>;
@@ -102,6 +194,7 @@ export class SupabaseConnector {
         userId: data.user.id,
         role: member.data[0].org_role as Role,
         tier: member.data[0].organization.tier ?? "",
+        authType: "jwt",
       });
     }
     if (owner.data.length !== 0) {
@@ -110,6 +203,7 @@ export class SupabaseConnector {
         userId: data.user.id,
         role: "owner" as Role,
         tier: owner.data[0].tier ?? "free",
+        authType: "jwt",
       });
     }
 
@@ -148,6 +242,7 @@ export class SupabaseConnector {
 
     return ok({
       organizationId: storedProxyKey.data.org_id,
+      authType: "bearerProxy",
     });
   }
 
@@ -188,10 +283,16 @@ export class SupabaseConnector {
       keyPermissions,
       role,
       tier,
+      authType,
     } = result.data;
 
     if (!orgId) {
       return err("No organization ID");
+    }
+    // The credential type must come from the branch that verified the
+    // credential, never from the caller-declared `_type`.
+    if (!authType) {
+      return err("Unverified credential type");
     }
 
     const authParamsResult: AuthParams = {
@@ -201,6 +302,7 @@ export class SupabaseConnector {
       keyPermissions,
       role,
       tier,
+      authType,
     };
 
     return ok(authParamsResult);
@@ -209,13 +311,12 @@ export class SupabaseConnector {
     authorization: HeliconeAuth,
     organizationId?: string
   ): AuthResult {
-    const cacheKey = await hashAuth(
-      JSON.stringify(authorization) + organizationId
-    );
-    return await cacheResultCustom(
+    // Compute the key before uncachedAuth, which may rewrite `_type`.
+    const cacheKey = await authCacheKey(authorization, organizationId);
+    return await cachedAuthResult(
       cacheKey,
       async () => await this.uncachedAuth(authorization, organizationId),
-      kvCache
+      isValidCachedAuth
     );
   }
 
@@ -247,11 +348,10 @@ export class SupabaseConnector {
   }
 
   async getOrganization(authParams: AuthParams): Promise<OrgResult> {
-    const cacheKey = `org:${authParams.organizationId}`;
-    return await cacheResultCustom(
-      cacheKey,
+    return await cachedAuthResult(
+      orgCacheKey(authParams.organizationId),
       async () => await this.uncachedGetOrganization(authParams),
-      kvCache
+      isValidCachedOrg
     );
   }
 }

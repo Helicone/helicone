@@ -41,6 +41,10 @@ import { EscrowInfo } from "../ai-gateway/types";
 import { getUsageProcessor } from "@helicone-package/cost/usage/getUsageProcessor";
 import { modelCostBreakdownFromRegistry } from "@helicone-package/cost/costCalc";
 import { heliconeProviderToModelProviderName } from "@helicone-package/cost/models/provider-helpers";
+import {
+  isTargetAllowedForPin,
+  pinnedTargetRejection,
+} from "../security/credentialPin";
 
 export async function proxyForwarder(
   request: RequestWrapper,
@@ -62,6 +66,19 @@ export async function proxyForwarder(
       status: 500,
     });
   }
+
+  // A provider key Helicone injected (vault / AI Gateway BYOK) may only go to
+  // its provider's first-party origin. Reject before any caching, logging or
+  // rate limiting so nothing downstream sees the request. callProvider
+  // re-checks this right before fetch.
+  const credentialPin = request.getCredentialPin();
+  if (
+    credentialPin &&
+    !isTargetAllowedForPin(credentialPin, proxyRequest.targetUrl)
+  ) {
+    return pinnedTargetRejection(credentialPin, proxyRequest.targetUrl);
+  }
+
   const responseBuilder = new ResponseBuilder();
 
   // Create DataDog tracer for rate limit monitoring
@@ -102,7 +119,8 @@ export async function proxyForwarder(
             proxyRequest,
             cacheSettings.bucketSettings,
             env.CACHE_KV,
-            cacheSettings.cacheSeed
+            cacheSettings.cacheSeed,
+            orgData.organizationId
           );
           if (cachedResponse) {
             const { data, error } = await handleProxyRequest(
@@ -396,6 +414,7 @@ export async function proxyForwarder(
                     responseBody.endTime.getTime() - loggable.getTimingStart(),
                   cacheKv: env.CACHE_KV,
                   cacheSeed: cacheSettings.cacheSeed ?? null,
+                  organizationId: orgData.organizationId,
                 });
                 if (!success) {
                   const sentryManager = new SentryManager(env);

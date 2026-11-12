@@ -6,6 +6,7 @@ import {
   buildFilter,
   buildFilterLeaf,
   FilterNotImplemented,
+  FilterValidationError,
 } from '../../filters/filters';
 import {
   FilterLeaf,
@@ -164,25 +165,50 @@ describe('Edge Cases and Error Conditions', () => {
     });
 
     test('should handle very long argument arrays', () => {
-      const manyConditions: FilterLeaf = {
-        request_response_rmt: {}
+      const manyConditions: FilterNode = {
+        left: {
+          request_response_rmt: {
+            model: { equals: 'value_0' },
+          },
+        },
+        operator: 'and',
+        right: 'all',
       };
 
-      // Add many conditions
-      for (let i = 0; i < 100; i++) {
-        (manyConditions.request_response_rmt as any)[`field_${i}`] = { equals: `value_${i}` };
+      let node: FilterNode = manyConditions;
+      for (let i = 1; i < 100; i++) {
+        node = {
+          left: { request_response_rmt: { model: { equals: `value_${i}` } } },
+          operator: 'or',
+          right: node,
+        };
       }
+
+      const result = buildFilter({
+        filter: node,
+        argsAcc: [],
+        argPlaceHolder: (index, value) => `$${index + 1}`,
+      });
+      expect(result.argsAcc).toHaveLength(100);
+    });
+
+    test('should reject unknown columns', () => {
+      const unknownColumns: FilterLeaf = {
+        request_response_rmt: {
+          ['field_0' as any]: { equals: 'value_0' },
+        },
+      };
 
       expect(() => {
         buildFilter({
-          filter: manyConditions,
+          filter: unknownColumns,
           argsAcc: [],
           argPlaceHolder: (index, value) => `$${index + 1}`,
         });
-      }).not.toThrow();
+      }).toThrow(FilterValidationError);
     });
 
-    test('should handle invalid operator keys gracefully', () => {
+    test('should reject invalid operator keys', () => {
       const invalidFilter: FilterLeaf = {
         request_response_rmt: {
           status: { ['invalid-operator' as any]: 200 }
@@ -195,7 +221,7 @@ describe('Edge Cases and Error Conditions', () => {
           argsAcc: [],
           argPlaceHolder: (index, value) => `$${index + 1}`,
         });
-      }).not.toThrow();
+      }).toThrow(FilterValidationError);
     });
 
     test('should handle missing column mappings', () => {

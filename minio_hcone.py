@@ -26,7 +26,7 @@ docker run -d -p {args.port}:9000 -p 9001:9001 --name {container_name} \
   -e "MINIO_ROOT_USER={args.access_key}" \
   -e "MINIO_ROOT_PASSWORD={args.secret_key}" \
   -v {args.data_dir}:/data \
-  minio/minio server /data --console-address ":9001"
+  pgsty/minio:RELEASE.2026-08-04T00-00-00Z server /data --console-address ":9001"
     ''', shell=True)
     time.sleep(5)  # Give MinIO some time to start
 

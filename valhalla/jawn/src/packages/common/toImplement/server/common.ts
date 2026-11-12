@@ -62,5 +62,7 @@ export async function authenticateBearer(bearer: string): Promise<AuthResult> {
     heliconeApiKeyId: apiKey.data?.[0]?.id ?? 0,
     keyPermissions: apiKey.data?.[0]?.key_permissions as KeyPermissions,
     tier: apiKey.data?.[0]?.tier ?? "free",
+    // Verified by the hash lookup above; never taken from the request.
+    authType: "bearer",
   });
 }

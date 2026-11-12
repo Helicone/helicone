@@ -12,6 +12,8 @@ import {
   HeliconeProxyKeys,
 } from "../../../services/lib/keys";
 import { logger } from "@/lib/telemetry/logger";
+import { Permission } from "../../../services/lib/user";
+import { withSameOrigin } from "@/lib/api/security/sameOrigin";
 
 type HashedPasswordRow = {
   hashed_password: string;
@@ -24,6 +26,7 @@ async function handler({
 }: HandlerWrapperOptions<Result<HeliconeProxyKeys, string>>) {
   if (req.method !== "POST") {
     res.status(405).json({ error: "Method not allowed", data: null });
+    return;
   }
 
   const { providerKeyId, heliconeProxyKeyName, limits } = req.body as {
@@ -42,14 +45,23 @@ async function handler({
     return;
   }
 
-  const { data: providerKey, error } =
-    await getDecryptedProviderKeyById(providerKeyId);
+  // Scoped to the caller's org: a provider key id from another tenant must
+  // resolve to "not found", never to a usable key.
+  const { data: providerKey, error } = await getDecryptedProviderKeyById(
+    providerKeyId,
+    userData.orgId,
+  );
 
-  if (error || !providerKey?.id) {
+  if (error) {
     logger.error({ error, providerKeyId }, "Failed to retrieve provider key");
     res
       .status(500)
-      .json({ error: error ?? "Failed to retrieve provider key", data: null });
+      .json({ error: "Failed to retrieve provider key", data: null });
+    return;
+  }
+
+  if (!providerKey?.id || providerKey.org_id !== userData.orgId) {
+    res.status(404).json({ error: "Provider key not found", data: null });
     return;
   }
 
@@ -114,7 +126,7 @@ async function handler({
 
   newProxyMapping.data.helicone_proxy_key = proxyKey;
 
-  if (limits.length > 0) {
+  if (Array.isArray(limits) && limits.length > 0) {
     for (const limit of limits) {
       await dbExecute(
         `INSERT INTO helicone_proxy_key_limits (id, helicone_proxy_key, timewindow_seconds, count, cost, currency) VALUES ($1, $2, $3, $4, $5, $6)`,
@@ -133,4 +145,4 @@ async function handler({
   res.status(200).json({ error: null, data: newProxyMapping.data });
 }
 
-export default withAuth(handler);
+export default withSameOrigin(withAuth(handler, [Permission.MANAGE_KEYS]));

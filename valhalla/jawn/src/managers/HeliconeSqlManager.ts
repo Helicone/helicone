@@ -41,15 +41,209 @@ const describeRowSchema = z.object({
   ttl_expression: z.string().optional(),
 });
 
-// Strip SQL comments (both -- line comments and /* block comments */)
-function stripSqlComments(sql: string): string {
-  return sql
-    .replace(/--[^\n]*/g, " ")
-    .replace(/\/\*[\s\S]*?\*\//g, " ");
+/**
+ * ClickHouse table functions. None of these are needed for analytics over
+ * request_response_rmt, and several of them (mergeTreeIndex, merge, view,
+ * remote, url, file, ...) can read data that the per-organization row policy
+ * does not cover. Matched case-insensitively wherever they appear in the query.
+ */
+export const FORBIDDEN_TABLE_FUNCTIONS = [
+  "mergeTreeIndex",
+  "mergeTreeProjection",
+  "merge",
+  "view",
+  "viewIfPermitted",
+  "viewExplain",
+  "dictionary",
+  "remote",
+  "remoteSecure",
+  "cluster",
+  "clusterAllReplicas",
+  "url",
+  "urlCluster",
+  "file",
+  "fileCluster",
+  "s3",
+  "s3Cluster",
+  "gcs",
+  "oss",
+  "cosn",
+  "hdfs",
+  "hdfsCluster",
+  "azureBlobStorage",
+  "azureBlobStorageCluster",
+  "iceberg",
+  "icebergS3",
+  "icebergAzure",
+  "icebergHDFS",
+  "icebergLocal",
+  "icebergCluster",
+  "icebergS3Cluster",
+  "icebergAzureCluster",
+  "icebergHDFSCluster",
+  "deltaLake",
+  "deltaLakeS3",
+  "deltaLakeAzure",
+  "deltaLakeLocal",
+  "deltaLakeCluster",
+  "hudi",
+  "hudiCluster",
+  "paimon",
+  "paimonCluster",
+  "hive",
+  "mysql",
+  "postgresql",
+  "mongodb",
+  "redis",
+  "odbc",
+  "jdbc",
+  "sqlite",
+  "ytsaurus",
+  "arrowFlight",
+  "executable",
+  "input",
+  "loop",
+  "values",
+  "null",
+  "numbers",
+  "numbers_mt",
+  "zeros",
+  "zeros_mt",
+  "generateRandom",
+  "generate_series",
+  "generateSeries",
+  "fuzzJSON",
+  "fuzzQuery",
+  "timeSeriesData",
+  "timeSeriesMetrics",
+  "timeSeriesTags",
+  "timeSeriesSelector",
+];
+
+const forbiddenTableFunctionPattern = new RegExp(
+  `\\b(${FORBIDDEN_TABLE_FUNCTIONS.join("|")})\\s*\\(`,
+  "i"
+);
+
+/**
+ * Produces a validation "skeleton" of the query by lexing it the way ClickHouse
+ * does for the constructs that matter here:
+ *   - `-- ...` and `/* ... *\/` comments are replaced by a single space
+ *   - the contents of single-quoted string literals are dropped (kept as '')
+ *
+ * Running keyword/identifier checks on the skeleton means they can neither be
+ * fooled by text that only appears inside a literal or comment, nor evaded by
+ * hiding real syntax behind something that merely looks like a comment
+ * (e.g. `WHERE x = '--' SETTINGS ...`, where `--` is inside a string).
+ *
+ * Anything whose lexing is not replicated here is rejected outright:
+ *   - backtick / double-quoted identifiers (ClickHouse decodes escapes such as
+ *     `\x69` inside them, which was used to smuggle the tenant setting name)
+ *   - heredoc strings ($tag$...$tag$) and `#` comments
+ *   - unterminated literals or comments, NUL bytes, and multiple statements
+ */
+export function skeletonizeSql(sql: string): Result<string, HqlError> {
+  let out = "";
+  let i = 0;
+  const n = sql.length;
+
+  while (i < n) {
+    const c = sql[i];
+    const next = i + 1 < n ? sql[i + 1] : "";
+
+    if (c === "'") {
+      let j = i + 1;
+      let closed = false;
+      while (j < n) {
+        if (sql[j] === "\\") {
+          j += 2;
+          continue;
+        }
+        if (sql[j] === "'") {
+          if (j + 1 < n && sql[j + 1] === "'") {
+            j += 2;
+            continue;
+          }
+          closed = true;
+          break;
+        }
+        j++;
+      }
+      if (!closed) {
+        return hqlError(
+          HqlErrorCode.INVALID_STATEMENT,
+          "Unterminated string literal"
+        );
+      }
+      out += "''";
+      i = j + 1;
+      continue;
+    }
+
+    if (c === "-" && next === "-") {
+      let j = i + 2;
+      while (j < n && sql[j] !== "\n") j++;
+      out += " ";
+      i = j;
+      continue;
+    }
+
+    if (c === "/" && next === "*") {
+      const close = sql.indexOf("*/", i + 2);
+      if (close === -1) {
+        return hqlError(
+          HqlErrorCode.INVALID_STATEMENT,
+          "Unterminated block comment"
+        );
+      }
+      out += " ";
+      i = close + 2;
+      continue;
+    }
+
+    if (c === "`" || c === '"') {
+      return hqlError(
+        HqlErrorCode.INVALID_STATEMENT,
+        "Quoted identifiers are not allowed"
+      );
+    }
+
+    if (c === "$" || c === "#") {
+      return hqlError(
+        HqlErrorCode.INVALID_STATEMENT,
+        `'${c}' is not allowed outside of string literals`
+      );
+    }
+
+    if (c === "\0") {
+      return hqlError(HqlErrorCode.INVALID_STATEMENT, "NUL byte in query");
+    }
+
+    if (c === ";") {
+      // Only a trailing semicolon is tolerated.
+      if (sql.slice(i + 1).trim().length > 0) {
+        return hqlError(
+          HqlErrorCode.INVALID_STATEMENT,
+          "Multiple statements are not allowed"
+        );
+      }
+      i = n;
+      continue;
+    }
+
+    out += c;
+    i++;
+  }
+
+  return ok(out);
 }
 
-function validateSql(sql: string): Result<null, HqlError> {
-  const stripped = stripSqlComments(sql).trim();
+export function validateSql(sql: string): Result<null, HqlError> {
+  const skeleton = skeletonizeSql(sql);
+  if (isError(skeleton)) {
+    return skeleton;
+  }
+  const stripped = skeleton.data.trim();
 
   // Must start with SELECT (after stripping comments/whitespace)
   if (!/^SELECT\b/i.test(stripped)) {
@@ -60,8 +254,11 @@ function validateSql(sql: string): Result<null, HqlError> {
     );
   }
 
-  // Reject any DML/DDL keywords that shouldn't appear in read-only queries
-  const forbidden = /\b(INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|TRUNCATE|REPLACE|MERGE|EXEC|EXECUTE|GRANT|REVOKE)\b/i;
+  // Reject any DML/DDL keywords that shouldn't appear in read-only queries, and
+  // any attempt to change settings: the tenant row policy is keyed off a
+  // session setting, so query-level SETTINGS must never be accepted.
+  const forbidden =
+    /\b(INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|TRUNCATE|REPLACE|MERGE|EXEC|EXECUTE|GRANT|REVOKE|SET|SETTINGS|ATTACH|DETACH|OPTIMIZE|KILL|RENAME|EXCHANGE)\b/i;
   const forbiddenMatch = stripped.match(forbidden);
   if (forbiddenMatch) {
     return hqlError(
@@ -70,18 +267,63 @@ function validateSql(sql: string): Result<null, HqlError> {
     );
   }
 
-  // Extract all table references from FROM and JOIN clauses
-  // Matches: FROM table, JOIN table, FROM (subquery) — skip subqueries (start with SELECT or opening paren)
-  const tableRefPattern = /\b(?:FROM|JOIN)\s+([a-zA-Z_][a-zA-Z0-9_]*)/gi;
+  // Table functions can appear anywhere a table can (FROM, JOIN, comma joins,
+  // subqueries); block them wherever they occur.
+  const tableFunctionMatch = stripped.match(forbiddenTableFunctionPattern);
+  if (tableFunctionMatch) {
+    return hqlError(
+      HqlErrorCode.INVALID_TABLE,
+      `Table function '${tableFunctionMatch[1]}' is not allowed`
+    );
+  }
+
+  // Every FROM / JOIN target must be either a parenthesised subquery or exactly
+  // one of the allowlisted tables (bare, unqualified, not a function call).
+  const tableRefPattern = /\b(?:FROM|JOIN)\b\s*/gi;
   let match;
   while ((match = tableRefPattern.exec(stripped)) !== null) {
-    const tableName = match[1];
-    // Skip SQL keywords that can follow FROM/JOIN (e.g. FROM (subquery))
-    if (/^(SELECT|WITH|WHERE|ON|AS)$/i.test(tableName)) continue;
+    const rest = stripped.slice(match.index + match[0].length);
+
+    if (rest.startsWith("(")) {
+      const inner = rest.replace(/^[\s(]+/, "");
+      if (!/^(SELECT|WITH)\b/i.test(inner)) {
+        return hqlError(
+          HqlErrorCode.INVALID_TABLE,
+          "Only subqueries are allowed in parentheses after FROM/JOIN"
+        );
+      }
+      continue;
+    }
+
+    // Numeric / string operands (e.g. `substring(x FROM 1)`) are not tables.
+    if (/^(\d|'')/.test(rest)) {
+      continue;
+    }
+
+    const ident = rest.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*([.(])?/);
+    if (!ident) {
+      return hqlError(
+        HqlErrorCode.INVALID_TABLE,
+        "Could not determine the table referenced after FROM/JOIN"
+      );
+    }
+    const tableName = ident[1];
     if (!CLICKHOUSE_TABLES.includes(tableName)) {
       return hqlError(
         HqlErrorCode.INVALID_TABLE,
         `Table '${tableName}' is not allowed. Allowed tables: ${CLICKHOUSE_TABLES.join(", ")}`
+      );
+    }
+    if (ident[2] === "(") {
+      return hqlError(
+        HqlErrorCode.INVALID_TABLE,
+        `Table function '${tableName}(...)' is not allowed`
+      );
+    }
+    if (ident[2] === ".") {
+      return hqlError(
+        HqlErrorCode.INVALID_TABLE,
+        "Database-qualified table names are not allowed"
       );
     }
   }

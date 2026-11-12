@@ -12,6 +12,7 @@ import {
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import { err, ok, Result } from "../../packages/common/result";
 import { type JawnAuthenticatedRequest } from "../../types/request";
+import { checkJwtOrgAdmin } from "../../utils/orgAuthz";
 
 @Route("v1/gov-organization")
 @Tags("Gov Organization")
@@ -27,6 +28,13 @@ export class GovOrganizationController extends Controller {
       days: number;
     }
   ) {
+    // Only a signed-in owner/admin of the authenticated organization; API keys
+    // carry their creator's user id and must not act as that user.
+    const denied = await checkJwtOrgAdmin(request.authParams);
+    if (denied) {
+      this.setStatus(denied.status);
+      return err(denied.message);
+    }
     const isAdminResult = await dbExecute<{
       id: string;
       organization: string;

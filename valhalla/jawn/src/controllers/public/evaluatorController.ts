@@ -15,13 +15,18 @@ import {
   EvaluatorScoreResult,
   LLMAsAJudge,
 } from "../../lib/clients/LLMAsAJudge/LLMAsAJudge";
-import { dbExecute } from "../../lib/shared/db/dbExecute";
+import {
+  checkOrgRateLimit,
+  EVALUATOR_RATE_LIMITS,
+  orgHasPaidEvaluatorTier,
+} from "../../managers/evaluator/orgRateLimit";
 import {
   EvaluatorConfig,
   OnlineEvalStore,
   OnlineEvaluatorByEvaluatorId,
 } from "../../lib/stores/OnlineEvalStore";
 import { EvaluatorManager } from "../../managers/evaluator/EvaluatorManager";
+import { PYTHON_EVALUATORS_UNSUPPORTED_MESSAGE } from "../../managers/evaluator/pythonEvaluator";
 import { LastMileConfigForm } from "../../managers/evaluator/types";
 import { err, ok, Result } from "../../packages/common/result";
 import type { JawnAuthenticatedRequest } from "../../types/request";
@@ -53,12 +58,6 @@ export interface EvaluatorResult {
   code_template: any;
   last_mile_config: any;
 }
-
-type EvaluatorExperiment = {
-  experiment_id: string;
-  experiment_created_at: string;
-  experiment_name: string;
-};
 
 type CreateOnlineEvaluatorParams = {
   config: Record<string, any>;
@@ -93,6 +92,28 @@ export interface EvaluatorStats {
 @Tags("Evaluator")
 @Security("api_key")
 export class EvaluatorController extends Controller {
+  /**
+   * Shared gate for evaluator test endpoints that spend Helicone-paid compute
+   * or LLM credits: paid tier only, plus a per-org rate limit. Sets the HTTP
+   * status on failure.
+   */
+  private async gateEvaluatorTest(
+    request: JawnAuthenticatedRequest,
+    limit: { bucket: string; limit: number; windowSeconds: number }
+  ): Promise<Result<null, string>> {
+    const orgId = request.authParams.organizationId;
+    if (!(await orgHasPaidEvaluatorTier(orgId))) {
+      this.setStatus(403);
+      return err("Evaluator testing requires a paid plan");
+    }
+    const rl = await checkOrgRateLimit({ ...limit, orgId });
+    if (!rl.allowed) {
+      this.setStatus(429);
+      return err("Too many evaluator test requests, please try again later");
+    }
+    return ok(null);
+  }
+
   @Post("/")
   public async createEvaluator(
     @Body() requestBody: CreateEvaluatorParams,
@@ -101,7 +122,9 @@ export class EvaluatorController extends Controller {
     const evaluatorManager = new EvaluatorManager(request.authParams);
     const result = await evaluatorManager.createEvaluator(requestBody);
 
-    if (result.error || !result.data) {
+    if (result.error === PYTHON_EVALUATORS_UNSUPPORTED_MESSAGE) {
+      this.setStatus(400);
+    } else if (result.error || !result.data) {
       this.setStatus(500);
     } else {
       this.setStatus(201);
@@ -153,7 +176,9 @@ export class EvaluatorController extends Controller {
       requestBody
     );
 
-    if (result.error || !result.data) {
+    if (result.error === PYTHON_EVALUATORS_UNSUPPORTED_MESSAGE) {
+      this.setStatus(400);
+    } else if (result.error || !result.data) {
       this.setStatus(500);
     } else {
       this.setStatus(200);
@@ -173,22 +198,6 @@ export class EvaluatorController extends Controller {
       this.setStatus(500);
     } else {
       this.setStatus(204);
-    }
-    return result;
-  }
-
-  @Get("{evaluatorId}/experiments")
-  public async getExperimentsForEvaluator(
-    @Request() request: JawnAuthenticatedRequest,
-    @Path() evaluatorId: string
-  ): Promise<Result<EvaluatorExperiment[], string>> {
-    const evaluatorManager = new EvaluatorManager(request.authParams);
-    const result = await evaluatorManager.getExperiments(evaluatorId);
-
-    if (result.error || !result.data) {
-      this.setStatus(500);
-    } else {
-      this.setStatus(200);
     }
     return result;
   }
@@ -246,28 +255,26 @@ export class EvaluatorController extends Controller {
       }
     }
 
-    const result = await dbExecute(
-      `INSERT INTO online_evaluators (evaluator, organization, config)
-        VALUES ($1, $2, $3)`,
-      [
-        evaluatorId,
-        request.authParams.organizationId,
-        JSON.stringify({
-          sampleRate,
-          propertyFilters: propertyFilters.map((propertyFilter) => ({
-            key: propertyFilter.key,
-            value: propertyFilter.value,
-          })),
-        }),
-      ]
+    const onlineEvalStore = new OnlineEvalStore(
+      request.authParams.organizationId
     );
-    if (result.error || !result.data) {
-      this.setStatus(500);
-      return err(result.error || "Failed to fetch evals");
-    } else {
-      this.setStatus(200);
-      return ok(null);
+    const result = await onlineEvalStore.createOnlineEvaluator(evaluatorId, {
+      sampleRate,
+      propertyFilters: propertyFilters.map((propertyFilter) => ({
+        key: propertyFilter.key,
+        value: propertyFilter.value,
+      })),
+    });
+    if (result.error === "Evaluator not found") {
+      this.setStatus(404);
+      return err(result.error);
     }
+    if (result.error) {
+      this.setStatus(500);
+      return err("Failed to create online evaluator");
+    }
+    this.setStatus(200);
+    return ok(null);
   }
 
   @Delete("{evaluatorId}/onlineEvaluators/{onlineEvaluatorId}")
@@ -280,7 +287,8 @@ export class EvaluatorController extends Controller {
       request.authParams.organizationId
     );
     const result = await onlineEvalStore.deleteOnlineEvaluator(
-      onlineEvaluatorId
+      onlineEvaluatorId,
+      evaluatorId
     );
     if (result.error) {
       this.setStatus(500);
@@ -309,19 +317,10 @@ export class EvaluatorController extends Controller {
       string
     >
   > {
-    const evaluatorManager = new EvaluatorManager(request.authParams);
-    const result = await evaluatorManager.testPythonEvaluator({
-      code: requestBody.code,
-      requestBodyString: requestBody.testInput.inputBody,
-      responseString: requestBody.testInput.outputBody,
-    });
-    if (result.error || !result.data) {
-      this.setStatus(500);
-      return err(result.error || "Failed to test python evaluator");
-    } else {
-      this.setStatus(200);
-      return ok(result.data);
-    }
+    // Python evaluators are retired. Answer 410 Gone before any tier, rate
+    // limit or sandbox work.
+    this.setStatus(410);
+    return err(PYTHON_EVALUATORS_UNSUPPORTED_MESSAGE);
   }
 
   @Post("/llm/test")
@@ -334,6 +333,24 @@ export class EvaluatorController extends Controller {
       evaluatorName: string;
     }
   ): Promise<EvaluatorScoreResult> {
+    const gate = await this.gateEvaluatorTest(
+      request,
+      EVALUATOR_RATE_LIMITS.llmTest
+    );
+    if (gate.error) {
+      return err(gate.error);
+    }
+
+    let llmTemplate: unknown;
+    try {
+      llmTemplate = JSON.parse(
+        requestBody.evaluatorConfig?.evaluator_llm_template ?? "{}"
+      );
+    } catch {
+      this.setStatus(400);
+      return err("Invalid LLM template");
+    }
+
     // convert "boolean" | "choice" | "range" to "LLM-CHOICE" | "LLM-BOOLEAN" | "LLM-RANGE"
     if (requestBody.evaluatorConfig.evaluator_scoring_type === "boolean") {
       requestBody.evaluatorConfig.evaluator_scoring_type = "LLM-BOOLEAN";
@@ -350,9 +367,7 @@ export class EvaluatorController extends Controller {
         | "LLM-CHOICE"
         | "LLM-BOOLEAN"
         | "LLM-RANGE",
-      llmTemplate: JSON.parse(
-        requestBody.evaluatorConfig.evaluator_llm_template ?? "{}"
-      ),
+      llmTemplate,
       inputRecord: requestBody.testInput.inputs,
       outputBody: requestBody.testInput.outputBody,
       inputBody: requestBody.testInput.inputBody,
@@ -386,6 +401,14 @@ export class EvaluatorController extends Controller {
       string
     >
   > {
+    const gate = await this.gateEvaluatorTest(
+      request,
+      EVALUATOR_RATE_LIMITS.lastMileTest
+    );
+    if (gate.error) {
+      return err(gate.error);
+    }
+
     const evaluatorManager = new EvaluatorManager(request.authParams);
     const result = await evaluatorManager.testLastMileEvaluator(requestBody);
     if (result.error) {

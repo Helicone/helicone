@@ -17,6 +17,7 @@ import { clickhouseDb } from "../../lib/db/ClickhouseWrapper";
 import { prepareRequestAzure } from "../../lib/experiment/requestPrep/azure";
 import { dbExecute } from "../../lib/shared/db/dbExecute";
 import type { JawnAuthenticatedRequest } from "../../types/request";
+import type { AuthParams } from "../../packages/common/auth/types";
 import { Setting, SettingsManager } from "../../utils/settings";
 import type { SettingName } from "../../utils/settings";
 import Stripe from "stripe";
@@ -71,7 +72,18 @@ import { HqlSavedQuery } from "../public/heliconeSqlController";
 // Admin org ID for shared admin queries
 const ADMIN_ORG_ID = "aff94038-3369-4ce9-957e-562fe5a79862";
 
-export const authCheckThrow = async (userId: string | undefined) => {
+/**
+ * Platform-admin gate. Requires BOTH:
+ *  1. a real user session (JWT). API keys are never accepted here: a key's
+ *     stored user_id is copied from whoever created it and can be manipulated
+ *     by a tenant (e.g. via ownership changes), so it is not proof of identity.
+ *  2. the user being present in the `admins` table.
+ */
+export const authCheckThrow = async (authParams: AuthParams | undefined) => {
+  if (!authParams || authParams.authType !== "jwt") {
+    throw new Error("Unauthorized");
+  }
+  const userId = authParams.userId;
   if (!userId) {
     throw new Error("Unauthorized");
   }
@@ -104,10 +116,22 @@ export class AdminController extends Controller {
     @Body() body: { feature: string; orgId: string }
   ): Promise<Result<boolean, string>> {
     try {
+      // Callers may only check their own organization's flags. Platform
+      // admins (JWT + admins table) may check any organization.
+      let orgId = request.authParams.organizationId;
+      if (body.orgId && body.orgId !== orgId) {
+        try {
+          await authCheckThrow(request.authParams);
+          orgId = body.orgId;
+        } catch {
+          this.setStatus(403);
+          return err("Forbidden");
+        }
+      }
       const { data } = await dbExecute<{
         id: string;
       }>(`SELECT id FROM feature_flags WHERE org_id = $1 AND feature = $2`, [
-        body.orgId,
+        orgId,
         body.feature,
       ]);
 
@@ -123,7 +147,7 @@ export class AdminController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Body() body: { flag: string; orgId: string }
   ) {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const { flag, orgId } = body;
 
@@ -138,7 +162,7 @@ export class AdminController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Body() body: { flag: string; orgId: string }
   ) {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     await dbExecute(
       `DELETE FROM feature_flags WHERE org_id = $1 AND feature = $2`,
@@ -148,7 +172,7 @@ export class AdminController extends Controller {
 
   @Post("/feature-flags/query")
   public async getFeatureFlags(@Request() request: JawnAuthenticatedRequest) {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     return await dbExecute<{
       organization_id: string;
@@ -206,7 +230,7 @@ export class AdminController extends Controller {
       };
     }>;
   }> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const limit = Math.max(1, Math.min(Math.floor(Number(body.limit) || 10), 1000));
     const minRequests = Math.max(0, Math.floor(Number(body.minRequests) || 1_000_000));
@@ -385,7 +409,7 @@ export class AdminController extends Controller {
     }
   ) {
     console.log("getTopOrgs");
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
     const orgData = await dbExecute<{
       id: string;
       tier: string;
@@ -581,7 +605,7 @@ export class AdminController extends Controller {
       user_id: string | null;
     }[]
   > {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const { data } = await dbExecute<{
       user_email: string | null;
@@ -638,7 +662,7 @@ export class AdminController extends Controller {
       };
     }>;
   }> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const { organizationId, userId, email } = body;
 
@@ -835,7 +859,7 @@ export class AdminController extends Controller {
       };
     }>;
   }> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const { query } = body;
 
@@ -1014,7 +1038,7 @@ export class AdminController extends Controller {
     total: number;
     hasMore: boolean;
   }> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const { query, limit = 50, offset = 0 } = body;
 
@@ -1208,7 +1232,7 @@ export class AdminController extends Controller {
     total: number;
     hasMore: boolean;
   }> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const { query, limit = 50, offset = 0 } = body;
 
@@ -1323,7 +1347,7 @@ export class AdminController extends Controller {
     @Path() orgId: string,
     @Path() memberId: string
   ): Promise<Result<null, string>> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const { error } = await dbExecute(
       `DELETE FROM organization_member WHERE organization = $1 AND member = $2`,
@@ -1344,7 +1368,7 @@ export class AdminController extends Controller {
     @Path() memberId: string,
     @Body() body: { role: string }
   ): Promise<Result<null, string>> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     // If changing to owner, we need to transfer ownership
     if (body.role.toLowerCase() === "owner") {
@@ -1401,7 +1425,7 @@ export class AdminController extends Controller {
     @Path() orgId: string,
     @Body() body: { enabled: boolean }
   ): Promise<Result<null, string>> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const { error } = await dbExecute(
       `UPDATE organization SET gateway_discount_enabled = $1 WHERE id = $2`,
@@ -1420,7 +1444,7 @@ export class AdminController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Path() orgId: string
   ): Promise<Result<null, string>> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     // Hardcoded target owner email for security - never trust frontend input
     const TARGET_OWNER_EMAIL = "cole+10@helicone.ai";
@@ -1478,7 +1502,7 @@ export class AdminController extends Controller {
     last_request_at: string | null;
     requests_last_30_days: number;
   }> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     // Lightweight query - only fetch last request time and 30-day count
     const usageQuery = `
@@ -1519,7 +1543,7 @@ export class AdminController extends Controller {
     }[];
     all_time_count: number;
   }> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     // Fetch usage data from ClickHouse for a single org
     const usageQuery = `
@@ -1593,7 +1617,7 @@ export class AdminController extends Controller {
     @Path() name: SettingName,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Setting> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const { data, error } = await dbExecute<{
       settings: Setting;
@@ -1621,7 +1645,7 @@ export class AdminController extends Controller {
       settings: any;
     }[]
   > {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const settings = await dbExecute<{
       name: string;
@@ -1650,7 +1674,7 @@ export class AdminController extends Controller {
       settings: any;
     }
   ): Promise<void> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const { error } = await dbExecute(
       `
@@ -1673,7 +1697,7 @@ export class AdminController extends Controller {
       requestBody: any;
     }
   ) {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const azureFetch = await prepareRequestAzure();
 
@@ -1707,7 +1731,7 @@ export class AdminController extends Controller {
       id: string;
     }[];
   }> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const { data } = await dbExecute<{
       name: string;
@@ -1756,7 +1780,7 @@ export class AdminController extends Controller {
       day: string;
     }[];
   }> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const orgData = await dbExecute<{
       count: string;
@@ -1851,7 +1875,7 @@ export class AdminController extends Controller {
       adminIds: string[];
     }
   ): Promise<void> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
     const { orgId, adminIds } = body;
 
     for (const adminId of adminIds) {
@@ -1877,7 +1901,7 @@ export class AdminController extends Controller {
       message: string;
     }
   ): Promise<void> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const { error } = await dbExecute(
       `
@@ -1900,7 +1924,7 @@ export class AdminController extends Controller {
       active: boolean;
     }
   ): Promise<void> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const { data } = await dbExecute<{
       title: string;
@@ -1953,7 +1977,7 @@ export class AdminController extends Controller {
       }>;
     }>;
   }> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     // Parse time range from string to interval
     const parseTimeRange = (rangeStr: string): string => {
@@ -2168,7 +2192,7 @@ export class AdminController extends Controller {
     discounts: Record<string, Stripe.Discount>;
     upcomingInvoices: Stripe.UpcomingInvoice[];
   }> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     // Use AdminManager to handle Stripe API calls with rate limiting and caching
     const adminManager = new AdminManager(request.authParams);
@@ -2201,7 +2225,7 @@ export class AdminController extends Controller {
     }>;
     totalCount: number;
   }> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const params: (string | number | boolean | Date)[] = [];
     let paramIndex = 0;
@@ -2263,7 +2287,7 @@ export class AdminController extends Controller {
     query: string;
     message: string;
   }> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
     const query = `OPTIMIZE TABLE request_response_rmt DEDUPLICATE`;
 
     const result = await clickhouseDb.dbQuery<{}>(query, []);
@@ -2294,7 +2318,7 @@ export class AdminController extends Controller {
   ): Promise<{
     query: string;
   }> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const params: (string | number | boolean | Date)[] = [];
     let paramIndex = 0;
@@ -2376,7 +2400,7 @@ export class AdminController extends Controller {
     @Query() status?: "all" | "escalated" | "resolved",
     @Query() tier?: "all" | "free" | "pro" | "growth" | "enterprise"
   ): Promise<Result<HelixThreadListResponse, string>> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const queryLimit = Math.min(limit ?? 50, 100);
     const queryOffset = offset ?? 0;
@@ -2448,7 +2472,7 @@ export class AdminController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Path() sessionId: string
   ): Promise<Result<HelixThreadDetail, string>> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     if (!uuidValidate(sessionId)) {
       return err("Invalid session ID format");
@@ -2476,7 +2500,7 @@ export class AdminController extends Controller {
     @Path() sessionId: string,
     @Body() body: { message: string; name?: string }
   ): Promise<Result<InAppThread, string>> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     if (!uuidValidate(sessionId)) {
       return err("Invalid session ID format");
@@ -2550,7 +2574,7 @@ export class AdminController extends Controller {
     @Path() sessionId: string,
     @Body() body: { resolved: boolean; adminEmail?: string }
   ): Promise<Result<InAppThread, string>> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     if (!uuidValidate(sessionId)) {
       return err("Invalid session ID format");
@@ -2626,7 +2650,7 @@ export class AdminController extends Controller {
       string
     >
   > {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const limit = body.limit ?? 100;
 
@@ -2741,7 +2765,7 @@ export class AdminController extends Controller {
   public async getAdminSavedQueries(
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<HqlSavedQuery[], string>> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const hqlQueryManager = new HqlQueryManager({
       ...request.authParams,
@@ -2763,7 +2787,7 @@ export class AdminController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Body() body: { name: string; sql: string }
   ): Promise<Result<HqlSavedQuery[], string>> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const hqlQueryManager = new HqlQueryManager({
       ...request.authParams,
@@ -2786,7 +2810,7 @@ export class AdminController extends Controller {
     @Path() queryId: string,
     @Body() body: { name: string; sql: string }
   ): Promise<Result<HqlSavedQuery, string>> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const hqlQueryManager = new HqlQueryManager({
       ...request.authParams,
@@ -2811,7 +2835,7 @@ export class AdminController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Path() queryId: string
   ): Promise<Result<null, string>> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const hqlQueryManager = new HqlQueryManager({
       ...request.authParams,
@@ -2860,7 +2884,7 @@ export class AdminController extends Controller {
     };
     hasMore: boolean;
   }> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const limit = body.limit ?? 20;
     const offset = body.offset ?? 0;
@@ -3013,7 +3037,7 @@ export class AdminController extends Controller {
       string
     >
   > {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     // Get the organization to determine which migration to use
     const orgResult = await dbExecute<{ tier: string }>(
@@ -3081,7 +3105,7 @@ export class AdminController extends Controller {
       string
     >
   > {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     // Get org details
     const orgResult = await dbExecute<{
@@ -3231,7 +3255,7 @@ export class AdminController extends Controller {
       string
     >
   > {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     // Get org details
     const orgResult = await dbExecute<{
@@ -3390,7 +3414,7 @@ export class AdminController extends Controller {
       byTier: Record<string, number>;
     };
   }> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const newTiers = ["pro-20251210", "team-20251210"];
 
@@ -3455,7 +3479,7 @@ export class AdminController extends Controller {
       string
     >
   > {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     // Get the organization
     const orgResult = await dbExecute<{ tier: string }>(
@@ -3511,7 +3535,7 @@ export class AdminController extends Controller {
       string
     >
   > {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     const result = await dbExecute<{
       id: string;
@@ -3562,7 +3586,7 @@ export class AdminController extends Controller {
       timestamp?: string;
     }
   ): Promise<Result<{ message: string }, string>> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     // Get org's stripe customer ID
     const orgResult = await dbExecute<{
@@ -3629,7 +3653,7 @@ export class AdminController extends Controller {
     @Request() request: JawnAuthenticatedRequest,
     @Path() orgId: string
   ): Promise<Result<{ message: string; previousTier: string }, string>> {
-    await authCheckThrow(request.authParams.userId);
+    await authCheckThrow(request.authParams);
 
     // Get current org info
     const orgResult = await dbExecute<{ tier: string }>(

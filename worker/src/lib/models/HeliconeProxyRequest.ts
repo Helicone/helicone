@@ -1,7 +1,7 @@
 // This will store all of the information coming from the client.
 
 import { Provider } from "@helicone-package/llm-mapper/types";
-import { approvedDomains } from "@helicone-package/cost/providers/mappings";
+import { isApprovedApiBase } from "@helicone-package/cost/providers/mappings";
 import { RequestWrapper } from "../RequestWrapper";
 import { buildTargetUrl } from "../clients/ProviderClient";
 import { Result, ok } from "../util/results";
@@ -209,10 +209,8 @@ export class HeliconeProxyRequestMapper {
   }
 
   private validateApiConfiguration(api_base: string | undefined): boolean {
-    return (
-      api_base === undefined ||
-      approvedDomains.some((domain) => domain.test(api_base))
-    );
+    // Validates the parsed origin, not the raw string.
+    return isApprovedApiBase(api_base);
   }
 
   private getApiBase(): Result<string, string> {

@@ -4,6 +4,10 @@ import { Database } from "../../../supabase/database.types";
 import { getProviderKeyFromProxyCache } from "../RequestWrapper";
 import { AuthParams } from "../dbLogger/DBLoggable";
 import { SecureCacheEnv, getAndStoreInCache } from "../util/cache/secureCache";
+import {
+  AUTH_CACHE_TTL_SECONDS,
+  CACHE_KEY_PREFIXES,
+} from "../util/cache/cacheKeys";
 import { Result, err, ok } from "../util/results";
 import { RateLimiter } from "../clients/RequestRateLimiter";
 
@@ -22,7 +26,7 @@ export type RateLimitPolicy = {
   segment: string | undefined;
 };
 
-const RATE_LIMIT_CACHE_TTL = 43200; // 12 hours
+const RATE_LIMIT_CACHE_TTL = AUTH_CACHE_TTL_SECONDS;
 
 async function getHeliconeApiKeyRow(
   dbClient: SupabaseClient<Database>,
@@ -216,10 +220,12 @@ export class DBWrapper {
       return err(internalAuthParams.error);
     }
 
+    // Soft-deleted organizations must not authenticate.
     const org = await this.supabaseClient
       .from("organization")
       .select("*")
       .eq("id", internalAuthParams.data.organizationId)
+      .eq("soft_delete", false)
       .single();
 
     if (org.error !== null) {
@@ -251,10 +257,10 @@ export class DBWrapper {
     }
     const cacheKey = (await hash(JSON.stringify(this.auth))).substring(0, 32);
     const authParams = await getAndStoreInCache(
-      `authParams3-${cacheKey}`,
+      `${CACHE_KEY_PREFIXES.authParams}${cacheKey}`,
       this.env,
       async () => await this._getAuthParams(),
-      43200 // 12 hours
+      AUTH_CACHE_TTL_SECONDS
     );
     if (!authParams || authParams.error || !authParams.data) {
       return err(authParams?.error || "Invalid authentication.");
@@ -271,7 +277,7 @@ export class DBWrapper {
     }
 
     return await getAndStoreInCache<RateLimitPolicy[], string>(
-      `rateLimitOptions-${authParams.data.organizationId}`,
+      `${CACHE_KEY_PREFIXES.rateLimitPolicies}${authParams.data.organizationId}`,
       this.secureCacheEnv,
       async () => {
         const { data, error } = await this.supabaseClient
@@ -328,7 +334,7 @@ export class DBWrapper {
       },
       string
     >(
-      `org-v3-${authParams.data.organizationId}`, // Bumped cache key version for type change
+      `${CACHE_KEY_PREFIXES.organization}${authParams.data.organizationId}`,
       this.secureCacheEnv,
       async () => {
         const { data, error } = await this.supabaseClient
@@ -349,7 +355,7 @@ export class DBWrapper {
             null,
         });
       },
-      600 // 10 minutes - shorter TTL so freeLimitExceeded flag updates quickly after upgrade
+      AUTH_CACHE_TTL_SECONDS // short so freeLimitExceeded / tier changes apply quickly
     );
   }
 

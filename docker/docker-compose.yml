@@ -49,7 +49,9 @@ services:
       start_period: 30s
 
   minio:
-    image: minio/minio
+    # minio/minio and minio/mc are no longer on Docker Hub; pgsty/* are
+    # drop-in community builds (same binaries, paths, env vars and ports).
+    image: pgsty/minio:RELEASE.2026-08-04T00-00-00Z
     container_name: helicone-minio
     ports:
       - "9000:9000" # MinIO API port
@@ -68,7 +70,7 @@ services:
       start_period: 5s
 
   minio-setup:
-    image: minio/mc:RELEASE.2025-04-08T15-39-49Z
+    image: pgsty/mc:RELEASE.2026-09-16T00-00-00Z
     depends_on:
       minio:
         condition: service_healthy
@@ -164,6 +166,9 @@ services:
       VERCEL_ENV: ${VERCEL_ENV:-development}
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-your-secret-key}
       SUPABASE_DATABASE_URL: postgres://postgres:testpassword@db:5432/helicone_test
+      # Must match the workers' HELICONE_MANUAL_ACCESS_KEY (worker/wrangler.toml
+      # dev default). Required by /v1/log/request; override in real deployments.
+      HELICONE_MANUAL_ACCESS_KEY: ${HELICONE_MANUAL_ACCESS_KEY:-sk-helicone-rrrrrrr-xxxxxxx-vvvvvvv-wwwwwww}
 
   web:
     container_name: helicone-web

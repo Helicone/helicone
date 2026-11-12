@@ -24,12 +24,10 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { useUpgradePlan } from "@/hooks/useUpgradePlan";
 
 export const FreePlanCard = () => {
   const org = useOrg();
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
-  const { handleUpgradeTeam, isLoading } = useUpgradePlan();
 
   const freeUsage = useQuery({
     queryKey: ["free-usage", org?.currentOrg?.id],
@@ -105,7 +103,7 @@ export const FreePlanCard = () => {
                   </div>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="flex-1 flex flex-col gap-4">
+              <CardContent className="flex flex-1 flex-col gap-4">
                 <p className="text-sm text-muted-foreground">
                   Unlimited seats, tiered usage-based billing
                 </p>
@@ -125,7 +123,7 @@ export const FreePlanCard = () => {
                   className="w-full bg-sky-500 text-white hover:bg-sky-600"
                   onClick={() => setShowUpgradeDialog(true)}
                 >
-                  Start 7-day free trial
+                  Contact us to upgrade
                 </Button>
               </CardFooter>
             </Card>
@@ -142,7 +140,7 @@ export const FreePlanCard = () => {
                   </div>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="flex-1 flex flex-col gap-4">
+              <CardContent className="flex flex-1 flex-col gap-4">
                 <p className="text-sm font-medium">Unlimited seats, 5 orgs</p>
                 <ul className="flex flex-col gap-2.5">
                   {teamBundleFeatures.map((feature) => (
@@ -158,10 +156,9 @@ export const FreePlanCard = () => {
                   variant="outline"
                   size="lg"
                   className="w-full"
-                  disabled={isLoading}
-                  onClick={() => handleUpgradeTeam()}
+                  onClick={() => setShowUpgradeDialog(true)}
                 >
-                  Start 7-day free trial
+                  Contact us to upgrade
                 </Button>
               </CardFooter>
             </Card>
@@ -189,7 +186,10 @@ export const FreePlanCard = () => {
                       className="group rounded-lg p-4 transition-colors hover:bg-muted/5"
                     >
                       <div className="flex gap-3">
-                        <Check size={20} className="mt-0.5 flex-shrink-0 text-primary" />
+                        <Check
+                          size={20}
+                          className="mt-0.5 flex-shrink-0 text-primary"
+                        />
                         <div>
                           <h4 className="text-sm font-medium transition-colors group-hover:text-primary">
                             {feature.title}

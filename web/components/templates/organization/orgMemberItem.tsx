@@ -2,7 +2,7 @@ import { AcademicCapIcon } from "@heroicons/react/20/solid";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { useJawnClient } from "../../../lib/clients/jawnHook";
+import { getJawnClient } from "../../../lib/clients/jawn";
 import useNotification from "../../shared/notification/useNotification";
 import ThemedModal from "../../shared/themed/themedModal";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
@@ -55,7 +55,9 @@ const OrgMemberItem = (props: OrgMemberItemProps) => {
 
   const router = useRouter();
 
-  const jawn = useJawnClient();
+  // Member management is authorized against the signed-in org, so act as
+  // the org being managed (e.g. a reseller managing a customer org).
+  const jawn = getJawnClient(orgId);
 
   const [memberRole, setMemberRole] = useState<string>(
     orgMember.org_role || "member",

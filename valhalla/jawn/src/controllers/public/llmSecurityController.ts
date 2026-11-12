@@ -2,6 +2,7 @@ import { Body, Controller, Post, Request, Route, Tags } from "tsoa";
 import { GET_KEY } from "../../lib/clients/constant";
 import { Result, err, ok } from "../../packages/common/result";
 import { type JawnAuthenticatedRequest } from "../../types/request";
+import { matchesManualAccessKey } from "../../utils/manualAccessKey";
 
 async function checkLLMGuard(text: string): Promise<{
   unsafe: boolean;
@@ -72,9 +73,8 @@ export class LLMSecurityController extends Controller {
     },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<{ unsafe: boolean }, string>> {
-    if (
-      request.headers.authorization !== process.env.HELICONE_MANUAL_ACCESS_KEY
-    ) {
+    // Fails closed when HELICONE_MANUAL_ACCESS_KEY is unset; constant-time.
+    if (!matchesManualAccessKey(request.headers.authorization)) {
       this.setStatus(401);
       return err("Unauthorized");
     }

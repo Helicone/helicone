@@ -35,8 +35,7 @@ const PortalPage = (props: PortalPageProps) => {
 
   const { data, isLoading, refetch } = usePortalPage();
 
-  const orgs = ((data?.data as { data?: OrgRow[] } | undefined)?.data ??
-    []) as OrgRow[];
+  const orgs = (data?.data ?? []) as OrgRow[];
 
   const filteredData = orgs.filter((org) => {
     if (currentSearch === null) {

@@ -85,7 +85,7 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
     updateProviderKey,
     deleteProviderKey,
     isDeletingKey,
-    viewDecryptedProviderKey,
+    viewMaskedProviderKey,
   } = useProvider({ provider });
 
   // Track saved state locally to control when to show "Saved" vs "Update"
@@ -98,10 +98,10 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
   const [isViewingKey, setIsViewingKey] = useState(false);
   const [isEditingKey, setIsEditingKey] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [decryptedKey, setDecryptedKey] = useState<string | null>(null);
-  const [decryptedSecretKey, setDecryptedSecretKey] = useState<string | null>(
-    null,
-  );
+  // Masked forms of the stored key (e.g. "sk-ant••••••••abcd"). The browser
+  // never receives plaintext provider keys.
+  const [maskedKey, setMaskedKey] = useState<string | null>(null);
+  const [maskedSecretKey, setMaskedSecretKey] = useState<string | null>(null);
   const [configValues, setConfigValues] = useState<Record<string, string>>({});
   const [byokEnabled, setByokEnabled] = useState(true);
 
@@ -187,8 +187,8 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
   useEffect(() => {
     if (isSavingKey) {
       setIsViewingKey(false);
-      setDecryptedKey(null);
-      setDecryptedSecretKey(null);
+      setMaskedKey(null);
+      setMaskedSecretKey(null);
     }
 
     // Set local saved state when save completes
@@ -219,22 +219,28 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
   const handleToggleKeyVisibility = async () => {
     if (isViewingKey) {
       setIsViewingKey(false);
-      setDecryptedKey(null);
-      setDecryptedSecretKey(null);
+      setMaskedKey(null);
+      setMaskedSecretKey(null);
       return;
     }
 
-    // For existing keys, fetch the decrypted version
+    // For existing keys, fetch the masked version
     if (existingKey) {
       setIsLoading(true);
 
       try {
-        const key = (await viewDecryptedProviderKey(existingKey.id)) ?? {
-          providerKey: "",
-          providerSecretKey: null,
-        };
-        setDecryptedKey(key.providerKey);
-        setDecryptedSecretKey(key.providerSecretKey || null);
+        const result = await viewMaskedProviderKey(existingKey.id);
+        if (!result.ok) {
+          setNotification(
+            result.forbidden
+              ? "Only organization owners and admins can view provider keys"
+              : "Failed to retrieve key",
+            "error",
+          );
+          return;
+        }
+        setMaskedKey(result.providerKeyMasked);
+        setMaskedSecretKey(result.providerSecretKeyMasked);
         setIsViewingKey(true);
       } catch (error) {
         logger.error({ error, keyId: existingKey.id }, "Error viewing key");
@@ -252,35 +258,16 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
     setKeyValue(value);
   };
 
-  const handleEnterEditMode = async () => {
-    // Fetch the current key value first
-    if (existingKey) {
-      setIsLoading(true);
-      try {
-        const key = (await viewDecryptedProviderKey(existingKey.id)) ?? {
-          providerKey: "",
-          providerSecretKey: null,
-        };
-        // Set the current values in the input fields
-        setKeyValue(key.providerKey || "");
-        setSecretKeyValue(key.providerSecretKey || "");
-        setIsEditingKey(true);
-        setIsViewingKey(false); // Not in view mode, but in edit mode
-        setDecryptedKey(null);
-        setDecryptedSecretKey(null);
-      } catch (error) {
-        logger.error(
-          { error, keyId: existingKey.id },
-          "Error fetching key for edit",
-        );
-        setNotification("Failed to load key for editing", "error");
-      } finally {
-        setIsLoading(false);
-      }
-    } else {
-      // For new keys, just enter edit mode
-      setIsEditingKey(true);
-    }
+  const handleEnterEditMode = () => {
+    // Stored keys are never sent back to the browser, so editing starts with
+    // empty key inputs. Leaving them blank keeps the current key; typing a new
+    // value replaces it.
+    setKeyValue("");
+    setSecretKeyValue("");
+    setIsEditingKey(true);
+    setIsViewingKey(false);
+    setMaskedKey(null);
+    setMaskedSecretKey(null);
   };
 
   const handleCancelEdit = () => {
@@ -361,18 +348,13 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
   const handleConfirmSave = async () => {
     if (!existingKey) return;
 
-    // Only update if we're in edit mode and have new values
-    if (
-      !isEditingKey ||
-      (provider.id === "bedrock" && !keyValue && !secretKeyValue) ||
-      (provider.id !== "bedrock" && !keyValue)
-    ) {
-      setNotification("Please enter at least one key value", "error");
+    if (!isEditingKey) {
       return;
     }
 
     try {
-      // Update the provider key
+      // Update the provider key. Key fields are only sent when the user typed
+      // a new value; blank means "keep the current key".
       updateProviderKey.mutate({
         key: keyValue || undefined, // Only send if there's a value
         secretKey: secretKeyValue || undefined,
@@ -393,11 +375,11 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
   // ====== Handle input value changes ======
   const handleKeyValueChange = (value: string) => {
     setKeyValue(value);
-    // If we're editing while viewing a decrypted key, stop showing it
-    if (isViewingKey && decryptedKey) {
+    // If we're editing while viewing a masked key, stop showing it
+    if (isViewingKey && maskedKey) {
       setIsViewingKey(false);
-      setDecryptedKey(null);
-      setDecryptedSecretKey(null);
+      setMaskedKey(null);
+      setMaskedSecretKey(null);
     }
   };
 
@@ -657,10 +639,10 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                     isEditMode && !isEditingKey
                       ? "••••••••••••••••"
                       : isEditingKey
-                        ? "Enter new API key..."
+                        ? "Enter new API key (leave blank to keep current)"
                         : provider.apiKeyPlaceholder
                   }
-                  value={isViewingKey && decryptedKey ? decryptedKey : keyValue}
+                  value={isViewingKey && maskedKey ? maskedKey : keyValue}
                   onChange={(e) => handleKeyValueChange(e.target.value)}
                   className="h-7 flex-1 py-1 pr-16 text-xs"
                   disabled={isEditMode && !isEditingKey}
@@ -720,20 +702,9 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                   {isEditMode ? (
                     <button
                       type="button"
-                      onClick={() =>
-                        handleCopyToClipboard(
-                          isViewingKey && decryptedKey
-                            ? decryptedKey
-                            : keyValue,
-                        )
-                      }
+                      onClick={() => handleCopyToClipboard(keyValue)}
                       className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
-                      disabled={
-                        !(
-                          (isViewingKey && decryptedKey) ||
-                          (isEditingKey && keyValue)
-                        )
-                      }
+                      disabled={!(isEditingKey && keyValue)}
                       title="Copy"
                     >
                       <Copy className="h-3 w-3" />
@@ -781,12 +752,12 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                     isEditMode && !isEditingKey
                       ? "••••••••••••••••"
                       : isEditingKey
-                        ? "Enter new secret key..."
+                        ? "Enter new secret key (leave blank to keep current)"
                         : "..."
                   }
                   value={
-                    isViewingKey && decryptedSecretKey
-                      ? decryptedSecretKey
+                    isViewingKey && maskedSecretKey
+                      ? maskedSecretKey
                       : secretKeyValue
                   }
                   onChange={(e) => setSecretKeyValue(e.target.value)}
@@ -799,20 +770,9 @@ const ProviderInstance: React.FC<ProviderInstanceProps> = ({
                   {isEditMode ? (
                     <button
                       type="button"
-                      onClick={() =>
-                        handleCopyToClipboard(
-                          isViewingKey && decryptedSecretKey
-                            ? decryptedSecretKey
-                            : secretKeyValue,
-                        )
-                      }
+                      onClick={() => handleCopyToClipboard(secretKeyValue)}
                       className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
-                      disabled={
-                        !(
-                          (isViewingKey && decryptedSecretKey) ||
-                          (isEditingKey && secretKeyValue)
-                        )
-                      }
+                      disabled={!(isEditingKey && secretKeyValue)}
                       title="Copy"
                     >
                       <Copy className="h-3 w-3" />
@@ -1161,9 +1121,9 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
           <AlertDialogHeader>
             <AlertDialogTitle>Update Provider Key</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to update this {provider.name} key? This
-              will replace the existing key with the new value you&apos;ve
-              entered.
+              Are you sure you want to update this {provider.name} key? Any key
+              value you entered will replace the existing one; blank key fields
+              keep the current key.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

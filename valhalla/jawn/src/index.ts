@@ -8,17 +8,14 @@ import bodyParser from "body-parser";
 import express, { Request as ExpressRequest, NextFunction } from "express";
 import swaggerUi from "swagger-ui-express";
 import cors from "cors";
-import { proxyRouter } from "./controllers/public/proxyController";
 import { ENVIRONMENT } from "./lib/clients/constant";
 import {
   DLQ_WORKER_COUNT,
   NORMAL_WORKER_COUNT,
   SCORES_WORKER_COUNT,
 } from "./lib/clients/kafkaConsumers/constant";
-import { webSocketProxyForwarder } from "./lib/proxy/WebSocketProxyForwarder";
 import { RequestWrapper } from "./lib/requestWrapper/requestWrapper";
 import { DelayedOperationService } from "./lib/shared/delayedOperationService";
-import { runLoopsOnce, runMainLoops } from "./mainLoops";
 import { authFromRequest, authMiddleware } from "./middleware/auth";
 import { IS_RATE_LIMIT_ENABLED, limiter } from "./middleware/ratelimitter";
 import { unauthorizedCacheMiddleware } from "./middleware/unauthorizedCache";
@@ -35,9 +32,6 @@ import { startDBListener } from "./controlPlane/dbListener";
 import { ValidateError } from "tsoa";
 import { SecretManager } from "@helicone-package/secrets/SecretManager";
 
-if (ENVIRONMENT === "production" || process.env.ENABLE_CRON_JOB === "true") {
-  runMainLoops();
-}
 const getAppUrlRegex = () => {
   const appUrl =
     process.env.APP_URL ||
@@ -153,25 +147,11 @@ app.get("/healthcheck", (req, res) => {
   });
 });
 
-if (ENVIRONMENT !== "production") {
-  app.get("/run-loops/:index", async (req, res) => {
-    const index = parseInt(req.params.index);
-    await runLoopsOnce(index);
-    res.json({
-      status: "done",
-    });
-  });
-}
-
 initSentry(app);
 initLogs(app);
 
 const v1APIRouter = express.Router();
 const unAuthenticatedRouter = express.Router();
-const v1ProxyRouter = express.Router();
-
-v1ProxyRouter.use(proxyRouter);
-app.use(v1ProxyRouter);
 
 unAuthenticatedRouter.use(
   "/docs",
@@ -283,9 +263,7 @@ server.on("upgrade", async (req, socket, head) => {
   if (requestWrapperErr || !requestWrapper) {
     throw new Error("Error creating request wrapper");
   }
-  if (req.url?.startsWith("/v1/gateway/oai/realtime")) {
-    webSocketProxyForwarder(requestWrapper, socket, head);
-  } else if (req.url?.startsWith("/ws/v1/router/control-plane")) {
+  if (req.url?.startsWith("/ws/v1/router/control-plane")) {
     return webSocketControlPlaneServer(requestWrapper, socket, head);
   } else {
     socket.destroy();
@@ -296,6 +274,12 @@ server.on("upgrade", async (req, socket, head) => {
 server.on("error", console.error);
 
 server.setTimeout(1000 * 60 * 10); // 10 minutes
+
+// Keep idle sockets open longer than the ALB idle timeout (60s in US and EU).
+// With Node's 5s default, the ALB can reuse a socket Node already closed and
+// return a 502 to the client. headersTimeout must stay above keepAliveTimeout.
+server.keepAliveTimeout = 65 * 1000;
+server.headersTimeout = 66 * 1000;
 
 // This shuts down the server and all delayed operations with delay only locally, on AWS it will be killed by the OS with no delay
 // Please wait few minutes before terminating the original task on AWS

@@ -232,7 +232,7 @@ const FeaturePreview = <T extends string>({
               className="inline-flex h-[52px] w-full items-center justify-center gap-2.5 rounded-xl bg-[hsl(var(--primary))] px-6 py-1.5 text-lg font-medium leading-normal tracking-normal text-[hsl(var(--primary-foreground))]"
               variant="action"
             >
-              {isOnFreeTier ? "Start 7-day free trial" : "Upgrade now"}
+              {isOnFreeTier ? "Contact us to upgrade" : "Contact us"}
             </Button>
 
             <a

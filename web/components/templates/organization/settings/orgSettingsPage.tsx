@@ -1,3 +1,4 @@
+import type { OrgRow } from "@/components/layout/org/OrgContextValue";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +14,6 @@ import { XSmall } from "@/components/ui/typography";
 import { useUpdateOrgMutation } from "@/services/hooks/organizations";
 import { useEffect, useState } from "react";
 import { useLocalStorage } from "../../../../services/hooks/localStorage";
-import { Database } from "../../../../db/database.types";
 import { clsx } from "../../../shared/clsx";
 import { DeleteOrgModal } from "../deleteOrgModal";
 import { ORGANIZATION_COLORS, ORGANIZATION_ICONS } from "../orgConstants";
@@ -34,7 +34,7 @@ const TIME_FILTER_OPTIONS = [
   { value: "3m", label: "Last 3 Months" },
 ] as const;
 interface OrgSettingsPageProps {
-  org: Database["public"]["Tables"]["organization"]["Row"];
+  org: OrgRow;
   variant?: "organization" | "reseller";
 }
 

@@ -2,6 +2,36 @@ import { ModelProviderName } from "../../../providers";
 import type { ModelProviderConfig } from "../../../types";
 import { GPTOSSModelName } from "./models";
 export const endpoints = {
+  "gpt-oss-120b:nebius": {
+    providerModelId: "openai/gpt-oss-120b",
+    provider: "nebius",
+    author: "openai",
+    // Public catalog, verified 2026-11-12:
+    // https://tokenfactory.nebius.com/api/public/models_info
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.00000015,
+        output: 0.0000006,
+        cacheMultipliers: { cachedInput: 2 / 3 },
+      },
+    ],
+    contextLength: 131_072,
+    maxCompletionTokens: 131_072,
+    quantization: "fp4",
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "tools",
+      "tool_choice",
+    ],
+    // Register for BYOK without enabling Helicone-managed billing.
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
   "gpt-oss-120b:groq": {
     providerModelId: "openai/gpt-oss-120b",
     provider: "groq",

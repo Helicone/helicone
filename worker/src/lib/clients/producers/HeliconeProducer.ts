@@ -66,7 +66,14 @@ export class HeliconeProducer {
         body: JSON.stringify({
           log: msg.log,
           authorization: msg.authorization,
-          heliconeMeta: msg.heliconeMeta,
+          heliconeMeta: {
+            ...msg.heliconeMeta,
+            // Jawn's HTTP log endpoint requires the server-held manual access
+            // key; this fallback is only used by the worker itself.
+            heliconeManualAccessKey:
+              this.HELICONE_MANUAL_ACCESS_KEY ??
+              msg.heliconeMeta.heliconeManualAccessKey,
+          },
         }),
       });
 

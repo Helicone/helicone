@@ -52,7 +52,6 @@ function getLastMileData(
   ground_truth?: string;
 } {
   const mappedRequest = heliconeRequestToMappedContent(heliconeRequest);
-  console.log("mappedRequest", mappedRequest);
 
   const input = extractData(metrics.input, mappedRequest, inputs);
   const output = extractData(metrics.output, mappedRequest, inputs);
@@ -95,14 +94,9 @@ export async function runLastMileEvaluator(
     string
   >
 > {
-  console.log("heliconRequest", heliconRequest);
-  console.log("metrics", metrics);
-  console.log("inputs", inputs);
   const client = new AutoEval({ apiKey: process.env.LAST_MILE_API_KEY });
   const data = getLastMileData(heliconRequest, metrics, inputs);
-  console.log("data", data);
   const result = await client.evaluateData([data], [metricMapper(metrics)]);
-  console.log("result", result);
   if (result.length === 0) {
     return err("No result from lastmile");
   }

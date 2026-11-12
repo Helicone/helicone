@@ -25,6 +25,14 @@ export interface AuthParams {
   keyPermissions?: KeyPermissions;
   role?: Role;
   tier?: string;
+  /**
+   * How the request was authenticated. Set by the authenticator from the
+   * credential it actually verified (never from the caller-declared `_type`).
+   * Only "jwt" proves the caller is the user identified by `userId`; API keys
+   * ("bearer") merely carry a stored user_id and proxy keys ("bearerProxy")
+   * carry none.
+   */
+  authType?: HeliconeAuth["_type"];
 }
 export type AuthResult = PromiseGenericResult<AuthParams>;
 

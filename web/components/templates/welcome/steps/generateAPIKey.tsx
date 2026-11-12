@@ -73,35 +73,26 @@ const GenerateAPIKey = ({
     const generateKey = async () => {
       if (!user) return;
       if (apiKey) return;
-      const { res: promiseRes, apiKey: generatedApiKey } = generateAPIKeyHelper(
+      const { apiKey: generatedApiKey, error } = await generateAPIKeyHelper(
         "rw",
-        org?.currentOrg?.organization_type ?? "",
         "Main",
         window.location.hostname.includes("eu."),
         false,
+        false,
+        org?.currentOrg?.id,
       );
 
-      const res = await promiseRes;
-
-      if (!res.response.ok) {
+      if (error || !generatedApiKey) {
         setNotification("Failed to generate API key", "error");
-        logger.error(
-          { response: await res.response.text() },
-          "Failed to generate API key",
-        );
+        logger.error({ error }, "Failed to generate API key");
+        return;
       }
 
       setApiKey(generatedApiKey);
     };
 
     generateKey();
-  }, [
-    user,
-    org?.currentOrg?.organization_type,
-    apiKey,
-    setApiKey,
-    setNotification,
-  ]);
+  }, [user, org?.currentOrg?.id, apiKey, setApiKey, setNotification]);
 
   return (
     <div className="flex h-full max-h-[calc(100vh-20rem)] flex-col overflow-y-auto p-4 pt-0">

@@ -2,6 +2,9 @@ import { Col, Row } from "@/components/layout/common";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
+export const CONTACT_US_URL =
+  "https://cal.com/team/helicone/helicone-discovery";
+
 export const ContactCTA = ({}) => {
   return (
     <div className="mt-2 rounded-lg border p-4">
@@ -13,11 +16,7 @@ export const ContactCTA = ({}) => {
           </p>
         </Col>
         <Button asChild>
-          <Link
-            href="https://cal.com/team/helicone/helicone-discovery"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <Link href={CONTACT_US_URL} target="_blank" rel="noopener noreferrer">
             Contact us
           </Link>
         </Button>

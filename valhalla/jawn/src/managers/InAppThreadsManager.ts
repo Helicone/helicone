@@ -45,22 +45,76 @@ export interface UpsertThreadMessageParams {
   };
 }
 
+/**
+ * Metadata keys that only the server may set. `slack_thread_ts` routes Slack
+ * support replies into a thread (SlackService looks threads up by it), so a
+ * client-supplied value could pull another customer's support conversation
+ * into the caller's thread.
+ */
+export const RESERVED_THREAD_METADATA_KEYS = new Set([
+  "slack_thread_ts",
+  "escalated",
+  "createdDirectlyEscalated",
+  "resolved",
+  "soft_delete",
+  "user_id",
+  "org_id",
+  "id",
+]);
+
+/** Drops reserved / server-owned keys from client-supplied thread metadata. */
+export function sanitizeThreadMetadata(
+  metadata: unknown
+): Record<string, any> {
+  if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) {
+    return {};
+  }
+  const out: Record<string, any> = {};
+  for (const [key, value] of Object.entries(metadata)) {
+    if (RESERVED_THREAD_METADATA_KEYS.has(key)) continue;
+    if (key.toLowerCase().startsWith("slack")) continue;
+    out[key] = value;
+  }
+  return out;
+}
+
+const MISSING_USER_ERROR = "A user session is required for agent threads";
+
+/**
+ * Helix threads are private to the user who created them. Every query is
+ * scoped by org_id AND user_id; support staff read threads through the
+ * platform admin controller, not this manager.
+ */
 export class InAppThreadsManager extends BaseManager {
   constructor(authParams: AuthParams) {
     super(authParams);
   }
 
+  /** Upsert from client input: reserved metadata keys are stripped. */
   async upsertThreadMessage(
     params: UpsertThreadMessageParams
   ): Promise<Result<InAppThread, string>> {
+    return this.upsertThreadMessageInternal({
+      ...params,
+      metadata: sanitizeThreadMetadata(params.metadata),
+    });
+  }
+
+  private async upsertThreadMessageInternal(
+    params: UpsertThreadMessageParams
+  ): Promise<Result<InAppThread, string>> {
     const { sessionId, messages, metadata } = params;
+    const userId = this.authParams.userId;
+    if (!userId) {
+      return err(MISSING_USER_ERROR);
+    }
 
     try {
       // Check if thread exists
       const existingThreadResult = await dbExecute<InAppThread>(
-        `SELECT * FROM in_app_threads 
-         WHERE id = $1 AND org_id = $2`,
-        [sessionId, this.authParams.organizationId]
+        `SELECT * FROM in_app_threads
+         WHERE id = $1 AND org_id = $2 AND user_id = $3`,
+        [sessionId, this.authParams.organizationId, userId]
       );
 
       if (existingThreadResult.error) {
@@ -78,13 +132,14 @@ export class InAppThreadsManager extends BaseManager {
            SET chat = $1::jsonb, 
                metadata = COALESCE(metadata, '{}'::jsonb) || $2::jsonb,
                updated_at = NOW()
-           WHERE id = $3 AND org_id = $4
+           WHERE id = $3 AND org_id = $4 AND user_id = $5
            RETURNING *`,
           [
             JSON.stringify({ messages }),
             JSON.stringify(metadata),
             sessionId,
             this.authParams.organizationId,
+            userId,
           ]
         );
 
@@ -117,7 +172,7 @@ export class InAppThreadsManager extends BaseManager {
           [
             sessionId,
             JSON.stringify({ messages }),
-            this.authParams.userId ?? "",
+            userId,
             this.authParams.organizationId,
             JSON.stringify(metadata),
           ]
@@ -139,14 +194,17 @@ export class InAppThreadsManager extends BaseManager {
   }
 
   async deleteThread(sessionId: string): Promise<Result<boolean, string>> {
+    if (!this.authParams.userId) {
+      return err(MISSING_USER_ERROR);
+    }
     try {
       const deleteResult = await dbExecute(
-        `UPDATE in_app_threads 
+        `UPDATE in_app_threads
          SET soft_delete = true,
              updated_at = NOW()
-         WHERE id = $1 AND org_id = $2
+         WHERE id = $1 AND org_id = $2 AND user_id = $3
          RETURNING *`,
-        [sessionId, this.authParams.organizationId]
+        [sessionId, this.authParams.organizationId, this.authParams.userId]
       );
 
       if (deleteResult.error) {
@@ -162,8 +220,11 @@ export class InAppThreadsManager extends BaseManager {
   async escalateThread(
     sessionId: string
   ): Promise<Result<InAppThread, string>> {
+    if (!this.authParams.userId) {
+      return err(MISSING_USER_ERROR);
+    }
     const slackService = SlackService.getInstance();
-    const userEmailResult = await dbExecute<{ email: string }>(
+    const userEmailResult= await dbExecute<{ email: string }>(
       `SELECT email FROM auth.users WHERE id = $1`,
       [this.authParams.userId]
     );
@@ -250,10 +311,15 @@ export class InAppThreadsManager extends BaseManager {
                '{slack_thread_ts}',
                to_jsonb($3::text)
              )
-         WHERE id = $1 AND org_id = $2 AND escalated = false
+         WHERE id = $1 AND org_id = $2 AND user_id = $4 AND escalated = false
          RETURNING *`,
         // If no row is updated, it means it was already escalated
-        [sessionId, this.authParams.organizationId, threadTs]
+        [
+          sessionId,
+          this.authParams.organizationId,
+          threadTs,
+          this.authParams.userId,
+        ]
       );
 
       if (updateResult.data?.[0]) {
@@ -275,14 +341,18 @@ export class InAppThreadsManager extends BaseManager {
   }
 
   async reopenThread(sessionId: string): Promise<Result<InAppThread, string>> {
+    if (!this.authParams.userId) {
+      return err(MISSING_USER_ERROR);
+    }
     try {
       // Update the thread to set escalated back to true
       const updateResult = await dbExecute<InAppThread>(
         `UPDATE in_app_threads
          SET escalated = true, updated_at = NOW()
-         WHERE id = $1 AND org_id = $2
+         WHERE id = $1 AND org_id = $2 AND user_id = $3
+           AND soft_delete = false
          RETURNING *`,
-        [sessionId, this.authParams.organizationId]
+        [sessionId, this.authParams.organizationId, this.authParams.userId]
       );
 
       if (updateResult.error) {
@@ -315,6 +385,9 @@ export class InAppThreadsManager extends BaseManager {
   }
 
   async getAllThreads(): Promise<Result<ThreadSummary[], string>> {
+    if (!this.authParams.userId) {
+      return err(MISSING_USER_ERROR);
+    }
     try {
       const threadsResult = await dbExecute<any>(
         `SELECT 
@@ -342,11 +415,15 @@ export class InAppThreadsManager extends BaseManager {
   }
 
   async getThread(sessionId: string): Promise<Result<InAppThread, string>> {
+    if (!this.authParams.userId) {
+      return err(MISSING_USER_ERROR);
+    }
     try {
       const threadResult = await dbExecute<InAppThread>(
-        `SELECT * FROM in_app_threads 
-         WHERE id = $1 AND org_id = $2 AND soft_delete = false`,
-        [sessionId, this.authParams.organizationId]
+        `SELECT * FROM in_app_threads
+         WHERE id = $1 AND org_id = $2 AND user_id = $3
+           AND soft_delete = false`,
+        [sessionId, this.authParams.organizationId, this.authParams.userId]
       );
 
       if (threadResult.error) {
@@ -377,8 +454,8 @@ export class InAppThreadsManager extends BaseManager {
         },
       ];
 
-      // Create the thread
-      const createResult = await this.upsertThreadMessage({
+      // Create the thread (server-set metadata, so skip client sanitization)
+      const createResult = await this.upsertThreadMessageInternal({
         sessionId,
         messages: initialMessages as any,
         metadata: {

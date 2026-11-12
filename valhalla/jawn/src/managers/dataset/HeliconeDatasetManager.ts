@@ -47,6 +47,24 @@ export class HeliconeDatasetManager extends BaseManager {
     );
   }
 
+  private async isOwnedDataset(
+    datasetId: string
+  ): Promise<Result<boolean, string>> {
+    const result = await dbExecute<{ id: string }>(
+      `SELECT id
+       FROM helicone_dataset
+       WHERE id = $1
+       AND organization = $2
+       AND deleted_at IS NULL
+       LIMIT 1`,
+      [datasetId, this.authParams.organizationId]
+    );
+    if (result.error) {
+      return err(result.error);
+    }
+    return ok((result.data?.length ?? 0) > 0);
+  }
+
   private async getTodayRowCount(): Promise<number> {
     const result = await dbExecute<{ count: number }>(
       `SELECT COUNT(*)::int as count
@@ -69,7 +87,8 @@ export class HeliconeDatasetManager extends BaseManager {
         helicone_dataset hd
       LEFT JOIN 
         helicone_dataset_row hdr ON hd.id = hdr.dataset_id
-      WHERE 
+          AND hdr.organization_id = hd.organization
+      WHERE
         hd.organization = $1
         AND hd.dataset_type = 'helicone'
         AND hd.deleted_at IS NULL
@@ -218,6 +237,16 @@ export class HeliconeDatasetManager extends BaseManager {
     datasetId: string,
     addRequests: string[]
   ): Promise<Result<null, string>> {
+    // The target dataset must belong to the caller's org; otherwise rows (and
+    // copied request bodies) could be attached to another org's dataset.
+    const owned = await this.isOwnedDataset(datasetId);
+    if (owned.error) {
+      return err(owned.error);
+    }
+    if (!owned.data) {
+      return err("Dataset not found");
+    }
+
     // Rate limit: 1000 rows per day per organization
     const todayCount = await this.getTodayRowCount();
     if (todayCount + addRequests.length > 1000) {

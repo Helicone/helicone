@@ -9,6 +9,7 @@ import { AbstractLogHandler } from "./AbstractLogHandler";
 import { HandlerContext } from "./HandlerContext";
 import crypto from "crypto";
 import * as Sentry from "@sentry/node";
+import { validateExternalUrl } from "../../utils/ssrfGuard";
 
 export class PostHogHandler extends AbstractLogHandler {
   private posthogEvents: PostHogEvent[] = [];
@@ -40,7 +41,14 @@ export class PostHogHandler extends AbstractLogHandler {
   }
 
   public async handleResults(): PromiseGenericResult<string> {
-    this.posthogEvents.forEach((event) => {
+    for (const event of this.posthogEvents) {
+      // The host is customer-supplied: refuse internal addresses.
+      if (event.host) {
+        const allowed = await validateExternalUrl(event.host);
+        if (allowed.error !== null) {
+          continue;
+        }
+      }
       try {
         const posthogClient = new PosthogUserClient(event.apiKey, event.host);
 
@@ -64,7 +72,7 @@ export class PostHogHandler extends AbstractLogHandler {
           },
         });
       }
-    });
+    }
 
     return ok("Posthog events sent");
   }

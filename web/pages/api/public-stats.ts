@@ -80,7 +80,25 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<PublicHeliconeStatsResult>,
 ) {
-  res.setHeader("Cache-Control", `s-maxage=${60 * 60 * 24 * 2}, public`); // 2 days
+  if (req.method !== "GET") {
+    res.status(405).json({ error: "Method not allowed", data: null });
+    return;
+  }
 
-  res.status(200).json(await getModelUsageOverTime());
+  const result = await getModelUsageOverTime();
+  if (result.error !== null) {
+    // Don't leak DB errors and don't let the CDN cache a failure.
+    res.setHeader("Cache-Control", "no-store");
+    res.status(500).json({ error: "Failed to load stats", data: null });
+    return;
+  }
+
+  // Coarse, rounded aggregates only; served from the CDN cache so this
+  // public endpoint can't be used to hammer the databases.
+  res.setHeader(
+    "Cache-Control",
+    `public, s-maxage=${60 * 60 * 24 * 2}, stale-while-revalidate=${60 * 60}`,
+  ); // 2 days
+
+  res.status(200).json(result);
 }

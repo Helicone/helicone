@@ -16,6 +16,7 @@ import {
   DecryptedProviderKey,
   VaultManager,
 } from "../../managers/VaultManager";
+import { isJwtOrgAdmin } from "../../utils/providerKeyAccess";
 
 export interface AddVaultKeyParams {
   key: string;
@@ -32,12 +33,7 @@ export class VaultController extends Controller {
     @Body() requestBody: AddVaultKeyParams,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<{ id: string }, string>> {
-    if (
-      !(
-        request.authParams.role === "admin" ||
-        request.authParams.role === "owner"
-      )
-    ) {
+    if (!isJwtOrgAdmin(request.authParams)) {
       this.setStatus(403);
       return { data: null, error: "Forbidden" };
     }
@@ -56,12 +52,7 @@ export class VaultController extends Controller {
   public async getKeys(
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<DecryptedProviderKey[], string>> {
-    if (
-      !(
-        request.authParams.role === "admin" ||
-        request.authParams.role === "owner"
-      )
-    ) {
+    if (!isJwtOrgAdmin(request.authParams)) {
       this.setStatus(403);
       return { data: null, error: "Forbidden" };
     }
@@ -81,12 +72,7 @@ export class VaultController extends Controller {
     @Path() providerKeyId: string,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<DecryptedProviderKey, string>> {
-    if (
-      !(
-        request.authParams.role === "admin" ||
-        request.authParams.role === "owner"
-      )
-    ) {
+    if (!isJwtOrgAdmin(request.authParams)) {
       this.setStatus(403);
       return { data: null, error: "Forbidden" };
     }
@@ -97,8 +83,10 @@ export class VaultController extends Controller {
       providerKeyId
     );
     if (result.error || !result.data) {
-      this.setStatus(500);
-      return { data: null, error: result.error || "Failed to retrieve key" };
+      // Return a generic 404 for both "does not exist" and "belongs to another
+      // organization" so this endpoint cannot be used as an existence oracle.
+      this.setStatus(404);
+      return { data: null, error: "Provider key not found" };
     }
 
     this.setStatus(200);
@@ -111,12 +99,7 @@ export class VaultController extends Controller {
     @Body() requestBody: { key?: string; name?: string; active?: boolean },
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
-    if (
-      !(
-        request.authParams.role === "admin" ||
-        request.authParams.role === "owner"
-      )
-    ) {
+    if (!isJwtOrgAdmin(request.authParams)) {
       this.setStatus(403);
       return { data: null, error: "Forbidden" };
     }

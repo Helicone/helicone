@@ -79,6 +79,18 @@ export async function getAllSignedURLsFromInputs(
   }, {} as PromptInputRecord["inputs"]);
 }
 
+// Each returned row fetches request/response bodies and signs URLs, so the
+// page size must be bounded regardless of what the caller asks for.
+export const MAX_INPUTS_LIMIT = 1000;
+
+export function clampInputsLimit(limit: unknown): number {
+  const n = typeof limit === "number" ? limit : Number(limit);
+  if (!Number.isFinite(n) || n < 1) {
+    return 1;
+  }
+  return Math.min(Math.floor(n), MAX_INPUTS_LIMIT);
+}
+
 export class InputsManager extends BaseManager {
   async createInputRecord(
     promptVersionId: string,
@@ -198,16 +210,25 @@ export class InputsManager extends BaseManager {
     inputRecordId: string,
     inputs: Record<string, string>
   ): Promise<Result<string, string>> {
+    // prompt_input_record has no organization column of its own; ownership is
+    // reached through its prompt_version. Scope the write so a caller can only
+    // update records belonging to their own organization.
     const updateQuery = `
       UPDATE prompt_input_record
       SET inputs = COALESCE(inputs, '{}'::jsonb) || $1::jsonb
       WHERE id = $2
+      AND prompt_version IN (
+        SELECT pv.id
+        FROM prompts_versions pv
+        WHERE pv.organization = $3
+      )
       RETURNING id
     `;
 
     const result = await dbExecute<{ id: string }>(updateQuery, [
       JSON.stringify(inputs),
       inputRecordId,
+      this.authParams.organizationId,
     ]);
 
     if (result.error || !result.data?.[0]?.id) {
@@ -243,7 +264,7 @@ export class InputsManager extends BaseManager {
       LIMIT $3
 
       `,
-      [this.authParams.organizationId, datasetId, limit]
+      [this.authParams.organizationId, datasetId, clampInputsLimit(limit)]
     );
     return promiseResultMap(result, async (data) => {
       return Promise.all(
@@ -339,7 +360,7 @@ export class InputsManager extends BaseManager {
       LIMIT $3
 
       `,
-      [this.authParams.organizationId, promptVersion, limit]
+      [this.authParams.organizationId, promptVersion, clampInputsLimit(limit)]
     );
     const bodyStore = new RequestResponseBodyStore(
       this.authParams.organizationId

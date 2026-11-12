@@ -9,7 +9,6 @@ import { RateLimitVisual } from "./RateLimitVisual";
 import { DatasetVisual } from "./DatasetVisual";
 import { SessionsFeatureVisual } from "./features/SessionsFeature";
 import { CodeExample } from "./CodeExample";
-import { useUpgradePlan } from "@/hooks/useUpgradePlan";
 import {
   Feature,
   PreviewCard,
@@ -281,7 +280,6 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
   highlightedFeature,
 }) => {
   const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
-  const { handleUpgradeTeam, isLoading } = useUpgradePlan();
 
   const getFeatures = () => {
     let features = { ...PRO_FEATURES };
@@ -312,8 +310,7 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
         priceSubtext="/mo"
         isBestValue={true}
         variant="outlined"
-        onClick={handleUpgradeTeam}
-        isLoading={isLoading}
+        onClick={() => setIsUpgradeDialogOpen(true)}
       />
     </div>
   );
@@ -392,7 +389,7 @@ export const FeatureUpgradeCard: React.FC<FeatureUpgradeCardProps> = ({
           className="flex h-[52px] items-center justify-center gap-2.5 rounded-xl bg-[hsl(var(--primary))] px-6 py-1.5"
         >
           <div className="text-[hsl(var(--primary-foreground))]">
-            Start 7-day free trial
+            Contact us to upgrade
           </div>
         </Button>
       </div>

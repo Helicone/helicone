@@ -8,6 +8,7 @@ import {
 import { Database } from "../../../../supabase/database.types";
 import { safePut } from "../../safePut";
 import { DBLoggable } from "../../dbLogger/DBLoggable";
+import { RESPONSE_CACHE_KEY_VERSION } from "./cacheKeys";
 const CACHE_BACKOFF_RETRIES = 5;
 
 function isGoogleAuthHeader(value: string): boolean {
@@ -30,11 +31,21 @@ function tryGetBodyAndRemoveKeys(text: string, ignoreKeys: string[]): string {
   }
 }
 
+/**
+ * Response cache key. Scoped to the authenticated organization so two
+ * tenants sending identical requests (same body, no per-tenant header in the
+ * hash, e.g. Google OAuth or gateway-injected keys) can never read each
+ * other's cached responses. The version prefix abandons pre-scoping entries.
+ */
 export async function kvKeyFromRequest(
   request: HeliconeProxyRequest,
   freeIndex: number,
-  cacheSeed: string | null
+  cacheSeed: string | null,
+  organizationId: string
 ): Promise<string> {
+  if (!organizationId) {
+    throw new Error("Response cache requires an organization id");
+  }
   const headers = new Headers();
   for (const [key, value] of request.requestWrapper.getHeaders().entries()) {
     if (key.toLowerCase().startsWith("helicone-cache")) {
@@ -56,13 +67,14 @@ export async function kvKeyFromRequest(
     ignoreKeys
   );
 
-  return await hash(
+  const digest = await hash(
     (cacheSeed ?? "") +
       request.url +
       body +
       JSON.stringify([...headers.entries()]) +
       (freeIndex >= 1 ? freeIndex.toString() : "")
   );
+  return `${RESPONSE_CACHE_KEY_VERSION}:${organizationId}:${digest}`;
 }
 
 interface SaveToCacheOptions {
@@ -74,6 +86,7 @@ interface SaveToCacheOptions {
   settings: { bucketSize: number };
   cacheKv: KVNamespace;
   cacheSeed: string | null;
+  organizationId: string;
 }
 
 async function trySaveToCache(options: SaveToCacheOptions): Promise<boolean> {
@@ -86,6 +99,7 @@ async function trySaveToCache(options: SaveToCacheOptions): Promise<boolean> {
       settings,
       cacheKv,
       cacheSeed,
+      organizationId,
     } = options;
     const expirationTtl = cacheControl.includes("max-age=")
       ? parseInt(cacheControl.split("max-age=")[1])
@@ -94,12 +108,18 @@ async function trySaveToCache(options: SaveToCacheOptions): Promise<boolean> {
       request,
       settings,
       cacheKv,
-      cacheSeed
+      cacheSeed,
+      organizationId
     );
     if (freeIndexes.length > 0) {
       const result = await safePut({
         key: cacheKv,
-        keyName: await kvKeyFromRequest(request, freeIndexes[0], cacheSeed),
+        keyName: await kvKeyFromRequest(
+          request,
+          freeIndexes[0],
+          cacheSeed,
+          organizationId
+        ),
         value: JSON.stringify({
           headers: Object.fromEntries(response.headers.entries()),
           latency: options.responseLatencyMs,
@@ -143,13 +163,20 @@ export async function getCachedResponse(
   request: HeliconeProxyRequest,
   settings: { bucketSize: number },
   cacheKv: KVNamespace,
-  cacheSeed: string | null
+  cacheSeed: string | null,
+  organizationId: string
 ): Promise<Response | null> {
   const CACHE_TIMEOUT = 2000;
 
   try {
     const { requests: requestCaches, freeIndexes } = (await Promise.race([
-      getMaxCachedResponses(request, settings, cacheKv, cacheSeed),
+      getMaxCachedResponses(
+        request,
+        settings,
+        cacheKv,
+        cacheSeed,
+        organizationId
+      ),
       new Promise((resolve, reject) =>
         setTimeout(() => reject(new Error("Cache timeout")), CACHE_TIMEOUT)
       ),
@@ -214,11 +241,17 @@ async function getMaxCachedResponses(
   request: HeliconeProxyRequest,
   { bucketSize: bucketSize }: { bucketSize: number },
   cacheKv: KVNamespace,
-  cacheSeed: string | null
+  cacheSeed: string | null,
+  organizationId: string
 ) {
   const previouslyCachedReqs = await Promise.all(
     Array.from(Array(bucketSize).keys()).map(async (idx) => {
-      const requestCache = await kvKeyFromRequest(request, idx, cacheSeed);
+      const requestCache = await kvKeyFromRequest(
+        request,
+        idx,
+        cacheSeed,
+        organizationId
+      );
       return cacheKv.get<{
         headers: Record<string, string>;
         latency: number;

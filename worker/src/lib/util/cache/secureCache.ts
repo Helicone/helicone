@@ -251,12 +251,23 @@ export async function getFromKVCacheOnly(
   });
 }
 
+export interface NegativeCacheOptions<K> {
+  /**
+   * Seconds to remember a failed lookup. Cloudflare KV enforces a 60 second
+   * minimum, so smaller values are raised to 60.
+   */
+  ttl: number;
+  /** Only errors for which this returns true are cached. Defaults to all. */
+  shouldCache?: (error: K) => boolean;
+}
+
 export async function getAndStoreInCache<T, K>(
   key: string,
   env: SecureCacheEnv,
   fn: () => Promise<Result<T, K>>,
   expirationTtl?: number,
-  useMemoryCache: boolean = true
+  useMemoryCache: boolean = true,
+  negativeCache?: NegativeCacheOptions<K>
 ): Promise<Result<T, K>> {
   const cached = await getFromCache({
     key,
@@ -267,6 +278,14 @@ export async function getAndStoreInCache<T, K>(
   if (cached !== null) {
     try {
       const cachedResult = JSON.parse(cached);
+      if (
+        negativeCache &&
+        cachedResult !== null &&
+        typeof cachedResult === "object" &&
+        "_helicone_cached_error" in cachedResult
+      ) {
+        return { data: null, error: cachedResult._helicone_cached_error as K };
+      }
       if (cachedResult._helicone_cached_string) {
         return ok(cachedResult._helicone_cached_string);
       }
@@ -277,6 +296,15 @@ export async function getAndStoreInCache<T, K>(
   }
   const value = await fn();
   if (value.error !== null) {
+    if (negativeCache && (negativeCache.shouldCache?.(value.error) ?? true)) {
+      await storeInCache(
+        key,
+        JSON.stringify({ _helicone_cached_error: value.error }),
+        env,
+        Math.max(60, negativeCache.ttl),
+        false
+      );
+    }
     return value;
   }
   if (typeof value.data === "string") {

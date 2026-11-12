@@ -14,6 +14,7 @@ import {
 import { RateLimitManager } from "../../managers/rateLimitManager";
 import type { JawnAuthenticatedRequest } from "../../types/request";
 import { Result, err, ok } from "../../packages/common/result";
+import { checkJwtOrgAdmin } from "../../utils/orgAuthz";
 
 // Exported types for the API contract
 export interface RateLimitRuleView {
@@ -65,6 +66,11 @@ export class RateLimitController extends Controller {
     @Body() params: CreateRateLimitRuleParams,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<RateLimitRuleView, string>> {
+    const denied = await checkJwtOrgAdmin(request.authParams);
+    if (denied) {
+      this.setStatus(denied.status);
+      return err(denied.message);
+    }
     const rateLimitManager = new RateLimitManager(request.authParams);
     const result = await rateLimitManager.createRateLimit(params);
 
@@ -82,6 +88,11 @@ export class RateLimitController extends Controller {
     @Body() params: UpdateRateLimitRuleParams,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<RateLimitRuleView, string>> {
+    const denied = await checkJwtOrgAdmin(request.authParams);
+    if (denied) {
+      this.setStatus(denied.status);
+      return err(denied.message);
+    }
     const rateLimitManager = new RateLimitManager(request.authParams);
     const result = await rateLimitManager.updateRateLimit(ruleId, params);
 
@@ -103,6 +114,11 @@ export class RateLimitController extends Controller {
     @Path() ruleId: string,
     @Request() request: JawnAuthenticatedRequest
   ): Promise<Result<null, string>> {
+    const denied = await checkJwtOrgAdmin(request.authParams);
+    if (denied) {
+      this.setStatus(denied.status);
+      return err(denied.message);
+    }
     const rateLimitManager = new RateLimitManager(request.authParams);
     const result = await rateLimitManager.deleteRateLimit(ruleId);
 

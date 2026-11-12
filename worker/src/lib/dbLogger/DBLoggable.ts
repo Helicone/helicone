@@ -19,6 +19,7 @@ import { INTERNAL_ERRORS } from "../util/constants";
 import { withTimeout } from "../util/helpers";
 import { Result, err, ok } from "../util/results";
 import { CacheSettings } from "../util/cache/cacheSettings";
+import { redactSecretsFromUrl } from "../security/redact";
 import {
   anthropicAIStream,
   getModel,
@@ -140,8 +141,10 @@ export function dbLoggableRequestFromProxyRequest(
     unsafeGetBodyText: proxyRequest.unsafeGetBodyText,
     body: proxyRequest.body,
     requestBodyBuffer: proxyRequest.requestWrapper.requestBodyBuffer,
-    path: proxyRequest.requestWrapper.url.href,
-    targetUrl: proxyRequest.targetUrl.href,
+    // URLs are stored and shown in the dashboard: strip ?key=, signatures
+    // and Helicone keys in path segments before they leave the worker.
+    path: redactSecretsFromUrl(proxyRequest.requestWrapper.url.href),
+    targetUrl: redactSecretsFromUrl(proxyRequest.targetUrl.href),
     properties: proxyRequest.requestWrapper.heliconeHeaders.heliconeProperties,
     isStream: proxyRequest.isStream,
     omitLog: proxyRequest.omitOptions.omitRequest,
@@ -225,8 +228,8 @@ export async function dbLoggableRequestFromAsyncLogModel(
 
       unsafeGetBodyText: async () =>
         JSON.stringify(asyncLogModel.providerRequest.json),
-      path: asyncLogModel.providerRequest.url,
-      targetUrl: asyncLogModel.providerRequest.url,
+      path: redactSecretsFromUrl(asyncLogModel.providerRequest.url),
+      targetUrl: redactSecretsFromUrl(asyncLogModel.providerRequest.url),
       properties: providerRequestHeaders.heliconeProperties,
       isStream: asyncLogModel.providerRequest.json?.stream == true,
       omitLog: false,
@@ -930,12 +933,20 @@ export class DBLoggable {
 
     const kafkaMessage: MessageData = {
       id: this.request.requestId,
+      // SECRET IN TRANSIT: this is the caller's raw Helicone credential (API
+      // key, proxy key or customer-portal key). Jawn's log consumer
+      // (valhalla/jawn/src/lib/handlers/AuthenticationHandler.ts) still
+      // re-authenticates every message from it, so it cannot be replaced by a
+      // key id/hash + org id until Jawn accepts that shape. Never log this
+      // message body; the queue must be treated as secret-bearing.
       authorization: requestHeaders.heliconeAuthV2.token,
       heliconeMeta: {
         modelOverride: requestHeaders.modelOverride ?? undefined,
         omitRequestLog: requestHeaders.omitHeaders.omitRequest,
         omitResponseLog: requestHeaders.omitHeaders.omitResponse,
         webhookEnabled: requestHeaders.webhookEnabled,
+        // SECRET IN TRANSIT: Jawn's PostHogHandler / LytixHandler use these
+        // caller-supplied keys to forward events, so they must stay raw.
         posthogApiKey: requestHeaders.posthogKey ?? undefined,
         lytixKey: requestHeaders.lytixKey ?? undefined,
         lytixHost: requestHeaders.lytixHost ?? undefined,
@@ -974,10 +985,10 @@ export class DBLoggable {
           properties: this.request.properties,
           heliconeApiKeyId: authParams.heliconeApiKeyId, // If undefined, proxy key id must be present
           heliconeProxyKeyId: this.request.heliconeProxyKeyId ?? undefined,
-          targetUrl: this.request.targetUrl,
+          targetUrl: redactSecretsFromUrl(this.request.targetUrl),
           provider: this.request.provider,
           bodySize: await this.request.requestBodyBuffer.bodyLength(),
-          path: this.request.path,
+          path: redactSecretsFromUrl(this.request.path),
           threat: this.request.threat ?? undefined,
           countryCode: this.request.country_code ?? undefined,
           requestCreatedAt: this.request.startTime ?? new Date(),

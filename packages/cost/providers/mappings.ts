@@ -30,69 +30,73 @@ import { costs as vercelCosts } from "./vercel";
 
 // Matches both standard api.openai.com and US data residency us.api.openai.com
 const openAiPattern = /^https:\/\/(us\.)?api\.openai\.com(\/|$)/;
-const anthropicPattern = /^https:\/\/api\.anthropic\.com/;
+const anthropicPattern = /^https:\/\/api\.anthropic\.com(\/|$)/;
+// The subdomain label excludes "/" so a dotless host cannot borrow an Azure
+// suffix from the path ("https://intranet/.openai.azure.com").
 export const azurePattern =
-  /^(https?:\/\/)?([^.]*\.)?(openai\.azure\.com|azure-api\.net|cognitiveservices\.azure\.com|services\.ai\.azure\.com)(\/.*)?$/;
-const llamaApiPattern = /^https:\/\/api\.llama\.com/;
-const nvidiaApiPattern = /^https:\/\/integrate\.api\.nvidia\.com/;
+  /^(https?:\/\/)?([^./]*\.)?(openai\.azure\.com|azure-api\.net|cognitiveservices\.azure\.com|services\.ai\.azure\.com)(\/.*)?$/;
+const llamaApiPattern = /^https:\/\/api\.llama\.com(\/|$)/;
+const nvidiaApiPattern = /^https:\/\/integrate\.api\.nvidia\.com(\/|$)/;
 const localProxyPattern = /^http:\/\/127\.0\.0\.1:\d+\/v\d+\/?$/;
-const heliconeProxyPattern = /^https:\/\/oai\.hconeai\.com/;
-const heliconeInferencePattern = /^https:\/\/inference\.helicone\.ai/;
-const amdbartekPattern = /^https:\/\/.*\.amdbartek\.dev/;
-const anyscalePattern = /^https:\/\/api\.endpoints\.anyscale\.com/;
-const cloudflareAiGatewayPattern = /^https:\/\/gateway\.ai\.cloudflare\.com/;
-const twoYFV = /^https:\/\/api\.2yfv\.com/;
-const togetherPattern = /^https:\/\/api\.together\.xyz/;
-const lemonFox = /^https:\/\/api\.lemonfox\.ai/;
-const fireworks = /^https:\/\/api\.fireworks\.ai/;
-const perplexity = /^https:\/\/api\.perplexity\.ai/;
-const googleapis = /^https:\/\/(.*\.)?googleapis\.com/;
+const heliconeProxyPattern = /^https:\/\/oai\.hconeai\.com(\/|$)/;
+const heliconeInferencePattern = /^https:\/\/inference\.helicone\.ai(\/|$)/;
+const amdbartekPattern = /^https:\/\/([a-z0-9-]+\.)+amdbartek\.dev(\/|$)/;
+const anyscalePattern = /^https:\/\/api\.endpoints\.anyscale\.com(\/|$)/;
+const cloudflareAiGatewayPattern =
+  /^https:\/\/gateway\.ai\.cloudflare\.com(\/|$)/;
+const twoYFV = /^https:\/\/api\.2yfv\.com(\/|$)/;
+const togetherPattern = /^https:\/\/api\.together\.xyz(\/|$)/;
+const lemonFox = /^https:\/\/api\.lemonfox\.ai(\/|$)/;
+const fireworks = /^https:\/\/api\.fireworks\.ai(\/|$)/;
+const perplexity = /^https:\/\/api\.perplexity\.ai(\/|$)/;
+const googleapis = /^https:\/\/([a-z0-9-]+\.)*googleapis\.com(\/|$)/;
 // openrouter.ai or api.openrouter.ai
-const openRouter = /^https:\/\/(api\.)?openrouter\.ai/;
+const openRouter = /^https:\/\/(api\.)?openrouter\.ai(\/|$)/;
 //api.wisdominanutshell.academy
-const wisdomInANutshell = /^https:\/\/api\.wisdominanutshell\.academy/;
+const wisdomInANutshell = /^https:\/\/api\.wisdominanutshell\.academy(\/|$)/;
 // api.groq.com
-const groq = /^https:\/\/api\.groq\.com/;
+const groq = /^https:\/\/api\.groq\.com(\/|$)/;
 // cohere.ai
-const cohere = /^https:\/\/api\.cohere\.ai/;
+const cohere = /^https:\/\/api\.cohere\.ai(\/|$)/;
 // api.mistral.ai
-const mistral = /^https:\/\/api\.mistral\.ai/;
+const mistral = /^https:\/\/api\.mistral\.ai(\/|$)/;
 // https://api.deepinfra.com
-const deepinfra = /^https:\/\/api\.deepinfra\.com/;
+const deepinfra = /^https:\/\/api\.deepinfra\.com(\/|$)/;
 //https://qstash.upstash.io/llm
-const qstash = /^https:\/\/qstash\.upstash\.io/;
+const qstash = /^https:\/\/qstash\.upstash\.io(\/|$)/;
 //https://www.firecrawl.dev/
-const firecrawl = /^https:\/\/api\.firecrawl\.dev/;
+const firecrawl = /^https:\/\/api\.firecrawl\.dev(\/|$)/;
 // https://bedrock-runtime.{some-region}.amazonaws.com/{something-after}
-const awsBedrock = /^https:\/\/bedrock-runtime\.[a-z0-9-]+\.amazonaws\.com\/.*/;
+const awsBedrock =
+  /^https:\/\/bedrock-runtime\.[a-z0-9-]+\.amazonaws\.com(\/|$)/;
 // https://bedrock-runtime.{some-region}.amazonaws.com/{something-after} same runtime
-const awsNova = /^https:\/\/bedrock-runtime\.[a-z0-9-]+\.amazonaws\.com\/.*/;
+const awsNova = /^https:\/\/bedrock-runtime\.[a-z0-9-]+\.amazonaws\.com(\/|$)/;
 // https://api.deepseek.com
-const deepseek = /^https:\/\/api\.deepseek\.com/;
+const deepseek = /^https:\/\/api\.deepseek\.com(\/|$)/;
 // https://api.x.ai
-const x = /^https:\/\/api\.x\.ai/;
-const avianPattern = /^https:\/\/api\.avian\.io/;
+const x = /^https:\/\/api\.x\.ai(\/|$)/;
+const avianPattern = /^https:\/\/api\.avian\.io(\/|$)/;
 
 //https://api.tokenfactory.nebius.com
-const nebius = /^https:\/\/api\.tokenfactory\.nebius\.com/;
+const nebius = /^https:\/\/api\.tokenfactory\.nebius\.com(\/|$)/;
 
 // https://ai-gateway.vercel.sh
-const vercelGateway = /^https:\/\/ai-gateway\.vercel\.sh/;
+const vercelGateway = /^https:\/\/ai-gateway\.vercel\.sh(\/|$)/;
 
 // https://api.novita.ai
-const novita = /^https:\/\/api\.novita\.ai/;
+const novita = /^https:\/\/api\.novita\.ai(\/|$)/;
 
 // api.openpipe.ai
-const openpipe = /^https:\/\/api\.openpipe\.ai/;
+const openpipe = /^https:\/\/api\.openpipe\.ai(\/|$)/;
 
 // llm.chutes.com and chutes.com
-const chutes = /^https:\/\/(llm\.)?chutes\.com/;
+const chutes = /^https:\/\/(llm\.)?chutes\.com(\/|$)/;
 
 // https://api.cerebras.ai
-const cerebras = /^https:\/\/api\.cerebras\.ai/;
+const cerebras = /^https:\/\/api\.cerebras\.ai(\/|$)/;
 
 // https://inference.canopywave.io
-const canopywave = /^https:\/\/inference\.canopywave\.io/;
+const canopywave = /^https:\/\/inference\.canopywave\.io(\/|$)/;
 
 export const providersNames = [
   "OPENAI",
@@ -325,7 +329,7 @@ export const providers: {
     pattern: canopywave,
     provider: "CANOPYWAVE",
     costs: [],
-  }
+  },
 ];
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -335,7 +339,61 @@ export const defaultProvider = providers.find(
 
 export const allCosts = providers.flatMap((provider) => provider.costs ?? []);
 
-export const approvedDomains = providers.map((provider) => provider.pattern);
+// Hosts the worker forwards to that have no entry in `providers` (no provider
+// detection or cost data), but which the gateway must still be allowed to
+// reach: AI Gateway registry endpoints (baseten, chutes) and the hardcoded
+// GATEWAY_TARGETs in worker/src/index.ts (hyperbolic, predibase, llmmapper).
+// Previously these were only rate limited; now unapproved hosts get a 403.
+const gatewayOnlyApprovedDomains: RegExp[] = [
+  /^https:\/\/inference\.baseten\.co(\/|$)/,
+  /^https:\/\/(llm|api)\.chutes\.ai(\/|$)/,
+  /^https:\/\/api\.hyperbolic\.xyz(\/|$)/,
+  /^https:\/\/api\.app\.predibase\.com(\/|$)/,
+  /^https:\/\/gateway\.llmmapper\.com(\/|$)/,
+];
+
+export const approvedDomains = [
+  ...providers.map((provider) => provider.pattern),
+  ...gatewayOnlyApprovedDomains,
+];
+
+/**
+ * Returns true when `apiBase` points at an approved provider host.
+ *
+ * The check runs against the *parsed* URL (origin + pathname), never the raw
+ * string, so userinfo, query, and fragment tricks cannot split what the regex
+ * sees from what `fetch` will actually connect to:
+ *
+ *   "https://api.anthropic.com@attacker.com/"  -> origin "https://attacker.com" -> rejected
+ *   "https://api.anthropic.com.evil.com/"      -> rejected by the (\/|$) anchors
+ *   "https://api.anthropic.com/v1/messages"    -> accepted
+ *
+ * `undefined` means "no override requested" and is accepted; an unparseable
+ * string, one carrying credentials, or plain http (other than the local dev
+ * proxy) is rejected.
+ */
+export function isApprovedApiBase(apiBase: string | undefined | null): boolean {
+  if (apiBase === undefined || apiBase === null) return true;
+
+  let url: URL;
+  try {
+    url = new URL(apiBase);
+  } catch {
+    return false;
+  }
+
+  if (url.username || url.password) return false;
+  if (url.protocol !== "https:" && url.protocol !== "http:") return false;
+
+  const normalized = `${url.origin}${url.pathname}`;
+  // Plain http is only acceptable for the local development proxy. Every
+  // provider host must be reached over TLS so the forwarded key is not sent
+  // in the clear.
+  if (url.protocol === "http:" && !localProxyPattern.test(normalized)) {
+    return false;
+  }
+  return approvedDomains.some((domain) => domain.test(normalized));
+}
 
 export const modelNames = allCosts.map((cost) => cost.model.value);
 

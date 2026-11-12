@@ -259,9 +259,7 @@ export const LegacyProPlanCard = () => {
     getBillingCycleDates,
   } = useProSubscription();
 
-  const hasPromptsAddon =
-    (org?.currentOrg?.stripe_metadata as { addons?: { prompts?: boolean } })
-      ?.addons?.prompts ?? false;
+  const hasPromptsAddon = org?.currentOrg?.addons?.prompts ?? false;
 
   return (
     <div className="flex max-w-5xl flex-row gap-6 pb-8">

@@ -1,6 +1,6 @@
+import type { OrgRow } from "@/components/layout/org/OrgContextValue";
 import { OrgContextValue } from "@/components/layout/org/OrgContextValue";
 import useNotification from "@/components/shared/notification/useNotification";
-import { Database } from "@/db/database.types";
 import { useHeliconeAuthClient } from "@/packages/common/auth/client/AuthClientFactory";
 import { HeliconeUser } from "@/packages/common/auth/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -129,7 +129,7 @@ const useGetOrgs = () => {
 };
 
 const identifyUserOrg = (
-  org: Database["public"]["Tables"]["organization"]["Row"],
+  org: OrgRow,
   user: HeliconeUser,
 ) => {
   if (user) {
@@ -152,7 +152,6 @@ const identifyUserOrg = (
     posthog.group("organization", org.id, {
       name: org.name || "",
       tier: org.tier || "",
-      stripe_customer_id: org.stripe_customer_id || "",
       organization_type: org.organization_type || "",
       date_joined: org.created_at || "",
       has_onboarded: org.has_onboarded || false,
@@ -181,11 +180,13 @@ const identifyUserOrg = (
   }
 };
 
-const useAddOrgMemberMutation = () => {
+// Member management is authorized against the organization the request is
+// signed in to, so the client must authenticate as the target org.
+const useAddOrgMemberMutation = (orgId?: string) => {
   const queryClient = useQueryClient();
   const { setNotification } = useNotification();
   
-  return $JAWN_API.useMutation("post", "/v1/organization/{organizationId}/add_member", {
+  return $JAWN_API_WITH_ORG(orgId).useMutation("post", "/v1/organization/{organizationId}/add_member", {
     onSuccess: (_data, variables) => {
       setNotification("Member added successfully", "success");
       

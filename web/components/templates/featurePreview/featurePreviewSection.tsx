@@ -100,7 +100,7 @@ const FeaturePreviewSection = ({
                 className="h-[52px] items-center justify-center gap-2.5 rounded-xl bg-[hsl(var(--primary))] px-6 py-1 text-lg font-medium leading-normal tracking-normal text-[hsl(var(--primary-foreground))]"
                 variant="action"
               >
-                Start 7-day free trial
+                Contact us to upgrade
               </Button>
             </div>
           )}

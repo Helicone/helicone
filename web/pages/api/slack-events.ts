@@ -1,27 +1,18 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import crypto from "crypto";
+import { buffer } from "micro";
 
 import { IntercomSlackService } from "../../lib/intercom-slack-service";
+import { verifySlackSignature } from "../../lib/slack/verifySlackSignature";
 
-// Verify Slack webhook signature
-function verifySlackWebhook(
-  payload: string,
-  signature: string,
-  secret: string,
-): boolean {
-  const timestamp = signature.split(",")[0].replace("t=", "");
-  const hash = signature.split(",")[1].replace("v0=", "");
+// Slack signs the exact request bytes, so we need the raw body.
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
 
-  const baseString = `v0:${timestamp}:${payload}`;
-  const expectedHash = crypto
-    .createHmac("sha256", secret)
-    .update(baseString)
-    .digest("hex");
-
-  return crypto.timingSafeEqual(
-    Buffer.from(hash, "hex"),
-    Buffer.from(expectedHash, "hex"),
-  );
+function headerValue(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
 }
 
 interface SlackEvent {
@@ -53,12 +44,6 @@ export default async function handler(
   }
 
   try {
-    // Handle Slack URL verification challenge
-    if (req.body.type === "url_verification") {
-      return res.status(200).json({ challenge: req.body.challenge });
-    }
-
-    const signature = req.headers["x-slack-signature"] as string;
     const slackSecret = process.env.SLACK_SIGNING_SECRET;
 
     if (!slackSecret) {
@@ -67,14 +52,33 @@ export default async function handler(
         .json({ error: "Slack signing secret not configured" });
     }
 
-    const payload = JSON.stringify(req.body);
+    const rawBody = await buffer(req);
 
-    // Verify webhook signature
-    if (!signature || !verifySlackWebhook(payload, signature, slackSecret)) {
+    // Verify the signature over the raw body (with the 5-minute replay
+    // window) before acting on anything in it, including url_verification.
+    if (
+      !verifySlackSignature({
+        rawBody,
+        signature: headerValue(req.headers["x-slack-signature"]),
+        timestamp: headerValue(req.headers["x-slack-request-timestamp"]),
+        signingSecret: slackSecret,
+      })
+    ) {
       return res.status(401).json({ error: "Invalid signature" });
     }
 
-    const eventData = req.body as SlackEventPayload;
+    let eventData: SlackEventPayload & { challenge?: string };
+    try {
+      eventData = JSON.parse(rawBody.toString("utf8"));
+    } catch {
+      return res.status(400).json({ error: "Invalid JSON body" });
+    }
+
+    // Handle Slack URL verification challenge
+    if (eventData.type === "url_verification") {
+      return res.status(200).json({ challenge: eventData.challenge });
+    }
+
     const service = new IntercomSlackService();
 
     // Handle different event types
