@@ -6335,6 +6335,24 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
         "*",
       ],
     },
+    "gpt-oss-120b:nebius": {
+      "context": 131072,
+      "crossRegion": false,
+      "maxTokens": 131072,
+      "modelId": "openai/gpt-oss-120b",
+      "parameters": [
+        "max_tokens",
+        "temperature",
+        "tool_choice",
+        "tools",
+        "top_p",
+      ],
+      "provider": "nebius",
+      "ptbEnabled": false,
+      "regions": [
+        "*",
+      ],
+    },
     "gpt-oss-120b:openrouter": {
       "context": 131072,
       "crossRegion": false,
@@ -7689,6 +7707,7 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "deepinfra",
     "groq",
     "groq",
+    "nebius",
     "novita",
     "openrouter",
     "openrouter",
@@ -9849,6 +9868,16 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "web_search": 0.01,
       },
     ],
+    "nebius": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.6666666666666666,
+        },
+        "input": 1.5e-7,
+        "output": 6e-7,
+        "threshold": 0,
+      },
+    ],
     "novita": [
       {
         "input": 5e-8,
@@ -10514,6 +10543,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
         "cerebras",
         "deepinfra",
         "groq",
+        "nebius",
         "openrouter",
       ],
     },
@@ -10902,7 +10932,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
       "provider": "mistral",
     },
     {
-      "modelCount": 4,
+      "modelCount": 5,
       "provider": "nebius",
     },
     {
@@ -11049,8 +11079,8 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 329,
-  "totalModelProviderConfigs": 329,
+  "totalEndpoints": 330,
+  "totalModelProviderConfigs": 330,
   "totalModelsWithPtb": 108,
   "totalProviders": 21,
 }
