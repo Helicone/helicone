@@ -205,7 +205,11 @@ const AuthLayout = (props: AuthLayoutProps) => {
                   minSize={30}
                   className="relative h-full"
                 >
-                  <MainContent banner={banner} pathname={pathname}>
+                  <MainContent
+                    banner={banner}
+                    pathname={pathname}
+                    isSignedIn={Boolean(auth.user?.id)}
+                  >
                     <ErrorBoundary>{children}</ErrorBoundary>
                   </MainContent>
                 </ResizablePanel>

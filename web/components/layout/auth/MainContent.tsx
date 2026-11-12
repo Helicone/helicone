@@ -5,6 +5,7 @@ interface MainContentProps {
   children: React.ReactNode;
   banner: BannerType | null;
   pathname: string;
+  isSignedIn: boolean;
 }
 
 export interface BannerType {
@@ -19,17 +20,56 @@ export interface BannerType {
   onDismiss?: () => void;
 }
 
-const OwnershipNoticeBanner = () => (
+const OwnershipNoticeBanner = ({ isSignedIn }: { isSignedIn: boolean }) => (
   <div className="relative bg-sky-600 px-4 py-3 text-white sm:px-6">
     <div className="mx-auto flex max-w-6xl items-center gap-4">
       <p className="text-sm font-semibold">
-        Helicone is no longer part of Mintlify. Details to come soon.
+        Helicone is now part of{" "}
+        <a
+          href="https://www.experientiallabs.ai/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline underline-offset-2 hover:text-white"
+        >
+          Experiential Labs
+        </a>
+        .{" "}
+        {isSignedIn ? (
+          <>
+            Your Helicone subscription includes an{" "}
+            <a
+              href="https://www.experientiallabs.ai/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2 hover:text-white"
+            >
+              Experiential Labs
+            </a>{" "}
+            subscription.{" "}
+            <a
+              href="https://experiential-labs.cal.com/silen/helicone"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2 hover:text-white"
+            >
+              Book a meeting with a founder
+            </a>{" "}
+            to redeem it.
+          </>
+        ) : (
+          "Details to come soon."
+        )}
       </p>
     </div>
   </div>
 );
 
-const MainContent = ({ children, banner, pathname }: MainContentProps) => {
+const MainContent = ({
+  children,
+  banner,
+  pathname,
+  isSignedIn,
+}: MainContentProps) => {
   return (
     <div
       className={clsx(
@@ -37,7 +77,7 @@ const MainContent = ({ children, banner, pathname }: MainContentProps) => {
       )}
     >
       <main className="flex-1">
-        <OwnershipNoticeBanner />
+        <OwnershipNoticeBanner isSignedIn={isSignedIn} />
         {banner && (
           <div>
             <div
