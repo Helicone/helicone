@@ -275,6 +275,8 @@ describe("modelCostBreakdownFromRegistry", () => {
         output: 50000,
         cacheDetails: {
           cachedInput: 10000,
+          write5m: 5000,
+          write1h: 5000,
         },
       };
 
@@ -290,8 +292,10 @@ describe("modelCostBreakdownFromRegistry", () => {
         expect(breakdown.inputCost).toBe(100000 * 0.000003);
         expect(breakdown.outputCost).toBe(50000 * 0.000015);
         expect(breakdown.cachedInputCost).toBe(10000 * 0.000003 * 0.1);
+        expect(breakdown.cacheWrite5mCost).toBe(5000 * 0.000003 * 1.25);
+        expect(breakdown.cacheWrite1hCost).toBe(5000 * 0.000003 * 2.0);
         expect(breakdown.totalCost).toBe(
-          breakdown.inputCost + breakdown.outputCost + breakdown.cachedInputCost
+          breakdown.inputCost + breakdown.outputCost + breakdown.cachedInputCost + breakdown.cacheWrite5mCost + breakdown.cacheWrite1hCost
         );
       }
     });
@@ -303,6 +307,7 @@ describe("modelCostBreakdownFromRegistry", () => {
         cacheDetails: {
           cachedInput: 10000,
           write5m: 5000,
+          write1h: 5000,
         },
       };
 
@@ -319,6 +324,7 @@ describe("modelCostBreakdownFromRegistry", () => {
         expect(breakdown.outputCost).toBe(50000 * 0.0000225);
         expect(breakdown.cachedInputCost).toBe(10000 * 0.000003 * 0.1);
         expect(breakdown.cacheWrite5mCost).toBe(5000 * 0.000003 * 1.25);
+        expect(breakdown.cacheWrite1hCost).toBe(5000 * 0.000003 * 2.0);
       }
     });
 
