@@ -76,7 +76,7 @@ const chatCompletion = await openai.chat.completions.create(
         content: hprompt\`Write a story about \${{ scene }}\`,
       },
     ],
-    model: "gpt-3.5-turbo",
+    model: "gpt-6-luna",
   },
   {
     // 3. Add Prompt Id Header
