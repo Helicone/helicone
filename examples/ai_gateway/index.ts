@@ -14,9 +14,9 @@ const withAnthropicSDK = async () => {
     },
   });
   const aiResponse = await anthropic.messages.create({
-    // model: "claude-3-7-sonnet-20250219/anthropic",
+    // model: "claude-sonnet-4-6/anthropic",
     model:
-      "claude-3-7-sonnet-20250219/anthropic, us.anthropic.claude-3-7-sonnet-20250219-v1:0/bedrock",
+      "claude-sonnet-4-6/anthropic, us.anthropic.claude-sonnet-4-6-20260217-v1:0/bedrock",
     system: "You are a helpful assistant.",
     messages: [
       {
@@ -26,7 +26,7 @@ const withAnthropicSDK = async () => {
     ],
     max_tokens: 100,
   });
-  console.log("Claude 3.7 Sonnet response using Anthropic SDK:");
+  console.log("Claude Sonnet 4.6 response using Anthropic SDK:");
   console.log(JSON.stringify(aiResponse, null, 2));
 };
 
@@ -59,7 +59,7 @@ const directBedrock = async (openai: OpenAI) => {
   // Example with Bedrock endpoint
   const bedrockCompletion = await openai.chat.completions
     .create({
-      model: "us.anthropic.claude-3-7-sonnet-20250219-v1:0/bedrock",
+      model: "us.anthropic.claude-sonnet-4-6-20260217-v1:0/bedrock",
       messages: [
         {
           role: "system",
@@ -74,7 +74,7 @@ const directBedrock = async (openai: OpenAI) => {
     })
     .withResponse();
 
-  console.log("\nBedrock Claude 3.7 Sonnet response:");
+  console.log("\nBedrock Claude Sonnet 4.6 response:");
   console.log(JSON.stringify(bedrockCompletion.data, null, 2));
 };
 
@@ -82,7 +82,7 @@ const directAnthropic = async (openai: OpenAI) => {
   // Example with Anthropic direct endpoint
   const anthropicCompletion = await openai.chat.completions
     .create({
-      model: "claude-3-7-sonnet-20250219/anthropic",
+      model: "claude-sonnet-4-6/anthropic",
       messages: [
         {
           role: "system",
@@ -97,7 +97,7 @@ const directAnthropic = async (openai: OpenAI) => {
     })
     .withResponse();
 
-  console.log("\nAnthropic Claude 3.7 Sonnet response:");
+  console.log("\nAnthropic Claude Sonnet 4.6 response:");
   console.log(JSON.stringify(anthropicCompletion.data, null, 2));
 };
 
@@ -106,7 +106,7 @@ const fallbackWithDirect = async (openai: OpenAI) => {
   const fallbackCompletion = await openai.chat.completions
     .create({
       model:
-        "us.anthropic.claude-3-7-sonnet-20250219-v1:0/bedrock,claude-3-7-sonnet-20250219/anthropic",
+        "us.anthropic.claude-sonnet-4-6-20260217-v1:0/bedrock,claude-sonnet-4-6/anthropic",
       messages: [
         {
           role: "system",
