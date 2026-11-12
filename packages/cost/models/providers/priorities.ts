@@ -21,6 +21,7 @@ export const PROVIDER_PRIORITIES: Record<ModelProviderName, number> = {
   openai: 3,
 
   // Priority 4: All other providers (default)
+  atlascloud: 4,
   azure: 4,
   baseten: 4,
   bedrock: 4,
