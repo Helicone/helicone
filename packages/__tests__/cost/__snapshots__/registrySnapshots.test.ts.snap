@@ -10054,8 +10054,8 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         "cacheMultipliers": {
           "cachedInput": 0.15,
         },
-        "input": 2e-8,
-        "output": 1e-7,
+        "input": 1.8e-8,
+        "output": 9e-8,
         "threshold": 0,
       },
     ],
