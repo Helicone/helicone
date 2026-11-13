@@ -64,7 +64,7 @@ type SortField =
   | "cacheWriteTokens";
 type SortDirection = "asc" | "desc";
 
-const Credits: NextPageWithLayout<void> = () => {
+const Credits: NextPageWithLayout = () => {
   // Overview tab state
   const [currentPageToken, setCurrentPageToken] = useState<string | null>(null);
   const [pageTokenHistory, setPageTokenHistory] = useState<string[]>([]);

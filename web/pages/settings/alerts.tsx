@@ -4,7 +4,7 @@ import { ReactElement } from "react";
 import AuthLayout from "../../components/layout/auth/authLayout";
 import AlertsPage from "../../components/templates/alerts/alertsPage";
 
-const AlertsSettings: NextPageWithLayout<void> = () => {
+const AlertsSettings: NextPageWithLayout = () => {
   return <AlertsPage />;
 };
 
