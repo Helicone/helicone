@@ -143,6 +143,35 @@ export const endpoints = {
       "*": {},
     },
   },
+  "deepseek-reasoner:quicksilverpro": {
+    provider: "quicksilverpro",
+    author: "deepseek",
+    providerModelId: "deepseek-r1",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.0000004, // $0.40 per 1M tokens
+        output: 0.0000017, // $1.70 per 1M tokens
+      },
+    ],
+    contextLength: 128_000,
+    maxCompletionTokens: 64_000,
+    supportedParameters: [
+      "frequency_penalty",
+      "max_tokens",
+      "presence_penalty",
+      "response_format",
+      "seed",
+      "stop",
+      "stream",
+      "temperature",
+      "top_p",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<
     `${DeepSeekReasonerModelName}:${ModelProviderName}`,
