@@ -35,6 +35,12 @@ const canopywaveAuthExpectations = {
   },
 };
 
+const flexaiAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
 describe("Alibaba Registry Tests", () => {
   beforeEach(() => {
     // Clear all mocks between tests
@@ -5564,5 +5570,94 @@ describe("Alibaba Registry Tests", () => {
         }));
     });
 
+  });
+
+  describe("BYOK Tests - Qwen3 Coder 30B A3B Instruct with FlexAI Provider", () => {
+    describe("qwen3-coder-30b-a3b-instruct", () => {
+      it("should handle flexai provider", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/flexai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.flex.ai/v1/chat/completions",
+                response: "success",
+                model: "Qwen3-Coder-30B-A3B-Instruct-FP8",
+                data: createOpenAIMockResponse("Qwen3-Coder-30B-A3B-Instruct-FP8"),
+                expects: flexaiAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle provider failure", () =>
+        runGatewayTest({
+          model: "qwen3-coder-30b-a3b-instruct/flexai",
+          expected: {
+            providers: [
+              {
+                url: "https://api.flex.ai/v1/chat/completions",
+                response: "failure",
+                statusCode: 500,
+                errorMessage: "FlexAI service unavailable",
+              },
+            ],
+            finalStatus: 500,
+          },
+        }));
+    });
+  });
+
+  describe("Parameter Tests - Qwen3 Coder 30B A3B Instruct on FlexAI", () => {
+    it("should forward tool calls", () =>
+      runGatewayTest({
+        model: "qwen3-coder-30b-a3b-instruct/flexai",
+        request: {
+          body: {
+            messages: [{ role: "user", content: "What's the weather?" }],
+            tools: [
+              {
+                type: "function",
+                function: {
+                  name: "get_weather",
+                  description: "Get current weather",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      location: { type: "string" },
+                    },
+                    required: ["location"],
+                  },
+                },
+              },
+            ],
+            tool_choice: "auto",
+            temperature: 0.7,
+            max_tokens: 1000,
+          },
+        },
+        expected: {
+          providers: [
+            {
+              url: "https://api.flex.ai/v1/chat/completions",
+              response: "success",
+              model: "Qwen3-Coder-30B-A3B-Instruct-FP8",
+              data: createOpenAIMockResponse("Qwen3-Coder-30B-A3B-Instruct-FP8"),
+              expects: {
+                ...flexaiAuthExpectations,
+                bodyContains: [
+                  "tools",
+                  "tool_choice",
+                  "get_weather",
+                  "temperature",
+                  "max_tokens",
+                ],
+              },
+            },
+          ],
+          finalStatus: 200,
+        },
+      }));
   });
 });
