@@ -59,9 +59,11 @@ export class AlertStore {
     if (!alert.grouping) return "";
 
     if (alert.grouping_is_property) {
-      // Sanitize property name: escape single quotes to prevent injection
-      const sanitized = alert.grouping.replace(/'/g, "\\'");
-      return `properties['${sanitized}']`;
+      // Validate property name against safe identifier pattern to prevent ClickHouse injection
+      if (!AlertStore.SAFE_IDENTIFIER.test(alert.grouping)) {
+        throw new Error(`Invalid property name for grouping: ${alert.grouping}`);
+      }
+      return `properties['${alert.grouping}']`;
     }
 
     const mapped = AlertStore.STANDARD_GROUPING_MAP[alert.grouping];
