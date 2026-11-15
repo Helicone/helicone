@@ -4,6 +4,96 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
+      value: "zai-org/GLM-5.3",
+    },
+    cost: {
+      prompt_token: 0.0000014,
+      completion_token: 0.0000044,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "zai-org/GLM-5.3-Flash",
+    },
+    cost: {
+      prompt_token: 0.00000015,
+      completion_token: 0.0000005,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "deepseek-ai/DeepSeek-V4.1-Flash",
+    },
+    cost: {
+      prompt_token: 0.00000029,
+      completion_token: 0.0000012,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "openai/gpt-oss-120b",
+    },
+    cost: {
+      prompt_token: 0.00000005,
+      completion_token: 0.00000025,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "google/gemma-4-31b-it",
+    },
+    cost: {
+      prompt_token: 0.00000014,
+      completion_token: 0.0000004,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "qwen/Qwen3.8-27B",
+    },
+    cost: {
+      prompt_token: 0.00000025,
+      completion_token: 0.000002,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "nvidia/nemotron-3.5-super-vl-120b-a12b",
+    },
+    cost: {
+      prompt_token: 0.0000001,
+      completion_token: 0.0000004,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "nvidia/nemotron-3.5-lightning-30b-a3b",
+    },
+    cost: {
+      prompt_token: 0.00000005,
+      completion_token: 0.0000002,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
+      value: "nvidia/Nemotron-3-Nano-Omni-Reasoning-30B-A3B",
+    },
+    cost: {
+      prompt_token: 0.0000003,
+      completion_token: 0.00000183,
+    },
+  },
+  {
+    model: {
+      operator: "equals",
       value: "zai/GLM-5.2",
     },
     cost: {
@@ -19,26 +109,6 @@ export const costs: ModelRow[] = [
     cost: {
       prompt_token: 0.0000012,
       completion_token: 0.0000044,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "openai/gpt-oss-120b",
-    },
-    cost: {
-      prompt_token: 0.00000005,
-      completion_token: 0.0000002,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "google/gemma-4-31b-it",
-    },
-    cost: {
-      prompt_token: 0.00000014,
-      completion_token: 0.0000004,
     },
   },
   {
@@ -124,21 +194,8 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "nvidia/Nemotron-3-Nano-Omni-Reasoning-30B-A3B",
-    },
-    cost: {
-      prompt_token: 0.0000003,
-      completion_token: 0.00000183,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
       value: "nvidia/Nemotron-3.5-Lightning-30B-A3B",
     },
-    // The pricing page's output/cached columns are transposed for this row
-    // ($0.03 out / $0.20 cached as printed); the output rate is $0.20 per 1M,
-    // consistent with Nemotron 3 Nano, the other 30B-A3B in the catalog.
     cost: {
       prompt_token: 0.00000005,
       completion_token: 0.0000002,

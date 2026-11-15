@@ -7,7 +7,7 @@ export class CrusoeProvider extends BaseProvider {
   readonly auth = "api-key" as const;
   readonly pricingPages = ["https://www.crusoe.ai/cloud/pricing"];
   readonly modelPages = [
-    "https://docs.crusoecloud.com/managed-inference/overview",
+    "https://docs.crusoecloud.com/serverless-inference/available-models",
   ];
 
   buildUrl(endpoint: Endpoint, requestParams: RequestParams): string {
