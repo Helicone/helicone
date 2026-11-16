@@ -54,7 +54,7 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "qwen/Qwen3.8-27B",
+      value: "Qwen/Qwen3.8-27B",
     },
     cost: {
       prompt_token: 0.00000025,
@@ -64,7 +64,7 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "nvidia/nemotron-3.5-super-vl-120b-a12b",
+      value: "nvidia/NVIDIA-Nemotron-3.5-Super-VL",
     },
     cost: {
       prompt_token: 0.0000001,
@@ -74,7 +74,7 @@ export const costs: ModelRow[] = [
   {
     model: {
       operator: "equals",
-      value: "nvidia/nemotron-3.5-lightning-30b-a3b",
+      value: "nvidia/Nemotron-3.5-Lightning-30B-A3B",
     },
     cost: {
       prompt_token: 0.00000005,
@@ -189,16 +189,6 @@ export const costs: ModelRow[] = [
     cost: {
       prompt_token: 0.0000003,
       completion_token: 0.0000024,
-    },
-  },
-  {
-    model: {
-      operator: "equals",
-      value: "nvidia/Nemotron-3.5-Lightning-30B-A3B",
-    },
-    cost: {
-      prompt_token: 0.00000005,
-      completion_token: 0.0000002,
     },
   },
 ];
