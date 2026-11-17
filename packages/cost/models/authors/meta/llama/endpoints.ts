@@ -770,6 +770,8 @@ export const endpoints = {
       "top_logprobs",
       "response_format",
     ],
+    // Stripped before forwarding, so a request carrying them still succeeds.
+    unsupportedParameters: ["min_p", "logit_bias"],
     ptbEnabled: false,
     endpointConfigs: {
       "*": {},
