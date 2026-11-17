@@ -68,7 +68,7 @@ Helicone is simple to self-host and update. To get started locally, just use our
 ```bash
 # Clone the repository
 git clone https://github.com/Helicone/helicone.git
-cd docker
+cd helicone/docker
 cp .env.example .env
 
 # Start the services
