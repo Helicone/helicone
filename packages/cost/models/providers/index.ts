@@ -8,6 +8,7 @@ import { ChutesProvider } from "./chutes";
 import { DeepInfraProvider } from "./deepinfra";
 import { DeepSeekProvider } from "./deepseek";
 import { FireworksProvider } from "./fireworks";
+import { FlexAIProvider } from "./flexai";
 import { GoogleProvider } from "./google";
 import { GroqProvider } from "./groq";
 import { HeliconeProvider } from "./helicone";
@@ -32,6 +33,7 @@ export const providers = {
   deepinfra: new DeepInfraProvider(),
   deepseek: new DeepSeekProvider(),
   fireworks: new FireworksProvider(),
+  flexai: new FlexAIProvider(),
   "google-ai-studio": new GoogleProvider(),
   groq: new GroqProvider(),
   helicone: new HeliconeProvider(),
@@ -73,6 +75,7 @@ export const ResponsesAPIEnabledProviders: ModelProviderName[] = [
   "chutes",
   "deepinfra",
   "deepseek",
+  "flexai",
 
   // has known issues with returning structured JSONS
   // should be okay to enable, but its not stable enough to add without request

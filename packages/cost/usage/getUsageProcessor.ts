@@ -25,6 +25,7 @@ export function getUsageProcessor(
     case "nebius":
     case "novita":
     case "fireworks":
+    case "flexai":
     case "cerebras":
     case "perplexity":
       return new OpenAIUsageProcessor();

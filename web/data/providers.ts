@@ -265,6 +265,16 @@ export const providers: Provider[] = [
     relevanceScore: 4,
   },
   {
+    id: "flexai",
+    name: "FlexAI",
+    logoUrl: "/assets/home/providers/flexai.webp",
+    description: "Configure your FlexAI API keys",
+    docsUrl: "https://docs.helicone.ai/getting-started/integration-methods",
+    apiKeyLabel: "FlexAI API Key",
+    apiKeyPlaceholder: "...",
+    relevanceScore: 3,
+  },
+  {
     id: "chutes",
     name: "Chutes",
     logoUrl: "/assets/home/providers/chutes.webp",
