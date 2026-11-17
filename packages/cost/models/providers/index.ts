@@ -12,6 +12,7 @@ import { GoogleProvider } from "./google";
 import { GroqProvider } from "./groq";
 import { HeliconeProvider } from "./helicone";
 import { MistralProvider } from "./mistral";
+import { CrusoeProvider } from "./crusoe";
 import { NebiusProvider } from "./nebius";
 import { NovitaProvider } from "./novita";
 import { OpenAIProvider } from "./openai";
@@ -36,6 +37,7 @@ export const providers = {
   groq: new GroqProvider(),
   helicone: new HeliconeProvider(),
   mistral: new MistralProvider(),
+  crusoe: new CrusoeProvider(),
   nebius: new NebiusProvider(),
   novita: new NovitaProvider(),
   openai: new OpenAIProvider(),
@@ -80,6 +82,7 @@ export const ResponsesAPIEnabledProviders: ModelProviderName[] = [
   "cerebras",
   "groq",
   "mistral",
+  "crusoe",
   "nebius",
   "novita",
   "openrouter",
