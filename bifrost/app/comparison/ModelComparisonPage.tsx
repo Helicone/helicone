@@ -566,7 +566,8 @@ export function ModelComparisonPage({
       // Recognize the existing response too, so this page can ship before the API fix.
       const error = response.error as { error?: string } | undefined;
       if (
-        (response.response.status === 404 || response.response.status === 500) &&
+        (response.response.status === 404 ||
+          response.response.status === 500) &&
         error?.error === "No data found for model"
       ) {
         return [];
