@@ -91,32 +91,49 @@ export function restoreRedactedSecrets(
   incoming: Json | undefined,
   existing: Json | undefined
 ): Json | undefined {
-  if (
-    !incoming ||
-    typeof incoming !== "object" ||
-    Array.isArray(incoming)
-  ) {
-    return incoming;
-  }
-  const existingObj =
-    existing && typeof existing === "object" && !Array.isArray(existing)
+  return restoreMaskedValues(incoming, existing, false);
+}
+
+function restoreMaskedValues(
+  incoming: Json | undefined,
+  existing: Json | undefined,
+  secretContext: boolean
+): Json | undefined {
+  if (typeof incoming === "string") {
+    return secretContext && incoming.includes(MASK_MARKER)
       ? existing
-      : {};
-  const out: { [key: string]: Json | undefined } = {};
-  for (const [k, v] of Object.entries(incoming)) {
-    if (isSecretSettingKey(k) && containsMask(v)) {
-      if (k in existingObj) {
-        out[k] = existingObj[k];
-      }
-      continue;
-    }
-    if (v && typeof v === "object" && !Array.isArray(v)) {
-      out[k] = restoreRedactedSecrets(v, existingObj[k]);
-    } else {
-      out[k] = v;
-    }
+      : incoming;
   }
-  return out;
+  if (Array.isArray(incoming)) {
+    const previous = Array.isArray(existing) ? existing : [];
+    const out: Json[] = [];
+    incoming.forEach((value, index) => {
+      const restored = restoreMaskedValues(
+        value,
+        previous[index],
+        secretContext
+      );
+      if (restored !== undefined) out.push(restored);
+    });
+    return out;
+  }
+  if (incoming && typeof incoming === "object") {
+    const previous =
+      existing && typeof existing === "object" && !Array.isArray(existing)
+        ? existing
+        : {};
+    const out: { [key: string]: Json | undefined } = {};
+    for (const [key, value] of Object.entries(incoming)) {
+      const restored = restoreMaskedValues(
+        value,
+        previous[key],
+        secretContext || isSecretSettingKey(key)
+      );
+      if (restored !== undefined) out[key] = restored;
+    }
+    return out;
+  }
+  return incoming;
 }
 
 export class IntegrationManager extends BaseManager {
