@@ -17,7 +17,8 @@ function Calendar() {
   }, []);
   return (
     <Cal
-      calLink="team/helicone/helicone-discovery"
+      calLink="silen/experiential-intro"
+      calOrigin="https://experiential-labs.cal.com"
       style={{ width: "100%", height: "100%", overflow: "scroll" }}
       config={{ layout: "month_view" }}
     />

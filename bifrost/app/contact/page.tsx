@@ -61,7 +61,7 @@ const Contact = () => {
               Want to chat with the founders?
             </p>
             <Link
-              href={"https://cal.com/team/helicone/helicone-discovery"}
+              href={"https://cal.com/silen/experiential-intro"}
               className="text-gray-500 hover:text-black flex flex-row items-center gap-1 text-sm mt-2 w-fit"
               target="_blank"
               rel="noopener noreferrer"
