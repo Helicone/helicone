@@ -542,7 +542,11 @@ export function ModelComparisonPage({
   modelBDetails?: ModelDetails;
 }) {
   const jawnClient = useJawnClient();
-  const { data: models, isLoading } = useQuery({
+  const {
+    data: models,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["modelComparison", modelA, modelB],
     queryFn: async () => {
       const response = await jawnClient.POST("/v1/public/compare/models", {
@@ -559,8 +563,20 @@ export function ModelComparisonPage({
           },
         ],
       });
-      return response.data?.data ?? null;
+      // Recognize the existing response too, so this page can ship before the API fix.
+      const error = response.error as { error?: string } | undefined;
+      if (
+        (response.response.status === 404 || response.response.status === 500) &&
+        error?.error === "No data found for model"
+      ) {
+        return [];
+      }
+      if (!response.response.ok || !response.data?.data) {
+        throw new Error("Failed to load model comparison");
+      }
+      return response.data.data;
     },
+    retry: false,
   });
 
   const [selectedModelIndex, setSelectedModelIndex] = useState(0);
@@ -606,10 +622,22 @@ export function ModelComparisonPage({
           </div>
         </div>
 
+        {!isLoading && (isError || models?.length === 0) && (
+          <div
+            role={isError ? "alert" : "status"}
+            className="mx-auto max-w-2xl rounded-lg border border-slate-200 bg-slate-50 px-6 py-8 text-center text-slate-600"
+          >
+            {isError
+              ? "Comparison data is unavailable right now. Please try again later."
+              : "No usage data is available for one or both models in the last 30 days. Try another model pair."}
+          </div>
+        )}
+
         {isLoading ? (
           <LoadingCard />
         ) : (
-          models && (
+          models &&
+          models.length > 0 && (
             <div className="grid grid-cols-1 gap-8">
               <div className="max-w-5xl mx-auto">
                 <DirectComparisonCard
