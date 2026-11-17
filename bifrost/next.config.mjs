@@ -42,6 +42,11 @@ const nextConfig = {
   async redirects() {
     return [
       {
+        source: "/contact",
+        destination: "https://cal.com/silen/experiential-intro",
+        permanent: false,
+      },
+      {
         source: "/onboarding",
         destination: "https://us.helicone.ai/",
         permanent: true,
