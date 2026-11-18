@@ -78,7 +78,10 @@ function mapCandidates(candidates: GoogleCandidate[]): OpenAIChoice[] {
         ...(tool_calls.length > 0 && { tool_calls }),
         ...(images && images.length > 0 && { images }),
       } as OpenAIResponseMessage,
-      finish_reason: mapGoogleFinishReason(candidate.finishReason),
+      finish_reason: mapGoogleFinishReason(
+        candidate.finishReason,
+        tool_calls.length > 0
+      ),
       logprobs: null,
     };
   });
@@ -198,11 +201,14 @@ export function mapGoogleUsage(usage: GoogleUsageMetadata): OpenAIUsage {
 }
 
 export function mapGoogleFinishReason(
-  reason?: string
+  reason?: string,
+  hasToolCalls = false
 ): OpenAIFinishReason {
   switch (reason) {
     case "STOP":
-      return "stop";
+      // Gemini reports STOP even when the turn ended with functionCall parts;
+      // OpenAI clients expect "tool_calls" in that case.
+      return hasToolCalls ? "tool_calls" : "stop";
     case "MAX_TOKENS":
       return "length";
     case "SAFETY":
