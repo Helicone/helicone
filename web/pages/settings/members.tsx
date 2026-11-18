@@ -5,7 +5,7 @@ import OrgMembersPage from "../../components/templates/organization/members/orgM
 import { useOrg } from "../../components/layout/org/organizationContext";
 import SettingsLayout from "@/components/templates/settings/settingsLayout";
 
-const MembersSettings: NextPageWithLayout<void> = () => {
+const MembersSettings: NextPageWithLayout = () => {
   const orgContext = useOrg();
   return orgContext?.currentOrg ? (
     <div className="flex w-full max-w-6xl flex-col border-y border-border">

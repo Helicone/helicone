@@ -14,7 +14,7 @@ import { useGetOrgMembers } from "@/services/hooks/organizations";
 import { ShieldAlert } from "lucide-react";
 import { P } from "@/components/ui/typography";
 
-const ProvidersSettings: NextPageWithLayout<void> = () => {
+const ProvidersSettings: NextPageWithLayout = () => {
   const org = useOrg();
   const { user } = useHeliconeAuthClient();
   const { data: members, isLoading } = useGetOrgMembers(

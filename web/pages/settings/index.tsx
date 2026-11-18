@@ -5,7 +5,7 @@ import SettingsLayout from "@/components/templates/settings/settingsLayout";
 import { ReactElement } from "react";
 import AuthLayout from "../../components/layout/auth/authLayout";
 
-const Settings: NextPageWithLayout<void> = () => {
+const Settings: NextPageWithLayout = () => {
   const orgContext = useOrg();
   return orgContext?.currentOrg ? (
     <OrgSettingsPage org={orgContext.currentOrg} />
