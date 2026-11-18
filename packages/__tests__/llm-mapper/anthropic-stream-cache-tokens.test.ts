@@ -161,8 +161,8 @@ describe("toOpenAI (non-streaming) - Cache Token Handling", () => {
 
     const result = toOpenAI(anthropicResponse);
 
-    // prompt_tokens should be input_tokens + cache_read_input_tokens
-    expect(result.usage.prompt_tokens).toBe(4);
+    // prompt_tokens should be input_tokens + cache_read_input_tokens (same as streaming)
+    expect(result.usage.prompt_tokens).toBe(4 + 51713);
     expect(result.usage.total_tokens).toBe(4 + 51713 + 100);
     expect(result.usage.prompt_tokens_details?.cached_tokens).toBe(51713);
   });
