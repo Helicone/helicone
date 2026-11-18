@@ -1,0 +1,121 @@
+name: Jawn Valkey Compatibility Tests
+
+on:
+  workflow_dispatch: # Manual trigger for testing iterations
+  push:
+    branches:
+      - main
+    paths:
+      - "valhalla/jawn/**"
+      - "packages/**"
+      - ".github/workflows/jawn-valkey-test.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "valhalla/jawn/**"
+      - "packages/**"
+      - ".github/workflows/jawn-valkey-test.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  jawn-valkey-tests:
+    name: Jawn Valkey Compatibility Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Generate self-signed TLS certificates for Valkey
+      - name: Generate TLS certificates
+        run: |
+          mkdir -p /tmp/valkey-tls
+          openssl req -x509 -newkey rsa:4096 -sha256 -days 1 \
+            -nodes -keyout /tmp/valkey-tls/server.key \
+            -out /tmp/valkey-tls/server.crt \
+            -subj "/CN=localhost" \
+            -addext "subjectAltName=DNS:localhost,IP:127.0.0.1"
+          chmod 600 /tmp/valkey-tls/server.key
+          chmod 644 /tmp/valkey-tls/server.crt
+
+      # Start Valkey 7.2 with TLS enabled (minimum supported version)
+      - name: Start Valkey with TLS
+        run: |
+          docker run -d --name valkey \
+            -p 6379:6379 \
+            -v /tmp/valkey-tls:/tls:ro \
+            valkey/valkey:7.2-alpine \
+            valkey-server \
+              --tls-port 6379 \
+              --port 0 \
+              --tls-cert-file /tls/server.crt \
+              --tls-key-file /tls/server.key \
+              --tls-auth-clients no
+
+      - name: Wait for Valkey to be ready
+        run: |
+          for i in $(seq 1 30); do
+            if docker exec valkey valkey-cli --tls --cert /tls/server.crt --key /tls/server.key --cacert /tls/server.crt ping | grep -q PONG; then
+              echo "Valkey is ready with TLS"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Valkey failed to start"
+          docker logs valkey
+          exit 1
+
+      # Cache node_modules using root yarn.lock (the real lockfile)
+      - name: Cache dependencies
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            valhalla/jawn/node_modules
+            packages/*/node_modules
+          key: deps-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            deps-${{ runner.os }}-
+
+      # Install from root using yarn workspaces (only if cache miss)
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          echo "Cache miss - installing dependencies from root workspace"
+          yarn install --frozen-lockfile --network-timeout 100000
+
+      # Show cache status
+      - name: Cache status
+        run: |
+          if [ "${{ steps.cache.outputs.cache-hit }}" = "true" ]; then
+            echo "Using cached dependencies - skipped yarn install!"
+          else
+            echo "Cache miss - installed dependencies"
+          fi
+
+      - name: Run Valkey integration tests
+        working-directory: valhalla/jawn
+        env:
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          NODE_EXTRA_CA_CERTS: /tmp/valkey-tls/server.crt
+        # --forceExit is required: ioredis keeps handles open that prevent Jest from
+        # exiting cleanly even after quit() in afterAll. Without it the CI job hangs.
+        run: npx jest --detectOpenHandles --forceExit src/lib/clients/__tests__/redisClient.integration.test.ts
+
+      # Optional: Include test summary in PR
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "Jawn Valkey compatibility tests completed (TLS enabled, Valkey 7.2)"
+
+      - name: Cleanup
+        if: always()
+        run: docker rm -f valkey || true
