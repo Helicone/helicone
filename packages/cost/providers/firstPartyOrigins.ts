@@ -59,6 +59,7 @@ const FIRST_PARTY_ORIGINS: Record<string, OriginRule[]> = {
   cerebras: ["https://api.cerebras.ai"],
   nebius: ["https://api.tokenfactory.nebius.com"],
   canopywave: ["https://inference.canopywave.io"],
+  synap: ["https://synap402.com"],
   chutes: ["https://llm.chutes.ai", "https://api.chutes.ai"],
   cohere: ["https://api.cohere.ai", "https://api.cohere.com"],
   llama: ["https://api.llama.com"],
