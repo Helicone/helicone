@@ -84,8 +84,8 @@ export const costs: ModelRow[] = [
       value: "mistral-large",
     },
     cost: {
-      prompt_token: 0.002,
-      completion_token: 0.006,
+      prompt_token: 0.000002,
+      completion_token: 0.000006,
     },
   },
   {
@@ -94,8 +94,8 @@ export const costs: ModelRow[] = [
       value: "mistral-large-latest",
     },
     cost: {
-      prompt_token: 0.002,
-      completion_token: 0.006,
+      prompt_token: 0.000002,
+      completion_token: 0.000006,
     },
   },
   // Embedding Models
@@ -166,8 +166,8 @@ export const costs: ModelRow[] = [
       value: "mixtral-8x22b-instruct",
     },
     cost: {
-      prompt_token: 0.002,
-      completion_token: 0.006,
+      prompt_token: 0.000002,
+      completion_token: 0.000006,
     },
   },
 
@@ -177,8 +177,8 @@ export const costs: ModelRow[] = [
       value: "mistral-medium-3",
     },
     cost: {
-      prompt_token: 0.0004,
-      completion_token: 0.002,
+      prompt_token: 0.0000004,
+      completion_token: 0.000002,
     },
   },
 
@@ -188,8 +188,8 @@ export const costs: ModelRow[] = [
       value: "magistral-medium",
     },
     cost: {
-      prompt_token: 0.002,
-      completion_token: 0.005,
+      prompt_token: 0.000002,
+      completion_token: 0.000005,
     },
   },
 
@@ -199,8 +199,8 @@ export const costs: ModelRow[] = [
       value: "codestral",
     },
     cost: {
-      prompt_token: 0.0003,
-      completion_token: 0.0009,
+      prompt_token: 0.0000003,
+      completion_token: 0.0000009,
     },
   },
 
@@ -210,8 +210,8 @@ export const costs: ModelRow[] = [
       value: "devstral-medium",
     },
     cost: {
-      prompt_token: 0.0004,
-      completion_token: 0.002,
+      prompt_token: 0.0000004,
+      completion_token: 0.000002,
     },
   },
 
@@ -221,8 +221,8 @@ export const costs: ModelRow[] = [
       value: "mistral-saba",
     },
     cost: {
-      prompt_token: 0.0002,
-      completion_token: 0.0006,
+      prompt_token: 0.0000002,
+      completion_token: 0.0000006,
     },
   },
 
@@ -232,8 +232,8 @@ export const costs: ModelRow[] = [
       value: "pixtral-large",
     },
     cost: {
-      prompt_token: 0.002,
-      completion_token: 0.006,
+      prompt_token: 0.000002,
+      completion_token: 0.000006,
     },
   },
 
@@ -243,8 +243,8 @@ export const costs: ModelRow[] = [
       value: "mistral-small-3.2",
     },
     cost: {
-      prompt_token: 0.0001,
-      completion_token: 0.0003,
+      prompt_token: 0.0000001,
+      completion_token: 0.0000003,
     },
   },
 
@@ -254,8 +254,8 @@ export const costs: ModelRow[] = [
       value: "mixtral-8x22b",
     },
     cost: {
-      prompt_token: 0.002,
-      completion_token: 0.006,
+      prompt_token: 0.000002,
+      completion_token: 0.000006,
     },
   },
 ];
