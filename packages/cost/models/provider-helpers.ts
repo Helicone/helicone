@@ -79,6 +79,7 @@ export function heliconeProviderToModelProviderName(
     case "LLAMA":
     case "NVIDIA":
     case "VERCEL":
+    case "RUNCRATE":
       return null;
     default:
       return null;
