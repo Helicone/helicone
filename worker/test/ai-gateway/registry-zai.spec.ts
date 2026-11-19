@@ -17,6 +17,13 @@ const canopywaveAuthExpectations = {
   },
 };
 
+// Define auth expectations for Engy provider
+const engyAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
 describe("Zai Registry Tests", () => {
   beforeEach(() => {
     // Clear all mocks between tests
@@ -847,5 +854,114 @@ describe("Zai Registry Tests", () => {
           finalStatus: 200,
         },
       }));
+  });
+
+  describe("BYOK Tests - glm-5 with Engy Provider", () => {
+    describe("glm-5.3", () => {
+      it("should handle engy provider", () =>
+        runGatewayTest({
+          model: "glm-5.3/engy",
+          expected: {
+            providers: [
+              {
+                url: "https://api.engy.ai/v1/chat/completions",
+                response: "success",
+                model: "glm-5.3",
+                data: createOpenAIMockResponse("glm-5.3"),
+                expects: engyAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle tool calls with engy provider", () =>
+        runGatewayTest({
+          model: "glm-5.3/engy",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "What's the weather?" }],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "get_weather",
+                    description: "Get current weather",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        location: { type: "string" },
+                      },
+                      required: ["location"],
+                    },
+                  },
+                },
+              ],
+              tool_choice: "auto",
+              temperature: 0.7,
+              max_tokens: 1000,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.engy.ai/v1/chat/completions",
+                response: "success",
+                model: "glm-5.3",
+                data: createOpenAIMockResponse("glm-5.3"),
+                expects: {
+                  ...engyAuthExpectations,
+                  bodyContains: [
+                    "tools",
+                    "tool_choice",
+                    "get_weather",
+                    "temperature",
+                    "max_tokens",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("glm-5.3-flash", () => {
+      it("should handle engy provider", () =>
+        runGatewayTest({
+          model: "glm-5.3-flash/engy",
+          expected: {
+            providers: [
+              {
+                url: "https://api.engy.ai/v1/chat/completions",
+                response: "success",
+                model: "glm-5.3-flash",
+                data: createOpenAIMockResponse("glm-5.3-flash"),
+                expects: engyAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("glm-5.2", () => {
+      it("should handle engy provider", () =>
+        runGatewayTest({
+          model: "glm-5.2/engy",
+          expected: {
+            providers: [
+              {
+                url: "https://api.engy.ai/v1/chat/completions",
+                response: "success",
+                model: "glm-5.2",
+                data: createOpenAIMockResponse("glm-5.2"),
+                expects: engyAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
   });
 });

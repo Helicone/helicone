@@ -7,6 +7,7 @@ import { CerebrasProvider } from "./cerebras";
 import { ChutesProvider } from "./chutes";
 import { DeepInfraProvider } from "./deepinfra";
 import { DeepSeekProvider } from "./deepseek";
+import { EngyProvider } from "./engy";
 import { FireworksProvider } from "./fireworks";
 import { GoogleProvider } from "./google";
 import { GroqProvider } from "./groq";
@@ -31,6 +32,7 @@ export const providers = {
   chutes: new ChutesProvider(),
   deepinfra: new DeepInfraProvider(),
   deepseek: new DeepSeekProvider(),
+  engy: new EngyProvider(),
   fireworks: new FireworksProvider(),
   "google-ai-studio": new GoogleProvider(),
   groq: new GroqProvider(),

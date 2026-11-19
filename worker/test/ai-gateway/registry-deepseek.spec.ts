@@ -33,6 +33,12 @@ const canopywaveAuthExpectations = {
   },
 };
 
+const engyAuthExpectations = {
+  headers: {
+    Authorization: /^Bearer /,
+  },
+};
+
 const chutesAuthExpectations = {
   headers: {
     Authorization: /^Bearer /,
@@ -2149,6 +2155,96 @@ describe("DeepSeek Registry Tests", () => {
                   ...chutesAuthExpectations,
                   bodyContains: ["cache_control"],
                 },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+  });
+
+  describe("BYOK Tests - deepseek-v4 with Engy Provider", () => {
+    describe("deepseek-v4.1-flash", () => {
+      it("should handle engy provider", () =>
+        runGatewayTest({
+          model: "deepseek-v4.1-flash/engy",
+          expected: {
+            providers: [
+              {
+                url: "https://api.engy.ai/v1/chat/completions",
+                response: "success",
+                model: "deepseek-v4.1-flash",
+                data: createOpenAIMockResponse("deepseek-v4.1-flash"),
+                expects: engyAuthExpectations,
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+
+      it("should handle tool calls with engy provider", () =>
+        runGatewayTest({
+          model: "deepseek-v4.1-flash/engy",
+          request: {
+            body: {
+              messages: [{ role: "user", content: "What's the weather?" }],
+              tools: [
+                {
+                  type: "function",
+                  function: {
+                    name: "get_weather",
+                    description: "Get current weather",
+                    parameters: {
+                      type: "object",
+                      properties: {
+                        location: { type: "string" },
+                      },
+                      required: ["location"],
+                    },
+                  },
+                },
+              ],
+              tool_choice: "auto",
+              temperature: 0.7,
+              max_tokens: 1000,
+            },
+          },
+          expected: {
+            providers: [
+              {
+                url: "https://api.engy.ai/v1/chat/completions",
+                response: "success",
+                model: "deepseek-v4.1-flash",
+                data: createOpenAIMockResponse("deepseek-v4.1-flash"),
+                expects: {
+                  ...engyAuthExpectations,
+                  bodyContains: [
+                    "tools",
+                    "tool_choice",
+                    "get_weather",
+                    "temperature",
+                    "max_tokens",
+                  ],
+                },
+              },
+            ],
+            finalStatus: 200,
+          },
+        }));
+    });
+
+    describe("deepseek-v4-flash-0731", () => {
+      it("should handle engy provider", () =>
+        runGatewayTest({
+          model: "deepseek-v4-flash-0731/engy",
+          expected: {
+            providers: [
+              {
+                url: "https://api.engy.ai/v1/chat/completions",
+                response: "success",
+                model: "deepseek-v4-flash-0731",
+                data: createOpenAIMockResponse("deepseek-v4-flash-0731"),
+                expects: engyAuthExpectations,
               },
             ],
             finalStatus: 200,

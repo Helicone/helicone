@@ -275,6 +275,17 @@ export const providers: Provider[] = [
     relevanceScore: 3,
   },
   {
+    id: "engy",
+    name: "Engy",
+    logoUrl: "/assets/home/providers/engy.webp",
+    description:
+      "Configure your Engy API keys for OpenAI-compatible inference across Engy's chat model catalog",
+    docsUrl: "https://docs.helicone.ai/getting-started/integration-methods",
+    apiKeyLabel: "Engy API Key",
+    apiKeyPlaceholder: "...",
+    relevanceScore: 3,
+  },
+  {
     id: "helicone",
     name: "Helicone Inference",
     logoUrl: "/assets/providers/openai.webp",

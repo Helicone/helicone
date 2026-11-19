@@ -367,6 +367,74 @@ export const endpoints = {
       "*": {},
     },
   },
+  "qwen3.8-27b:engy": {
+    providerModelId: "qwen3.8-27b",
+    provider: "engy",
+    author: "qwen",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000000045, // $0.045/1M
+        output: 0.00000032, // $0.32/1M
+        cacheMultipliers: {
+          cachedInput: 0.333, // $0.015/1M cache read vs $0.045/1M input
+        },
+      },
+    ],
+    contextLength: 1_001_536,
+    maxCompletionTokens: 16_384,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "stream",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "tools",
+      "tool_choice",
+      "response_format",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
+  "qwen3.6-35b-a3b:engy": {
+    providerModelId: "qwen3.6-35b-a3b",
+    provider: "engy",
+    author: "qwen",
+    pricing: [
+      {
+        threshold: 0,
+        input: 0.000000045, // $0.045/1M
+        output: 0.0000003, // $0.30/1M
+        cacheMultipliers: {
+          cachedInput: 0.333, // $0.015/1M cache read vs $0.045/1M input
+        },
+      },
+    ],
+    contextLength: 208_192,
+    maxCompletionTokens: 16_384,
+    supportedParameters: [
+      "max_tokens",
+      "temperature",
+      "top_p",
+      "stop",
+      "stream",
+      "frequency_penalty",
+      "presence_penalty",
+      "seed",
+      "tools",
+      "tool_choice",
+      "response_format",
+    ],
+    ptbEnabled: false,
+    endpointConfigs: {
+      "*": {},
+    },
+  },
 } satisfies Partial<
   Record<`${Qwen3ModelName}:${ModelProviderName}`, ModelProviderConfig>
 >;
