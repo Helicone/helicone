@@ -9,6 +9,7 @@ import {
 import React, { useMemo } from "react";
 import { useEvaluators } from "./EvaluatorHook";
 import LLMAsJudgeEvaluatorDetails from "./details/LLMAsJudgeEvaluatorDetails";
+import LastMileEvaluatorDetails from "./details/LastMileEvaluatorDetails";
 import PythonEvaluatorDetails from "./details/PythonEvaluatorDetails";
 
 export function getEvaluatorScoreName(
@@ -65,7 +66,7 @@ const EvaluatorDetailsSheet: React.FC<EvaluatorDetailsSheetProps> = ({
                   setSelectedEvaluatorId(evalVar?.id ?? null);
                 }}
               />
-            ) : (
+            ) : evaluator.code_template ? (
               <PythonEvaluatorDetails
                 evaluator={evaluator}
                 deleteEvaluator={deleteEvaluator}
@@ -73,6 +74,16 @@ const EvaluatorDetailsSheet: React.FC<EvaluatorDetailsSheetProps> = ({
                   setSelectedEvaluatorId(evalVar?.id ?? null);
                 }}
               />
+            ) : evaluator.last_mile_config ? (
+              <LastMileEvaluatorDetails
+                evaluator={evaluator}
+                deleteEvaluator={deleteEvaluator}
+                setSelectedEvaluator={(evalVar) => {
+                  setSelectedEvaluatorId(evalVar?.id ?? null);
+                }}
+              />
+            ) : (
+              <p>This evaluator is a default evaluator.</p>
             )
           ) : (
             <p>This evaluator is a default evaluator.</p>
