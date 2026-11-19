@@ -532,10 +532,13 @@ export class AttemptExecutor {
       const walletId = this.env.WALLET.idFromName(orgId);
       const walletStub = this.env.WALLET.get(walletId);
 
+      // Convert USD cost to cents for wallet reservation
+      const worstCaseCostInCents = worstCaseCost * 100;
+
       const escrowResult = await walletStub.reserveCostInEscrow(
         orgId,
         requestId,
-        worstCaseCost,
+        worstCaseCostInCents,
         {
           enabled: orgMeta.allowNegativeBalance,
           limit: orgMeta.creditLimit,

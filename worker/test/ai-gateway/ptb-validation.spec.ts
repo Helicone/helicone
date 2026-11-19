@@ -98,6 +98,34 @@ describe("PTB request validation", () => {
     });
   });
 
+  it("rejects PTB request when wallet balance cannot cover worst-case cost in cents", async () => {
+    setSupabaseTestCase({ byokEnabled: false, creditsEnabled: true });
+
+    // Set up low balance for the wallet (5 cents)
+    const orgId = "test-org-id";
+    const walletId = env.WALLET.idFromName(orgId);
+    const walletStub = env.WALLET.get(walletId);
+
+    // @ts-ignore
+    await runInDurableObject(walletStub, async (wallet: any) => {
+      await wallet.setCredits(5, `test-credits-${randomUUID()}`);
+    });
+
+    const { response } = await runGatewayTest({
+      model: "gpt-4o/openai",
+      request: {
+        messages: [{ role: "user", content: "Hello" }],
+      },
+      expected: {
+        providers: [],
+        finalStatus: 429,
+        responseContains: "Insufficient balance for escrow",
+      },
+    });
+
+    expect(response.status).toBe(429);
+  });
+
   it("blocks PTB before calling a provider when the org is not allowlisted", async () => {
     setSupabaseTestCase({
       byokEnabled: false,
