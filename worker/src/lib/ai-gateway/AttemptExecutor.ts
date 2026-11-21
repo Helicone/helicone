@@ -528,6 +528,8 @@ export class AttemptExecutor {
       });
     }
 
+    const worstCaseCostInCents = worstCaseCost * 100;
+
     try {
       const walletId = this.env.WALLET.idFromName(orgId);
       const walletStub = this.env.WALLET.get(walletId);
@@ -535,7 +537,7 @@ export class AttemptExecutor {
       const escrowResult = await walletStub.reserveCostInEscrow(
         orgId,
         requestId,
-        worstCaseCost,
+        worstCaseCostInCents,
         {
           enabled: orgMeta.allowNegativeBalance,
           limit: orgMeta.creditLimit,
