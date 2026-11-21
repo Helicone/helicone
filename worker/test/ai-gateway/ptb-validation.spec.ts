@@ -4,6 +4,7 @@ import "../setup";
 import { runGatewayTest } from "./test-framework";
 import { setSupabaseTestCase } from "../setup";
 import { clearProviderKeysInMemoryCache } from "../../src/lib/util/cache/inMemoryCache";
+import { AttemptExecutor } from "../../src/lib/ai-gateway/AttemptExecutor";
 import { randomUUID } from "crypto";
 
 describe("PTB request validation", () => {
@@ -450,6 +451,89 @@ describe("PTB request validation", () => {
 
       const body = (await response.json()) as any;
       expect(body.error).toContain("cache_control");
+    });
+  });
+
+  describe("PTB escrow unit conversion", () => {
+    it("reserves worst-case cost in cents rather than USD", async () => {
+      const reserveCostInEscrow = vi.fn().mockResolvedValue({
+        data: { escrowId: "escrow-1" },
+        error: null,
+      });
+      const fakeEnv = {
+        WALLET: {
+          idFromName: vi.fn().mockReturnValue("wallet-id"),
+          get: vi.fn().mockReturnValue({ reserveCostInEscrow }),
+        },
+      } as unknown as Env;
+
+      const executor = new AttemptExecutor(
+        fakeEnv,
+        {} as ExecutionContext,
+        {} as any,
+        {} as any
+      );
+
+      // $0.50 input + $0.50 output = $1.00 worst-case USD => 100 cents
+      const res = await executor.reserveEscrowAndGetId({
+        attempt: {
+          endpoint: {
+            provider: "openai",
+            providerModelId: "test-model",
+            contextLength: 1000,
+            maxCompletionTokens: 1000,
+            pricing: [{ threshold: 0, input: 0.0005, output: 0.0005 }],
+          },
+        } as any,
+        requestWrapper: {
+          heliconeHeaders: { requestId: "req-escrow-cents" },
+        } as any,
+        orgId: "test-org-id",
+        orgMeta: { allowNegativeBalance: false, creditLimit: 0 },
+      });
+
+      expect(res.error).toBeNull();
+      expect(reserveCostInEscrow).toHaveBeenCalledWith(
+        "test-org-id",
+        "req-escrow-cents",
+        100,
+        { enabled: false, limit: 0 }
+      );
+    });
+
+    it("rejects PTB requests when wallet cents cover 1/100th of worst-case USD but not full cents", async () => {
+      setSupabaseTestCase({ byokEnabled: false, creditsEnabled: true });
+
+      const orgId = "test-org-id";
+      const walletId = env.WALLET.idFromName(orgId);
+      const walletStub = env.WALLET.get(walletId);
+
+      // @ts-ignore
+      await runInDurableObject(walletStub, async (wallet: any) => {
+        const storage = (wallet as any).ctx.storage;
+        storage.sql.exec("DELETE FROM escrows");
+        storage.sql.exec("DELETE FROM aggregated_debits");
+        // 30 cents: enough for ~0.48 cents if unscaled, insufficient for ~48 cents for gpt-4o
+        await wallet.setCredits(30, `test-credits-${randomUUID()}`);
+      });
+
+      const { response, calls } = await runGatewayTest({
+        model: "gpt-4o/openai",
+        request: {
+          body: {
+            messages: [{ role: "user", content: "Hello" }],
+            model: "gpt-4o",
+          },
+        },
+        expected: {
+          providers: [],
+          finalStatus: 429,
+          responseContains: "Insufficient credits",
+        },
+      });
+
+      expect(response.status).toBe(429);
+      expect(calls.length).toBe(0);
     });
   });
 });
