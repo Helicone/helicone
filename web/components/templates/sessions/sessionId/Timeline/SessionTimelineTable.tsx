@@ -25,8 +25,9 @@ import {
   Row,
   useReactTable,
 } from "@tanstack/react-table";
-import { ChevronDown, ChevronRight, ChevronsUpDown } from "lucide-react";
+import { ChevronDown, ChevronRight, ChevronsUpDown, CopyIcon } from "lucide-react";
 import Link from "next/link";
+import useNotification from "@/components/shared/notification/useNotification";
 import React, { useEffect, useMemo } from "react";
 import { TimeInterval } from "../../../../../lib/timeCalculations/time";
 import { Result } from "@/packages/common/result";
@@ -210,6 +211,7 @@ export default function SessionTimelineTable(
   };
 
   const { getColor } = useColorMapStore();
+  const { setNotification } = useNotification();
 
   return (
     <ScrollArea className="sentry-mask-me h-full w-full" orientation="both">
@@ -510,6 +512,27 @@ export default function SessionTimelineTable(
                               title="Contains descendant error"
                               className="ml-2 h-2 w-2 shrink-0 rounded-full bg-red-600"
                             />
+                          )}
+                        {cell.column.id === "path" &&
+                          row.original.completePath && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="ml-auto h-6 w-6 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigator.clipboard.writeText(
+                                  row.original.completePath,
+                                );
+                                setNotification(
+                                  "Path copied to clipboard",
+                                  "success",
+                                );
+                              }}
+                              title="Copy path"
+                            >
+                              <CopyIcon className="h-3 w-3" />
+                            </Button>
                           )}
                       </div>
                     </td>

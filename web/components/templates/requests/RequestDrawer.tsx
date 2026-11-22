@@ -1,5 +1,10 @@
 import { Button } from "@/components/ui/button";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -64,48 +69,53 @@ const RequestDescTooltip = (props: {
 }) => {
   const { displayText, icon, copyText, href, truncateLength = 18 } = props;
   const { setNotification } = useNotification();
+  const [open, setOpen] = useState(false);
   return (
-    <TooltipProvider>
-      <Tooltip delayDuration={150}>
-        <TooltipTrigger asChild>
-          <div className="-ml-1 flex cursor-pointer items-center gap-2 rounded-md px-2 py-1 text-secondary hover:bg-accent">
-            {icon}
-            <XSmall>
-              <span className="truncate">
-                {displayText.length > truncateLength
-                  ? displayText.slice(0, truncateLength) + "..."
-                  : displayText}
-              </span>
-            </XSmall>
-          </div>
-        </TooltipTrigger>
-        <TooltipContent side="bottom" align="start" className="ml-2 p-0">
-          <div className="flex w-full flex-col">
-            {copyText && (
-              <button
-                className="flex items-center justify-between gap-2 p-2 text-left hover:bg-accent"
-                onClick={() => {
-                  navigator.clipboard.writeText(copyText);
-                  setNotification("Copied to clipboard", "success");
-                }}
-              >
-                <span className="text-xs">Copy ID</span>
-                <LuCopy className="h-3 w-3" />
-              </button>
-            )}
-            {href && (
-              <Link
-                href={href}
-                className="flex items-center justify-between gap-2 p-2 text-left hover:bg-accent"
-              >
-                <span className="text-xs">View</span>
-                <Eye className="h-3 w-3" />
-              </Link>
-            )}
-          </div>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button className="-ml-1 flex cursor-pointer items-center gap-2 rounded-md px-2 py-1 text-secondary hover:bg-accent">
+          {icon}
+          <XSmall>
+            <span className="truncate">
+              {displayText.length > truncateLength
+                ? displayText.slice(0, truncateLength) + "..."
+                : displayText}
+            </span>
+          </XSmall>
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        side="bottom"
+        align="start"
+        className="ml-2 w-auto p-0"
+      >
+        <div className="flex w-full flex-col">
+          {copyText && (
+            <button
+              className="flex items-center justify-between gap-2 p-2 text-left hover:bg-accent"
+              onClick={() => {
+                navigator.clipboard.writeText(copyText);
+                setNotification("Copied to clipboard", "success");
+                setOpen(false);
+              }}
+            >
+              <span className="text-xs">Copy ID</span>
+              <LuCopy className="h-3 w-3" />
+            </button>
+          )}
+          {href && (
+            <Link
+              href={href}
+              className="flex items-center justify-between gap-2 p-2 text-left hover:bg-accent"
+              onClick={() => setOpen(false)}
+            >
+              <span className="text-xs">View</span>
+              <Eye className="h-3 w-3" />
+            </Link>
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 };
 
