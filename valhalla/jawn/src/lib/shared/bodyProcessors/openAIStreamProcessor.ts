@@ -5,6 +5,10 @@ import {
 import { PromiseGenericResult, err, ok } from "../../../packages/common/result";
 import { IBodyProcessor, ParseInput, ParseOutput } from "./IBodyProcessor";
 import { isParseInputJson } from "./helpers";
+import {
+  getCacheTokenUsage,
+  getEffectivePromptTokens,
+} from "@helicone-package/cost/usage/cacheTokenUtils";
 
 export const NON_DATA_LINES = [
   "event: content_block_delta",
@@ -91,7 +95,7 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
       const isResponsesAPI = data.some(
         (item) =>
           item?.type === "response.created" ||
-          item?.type === "response.completed"
+          item?.type === "response.completed",
       );
 
       if (isResponsesAPI) {
@@ -101,26 +105,25 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
 
         let usage;
         if (usageData) {
-          // Responses API uses input_tokens/output_tokens
-          // Guard: if cached > input_tokens, data is already non-cached (Anthropic convention)
-          const rInputToks = usageData.input_tokens ?? 0;
-          const rCachedToks = usageData.input_tokens_details?.cached_tokens ?? 0;
-          const effectivePromptTokens = rCachedToks > rInputToks
-            ? rInputToks
-            : Math.max(0, rInputToks - rCachedToks);
+          const { promptTokens, cachedTokens, promptAudioTokens } =
+            getCacheTokenUsage(usageData);
+          const effectivePromptTokens = getEffectivePromptTokens({
+            promptTokens,
+            cachedTokens,
+            promptAudioTokens,
+          });
 
           const effectiveCompletionTokens = Math.max(
             0,
             (usageData.output_tokens ?? 0) -
-              (usageData.output_tokens_details?.reasoning_tokens ?? 0)
+              (usageData.output_tokens_details?.reasoning_tokens ?? 0),
           );
 
           usage = {
             totalTokens: usageData.total_tokens,
             completionTokens: effectiveCompletionTokens,
             promptTokens: effectivePromptTokens,
-            promptCacheReadTokens:
-              usageData.input_tokens_details?.cached_tokens ?? 0,
+            promptCacheReadTokens: cachedTokens,
             heliconeCalculated: false,
           };
         } else {
@@ -152,14 +155,18 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
 
       let usage;
       if (usageData) {
-        // Guard: if cached > prompt_tokens, data is already non-cached (Anthropic convention)
-        const promptToks = usageData.prompt_tokens ?? usageData.input_tokens ?? 0;
-        const cachedToks = usageData.prompt_tokens_details?.cached_tokens
-          ?? usageData.input_tokens_details?.cached_tokens ?? 0;
-        const audioToks = usageData.prompt_tokens_details?.audio_tokens ?? 0;
-        const effectivePromptTokens = cachedToks > promptToks
-          ? Math.max(0, promptToks - audioToks)
-          : Math.max(0, promptToks - cachedToks - audioToks);
+        const {
+          promptTokens,
+          cachedTokens,
+          promptAudioTokens,
+          cacheWrite5mTokens,
+          cacheWrite1hTokens,
+        } = getCacheTokenUsage(usageData);
+        const effectivePromptTokens = getEffectivePromptTokens({
+          promptTokens,
+          cachedTokens,
+          promptAudioTokens,
+        });
 
         const effectiveCompletionTokens =
           usageData?.completion_tokens !== undefined
@@ -167,24 +174,20 @@ export class OpenAIStreamProcessor implements IBodyProcessor {
                 0,
                 (usageData.completion_tokens ?? 0) -
                   (usageData.completion_tokens_details?.reasoning_tokens ?? 0) -
-                  (usageData.completion_tokens_details?.audio_tokens ?? 0)
+                  (usageData.completion_tokens_details?.audio_tokens ?? 0),
               )
             : Math.max(
                 0,
                 (usageData.output_tokens ?? 0) -
-                  (usageData.output_tokens_details?.reasoning_tokens ?? 0)
+                  (usageData.output_tokens_details?.reasoning_tokens ?? 0),
               );
 
         usage = {
           totalTokens: usageData?.total_tokens,
           completionTokens: effectiveCompletionTokens,
           promptTokens: effectivePromptTokens,
-          promptCacheReadTokens:
-            usageData?.prompt_tokens_details?.cached_tokens ??
-            usageData?.input_tokens_details?.cached_tokens ??
-            0,
-          promptCacheWriteTokens:
-            usageData?.prompt_tokens_details?.cache_write_tokens ?? 0,
+          promptCacheReadTokens: cachedTokens,
+          promptCacheWriteTokens: cacheWrite5mTokens + cacheWrite1hTokens,
           heliconeCalculated: usageData?.helicone_calculated ?? false,
 
           // OpenRouter may contain these fields based on wallet/BYOK setup
