@@ -120,6 +120,20 @@ export interface ResponsesImageGenerationConfig {
   image_size: string; // e.g "2K"
 }
 
+/**
+ * Text format configuration for structured output in the Responses API.
+ * Maps to response_format in Chat Completions API.
+ */
+export interface ResponsesTextFormat {
+  type: "text" | "json_schema" | "json_object";
+  json_schema?: {
+    name: string;
+    description?: string;
+    schema: Record<string, any>;
+    strict?: boolean;
+  };
+}
+
 export interface ResponsesRequestBody {
   model: string;
   input: string | ResponsesInputItem[];
@@ -136,7 +150,12 @@ export interface ResponsesRequestBody {
   reasoning_options?: {
     budget_tokens?: number;
   };
+  /**
+   * Text output configuration including format for structured output.
+   * In the Responses API, `text.format` replaces `response_format` from Chat Completions.
+   */
   text?: {
+    format?: ResponsesTextFormat;
     verbosity?: "low" | "medium" | "high";
   };
   store?: boolean;
@@ -154,7 +173,6 @@ export interface ResponsesRequestBody {
   logprobs?: boolean;
   top_logprobs?: number;
   n?: number;
-  response_format?: { type: string; json_schema?: any };
   seed?: number;
   service_tier?: string;
   stream_options?: any;
