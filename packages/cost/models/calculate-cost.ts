@@ -111,6 +111,20 @@ function getPricingTier(
   return preprocessedPricing[matchedTierIndex];
 }
 
+const MODALITIES = ["image", "audio", "video", "file"] as const;
+
+// Prompt tokens reported under a non-text modality (image, audio, video, file).
+// Google splits these out of `input`, but they still count toward the prompt size tiers.
+function modalityPromptTokens(
+  usage: ModelUsage,
+  field: "input" | "cachedInput",
+): number {
+  return MODALITIES.reduce(
+    (sum, modality) => sum + (usage[modality]?.[field] ?? 0),
+    0,
+  );
+}
+
 function getThresholdValueFunction(provider: ModelProviderName): (usage: ModelUsage, field: CostBreakdownField) => number {
   switch (provider) {
     case "vertex":
@@ -118,9 +132,12 @@ function getThresholdValueFunction(provider: ModelProviderName): (usage: ModelUs
         switch (field) {
           case "inputCost":
           case "outputCost":
-            return usage.input;
+            return usage.input + modalityPromptTokens(usage, "input");
           case "cachedInputCost":
-            return usage.cacheDetails?.cachedInput ?? 0;
+            return (
+              (usage.cacheDetails?.cachedInput ?? 0) +
+              modalityPromptTokens(usage, "cachedInput")
+            );
           default:
             return 0;
         } 
@@ -132,7 +149,12 @@ function getThresholdValueFunction(provider: ModelProviderName): (usage: ModelUs
           case "outputCost":
           case "cachedInputCost":
             // total prompt length
-            return usage.input + (usage.cacheDetails?.cachedInput ?? 0);
+            return (
+              usage.input +
+              (usage.cacheDetails?.cachedInput ?? 0) +
+              modalityPromptTokens(usage, "input") +
+              modalityPromptTokens(usage, "cachedInput")
+            );
           default:
             return 0;
         }
@@ -207,9 +229,10 @@ export function calculateModelCostBreakdown(params: {
   const inputPricing = getPricingTier(preprocessedPricing, getThresholdValue(modelUsage, "inputCost"));
   breakdown.inputCost = modelUsage.input * inputPricing.input;
 
+  const cachedInputPricing = getPricingTier(preprocessedPricing, getThresholdValue(modelUsage, "cachedInputCost"));
+
   if (modelUsage.cacheDetails) {
     if (modelUsage.cacheDetails.cachedInput > 0) {
-      const cachedInputPricing = getPricingTier(preprocessedPricing, getThresholdValue(modelUsage, "cachedInputCost"));
       const cachedMultiplier = cachedInputPricing.cacheMultipliers?.cachedInput ?? 1.0;
       breakdown.cachedInputCost =
         modelUsage.cacheDetails.cachedInput * cachedInputPricing.input * cachedMultiplier;
@@ -236,18 +259,16 @@ export function calculateModelCostBreakdown(params: {
     breakdown.thinkingCost = modelUsage.thinking * thinkingRate;
   }
 
-  // Calculate per-modality costs
-  const modalities = ['image', 'audio', 'video', 'file'] as const;
-  for (const modality of modalities) {
+  // Calculate per-modality costs, using the same tiers as the text tokens
+  for (const modality of MODALITIES) {
     const modalityUsage = modelUsage[modality];
-    const modalityPricing = basePricing[modality];
 
     if (modalityUsage && hasModalityTokens(modalityUsage)) {
-      breakdown[modality] = calculateModalityCost(
-        modalityUsage,
-        modalityPricing,
-        basePricing
-      );
+      breakdown[modality] = calculateModalityCost(modalityUsage, modality, {
+        input: inputPricing,
+        cachedInput: cachedInputPricing,
+        output: outputPricing,
+      });
     }
   }
 
@@ -263,7 +284,7 @@ export function calculateModelCostBreakdown(params: {
     breakdown.totalCost = modelUsage.cost;
   } else {
     // Sum up all costs including modality costs
-    const modalityTotalCost = modalities.reduce((sum, modality) => {
+    const modalityTotalCost = MODALITIES.reduce((sum, modality) => {
       const modalityCosts = breakdown[modality];
       if (modalityCosts) {
         return sum + modalityCosts.inputCost + modalityCosts.cachedInputCost + modalityCosts.outputCost;
@@ -296,24 +317,29 @@ function hasModalityTokens(usage: ModalityUsage): boolean {
  */
 function calculateModalityCost(
   modalityUsage: ModalityUsage,
-  modalityPricing: ModalityPricing | undefined,
-  basePricing: ModelPricing
+  modality: (typeof MODALITIES)[number],
+  tiers: { input: ModelPricing; cachedInput: ModelPricing; output: ModelPricing }
 ): ModalityCostBreakdown {
+  const inputPricing: ModalityPricing | undefined = tiers.input[modality];
+  const cachedPricing: ModalityPricing | undefined = tiers.cachedInput[modality];
+  const outputPricing: ModalityPricing | undefined = tiers.output[modality];
+
   // Input rate fallback: modality.input -> text input
-  const inputRate = modalityPricing?.input ?? basePricing.input;
+  const inputRate = inputPricing?.input ?? tiers.input.input;
+  const cachedInputRate = cachedPricing?.input ?? tiers.cachedInput.input;
 
   // Cached multiplier fallback: modality.cachedInputMultiplier -> text cacheMultipliers.cachedInput -> 1.0
   const cachedMultiplier =
-    modalityPricing?.cachedInputMultiplier ??
-    basePricing.cacheMultipliers?.cachedInput ??
+    cachedPricing?.cachedInputMultiplier ??
+    tiers.cachedInput.cacheMultipliers?.cachedInput ??
     1.0;
 
   // Output rate fallback: modality.output -> text output
-  const outputRate = modalityPricing?.output ?? basePricing.output;
+  const outputRate = outputPricing?.output ?? tiers.output.output;
 
   return {
     inputCost: (modalityUsage.input ?? 0) * inputRate,
-    cachedInputCost: (modalityUsage.cachedInput ?? 0) * inputRate * cachedMultiplier,
+    cachedInputCost: (modalityUsage.cachedInput ?? 0) * cachedInputRate * cachedMultiplier,
     outputCost: (modalityUsage.output ?? 0) * outputRate,
   };
 }
