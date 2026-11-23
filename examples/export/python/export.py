@@ -148,15 +148,20 @@ async def fetch_signed_body_async(session: aiohttp.ClientSession, url: str) -> D
 
 async def fetch_all_signed_bodies(data: List[ResponseData]):
     async with aiohttp.ClientSession() as session:
-        tasks = [fetch_signed_body_async(
-            session, d.signed_body_url) for d in data]
-        for d, task in zip(data, asyncio.as_completed(tasks)):
+        async def fetch_for_response(d: ResponseData):
             try:
-                d.signed_body_content = await task
+                content = await fetch_signed_body_async(
+                    session, d.signed_body_url)
+                return d, content
             except Exception as e:
                 print(
                     f"Failed to fetch or decode signed_body_url for response_id {d.response_id}: {e}")
                 raise e
+
+        tasks = [fetch_for_response(d) for d in data]
+        for task in asyncio.as_completed(tasks):
+            d, content = await task
+            d.signed_body_content = content
 
 
 def write_data_to_csv(data: List[ResponseData], file_name: str):
