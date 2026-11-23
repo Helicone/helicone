@@ -1165,6 +1165,138 @@ exports[`Registry Snapshots endpoint configurations snapshot 1`] = `
       ],
     },
   },
+  "anthropic/claude-4.7-opus": {
+    "claude-4.7-opus:anthropic": {
+      "context": 1000000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "claude-opus-4-7",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "anthropic",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
+  "anthropic/claude-4.8-opus": {
+    "claude-4.8-opus:anthropic": {
+      "context": 1000000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "claude-opus-4-8",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "anthropic",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
+  "anthropic/claude-5-fable": {
+    "claude-5-fable:anthropic": {
+      "context": 1000000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "claude-fable-5",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "anthropic",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
+  "anthropic/claude-5-opus": {
+    "claude-5-opus:anthropic": {
+      "context": 1000000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "claude-opus-5",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "anthropic",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
+  "anthropic/claude-5-sonnet": {
+    "claude-5-sonnet:anthropic": {
+      "context": 1000000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "claude-sonnet-5",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "anthropic",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
+  "anthropic/claude-5.1-fable": {
+    "claude-5.1-fable:anthropic": {
+      "context": 1000000,
+      "crossRegion": false,
+      "maxTokens": 128000,
+      "modelId": "claude-fable-5-1",
+      "parameters": [
+        "include_reasoning",
+        "max_tokens",
+        "reasoning",
+        "stop",
+        "temperature",
+        "tool_choice",
+        "tools",
+      ],
+      "provider": "anthropic",
+      "ptbEnabled": true,
+      "regions": [
+        "*",
+      ],
+    },
+  },
   "anthropic/claude-haiku-4-5-20251001": {
     "claude-haiku-4-5-20251001:anthropic": {
       "context": 200000,
@@ -7372,6 +7504,24 @@ exports[`Registry Snapshots model coverage snapshot 1`] = `
     "helicone",
     "vertex",
   ],
+  "anthropic/claude-4.7-opus": [
+    "anthropic",
+  ],
+  "anthropic/claude-4.8-opus": [
+    "anthropic",
+  ],
+  "anthropic/claude-5-fable": [
+    "anthropic",
+  ],
+  "anthropic/claude-5-opus": [
+    "anthropic",
+  ],
+  "anthropic/claude-5-sonnet": [
+    "anthropic",
+  ],
+  "anthropic/claude-5.1-fable": [
+    "anthropic",
+  ],
   "anthropic/claude-haiku-4-5-20251001": [
     "anthropic",
     "bedrock",
@@ -8299,6 +8449,96 @@ exports[`Registry Snapshots pricing snapshot 1`] = `
         },
         "input": 0.000003,
         "output": 0.000015,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+  },
+  "anthropic/claude-4.7-opus": {
+    "anthropic": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000005,
+        "output": 0.000025,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+  },
+  "anthropic/claude-4.8-opus": {
+    "anthropic": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000005,
+        "output": 0.000025,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+  },
+  "anthropic/claude-5-fable": {
+    "anthropic": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.00001,
+        "output": 0.00005,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+  },
+  "anthropic/claude-5-opus": {
+    "anthropic": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000005,
+        "output": 0.000025,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+  },
+  "anthropic/claude-5-sonnet": {
+    "anthropic": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.1,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.000002,
+        "output": 0.00001,
+        "threshold": 0,
+        "web_search": 0.01,
+      },
+    ],
+  },
+  "anthropic/claude-5.1-fable": {
+    "anthropic": [
+      {
+        "cacheMultipliers": {
+          "cachedInput": 0.025,
+          "write1h": 2,
+          "write5m": 1.25,
+        },
+        "input": 0.00001,
+        "output": 0.00005,
         "threshold": 0,
         "web_search": 0.01,
       },
@@ -10054,6 +10294,42 @@ exports[`Registry Snapshots verify registry state 1`] = `
       ],
     },
     {
+      "model": "claude-4.7-opus",
+      "providers": [
+        "anthropic",
+      ],
+    },
+    {
+      "model": "claude-4.8-opus",
+      "providers": [
+        "anthropic",
+      ],
+    },
+    {
+      "model": "claude-5-fable",
+      "providers": [
+        "anthropic",
+      ],
+    },
+    {
+      "model": "claude-5-opus",
+      "providers": [
+        "anthropic",
+      ],
+    },
+    {
+      "model": "claude-5-sonnet",
+      "providers": [
+        "anthropic",
+      ],
+    },
+    {
+      "model": "claude-5.1-fable",
+      "providers": [
+        "anthropic",
+      ],
+    },
+    {
       "model": "claude-haiku-4-5-20251001",
       "providers": [
         "anthropic",
@@ -10846,7 +11122,7 @@ exports[`Registry Snapshots verify registry state 1`] = `
   ],
   "providerBreakdown": [
     {
-      "modelCount": 15,
+      "modelCount": 21,
       "provider": "anthropic",
     },
     {
@@ -10941,6 +11217,12 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-4.5-sonnet",
     "claude-4.6-opus",
     "claude-4.6-sonnet",
+    "claude-4.7-opus",
+    "claude-4.8-opus",
+    "claude-5-fable",
+    "claude-5-opus",
+    "claude-5-sonnet",
+    "claude-5.1-fable",
     "claude-haiku-4-5-20251001",
     "claude-opus-4",
     "claude-opus-4-1",
@@ -11049,9 +11331,9 @@ exports[`Registry Snapshots verify registry state 1`] = `
     "claude-3.5-haiku:anthropic:*",
   ],
   "totalArchivedConfigs": 0,
-  "totalEndpoints": 329,
-  "totalModelProviderConfigs": 329,
-  "totalModelsWithPtb": 108,
+  "totalEndpoints": 335,
+  "totalModelProviderConfigs": 335,
+  "totalModelsWithPtb": 114,
   "totalProviders": 21,
 }
 `;

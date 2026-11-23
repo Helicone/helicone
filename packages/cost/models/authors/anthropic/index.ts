@@ -21,6 +21,12 @@ import { models as claudeOpus4120250805Models } from "./claude-opus-4-1-20250805
 import { models as claudeOpus45Models } from "./claude-4.5-opus/model";
 import { models as claudeOpus46Models } from "./claude-4.6-opus/model";
 import { models as claudeSonnet46Models } from "./claude-4.6-sonnet/model";
+import { models as claudeOpus47Models } from "./claude-4.7-opus/model";
+import { models as claudeOpus48Models } from "./claude-4.8-opus/model";
+import { models as claudeOpus5Models } from "./claude-5-opus/model";
+import { models as claudeSonnet5Models } from "./claude-5-sonnet/model";
+import { models as claudeFable5Models } from "./claude-5-fable/model";
+import { models as claudeFable51Models } from "./claude-5.1-fable/model";
 
 // Import endpoints
 import { endpoints as claudeOpus41Endpoints } from "./claude-opus-4-1/endpoints";
@@ -38,6 +44,12 @@ import { endpoints as claudeOpus4120250805Endpoints } from "./claude-opus-4-1-20
 import { endpoints as claudeOpus45Endpoints } from "./claude-4.5-opus/endpoints";
 import { endpoints as claudeOpus46Endpoints } from "./claude-4.6-opus/endpoints";
 import { endpoints as claudeSonnet46Endpoints } from "./claude-4.6-sonnet/endpoints";
+import { endpoints as claudeOpus47Endpoints } from "./claude-4.7-opus/endpoints";
+import { endpoints as claudeOpus48Endpoints } from "./claude-4.8-opus/endpoints";
+import { endpoints as claudeOpus5Endpoints } from "./claude-5-opus/endpoints";
+import { endpoints as claudeSonnet5Endpoints } from "./claude-5-sonnet/endpoints";
+import { endpoints as claudeFable5Endpoints } from "./claude-5-fable/endpoints";
+import { endpoints as claudeFable51Endpoints } from "./claude-5.1-fable/endpoints";
 
 // Aggregate models
 export const anthropicModels = {
@@ -56,6 +68,12 @@ export const anthropicModels = {
   ...claudeOpus45Models,
   ...claudeOpus46Models,
   ...claudeSonnet46Models,
+  ...claudeOpus47Models,
+  ...claudeOpus48Models,
+  ...claudeOpus5Models,
+  ...claudeSonnet5Models,
+  ...claudeFable5Models,
+  ...claudeFable51Models,
 } satisfies Record<string, ModelConfig>;
 
 // Aggregate endpoints
@@ -75,4 +93,10 @@ export const anthropicEndpointConfig = {
   ...claudeOpus45Endpoints,
   ...claudeOpus46Endpoints,
   ...claudeSonnet46Endpoints,
+  ...claudeOpus47Endpoints,
+  ...claudeOpus48Endpoints,
+  ...claudeOpus5Endpoints,
+  ...claudeSonnet5Endpoints,
+  ...claudeFable5Endpoints,
+  ...claudeFable51Endpoints,
 } satisfies Record<string, ModelProviderConfig>;
