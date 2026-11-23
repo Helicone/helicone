@@ -1,0 +1,148 @@
+---
+title: "TealTiger Integration"
+sidebarTitle: "TealTiger"
+description: "Surface deterministic AI governance decisions in Helicone by attaching TealTiger metadata as custom properties."
+"twitter:title": "TealTiger Integration - Helicone OSS LLM Observability"
+iconType: "solid"
+---
+
+[TealTiger](https://github.com/agentguard-ai/tealtiger) is an open-source
+deterministic governance layer for AI agents: tool allowlists, PII and secret
+detection, prompt-injection blocking, and cost limits, with no LLM in the
+governance path. Each evaluation returns a `Decision` (action, risk score,
+reason codes, correlation id).
+
+When you route LLM calls through Helicone, you can attach that decision as
+Helicone [custom properties](/features/advanced-usage/custom-properties) so the
+governance status of every request is visible and filterable in your Helicone
+dashboard, with no extra instrumentation.
+
+<Steps title="TealTiger Integration">
+  <Step title="Create an account + generate an API key">
+    Log into [Helicone](https://www.helicone.ai) or create an account. Then
+    generate an [API key](https://helicone.ai/developer).
+  </Step>
+  <Step title="Install and set environment variables">
+```bash
+npm install tealtiger openai
+```
+
+```bash
+export HELICONE_API_KEY=<your Helicone API key>
+export OPENAI_API_KEY=<your OpenAI API key>
+```
+  </Step>
+  <Step title="Evaluate the request with TealTiger">
+```typescript
+import { TealEngine, toHeliconeHeaders } from "tealtiger";
+
+// Define a governance policy (here: only web_search is allowed).
+const engine = new TealEngine({
+  tools: {
+    web_search: { allowed: true },
+    shell: { allowed: false },
+  },
+});
+
+// Evaluate the action the agent is about to take.
+const decision = engine.evaluate({
+  agentId: "research-agent-1",
+  action: "tool.execute",
+  tool: "web_search",
+});
+```
+  </Step>
+  <Step title="Attach the governance decision as Helicone properties">
+
+`toHeliconeHeaders(decision)` maps the decision to `Helicone-Property-*`
+headers. Spread them into your client's `defaultHeaders` alongside your
+Helicone auth:
+
+```typescript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: "https://oai.helicone.ai/v1",
+  defaultHeaders: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+    ...toHeliconeHeaders(decision),
+  },
+});
+```
+
+This attaches the following custom properties to each request:
+
+| Property | Example value |
+| --- | --- |
+| `Helicone-Property-TealTiger-Action` | `ALLOW` / `DENY` / `REDACT` |
+| `Helicone-Property-TealTiger-Risk-Score` | `0`–`100` |
+| `Helicone-Property-TealTiger-Reason-Codes` | `PII_DETECTED,SECRET_DETECTED` |
+| `Helicone-Property-TealTiger-Correlation-Id` | correlation id (join key to your audit trail) |
+
+Open the Helicone dashboard and filter the request table by the
+`TealTiger-Action` property to see governance status per request.
+
+  </Step>
+</Steps>
+
+## Complete working example
+
+```typescript
+import OpenAI from "openai";
+import { TealEngine, toHeliconeHeaders } from "tealtiger";
+
+const engine = new TealEngine({
+  tools: {
+    web_search: { allowed: true },
+    shell: { allowed: false },
+  },
+});
+
+async function main() {
+  const decision = engine.evaluate({
+    agentId: "research-agent-1",
+    action: "tool.execute",
+    tool: "web_search",
+  });
+
+  const client = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    baseURL: "https://oai.helicone.ai/v1",
+    defaultHeaders: {
+      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+      ...toHeliconeHeaders(decision),
+    },
+  });
+
+  const response = await client.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      { role: "user", content: "Summarize the benefits of deterministic AI governance." },
+    ],
+  });
+
+  console.log(response.choices[0]?.message?.content);
+}
+
+main();
+```
+
+<Note>
+  In `ENFORCE` mode you would short-circuit on a `DENY` decision before calling
+  the model. Letting the call proceed (as above) records the governance
+  properties against a real request so they appear in Helicone.
+</Note>
+
+## Options
+
+`toHeliconeHeaders(decision, options)` accepts options to include the policy
+id/version, toggle the correlation and trace ids, or use a custom property
+prefix. Use `withHeliconeHeaders(existingHeaders, decision)` to merge
+governance properties into headers you already have.
+
+## Learn more
+
+- [TealTiger on GitHub](https://github.com/agentguard-ai/tealtiger)
+- [TealTiger on npm](https://www.npmjs.com/package/tealtiger)
+- [Helicone custom properties](/features/advanced-usage/custom-properties)
