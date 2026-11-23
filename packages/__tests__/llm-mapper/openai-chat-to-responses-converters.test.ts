@@ -418,6 +418,70 @@ describe("OpenAI Chat -> Responses converters", () => {
       expect(toolResponse.tool_call_id).toBe(shortId);
     });
 
+    it("prefers call_id over id when mapping function_call items", () => {
+      const req = {
+        model: "gpt-4o-mini",
+        input: [
+          { role: "user", content: "Hello" },
+          {
+            type: "function_call",
+            id: "fc_1234567890abcdefghij1234567890abcdefghij1234567890",
+            call_id: "call_link_1",
+            name: "my_func",
+            arguments: "{}",
+          },
+          { type: "function_call_output", call_id: "call_link_1", output: "result" },
+        ],
+      } as unknown as ResponsesRequestBody;
+
+      const oai = toChatCompletions(req);
+
+      const assistant = oai.messages?.[1] as any;
+      const toolResponse = oai.messages?.[2] as any;
+
+      expect(assistant.tool_calls?.[0].id).toBe("call_link_1");
+      expect(toolResponse.tool_call_id).toBe("call_link_1");
+    });
+
+    it("maps responses text.format json_schema to chat response_format", () => {
+      const req = {
+        model: "gpt-4o-mini",
+        input: "hello",
+        text: {
+          format: {
+            type: "json_schema",
+            name: "weather_schema",
+            description: "Structured weather response",
+            schema: {
+              type: "object",
+              properties: {
+                temperature: { type: "number" },
+              },
+              required: ["temperature"],
+            },
+            strict: true,
+          },
+        },
+      } as unknown as ResponsesRequestBody;
+
+      const oai = toChatCompletions(req);
+      expect(oai.response_format).toEqual({
+        type: "json_schema",
+        json_schema: {
+          name: "weather_schema",
+          description: "Structured weather response",
+          schema: {
+            type: "object",
+            properties: {
+              temperature: { type: "number" },
+            },
+            required: ["temperature"],
+          },
+          strict: true,
+        },
+      });
+    });
+
     it("maps Responses tools (flattened) to Chat tools (nested)", () => {
       const req = {
         model: "gpt-4o-mini",
