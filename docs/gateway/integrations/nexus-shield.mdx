@@ -1,0 +1,69 @@
+---
+title: "Nexus Shield Guardrail"
+sidebarTitle: "Nexus Shield"
+description: "Learn how to route Helicone requests through Nexus Shield for sub-10ms in-RAM PII sanitization."
+"twitter:title": "Nexus Shield Integration - Helicone OSS LLM Observability"
+iconType: "solid"
+---
+
+# Nexus Shield Integration
+
+[Nexus Shield](https://api.nexusshield.ai) is a sub-10ms in-RAM PII sanitization and security guardrail proxy. You can seamlessly pair Helicone with Nexus Shield to monitor your LLM calls while sanitizing sensitive data before it hits upstream providers.
+
+## How It Works
+
+1. **Client** sends request to **Nexus Shield Proxy**.
+2. **Nexus Shield** redacts PII in RAM (&lt;10ms).
+3. Request is forwarded to **Helicone Gateway** for logging and observability.
+4. Helicone routes the sanitized request to the model provider (OpenAI, Anthropic, etc.).
+
+## Quickstart (Python OpenAI Example)
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.nexusshield.ai/v1",
+    default_headers={
+        "X-API-Key": "nx_live_YOUR_NEXUS_KEY",
+        "Helicone-Auth": "Bearer YOUR_HELICONE_API_KEY",
+        "Helicone-Target-Url": "https://api.openai.com/v1",
+    },
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "My social security number is 000-12-3456"}],
+)
+
+print(response.choices[0].message.content)
+```
+
+## Features
+
+- **Sub-10ms Overhead:** Real-time RAM pattern matching.
+- **Zero Disk Persistence:** PII is stripped before Helicone logs or processes the payload.
+
+## Get a Nexus Shield API Key
+
+Start a 14-day free trial at [api.nexusshield.ai](https://api.nexusshield.ai):
+
+```bash
+curl -X POST https://api.nexusshield.ai/v1/auth/register-trial \
+  -H "Content-Type: application/json" \
+  -d '{"email":"you@company.com"}'
+```
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="AI Gateway Overview" icon="arrow-progress" href="/gateway/overview">
+    Learn about Helicone's AI Gateway features and capabilities
+  </Card>
+  <Card title="Custom Headers" icon="tags" href="/helicone-headers/introduction">
+    Helicone headers for routing and observability
+  </Card>
+  <Card title="Nexus Shield Live Demo" icon="shield" href="https://api.nexusshield.ai">
+    Interactive playground and Trust Center
+  </Card>
+</CardGroup>
