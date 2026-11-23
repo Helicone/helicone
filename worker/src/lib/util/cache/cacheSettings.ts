@@ -15,8 +15,8 @@ export interface CacheSettings {
 }
 
 function buildCacheControl(cacheControl: string): string {
-  const sMaxAge = cacheControl.match(/s-maxage=(\d+)/)?.[1];
-  const maxAge = cacheControl.match(/max-age=(\d+)/)?.[1];
+  const sMaxAge = cacheControl.match(/(?:^|[,;\s])s-maxage=(\d+)/)?.[1];
+  const maxAge = cacheControl.match(/(?:^|[,;\s])max-age=(\d+)/)?.[1];
 
   if (sMaxAge || maxAge) {
     let sMaxAgeInSeconds = 0;
