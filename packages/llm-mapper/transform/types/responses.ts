@@ -137,6 +137,13 @@ export interface ResponsesRequestBody {
     budget_tokens?: number;
   };
   text?: {
+    format?: {
+      type: string;
+      name?: string;
+      description?: string;
+      schema?: any;
+      strict?: boolean;
+    };
     verbosity?: "low" | "medium" | "high";
   };
   store?: boolean;
