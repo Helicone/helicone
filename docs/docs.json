@@ -143,6 +143,7 @@
                       "integrations/azure/python"
                     ]
                   },
+                  "getting-started/integration-method/auxen",
                   "getting-started/integration-method/deepinfra",
                   "getting-started/integration-method/deepseek",
                   {
