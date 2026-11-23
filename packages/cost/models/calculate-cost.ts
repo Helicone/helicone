@@ -166,13 +166,19 @@ function getThresholdValueFunction(provider: ModelProviderName): (usage: ModelUs
   }
 }
 
+export interface CostOverride {
+  inputCostPerToken?: number;
+  outputCostPerToken?: number;
+}
+
 export function calculateModelCostBreakdown(params: {
   modelUsage: ModelUsage;
   providerModelId: string;
   provider: ModelProviderName;
   requestCount?: number;
+  costOverride?: CostOverride;
 }): CostBreakdown | null {
-  const { modelUsage, providerModelId, provider, requestCount = 1 } = params;
+  const { modelUsage, providerModelId, provider, requestCount = 1, costOverride } = params;
 
   const configResult = registry.getModelProviderConfigByProviderModelId(
     providerModelId,
@@ -205,7 +211,7 @@ export function calculateModelCostBreakdown(params: {
   };
 
   const inputPricing = getPricingTier(preprocessedPricing, getThresholdValue(modelUsage, "inputCost"));
-  breakdown.inputCost = modelUsage.input * inputPricing.input;
+  breakdown.inputCost = modelUsage.input * (costOverride?.inputCostPerToken ?? inputPricing.input);
 
   if (modelUsage.cacheDetails) {
     if (modelUsage.cacheDetails.cachedInput > 0) {
@@ -229,7 +235,7 @@ export function calculateModelCostBreakdown(params: {
   }
 
   const outputPricing = getPricingTier(preprocessedPricing, getThresholdValue(modelUsage, "outputCost"));
-  breakdown.outputCost = modelUsage.output * outputPricing.output;
+  breakdown.outputCost = modelUsage.output * (costOverride?.outputCostPerToken ?? outputPricing.output);
 
   if (modelUsage.thinking) {
     const thinkingRate = basePricing.thinking ?? basePricing.output;

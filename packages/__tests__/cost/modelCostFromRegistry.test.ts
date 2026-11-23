@@ -436,4 +436,81 @@ describe("modelCostBreakdownFromRegistry", () => {
       }
     });
   });
+
+  describe("cost override", () => {
+    const usage: ModelUsage = { input: 1000, output: 500 };
+
+    it("overrides both input and output per-token cost", () => {
+      const breakdown = modelCostBreakdownFromRegistry({
+        modelUsage: usage,
+        providerModelId: "gpt-4o",
+        provider: "openai" as ModelProviderName,
+        costOverride: { inputCostPerToken: 0.00001, outputCostPerToken: 0.00002 },
+      });
+
+      expect(breakdown).not.toBeNull();
+      if (breakdown) {
+        expect(breakdown.inputCost).toBe(1000 * 0.00001);
+        expect(breakdown.outputCost).toBe(500 * 0.00002);
+        expect(breakdown.totalCost).toBe(1000 * 0.00001 + 500 * 0.00002);
+      }
+    });
+
+    it("applies a partial override per field, falling back to the registry rate", () => {
+      const inputOnly = modelCostBreakdownFromRegistry({
+        modelUsage: usage,
+        providerModelId: "gpt-4o",
+        provider: "openai" as ModelProviderName,
+        costOverride: { inputCostPerToken: 0.00001 },
+      });
+      expect(inputOnly).not.toBeNull();
+      if (inputOnly) {
+        // input overridden; output keeps the gpt-4o registry rate (0.01 / 1K)
+        expect(inputOnly.inputCost).toBe(1000 * 0.00001);
+        expect(inputOnly.outputCost).toBe(500 * 0.00001);
+      }
+
+      const outputOnly = modelCostBreakdownFromRegistry({
+        modelUsage: usage,
+        providerModelId: "gpt-4o",
+        provider: "openai" as ModelProviderName,
+        costOverride: { outputCostPerToken: 0.00002 },
+      });
+      expect(outputOnly).not.toBeNull();
+      if (outputOnly) {
+        // output overridden; input keeps the gpt-4o registry rate (0.0025 / 1K)
+        expect(outputOnly.inputCost).toBe(1000 * 0.0000025);
+        expect(outputOnly.outputCost).toBe(500 * 0.00002);
+      }
+    });
+
+    it("treats a zero override as free, not as unset", () => {
+      const breakdown = modelCostBreakdownFromRegistry({
+        modelUsage: usage,
+        providerModelId: "gpt-4o",
+        provider: "openai" as ModelProviderName,
+        costOverride: { inputCostPerToken: 0, outputCostPerToken: 0 },
+      });
+
+      expect(breakdown).not.toBeNull();
+      if (breakdown) {
+        expect(breakdown.inputCost).toBe(0);
+        expect(breakdown.outputCost).toBe(0);
+        expect(breakdown.totalCost).toBe(0);
+      }
+    });
+
+    it("uses registry pricing when no override is provided", () => {
+      const breakdown = modelCostBreakdownFromRegistry({
+        modelUsage: usage,
+        providerModelId: "gpt-4o",
+        provider: "openai" as ModelProviderName,
+      });
+
+      expect(breakdown).not.toBeNull();
+      if (breakdown) {
+        expect(breakdown.totalCost).toBe(0.0075);
+      }
+    });
+  });
 });

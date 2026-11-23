@@ -1,7 +1,7 @@
 import { costOfPrompt } from "./index";
 import type { ModelUsage } from "./usage/types";
 import type { ModelProviderName } from "./models/providers";
-import { calculateModelCostBreakdown, CostBreakdown } from "./models/calculate-cost";
+import { calculateModelCostBreakdown, CostBreakdown, CostOverride } from "./models/calculate-cost";
 
 // since costs in clickhouse are multiplied by the multiplier
 // divide to get real cost in USD in dollars
@@ -53,13 +53,15 @@ export function modelCostBreakdownFromRegistry(params: {
   provider: ModelProviderName;
   providerModelId: string;
   requestCount?: number;
+  costOverride?: CostOverride;
 }): CostBreakdown | null {
   const breakdown = calculateModelCostBreakdown({
     modelUsage: params.modelUsage,
     providerModelId: params.providerModelId,
     provider: params.provider,
     requestCount: params.requestCount,
+    costOverride: params.costOverride,
   });
-  
+
   return breakdown;
 }
