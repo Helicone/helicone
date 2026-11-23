@@ -1,0 +1,96 @@
+---
+title: "Auxen JavaScript SDK Integration"
+sidebarTitle: "JavaScript"
+description: "Use Auxen's private AI model instances with Helicone observability via the OpenAI-compatible API."
+"twitter:title": "Auxen JavaScript SDK Integration - Helicone OSS LLM Observability"
+icon: "js"
+iconType: "solid"
+---
+
+[Auxen](https://auxen.ai) provisions private AI model endpoints on dedicated GPUs (Llama, Qwen, Mistral, Gemma, Phi-3, Mixtral). Each instance is OpenAI-compatible and has its own base URL, so Helicone proxies through the generic `gateway.helicone.ai` endpoint using the `Helicone-Target-URL` header.
+
+<Note>
+
+Auxen issues a **per-instance** base URL (`https://api.auxen.ai/v1/inst_xxx`) and API key (`auxk_...`) at provision time. Set those as environment variables before configuring Helicone.
+
+</Note>
+
+<Steps>
+  <Step title="Create a Helicone account + Generate an API Key">
+    Log into [helicone](https://www.helicone.ai) or create an account. Once you have an account, you can generate an [API key](https://helicone.ai/developer).
+  </Step>
+
+  <Step title="Provision an Auxen instance">
+    Sign up at [auxen.ai/dashboard](https://auxen.ai/dashboard), provision a model, and copy the **endpoint URL** + **API key** Auxen returns.
+  </Step>
+
+  <Step title="Set environment variables">
+```bash
+HELICONE_API_KEY=<your-helicone-api-key>
+AUXEN_BASE_URL=https://api.auxen.ai/v1/inst_xxx     # from the Auxen dashboard
+AUXEN_API_KEY=auxk_...                              # from the Auxen dashboard
+```
+  </Step>
+
+  <Step title="Use the OpenAI SDK with the Helicone gateway + Auxen target">
+<CodeGroup>
+
+```javascript OpenAI SDK
+import OpenAI from "openai";
+
+const auxen = new OpenAI({
+  apiKey: process.env.AUXEN_API_KEY,
+  baseURL: "https://gateway.helicone.ai/v1",
+  defaultHeaders: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+    "Helicone-Target-URL": process.env.AUXEN_BASE_URL,
+  },
+});
+
+const completion = await auxen.chat.completions.create({
+  model: "llama-3.1-8b",
+  messages: [{ role: "user", content: "Hello" }],
+});
+
+console.log(completion.choices[0].message.content);
+```
+
+```javascript Vercel AI SDK
+import { createAuxen } from "@auxen-ai/ai-sdk-provider";
+import { generateText } from "ai";
+
+const auxen = createAuxen({
+  baseURL: process.env.AUXEN_BASE_URL,
+  apiKey: process.env.AUXEN_API_KEY,
+  headers: {
+    "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
+    "Helicone-Target-URL": process.env.AUXEN_BASE_URL,
+  },
+  // override the base URL to route through Helicone
+  baseURL: "https://gateway.helicone.ai/v1",
+});
+
+const { text } = await generateText({
+  model: auxen("llama-3.1-8b"),
+  prompt: "Hello",
+});
+```
+
+</CodeGroup>
+  </Step>
+</Steps>
+
+## What gets logged
+
+- Token counts (prompt + completion)
+- Latency
+- Cost estimates (LiteLLM does cost lookup via per-token rates; Auxen bills per minute of GPU runtime — see the [Auxen pricing docs](https://auxen.ai/docs) for ground-truth billing)
+- Errors and retry behavior
+- Full request/response bodies (subject to your Helicone data-retention settings)
+
+## Related
+
+- [Auxen homepage](https://auxen.ai)
+- [Auxen Python SDK](https://github.com/auxen-ai/auxen-python)
+- [Auxen AI SDK Provider for Vercel AI SDK](https://github.com/auxen-ai/ai-sdk-provider)
+- [Auxen MCP server](https://github.com/auxen-ai/mcp-server)
