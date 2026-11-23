@@ -108,6 +108,14 @@ export function toGoogle(
     }
   }
 
+  // Forward cachedContent parameter for Gemini explicit caching
+  // Supports both Vertex AI format (projects/*/locations/*/cachedContents/*)
+  // and Google AI Studio format (cachedContents/*)
+  const cachedContent = (openAIBody as any).cachedContent;
+  if (typeof cachedContent === "string" && cachedContent.length > 0) {
+    geminiBody.cachedContent = cachedContent;
+  }
+
   return geminiBody;
 }
 
