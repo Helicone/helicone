@@ -1,4 +1,3 @@
-
 **<span style={{color: '#0ea5e9'}}>Helicone</span>** and **<span style={{color: '#0ea5e9'}}>Langfuse</span>** are top open-source tools that help developers monitor, analyze, and optimize their LLM-powered applications. While several options are available in the market, many developers and organizations are exploring alternatives that offer unique features or better suit their specific needs.
 
 ![Langfuse vs Helicone](/static/blog/langfuse-alternatives/helicone-vs-langfuse.webp)
@@ -9,28 +8,28 @@ In this comparison, we'll explore the differences between Helicone and Langfuse,
 
 |        | Helicone                                                         | Langfuse                                                            |
 | ------------ | ---------------------------------------------------------------- | ------------------------------------------------------------------- |
-| **Best For**     | **Proxy-based** or SDK integration                               | **SDK-first** integration                                           |
-| **Pricing**      | Starting at `$20/seat/month`. <br/>Free trial available. | Starting at `$59/month`.<br/> No free trial available. |
-| **Integration**            | <a href="https://docs.helicone.ai/integrations/openai/javascript" target="_blank" rel="noopener">One-line</a> proxy integration or async logging with SDK                                             | Requires SDK and more code changes                                                 |
-| **Strengths**   | Cloud-focused, highly scalable, comprehensive features          | Self-host focused, Open-source                                      |
-| **Drawback**       | More complex self-hosting setup due to distributed architecture  | Single PostgreSQL database may limit scalability                    |
-| **Architecture** | Distributed (Cloudflare Workers, ClickHouse, Kafka)              | Centralized (Single PostgreSQL database)                            |
+| **Best For**     | **Proxy-based** or SDK integration                               | **SDK and OpenTelemetry** integration                               |
+| **Pricing**      | Starting at `$20/seat/month`. <br/>Free trial available. | Free Hobby plan available.<br/> Usage-based paid plans for production and scaling. |
+| **Integration**            | <a href="https://docs.helicone.ai/integrations/openai/javascript" target="_blank" rel="noopener">One-line</a> proxy integration or async logging with SDK                                             | SDK, OpenTelemetry (OTLP), or 50+ framework integrations                          |
+| **Strengths**   | Cloud-focused, highly scalable, comprehensive features          | Open-source, self-hostable, strong OpenTelemetry support            |
+| **Drawback**       | More complex self-hosting setup due to distributed architecture  | Self-hosting requires multiple components (ClickHouse, Redis, S3, PostgreSQL) since v3 |
+| **Architecture** | Distributed (Cloudflare Workers, ClickHouse, Kafka)              | Distributed (ClickHouse, PostgreSQL, Redis, S3)                     |
 
 ## Platform & Features
 | Feature                    | Helicone                                | Langfuse                                |
 | -------------------------- | --------------------------------------- | --------------------------------------- |
 | **Open-Source**            | ✅                                      | ✅                                      |
 | **Self-Hosting**           | ✅                                      | ✅                                      |
-| **Built-in Caching**       | ✅                                      | ❌                                      |
+| **Built-in Caching**       | ✅ LLM response caching                | 🟠 Prompt caching (not LLM response caching) |
 | **Prompt Management**      | ✅                                      | ✅                                      |
-| **Agent Tracing**          | ✅                                      | 🟠 Limited at scale                     |
+| **Agent Tracing**          | ✅                                      | ✅  |
 | **Experimentation**        | ✅                                      | ✅                                      |
 | **Evaluation**             | ✅                                      | ✅ Strong human annotation workflows    |
 | **User Tracking**          | ✅ Detailed UI analysis                 | ✅ Basic capabilities                   |
-| **Cost Analysis**          | ✅ Comprehensive                        | 🟠 Basic, limited at scale              |
-| **Security Features**      | ✅ Advanced protections                 | ❌ Basic only                           |
+| **Cost Analysis**          | ✅ Comprehensive                        | ✅ Token & cost tracking with pricing tiers |
+| **Security Features**      | ✅ Advanced built-in protections        | 🟠 Via integrations (LLM Guard, Lakera, etc.) and platform security (SOC 2 Type II, ISO 27001) |
 | **Supported LLMs**         | ✅ Wide support                         | ✅ Wide support                         |
-| **Scalability**            | ✅ Highly scalable                      | ❌ Limited by PostgreSQL                |
+| **Scalability**            | ✅ Highly scalable                      | ✅ Scalable (ClickHouse-based since v3) |
 
 <CallToAction
   title="💡 Ready to monitor your LLM app?"
@@ -106,34 +105,37 @@ For other providers, please refer to the <a href="https://docs.helicone.ai/integ
 
 ### What is Langfuse?
 
-Langfuse is one of the most popular open-source LLM observability tools that offers robust tracing and monitoring capabilities.
+Langfuse is one of the most popular open-source LLM observability tools, with over 20K GitHub stars and 26M+ SDK installs per month. It offers robust tracing, evaluation, and prompt management capabilities.
 
-It emphasizes ease of self-hosting, making it accessible for small teams or individual developers who prefer to manage their own infrastructure.
+Langfuse was acquired by ClickHouse in January 2026. The team continues to build Langfuse as an open-source, self-hostable product, now with deeper infrastructure backing.
 
 ### Top Features
 
-1. **Self-Hosting Focus** - Designed for easy self-deployment, allowing teams to manage their own infrastructure
-2. **Tracing** - Provides tracing capabilities for LLM interactions, including session tracking
-3. **Prompt Management** - Offers prompt versioning and management features
-4. **OpenTelemetry Integration** - Native support for industry-standard observability protocols
-
+1. **Open-Source & Self-Hostable** - Fully open-source (MIT license for core features) with self-hosting as a first-class path
+2. **Tracing & Agent Observability** - Comprehensive tracing with Agent Graphs (GA), dedicated observation types for agents, tools, guardrails, and more
+3. **Prompt Management** - Prompt versioning, A/B testing, playground, and prompt experiments against datasets
+4. **OpenTelemetry Integration** - Native support for OpenTelemetry, extending language support to Java, Go, and any OTLP-compatible framework
+5. **Evaluation** - LLM-as-a-judge, annotation queues, dataset experiments, and score analytics
 
 ### Langfuse Architecture
 
-Langfuse employs a simpler, more centralized architecture compared to Helicone:
+Langfuse v3 uses a distributed, event-driven architecture:
 
-1. **PostgreSQL Database**: Langfuse relies on a single PostgreSQL database for data storage. This approach simplifies deployment and maintenance but may face scalability challenges with very high volumes of data.
+1. **ClickHouse**: The main analytical data store for traces, observations, and scores. ClickHouse is a column-oriented database optimized for high write throughput and fast analytical queries at scale. Some of Langfuse's largest users ingest billions of rows.
 
-2. **SDK-First Approach**: Rather than using a proxy architecture, Langfuse primarily integrates through SDKs in Python and JavaScript. This provides deep integration capabilities but requires more code changes to implement.
+2. **PostgreSQL**: Retained for transactional data such as authentication, project configuration, and prompt management.
 
-3. **OpenTelemetry Support**: Langfuse has strong support for the OpenTelemetry protocol, making it compatible with existing observability stacks. This can be particularly valuable for teams that already have established monitoring practices.
+3. **Redis/Valkey**: Used for event queuing and caching of API keys and prompts. Ingestion requests are queued and processed asynchronously by a separate worker container.
 
-The architecture prioritizes simplicity and ease of deployment over distributed scalability. For many applications with moderate traffic volumes, this trade-off is perfectly reasonable and may even be preferable.
+4. **S3/Blob Storage**: Stores large objects and acts as a durable buffer — incoming traces are written to S3 first, then ingested into ClickHouse by the worker, ensuring data is not lost during traffic spikes.
 
+5. **SDK and OpenTelemetry**: Langfuse integrates through native SDKs in Python and JavaScript (built on OpenTelemetry), and also accepts traces via its OTLP endpoint from any OpenTelemetry-compatible instrumentation. This extends support to additional languages and 50+ frameworks.
+
+This architecture represents a significant evolution from Langfuse's original single-container PostgreSQL setup. The v3 architecture is the same codebase that powers Langfuse Cloud.
 
 ### How Does Langfuse Compare to Helicone?
 
-Langfuse distinguishes itself by emphasizing ease of self-hosting and simplicity in setup. Its exclusive reliance on PostgreSQL as the sole database backend simplifies deployment and is well-suited for low-volume projects or developers who prefer managing their own infrastructure. This makes Langfuse an attractive option for teams or individual developers focusing on small to medium-scale applications.
+Langfuse distinguishes itself by emphasizing ease of self-hosting and simplicity in setup. This makes Langfuse an attractive option for teams or individual developers focusing on small to medium-scale applications.
 
 However, as data volume increases, PostgreSQL may face performance limitations. Additionally, without a data streaming platform like **Kafka**, there can be challenges with scaling and data persistence; if the system goes down, logs may be lost.
 
@@ -142,31 +144,7 @@ However, as data volume increases, PostgreSQL may face performance limitations. 
   description="For teams that prioritize ease of deployment and don't anticipate extremely high traffic volumes, Langfuse's architecture may be the perfect fit. Its simpler architecture means fewer components to maintain and troubleshoot, potentially leading to lower operational overhead."
 />
 
-### Sample Langfuse Integration
 
-```python
-from langfuse.decorators import observe
-from langfuse.openai import openai # OpenAI integration
-
-@observe()
-def story():
-    return openai.chat.completions.create(
-        model="gpt-3.5-turbo",
-        max_tokens=100,
-        messages=[
-          {"role": "system", "content": "You are a great storyteller."},
-          {"role": "user", "content": "Once upon a time in a galaxy far, far away..."}
-        ],
-    ).choices[0].message.content
-
-@observe()
-def main():
-    return story()
-
-main()
-```
-
-Please refer to the <a href="https://langfuse.com/docs/get-started" rel="noopener noreferrer" target="_blank">Langfuse documentation</a> for most up-to-date instructions.
 
 ## Which tool is best for your team?
 
@@ -176,7 +154,7 @@ Choosing the right LLM observability tool depends on your specific needs and pri
 | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | **Proxy-Based Implementation**  | **<span style={{color: '#0ea5e9'}}>Helicone</span>** offers robust proxy architecture with caching and edge deployment capabilities.                                  |
 | **Deep Tracing & Evaluation** | **<span style={{color: '#0ea5e9'}}>Consider both platforms</span>** as they both offer comprehensive tracing and evaluation capabilities.                                           |
-| **Simple Self-Hosting Setup**                 | **<span style={{color: '#0ea5e9'}}>Langfuse</span>**'s single PostgreSQL database makes deployment straightforward.                                                     |
+| **Simple Self-Hosting Setup**                 | **<span style={{color: '#0ea5e9'}}>Consider both platforms</span>** — both require multiple components for production self-hosting. Langfuse offers Docker Compose for simpler testing setups. |
 | **Scalable Self-Hosting**              | **<span style={{color: '#0ea5e9'}}>Helicone</span>**'s Helm chart with distributed architecture using Cloudflare Workers, ClickHouse, and Kafka enables better scaling. |
 | **High LLM Usage**                     | **<span style={{color: '#0ea5e9'}}>Helicone</span>**'s distributed architecture is built to handle millions to billions of requests.                                    |
 | **Enterprise with Complex Workflows**         | **<span style={{color: '#0ea5e9'}}>Consider both platforms</span>** as they both serve enterprise customers with comprehensive feature sets.                                       |
@@ -205,30 +183,30 @@ Choosing the right LLM observability tool depends on your specific needs and pri
 
 1. **What is the main difference between Helicone and Langfuse?**
 
-   The main differences lie in their architecture and scalability. Helicone uses a distributed architecture (Cloudflare Workers, ClickHouse, Kafka) designed for high scalability, while Langfuse uses a simpler, centralized architecture with a single PostgreSQL database. Helicone offers one-line integration via proxy, while Langfuse primarily uses an SDK-first approach.
+   The main differences lie in their integration approach and architecture. Helicone uses a proxy-based architecture with Cloudflare Workers for edge computing, ClickHouse, and Kafka, offering one-line integration by changing a base URL. Langfuse uses an SDK and OpenTelemetry-based approach with ClickHouse, PostgreSQL, Redis, and S3. Both platforms use ClickHouse for analytical data, but Helicone's edge-first proxy design and Langfuse's OpenTelemetry-native approach serve different integration preferences.
 
 2. **Which tool is better for security and reducing costs?**
 
-   Helicone. Helicone comes with built-in caching and out-of-the-box security features like API key vaults and integration with state-of-the-art LLM security platforms. Langfuse, on the other hand, requires additional setups for these features.
+   Helicone offers built-in LLM response caching to reduce API costs and built-in security features like prompt injection protection. Langfuse supports security through integrations with libraries like LLM Guard and Lakera, and offers prompt caching via its SDKs, but does not provide built-in LLM response caching or built-in prompt injection blocking.
 
 3. **Which tool is best for beginners?**
 
-   Both Helicone and Langfuse are good for beginners. Helicone offers an easy start with its one-line integration and more intuitive UI. Langfuse, while simpler to self-host, requires the use of an SDK and is a bit less friendly to non-technical users.
+   Both Helicone and Langfuse are good for beginners. Helicone offers an easy start with its one-line proxy integration and intuitive UI. Langfuse requires SDK or OpenTelemetry instrumentation but offers extensive documentation, 50+ framework integrations, and a large open-source community for support.
 
 4. **Can I switch easily between these tools?**
 
-   Switching to and from Helicone is simple because it does not require an SDK; you only need to change the base URL and headers. On the other hand, Langfuse requires an SDK and code changes, making the switching process more involved.
+   Switching to and from Helicone is simple because its proxy approach only requires changing the base URL and headers. Langfuse requires SDK or OpenTelemetry instrumentation changes, though its OpenTelemetry support means you can potentially switch between any OTLP-compatible backends with less effort.
 
 5. **Are there any free options available?**
 
-   Yes, both Helicone and Langfuse offer free tiers, making them accessible for small projects or initial testing. Helicone offers a free trial on its premium plans whereas Langfuse does not.
+   Yes, both Helicone and Langfuse offer free tiers, making them accessible for small projects or initial testing. Helicone offers a free trial on its premium plans. Langfuse offers a free Hobby plan with no credit card required.
 
 6. **How do these tools handle data privacy and security?**
 
-   Both tools take data privacy seriously and are **SOC 2 compliant**. They also offer self-hosting capabilities for higher compliance concerns, allowing you to keep all data on your own infrastructure if necessary.
+   Both tools take data privacy seriously. Helicone is SOC 2 compliant. Langfuse is SOC 2 Type II and ISO 27001 certified. Both offer self-hosting capabilities for higher compliance concerns, allowing you to keep all data on your own infrastructure if necessary. Langfuse also offers HIPAA compliance support.
 
 7. **Which platform handles high-volume better?**
 
-   Helicone's distributed architecture with ClickHouse and Kafka is specifically designed for high-volume applications and has been proven to handle billions of requests. Langfuse's PostgreSQL-based architecture may face scalability challenges at extremely high volumes.
+   Both platforms use ClickHouse for analytical data storage. Helicone's architecture with Cloudflare Workers and Kafka is specifically designed for high-volume proxy-based observability and has been proven to handle billions of requests. Langfuse v3's ClickHouse-based architecture also handles billions of rows in production, with asynchronous ingestion via Redis and S3 for durability. Helicone's edge-computing approach may offer lower latency for proxy-based use cases.
 
 <Questions />
