@@ -535,6 +535,7 @@ export class DBLoggable {
           promptTokenCount?: number;
           candidatesTokenCount?: number;
           cachedContentTokenCount?: number;
+          thoughtsTokenCount?: number;
         };
       };
       const usageMetadata = response.usageMetadata;
@@ -543,6 +544,7 @@ export class DBLoggable {
         prompt_tokens: usageMetadata?.promptTokenCount,
         completion_tokens: usageMetadata?.candidatesTokenCount,
         prompt_cache_read_tokens: usageMetadata?.cachedContentTokenCount,
+        reasoning_tokens: usageMetadata?.thoughtsTokenCount,
       };
     }
 
