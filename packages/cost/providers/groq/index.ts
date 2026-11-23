@@ -195,8 +195,8 @@ export const costs: ModelRow[] = [
       value: "openai/gpt-oss-20b",
     },
     cost: {
-      prompt_token: 0.0000001,
-      completion_token: 0.0000005,
+      prompt_token: 0.00000075,
+      completion_token: 0.0000003,
     },
   },
   {
@@ -206,7 +206,7 @@ export const costs: ModelRow[] = [
     },
     cost: {
       prompt_token: 0.00000015,
-      completion_token: 0.00000075,
+      completion_token: 0.0000006,
     },
   },
 ];
