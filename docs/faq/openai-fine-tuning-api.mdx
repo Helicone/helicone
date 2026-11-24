@@ -42,9 +42,11 @@ The OpenAI fine-tuning API allows you to create custom versions of their models 
        First, upload your file:
 
        ```python
-       import openai
+       from openai import OpenAI
 
-       file = openai.File.create(
+       client = OpenAI()
+
+       file = client.files.create(
            file=open("training_data.jsonl", "rb"),
            purpose="fine-tune"
        )
@@ -53,7 +55,7 @@ The OpenAI fine-tuning API allows you to create custom versions of their models 
        Then, create a fine-tuning job:
 
        ```python
-       job = openai.FineTuningJob.create(
+       job = client.fine_tuning.jobs.create(
            training_file=file.id,
            model="gpt-4o-mini"
        )
@@ -66,14 +68,14 @@ The OpenAI fine-tuning API allows you to create custom versions of their models 
   <Step title="Monitor the job">
     If you used the UI, you can monitor your job's progress directly on the OpenAI platform.
 
-    If you used the API, you can check the status of your fine-tuning job using `openai.FineTuningJob.retrieve()`. You can also list all your fine-tuning jobs with `openai.FineTuningJob.list()`.
+    If you used the API, you can check the status of your fine-tuning job using `client.fine_tuning.jobs.retrieve()`. You can also list all your fine-tuning jobs with `client.fine_tuning.jobs.list()`.
 
     ```python
     # Retrieve the state of a fine-tune
-    job_status = openai.FineTuningJob.retrieve(job.id)
+    job_status = client.fine_tuning.jobs.retrieve(job.id)
 
     # List all created fine-tunes
-    jobs = openai.FineTuningJob.list()
+    jobs = client.fine_tuning.jobs.list()
     ```
 
   </Step>
@@ -82,7 +84,7 @@ The OpenAI fine-tuning API allows you to create custom versions of their models 
     Once complete, you can use your fine-tuned model by specifying its name in your API calls.
 
     ```python
-    completion = openai.ChatCompletion.create(
+    completion = client.chat.completions.create(
         model=job_status.fine_tuned_model,
         messages=[{"role": "user", "content": "Hello, how are you?"}]
     )

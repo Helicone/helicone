@@ -51,35 +51,39 @@ Since the proxy sits on the edge and is the gatekeeper of the requests, you get 
     <CodeGroup>
 
     ```python Dedicated domain example
-    import openai
+    from openai import OpenAI
 
     # Set the API base URL to Helicone's proxy
-    openai.api_base = "https://oai.helicone.ai/v1"
+    client = OpenAI(
+        base_url="https://oai.helicone.ai/v1",
+        default_headers={
+            "Helicone-Auth": "Bearer [HELICONE_API_KEY]"  # Your Helicone API key
+        },
+    )
 
     # Generate a chat completion request
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[{"role": "user", "content": "Say hi!"}],
-        headers={
-            "Helicone-Auth": "Bearer [HELICONE_API_KEY]"  # Your Helicone API key
-        }
     )
 
     print(response)
     ```
 
     ```python Other (Gateway example)
-    import openai
+    from openai import OpenAI
 
-    openai.api_base = "https://gateway.helicone.ai"  # Set the API base URL to Helicone Gateway
-    response = openai.ChatCompletion.create(
-        model="[DEPLOYMENT]",
-        messages=[{"role": "user", "content": "Say hi!"}],
-        headers={
+    client = OpenAI(
+        base_url="https://gateway.helicone.ai",  # Set the API base URL to Helicone Gateway
+        default_headers={
             "Helicone-Auth": "Bearer [HELICONE_API_KEY]",  # Your Helicone API key
             "Helicone-Target-Url": "https://api.lemonfox.ai",  # The target API URL
             "Helicone-Target-Provider": "LemonFox",  # The provider name
-        }
+        },
+    )
+    response = client.chat.completions.create(
+        model="[DEPLOYMENT]",
+        messages=[{"role": "user", "content": "Say hi!"}],
     )
     print(response)
     ```

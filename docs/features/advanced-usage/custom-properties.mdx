@@ -94,22 +94,21 @@ Use headers to add Custom Properties to your LLM requests.
     from langchain_openai import ChatOpenAI
     
     llm = ChatOpenAI(
-        openai_api_key="<HELICONE_API_KEY>",
-        openai_api_base="https://ai-gateway.helicone.ai",
-        model_name="gpt-4o-mini",
+        api_key="<HELICONE_API_KEY>",
+        base_url="https://ai-gateway.helicone.ai",
+        model="gpt-4o-mini",
         default_headers={
             "Helicone-Property-Type": "Course Outline"
         }
     )
 
-    course = llm.predict("Generate a course outline about AI.")
+    course = llm.invoke("Generate a course outline about AI.")
 
-    # Update helicone properties/headers for each request
-    llm.model_kwargs["headers"] = {
-        "Helicone-Property-Type": "Lesson"
-    }
-
-    lesson = llm.predict("Generate a lesson for the AI course.")
+    # Override helicone properties/headers for a single request
+    lesson = llm.invoke(
+        "Generate a lesson for the AI course.",
+        extra_headers={"Helicone-Property-Type": "Lesson"},
+    )
     ```
     </CodeGroup>
 
