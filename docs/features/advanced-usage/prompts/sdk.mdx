@@ -416,10 +416,13 @@ Both SDKs provide the `HeliconePromptManager` with these main methods:
   # Partials like {{hcp:abc123:0}} are automatically resolved!
   response = client.chat.completions.create(
       model="gpt-4o-mini",
-      prompt_id="xyz789",  # This prompt may contain partials
-      inputs={
-          "user_name": "Alice"
-      }
+      messages=[],  # The saved prompt provides the messages
+      extra_body={
+          "prompt_id": "xyz789",  # This prompt may contain partials
+          "inputs": {
+              "user_name": "Alice"
+          },
+      },
   )
   ```
 </CodeGroup>

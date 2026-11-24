@@ -130,12 +130,15 @@ Traditional prompt development involves hardcoded prompts in application code, m
 
       response = client.chat.completions.create(
           model="gpt-4o-mini",
-          prompt_id="abc123",  # Reference your saved prompt
-          environment="production",  # Optional: specify environment
-          inputs={
-              "customer_name": "John Doe",
-              "product": "AI Gateway"
-          }
+          messages=[],  # The saved prompt provides the messages
+          extra_body={
+              "prompt_id": "abc123",  # Reference your saved prompt
+              "environment": "production",  # Optional: specify environment
+              "inputs": {
+                  "customer_name": "John Doe",
+                  "product": "AI Gateway"
+              },
+          },
       )
       ```
 
