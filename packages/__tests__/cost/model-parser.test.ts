@@ -137,6 +137,20 @@ describe("parseModelString", () => {
       expect(result.error).toBeNull();
     });
 
+    it("should map dashed claude-3-5-sonnet to claude-3.5-sonnet-v2", () => {
+      const result = parseModelString("claude-3-5-sonnet");
+
+      expect(result.data?.modelName).toBe("claude-3.5-sonnet-v2");
+      expect(result.error).toBeNull();
+    });
+
+    it("should map dashed claude-3-5-sonnet-20240620 to claude-3.5-sonnet-v2", () => {
+      const result = parseModelString("claude-3-5-sonnet-20240620");
+
+      expect(result.data?.modelName).toBe("claude-3.5-sonnet-v2");
+      expect(result.error).toBeNull();
+    });
+
     it("should map deepseek-r1 to deepseek-reasoner", () => {
       const result = parseModelString("deepseek-r1");
 
