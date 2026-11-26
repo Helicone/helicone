@@ -2,6 +2,7 @@ import AssistantToolCall from "./AssistantToolCall";
 
 import MarkdownEditor from "@/components/shared/markdownEditor";
 import { cn } from "@/lib/utils";
+import { requestMarkdownRehypePlugins } from "@/lib/requestMarkdownPlugins";
 import {
   FunctionCall,
   MappedLLMRequest,
@@ -66,7 +67,10 @@ export default function AssistantToolCalls({
       ) : (
         content && (
           <div className="w-full whitespace-pre-wrap break-words p-2 text-xs">
-            <Streamdown shikiTheme={shikiTheme}>
+            <Streamdown
+              shikiTheme={shikiTheme}
+              rehypePlugins={requestMarkdownRehypePlugins}
+            >
               {preserveLineBreaksForMarkdown(content)}
             </Streamdown>
           </div>

@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { requestMarkdownRehypePlugins } from "@/lib/requestMarkdownPlugins";
 import {
   FunctionCall,
   MappedLLMRequest,
@@ -270,7 +271,10 @@ function ChatBubble({
               : "text-purple-900 dark:text-purple-100"
           )}
         >
-          <Streamdown shikiTheme={shikiTheme}>
+          <Streamdown
+            shikiTheme={shikiTheme}
+            rehypePlugins={requestMarkdownRehypePlugins}
+          >
             {preserveLineBreaksForMarkdown(displayContent)}
           </Streamdown>
         </div>
