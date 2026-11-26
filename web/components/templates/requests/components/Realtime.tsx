@@ -1,7 +1,7 @@
-import { stripDangerousHtml } from "@/lib/sanitizeContent";
 import GlassHeader from "@/components/shared/universal/GlassHeader";
 import { JsonRenderer } from "@/components/templates/requests/components/chatComponent/single/JsonRenderer";
 import { logger } from "@/lib/telemetry/logger";
+import { requestMarkdownRehypePlugins } from "@/lib/requestMarkdownPlugins";
 import {
   Tooltip,
   TooltipContent,
@@ -644,8 +644,11 @@ const SessionUpdate: React.FC<SessionUpdateProps> = ({ content }) => {
             }`}
           >
             <div className="prose prose-sm dark:prose-invert prose-headings:text-slate-50 prose-p:text-slate-200 prose-a:text-cyan-200 hover:prose-a:text-cyan-100 prose-blockquote:border-slate-400 prose-blockquote:text-slate-300 prose-strong:text-white prose-em:text-slate-300 prose-code:text-yellow-200 prose-pre:bg-slate-800/50 prose-pre:text-slate-200 prose-ol:text-slate-200 prose-ul:text-slate-200 prose-li:text-slate-200 [&_ol>li::marker]:text-white [&_ul>li::marker]:text-white">
-              <Streamdown shikiTheme={shikiTheme}>
-                {preserveLineBreaksForMarkdown(stripDangerousHtml(sessionData.instructions))}
+              <Streamdown
+                shikiTheme={shikiTheme}
+                rehypePlugins={requestMarkdownRehypePlugins}
+              >
+                {preserveLineBreaksForMarkdown(sessionData.instructions)}
               </Streamdown>
             </div>
           </div>

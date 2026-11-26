@@ -1,5 +1,5 @@
-import { stripDangerousHtml } from "@/lib/sanitizeContent";
 import { MappedLLMRequest, Message } from "@helicone-package/llm-mapper/types";
+import { requestMarkdownRehypePlugins } from "@/lib/requestMarkdownPlugins";
 import { isJson } from "../ChatMessage";
 import { JsonRenderer } from "./JsonRenderer";
 import { ChatMode } from "../../Chat";
@@ -124,8 +124,11 @@ export default function TextMessage({
       {displayContent ? (
         <>
           <div className="w-full whitespace-pre-wrap break-words text-sm">
-            <Streamdown shikiTheme={shikiTheme}>
-              {preserveLineBreaksForMarkdown(stripDangerousHtml(displayContent))}
+            <Streamdown
+              shikiTheme={shikiTheme}
+              rehypePlugins={requestMarkdownRehypePlugins}
+            >
+              {preserveLineBreaksForMarkdown(displayContent)}
             </Streamdown>
           </div>
           {annotations && annotations.length > 0 && (

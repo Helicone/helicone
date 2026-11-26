@@ -11326,6 +11326,15 @@ hast-util-raw@^9.0.0:
     web-namespaces "^2.0.0"
     zwitch "^2.0.0"
 
+hast-util-sanitize@^5.0.0:
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/hast-util-sanitize/-/hast-util-sanitize-5.0.2.tgz#edb260d94e5bba2030eb9375790a8753e5bf391f"
+  integrity sha512-3yTWghByc50aGS7JlGhk61SPenfE/p1oaFeNwkOOyrscaOkMGrcW9+Cy/QAIOBpZxP1yqDIzFMR0+Np0i0+usg==
+  dependencies:
+    "@types/hast" "^3.0.0"
+    "@ungap/structured-clone" "^1.0.0"
+    unist-util-position "^5.0.0"
+
 hast-util-to-estree@^2.0.0:
   version "2.3.3"
   resolved "https://registry.npmjs.org/hast-util-to-estree/-/hast-util-to-estree-2.3.3.tgz"
@@ -16538,6 +16547,14 @@ rehype-recma@^1.0.0:
     "@types/hast" "^3.0.0"
     hast-util-to-estree "^3.0.0"
 
+rehype-sanitize@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/rehype-sanitize/-/rehype-sanitize-6.0.0.tgz#16e95f4a67a69cbf0f79e113c8e0df48203db73c"
+  integrity sha512-CsnhKNsyI8Tub6L4sm5ZFsme4puGfc6pYylvXo1AeqaGbjOYyzNv3qZPwvs0oMJ39eryyeOdmxwUIo94IpEhqg==
+  dependencies:
+    "@types/hast" "^3.0.0"
+    hast-util-sanitize "^5.0.0"
+
 rehype-slug@^6.0.0:
   version "6.0.0"
   resolved "https://registry.npmjs.org/rehype-slug/-/rehype-slug-6.0.0.tgz"
@@ -17449,10 +17466,10 @@ stoppable@1.1.0:
   resolved "https://registry.yarnpkg.com/stoppable/-/stoppable-1.1.0.tgz#32da568e83ea488b08e4d7ea2c3bcc9d75015d5b"
   integrity sha512-KXDYZ9dszj6bzvnEMRYvxgeTHU74QBFL54XKtP3nyMuJ81CFYtABZ3bAzL2EdFUaEwJOBOgENyFj3R7oTzDyyw==
 
-streamdown@^1.6.10:
-  version "1.6.10"
-  resolved "https://registry.npmjs.org/streamdown/-/streamdown-1.6.10.tgz"
-  integrity sha512-B4Y3Z/qiXl1Dc+LzAB5c52Cd1QGRiFjaDwP+ERoj1JtCykdRDM8X6HwQnn3YkpkSk0x3R7S/6LrGe1nQiElHQQ==
+streamdown@^1.6.11:
+  version "1.6.11"
+  resolved "https://registry.yarnpkg.com/streamdown/-/streamdown-1.6.11.tgz#86b2a26459c0ab25c32e0a409a01e37549604ca5"
+  integrity sha512-Y38fwRx5kCKTluwM+Gf27jbbi9q6Qy+WC9YrC1YbCpMkktT3PsRBJHMWiqYeF8y/JzLpB1IzDoeaB6qkQEDnAA==
   dependencies:
     clsx "^2.1.1"
     hast "^1.0.0"
@@ -17465,6 +17482,7 @@ streamdown@^1.6.10:
     rehype-harden "^1.1.6"
     rehype-katex "^7.0.1"
     rehype-raw "^7.0.0"
+    rehype-sanitize "^6.0.0"
     remark-cjk-friendly "^1.2.3"
     remark-cjk-friendly-gfm-strikethrough "^1.2.3"
     remark-gfm "^4.0.1"
