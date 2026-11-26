@@ -1,4 +1,3 @@
-import { stripDangerousHtml } from "@/lib/sanitizeContent";
 import { cn } from "@/lib/utils";
 import {
   FunctionCall,
@@ -272,7 +271,7 @@ function ChatBubble({
           )}
         >
           <Streamdown shikiTheme={shikiTheme}>
-            {preserveLineBreaksForMarkdown(stripDangerousHtml(displayContent))}
+            {preserveLineBreaksForMarkdown(displayContent)}
           </Streamdown>
         </div>
 
