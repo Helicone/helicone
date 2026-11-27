@@ -3,6 +3,7 @@ import { AzureOpenAIProvider } from "./azure";
 import { BasetenProvider } from "./baseten";
 import { BedrockProvider } from "./bedrock";
 import { CanopyWaveProvider } from "./canopywave";
+import { CaymanAIProvider } from "./cayman-ai";
 import { CerebrasProvider } from "./cerebras";
 import { ChutesProvider } from "./chutes";
 import { DeepInfraProvider } from "./deepinfra";
@@ -27,6 +28,7 @@ export const providers = {
   azure: new AzureOpenAIProvider(),
   bedrock: new BedrockProvider(),
   canopywave: new CanopyWaveProvider(),
+  "cayman-ai": new CaymanAIProvider(),
   cerebras: new CerebrasProvider(),
   chutes: new ChutesProvider(),
   deepinfra: new DeepInfraProvider(),
