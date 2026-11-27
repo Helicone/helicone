@@ -66,6 +66,7 @@ const FIRST_PARTY_ORIGINS: Record<string, OriginRule[]> = {
   hyperbolic: ["https://api.hyperbolic.xyz"],
   vercel: ["https://ai-gateway.vercel.sh"],
   helicone: ["https://inference.helicone.ai"],
+  "cayman-ai": ["https://strategies-pursue-magazine-graphs.trycloudflare.com"],
 };
 
 // Provider names as they appear in provider_keys.provider_name (lower-cased),

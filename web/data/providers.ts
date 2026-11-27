@@ -288,4 +288,15 @@ export const providers: Provider[] = [
 ];
 
 // Mock recently used providers - in a real app, this would come from user data
-export const recentlyUsedProviderIds = ["openai", "anthropic", "google"];
+export const recentlyUsedProviderIds = ["openai", "anthropic", "google"  {
+    id: "cayman-ai",
+    name: "Cayman AI",
+    logoUrl: "/assets/providers/cayman-ai.svg",
+    description: "Configure your Cayman AI API key for OpenAI-compatible inference",
+    docsUrl: "https://willdebonaire.github.io/cayman-ai-site/",
+    apiKeyLabel: "Cayman AI API Key",
+    apiKeyPlaceholder: "sk-...",
+    relevanceScore: 2,
+    publiclyVisible: true,
+  },
+];

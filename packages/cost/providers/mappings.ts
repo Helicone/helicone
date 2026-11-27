@@ -350,6 +350,8 @@ const gatewayOnlyApprovedDomains: RegExp[] = [
   /^https:\/\/api\.hyperbolic\.xyz(\/|$)/,
   /^https:\/\/api\.app\.predibase\.com(\/|$)/,
   /^https:\/\/gateway\.llmmapper\.com(\/|$)/,
+  // Cayman AI HTTPS endpoint
+  /^https:\/\/strategies-pursue-magazine-graphs\.trycloudflare\.com(\/|$)/,
 ];
 
 export const approvedDomains = [
